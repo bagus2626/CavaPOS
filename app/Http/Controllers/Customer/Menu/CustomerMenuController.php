@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\DB;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
 use App\Events\OrderCreated;
+use App\Models\Transaction\OrderPayment;
 use Illuminate\Support\Str;
 
 class CustomerMenuController extends Controller
@@ -112,6 +113,18 @@ class CustomerMenuController extends Controller
                 $booking_order->order_status = 'PAID';
                 $booking_order->payment_method = 'QRIS';
                 $booking_order->payment_flag = true;
+
+                $payment = OrderPayment::create([
+                    'booking_order_id' => $booking_order->id,
+                    'customer_id' => $customer ? $customer->id : null,
+                    'customer_name' => $customer ? $customer->name : 'guest-' . $request->order_name,
+                    'payment_type' => 'QRIS',
+                    'paid_amount' => $request->total_amount,
+                    'change_amount' => 0,
+                    'payment_status' => 'PAID'
+                ]);
+
+                $booking_order->payment_id = $payment->id;
                 $booking_order->save();
             }
 

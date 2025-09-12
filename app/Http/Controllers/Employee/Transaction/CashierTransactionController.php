@@ -226,6 +226,7 @@ class CashierTransactionController extends Controller
 
     public function printReceipt($id)
     {
+        // dd($id);
         $cashier = Auth::user();
         $data = BookingOrder::with(
             'order_details.order_detail_options.option',

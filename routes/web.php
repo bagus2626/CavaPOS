@@ -19,9 +19,64 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Partner\PartnerDashboardController;
 use App\Http\Controllers\Employee\Transaction\CashierTransactionController;
+use Illuminate\Http\Request;
+use Pusher\Pusher;
+use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Employee\Transaction\KitchenTransactionController;
 // use App\Http\Middleware\IsAdmin;
 // use App\Http\Middleware\RedirectIfAuthenticatedWithRole;
+
+// Route::get('/debug/fire-order', function () {
+//     $order = \App\Models\Transaction\BookingOrder::where('partner_id', 6)->latest()->first();
+//     broadcast(new \App\Events\OrderCreated($order));
+//     return 'OK';
+// })->middleware(['web', 'auth:employee']);
+
+// Route::post('/broadcasting/auth-employee', function (Request $request) {
+//     try {
+//         $user = auth('employee')->user();
+//         abort_unless($user, 401, 'Unauthorized');
+
+//         $socketId = $request->input('socket_id');
+//         $channel  = $request->input('channel_name');
+
+//         if (!preg_match('/^private-partner\.(\d+)\.orders$/', (string) $channel, $m)) {
+//             abort(403, 'Invalid channel');
+//         }
+//         $partnerId = (int) $m[1];
+//         abort_unless((int) $user->partner_id === $partnerId, 403, 'Forbidden');
+//         // abort_unless(($user->role ?? null) === 'CASHIER', 403);
+
+//         $options = [
+//             'cluster' => env('PUSHER_APP_CLUSTER', 'ap1'),
+//             'useTLS'  => (env('PUSHER_SCHEME', 'https') === 'https'),
+//         ];
+//         if (env('PUSHER_HOST')) {
+//             $options['host']   = env('PUSHER_HOST');
+//             $options['port']   = (int) (env('PUSHER_PORT') ?: ($options['useTLS'] ? 443 : 80));
+//             $options['scheme'] = env('PUSHER_SCHEME', 'https');
+//         }
+
+//         foreach (['PUSHER_APP_ID', 'PUSHER_APP_KEY', 'PUSHER_APP_SECRET'] as $k) {
+//             if (!env($k)) abort(500, "Env $k empty");
+//         }
+
+//         $pusher = new Pusher(env('PUSHER_APP_KEY'), env('PUSHER_APP_SECRET'), env('PUSHER_APP_ID'), $options);
+//         $auth = $pusher->authorizeChannel($channel, $socketId);
+
+//         // return response()->json($auth);
+//         return response($auth, 200)->header('Content-Type', 'application/json');
+//     } catch (\Throwable $e) {
+//         Log::error('AUTH-EMPLOYEE FAILED', [
+//             'msg'  => $e->getMessage(),
+//             'file' => $e->getFile(),
+//             'line' => $e->getLine(),
+//         ]);
+//         return response()->json(['error' => 'auth-failed'], 500);
+//     }
+// })->middleware(['web', 'auth:employee']);
+
 
 
 

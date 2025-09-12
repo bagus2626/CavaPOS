@@ -2,6 +2,8 @@
 @extends('layouts.employee-cashier')
 
 @section('title', 'Employee Dashboard')
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -85,38 +87,38 @@
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
         {{-- Total orders (gradient card) --}}
         <div class="rounded-2xl border border-choco/10 p-4 shadow-sm bg-gradient-to-br from-soft-choco to-choco">
-            <p class="text-xs text-white/90">Total Order</p>
+            <p class="metric-label text-xs text-white/90">Total Order</p>
             <p class="mt-2 text-3xl font-extrabold text-white drop-shadow">{{ number_format($ordersToday->count() ?? 0) }}</p>
         </div>
 
         {{-- Unpaid cash --}}
         <div class="rounded-2xl border border-choco/10 p-4 bg-white shadow-sm">
-            <p class="text-xs text-gray-500">Belum Bayar (Cash)</p>
+            <p class="metric-label text-xs text-gray-500">Belum Bayar (Cash)</p>
             <p class="mt-2 text-3xl font-extrabold text-soft-choco">{{ number_format($ordersToday->where('payment_method', 'CASH')->where('payment_flag', 0)->count() ?? 0) }}</p>
         </div>
 
         {{-- paid cash --}}
         <div class="rounded-2xl border border-choco/10 p-4 bg-white shadow-sm">
-            <p class="text-xs text-gray-500">Sudah Bayar (Cash)</p>
+            <p class="metric-label text-xs text-gray-500">Sudah Bayar (Cash)</p>
             <p class="mt-2 text-3xl font-extrabold text-soft-choco">{{ number_format($ordersToday->where('payment_method', 'CASH')->where('payment_flag', 1)->count() ?? 0) }}</p>
         </div>
 
         {{-- QRIS paid --}}
         <div class="rounded-2xl border border-choco/10 p-4 bg-white shadow-sm">
-            <p class="text-xs text-gray-500">QRIS Berhasil</p>
+            <p class="metric-label text-xs text-gray-500">QRIS Berhasil</p>
             <p class="mt-2 text-3xl font-extrabold text-teal-700">{{ number_format($ordersToday->where('payment_method', 'QRIS')->where('payment_flag', 1)->count() ?? 0) }}</p>
         </div>
 
         {{-- On Process Order --}}
         <div class="rounded-2xl border border-choco/10 p-4 bg-white shadow-sm">
-            <p class="text-xs text-gray-500">Order Diproses</p>
-            <p class="mt-2 text-3xl font-extrabold text-cyan-700">{{ number_format($ordersToday->where('order_status', 'PROCESSED')->count() ?? 0) }}</p>
+            <p class="metric-label text-xs text-gray-500">Order Diproses</p>
+            <p class="mt-2 text-3xl font-extrabold text-cyan-700">{{ number_format($ordersToday->whereIn('order_status', ['PROCESSED', 'PAID'])->count() ?? 0) }}</p>
         </div>
 
         {{-- Revenue --}}
         <div class="rounded-2xl border border-choco/10 p-4 bg-white shadow-sm">
-            <p class="text-xs text-gray-500">Pendapatan</p>
-            <p class="mt-2 text-2xl font-extrabold text-choco">Rp {{ number_format($ordersToday->where('payment_flag', 1)->sum('total_order_value') ?? 0) }}</p>
+            <p class="metric-label text-xs text-gray-500">Pendapatan</p>
+            <p class="mt-2 text-2xl font-extrabold text-choco">Rp {{ number_format($ordersToday->where('payment_flag', 1)->sum('total_order_value') ?? 0, 0, ',', '.') }}</p>
         </div>
     </div>
 
@@ -404,71 +406,32 @@
 })();
 
 </script>
+
 {{-- <script>
-    function startListenerIndex() {
-        if (!window.Echo) {
-            console.error("Echo belum siap");
-            return;
-        }
-
-        const pid = window.CASHIER_PARTNER_ID;
-        if (!pid) {
-            console.warn("CASHIER_PARTNER_ID kosong");
-            return;
-        }
-
-        const channel = `partner.${pid}.orders`;
-        console.log("Subscribe:", channel);
-
-        let count = 0;
-
-        window.Echo.private(channel).listen(".OrderCreated", (e) => {
-            console.log("Payload ss:", e);
-
-        });
-    }
-
-    // Tunggu DOM siap, lalu mulai ketika Echo siap
-    document.addEventListener("DOMContentLoaded", () => {
-        if (window.Echo) startListenerIndex();
-        else
-            window.addEventListener("echo:ready", startListenerIndex, {
-                once: true,
-            });
-    });
-</script> --}}
-<script>
 (function () {
-  // Simpan ID order yang sudah diproses agar tidak double increment
+  // ─── Anti duplikasi event ───────────────────────────────────────────────
   const seenIds = new Set();
 
+  // ─── Util format angka ──────────────────────────────────────────────────
   function parseCount(text) {
-    // Ambil hanya digit (hindari masalah format "1,234")
     const n = parseInt(String(text).replace(/\D/g, ''), 10);
     return isNaN(n) ? 0 : n;
   }
-
   function formatCount(n) {
-    // Sesuaikan dengan locale Indonesia (tanpa desimal)
     return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 }).format(n);
   }
 
+  // ─── Badge tab (Pembayaran/Proses) ──────────────────────────────────────
   function findBadgeEl(tabKey) {
-    // Prioritas 1: cari badge by data-badge (jika kamu menambahkan di Blade)
     let badge = document.querySelector(`.tab-btn[data-tab="${tabKey}"] [data-badge="${tabKey}"]`);
     if (badge) return badge;
-
-    // Prioritas 2: cari badge by class .badge-count di dalam tombol tab
     badge = document.querySelector(`.tab-btn[data-tab="${tabKey}"] .badge-count`);
     if (badge) return badge;
-
-    // Fallback: cari span terakhir di dalam tombol (karena struktur kamu: label + badge)
     const btn = document.querySelector(`.tab-btn[data-tab="${tabKey}"]`);
     if (!btn) return null;
     const spans = btn.querySelectorAll('span');
     return spans.length ? spans[spans.length - 1] : null;
   }
-
   function incrementBadge(tabKey, delta = 1) {
     const el = findBadgeEl(tabKey);
     if (!el) return;
@@ -476,25 +439,82 @@
     el.textContent = formatCount(current + delta);
   }
 
+  // ─── Kartu ringkasan (grid metrics) ─────────────────────────────────────
+  // Cari elemen angka berdasarkan label di atasnya (pakai class .metric-label)
+  function findMetricNumberElByLabel(labelText) {
+    const labelNodes = document.querySelectorAll('.grid p.metric-label');
+    for (const node of labelNodes) {
+      if (node.textContent.trim() === labelText) {
+        const numEl = node.nextElementSibling; // angka ada tepat di bawah label
+        if (numEl) return numEl;
+      }
+    }
+    return null;
+  }
+
+  function incrementMetric(labelText, delta = 1) {
+    const el = findMetricNumberElByLabel(labelText);
+    if (!el) return;
+    const hasRp = el.textContent.trim().startsWith('Rp');
+    const current = parseCount(el.textContent);
+    const next = current + (Number(delta) || 0);
+    el.textContent = hasRp ? `Rp ${formatCount(next)}` : formatCount(next);
+  }
+
+  // Khusus pendapatan: tambah nominal (rupiah)
+  function incrementRevenue(amount) {
+    const delta = Math.round(Number(amount) || 0);
+    if (delta <= 0) return; // abaikan kalau tidak valid / nol / negatif
+    incrementMetric('Pendapatan', delta);
+  }
+
+  // ─── Handler event dari Echo ────────────────────────────────────────────
   function handleOrderEvent(e) {
-    // Pastikan payload minimal punya id/status
     const orderId = e?.order_id ?? e?.id;
     const status  = (e?.order_status || '').toUpperCase();
+    const method  = (e?.payment_method || '').toUpperCase();
 
     if (!status) return;
 
-    // Anti-duplikasi: kalau event order yang sama datang dua kali, jangan hitung lagi
+    // cegah double increment untuk order yang sama
     if (orderId && seenIds.has(orderId)) return;
     if (orderId) seenIds.add(orderId);
 
+    // 1) Total Order ++ (untuk OrderCreated)
+    incrementMetric('Total Order', 1);
+
+    // 2) Tab badges
     if (status === 'PROCESSED' || status === 'PAID') {
       incrementBadge('proses', 1);
     } else if (status === 'UNPAID') {
       incrementBadge('pembayaran', 1);
     }
-    // Kalau ingin log tab lain (mis. selesai), tinggal tambahkan mapping di sini.
+
+    // 3) Kartu ringkasan
+    if (status === 'UNPAID') {
+      incrementMetric('Belum Bayar (Cash)', 1);
+    }
+
+    if (status === 'PAID') {
+      // Order Diproses selalu +1 saat PAID (sesuai instruksi)
+      incrementMetric('Order Diproses', 1);
+
+      // Jika QRIS, tambah juga QRIS Berhasil
+      if (method === 'QRIS') {
+        incrementMetric('QRIS Berhasil', 1);
+      }
+      // Tambah Pendapatan dengan nominal dari event
+      const total = e?.total ?? e?.total_order_value ?? 0;
+      incrementRevenue(total);
+
+    }
+
+    if (status === 'PROCESSED') {
+      incrementMetric('Order Diproses', 1);
+    }
   }
 
+  // ─── Echo bootstrap ─────────────────────────────────────────────────────
   function startListenerIndex() {
     if (!window.Echo) {
       console.error("Echo belum siap");
@@ -514,17 +534,15 @@
       handleOrderEvent(payload);
     });
 
-    // (Opsional) Jika ada event lain:
-    // .listen(".OrderUpdated", handleOrderEvent)
-    // .listen(".PaymentReceived", handleOrderEvent)
   }
 
-  // Tunggu DOM siap, lalu mulai ketika Echo siap
   document.addEventListener("DOMContentLoaded", () => {
     if (window.Echo) startListenerIndex();
     else window.addEventListener("echo:ready", startListenerIndex, { once: true });
   });
 })();
-</script>
+</script> --}}
+
+
 
 @endpush

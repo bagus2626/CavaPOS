@@ -1,53 +1,49 @@
-// resources/js/echo.js
 import Echo from "laravel-echo";
-import axios from "axios";
-window.Pusher = (await import("pusher-js")).default;
+import Pusher from "pusher-js";
 
-axios.defaults.withCredentials = true;
+window.Pusher = Pusher;
 
-const token = document.querySelector('meta[name="csrf-token"]')?.content;
+const csrf = document
+  .querySelector('meta[name="csrf-token"]')
+  ?.getAttribute("content");
 
 window.Echo = new Echo({
-    broadcaster: "reverb",
-    key: import.meta.env.VITE_REVERB_APP_KEY,
-    wsHost: import.meta.env.VITE_REVERB_HOST,
-    wsPort: Number(import.meta.env.VITE_REVERB_PORT),
-    wssPort: Number(import.meta.env.VITE_REVERB_PORT),
-    forceTLS: import.meta.env.VITE_REVERB_SCHEME === "https",
-    enabledTransports: ["ws", "wss"],
-    authorizer: (channel) => ({
-        authorize: (socketId, callback) => {
-            axios
-                .post(
-                    "/broadcasting/auth",
-                    { socket_id: socketId, channel_name: channel.name },
-                    {
-                        headers: {
-                            "X-CSRF-TOKEN": token,
-                            "X-Requested-With": "XMLHttpRequest",
-                        },
-                        withCredentials: true,
-                    }
-                )
-                .then((res) => callback(false, res.data))
-                .catch((err) => {
-                    console.error(
-                        "Broadcast auth error:",
-                        err?.response?.status,
-                        err?.response?.data || err
-                    );
-                    callback(true, err);
-                });
+  broadcaster: "pusher",
+  key: import.meta.env.VITE_PUSHER_APP_KEY,
+  cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER ?? "ap1",
+  wsHost:
+    import.meta.env.VITE_PUSHER_HOST ||
+    `ws-${import.meta.env.VITE_PUSHER_APP_CLUSTER}.pusher.com`,
+  wsPort: Number(import.meta.env.VITE_PUSHER_PORT || 80),
+  wssPort: Number(import.meta.env.VITE_PUSHER_PORT || 443),
+  forceTLS: (import.meta.env.VITE_PUSHER_SCHEME || "https") === "https",
+  enabledTransports: ["ws", "wss"],
+
+  // ⬇️ kunci: jangan pakai authEndpoint lama; pakai authorizer ini
+  authorizer: (channel) => ({
+    authorize(socketId, callback) {
+      fetch("/broadcasting/auth", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-CSRF-TOKEN": csrf,
         },
-    }),
+        credentials: "include", // wajib agar cookie guard employee ikut
+        body: new URLSearchParams({
+          socket_id: socketId,
+          channel_name: channel.name, // ex: "private-partner.6.orders"
+        }),
+      })
+        .then(async (r) => {
+          const txt = await r.text();
+          if (!r.ok)
+            return callback(true, new Error(`Auth ${r.status}: ${txt || ""}`));
+          callback(false, JSON.parse(txt)); // { auth: "key:signature" }
+        })
+        .catch((err) => callback(true, err));
+    },
+  }),
 });
 
-// INFO: log koneksi & subscription dari sisi client
-try {
-    const p = window.Echo.connector.pusher;
-    p.connection.bind("connected", () => console.log("[Echo] connected"));
-    p.connection.bind("error", (e) => console.warn("[Echo] conn error", e));
-} catch (_) {}
-
-window.dispatchEvent(new Event("echo:ready")); // ← penting, ditunggu oleh cashier.js
-console.log("[Echo] ready");
+// opsional: beri sinyal siap
+window.dispatchEvent(new Event("echo:ready"));

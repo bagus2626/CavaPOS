@@ -27,7 +27,6 @@ class OrderCreated implements ShouldBroadcastNow
 
     public function broadcastWith(): array
     {
-        $countPayment = BookingOrder::where('partner_id', $this->order->partner_id)->count();
         return [
             'id'         => $this->order->id,
             'code'       => $this->order->booking_order_code ?? null,
@@ -35,8 +34,8 @@ class OrderCreated implements ShouldBroadcastNow
             'total'      => $this->order->total_order_value ?? null,
             'order_status' => $this->order->order_status ?? null,
             'partner_id' => $this->order->partner_id ?? null,
+            'payment_method' => $this->order->payment_method ?? null,
             'created_at' => optional($this->order->created_at)->toDateTimeString(),
-            'count_payment' => $countPayment,
         ];
     }
 }

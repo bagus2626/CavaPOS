@@ -24,12 +24,15 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Paginator::useBootstrap();
-        View::composer('*', function ($view) {
-            if (request()->route()) {
-                $view->with('partner_slug', request()->route('partner_slug'));
-                $view->with('table_code', request()->route('table_code'));
-            }
+
+        // ✅ tunda sampai service 'view' sudah siap
+        $this->callAfterResolving('view', function () {
+            View::composer('*', function ($view) {
+                if (request()->route()) {
+                    $view->with('partner_slug', request()->route('partner_slug'));
+                    $view->with('table_code', request()->route('table_code'));
+                }
+            });
         });
-        // app(UrlGeneratorFactory::class)->setCustomUrlGenerator(CustomMediaUrlGenerator::class);
     }
 }
