@@ -228,11 +228,11 @@
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-sm font-semibold text-gray-900">
-                                            {{ $o->booking_order_code }} · Meja {{ $o->table->table_no }}
+                                            {{ $o->booking_order_code }} &middot; Meja {{ $o->table->table_no }}
                                         </p>
                                         <p class="text-xs text-gray-500">
-                                            Rp {{ number_format($o->total_order_value, 0, ',', '.') }} · 
-                                            {{ $o->created_at?->format('H:i') }} · 
+                                            Rp {{ number_format($o->total_order_value, 0, ',', '.') }} &middot; 
+                                            {{ $o->created_at?->format('H:i') }} &middot; 
                                             <span class="font-bold">{{ $o->customer_name }}</span>
                                         </p>
                                     </div>

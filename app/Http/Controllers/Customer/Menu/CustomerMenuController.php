@@ -128,9 +128,10 @@ class CustomerMenuController extends Controller
                 $booking_order->save();
             }
 
-            event(new OrderCreated($booking_order));
 
             DB::commit();
+
+            event(new OrderCreated($booking_order));
 
             $token = Crypt::encrypt([
                 'p' => $partner_slug,

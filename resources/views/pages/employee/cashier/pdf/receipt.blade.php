@@ -156,7 +156,7 @@
         {{-- Baris produk (nama + subtotal kanan) --}}
         <tr>
           <td class="name">
-            {{ $qty }} × {{ $item->partnerProduct->name ?? '-' }}
+            {{ $qty }} &times; {{ $item->partnerProduct->name ?? '-' }}
             <span class="price">Rp {{ number_format($base, 0, ',', '.') }}</span>
           </td>
           <td class="right">Rp {{ number_format($line, 0, ',', '.') }}</td>
