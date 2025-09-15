@@ -1,3 +1,3 @@
 # CavaPOS
 
-test
+hapus test
