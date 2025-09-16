@@ -6,6 +6,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\IsAdmin;
 use App\Http\Middleware\IsPartner;
 use App\Http\Middleware\IsEmployee;
+use App\Http\Middleware\IsOwner;
 use App\Http\Middleware\RedirectIfAuthenticatedWithRole;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -19,7 +20,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'is_admin' => IsAdmin::class,
             'is_partner' => IsPartner::class,
             'is_employee' => IsEmployee::class,
+            'is_owner' => IsOwner::class,
             'redirect.auth.role' => \App\Http\Middleware\RedirectIfAuthenticatedWithRole::class,
+            'auth' => \App\Http\Middleware\Authenticate::class,
         ]);
 
         $middleware->appendToGroup('web', \Illuminate\Session\Middleware\StartSession::class);

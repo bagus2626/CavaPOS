@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Partner\HumanResource;
+namespace App\Http\Controllers\Owner\HumanResource;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product\Product;
@@ -8,6 +8,7 @@ use App\Models\Partner\Products\PartnerProduct;
 use App\Models\Partner\Products\PartnerProductParentOption;
 use App\Models\Partner\Products\PartnerProductOption;
 use App\Models\Partner\HumanResource\Employee;
+use App\Models\User;
 use App\Models\Product\Specification;
 use App\Models\Admin\Product\Category;
 use Illuminate\Http\Request;
@@ -18,29 +19,34 @@ use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-class PartnerEmployeeController extends Controller
+class OwnerEmployeeController extends Controller
 {
     public function index()
     {
-        $partner = Auth::user();
-        $employees = Employee::where('partner_id', $partner->id)->get();
+        $owner_id = Auth::id();
+        $partners = User::where('owner_id', $owner_id)->get();
+        $partners_ids = $partners->pluck('id');
+        $employees = Employee::with('partner')->whereIn('partner_id', $partners_ids)->get();
         $roles = $employees->pluck('role')->unique()->sort()->values();
-        return view('pages.partner.human-resource.employee.index', compact('employees', 'roles'));
+        return view('pages.owner.human-resource.employee.index', compact('partners', 'employees', 'roles'));
     }
 
     public function create()
     {
-        $categories = Category::where('partner_id', Auth::id())->get();
-        return view('pages.partner.human-resource.employee.create', compact('categories'));
+        $owner_id = Auth::id();
+        $partners = User::where('owner_id', $owner_id)->get();
+        return view('pages.owner.human-resource.employee.create', compact('partners'));
     }
 
     public function store(Request $request)
     {
+        // dd($request->all());
         // 1) Validasi input
         $validated = $request->validate([
             'name'                  => ['required', 'string', 'max:100'],
-            'username'              => ['required', 'string'],
+            'username'              => ['required', 'string', 'unique:employees,user_name'],
             'email'                 => ['required', 'email:rfc,dns', 'max:254', 'unique:employees,email'],
+            'partner'               => ['required'],
             'role'                  => ['required', 'in:CASHIER,KITCHEN,WAITER'],
             'password'              => ['required', 'string', 'min:8', 'confirmed'],
             'image'                 => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'], // max 2MB
@@ -90,10 +96,9 @@ class PartnerEmployeeController extends Controller
                 $imagePath = $path;
             }
 
-            $auth = Auth::user();
             // 3) Buat record employee
             $employee = Employee::create([
-                'partner_id' => $auth->id, // partner yang sedang login
+                'partner_id' => $validated['partner'], // partner yang sedang login
                 'name'       => $validated['name'],
                 'user_name'  => $validated['username'],
                 'email'      => $validated['email'],
@@ -106,7 +111,7 @@ class PartnerEmployeeController extends Controller
             DB::commit();
 
             return redirect()
-                ->route('partner.user-management.employees.index')
+                ->route('owner.user-owner.employees.index')
                 ->with('success', 'Employee created successfully!');
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -134,18 +139,19 @@ class PartnerEmployeeController extends Controller
 
     public function edit(Employee $employee)
     {
-        // Pastikan milik partner yang login
-        $partnerId = Auth::id();
-        abort_if($employee->partner_id !== $partnerId, 403);
+        $owner_id = Auth::id();
+        $partners = User::where('owner_id', $owner_id)->get();
 
-        return view('pages.partner.human-resource.employee.edit', compact('employee'));
+        return view('pages.owner.human-resource.employee.edit', compact('employee', 'partners'));
     }
 
     public function update(Request $request, Employee $employee)
     {
+        // dd($request->all());
         // Pastikan milik partner yang login
-        $partnerId = Auth::id();
-        abort_if($employee->partner_id !== $partnerId, 403);
+        $ownerId = Auth::id();
+        $partners = User::where('owner_id', $ownerId)->get();
+        abort_if(!$partners->contains($employee->partner_id), 403);
 
         // Validasi
         $validated = $request->validate([
@@ -153,6 +159,7 @@ class PartnerEmployeeController extends Controller
             'username'              => ['required', 'string', 'min:3', 'max:30', 'regex:/^[A-Za-z0-9._-]+$/', 'unique:employees,user_name,' . $employee->id],
             'email'                 => ['required', 'email:rfc,dns', 'max:254', 'unique:employees,email,' . $employee->id],
             'role'                  => ['required', 'in:CASHIER,KITCHEN,WAITER'],
+            'partner'               => ['required'],
             'password'              => ['nullable', 'string', 'min:8', 'confirmed'],
             'image'                 => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'is_active'             => ['nullable', 'boolean'],
@@ -204,6 +211,7 @@ class PartnerEmployeeController extends Controller
             // Update field lainnya
             $employee->name      = $validated['name'];
             $employee->user_name  = $validated['username'];
+            $employee->partner_id = $validated['partner'];
             $employee->email     = $validated['email'];
             $employee->role      = $validated['role'];
             $employee->is_active = $request->boolean('is_active', true);
@@ -217,7 +225,7 @@ class PartnerEmployeeController extends Controller
 
             DB::commit();
             return redirect()
-                ->route('partner.user-management.employees.index')
+                ->route('owner.user-owner.employees.index')
                 ->with('success', 'Employee updated successfully!');
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -231,10 +239,9 @@ class PartnerEmployeeController extends Controller
     public function destroy(Employee $employee)
     {
         // (opsional tapi bagus) pastikan employee milik partner yang login
-        $partnerId = Auth::id();
-        if ($employee->partner_id !== $partnerId) {
-            abort(403, 'Anda tidak berhak menghapus data ini.');
-        }
+        $ownerId = Auth::id();
+        $partners = User::where('owner_id', $ownerId)->get();
+        abort_if(!$partners->contains($employee->partner_id), 403);
 
         try {
             // Hapus file gambar jika ada
@@ -249,11 +256,34 @@ class PartnerEmployeeController extends Controller
             $employee->delete();
 
             return redirect()
-                ->route('partner.user-management.employees.index')
+                ->route('owner.user-owner.employees.index')
                 ->with('success', 'Employee deleted successfully!');
         } catch (\Throwable $e) {
             return back()
                 ->withErrors(['error' => 'Gagal menghapus: ' . $e->getMessage()]);
         }
+    }
+
+    public function checkUsername(Request $request)
+    {
+        $validated = $request->validate([
+            'username'   => ['required', 'string', 'min:3', 'max:30', 'regex:/^[A-Za-z0-9._-]+$/'],
+            // opsional: saat edit, kirimkan exclude_id agar username miliknya sendiri dianggap valid
+            'exclude_id' => ['nullable', 'integer', 'exists:employees,id'],
+        ]);
+
+        $query = Employee::query()->where('user_name', $validated['username']);
+
+        if (!empty($validated['exclude_id'])) {
+            $query->where('id', '!=', $validated['exclude_id']);
+        }
+
+        $available = !$query->exists();
+
+        return response()->json([
+            'username' => $validated['username'],
+            'available' => $available,
+            'message'  => $available ? 'Username tersedia' : 'Username sudah dipakai',
+        ]);
     }
 }

@@ -29,23 +29,46 @@
         </p>
     </div>
 
-    {{-- Category Filter --}}
-    <div class="relative pb-6 bg-white">
-        <div id="categoryWrapper"
-            class="flex gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide px-2 sm:px-8">
+    {{-- Category Filter + Search (sticky) --}}
+    <div class="sticky top-0 z-30 bg-white backdrop-blur supports-[backdrop-filter]:bg-white border-b border-gray-200">
+    <div class="w-full py-4">
+        <div class="px-2 sm:px-6 relative flex flex-col md:flex-row md:items-center md:gap-3">
 
-            <div class="filter-btn px-4 py-2 text-sm rounded-md active cursor-pointer" data-category="all">
-                All
-            </div>
-
+        {{-- Kategori: scroll horizontal, berhenti sebelum search --}}
+        <div class="category-bar md:flex-1 md:min-w-0 overflow-x-auto overflow-y-hidden pr-1">
+            <div id="categoryWrapper" class="category-track inline-flex items-center gap-2 min-w-max">
+            <div class="filter-btn px-4 py-2 text-sm rounded-md active cursor-pointer" data-category="all">All</div>
             @foreach($categories as $category)
-                <div class="filter-btn px-4 py-2 text-sm rounded-md cursor-pointer"
-                    data-category="{{ $category->id }}">
-                    {{ $category->category_name }}
+                <div class="filter-btn px-4 py-2 text-sm rounded-md cursor-pointer" data-category="{{ $category->id }}">
+                {{ $category->category_name }}
                 </div>
             @endforeach
+            </div>
         </div>
+
+        {{-- Searchbar: kanan di desktop, turun di mobile --}}
+        <div class="mt-2 md:mt-0 md:flex-none md:w-80">
+            <div class="relative">
+            <input
+                id="menuSearch"
+                type="search"
+                placeholder="Cari menu… (nama / deskripsi)"
+                class="w-full h-10 rounded-md border border-gray-300 bg-white px-3 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-choco/40"
+                autocomplete="off"
+            />
+            <button
+                type="button"
+                id="menuSearchClear"
+                class="absolute right-2 top-1/2 -translate-y-1/2 hidden w-6 h-6 rounded hover:bg-gray-100 text-gray-500"
+                aria-label="Clear"
+                title="Clear">×</button>
+            </div>
+        </div>
+
+        {{-- Fade overlay tepat di tepi kiri search (desktop only) --}}
     </div>
+    </div>
+
 
     {{-- menu list --}}
     @php
@@ -181,6 +204,16 @@
     #floatingCartBar { padding-bottom: env(safe-area-inset-bottom); }
     /* animasi slide-up cart manager */
     #cartManagerModal.show #cartManagerSheet { transform: translateY(0); }
+
+    /* Hilangkan tombol clear bawaan browser */
+    #menuSearch::-webkit-search-cancel-button { display: none; }
+
+    /* (opsional) smooth look untuk area kategori */
+    .category-bar::-webkit-scrollbar { height: 0; }
+
+    /* Track kategori biar item tetap di satu baris */
+    .category-track .filter-btn { flex: 0 0 auto; white-space: nowrap; }
+
 
 </style>
 
@@ -1288,4 +1321,128 @@ function recomputeLineTotal(key) {
 
 });
 </script>
+
+<script>
+(function setupCustomerCategoryAndSearch(){
+  // GUARD: cegah init ganda saat partial re-render
+  if (window.__CATSEARCH_INITED_CUSTOMER__) return;
+  window.__CATSEARCH_INITED_CUSTOMER__ = true;
+
+  const filterButtons  = document.querySelectorAll('.filter-btn');
+  const categoryGroups = document.querySelectorAll('.category-group');
+  const items          = document.querySelectorAll('.menu-item');
+
+  const searchInput = document.getElementById('menuSearch');
+  const searchClear = document.getElementById('menuSearchClear');
+
+  let activeCategory = 'all';
+  let query = '';
+
+  function norm(s){
+    return (s||'').toString().toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+  }
+
+  function itemMatches(item, cat, q){
+    const catOk = (cat === 'all' || item.dataset.category === cat);
+    if (!catOk) return false;
+    if (!q) return true;
+
+    const nameEl = item.querySelector('h5');
+    const descEl = item.querySelector('p.text-gray-500');
+    const name = norm(nameEl ? nameEl.textContent : '');
+    const desc = norm(descEl ? descEl.textContent : '');
+    return name.includes(q) || desc.includes(q);
+  }
+
+  let noResEl = document.getElementById('noResultBanner');
+  function ensureNoResultBanner(show, nq){
+    if (!noResEl) {
+      noResEl = document.createElement('div');
+      noResEl.id = 'noResultBanner';
+      noResEl.className = 'p-6 text-center text-gray-500';
+      noResEl.style.display = 'none';
+      const menuContainer = document.getElementById('menu-container');
+      if (menuContainer && menuContainer.parentNode) {
+        menuContainer.parentNode.insertBefore(noResEl, menuContainer);
+      }
+    }
+    if (show) {
+      noResEl.innerHTML = `Tidak ada menu yang cocok untuk <b>"${nq}"</b>${activeCategory!=='all' ? ' pada kategori terpilih' : ''}.`;
+      noResEl.style.display = 'block';
+    } else {
+      noResEl.style.display = 'none';
+    }
+  }
+
+  function applyFilters(){
+    const nq = norm(query);
+
+    // toggle active pada tombol
+    filterButtons.forEach(b => {
+      const isActive = (b.dataset.category === activeCategory) || (activeCategory==='all' && b.dataset.category==='all');
+      b.classList.toggle('active', isActive);
+    });
+
+    // tampilkan item sesuai kombinasi
+    let anyShown = false;
+    items.forEach(item => {
+      const show = itemMatches(item, activeCategory, nq);
+      item.style.display = show ? 'flex' : 'none';
+      if (show) anyShown = true;
+    });
+
+    // tampilkan/semmbunyikan heading group
+    categoryGroups.forEach(group => {
+      if (activeCategory === 'all') {
+        const hasVisible = Array.from(group.querySelectorAll('.menu-item')).some(it => it.style.display !== 'none');
+        group.style.display = hasVisible ? 'block' : 'none';
+      } else {
+        const sameCat = (group.dataset.category === activeCategory);
+        if (!sameCat) { group.style.display = 'none'; return; }
+        const hasVisible = Array.from(group.querySelectorAll('.menu-item')).some(it => it.style.display !== 'none');
+        group.style.display = hasVisible ? 'block' : 'none';
+      }
+    });
+
+    // banner & tombol clear
+    ensureNoResultBanner(!anyShown, nq);
+    if (searchClear) searchClear.classList.toggle('hidden', !nq);
+  }
+
+  // Debounce helper
+  let t=null;
+  function debounce(fn, wait=150){
+    return (...args) => { clearTimeout(t); t = setTimeout(() => fn.apply(null,args), wait); };
+  }
+
+  // Listeners
+  filterButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeCategory = btn.dataset.category;
+      applyFilters();
+    });
+  });
+
+  if (searchInput) {
+    searchInput.addEventListener('input', debounce(e => {
+      query = e.target.value || '';
+      applyFilters();
+    }, 150));
+  }
+  if (searchClear) {
+    searchClear.addEventListener('click', () => {
+      if (!searchInput) return;
+      searchInput.value = '';
+      query = '';
+      applyFilters();
+      searchInput.focus({ preventScroll: true });
+    });
+  }
+
+  // init pertama
+  applyFilters();
+})();
+</script>
+
 @endpush

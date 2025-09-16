@@ -3,12 +3,12 @@
         {{-- Kolom 1 --}}
         <div class="flex-1">
             <!-- Logo untuk Light Mode -->
-            <img src="{{ asset('images/vastech-transparent-black.png') }}"
+            <img src="{{ asset('images/cava-logo2-black.png') }}"
                 class="block dark:hidden h-24 w-auto ml-7"
                 alt="Logo Light Mode">
 
             <!-- Logo untuk Dark Mode -->
-            <img src="{{ asset('images/vastech-transparent-white.png') }}"
+            <img src="{{ asset('images/cava-logo2.png') }}"
                 class="hidden dark:block h-24 w-auto ml-7"
                 alt="Logo Dark Mode">
             <div class="flex-1 mt-4">

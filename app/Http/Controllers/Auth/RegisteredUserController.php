@@ -33,7 +33,7 @@ class RegisteredUserController extends Controller
             // dd($request->all());
             $request->validate([
                 'name' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+                'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
                 'password' => ['required', 'confirmed', Rules\Password::defaults()],
                 'province' => ['required', 'string', 'max:255'],
                 'city' => ['required', 'string', 'max:255'],
@@ -62,10 +62,9 @@ class RegisteredUserController extends Controller
 
             return redirect()
                 ->route('dashboard')
-                ->with('success', 'Akun berhasil dibuat! Selamat datang, '.$user->name.' dari '.$user->city);
+                ->with('success', 'Akun berhasil dibuat! Selamat datang, ' . $user->name . ' dari ' . $user->city);
         } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
-
 }

@@ -15,12 +15,12 @@
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('home') }}">
                         <!-- Logo untuk Light Mode -->
-                        <img src="{{ asset('images/vastech-transparent-black.png') }}"
+                        <img src="{{ asset('images/cava-logo2-black.png') }}"
                             class="block dark:hidden h-14 w-auto"
                             alt="Logo Light Mode">
 
                         <!-- Logo untuk Dark Mode -->
-                        <img src="{{ asset('images/vastech-transparent-white.png') }}"
+                        <img src="{{ asset('images/cava-logo2.png') }}"
                             class="hidden dark:block h-14 w-auto"
                             alt="Logo Dark Mode">
                     </a>

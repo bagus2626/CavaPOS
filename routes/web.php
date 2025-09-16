@@ -13,8 +13,12 @@ use App\Http\Controllers\Customer\Auth\CustomerAuthController;
 use App\Http\Controllers\Customer\Transaction\CustomerPaymentController;
 use App\Http\Controllers\Employee\Dashboard\CashierDashboardController;
 use App\Http\Controllers\Employee\Dashboard\KitchenDashboardController;
+use App\Http\Controllers\Owner\OwnerDashboardController;
+use App\Http\Controllers\Owner\HumanResource\OwnerEmployeeController;
 use App\Http\Controllers\Employee\Auth\EmployeeAuthController;
 use App\Http\Controllers\Public\PriceController;
+use App\Http\Controllers\Owner\Auth\OwnerAuthController;
+use App\Http\Controllers\Owner\Outlet\OwnerOutletController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Partner\PartnerDashboardController;
@@ -24,61 +28,6 @@ use Pusher\Pusher;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Employee\Transaction\KitchenTransactionController;
-// use App\Http\Middleware\IsAdmin;
-// use App\Http\Middleware\RedirectIfAuthenticatedWithRole;
-
-// Route::get('/debug/fire-order', function () {
-//     $order = \App\Models\Transaction\BookingOrder::where('partner_id', 6)->latest()->first();
-//     broadcast(new \App\Events\OrderCreated($order));
-//     return 'OK';
-// })->middleware(['web', 'auth:employee']);
-
-// Route::post('/broadcasting/auth-employee', function (Request $request) {
-//     try {
-//         $user = auth('employee')->user();
-//         abort_unless($user, 401, 'Unauthorized');
-
-//         $socketId = $request->input('socket_id');
-//         $channel  = $request->input('channel_name');
-
-//         if (!preg_match('/^private-partner\.(\d+)\.orders$/', (string) $channel, $m)) {
-//             abort(403, 'Invalid channel');
-//         }
-//         $partnerId = (int) $m[1];
-//         abort_unless((int) $user->partner_id === $partnerId, 403, 'Forbidden');
-//         // abort_unless(($user->role ?? null) === 'CASHIER', 403);
-
-//         $options = [
-//             'cluster' => env('PUSHER_APP_CLUSTER', 'ap1'),
-//             'useTLS'  => (env('PUSHER_SCHEME', 'https') === 'https'),
-//         ];
-//         if (env('PUSHER_HOST')) {
-//             $options['host']   = env('PUSHER_HOST');
-//             $options['port']   = (int) (env('PUSHER_PORT') ?: ($options['useTLS'] ? 443 : 80));
-//             $options['scheme'] = env('PUSHER_SCHEME', 'https');
-//         }
-
-//         foreach (['PUSHER_APP_ID', 'PUSHER_APP_KEY', 'PUSHER_APP_SECRET'] as $k) {
-//             if (!env($k)) abort(500, "Env $k empty");
-//         }
-
-//         $pusher = new Pusher(env('PUSHER_APP_KEY'), env('PUSHER_APP_SECRET'), env('PUSHER_APP_ID'), $options);
-//         $auth = $pusher->authorizeChannel($channel, $socketId);
-
-//         // return response()->json($auth);
-//         return response($auth, 200)->header('Content-Type', 'application/json');
-//     } catch (\Throwable $e) {
-//         Log::error('AUTH-EMPLOYEE FAILED', [
-//             'msg'  => $e->getMessage(),
-//             'file' => $e->getFile(),
-//             'line' => $e->getLine(),
-//         ]);
-//         return response()->json(['error' => 'auth-failed'], 500);
-//     }
-// })->middleware(['web', 'auth:employee']);
-
-
-
 
 Route::get('/', function () {
     return view('pages.client.home.index');
@@ -101,6 +50,8 @@ Route::get('/price', [PriceController::class, 'index'])->name('price');
 Route::get('/price/data', [PriceController::class, 'data']);
 Route::get('/price/{product:slug}', [PriceController::class, 'show'])->name('price.show');
 
+Route::middleware('guest')->group(function () {});
+
 
 //admin
 Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -109,6 +60,26 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
     // Route::resource('specifications', SpecificationController::class);
     Route::resource('categories', CategoryController::class);
     Route::resource('portfolios', PortfolioController::class);
+});
+
+// Owner
+Route::prefix('owner')->name('owner.')->group(function () {
+    // register owner
+    Route::get('register',  [OwnerAuthController::class, 'create'])->name('register');
+    Route::post('register', [OwnerAuthController::class, 'store'])->name('register.store');
+    // Login owner
+    Route::get('login',     [OwnerAuthController::class, 'login'])->name('login');
+    Route::post('login',    [OwnerAuthController::class, 'authenticate'])->name('login.attempt');
+    Route::post('logout',    [OwnerAuthController::class, 'logout'])->name('logout');
+
+    // OWNER area
+    Route::middleware(['auth:owner', 'is_owner:owner'])->prefix('user-owner')->name('user-owner.')->group(function () {
+        Route::get('/', [OwnerDashboardController::class, 'index'])->name('dashboard');
+        Route::get('outlets/check-username', [OwnerOutletController::class, 'checkUsername'])->name('outlets.check-username')->middleware('throttle:30,1');
+        Route::resource('outlets', OwnerOutletController::class);
+        Route::get('employees/check-username', [OwnerEmployeeController::class, 'checkUsername'])->name('employees.check-username');
+        Route::resource('employees', OwnerEmployeeController::class);
+    });
 });
 
 //Partner

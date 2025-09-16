@@ -1,0 +1,319 @@
+<?php
+
+namespace App\Http\Controllers\Owner\Outlet;
+
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rules;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Validator;
+
+class OwnerOutletController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        $owner = Auth::user();
+        // dd($owner);
+        $outlets = User::where('owner_id', Auth::id())->get();
+
+        return view('pages.owner.outlet.index', compact('owner', 'outlets'));
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        $outlets = User::where('owner_id', Auth::id())->get();
+        return view('pages.owner.outlet.create', compact('outlets'));
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        // dd($request->all());
+        try {
+            DB::beginTransaction();
+
+            $imagePath = null;
+            // dd($request->all());
+            $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'username' => ['required', 'string', 'max:255', 'unique:' . User::class],
+                'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+                'password' => ['required', 'confirmed', Rules\Password::defaults()],
+                'province' => ['required', 'string', 'max:255'],
+                'city' => ['required', 'string', 'max:255'],
+                'district' => ['required', 'string', 'max:255'],
+                'village' => ['required', 'string', 'max:255'],
+                'address' => ['required', 'string'],
+            ]);
+
+            if ($request->hasFile('image')) {
+                $file = $request->file('image');
+
+                // Baca & perbaiki orientasi EXIF
+                $img = Image::make($file->getPathname())->orientate();
+
+                // Batasi dimensi supaya aman (maks 1600x1600, tetap proporsional)
+                $img->resize(1600, 1600, function ($c) {
+                    $c->aspectRatio();
+                    $c->upsize();
+                });
+
+                $disk = Storage::disk('public');
+                $dir  = 'outlets';
+                $disk->makeDirectory($dir);
+
+                $basename = Str::uuid()->toString();
+                $path     = null;
+                $binary   = null;
+
+                // Coba simpan sebagai WebP (ukuran kecil, modern)
+                try {
+                    $binary = (string) $img->encode('webp', 78); // kualitas 0-100
+                    $path   = "{$dir}/{$basename}.webp";
+                } catch (\Throwable $e) {
+                    // Fallback ke JPEG kalau WebP tidak didukung di server
+                    $binary = (string) $img->encode('jpg', 80);
+                    $path   = "{$dir}/{$basename}.jpg";
+                }
+
+                // Tulis ke disk public
+                $disk->put($path, $binary);
+
+                // Simpan path relatif untuk database
+                $imagePath = $path;
+            }
+            $auth = Auth::user();
+            // dd($auth);
+
+            $user = User::create([
+                'name' => $request->name,
+                'owner_id' => $auth->id,
+                'email' => $request->email,
+                'username' => $request->username,
+                'role' => 'partner',
+                'logo' => $imagePath,
+                'password' => Hash::make($request->password),
+                'province' => $request->province_name,
+                'province_id' => $request->province,
+                'city' => $request->city_name,
+                'city_id' => $request->city,
+                'subdistrict' => $request->district_name,
+                'subdistrict_id' => $request->district,
+                'urban_village' => $request->village_name,
+                'urban_village_id' => $request->village,
+                'address' => $request->address,
+            ]);
+
+            event(new Registered($user));
+            // Auth::login($user);
+
+            DB::commit();
+            return redirect()
+                ->route('owner.user-owner.outlets.index')
+                ->with('success', 'Outlet berhasil dibuat! Selamat datang, ' . $user->name . ' dari ' . $user->city);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(User $outlet)
+    {
+        // Pastikan ini milik owner yang login & rolenya partner
+        abort_if($outlet->role !== 'partner', 404);
+        abort_if($outlet->owner_id !== Auth::id(), 403);
+
+        return view('pages.owner.outlet.edit', compact('outlet'));
+    }
+
+    // Update data
+    public function update(Request $request, User $outlet)
+    {
+        abort_if($outlet->role !== 'partner', 404);
+        abort_if($outlet->owner_id !== Auth::id(), 403);
+
+        $request->validate([
+            'name'     => ['required', 'string', 'max:255'],
+            'username' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique(User::class, 'username')->ignore($outlet->id),
+            ],
+            'email'    => [
+                'required',
+                'string',
+                'lowercase',
+                'email',
+                'max:255',
+                Rule::unique(User::class, 'email')->ignore($outlet->id),
+            ],
+
+            // password opsional saat edit
+            'password' => ['nullable', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
+
+            // alamat (ID yang dipost adalah kode dari API Emsifa)
+            'province' => ['required', 'string', 'max:255'],
+            'city'     => ['required', 'string', 'max:255'],
+            'district' => ['required', 'string', 'max:255'],
+            'village'  => ['required', 'string', 'max:255'],
+            'address'  => ['required', 'string'],
+
+            'image'    => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:2048'],
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Upload gambar baru bila ada
+            $newImagePath = $outlet->logo;
+            if ($request->hasFile('image')) {
+                $file = $request->file('image');
+
+                $img = Image::make($file->getPathname())->orientate();
+                $img->resize(1600, 1600, function ($c) {
+                    $c->aspectRatio();
+                    $c->upsize();
+                });
+
+                $disk = Storage::disk('public');
+                $dir  = 'outlets';
+                $disk->makeDirectory($dir);
+
+                $basename = Str::uuid()->toString();
+
+                try {
+                    $binary = (string) $img->encode('webp', 78);
+                    $path   = "{$dir}/{$basename}.webp";
+                } catch (\Throwable $e) {
+                    $binary = (string) $img->encode('jpg', 80);
+                    $path   = "{$dir}/{$basename}.jpg";
+                }
+
+                $disk->put($path, $binary);
+
+                // Hapus lama bila ada
+                if ($outlet->logo && $disk->exists($outlet->logo)) {
+                    $disk->delete($outlet->logo);
+                }
+
+                $newImagePath = $path;
+            }
+
+            // Data update
+            $updateData = [
+                'name'   => $request->name,
+                'email'  => $request->email,
+                'username' => $request->username,
+                'logo'   => $newImagePath,
+
+                // alamat simpan nama & id
+                'province'         => $request->province_name,
+                'province_id'      => $request->province,
+                'city'             => $request->city_name,
+                'city_id'          => $request->city,
+                'subdistrict'      => $request->district_name,
+                'subdistrict_id'   => $request->district,
+                'urban_village'    => $request->village_name,
+                'urban_village_id' => $request->village,
+                'address'          => $request->address,
+            ];
+
+            if ($request->filled('password')) {
+                $updateData['password'] = Hash::make($request->password);
+            }
+
+            $outlet->update($updateData);
+
+            DB::commit();
+
+            return redirect()
+                ->route('owner.user-owner.outlets.index')
+                ->with('success', 'Outlet berhasil diperbarui: ' . $outlet->name);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(User $outlet)
+    {
+        // (opsional tapi bagus) pastikan employee milik partner yang login
+        $ownerId = Auth::id();
+        $partners = User::where('owner_id', $ownerId)->get();
+        abort_if(!$partners->contains($outlet->id), 403);
+
+        try {
+            // Hapus file gambar jika ada
+            if (!empty($outlet->image)) {
+                $disk = Storage::disk('public');       // path DB: "employees/xxxx.webp"
+                if ($disk->exists($outlet->image)) {
+                    $disk->delete($outlet->image);
+                }
+            }
+
+            // Hapus record
+            $outlet->delete();
+
+            return redirect()
+                ->route('owner.user-owner.outlets.index')
+                ->with('success', 'Employee deleted successfully!');
+        } catch (\Throwable $e) {
+            return back()
+                ->withErrors(['error' => 'Gagal menghapus: ' . $e->getMessage()]);
+        }
+    }
+
+    public function checkUsername(Request $request)
+    {
+        $v = Validator::make($request->all(), [
+            'username'   => ['required', 'string', 'min:3', 'max:30', 'regex:/^[A-Za-z0-9._\-]+$/'],
+            'exclude_id' => ['nullable', 'integer', 'exists:users,id'],
+        ], [
+            'username.regex' => 'Format username tidak valid.',
+        ]);
+
+        if ($v->fails()) {
+            return response()->json(['errors' => $v->errors()], 422);
+        }
+
+        $query = User::query()->where('username', $request->username);
+        if ($request->filled('exclude_id')) {
+            $query->where('id', '!=', (int) $request->exclude_id);
+        }
+
+        return response()->json([
+            'available' => ! $query->exists(),
+        ]);
+    }
+}
