@@ -329,67 +329,6 @@
               </ul>
             </li>
 
-
-
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon fas fa-file-alt"></i>
-                <p>
-                  Home Page
-                  <i class="fas fa-angle-left right"></i>
-                </p>
-              </a>
-              <ul class="nav nav-treeview">
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="far fa-circle nav-icon"></i>
-                    <p>Partners</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="far fa-circle nav-icon"></i>
-                    <p>Reviews</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="far fa-circle nav-icon"></i>
-                    <p>News</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="far fa-circle nav-icon"></i>
-                    <p>Contacts</p>
-                  </a>
-                </li>
-              </ul>
-            </li>
-            <li class="nav-item">
-              <a href="#" class="nav-link">
-                <i class="nav-icon fas fa-file-alt"></i>
-                <p>
-                  Pages
-                  <i class="fas fa-angle-left right"></i>
-                </p>
-              </a>
-              <ul class="nav nav-treeview">
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="far fa-circle nav-icon"></i>
-                    <p>All Pages</p>
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="#" class="nav-link">
-                    <i class="far fa-circle nav-icon"></i>
-                    <p>Add New</p>
-                  </a>
-                </li>
-              </ul>
-            </li>
-
             <li class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-cog"></i>
@@ -510,11 +449,9 @@
       @if(session('success'))
         toastr.success('{{ session('success') }}');
       @endif
-
       @if(session('error'))
         toastr.error('{{ session('error') }}');
       @endif
-
         // Example chart
         var ctx = document.getElementById('myChart').getContext('2d');
       var myChart = new Chart(ctx, {
