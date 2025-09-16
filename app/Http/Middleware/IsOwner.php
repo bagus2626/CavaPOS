@@ -4,24 +4,17 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
-class IsEmployee
+class IsOwner
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
-        $user = Auth::guard('employee')->user();
+        $user = Auth::guard('owner')->user();
         if (!$user) {
-            // Belum login sebagai employee
-            // abort(401);
-            // atau redirect ke login employee kalau rutenya ada:
-            return redirect()->route('employee.login');
+            // Belum login sebagai owner
+            abort(401);
         }
 
         // Optional: blokir akun non-aktif

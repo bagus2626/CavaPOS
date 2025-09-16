@@ -12,8 +12,11 @@
 
             {{-- Brand --}}
             <div class="flex-1 flex justify-center">
-                <a href="{{ url('/') }}" class="text-xl font-bold text-choco">
-                    {{ config('app.name', 'FoodBee') }}
+                <a href="{{ route('home') }}">
+                        <!-- Logo untuk Light Mode -->
+                        <img src="{{ asset('images/cava-logo2-choco.png') }}"
+                            class="block h-14 w-auto"
+                            alt="Logo Light Mode">
                 </a>
             </div>
 

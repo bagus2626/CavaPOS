@@ -22,19 +22,19 @@ class EmployeeAuthController extends Controller
     {
         // dd($request->all());
         $cred = $request->validate([
-            'email'    => ['required', 'email'],
+            'user_name'    => ['required', 'string'],
             'password' => ['required'],
         ]);
 
         // pastikan hanya employee aktif yang bisa login
         $attempt = Auth::guard('employee')->attempt([
-            'email'     => $cred['email'],
+            'user_name'     => $cred['user_name'],
             'password'  => $cred['password'],
             'is_active' => 1,
         ], $request->boolean('remember'));
 
         if (!$attempt) {
-            return back()->withInput()->withErrors(['email' => 'Kredensial tidak valid atau akun nonaktif.']);
+            return back()->withInput()->withErrors(['user_name' => 'Kredensial tidak valid atau akun nonaktif.']);
         }
 
         $request->session()->regenerate();

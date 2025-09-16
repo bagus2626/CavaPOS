@@ -43,22 +43,22 @@
 
         {{-- Email --}}
         <div>
-          <label for="email" class="block text-sm font-medium text-gray-800">Email</label>
+          <label for="user_name" class="block text-sm font-medium text-gray-800">Username</label>
           <div class="mt-1 relative">
             <input
-              id="email"
-              name="email"
-              type="email"
-              value="{{ old('email') }}"
+              id="user_name"
+              name="user_name"
+              type="text"
+              value="{{ old('user_name') }}"
               required
-              autocomplete="email"
-              placeholder="name@company.com"
+              autocomplete="user_name"
+              placeholder="username"
               class="block w-full rounded-lg border-gray-300 shadow-sm placeholder-gray-400
                      focus:border-choco focus:ring-2 focus:ring-choco/40
-                     @error('email') ring-2 ring-red-500 focus:ring-red-500 focus:border-red-500 @enderror"
+                     @error('user_name') ring-2 ring-red-500 focus:ring-red-500 focus:border-red-500 @enderror"
             >
           </div>
-          @error('email')
+          @error('user_name')
             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
           @enderror
         </div>

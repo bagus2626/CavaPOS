@@ -48,6 +48,10 @@ return [
             'driver' => 'session',
             'provider' => 'employees',
         ],
+        'owner' => [
+            'driver' => 'session',
+            'provider' => 'owners',
+        ],
     ],
 
     /*
@@ -79,6 +83,10 @@ return [
         'employees' => [
             'driver' => 'eloquent',
             'model' => App\Models\Partner\HumanResource\Employee::class,
+        ],
+        'owners' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Owner::class,
         ],
 
         // 'users' => [

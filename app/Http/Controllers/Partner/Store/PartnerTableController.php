@@ -78,10 +78,12 @@ class PartnerTableController extends Controller
             //generate table barcode
             $barcode = 'TB' . strtoupper(uniqid());
             //generate table URL
-            $table_url = route('customer.menu.index', [
-                'partner_slug' => Auth::user()->slug,
-                'table_code'   => $barcode,
-            ]);
+            // $table_url = route('customer.menu.index', [
+            //     'partner_slug' => Auth::user()->slug,
+            //     'table_code'   => $barcode,
+            // ]);
+
+            $table_url = 'customer/' . Auth::user()->slug . '/menu' . '/' . $barcode;
 
             $table = new Table();
             $table->table_no = $validated['table_no'];
@@ -225,7 +227,7 @@ class PartnerTableController extends Controller
         // Generate QR code normal (tanpa label bawaan!)
         $result = Builder::create()
             ->writer(new PngWriter())
-            ->data($table->table_url)
+            ->data(url($table->table_url))
             ->size(300)
             ->margin(10)
             ->backgroundColor(new Color(255, 255, 255)) // putih

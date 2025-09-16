@@ -1,0 +1,573 @@
+@extends('layouts.owner')
+
+@section('title', 'Create Outlet')
+@section('page_title', 'Buat Outlet Baru')
+
+@section('content')
+<div class="container">
+
+    <a href="{{ route('owner.user-owner.outlets.index') }}" class="btn btn-outline-secondary mb-3">
+        <i class="fas fa-arrow-left me-2"></i>Kembali
+    </a>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 py-3">
+            <h5 class="card-title mb-0 d-flex align-items-center gap-2">
+                <i class="fas fa-store text-primary"></i>
+                Create New Outlet
+            </h5>
+        </div>
+
+        <div class="card-body pt-0">
+            {{-- Alerts --}}
+            @if ($errors->any())
+                <div class="alert alert-danger d-flex align-items-start gap-2">
+                    <i class="fas fa-circle-exclamation mt-1"></i>
+                    <div>
+                        <strong>Periksa kembali input kamu:</strong>
+                        <ul class="mb-0 mt-2 ps-3">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            @endif
+            @if ($errors->has('error'))
+                <div class="alert alert-danger"><i class="fas fa-circle-exclamation me-2"></i>{{ $errors->first('error') }}</div>
+            @endif
+            @if (session('success'))
+                <div class="alert alert-success"><i class="fas fa-check-circle me-2"></i>{{ session('success') }}</div>
+            @endif
+            @if (session('status'))
+                <div class="alert alert-info"><i class="fas fa-circle-info me-2"></i>{{ session('status') }}</div>
+            @endif
+
+            <form action="{{ route('owner.user-owner.outlets.store') }}" method="POST" enctype="multipart/form-data" id="employeeForm" class="needs-validation" novalidate>
+                @csrf
+
+                {{-- SECTION: Info Dasar --}}
+                <div class="form-section">
+                    <div class="section-header">
+                        <span class="section-icon"><i class="fas fa-id-card"></i></span>
+                        <h6 class="mb-0">Informasi Dasar</h6>
+                    </div>
+
+                    <div class="row g-3">
+                        {{-- Outlet name --}}
+                        <div class="col-md-6">
+                            <label for="name" class="form-label required">Nama Outlet</label>
+                            <input type="text" name="name" id="name"
+                                   class="form-control @error('name') is-invalid @enderror"
+                                   value="{{ old('name') }}" placeholder="cth: Cava Coffee - Malioboro" required>
+                            @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        {{-- username --}}
+                        <input type="hidden" id="usernameCheckUrl" value="{{ route('owner.user-owner.outlets.check-username') }}">
+
+                        <div class="col-md-6">
+                            <label for="username" class="form-label required">Username</label>
+                            <div class="input-group has-validation">
+                                <span class="input-group-text">@</span>
+                                <input type="text" name="username" id="username"
+                                    class="form-control @error('username') is-invalid @enderror"
+                                    value="{{ old('username') }}" required minlength="3" maxlength="30"
+                                    pattern="^[A-Za-z0-9._\-]+$"  {{-- <- dash di-escape --}}
+                                    placeholder="contoh: budi.setiawan"
+                                    autocomplete="username" autocapitalize="none" spellcheck="false">
+                                <button type="button" id="btnCheckUsername" class="btn btn-outline-primary">
+                                    <span class="label">Check</span>
+                                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                </button>
+                                @error('username') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                            </div>
+                            <small class="text-muted">3–30 karakter: huruf/angka, titik (.), underscore (_), dash (-).</small>
+
+                            {{-- status ketersediaan --}}
+                            <div id="usernameStatus" class="form-text mt-1"></div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- SECTION: Alamat Outlet --}}
+                <div class="form-section">
+                    <div class="section-header">
+                        <span class="section-icon"><i class="fas fa-location-dot"></i></span>
+                        <h6 class="mb-0">Alamat Outlet</h6>
+                    </div>
+
+                    <div class="row g-3">
+                        {{-- Province --}}
+                        <div class="col-md-6">
+                            <label for="province" class="form-label">Provinsi</label>
+                            <div class="position-relative">
+                                <select id="province" name="province"
+                                        class="form-select w-100 @error('province') is-invalid @enderror" disabled>
+                                    <option value="">Memuat provinsi…</option>
+                                </select>
+                                <span class="loading-spinner d-none" id="spnProvince"></span>
+                            </div>
+                            <input type="hidden" id="province_name" name="province_name" value="{{ old('province_name') }}">
+                            @error('province') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        {{-- City --}}
+                        <div class="col-md-6">
+                            <label for="city" class="form-label">Kota/Kabupaten</label>
+                            <div class="position-relative">
+                                <select id="city" name="city"
+                                        class="form-select w-100 @error('city') is-invalid @enderror" disabled>
+                                    <option value="">Pilih provinsi dahulu</option>
+                                </select>
+                                <span class="loading-spinner d-none" id="spnCity"></span>
+                            </div>
+                            <input type="hidden" id="city_name" name="city_name" value="{{ old('city_name') }}">
+                            @error('city') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        {{-- District --}}
+                        <div class="col-md-6">
+                            <label for="district" class="form-label">Kecamatan</label>
+                            <div class="position-relative">
+                                <select id="district" name="district"
+                                        class="form-select w-100 @error('district') is-invalid @enderror" disabled>
+                                    <option value="">Pilih kota dahulu</option>
+                                </select>
+                                <span class="loading-spinner d-none" id="spnDistrict"></span>
+                            </div>
+                            <input type="hidden" id="district_name" name="district_name" value="{{ old('district_name') }}">
+                            @error('district') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        {{-- Village --}}
+                        <div class="col-md-6">
+                            <label for="village" class="form-label">Kelurahan/Desa</label>
+                            <div class="position-relative">
+                                <select id="village" name="village"
+                                        class="form-select w-100 @error('village') is-invalid @enderror" disabled>
+                                    <option value="">Pilih kecamatan dahulu</option>
+                                </select>
+                                <span class="loading-spinner d-none" id="spnVillage"></span>
+                            </div>
+                            <input type="hidden" id="village_name" name="village_name" value="{{ old('village_name') }}">
+                            @error('village') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        {{-- Address detail --}}
+                        <div class="col-12">
+                            <label for="address" class="form-label mt-2">Alamat Detail</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-road"></i></span>
+                                <input type="text" id="address" name="address"
+                                       class="form-control @error('address') is-invalid @enderror"
+                                       value="{{ old('address') }}" placeholder="Nama jalan, RT/RW, nomor, patokan">
+                                @error('address') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- SECTION: Kontak & Media --}}
+                <div class="form-section">
+                    <div class="section-header">
+                        <span class="section-icon"><i class="fas fa-envelope"></i></span>
+                        <h6 class="mb-0">Kontak & Gambar</h6>
+                    </div>
+
+                    <div class="row g-3">
+                        {{-- Email --}}
+                        <div class="col-md-6">
+                            <label for="email" class="form-label required">Email Outlet</label>
+                            <input type="email" name="email" id="email"
+                                   class="form-control @error('email') is-invalid @enderror"
+                                   value="{{ old('email', $employee->email ?? '') }}"
+                                   placeholder="name@company.com" required maxlength="254"
+                                   autocomplete="email" autocapitalize="off" spellcheck="false" inputmode="email">
+                            @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+
+                        {{-- Image --}}
+                        <div class="col-md-6">
+                            <label for="image" class="form-label">Unggah Gambar</label>
+                            <input type="file" name="image" id="image"
+                                   class="form-control @error('image') is-invalid @enderror" accept="image/*">
+                            <small class="text-muted">JPG/PNG/WEBP, maks 2 MB.</small>
+                            @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
+                            {{-- Preview --}}
+                            <div id="imagePreviewWrapper" class="mt-2 d-none">
+                                <div class="position-relative preview-box">
+                                    <img id="imagePreview" src="" alt="Preview"
+                                         class="img-thumbnail rounded w-100 h-auto">
+                                    <button type="button" id="clearImageBtn"
+                                            class="btn btn-sm btn-danger position-absolute top-0 end-0"
+                                            aria-label="Hapus gambar">
+                                        &times;
+                                    </button>
+                                </div>
+                                <small id="imageInfo" class="text-muted d-block mt-1"></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- SECTION: Keamanan --}}
+                <div class="form-section">
+                    <div class="section-header">
+                        <span class="section-icon"><i class="fas fa-lock"></i></span>
+                        <h6 class="mb-0">Keamanan</h6>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="password" class="form-label required">Password</label>
+                            <div class="input-group has-validation">
+                                <input type="password" name="password" id="password"
+                                       class="form-control @error('password') is-invalid @enderror"
+                                       minlength="8" required autocomplete="new-password"
+                                       placeholder="Min. 8 karakter">
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword" tabindex="-1">
+                                    Show
+                                </button>
+                                @error('password') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                            </div>
+                            <small class="text-muted">Disarankan kombinasi huruf, angka, dan simbol.</small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="password_confirmation" class="form-label required">Konfirmasi Password</label>
+                            <div class="input-group has-validation">
+                                <input type="password" name="password_confirmation" id="password_confirmation"
+                                       class="form-control @error('password_confirmation') is-invalid @enderror"
+                                       minlength="8" required autocomplete="new-password"
+                                       placeholder="Ulangi password">
+                                <button class="btn btn-outline-secondary" type="button" id="togglePasswordConfirm" tabindex="-1">
+                                    Show
+                                </button>
+                                @error('password_confirmation') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Sticky Actions --}}
+                <div class="form-actions sticky-actions">
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ route('owner.user-owner.outlets.index') }}" class="btn btn-light border">
+                            <i class="fas fa-xmark me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+@endsection
+
+@push('styles')
+<style>
+    .form-section { padding: 1.25rem 0; border-top: 1px solid rgba(0,0,0,.06); }
+    .form-section:first-of-type { border-top: 0; }
+    .section-header { display:flex; align-items:center; gap:.5rem; margin-bottom:.75rem; }
+    .section-icon { width:34px; height:34px; border-radius:50%; background:#f1f5f9; display:grid; place-items:center; color:#0d6efd; }
+    .required::after { content:" *"; color:#dc3545; }
+    .preview-box { width: 220px; }
+    .sticky-actions { position: sticky; bottom: 0; background: linear-gradient(180deg, rgba(255,255,255,0) 0%, #fff 30%); padding-top: .75rem; margin-top: 1rem; }
+    .loading-spinner { position:absolute; right:.75rem; top:50%; transform:translateY(-50%); width:1rem; height:1rem; border:.15rem solid rgba(13,110,253,.2); border-top-color:#0d6efd; border-radius:50%; animation: spin .8s linear infinite; }
+    .d-none{display:none!important;}
+    @keyframes spin{to{transform:translateY(-50%) rotate(360deg)}}
+</style>
+@endpush
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // ===== Image preview (tetap) =====
+    const input    = document.getElementById('image');
+    const wrapper  = document.getElementById('imagePreviewWrapper');
+    const preview  = document.getElementById('imagePreview');
+    const info     = document.getElementById('imageInfo');
+    const clearBtn = document.getElementById('clearImageBtn');
+
+    const MAX_SIZE = 2 * 1024 * 1024; // 2 MB
+    const ALLOWED  = ['image/jpeg', 'image/png', 'image/webp'];
+
+    function bytesToSize(bytes) {
+        const units = ['B','KB','MB','GB'];
+        let i = 0, num = bytes;
+        while (num >= 1024 && i < units.length - 1) { num /= 1024; i++; }
+        return `${num.toFixed(num < 10 && i > 0 ? 1 : 0)} ${units[i]}`;
+    }
+    function resetPreview() {
+        preview.src = '';
+        info.textContent = '';
+        wrapper.classList.add('d-none');
+    }
+    if (input) {
+        input.addEventListener('change', function () {
+            const file = input.files && input.files[0];
+            if (!file) { resetPreview(); return; }
+            if (!ALLOWED.includes(file.type)) {
+                alert('Tipe file tidak didukung. Gunakan JPG, PNG, atau WEBP.');
+                input.value = ''; resetPreview(); return;
+            }
+            if (file.size > MAX_SIZE) {
+                alert('Ukuran file melebihi 2 MB.');
+                input.value = ''; resetPreview(); return;
+            }
+            const url = URL.createObjectURL(file);
+            preview.src = url;
+            info.textContent = `${file.name} • ${bytesToSize(file.size)}`;
+            wrapper.classList.remove('d-none');
+        });
+    }
+    if (clearBtn) { clearBtn.addEventListener('click', function () { if (input) input.value = ''; resetPreview(); }); }
+
+    // ===== Password show/hide (tetap) =====
+    function bindToggle(btnId, inputId) {
+        const btn = document.getElementById(btnId);
+        const inp = document.getElementById(inputId);
+        if (!btn || !inp) return;
+        btn.addEventListener('click', () => {
+            const isPw = inp.type === 'password';
+            inp.type   = isPw ? 'text' : 'password';
+            btn.textContent = isPw ? 'Hide' : 'Show';
+        });
+    }
+    bindToggle('togglePassword', 'password');
+    bindToggle('togglePasswordConfirm', 'password_confirmation');
+
+    // ===== Client check (tetap) =====
+    const form = document.getElementById('employeeForm');
+    const pw   = document.getElementById('password');
+    const pwc  = document.getElementById('password_confirmation');
+    if (form && pw && pwc) {
+        form.addEventListener('submit', function (e) {
+            if (pw.value.length < 8) { e.preventDefault(); alert('Password minimal 8 karakter.'); pw.focus(); return; }
+            if (pw.value !== pwc.value) { e.preventDefault(); alert('Konfirmasi password tidak sama.'); pwc.focus(); }
+        });
+    }
+
+    // ===== Alamat: UX perbaikan (spinner/disable) =====
+    const API_BASE = "https://www.emsifa.com/api-wilayah-indonesia/api";
+    const provinceSelect = document.getElementById("province");
+    const citySelect     = document.getElementById("city");
+    const districtSelect = document.getElementById("district");
+    const villageSelect  = document.getElementById("village");
+    const provinceNameInput = document.getElementById("province_name");
+    const cityNameInput     = document.getElementById("city_name");
+    const districtNameInput = document.getElementById("district_name");
+    const villageNameInput  = document.getElementById("village_name");
+
+    const spnProvince = document.getElementById('spnProvince');
+    const spnCity     = document.getElementById('spnCity');
+    const spnDistrict = document.getElementById('spnDistrict');
+    const spnVillage  = document.getElementById('spnVillage');
+
+    const setLoading = (selectEl, spinnerEl, isLoading, placeholder) => {
+        if (isLoading) {
+            selectEl.innerHTML = `<option value="">${placeholder}</option>`;
+            selectEl.disabled = true;
+            spinnerEl?.classList.remove('d-none');
+        } else {
+            spinnerEl?.classList.add('d-none');
+            selectEl.disabled = false;
+        }
+    };
+    const resetSelect = (sel, msg) => { sel.innerHTML = `<option value="">${msg}</option>`; };
+
+    const fillAndStoreName = (selectEl, hiddenInputEl) => {
+        const txt = selectEl.options[selectEl.selectedIndex]?.text || '';
+        hiddenInputEl.value = txt;
+    };
+
+    // Load provinces
+    setLoading(provinceSelect, spnProvince, true, 'Memuat provinsi…');
+    fetch(`${API_BASE}/provinces.json`)
+        .then(r => r.json())
+        .then(list => {
+            resetSelect(provinceSelect, '-- Pilih Provinsi --');
+            list.forEach(item => {
+                const opt = document.createElement("option");
+                opt.value = item.id; opt.textContent = item.name;
+                provinceSelect.appendChild(opt);
+            });
+        })
+        .catch(() => { resetSelect(provinceSelect, 'Gagal memuat provinsi'); alert("Gagal memuat daftar provinsi. Coba reload."); })
+        .finally(() => setLoading(provinceSelect, spnProvince, false));
+
+    // Province -> Cities
+    provinceSelect.addEventListener("change", function () {
+        fillAndStoreName(provinceSelect, provinceNameInput);
+        resetSelect(citySelect, '-- Pilih Kota --'); resetSelect(districtSelect, '-- Pilih Kecamatan --'); resetSelect(villageSelect, '-- Pilih Kelurahan --');
+        if (!this.value) { citySelect.disabled = true; districtSelect.disabled = true; villageSelect.disabled = true; return; }
+
+        setLoading(citySelect, spnCity, true, 'Memuat kota…');
+        fetch(`${API_BASE}/regencies/${this.value}.json`)
+            .then(r => r.json())
+            .then(list => {
+                resetSelect(citySelect, '-- Pilih Kota --');
+                list.forEach(item => {
+                    const opt = document.createElement("option");
+                    opt.value = item.id; opt.textContent = item.name;
+                    citySelect.appendChild(opt);
+                });
+            })
+            .catch(() => alert("Gagal memuat daftar kota."))
+            .finally(() => setLoading(citySelect, spnCity, false));
+    });
+
+    // City -> Districts
+    citySelect.addEventListener("change", function () {
+        fillAndStoreName(citySelect, cityNameInput);
+        resetSelect(districtSelect, '-- Pilih Kecamatan --'); resetSelect(villageSelect, '-- Pilih Kelurahan --');
+        if (!this.value) { districtSelect.disabled = true; villageSelect.disabled = true; return; }
+
+        setLoading(districtSelect, spnDistrict, true, 'Memuat kecamatan…');
+        fetch(`${API_BASE}/districts/${this.value}.json`)
+            .then(r => r.json())
+            .then(list => {
+                resetSelect(districtSelect, '-- Pilih Kecamatan --');
+                list.forEach(item => {
+                    const opt = document.createElement("option");
+                    opt.value = item.id; opt.textContent = item.name;
+                    districtSelect.appendChild(opt);
+                });
+            })
+            .catch(() => alert("Gagal memuat daftar kecamatan."))
+            .finally(() => setLoading(districtSelect, spnDistrict, false));
+    });
+
+    // District -> Villages
+    districtSelect.addEventListener("change", function () {
+        fillAndStoreName(districtSelect, districtNameInput);
+        resetSelect(villageSelect, '-- Pilih Kelurahan --');
+        if (!this.value) { villageSelect.disabled = true; return; }
+
+        setLoading(villageSelect, spnVillage, true, 'Memuat kelurahan…');
+        fetch(`${API_BASE}/villages/${this.value}.json`)
+            .then(r => r.json())
+            .then(list => {
+                resetSelect(villageSelect, '-- Pilih Kelurahan --');
+                list.forEach(item => {
+                    const opt = document.createElement("option");
+                    opt.value = item.id; opt.textContent = item.name;
+                    villageSelect.appendChild(opt);
+                });
+            })
+            .catch(() => alert("Gagal memuat daftar kelurahan."))
+            .finally(() => setLoading(villageSelect, spnVillage, false));
+    });
+
+    // Village -> store name
+    villageSelect.addEventListener("change", function () {
+        fillAndStoreName(villageSelect, villageNameInput);
+    });
+
+    // === Username availability check (USERS TABLE) ===
+    (function () {
+        const inputUsername = document.getElementById('username');
+        const btnCheck      = document.getElementById('btnCheckUsername');
+        const statusEl      = document.getElementById('usernameStatus');
+        const urlCheckEl    = document.getElementById('usernameCheckUrl');
+        const urlCheck      = urlCheckEl ? urlCheckEl.value : '';
+
+        if (!inputUsername || !btnCheck || !statusEl || !urlCheck) return;
+
+        const spinner  = btnCheck.querySelector('.spinner-border');
+        const btnLabel = btnCheck.querySelector('.label');
+
+        function setUsernameLoading(isLoading) {
+            if (isLoading) {
+                btnCheck.disabled = true;
+                spinner.classList.remove('d-none');
+                btnLabel.textContent = 'Checking...';
+            } else {
+                btnCheck.disabled = false;
+                spinner.classList.add('d-none');
+                btnLabel.textContent = 'Check';
+            }
+        }
+
+        function showStatus(ok, msg) {
+            statusEl.className = 'form-text mt-1';
+            if (ok) {
+                statusEl.innerHTML = `<span class="badge bg-success">Available</span> <span class="text-success ms-1">${msg}</span>`;
+                inputUsername.classList.remove('is-invalid');
+                inputUsername.classList.add('is-valid');
+            } else {
+                statusEl.innerHTML = `<span class="badge bg-danger">Taken</span> <span class="text-danger ms-1">${msg}</span>`;
+                inputUsername.classList.remove('is-valid');
+                inputUsername.classList.add('is-invalid');
+            }
+        }
+
+        function showNeutral(msg) {
+            statusEl.className = 'form-text mt-1 text-muted';
+            statusEl.textContent = msg || '';
+            inputUsername.classList.remove('is-valid','is-invalid');
+        }
+
+        async function checkUsername() {
+            const val = (inputUsername.value || '').trim();
+            if (!val) { showNeutral(''); return; }
+
+            // Validasi ringan di client – harus sesuai pattern HTML
+            if (val.length < 3 || val.length > 30 || !/^[A-Za-z0-9._\-]+$/.test(val)) {
+                showStatus(false, 'Format tidak valid.');
+                return;
+            }
+
+            try {
+                setUsernameLoading(true);
+                const params = new URLSearchParams({ username: val });
+
+                // Untuk halaman EDIT: kirimkan exclude_id bila ada
+                const excludeId = inputUsername.dataset.excludeId || '';
+                if (excludeId) params.append('exclude_id', excludeId);
+
+                const res = await fetch(`${urlCheck}?${params.toString()}`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' },
+                });
+
+                if (res.status === 422) {
+                    // salah format / validasi gagal
+                    showStatus(false, 'Format tidak valid.');
+                    return;
+                }
+
+                const data = await res.json();
+                if (typeof data.available !== 'undefined') {
+                    data.available
+                        ? showStatus(true, 'Username tersedia 🎉')
+                        : showStatus(false, 'Username sudah dipakai.');
+                } else {
+                    showNeutral('Tidak bisa memeriksa saat ini.');
+                }
+            } catch (e) {
+                showNeutral('Terjadi kesalahan jaringan.');
+            } finally {
+                setUsernameLoading(false);
+            }
+        }
+
+        // klik tombol
+        btnCheck.addEventListener('click', checkUsername);
+
+        // debounce saat mengetik
+        let t;
+        inputUsername.addEventListener('input', () => {
+            showNeutral('');
+            clearTimeout(t);
+            t = setTimeout(checkUsername, 500);
+        });
+    })();
+});
+</script>
+@endpush
