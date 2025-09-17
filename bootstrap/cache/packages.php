@@ -6,6 +6,18 @@
       'EloquentSerialize' => 'AnourValar\\EloquentSerialize\\Facades\\EloquentSerializeFacade',
     ),
   ),
+  'barryvdh/laravel-dompdf' => 
+  array (
+    'aliases' => 
+    array (
+      'PDF' => 'Barryvdh\\DomPDF\\Facade\\Pdf',
+      'Pdf' => 'Barryvdh\\DomPDF\\Facade\\Pdf',
+    ),
+    'providers' => 
+    array (
+      0 => 'Barryvdh\\DomPDF\\ServiceProvider',
+    ),
+  ),
   'blade-ui-kit/blade-heroicons' => 
   array (
     'providers' => 
@@ -106,18 +118,6 @@
     'providers' => 
     array (
       0 => 'Laravel\\Pail\\PailServiceProvider',
-    ),
-  ),
-  'laravel/reverb' => 
-  array (
-    'aliases' => 
-    array (
-      'Output' => 'Laravel\\Reverb\\Output',
-    ),
-    'providers' => 
-    array (
-      0 => 'Laravel\\Reverb\\ApplicationManagerServiceProvider',
-      1 => 'Laravel\\Reverb\\ReverbServiceProvider',
     ),
   ),
   'laravel/sail' => 
