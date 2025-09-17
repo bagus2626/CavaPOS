@@ -64,7 +64,8 @@ return [
     | is set to "UTC" by default as it is suitable for most use cases.
     |
     */
-
+    'locale' => 'id',
+    'fallback_locale' => 'en',
     'timezone' => env('APP_TIMEZONE', 'Asia/Jakarta'),
 
     /*

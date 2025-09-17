@@ -24,7 +24,7 @@
     <div class="max-w-7xl mx-auto">
         <div class="w-full md:w-2/3">
             <h1 class="text-3xl md:text-5xl font-extrabold text-gray-200 dark:text-white mb-6 leading-tight">
-                Kami menyediakan jasa dalam pembuatan aplikasi
+                {{ __('messages.home.header') }}
             </h1>
 
             <p class="text-lg text-gray-200 dark:text-gray-300 mb-8">

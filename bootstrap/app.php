@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'is_owner' => IsOwner::class,
             'redirect.auth.role' => \App\Http\Middleware\RedirectIfAuthenticatedWithRole::class,
             'auth' => \App\Http\Middleware\Authenticate::class,
+            'setlocale' => \App\Http\Middleware\SetLocale::class,
         ]);
 
         $middleware->appendToGroup('web', \Illuminate\Session\Middleware\StartSession::class);
