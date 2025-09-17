@@ -291,12 +291,6 @@
                                     <p>All Outlets</p>
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a href="{{ route('partner.categories.index') }}" class="nav-link {{ Route::is('partner.categories.*') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Categories</p>
-                                </a>
-                            </li>
 
                         </ul>
                     </li>

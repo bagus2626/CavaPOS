@@ -23,7 +23,7 @@
             {{ $partner->name }}
         </h2>
         <p class="inline-flex items-center gap-2 rounded-full bg-soft-choco/10 px-4 py-1 text-sm font-medium text-choco">
-            <span class="font-semibold">Table {{ $table->table_no }}</span>
+            <span class="font-semibold">{{ __('messages.customer.menu.table') }} {{ $table->table_no }}</span>
             <span class="text-gray-400">•</span>
             <span>{{ $table->table_class }}</span>
         </p>
