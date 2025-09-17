@@ -26,7 +26,7 @@
                     {{-- switch language --}}
                 <button
                     type="button"
-                    class="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-gray-200 bg-white text-gray-700 shadow-sm hover:bg-gray-50
+                    class="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-gray-200 bg-choco text-white shadow-sm hover:bg-soft-choco
                         dark:bg-choco dark:text-white dark:soft-choco dark:hover:bg-choco/80"
                     data-toggle="lang-dropdown"
                     aria-haspopup="true"
@@ -47,13 +47,13 @@
 
                 <!-- Dropdown -->
                 <div
-                    class="hidden absolute right-0 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg dark:bg-soft-choco dark:border-choco"
+                    class="hidden absolute right-0 mt-2 w-40 rounded-md border border-gray-200 bg-soft-choco shadow-lg dark:bg-soft-choco dark:border-choco"
                     data-menu="lang-dropdown"
                 >
                     <button
                         type="button"
                         class="w-full px-3 py-2 text-left text-sm hover:bg-choco dark:hover:bg-choco flex items-center gap-2
-                            {{ app()->getLocale() === 'en' ? 'font-semibold text-gray-200 dark:text-white' : 'text-gray-700 dark:text-gray-200' }}"
+                            {{ app()->getLocale() === 'en' ? 'font-semibold text-gray-300 dark:text-gray-300' : 'text-white dark:text-white' }}"
                         data-lang="en"
                     >
                         <span>🇬🇧</span><span>English</span>
@@ -61,7 +61,7 @@
                     <button
                         type="button"
                         class="w-full px-3 py-2 text-left text-sm hover:bg-choco dark:hover:bg-choco flex items-center gap-2
-                            {{ app()->getLocale() === 'id' ? 'font-semibold text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-200' }}"
+                            {{ app()->getLocale() === 'id' ? 'font-semibold text-gray-300 dark:text-gray-300' : 'text-white dark:text-white' }}"
                         data-lang="id"
                     >
                         <span>🇮🇩</span><span>Bahasa</span>
@@ -110,7 +110,7 @@
         <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <span class="text-sm text-gray-700 dark:text-gray-500">Language</span>
-                <div class="inline-flex rounded-md overflow-hidden border borderchoco dark:border-choco">
+                <div class="inline-flex rounded-md overflow-hidden border border-choco dark:border-choco">
                     <button
                         type="button"
                         class="px-3 py-1.5 text-sm
