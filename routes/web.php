@@ -3,10 +3,14 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Partner\Product\PartnerProductController;
+use App\Http\Controllers\Owner\Product\OwnerProductController;
+use App\Http\Controllers\Owner\Product\OwnerMasterProductController;
+use App\Http\Controllers\Owner\Product\OwnerOutletProductController;
 use App\Http\Controllers\Partner\Store\PartnerTableController;
 use App\Http\Controllers\Admin\PortfolioController;
 use App\Http\Controllers\Admin\Product\CategoryController;
 use App\Http\Controllers\Partner\Product\PartnerCategoryController;
+use App\Http\Controllers\Owner\Product\OwnerCategoryController;
 use App\Http\Controllers\Partner\HumanResource\PartnerEmployeeController;
 use App\Http\Controllers\Customer\Menu\CustomerMenuController;
 use App\Http\Controllers\Customer\Auth\CustomerAuthController;
@@ -81,6 +85,7 @@ Route::middleware('setlocale')->group(function () {
         Route::post('login',    [OwnerAuthController::class, 'authenticate'])->name('login.attempt');
         Route::post('logout',    [OwnerAuthController::class, 'logout'])->name('logout');
 
+
         // OWNER area
         Route::middleware(['auth:owner', 'is_owner:owner'])->prefix('user-owner')->name('user-owner.')->group(function () {
             Route::get('/', [OwnerDashboardController::class, 'index'])->name('dashboard');
@@ -88,6 +93,11 @@ Route::middleware('setlocale')->group(function () {
             Route::resource('outlets', OwnerOutletController::class);
             Route::get('employees/check-username', [OwnerEmployeeController::class, 'checkUsername'])->name('employees.check-username');
             Route::resource('employees', OwnerEmployeeController::class);
+            Route::resource('master-products', OwnerMasterProductController::class);
+            Route::get('outlet-products/get-master-products', [OwnerOutletProductController::class, 'getMasterProducts'])->name('outlet-products.get-master-products');
+            Route::resource('outlet-products', OwnerOutletProductController::class);
+            Route::resource('products', OwnerProductController::class);
+            Route::resource('categories', OwnerCategoryController::class);
         });
     });
 
