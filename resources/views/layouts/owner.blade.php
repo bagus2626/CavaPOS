@@ -33,6 +33,8 @@
 
     <!-- Bootstrap 4 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.6.4/dist/select2-bootstrap4.min.css">
+
 
 
 
@@ -209,7 +211,7 @@
                                     <p>Employees</p>
                                 </a>
                             </li>
-                            <li class="nav-item">
+                            {{-- <li class="nav-item">
                                 <a href="#" class="nav-link">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Roles</p>
@@ -220,7 +222,7 @@
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Permissions</p>
                                 </a>
-                            </li>
+                            </li> --}}
                         </ul>
                     </li>
 
@@ -293,6 +295,57 @@
                             </li>
 
                         </ul>
+                    </li>
+
+                     @php
+                        $productRoutes = ['owner.user-owner.products.*'];
+                        $categoryRoutes = ['owner.user-owner.categories.*'];
+                        $masterProductRoutes = ['owner.user-owner.master-products.*'];
+                        $outletProductRoutes = ['owner.user-owner.outlet-products.*'];
+
+                        $allProductRoutes = array_merge($productRoutes, $categoryRoutes, $masterProductRoutes, $outletProductRoutes);
+                    @endphp
+
+                    <li class="nav-item {{ Route::is($allProductRoutes) ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ Route::is($allProductRoutes) ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-shopping-cart"></i>
+                        <p>
+                        Products
+                        <i class="fas fa-angle-left right"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{{ route('owner.user-owner.master-products.index') }}"
+                                class="nav-link {{ Route::is('owner.user-owner.master-products.*') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Master Products</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('owner.user-owner.outlet-products.index') }}"
+                                class="nav-link {{ Route::is('owner.user-owner.outlet-products.*') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Outlet Products</p>
+                            </a>
+                        </li>
+                        {{-- <li class="nav-item">
+                            <a href="{{ route('owner.user-owner.products.index') }}"
+                                class="nav-link {{ Route::is('owner.user-owner.products.*') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>All Products</p>
+                            </a>
+                        </li> --}}
+                        <li class="nav-item">
+                            <a href="{{ route('owner.user-owner.categories.index') }}"
+                                class="nav-link {{ Route::is('owner.user-owner.categories.*') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Categories</p>
+                            </a>
+                        </li>
+
+                    </ul>
+
                     </li>
 
                     <li class="nav-item">
@@ -411,13 +464,13 @@
         });
 
         // Toastr notification example
-        @if(session('success'))
-            toastr.success('{{ session('success') }}');
-        @endif
+        // @if(session('success'))
+        //     toastr.success('{{ session('success') }}');
+        // @endif
 
-        @if(session('error'))
-            toastr.error('{{ session('error') }}');
-        @endif
+        // @if(session('error'))
+        //     toastr.error('{{ session('error') }}');
+        // @endif
 
         // Example chart
         var ctx = document.getElementById('myChart').getContext('2d');
@@ -500,5 +553,31 @@
 
 @yield('scripts')
 @stack('scripts')
+
+@if(session('success'))
+    <script>
+    $(function () {
+        toastr.success({!! json_encode(session('success')) !!});
+    });
+    </script>
+@endif
+
+@if(session('error'))
+    <script>
+    $(function () {
+        toastr.error({!! json_encode(session('error')) !!});
+    });
+    </script>
+@endif
+@if ($errors->any())
+    <script>
+    $(function () {
+        @foreach ($errors->all() as $err)
+        toastr.error({!! json_encode($err) !!});
+        @endforeach
+    });
+    </script>
+@endif
+
 </body>
 </html>

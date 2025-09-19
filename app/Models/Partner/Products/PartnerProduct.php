@@ -13,6 +13,8 @@ class PartnerProduct extends Model
 
     protected $fillable = [
         'product_code',
+        'master_product_id',
+        'owner_id',
         'partner_id',
         'category_id',
         'name',
@@ -39,20 +41,14 @@ class PartnerProduct extends Model
         return $this->belongsTo(Category::class);
     }
 
-    // Relasi ke Promo
-    public function promo()
-    {
-        return $this->belongsTo(Promo::class);
-    }
-
     public function parent_options()
     {
-        return $this->hasMany(PartnerProductParentOption::class,'partner_product_id', 'id');
+        return $this->hasMany(PartnerProductParentOption::class, 'partner_product_id', 'id');
     }
 
     // Relasi ke Addons (options)
     public function options()
     {
-        return $this->hasMany(PartnerProductOption::class,'partner_product_id', 'id');
+        return $this->hasMany(PartnerProductOption::class, 'partner_product_id', 'id');
     }
 }
