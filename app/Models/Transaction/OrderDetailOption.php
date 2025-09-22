@@ -9,6 +9,8 @@ class OrderDetailOption extends Model
 {
     protected $fillable = [
         'order_detail_id',
+        'parent_name',
+        'partner_product_option_name',
         'option_id',
         'price',
     ];

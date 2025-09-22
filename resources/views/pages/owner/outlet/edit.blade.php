@@ -93,6 +93,33 @@
                             {{-- status ketersediaan --}}
                             <div id="usernameStatus" class="form-text mt-1"></div>
                         </div>
+
+                        <div class="col-md-6">
+                            <label for="slug" class="form-label required">Slug</label>
+                            <div class="input-group has-validation">
+                                <input
+                                    type="text"
+                                    name="slug"
+                                    id="slug"
+                                    class="form-control @error('slug') is-invalid @enderror"
+                                    value="{{ old('slug', $outlet->slug) }}"
+                                    required
+                                    minlength="3"
+                                    maxlength="30"
+                                    pattern="^[A-Za-z0-9._\-]+$"
+                                    placeholder="contoh: cava-coffee-malioboro"
+                                    autocomplete="off"
+                                    autocapitalize="none"
+                                    spellcheck="false"
+                                    disabled
+                                    {{-- opsional saat form edit: data-exclude-id="{{ $outlet->id ?? '' }}" --}}
+                                >
+                            </div>
+                            <small class="text-muted">slug sudah tidak dapat diganti</small>
+
+                            {{-- status ketersediaan --}}
+                            <div id="slugStatus" class="form-text mt-1"></div>
+                        </div>
                     </div>
                 </div>
 

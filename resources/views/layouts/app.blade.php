@@ -21,7 +21,11 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased bg-gray-100 dark:bg-black text-gray-900 dark:text-white">
-        @include('layouts.navigation')
+        @if (request()->is('partner*'))
+            @include('layouts.guest-partner-navigation')
+        @else
+            @include('layouts.navigation')
+        @endif
         <div class="min-h-screen mt-20 bg-gray-100 dark:bg-black">
             <!-- Page Heading -->
             @isset($header)
