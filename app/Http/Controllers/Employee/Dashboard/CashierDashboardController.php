@@ -143,8 +143,11 @@ class CashierDashboardController extends Controller
             case 'pembelian':
 
                 $partner = User::findOrFail($partnerId);
-                $partner_products = PartnerProduct::with('category', 'parent_options.options')->where('partner_id', $partner->id)->get();
-                $categories = Category::where('partner_id', $partner->id)->get();
+                $partner_products = PartnerProduct::with('category', 'parent_options.options')
+                    ->where('partner_id', $partner->id)
+                    ->where('is_active', 1)
+                    ->get();
+                $categories = Category::whereIn('id', $partner_products->pluck('category_id'))->get();
                 $tables = Table::where('partner_id', $partner->id)->orderBy('table_no', 'ASC')->get();
 
                 return view('pages.employee.cashier.dashboard.tabs.pembelian', compact('partner', 'partner_products', 'categories', 'tables'));

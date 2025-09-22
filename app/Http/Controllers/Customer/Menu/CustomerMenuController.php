@@ -10,6 +10,7 @@ use App\Models\Partner\Products\PartnerProductOption;
 use App\Models\Transaction\BookingOrder;
 use App\Models\Transaction\OrderDetail;
 use App\Models\Transaction\OrderDetailOption;
+use App\Models\Owner;
 use App\Models\Product\Specification;
 use App\Models\Admin\Product\Category;
 use App\Models\User;
@@ -42,8 +43,12 @@ class CustomerMenuController extends Controller
             ->whereHas('partner', fn($q) => $q->where('slug', $partner_slug))
             ->firstOrFail();
         $partner = User::where('slug', $partner_slug)->first();
-        $partner_products = PartnerProduct::with('category', 'parent_options.options')->where('partner_id', $partner->id)->get();
-        $categories = Category::where('partner_id', $partner->id)->get();
+        $partner_products = PartnerProduct::with('category', 'parent_options.options')
+            ->where('partner_id', $partner->id)
+            ->where('is_active', 1)
+            ->get();
+        $owner = Owner::where('id', $partner->owner_id)->first();
+        $categories = Category::whereIn('id', $partner_products->pluck('category_id'))->get();
 
         return view('pages.customer.menu.index', compact('table', 'customer', 'partner', 'partner_products', 'categories'));
     }
@@ -71,8 +76,10 @@ class CustomerMenuController extends Controller
             $booking_order = BookingOrder::create([
                 'booking_order_code' => $booking_order_code,
                 'partner_id' => $partner->id,
+                'partner_name' => $partner->name,
                 'table_id' => $table->id,
                 'customer_id' => $customer ? $customer->id : null,
+                'order_by' => 'CUSTOMER',
                 'customer_name' => $customer ? $customer->name : 'guest-' . $request->order_name,
                 'order_status' => 'UNPAID',
                 'payment_method' => $request->payment_method,
@@ -87,11 +94,13 @@ class CustomerMenuController extends Controller
                 $note        = data_get($order, 'note', '');
 
                 $product = PartnerProduct::findOrFail($productId);
-                $options = PartnerProductOption::whereIn('id', (array)$optionIds)->get();
+                $options = PartnerProductOption::with('parent')->whereIn('id', (array)$optionIds)->get();
                 $optionsPrice = $options->sum('price');
 
                 $order_detail = OrderDetail::create([
                     'booking_order_id'    => $booking_order->id,
+                    'product_code'       => $product->product_code,
+                    'product_name'       => $product->name,
                     'partner_product_id'  => $productId,
                     'base_price'          => $product->price,
                     'options_price'     => $optionsPrice ?? 0,   // isi jika ingin simpan
@@ -102,6 +111,8 @@ class CustomerMenuController extends Controller
                 foreach ($options as $opt) {
                     OrderDetailOption::create([
                         'order_detail_id' => $order_detail->id,
+                        'parent_name' => $opt->parent->name ?? null,
+                        'partner_product_option_name' => $opt->name,
                         'option_id' => $opt->id,
                         'price' => $opt->price
                     ]);

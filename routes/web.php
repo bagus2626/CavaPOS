@@ -90,6 +90,7 @@ Route::middleware('setlocale')->group(function () {
         Route::middleware(['auth:owner', 'is_owner:owner'])->prefix('user-owner')->name('user-owner.')->group(function () {
             Route::get('/', [OwnerDashboardController::class, 'index'])->name('dashboard');
             Route::get('outlets/check-username', [OwnerOutletController::class, 'checkUsername'])->name('outlets.check-username')->middleware('throttle:30,1');
+            Route::get('outlets/check-slug', [OwnerOutletController::class, 'checkSlug'])->name('outlets.check-slug')->middleware('throttle:30,1');
             Route::resource('outlets', OwnerOutletController::class);
             Route::get('employees/check-username', [OwnerEmployeeController::class, 'checkUsername'])->name('employees.check-username');
             Route::resource('employees', OwnerEmployeeController::class);

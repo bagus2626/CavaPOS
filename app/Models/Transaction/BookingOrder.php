@@ -12,6 +12,7 @@ class BookingOrder extends Model
     protected $fillable = [
         'booking_order_code',
         'partner_id',
+        'partner_name',
         'table_id',
         'customer_id',
         'employee_order_id',

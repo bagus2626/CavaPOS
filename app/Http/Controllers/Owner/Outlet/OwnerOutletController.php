@@ -48,11 +48,15 @@ class OwnerOutletController extends Controller
         try {
             DB::beginTransaction();
 
+            $partnerCode = $this->generateUniquePartnerCode();
+            $request->merge(['partner_code' => $partnerCode]);
+
             $imagePath = null;
             // dd($request->all());
             $request->validate([
                 'name' => ['required', 'string', 'max:255'],
                 'username' => ['required', 'string', 'max:255', 'unique:' . User::class],
+                'slug' => ['required', 'string', 'max:255', 'unique:' . User::class],
                 'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
                 'password' => ['required', 'confirmed', Rules\Password::defaults()],
                 'province' => ['required', 'string', 'max:255'],
@@ -60,6 +64,7 @@ class OwnerOutletController extends Controller
                 'district' => ['required', 'string', 'max:255'],
                 'village' => ['required', 'string', 'max:255'],
                 'address' => ['required', 'string'],
+                'partner_code' => ['required', 'size:4', 'alpha_num', Rule::unique('users', 'partner_code')],
             ]);
 
             if ($request->hasFile('image')) {
@@ -107,6 +112,8 @@ class OwnerOutletController extends Controller
                 'email' => $request->email,
                 'username' => $request->username,
                 'role' => 'partner',
+                'slug' => $request->slug,
+                'partner_code' => $request->partner_code,
                 'logo' => $imagePath,
                 'password' => Hash::make($request->password),
                 'province' => $request->province_name,
@@ -131,6 +138,21 @@ class OwnerOutletController extends Controller
             DB::rollBack();
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
+    }
+
+    protected function generateUniquePartnerCode(int $maxTries = 50): string
+    {
+        for ($i = 0; $i < $maxTries; $i++) {
+            // Str::random sudah alnum, kita uppercase agar A–Z
+            $code = strtoupper(Str::random(4)); // contoh: 7K3B
+
+            // (opsional) hilangkan karakter yang membingungkan:
+            // $code = strtr($code, ['O'=>'A','0'=>'1','I'=>'B','l'=>'C']);
+
+            $exists = User::where('partner_code', $code)->exists();
+            if (!$exists) return $code;
+        }
+        throw new \RuntimeException('Gagal membuat partner_code unik setelah beberapa percobaan.');
     }
 
     /**
@@ -308,6 +330,29 @@ class OwnerOutletController extends Controller
         }
 
         $query = User::query()->where('username', $request->username);
+        if ($request->filled('exclude_id')) {
+            $query->where('id', '!=', (int) $request->exclude_id);
+        }
+
+        return response()->json([
+            'available' => ! $query->exists(),
+        ]);
+    }
+
+    public function checkSlug(Request $request)
+    {
+        $v = Validator::make($request->all(), [
+            'slug'       => ['required', 'string', 'min:3', 'max:30', 'regex:/^[a-z0-9-]+$/'],
+            'exclude_id' => ['nullable', 'integer', 'exists:users,id'],
+        ], [
+            'slug.regex' => 'Format slug tidak valid.',
+        ]);
+
+        if ($v->fails()) {
+            return response()->json(['errors' => $v->errors()], 422);
+        }
+
+        $query = User::query()->where('slug', $request->slug);
         if ($request->filled('exclude_id')) {
             $query->where('id', '!=', (int) $request->exclude_id);
         }

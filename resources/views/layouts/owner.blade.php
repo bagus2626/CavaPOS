@@ -275,7 +275,7 @@
 
 
                     @php
-                        $outletRoutes = ['employee.outlet.*'];
+                        $outletRoutes = ['owner.user-owner.outlets.*'];
                     @endphp
 
                     <li class="nav-item {{ Route::is($outletRoutes) ? 'menu-open' : '' }}">
@@ -288,7 +288,7 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{{ route('owner.user-owner.outlets.index') }}" class="nav-link {{ Route::is('partner.products.*') ? 'active' : '' }}">
+                                <a href="{{ route('owner.user-owner.outlets.index') }}" class="nav-link {{ Route::is('owner.user-owner.outlets.*') ? 'active' : '' }}">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>All Outlets</p>
                                 </a>
