@@ -1,8 +1,8 @@
 @extends('layouts.owner')
 
-@section('title', 'Partner Dashboard')
+@section('title', 'Owner Dashboard')
 
-@section('page_title', 'Dashboard Partner')
+@section('page_title', 'Dashboard Owner')
 
 @section('content')
 <!-- Main Content -->

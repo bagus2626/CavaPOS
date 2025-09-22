@@ -12,6 +12,7 @@ class Category extends Model
 
     protected $fillable = [
         'category_name',
+        'owner_id',
         'description',
         'images',
         'partner_id',
@@ -23,6 +24,6 @@ class Category extends Model
 
     public function partner_products()
     {
-        return $this->hasMany(PartnerProduct::class,'category_id', 'id');
+        return $this->hasMany(PartnerProduct::class, 'category_id', 'id');
     }
 }

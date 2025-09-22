@@ -12,6 +12,7 @@ class PartnerProductOption extends Model
 
     protected $fillable = [
         'partner_product_id',
+        'master_product_option_id',
         'partner_product_parent_option_id',
         'name',
         'quantity',
