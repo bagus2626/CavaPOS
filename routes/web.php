@@ -163,7 +163,7 @@ Route::middleware('setlocale')->group(function () {
 
         // Google login (Socialite)
         Route::get('{partner_slug}/menu/{table_code}/login/{provider}', [CustomerAuthController::class, 'redirectToProvider'])->name('social.login');
-        Route::get('/menu/google/callback', [CustomerAuthController::class, 'handleProviderCallback'])->name('social.callback');
+        Route::get('/auth/google/callback', [CustomerAuthController::class, 'handleProviderCallback'])->name('social.callback');
 
         Route::post('{partner_slug}/menu/{table_code}/guest', [CustomerAuthController::class, 'guestLogin'])->name('guest');
         Route::post('/guest-logout/{partner_slug}/{table_code}', [CustomerAuthController::class, 'guestLogout'])->name('guest-logout');

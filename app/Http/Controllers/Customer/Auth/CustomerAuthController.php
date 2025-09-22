@@ -8,6 +8,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
+
 
 class CustomerAuthController extends Controller
 {
@@ -51,7 +56,6 @@ class CustomerAuthController extends Controller
             return back()->withErrors($e->validator)->withInput();
         } catch (\Exception $e) {
             // Kalau error lain (misalnya DB error)
-            \Log::error('Register error: ' . $e->getMessage());
             return back()->with('error', 'Terjadi kesalahan saat registrasi. Silakan coba lagi.')->withInput();
         }
     }
@@ -104,14 +108,14 @@ class CustomerAuthController extends Controller
     {
         session()->forget('guest_customer');
         return redirect()->route('customer.menu.index', compact('partner_slug', 'table_code'))
-                ->with('success', 'Registrasi berhasil, selamat datang!');
+            ->with('success', 'Registrasi berhasil, selamat datang!');
     }
 
 
     public function guestLogin(Request $request, $partner_slug, $table_code)
     {
         $guestCustomer = [
-            'id' => 'guest_'.uniqid(),
+            'id' => 'guest_' . uniqid(),
             'name' => 'Guest',
         ];
 
@@ -120,44 +124,111 @@ class CustomerAuthController extends Controller
         return redirect()->route('customer.menu.index', compact('partner_slug', 'table_code'));
     }
 
+
     public function redirectToProvider(Request $request, $partner_slug, $table_code, $provider)
     {
+        // simpan ke session dulu
+        session([
+            'oauth.partner_slug' => $partner_slug,
+            'oauth.table_code'   => $table_code,
+        ]);
+
+        // return Socialite::driver($provider)->redirect();
         return Socialite::driver($provider)
-            ->with([
-                'state' => json_encode([
-                    'partner_slug' => $partner_slug,
-                    'table_code'   => $table_code,
-                ]),
-            ])
+            ->with(['state' => json_encode([
+                'partner_slug' => $partner_slug,
+                'table_code'   => $table_code,
+            ])])
             ->redirect();
     }
 
-    public function handleProviderCallback(Request $request, $partner_slug, $table_code, $provider)
+
+    public function handleProviderCallback() // <- hanya $provider
     {
-        // Ambil user dari Google
-        $socialUser = Socialite::driver($provider)->stateless()->user();
+        // dd(session()->all());
+        $state = json_decode(request()->get('state'), true);
+        $partner_slug = $state['partner_slug'];
+        $table_code   = $state['table_code'];
 
-        // Decode state untuk ambil partner_slug & table_code
-        $state = json_decode($request->input('state'), true);
-        $partner_slug = $state['partner_slug'] ?? $partner_slug;
-        $table_code   = $state['table_code'] ?? $table_code;
 
-        // Lanjutkan proses login/register customer...
+        // Ambil kembali konteks dari session
+        // $partner_slug = session('oauth.partner_slug');
+        // $table_code   = session('oauth.table_code');
+
+        // dd($partner_slug, $table_code);
+
+        // Ambil profil dari Google (stateful dulu; fallback stateless bila perlu)
+        try {
+            $socialUser = Socialite::driver('google')->user();
+        } catch (\Laravel\Socialite\Two\InvalidStateException $e) {
+            $socialUser = Socialite::driver('google')->stateless()->user();
+        }
+
+        // Provision / link akun customer
         $customer = Customer::firstOrCreate(
             ['email' => $socialUser->getEmail()],
             [
-                'name' => $socialUser->getName(),
-                'password' => Hash::make(Str::random(16)),
+                'name'     => $socialUser->getName() ?: 'Customer',
+                'password' => Hash::make(Str::random(32)),
             ]
         );
 
-        Auth::guard('customer')->login($customer);
+        Auth::guard('customer')->login($customer, remember: true);
 
+        // Bersihkan konteks
+        session()->forget(['oauth.partner_slug', 'oauth.table_code']);
+
+        // Redirect balik ke menu meja
         return redirect()->route('customer.menu.index', [
             'partner_slug' => $partner_slug,
             'table_code'   => $table_code,
         ]);
     }
 
+    // public function redirectToProvider(Request $request, $partner_slug, $table_code, $provider)
+    // {
+    //     // simpan ke session dulu
+    //     session([
+    //         'oauth.partner_slug' => $partner_slug,
+    //         'oauth.table_code'   => $table_code,
+    //     ]);
+
+    //     return Socialite::driver($provider)->redirect();
+    // }
+
+
+    // public function handleProviderCallback() // <- hanya $provider
+    // {
+    //     // Ambil kembali konteks dari session
+    //     $partner_slug = session('oauth.partner_slug');
+    //     $table_code   = session('oauth.table_code');
+
+    //     // Ambil profil dari Google (stateful dulu; fallback stateless bila perlu)
+    //     try {
+    //         $socialUser = Socialite::driver('google')->user();
+    //     } catch (\Laravel\Socialite\Two\InvalidStateException $e) {
+    //         $socialUser = Socialite::driver('google')->stateless()->user();
+    //     }
+
+    //     // Provision / link akun customer
+    //     $customer = Customer::firstOrCreate(
+    //         ['email' => $socialUser->getEmail()],
+    //         [
+    //             'name'     => $socialUser->getName() ?: 'Customer',
+    //             'password' => Hash::make(Str::random(32)),
+    //         ]
+    //     );
+
+    //     Auth::guard('customer')->login($customer, remember: true);
+
+    //     // Bersihkan konteks
+    //     session()->forget(['oauth.partner_slug', 'oauth.table_code']);
+
+    //     // Redirect balik ke menu meja
+    //     return redirect()->route('customer.menu.index', [
+    //         'partner_slug' => $partner_slug,
+    //         'table_code'   => $table_code,
+    //     ]);
+    // }
 
 }
