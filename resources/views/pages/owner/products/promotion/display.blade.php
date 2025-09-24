@@ -56,11 +56,33 @@
                     </td>
                     <td>{{ $activeDays }}</td>
                     <td>
-                        @if ($promotion->is_active)
-                            <span class="badge badge-success px-3 py-2">Aktif</span>
-                        @else
-                            <span class="badge badge-secondary px-3 py-2">Nonaktif</span>
-                        @endif
+                        @php
+                            // Jika toggle nonaktif, langsung Nonaktif tanpa lihat tanggal
+                            if (!$promotion->is_active) {
+                                $label = 'Nonaktif';
+                                $class = 'badge-secondary';
+                            } else {
+                                $now   = now();
+                                $start = $promotion->start_date;
+                                $end   = $promotion->end_date;
+
+                                if ($start && $now->lt($start)) {
+                                    // Belum masuk rentang waktu
+                                    $label = 'Akan Aktif';
+                                    $class = 'badge-warning';
+                                } elseif ($end && $now->gt($end)) {
+                                    // Sudah melewati rentang waktu
+                                    $label = 'Kadaluarsa';
+                                    $class = 'badge-danger';
+                                } else {
+                                    // Dalam rentang waktu (atau tanpa batas tanggal)
+                                    $label = 'Aktif';
+                                    $class = 'badge-success';
+                                }
+                            }
+                        @endphp
+
+                        <span class="badge {{ $class }} px-3 py-2">{{ $label }}</span>
                     </td>
                     <td>
                         <a href="{{ route('owner.user-owner.promotions.show', $promotion->id) }}" class="btn btn-sm btn-info">Detail</a>

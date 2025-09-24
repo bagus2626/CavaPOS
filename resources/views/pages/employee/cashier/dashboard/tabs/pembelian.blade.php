@@ -77,6 +77,29 @@
           @foreach($products as $product)
             @php
               $firstImage = $product->pictures[0]['path'] ?? null;
+
+              // --- PROMO (sama seperti Customer) ---
+              $promo = $product->promotion; // null kalau tidak ada/ tidak aktif hari ini
+              $basePrice = (float) $product->price;
+
+              $hasPromo = false;
+              $discountedBase = $basePrice;
+
+              if ($promo) {
+                  if ($promo->promotion_type === 'percentage') {
+                      $discountedBase = max(0, $basePrice * (1 - ($promo->promotion_value / 100)));
+                  } else { // amount
+                      $discountedBase = max(0, $basePrice - (float)$promo->promotion_value);
+                  }
+                  $hasPromo = $discountedBase < $basePrice;
+              }
+
+              $promoBadge = null;
+              if ($promo) {
+                  $promoBadge = $promo->promotion_type === 'percentage'
+                      ? '-'.rtrim(rtrim(number_format($promo->promotion_value, 2, ',', '.'), '0'), ',').'%'
+                      : '-Rp '.number_format($promo->promotion_value, 0, ',', '.');
+              }
             @endphp
             <div
               @class([
@@ -86,16 +109,27 @@
               data-category="{{ $product->category_id }}"
             >
               @if($firstImage)
-                <div class="w-28 h-28 flex-shrink-0 rounded-lg m-2 rounded-bl-lg overflow-hidden">
+                <div class="w-28 h-28 flex-shrink-0 rounded-lg m-2 rounded-bl-lg overflow-hidden relative">
                   <img src="{{ asset($firstImage) }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
+                  @if($hasPromo && $promoBadge)
+                    <span class="absolute top-1 left-1 bg-red-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded">
+                      {{ $promoBadge }}
+                    </span>
+                  @endif
                 </div>
               @endif
-
               <div class="ml-4 flex-1 flex flex-col justify-between">
                 <div>
                   <h5 class="text-lg font-semibold text-gray-800">{{ $product->name }}</h5>
                   <p class="text-gray-500 text-sm mb-1 line-clamp-1">{{ $product->description }}</p>
-                  <p class="text-lg font-bold text-gray-900">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
+                  @if($hasPromo)
+                    <div class="flex items-baseline gap-2">
+                      <span class="text-sm text-gray-500 line-through">Rp {{ number_format($basePrice, 0, ',', '.') }}</span>
+                      <span class="text-lg font-bold text-gray-900">Rp {{ number_format($discountedBase, 0, ',', '.') }}</span>
+                    </div>
+                  @else
+                    <p class="text-lg font-bold text-gray-900">Rp {{ number_format($basePrice, 0, ',', '.') }}</p>
+                  @endif
                 </div>
 
                 <div class="mb-2 flex items-center ml-auto space-x-4">
@@ -177,16 +211,35 @@
 @php
   $productsData = $partner_products->map(function($p){
     $firstImage = $p->pictures[0]['path'] ?? null;
+    $promo = $p->promotion;
+    $base  = (float) $p->price;
+    $discBase = $base;
+
+    if ($promo) {
+      if ($promo->promotion_type === 'percentage') {
+        $discBase = max(0, $base * (1 - ($promo->promotion_value / 100)));
+      } else {
+        $discBase = max(0, $base - (float)$promo->promotion_value);
+      }
+    }
+
     return [
-      'id'             => $p->id,
-      'name'           => $p->name,
-      'description'    => $p->description,
-      'price'          => $p->price,
-      'image'          => $firstImage ? asset($firstImage) : null,
-      'parent_options' => $p->parent_options ?? [],
+      'id'              => $p->id,
+      'name'            => $p->name,
+      'description'     => strip_tags((string)$p->description),
+      'price'           => $base,
+      'discounted_base' => $discBase,                // <— kirim harga dasar setelah promo
+      'promotion'       => $promo ? [
+        'id'    => $promo->id,
+        'type'  => $promo->promotion_type,
+        'value' => (float)$promo->promotion_value,
+      ] : null,
+      'image'           => $firstImage ? asset($firstImage) : null,
+      'parent_options'  => $p->parent_options ?? [],
     ];
   })->values()->toArray();
 @endphp
+
 
 <script>
 window.initPembelianTab = function initPembelianTab() {
@@ -280,16 +333,16 @@ window.initPembelianTab = function initPembelianTab() {
   }
   function computeUnitPrice(productId, optionsArr) {
     const pd = getProductDataById(productId);
-    const base = Number(pd.price) || 0;
-    const opts = pd.parent_options || [];
+    const base = Number(pd.discounted_base ?? pd.price) || 0; // <— PAKAI DISCOUNTED BASE
     let optSum = 0;
-    opts.forEach(po => {
+    (pd.parent_options || []).forEach(po => {
       (po.options || []).forEach(opt => {
         if ((optionsArr || []).includes(opt.id)) optSum += Number(opt.price) || 0;
       });
     });
     return base + optSum;
   }
+
   function recomputeLineTotal(key) {
     const row = cart[key];
     if (!row) return;
@@ -298,9 +351,15 @@ window.initPembelianTab = function initPembelianTab() {
   }
   function addToCart(productId, optionsArr, qty = 1, note = '') {
     const key = keyOf(productId, optionsArr);
+    const pd  = getProductDataById(productId);
+    const promoId = pd.promotion?.id ?? null; // <— ambil id promo
+
     if (!cart[key]) {
-      cart[key] = { productId, options: (optionsArr || []).slice(), qty: 0, unitPrice: 0, lineTotal: 0, note: '' };
+      cart[key] = { productId, options: (optionsArr || []).slice(), qty: 0, unitPrice: 0, lineTotal: 0, note: '', promo_id: promoId };
+    } else if (cart[key].promo_id == null) {
+      cart[key].promo_id = promoId; // jaga-jaga
     }
+
     cart[key].qty += qty;
     if (note && note.trim().length > 0) cart[key].note = note.trim();
     recomputeLineTotal(key);
@@ -308,6 +367,7 @@ window.initPembelianTab = function initPembelianTab() {
     updateFloatingCartBar();
     return key;
   }
+
   function minusFromCart(productId, optionsArr) {
     const key = keyOf(productId, optionsArr);
     if (!cart[key]) return;
@@ -412,17 +472,18 @@ window.initPembelianTab = function initPembelianTab() {
     saveModalBtn.classList.toggle('cursor-not-allowed', !allValid);
   }
   function calcModalTotal(productData) {
-    const base = Number(productData.price) || 0;
+    const baseDisc = Number(productData.discounted_base ?? productData.price) || 0; // <— PAKAI DISCOUNTED
     const optSum = (productData.parent_options || []).reduce((sum, po) => {
       (po.options || []).forEach(opt => {
         if (selectedOptions.includes(opt.id)) sum += Number(opt.price) || 0;
       });
       return sum;
     }, 0);
-    const total = (base + optSum) * modalQty;
+    const total = (baseDisc + optSum) * modalQty;
     const priceEl = document.getElementById('modalTotalPrice');
     if (priceEl) priceEl.innerText = `(${rupiahFmt.format(total)})`;
   }
+
   function showModal(productData) {
     // reset
     modalContent.innerHTML = ''; modalHeader.innerHTML = '';
@@ -734,10 +795,13 @@ window.initPembelianTab = function initPembelianTab() {
     const rows = checkoutRows();
     if (rows.length === 0) {
       checkoutBody.innerHTML = `<div class="text-center text-gray-500 py-8">Keranjang masih kosong.</div>`;
-      checkoutGrandTotal.textContent = rupiah(0); return;
+      checkoutGrandTotal.textContent = rupiah(0);
+      return;
     }
+
     checkoutBody.innerHTML = rows.map(r => {
-      const opts = r.optionsDetail.map(od => {
+      // 1) Baris opsi (tidak berubah)
+      const opts = (r.optionsDetail || []).map(od => {
         const label = od.parentName ? `${od.parentName}: ${od.name}` : od.name;
         return `
           <div class="w-full flex items-center justify-between text-xs text-gray-600">
@@ -746,7 +810,34 @@ window.initPembelianTab = function initPembelianTab() {
           </div>
         `;
       }).join('');
+
+      // 2) Catatan (opsional)
       const note = r.note ? `<div class="mt-2 text-xs italic text-gray-700">Catatan: ${r.note}</div>` : '';
+
+      // 3) HITUNG baseDisc dari unit - sumOpts
+      //    (karena unit = discounted_base + total harga opsi)
+      const sumOpts  = (r.optionsDetail || []).reduce((s, od) => s + (Number(od.price) || 0), 0);
+      const rawBase  = Number(r.basePrice) || 0;                           // harga dasar asli (sebelum promo)
+      const baseDisc = Math.max(0, (Number(r.unit) || 0) - sumOpts);       // harga dasar setelah promo
+
+      const baseRow = (baseDisc < rawBase)
+        ? `
+            <div class="w-full flex items-center justify-between text-xs text-gray-600">
+              <span>Harga dasar</span>
+              <span class="shrink-0">
+                <span class="line-through mr-1">${rupiah(rawBase)}</span>
+                <span class="font-medium">${rupiah(baseDisc)}</span>
+              </span>
+            </div>
+          `
+        : `
+            <div class="w-full flex items-center justify-between text-xs text-gray-600">
+              <span>Harga dasar</span>
+              <span class="shrink-0">${rupiah(rawBase)}</span>
+            </div>
+          `;
+
+      // 4) RETURN card: pakai ${baseRow} (ganti blok "Harga dasar" lama)
       return `
         <div class="border rounded-lg p-3">
           <div class="flex items-center justify-between gap-3">
@@ -759,13 +850,14 @@ window.initPembelianTab = function initPembelianTab() {
               <span class="font-semibold align-middle">${r.qty}</span>
             </div>
           </div>
+
           <div class="mt-1 space-y-0.5">
-            <div class="w-full flex items-center justify-between text-xs text-gray-600">
-              <span>Harga dasar</span><span class="shrink-0">${rupiah(r.basePrice)}</span>
-            </div>
+            ${baseRow}   <!-- <<< ini menggantikan baris harga dasar lama -->
             ${opts}
           </div>
+
           ${note}
+
           <div class="mt-2 w-full flex items-center justify-between">
             <span class="text-xs text-gray-500">Subtotal</span>
             <span class="font-semibold">${rupiah(r.line)}</span>
@@ -773,9 +865,11 @@ window.initPembelianTab = function initPembelianTab() {
         </div>
       `;
     }).join('');
+
     const grand = rows.reduce((s, r) => s + r.line, 0);
     checkoutGrandTotal.textContent = rupiah(grand);
   }
+
   function openCheckoutModal() {
     renderCheckoutModal();
     paymentMethodSel.value = '';
@@ -813,8 +907,12 @@ window.initPembelianTab = function initPembelianTab() {
       option_ids: r.options,
       qty: r.qty,
       unit_price: r.unitPrice ?? computeUnitPrice(r.productId, r.options),
-      note: r.note || ''
+      note: r.note || '',
+      promo_id: (r.promo_id != null)
+        ? r.promo_id
+        : (getProductDataById(r.productId)?.promotion?.id ?? null), // fallback
     }));
+
     const grandTotal = payload.reduce((s, it) => s + (it.unit_price * it.qty), 0);
     if (!paymentMethod) { Swal && Swal.fire({ icon:'warning', title:'Metode belum dipilih' }); return; }
     if (!orderTable) { Swal && Swal.fire({ icon:'warning', title:'Meja belum dipilih' }); return; }
