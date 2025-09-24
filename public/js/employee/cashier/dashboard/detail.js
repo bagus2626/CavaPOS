@@ -76,11 +76,13 @@
               <li class="border-b pb-2">
                 <div class="font-medium text-choco">
                   ${
-                    it.partner_product && it.partner_product.name
-                      ? it.partner_product.name
+                    it.partner_product && it.product_name
+                      ? it.product_name
                       : "Produk"
                   } \u00D7 ${it.quantity}
-                  = ${rupiah(it.base_price)}
+                  = ${rupiah(
+                    (it.base_price - (it.promo_amount ?? 0)) * it.quantity
+                  )}
                   ${
                     it.customer_note
                       ? `<span class="text-xs text-gray-500 italic">(${it.customer_note})</span>`
@@ -89,18 +91,15 @@
                 </div>
             `;
             if (it.order_detail_options && it.order_detail_options.length) {
-              html += `<ul class="ml-4 mt-1 space-y-1 text-sm text-gray-600 list-disc">`;
+              html += `<ul class="list-none ml-4 mt-1 space-y-1 text-sm text-gray-600">`;
               it.order_detail_options.forEach((opt) => {
-                html += `
-                  <li>
-                    ${
-                      opt.option && opt.option.parent && opt.option.parent.name
-                        ? opt.option.parent.name
-                        : "Opsi"
-                    }:
-                    ${opt.option?.name ?? "-"}
-                  </li>
-                `;
+                html += `<li>- ${
+                  opt.option && opt.option.parent && opt.option.parent.name
+                    ? opt.option.parent.name
+                    : "Opsi"
+                }: ${opt.option?.name ?? "-"} \u00D7 ${it.quantity} = ${rupiah(
+                  opt.price * it.quantity
+                )} </li>`;
               });
               html += `</ul>`;
             }
@@ -196,7 +195,9 @@
                         ? it.partner_product.name
                         : "Produk"
                     } \u00D7 ${it.quantity}
-                    = ${rupiah(it.base_price * it.quantity)}
+                    = ${rupiah(
+                      (it.base_price - (it.promo_amount ?? 0)) * it.quantity
+                    )}
                     ${
                       it.customer_note
                         ? `<span class="text-sm text-gray-500 italic">(${it.customer_note})</span>`
