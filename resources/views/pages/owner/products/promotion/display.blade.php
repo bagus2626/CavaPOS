@@ -44,17 +44,16 @@
                     @endif
                     <td>
                         @if($promotion->start_date && $promotion->end_date)
-                            {{ $promotion->start_date->translatedFormat('d F Y') }} -
-                            {{ $promotion->end_date->translatedFormat('d F Y') }}
+                            {{ $promotion->start_date->translatedFormat('d F Y') }} ({{ $promotion->start_date->format('H:i') }}) -
+                            {{ $promotion->end_date->translatedFormat('d F Y') }} ({{ $promotion->end_date->format('H:i') }})
                         @elseif($promotion->start_date)
-                            Mulai {{ $promotion->start_date->translatedFormat('d F Y') }}
+                            Mulai {{ $promotion->start_date->translatedFormat('d F Y') }} ({{ $promotion->start_date->format('H:i') }})
                         @elseif($promotion->end_date)
-                            Sampai {{ $promotion->end_date->translatedFormat('d F Y') }}
+                            Sampai {{ $promotion->end_date->translatedFormat('d F Y') }} ({{ $promotion->end_date->format('H:i') }})
                         @else
                             <span class="text-muted">Tidak terbatas</span>
                         @endif
                     </td>
-
                     <td>{{ $activeDays }}</td>
                     <td>
                         @if ($promotion->is_active)

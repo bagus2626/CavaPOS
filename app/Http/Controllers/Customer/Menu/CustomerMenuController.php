@@ -11,6 +11,7 @@ use App\Models\Transaction\BookingOrder;
 use App\Models\Transaction\OrderDetail;
 use App\Models\Transaction\OrderDetailOption;
 use App\Models\Owner;
+use App\Models\Product\Promotion;
 use App\Models\Product\Specification;
 use App\Models\Admin\Product\Category;
 use App\Models\User;
@@ -43,10 +44,18 @@ class CustomerMenuController extends Controller
             ->whereHas('partner', fn($q) => $q->where('slug', $partner_slug))
             ->firstOrFail();
         $partner = User::where('slug', $partner_slug)->first();
-        $partner_products = PartnerProduct::with('category', 'parent_options.options')
+
+        $partner_products = PartnerProduct::with([
+            'category',
+            'parent_options.options',
+            'promotion' => function ($q) {
+                $q->activeToday();
+            }
+        ])
             ->where('partner_id', $partner->id)
             ->where('is_active', 1)
             ->get();
+
         $owner = Owner::where('id', $partner->owner_id)->first();
         $categories = Category::whereIn('id', $partner_products->pluck('category_id'))->get();
 
@@ -55,6 +64,7 @@ class CustomerMenuController extends Controller
 
     public function checkout(Request $request, $partner_slug, $table_code)
     {
+        // dd($request->all());
         DB::beginTransaction();
         try {
             // dd($request->all());
@@ -88,14 +98,29 @@ class CustomerMenuController extends Controller
 
 
             foreach ($orders as $order) {
+                // dd($order);
                 $productId   = data_get($order, 'product_id');
                 $optionIds   = data_get($order, 'option_ids', []);
                 $qty         = (int) data_get($order, 'qty', 1);
                 $note        = data_get($order, 'note', '');
+                $promoId    = data_get($order, 'promo_id', null);
 
                 $product = PartnerProduct::findOrFail($productId);
                 $options = PartnerProductOption::with('parent')->whereIn('id', (array)$optionIds)->get();
                 $optionsPrice = $options->sum('price');
+
+                $promoAmount = 0;
+                $promoType = null;
+                if ($promoId) {
+                    $promotion = Promotion::findOrFail($promoId);
+                    if ($promotion->promotion_type === 'percentage') {
+                        $promoAmount = $product->price * $promotion->promotion_value / 100;
+                        $promoType = $promotion->promotion_type;
+                    } else if ($promotion->promotion_type === 'amount') {
+                        $promoAmount = $promotion->promotion_value;
+                        $promoType = $promotion->promotion_type;
+                    }
+                }
 
                 $order_detail = OrderDetail::create([
                     'booking_order_id'    => $booking_order->id,
@@ -103,6 +128,9 @@ class CustomerMenuController extends Controller
                     'product_name'       => $product->name,
                     'partner_product_id'  => $productId,
                     'base_price'          => $product->price,
+                    'promo_id'           => $promoId,
+                    'promo_amount'      => $promoAmount,
+                    'promo_type'        => $promoType,
                     'options_price'     => $optionsPrice ?? 0,   // isi jika ingin simpan
                     'quantity'          => $qty,
                     'customer_note'       => $note,
@@ -142,7 +170,9 @@ class CustomerMenuController extends Controller
 
             DB::commit();
 
-            event(new OrderCreated($booking_order));
+            DB::afterCommit(function () use ($booking_order) {
+                event(new OrderCreated($booking_order));
+            });
 
             $token = Crypt::encrypt([
                 'p' => $partner_slug,

@@ -16,6 +16,9 @@ class OrderDetail extends Model
         'base_price',
         'options_price',
         'customer_note',
+        'promo_id',
+        'promo_amount',
+        'promo_type',
     ];
 
     protected $casts = [
