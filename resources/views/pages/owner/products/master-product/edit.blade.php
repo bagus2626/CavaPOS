@@ -76,7 +76,7 @@
 
                     <!-- Quantity & Price -->
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label>Quantity</label>
                                 <div class="input-group">
@@ -88,7 +88,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label>Price</label>
                                 <div class="input-group">
@@ -98,6 +98,38 @@
                                     <input type="text" id="price" name="price" class="form-control"
                                         value="{{ number_format($data->price,0,',','.') }}" required>
                                 </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="mb-1" for="promotion_id">Promotion</label>
+                                <select id="promotion_id" name="promotion_id" class="form-control">
+                                {{-- kosong = tanpa promo --}}
+                                @php
+                                    $selectedPromoId = old('promotion_id', $data->promo_id);
+                                @endphp
+                                <option value="">— No Promotion —</option>
+                                @foreach($promotions as $promo)
+                                    <option value="{{ $promo->id }}" {{ (string)$selectedPromoId === (string)$promo->id ? 'selected' : '' }}>
+                                    {{ $promo->promotion_name }}
+                                    (
+                                    @if($promo->promotion_type === 'percentage')
+                                        {{ number_format($promo->promotion_value, 0, ',', '.') }}% Off
+                                    @else
+                                        Rp.
+                                        @if(fmod($promo->promotion_value, 1) == 0)
+                                        {{ number_format($promo->promotion_value, 0, ',', '.') }} Off
+                                        @else
+                                        {{ number_format($promo->promotion_value, 2, ',', '.') }} Off
+                                        @endif
+                                    @endif
+                                    )
+                                    </option>
+                                @endforeach
+                                </select>
+                                @error('promotion_id')
+                                <small class="text-danger d-block mt-1">{{ $message }}</small>
+                                @enderror
                             </div>
                         </div>
                     </div>

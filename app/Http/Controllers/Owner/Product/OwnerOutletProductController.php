@@ -9,6 +9,7 @@ use App\Models\Partner\Products\PartnerProduct;
 use App\Models\Partner\Products\PartnerProductParentOption;
 use App\Models\Partner\Products\PartnerProductOption;
 use App\Models\Product\MasterProduct;
+use App\Models\Product\Promotion;
 use App\Models\Product\MasterProductParentOption;
 use App\Models\Product\MasterProductOption;
 use App\Models\Product\Specification;
@@ -33,11 +34,12 @@ class OwnerOutletProductController extends Controller
             ->orderBy('category_name')
             ->get();
         $master_product = MasterProduct::where('owner_id', $owner->id)->get();
-        $productsByOutlet = PartnerProduct::with('parent_options.options', 'category')
+        $productsByOutlet = PartnerProduct::with('parent_options.options', 'category', 'promotion')
             ->where('owner_id', $owner->id)
             ->get()
             ->groupBy('partner_id');
-        return view('pages.owner.products.outlet-product.index', compact('productsByOutlet', 'categories', 'outlets', 'master_product'));
+        $promotions = Promotion::where('owner_id', $owner->id)->get();
+        return view('pages.owner.products.outlet-product.index', compact('productsByOutlet', 'categories', 'outlets', 'master_product', 'promotions'));
     }
 
     public function create()
@@ -131,6 +133,7 @@ class OwnerOutletProductController extends Controller
 
     public function store(Request $request)
     {
+        // dd($request->all());
         $owner = Auth::user();
 
         // VALIDASI
@@ -275,13 +278,13 @@ class OwnerOutletProductController extends Controller
     {
         $owner = Auth::user();
         $categories = Category::where('owner_id', $owner->id)->get();
-        $data = PartnerProduct::with('parent_options.options', 'category')
+        $data = PartnerProduct::with('parent_options.options', 'category', 'owner')
             ->where('owner_id', $owner->id)
             ->where('id', $outlet_product->id)
             ->first();
-        // dd($data);
+        $promotions = Promotion::where('owner_id', $owner->id)->get();
 
-        return view('pages.owner.products.outlet-product.edit', compact('data', 'categories'));
+        return view('pages.owner.products.outlet-product.edit', compact('data', 'categories', 'promotions'));
     }
 
     public function update(Request $request, $id)
@@ -291,18 +294,23 @@ class OwnerOutletProductController extends Controller
             // Ambil produk + relasi
             $product = PartnerProduct::with(['parent_options.options'])->findOrFail($id);
 
-            // Cek apakah produk ini punya option
-            $hasOptions = $product->parent_options->flatMap->options->isNotEmpty();
+            // Cek apakah produk ini punya option (pakai flatMap eksplisit biar aman)
+            $hasOptions = $product->parent_options
+                ->flatMap(function ($parent) {
+                    return $parent->options ?? collect();
+                })
+                ->isNotEmpty();
 
             // Rules dasar
             $rules = [
-                'quantity'  => ['required', 'integer', 'min:0'],
-                'is_active' => ['required', 'in:0,1'],
+                'quantity'      => ['required', 'integer', 'min:0'],
+                'is_active'     => ['required', 'in:0,1'],
+                'promotion_id'  => ['nullable', 'integer', 'exists:promotions,id'],
                 // options hanya wajib bila produk punya option
-                'options'   => [$hasOptions ? 'required' : 'nullable', 'array'],
+                'options'       => [$hasOptions ? 'required' : 'nullable', 'array'],
             ];
 
-            // Validasi quantity per option hanya bila memang ada options
+            // Validasi quantity per option (hanya jika ada options)
             if ($hasOptions) {
                 $rules['options.*.quantity'] = ['required', 'integer', 'min:0'];
             } else {
@@ -312,10 +320,16 @@ class OwnerOutletProductController extends Controller
 
             $validated = $request->validate($rules);
 
-            // Update field utama produk
+            // Normalisasi nilai
+            $newQuantity  = (int) ($validated['quantity'] ?? 0);
+            $newIsActive  = (int) ($validated['is_active'] ?? 0);
+            $promotionId  = $request->filled('promotion_id') ? (int) $validated['promotion_id'] : null;
+
+            // Update field utama produk (termasuk promo)
             $product->update([
-                'quantity'  => (int) $validated['quantity'],
-                'is_active' => (int) $validated['is_active'],
+                'quantity'  => $newQuantity,
+                'is_active' => $newIsActive,
+                'promo_id'  => $promotionId,   // <- tambahkan ini
             ]);
 
             // === Update quantity per option (jika ada input options) ===
@@ -333,7 +347,8 @@ class OwnerOutletProductController extends Controller
 
                 foreach ($options as $opt) {
                     $newQty = (int) ($optionInputs[$opt->id]['quantity'] ?? 0);
-                    $opt->update(['quantity' => $newQty]);
+                    // Gunakan fill+save agar event model tetap terpanggil (kalau ada)
+                    $opt->fill(['quantity' => $newQty])->save();
                 }
             }
 
@@ -350,6 +365,74 @@ class OwnerOutletProductController extends Controller
                 ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
+
+
+    // public function update(Request $request, $id)
+    // {
+    //     DB::beginTransaction();
+    //     try {
+    //         // Ambil produk + relasi
+    //         $product = PartnerProduct::with(['parent_options.options'])->findOrFail($id);
+
+    //         // Cek apakah produk ini punya option
+    //         $hasOptions = $product->parent_options->flatMap->options->isNotEmpty();
+
+    //         // Rules dasar
+    //         $rules = [
+    //             'quantity'  => ['required', 'integer', 'min:0'],
+    //             'is_active' => ['required', 'in:0,1'],
+    //             // options hanya wajib bila produk punya option
+    //             'options'   => [$hasOptions ? 'required' : 'nullable', 'array'],
+    //         ];
+
+    //         // Validasi quantity per option hanya bila memang ada options
+    //         if ($hasOptions) {
+    //             $rules['options.*.quantity'] = ['required', 'integer', 'min:0'];
+    //         } else {
+    //             // Jika tidak punya option, abaikan bila ada kiriman options
+    //             $rules['options.*.quantity'] = ['sometimes', 'integer', 'min:0'];
+    //         }
+
+    //         $validated = $request->validate($rules);
+
+    //         // Update field utama produk
+    //         $product->update([
+    //             'quantity'  => (int) $validated['quantity'],
+    //             'is_active' => (int) $validated['is_active'],
+    //         ]);
+
+    //         // === Update quantity per option (jika ada input options) ===
+    //         $optionInputs = $validated['options'] ?? []; // bisa kosong
+    //         if (!empty($optionInputs)) {
+    //             // Struktur diasumsikan: [ optionId => ['quantity' => ...], ... ]
+    //             $optionIds = array_map('intval', array_keys($optionInputs));
+
+    //             // Pastikan hanya option milik produk ini yang diupdate
+    //             $options = PartnerProductOption::whereIn('id', $optionIds)
+    //                 ->whereHas('parent', function ($q) use ($product) {
+    //                     $q->where('partner_product_id', $product->id);
+    //                 })
+    //                 ->get();
+
+    //             foreach ($options as $opt) {
+    //                 $newQty = (int) ($optionInputs[$opt->id]['quantity'] ?? 0);
+    //                 $opt->update(['quantity' => $newQty]);
+    //             }
+    //         }
+
+    //         DB::commit();
+
+    //         return redirect()
+    //             ->route('owner.user-owner.outlet-products.index')
+    //             ->with('success', 'Product updated successfully!');
+    //     } catch (\Throwable $e) {
+    //         DB::rollBack();
+    //         return redirect()
+    //             ->back()
+    //             ->withInput()
+    //             ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+    //     }
+    // }
 
     public function destroy(PartnerProduct $outlet_product)
     {

@@ -87,6 +87,40 @@
                             {{-- status ketersediaan --}}
                             <div id="usernameStatus" class="form-text mt-1"></div>
                         </div>
+
+                        <input type="hidden" id="slugCheckUrl" value="{{ route('owner.user-owner.outlets.check-slug') }}">
+
+                        <div class="col-md-6">
+                            <label for="slug" class="form-label required">Slug</label>
+                            <div class="input-group has-validation">
+                                <input
+                                    type="text"
+                                    name="slug"
+                                    id="slug"
+                                    class="form-control @error('slug') is-invalid @enderror"
+                                    value="{{ old('slug') }}"
+                                    required
+                                    minlength="3"
+                                    maxlength="30"
+                                    pattern="^[A-Za-z0-9._\-]+$"
+                                    placeholder="contoh: cava-coffee-malioboro"
+                                    autocomplete="off"
+                                    autocapitalize="none"
+                                    spellcheck="false"
+                                    {{-- opsional saat form edit: data-exclude-id="{{ $outlet->id ?? '' }}" --}}
+                                >
+                                <button type="button" id="btnCheckSlug" class="btn btn-outline-primary">
+                                    <span class="label">Check</span>
+                                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                </button>
+                                @error('slug') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                            </div>
+                            <small class="text-muted">3–30 karakter: huruf/angka, titik (.), underscore (_), dash (-).</small>
+
+                            {{-- status ketersediaan --}}
+                            <div id="slugStatus" class="form-text mt-1"></div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -474,10 +508,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const inputUsername = document.getElementById('username');
         const btnCheck      = document.getElementById('btnCheckUsername');
         const statusEl      = document.getElementById('usernameStatus');
+        const statusSlug    = document.getElementById('slugStatus');
         const urlCheckEl    = document.getElementById('usernameCheckUrl');
         const urlCheck      = urlCheckEl ? urlCheckEl.value : '';
 
-        if (!inputUsername || !btnCheck || !statusEl || !urlCheck) return;
+        if (!inputUsername || !btnCheck || !statusEl || !urlCheck || !statusSlug) return;
 
         const spinner  = btnCheck.querySelector('.spinner-border');
         const btnLabel = btnCheck.querySelector('.label');
@@ -567,6 +602,135 @@ document.addEventListener('DOMContentLoaded', function () {
             clearTimeout(t);
             t = setTimeout(checkUsername, 500);
         });
+    })();
+
+// === Slug availability check (USERS TABLE) ===
+    (function () {
+        const inputSlug = document.getElementById('slug');
+        const btnCheck  = document.getElementById('btnCheckSlug');
+        const statusEl  = document.getElementById('slugStatus');
+        const urlCheckEl= document.getElementById('slugCheckUrl');
+        const urlCheck  = urlCheckEl ? urlCheckEl.value : '';
+
+        if (!inputSlug || !btnCheck || !statusEl || !urlCheck) return;
+
+        const spinner  = btnCheck.querySelector('.spinner-border');
+        const btnLabel = btnCheck.querySelector('.label');
+
+        function setLoading(isLoading) {
+            if (isLoading) {
+                btnCheck.disabled = true;
+                spinner.classList.remove('d-none');
+                btnLabel.textContent = 'Checking...';
+            } else {
+                btnCheck.disabled = false;
+                spinner.classList.add('d-none');
+                btnLabel.textContent = 'Check';
+            }
+        }
+
+        function showStatus(ok, msg) {
+            statusEl.className = 'form-text mt-1';
+            if (ok) {
+                statusEl.innerHTML = `<span class="badge bg-success">Available</span> <span class="text-success ms-1">${msg}</span>`;
+                inputSlug.classList.remove('is-invalid');
+                inputSlug.classList.add('is-valid');
+            } else {
+                statusEl.innerHTML = `<span class="badge bg-danger">Taken</span> <span class="text-danger ms-1">${msg}</span>`;
+                inputSlug.classList.remove('is-valid');
+                inputSlug.classList.add('is-invalid');
+            }
+        }
+
+        function showNeutral(msg) {
+            statusEl.className = 'form-text mt-1 text-muted';
+            statusEl.textContent = msg || '';
+            inputSlug.classList.remove('is-valid','is-invalid');
+        }
+
+        // Normalisasi slug ringan (opsional): huruf kecil, spasi -> '-', gabungan dash
+        function normalizeSlug(s) {
+            return s
+                .toLowerCase()
+                .trim()
+                .replace(/[\s]+/g, '-')      // spasi ke dash
+                .replace(/[^a-z0-9._-]/g, '')// buang char tak valid
+                .replace(/-+/g, '-')         // dash ganda jadi satu
+                .replace(/^[-._]+|[-._]+$/g,''); // trim simbol di tepi
+        }
+
+        async function checkSlug() {
+            const raw = (inputSlug.value || '').trim();
+            const val = normalizeSlug(raw);
+            if (raw !== val) {
+                // sinkronkan input ke hasil normalisasi agar konsisten dengan server
+                inputSlug.value = val;
+            }
+
+            if (!val) { showNeutral(''); return; }
+
+            // Validasi ringan sesuai pattern HTML
+            if (val.length < 3 || val.length > 30 || !/^[a-z0-9._\-]+$/.test(val)) {
+                showStatus(false, 'Format tidak valid.');
+                return;
+            }
+
+            try {
+                setLoading(true);
+                const params = new URLSearchParams({ slug: val });
+
+                // Untuk halaman EDIT: kirimkan exclude_id bila ada
+                const excludeId = inputSlug.dataset.excludeId || '';
+                if (excludeId) params.append('exclude_id', excludeId);
+
+                const res = await fetch(`${urlCheck}?${params.toString()}`, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' },
+                });
+
+                if (res.status === 422) {
+                    showStatus(false, 'Format tidak valid.');
+                    return;
+                }
+
+                const data = await res.json();
+                if (typeof data.available !== 'undefined') {
+                    data.available
+                        ? showStatus(true, 'Slug tersedia 🎉')
+                        : showStatus(false, 'Slug sudah dipakai.');
+                } else {
+                    showNeutral('Tidak bisa memeriksa saat ini.');
+                }
+            } catch (e) {
+                showNeutral('Terjadi kesalahan jaringan.');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // klik tombol
+        btnCheck.addEventListener('click', checkSlug);
+
+        // debounce saat mengetik
+        let t;
+        inputSlug.addEventListener('input', () => {
+            showNeutral('');
+            clearTimeout(t);
+            t = setTimeout(checkSlug, 500);
+        });
+
+        // (opsional) auto-generate slug dari "name" saat pertama kali fokus
+        const nameInput = document.getElementById('name');
+        if (nameInput) {
+            nameInput.addEventListener('blur', () => {
+                if (!inputSlug.value.trim() && nameInput.value.trim()) {
+                    inputSlug.value = normalizeSlug(nameInput.value);
+                    showNeutral(''); // biar langsung bisa di-cek otomatis oleh debounce
+                    clearTimeout(t);
+                    t = setTimeout(checkSlug, 300);
+                }
+            });
+        }
     })();
 });
 </script>

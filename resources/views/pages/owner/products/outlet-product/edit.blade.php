@@ -250,7 +250,40 @@
                       <small class="text-danger d-block mt-1">{{ $message }}</small>
                     @enderror
                   </div>
+                  
+                  {{-- Promotion --}}
+                  <div class="form-group">
+                    <label class="mb-1" for="promotion_id">Promotion</label>
+                    <select id="promotion_id" name="promotion_id" class="form-control">
+                      {{-- kosong = tanpa promo --}}
+                      @php
+                        $selectedPromoId = old('promotion_id', $data->promo_id);
+                      @endphp
+                      <option value="">— No Promotion —</option>
+                      @foreach($promotions as $promo)
+                        <option value="{{ $promo->id }}" {{ (string)$selectedPromoId === (string)$promo->id ? 'selected' : '' }}>
+                          {{ $promo->promotion_name }}
+                          (
+                          @if($promo->promotion_type === 'percentage')
+                            {{ number_format($promo->promotion_value, 0, ',', '.') }}% Off
+                          @else
+                            Rp.
+                            @if(fmod($promo->promotion_value, 1) == 0)
+                              {{ number_format($promo->promotion_value, 0, ',', '.') }} Off
+                            @else
+                              {{ number_format($promo->promotion_value, 2, ',', '.') }} Off
+                            @endif
+                          @endif
+                          )
+                        </option>
+                      @endforeach
+                    </select>
+                    @error('promotion_id')
+                      <small class="text-danger d-block mt-1">{{ $message }}</small>
+                    @enderror
+                  </div>
 
+                  {{-- Submit --}}
                   <hr>
                   <div class="d-flex justify-content-end">
                     <a href="{{ route('owner.user-owner.outlet-products.index') }}" class="btn btn-light border mr-2">Cancel</a>
@@ -272,8 +305,8 @@
                     <strong>{{ optional($data->updated_at)->format('d M Y, H:i') ?? '-' }}</strong>
                   </div>
                   <div class="d-flex justify-content-between">
-                    <span>Owner ID</span>
-                    <strong>{{ $data->owner_id }}</strong>
+                    <span>Owner </span>
+                    <strong>{{ $data->owner->name ?? '-' }}</strong>
                   </div>
                 </div>
               </div>

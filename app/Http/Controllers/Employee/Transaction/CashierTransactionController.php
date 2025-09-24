@@ -151,6 +151,7 @@ class CashierTransactionController extends Controller
             $booking_order = BookingOrder::create([
                 'booking_order_code' => $booking_order_code,
                 'partner_id' => $partner->id,
+                'partner_name' => $partner->name,
                 'table_id' => $table->id,
                 'customer_id' => null,
                 'employee_order_id' => $employee->id,
@@ -169,21 +170,25 @@ class CashierTransactionController extends Controller
                 $note        = data_get($order, 'note', '');
 
                 $product = PartnerProduct::findOrFail($productId);
-                $options = PartnerProductOption::whereIn('id', (array)$optionIds)->get();
+                $options = PartnerProductOption::with('parent')->whereIn('id', (array)$optionIds)->get();
                 $optionsPrice = $options->sum('price');
 
                 $order_detail = OrderDetail::create([
-                    'booking_order_id'    => $booking_order->id,
+                    'booking_order_id'  => $booking_order->id,
+                    'product_code'  => $product->product_code,
+                    'product_name'  => $product->name,
                     'partner_product_id'  => $productId,
-                    'base_price'          => $product->price,
-                    'options_price'     => $optionsPrice ?? 0,   // isi jika ingin simpan
-                    'quantity'          => $qty,
-                    'customer_note'       => $note,
+                    'base_price'    => $product->price,
+                    'options_price' => $optionsPrice ?? 0,   // isi jika ingin simpan
+                    'quantity'  => $qty,
+                    'customer_note' => $note,
                 ]);
 
                 foreach ($options as $opt) {
                     OrderDetailOption::create([
                         'order_detail_id' => $order_detail->id,
+                        'parent_name' => $opt->parent->name ?? null,
+                        'partner_product_option_name' => $opt->name,
                         'option_id' => $opt->id,
                         'price' => $opt->price
                     ]);

@@ -5,7 +5,9 @@ namespace App\Models\Partner\Products;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use App\Models\Owner;
 use App\Models\Admin\Product\Category;
+use App\Models\Product\Promotion;
 
 class PartnerProduct extends Model
 {
@@ -13,6 +15,7 @@ class PartnerProduct extends Model
 
     protected $fillable = [
         'product_code',
+        'is_active',
         'master_product_id',
         'owner_id',
         'partner_id',
@@ -50,5 +53,15 @@ class PartnerProduct extends Model
     public function options()
     {
         return $this->hasMany(PartnerProductOption::class, 'partner_product_id', 'id');
+    }
+
+    public function promotion()
+    {
+        return $this->belongsTo(Promotion::class, 'promo_id', 'id');
+    }
+
+    public function owner()
+    {
+        return $this->belongsTo(Owner::class, 'owner_id', 'id');
     }
 }

@@ -90,31 +90,8 @@
 
                     {{-- List produk --}}
                     @foreach($products as $product)
-                        {{-- hitung promo dulu sebelum menampilkan --}}
                         @php
                             $firstImage = $product->pictures[0]['path'] ?? null;
-                            $promo = $product->promotion; // null kalau tidak ada/ tidak aktif hari ini
-                            $basePrice = (float) $product->price;
-
-                            $hasPromo = false;
-                            $discountedBase = $basePrice;
-
-                            if ($promo) {
-                                if ($promo->promotion_type === 'percentage') {
-                                    $discountedBase = max(0, $basePrice * (1 - ($promo->promotion_value / 100)));
-                                } else { // amount
-                                    $discountedBase = max(0, $basePrice - (float)$promo->promotion_value);
-                                }
-                                $hasPromo = $discountedBase < $basePrice;
-                            }
-
-                            // Badge text
-                            $promoBadge = null;
-                            if ($promo) {
-                                $promoBadge = $promo->promotion_type === 'percentage'
-                                    ? '-'.rtrim(rtrim(number_format($promo->promotion_value, 2, ',', '.'), '0'), ',').'%'
-                                    : '-Rp '.number_format($promo->promotion_value, 0, ',', '.');
-                            }
                         @endphp
                         <div
                             @class([
@@ -127,13 +104,10 @@
 
                             {{-- Gambar Produk --}}
                             @if($firstImage)
-                                <div class="w-28 h-28 flex-shrink-0 rounded-lg m-2 rounded-bl-lg overflow-hidden relative">
-                                    <img src="{{ asset($firstImage) }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
-                                    @if($hasPromo && $promoBadge)
-                                        <span class="absolute top-1 left-1 bg-red-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded">
-                                            {{ $promoBadge }}
-                                        </span>
-                                    @endif
+                                <div class="w-28 h-28 flex-shrink-0 rounded-lg m-2 rounded-bl-lg overflow-hidden">
+                                    <img src="{{ asset($firstImage) }}"
+                                        alt="{{ $product->name }}"
+                                        class="w-full h-full object-cover">
                                 </div>
                             @endif
 
@@ -142,21 +116,7 @@
                                 <div>
                                     <h5 class="text-lg font-semibold text-gray-800">{{ $product->name }}</h5>
                                     <p class="text-gray-500 text-sm mb-1 line-clamp-1">{{ $product->description }}</p>
-                                    @if($hasPromo)
-                                        <div class="flex items-baseline gap-2">
-                                            <span class="text-sm text-gray-500 line-through">
-                                                Rp {{ number_format($basePrice, 0, ',', '.') }}
-                                            </span>
-                                            <span class="text-lg font-bold text-gray-900">
-                                                Rp {{ number_format($discountedBase, 0, ',', '.') }}
-                                            </span>
-                                        </div>
-                                    @else
-                                        <p class="text-lg font-bold text-gray-900">
-                                            Rp {{ number_format($basePrice, 0, ',', '.') }}
-                                        </p>
-                                    @endif
-
+                                    <p class="text-lg font-bold text-gray-900">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
                                 </div>
 
                                 {{-- Tombol Qty --}}
@@ -261,28 +221,11 @@
 @php
     $productsData = $partner_products->map(function($p){
         $firstImage = $p->pictures[0]['path'] ?? null;
-        $promo = $p->promotion;
-        $base  = (float) $p->price;
-        $discBase = $base;
-
-        if ($promo) {
-            if ($promo->promotion_type === 'percentage') {
-                $discBase = max(0, $base * (1 - ($promo->promotion_value / 100)));
-            } else {
-                $discBase = max(0, $base - (float)$promo->promotion_value);
-            }
-        }
         return [
             'id'             => $p->id,
             'name'           => $p->name,
-            'description'    => strip_tags((string)$p->description),
-            'price'          => $base,
-            'discounted_base'=> $discBase,                 // <<—
-            'promotion'      => $promo ? [                 // <<—
-                'id'    => $promo->id,
-                'type'  => $promo->promotion_type,
-                'value' => (float)$promo->promotion_value,
-            ] : null,
+            'description'    => $p->description,
+            'price'          => $p->price,
             'image'          => $firstImage ? asset($firstImage) : null,
             'parent_options' => $p->parent_options ?? [],
         ];
@@ -360,53 +303,27 @@ document.addEventListener('DOMContentLoaded', function () {
   // ===== HELPERS =====
   const rupiahFmt = new Intl.NumberFormat('id-ID', { style:'currency', currency:'IDR', minimumFractionDigits:0 });
 
-  function getProductDataById(pid){ return productsData.find(p => p.id === pid) || {}; }
-
-  function addToCart(productId, optionsArr) {
-        const key = keyOf(productId, optionsArr);
-        const pd  = getProductDataById(productId);
-        const promoId = pd.promotion?.id ?? null;
-
-        if (!cart[key]) {
-            cart[key] = {
-            productId,
-            options: (optionsArr || []).slice(),
-            qty: 0,
-            unitPrice: 0,
-            lineTotal: 0,
-            note: '',
-            promo_id: promoId, // <-- WAJIB
-            };
-        } else if (cart[key].promo_id == null) {
-            cart[key].promo_id = promoId;
-        }
-
-        cart[key].qty += 1;
-        recomputeLineTotal(key);
-        lastKeyPerProduct[productId] = key;
-        updateFloatingCartBar();
-        return key;
-  }
-
-
+  function getProductDataById(pid) {
+  return productsData.find(p => p.id === pid) || {};
+}
 
 function computeUnitPrice(productId, optionsArr) {
   const pd = getProductDataById(productId);
-  // pakai discounted_base kalau ada; fallback ke price
-  const base = Number(pd.discounted_base ?? pd.price) || 0;
+  const base = Number(pd.price) || 0;
 
+  // jumlahkan harga opsi terpilih
+  const opts = (pd.parent_options || []);
   let optSum = 0;
-  (pd.parent_options || []).forEach(po => {
+  opts.forEach(po => {
     (po.options || []).forEach(opt => {
       if ((optionsArr || []).includes(opt.id)) {
-        optSum += Number(opt.price) || 0; // opsi tidak didiskon
+        optSum += Number(opt.price) || 0;
       }
     });
   });
 
   return base + optSum;
 }
-
 
 function recomputeLineTotal(key) {
   const row = cart[key];
@@ -437,24 +354,24 @@ function recomputeLineTotal(key) {
   }
 
   // Tambah 1 ke cart untuk kombinasi tertentu
-//   function addToCart(productId, optionsArr) {
-//     const key = keyOf(productId, optionsArr);
-//     if (!cart[key]) {
-//         cart[key] = {
-//         productId,
-//         options: (optionsArr || []).slice(),
-//         qty: 0,
-//         unitPrice: 0,
-//         lineTotal: 0,
-//         note: ''
-//         };
-//     }
-//     cart[key].qty += 1;
-//     recomputeLineTotal(key);
-//     lastKeyPerProduct[productId] = key;
-//     updateFloatingCartBar();
-//     return key;
-//     }
+  function addToCart(productId, optionsArr) {
+    const key = keyOf(productId, optionsArr);
+    if (!cart[key]) {
+        cart[key] = {
+        productId,
+        options: (optionsArr || []).slice(),
+        qty: 0,
+        unitPrice: 0,
+        lineTotal: 0,
+        note: ''
+        };
+    }
+    cart[key].qty += 1;
+    recomputeLineTotal(key);
+    lastKeyPerProduct[productId] = key;
+    updateFloatingCartBar();
+    return key;
+    }
 
     function minusFromCart(productId, optionsArr) {
         const key = keyOf(productId, optionsArr);
@@ -519,7 +436,6 @@ function recomputeLineTotal(key) {
     modalHeader.innerHTML = '';
     modalQty = 1; // reset qty ke 1 setiap kali modal dibuka
     modalNote = '';
-    updateModalQtyDisplay();
 
     // === header produk ===
     const headerWrapper = document.createElement('div');
@@ -695,34 +611,49 @@ function recomputeLineTotal(key) {
     saveModalBtn.addEventListener('click', function () {
         if (!currentProductId) return;
 
-        let key;
-        // tambahkan sebanyak modalQty
-        for (let i = 0; i < modalQty; i++) {
-        key = addToCart(currentProductId, selectedOptions);
+        const key = keyOf(currentProductId, selectedOptions);
+        if (!cart[key]) {
+            cart[key] = {
+            productId: currentProductId,
+            options: selectedOptions.slice(),
+            qty: 0,
+            unitPrice: 0,
+            lineTotal: 0,
+            note: '' // NEW
+            };
         }
 
-        // simpan catatan (optional) pada line item tsb
-        const noteEl  = document.getElementById('modalNote');
+        // ambil note dari textarea (fallback ke state)
+        const noteEl = document.getElementById('modalNote');
         const noteVal = (noteEl ? noteEl.value : modalNote || '').trim();
-        if (noteVal.length > 0 && key && cart[key]) {
-        cart[key].note = noteVal;
+
+        // simpan/overwrite note untuk line item ini (tidak mempengaruhi kombinasi lain)
+        if (noteVal.length > 0) {
+            cart[key].note = noteVal;
         }
 
-
-        updateProductBadge(currentProductId);
+        cart[key].qty += modalQty;          // sesuai jumlah di modal
+        recomputeLineTotal(key);
         updateFloatingCartBar();
 
-        // reset & tutup modal
+        lastKeyPerProduct[currentProductId] = key;
+
+        updateProductBadge(currentProductId);
+        printCart('Cart (saved with options):');
+
+        // reset state + tutup modal
         currentProductId = null;
         selectedOptions = [];
         modalQty = 1;
-        modalNote = '';
+        modalNote = '';                      // <<< reset note
+        updateModalQtyDisplay();
         modal.classList.remove('show');
         setTimeout(() => {
             modal.classList.add('hidden');
             unlockBodyScroll();
         }, 300);
     });
+
 
 
   // ===== UI EVENTS =====
@@ -779,6 +710,27 @@ function recomputeLineTotal(key) {
         unlockBodyScroll(); // <<< penting
     }, 300);
     });
+
+  // SAVE (modal): simpan sebagai line item per kombinasi opsi
+  saveModalBtn.addEventListener('click', function () {
+    if (!currentProductId) return;
+
+    // tambah 1 ke kombinasi yang dipilih
+    addToCart(currentProductId, selectedOptions);
+
+    // update badge agregat di kartu produk
+    updateProductBadge(currentProductId);
+    printCart('Cart (saved with options):');
+
+    // reset state + tutup modal
+    currentProductId = null;
+    selectedOptions = [];
+    modal.classList.remove('show');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        unlockBodyScroll(); // <<< penting
+    }, 300);
+  });
 
   function enforceProvision(poDiv, provision, value) {
         const checkboxes = Array.from(poDiv.querySelectorAll('input[type="checkbox"]'));
@@ -864,41 +816,21 @@ function recomputeLineTotal(key) {
 
     // Hitung total harga di modal
     function calcModalTotal(productData) {
-        const base = Number(productData.price) || 0;
-        const baseDisc = Number(productData.discounted_base ?? productData.price) || 0;
+        let basePrice = Number(productData.price) || 0;
 
+        // harga option terpilih
         const optionPrice = (productData.parent_options || []).reduce((sum, po) => {
             (po.options || []).forEach(opt => {
-            if (selectedOptions.includes(opt.id)) sum += Number(opt.price) || 0;
+                if (selectedOptions.includes(opt.id)) {
+                    sum += Number(opt.price) || 0;
+                }
             });
             return sum;
         }, 0);
 
-        const unit = baseDisc + optionPrice;
-        const total = unit * modalQty;
-
-        // update label total
-        document.getElementById('modalTotalPrice').innerText =
-            `(${new Intl.NumberFormat('id-ID', { style:'currency', currency:'IDR', minimumFractionDigits:0 }).format(total)})`;
-
-        // (opsional) tampilkan ringkas harga dasar dicoret bila promo
-        // Misal Anda punya placeholder <span id="modalBasePrice"></span>
-        const el = document.getElementById('modalBasePrice');
-        if (el) {
-            if (baseDisc < base) {
-            el.innerHTML =
-                `<span class="line-through text-gray-500 mr-1">` +
-                new Intl.NumberFormat('id-ID', { style:'currency', currency:'IDR', minimumFractionDigits:0 }).format(base) +
-                `</span>` +
-                `<span class="font-semibold">` +
-                new Intl.NumberFormat('id-ID', { style:'currency', currency:'IDR', minimumFractionDigits:0 }).format(baseDisc) +
-                `</span>`;
-            } else {
-            el.textContent = new Intl.NumberFormat('id-ID', { style:'currency', currency:'IDR', minimumFractionDigits:0 }).format(base);
-            }
-        }
+        const total = (basePrice + optionPrice) * modalQty;
+        document.getElementById('modalTotalPrice').innerText = `(${rupiahFmt.format(total)})`;
     }
-
 
     // === Floating Cart helpers ===
     function cartGrandTotal() {
@@ -1139,94 +1071,75 @@ function recomputeLineTotal(key) {
 
         // --- Render isi modal checkout ---
         function renderCheckoutModal() {
-            const body = document.getElementById('checkoutBody');
-            const totalEl = document.getElementById('checkoutGrandTotal');
+        const body = document.getElementById('checkoutBody');
+        const totalEl = document.getElementById('checkoutGrandTotal');
 
-            const rows = checkoutRows();
-            if (rows.length === 0) {
-                body.innerHTML = `
-                <div class="text-center text-gray-500 py-8">
-                    Keranjang masih kosong.
-                </div>`;
-                totalEl.textContent = rupiah(0);
-                return;
-            }
+        const rows = checkoutRows();
+        if (rows.length === 0) {
+            body.innerHTML = `
+            <div class="text-center text-gray-500 py-8">
+                Keranjang masih kosong.
+            </div>`;
+            totalEl.textContent = rupiah(0);
+            return;
+        }
 
-            // item cards
-            body.innerHTML = rows.map(r => {
-                // breakdown opsi (label kiri, harga kanan)
-                const opts = (r.optionsDetail || []).map(od => {
+        // item cards
+        body.innerHTML = rows.map(r => {
+            // breakdown opsi (label kiri, harga kanan)
+            const opts = r.optionsDetail.map(od => {
                 const label = od.parentName ? `${od.parentName}: ${od.name}` : od.name;
                 return `
-                    <div class="w-full flex items-center justify-between text-xs text-gray-600">
+                <div class="w-full flex items-center justify-between text-xs text-gray-600">
                     <span class="truncate">${label}</span>
                     <span class="shrink-0">${od.price === 0 ? '(Free)' : rupiah(od.price)}</span>
-                    </div>
-                `;
-                }).join('');
-
-                const note = r.note
-                ? `<div class="mt-2 text-xs italic text-gray-700">Catatan: ${r.note}</div>`
-                : '';
-
-                // === DI SINI tempatkan logika diskon base price ===
-                // r.unit = (discounted_base + sum harga opsi)
-                // Maka discounted_base = r.unit - sum harga opsi
-                const sumOpts   = (r.optionsDetail || []).reduce((s, od) => s + (Number(od.price) || 0), 0);
-                const rawBase   = Number(r.basePrice) || 0;                   // harga dasar asli (sebelum diskon)
-                const baseDisc  = Math.max(0, (Number(r.unit) || 0) - sumOpts); // harga dasar SETELAH diskon
-                const baseRow   = (baseDisc < rawBase)
-                ? `
-                    <div class="w-full flex items-center justify-between text-xs text-gray-600">
-                    <span>Harga dasar</span>
-                    <span class="shrink-0">
-                        <span class="line-through mr-1">${rupiah(rawBase)}</span>
-                        <span class="font-medium">${rupiah(baseDisc)}</span>
-                    </span>
-                    </div>
-                `
-                : `
-                    <div class="w-full flex items-center justify-between text-xs text-gray-600">
-                    <span>Harga dasar</span>
-                    <span class="shrink-0">${rupiah(rawBase)}</span>
-                    </div>
-                `;
-
-                return `
-                <div class="border rounded-lg p-3">
-                    <!-- HEADER: Gambar + Nama kiri, Qty kanan (SEBARIS) -->
-                    <div class="flex items-center justify-between gap-3">
-                    <div class="flex items-center gap-3 min-w-0">
-                        ${r.image ? `<img src="${r.image}" alt="${r.name}" class="w-20 h-20 rounded-md object-cover flex-shrink-0">` : ''}
-                        <p class="text-sm font-semibold truncate">${r.name}</p>
-                    </div>
-                    <div class="text-right shrink-0">
-                        <span class="text-xs text-gray-500 align-middle mr-1">Qty</span>
-                        <span class="font-semibold align-middle">${r.qty}</span>
-                    </div>
-                    </div>
-
-                    <!-- DETAIL: harga dasar & opsi (harga rata kanan) -->
-                    <div class="mt-1 space-y-0.5">
-                    ${baseRow}
-                    ${opts}
-                    </div>
-
-                    ${note}
-
-                    <!-- SUBTOTAL -->
-                    <div class="mt-2 w-full flex items-center justify-between">
-                    <span class="text-xs text-gray-500">Subtotal</span>
-                    <span class="font-semibold">${rupiah(r.line)}</span>
-                    </div>
                 </div>
                 `;
             }).join('');
 
-            const grand = rows.reduce((s, r) => s + r.line, 0);
-            totalEl.textContent = rupiah(grand);
-        }
+            const note = r.note
+                ? `<div class="mt-2 text-xs italic text-gray-700">Catatan: ${r.note}</div>`
+                : '';
 
+            return `
+                <div class="border rounded-lg p-3">
+                <!-- HEADER: Gambar + Nama kiri, Qty kanan (SEBARIS) -->
+                <div class="flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                    ${r.image ? `<img src="${r.image}" alt="${r.name}" class="w-20 h-20 rounded-md object-cover flex-shrink-0">` : ''}
+                    <p class="text-sm font-semibold truncate">${r.name}</p>
+                    </div>
+                    <div class="text-right shrink-0">
+                    <span class="text-xs text-gray-500 align-middle mr-1">Qty</span>
+                    <span class="font-semibold align-middle">${r.qty}</span>
+                    </div>
+                </div>
+
+                <!-- DETAIL: harga dasar & opsi (harga rata kanan) -->
+                <div class="mt-1 space-y-0.5">
+                    <div class="w-full flex items-center justify-between text-xs text-gray-600">
+                    <span>Harga dasar</span>
+                    <span class="shrink-0">${rupiah(r.basePrice)}</span>
+                    </div>
+                    ${opts}
+                </div>
+
+                ${note}
+
+                <!-- SUBTOTAL -->
+                <div class="mt-2 w-full flex items-center justify-between">
+                    <span class="text-xs text-gray-500">Subtotal</span>
+                    <span class="font-semibold">${rupiah(r.line)}</span>
+                </div>
+                </div>
+            `;
+            }).join('');
+
+
+
+        const grand = rows.reduce((s, r) => s + r.line, 0);
+        totalEl.textContent = rupiah(grand);
+        }
 
         // --- Buka/Tutup modal checkout ---
         const checkoutModal    = document.getElementById('checkoutModal');
@@ -1252,12 +1165,8 @@ function recomputeLineTotal(key) {
                 option_ids: r.options,
                 qty: r.qty,
                 unit_price: r.unitPrice ?? computeUnitPrice(r.productId, r.options),
-                note: r.note || '',
-                promo_id: (r.promo_id != null)
-                    ? r.promo_id
-                    : (productsData.find(p => p.id === r.productId)?.promotion?.id ?? null), // fallback
+                note: r.note || ''
             }));
-
 
             const grandTotal = payload.reduce((s, it) => s + (it.unit_price * it.qty), 0);
 
