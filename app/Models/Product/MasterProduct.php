@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Owner;
 use App\Models\Admin\Product\Category;
+use App\Models\Product\Promotion;
 
 class MasterProduct extends Model
 {
@@ -49,5 +50,10 @@ class MasterProduct extends Model
     public function options()
     {
         return $this->hasMany(MasterProductOption::class, 'master_product_id', 'id');
+    }
+
+    public function promotion()
+    {
+        return $this->belongsTo(Promotion::class, 'promo_id', 'id');
     }
 }

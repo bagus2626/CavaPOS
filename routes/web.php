@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\PortfolioController;
 use App\Http\Controllers\Admin\Product\CategoryController;
 use App\Http\Controllers\Partner\Product\PartnerCategoryController;
 use App\Http\Controllers\Owner\Product\OwnerCategoryController;
+use App\Http\Controllers\Owner\Product\OwnerPromotionController;
 use App\Http\Controllers\Partner\HumanResource\PartnerEmployeeController;
 use App\Http\Controllers\Customer\Menu\CustomerMenuController;
 use App\Http\Controllers\Customer\Auth\CustomerAuthController;
@@ -99,6 +100,7 @@ Route::middleware('setlocale')->group(function () {
             Route::resource('outlet-products', OwnerOutletProductController::class);
             Route::resource('products', OwnerProductController::class);
             Route::resource('categories', OwnerCategoryController::class);
+            Route::resource('promotions', OwnerPromotionController::class);
         });
     });
 

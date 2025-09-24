@@ -56,6 +56,32 @@
           <input type="number" min="0" step="1" id="qp_quantity" name="quantity" class="form-control" value="0">
         </div>
 
+        {{-- Promo --}}
+        {{-- <div class="mb-3">
+          <label for="qp_promotion_id" class="form-label">Promotion <span class="text-danger">*</span></label>
+          <select id="qp_promotion_id" name="promotion_id" class="form-control">
+            <option value="">— All Promos —</option>
+            @foreach($promotions as $promo)
+              <option value="{{ $promo->id }}">{{ $promo->promotion_name }} 
+                (
+                @if($promo->promotion_type == 'percentage')
+                  {{ number_format($promo->promotion_value, 0, ',', '.') }}% Off
+                @else
+                  Rp.
+                  @if(fmod($promo->promotion_value, 1) == 0)
+                    {{ number_format($promo->promotion_value, 0, ',', '.') }} Off
+                  @else
+                    {{ number_format($promo->promotion_value, 2, ',', '.') }} Off
+                  @endif
+                @endif
+                )
+
+              </option>
+            @endforeach
+          </select>
+          <div class="invalid-feedback">Please choose a promotion.</div>
+        </div> --}}
+
         {{-- Status --}}
         <div class="mb-3">
           <label for="qp_is_active" class="form-label">Status</label>

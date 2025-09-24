@@ -300,10 +300,11 @@
                      @php
                         $productRoutes = ['owner.user-owner.products.*'];
                         $categoryRoutes = ['owner.user-owner.categories.*'];
+                        $promotionRoutes = ['owner.user-owner.promotions.*'];
                         $masterProductRoutes = ['owner.user-owner.master-products.*'];
                         $outletProductRoutes = ['owner.user-owner.outlet-products.*'];
 
-                        $allProductRoutes = array_merge($productRoutes, $categoryRoutes, $masterProductRoutes, $outletProductRoutes);
+                        $allProductRoutes = array_merge($productRoutes, $categoryRoutes, $promotionRoutes, $masterProductRoutes, $outletProductRoutes);
                     @endphp
 
                     <li class="nav-item {{ Route::is($allProductRoutes) ? 'menu-open' : '' }}">
@@ -341,6 +342,13 @@
                                 class="nav-link {{ Route::is('owner.user-owner.categories.*') ? 'active' : '' }}">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Categories</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('owner.user-owner.promotions.index') }}"
+                                class="nav-link {{ Route::is('owner.user-owner.promotions.*') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Promotions</p>
                             </a>
                         </li>
 

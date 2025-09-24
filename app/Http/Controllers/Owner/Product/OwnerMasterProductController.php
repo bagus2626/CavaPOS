@@ -10,6 +10,7 @@ use App\Models\Partner\Products\PartnerProductOption;
 use App\Models\Product\MasterProduct;
 use App\Models\Product\MasterProductParentOption;
 use App\Models\Product\MasterProductOption;
+use App\Models\Product\Promotion;
 use App\Models\Product\Specification;
 use App\Models\Admin\Product\Category;
 use Illuminate\Http\Request;
@@ -25,7 +26,7 @@ class OwnerMasterProductController extends Controller
     public function index()
     {
         $categories = Category::where('owner_id', Auth::id())->get();
-        $products = MasterProduct::with('parent_options.options', 'category')
+        $products = MasterProduct::with('parent_options.options', 'category', 'promotion')
             ->where('owner_id', Auth::id())
             ->get();
         return view('pages.owner.products.master-product.index', compact('products', 'categories'));
@@ -34,7 +35,9 @@ class OwnerMasterProductController extends Controller
     public function create()
     {
         $categories = Category::where('owner_id', Auth::id())->get();
-        return view('pages.owner.products.master-product.create', compact('categories'));
+        $promotions = Promotion::where('owner_id', Auth::id())
+            ->get();
+        return view('pages.owner.products.master-product.create', compact('categories', 'promotions'));
     }
 
     public function store(Request $request)
@@ -52,6 +55,7 @@ class OwnerMasterProductController extends Controller
                 'price'            => 'required',
                 'description'      => 'nullable|string',
                 'images'           => 'nullable|array|max:5',
+                'promotion_id'     => 'nullable|integer|exists:promotions,id',
                 'images.*'         => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
                 'options'          => 'nullable|array',
             ], [
@@ -101,6 +105,7 @@ class OwnerMasterProductController extends Controller
                 'quantity'     => $request->quantity,
                 'price'        => $price,
                 'description'  => $request->description,
+                'promo_id' => $request->promotion_id ?? null,
                 'pictures'     => $storedImages ?? null,
             ]);
 
@@ -186,13 +191,14 @@ class OwnerMasterProductController extends Controller
             ->where('owner_id', $owner->id)
             ->where('id', $master_product->id)
             ->first();
-        // dd($data);
+        $promotions = Promotion::where('owner_id', $owner->id)->get();
 
-        return view('pages.owner.products.master-product.edit', compact('data', 'categories'));
+        return view('pages.owner.products.master-product.edit', compact('data', 'categories', 'promotions'));
     }
 
     public function update(Request $request, $id)
     {
+        // dd($request->all());
         DB::beginTransaction();
         try {
             $product = MasterProduct::with(['parent_options.options'])->findOrFail($id);
@@ -204,6 +210,7 @@ class OwnerMasterProductController extends Controller
                 'quantity'         => 'required',
                 'price'            => 'required',
                 'description'      => 'nullable|string',
+                'promotion_id'     => 'nullable|integer|exists:promotions,id',
                 'images'           => 'nullable|array|max:5',
                 'images.*'         => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
                 'existing_images'  => 'nullable|array',
@@ -273,6 +280,7 @@ class OwnerMasterProductController extends Controller
                 'category_id' => $request->product_category,
                 'quantity'    => $request->quantity,
                 'price'       => $price,
+                'promo_id'    => $request->promotion_id,
                 'description' => $request->description,
                 'pictures'    => $storedImages,
             ]);
@@ -431,6 +439,7 @@ class OwnerMasterProductController extends Controller
             $payload = [
                 'name'        => $master->name,
                 'category_id' => $master->category_id,
+                'promo_id'    => $master->promo_id,
                 'description' => $master->description,
             ];
 
