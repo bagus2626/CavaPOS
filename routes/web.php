@@ -1,36 +1,37 @@
 <?php
 
+use Pusher\Pusher;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Broadcast;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Public\PriceController;
 use App\Http\Controllers\Admin\ProductController;
-use App\Http\Controllers\Partner\Product\PartnerProductController;
+use App\Http\Controllers\Admin\PortfolioController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Owner\Auth\OwnerAuthController;
+use App\Http\Controllers\Owner\OwnerDashboardController;
+use App\Http\Controllers\Admin\Product\CategoryController;
+use App\Http\Controllers\Owner\Outlet\OwnerOutletController;
+use App\Http\Controllers\Owner\Report\SalesReportController;
+use App\Http\Controllers\Partner\PartnerDashboardController;
+use App\Http\Controllers\Customer\Auth\CustomerAuthController;
+use App\Http\Controllers\Customer\Menu\CustomerMenuController;
+use App\Http\Controllers\Employee\Auth\EmployeeAuthController;
 use App\Http\Controllers\Owner\Product\OwnerProductController;
+use App\Http\Controllers\Partner\Store\PartnerTableController;
+use App\Http\Controllers\Owner\Product\OwnerCategoryController;
+use App\Http\Controllers\Partner\Product\PartnerProductController;
+use App\Http\Controllers\Partner\Product\PartnerCategoryController;
 use App\Http\Controllers\Owner\Product\OwnerMasterProductController;
 use App\Http\Controllers\Owner\Product\OwnerOutletProductController;
-use App\Http\Controllers\Partner\Store\PartnerTableController;
-use App\Http\Controllers\Admin\PortfolioController;
-use App\Http\Controllers\Admin\Product\CategoryController;
-use App\Http\Controllers\Partner\Product\PartnerCategoryController;
-use App\Http\Controllers\Owner\Product\OwnerCategoryController;
-use App\Http\Controllers\Partner\HumanResource\PartnerEmployeeController;
-use App\Http\Controllers\Customer\Menu\CustomerMenuController;
-use App\Http\Controllers\Customer\Auth\CustomerAuthController;
-use App\Http\Controllers\Customer\Transaction\CustomerPaymentController;
+use App\Http\Controllers\Owner\HumanResource\OwnerEmployeeController;
 use App\Http\Controllers\Employee\Dashboard\CashierDashboardController;
 use App\Http\Controllers\Employee\Dashboard\KitchenDashboardController;
-use App\Http\Controllers\Owner\OwnerDashboardController;
-use App\Http\Controllers\Owner\HumanResource\OwnerEmployeeController;
-use App\Http\Controllers\Employee\Auth\EmployeeAuthController;
-use App\Http\Controllers\Public\PriceController;
-use App\Http\Controllers\Owner\Auth\OwnerAuthController;
-use App\Http\Controllers\Owner\Outlet\OwnerOutletController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\AdminDashboardController;
-use App\Http\Controllers\Partner\PartnerDashboardController;
+use App\Http\Controllers\Customer\Transaction\CustomerPaymentController;
+use App\Http\Controllers\Partner\HumanResource\PartnerEmployeeController;
 use App\Http\Controllers\Employee\Transaction\CashierTransactionController;
-use Illuminate\Http\Request;
-use Pusher\Pusher;
-use Illuminate\Support\Facades\Broadcast;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Employee\Transaction\KitchenTransactionController;
 
 Route::post('/set-language', function () {
@@ -98,6 +99,10 @@ Route::middleware('setlocale')->group(function () {
             Route::resource('outlet-products', OwnerOutletProductController::class);
             Route::resource('products', OwnerProductController::class);
             Route::resource('categories', OwnerCategoryController::class);
+
+            Route::prefix('report')->name('report.')->group(function () {
+                Route::resource('sales', SalesReportController::class);
+            });
         });
     });
 
