@@ -29,8 +29,8 @@ class Promotion extends Model
     ];
 
     protected $casts = [
-        'start_date'   => 'date',
-        'end_date'     => 'date',
+        'start_date'   => 'datetime',
+        'end_date'     => 'datetime',
         'is_active'    => 'boolean',
         'active_days'  => 'array',
         'uses_expiry'  => 'boolean',
@@ -54,20 +54,21 @@ class Promotion extends Model
 
     public function scopeActiveToday($query)
     {
-        $today = Carbon::today();
-        $dayKey = strtolower($today->format('D')); // "mon", "tue", dst.
+        $now   = Carbon::now();
+        $dayKey = strtolower($now->format('D')); // mon, tue, ...
 
         return $query->where('is_active', true)
-            ->where(function ($q) use ($today) {
+            ->where(function ($q) use ($now) {
                 $q->where('uses_expiry', false)
-                    ->orWhere(function ($q2) use ($today) {
-                        $q2->where(function ($qq) use ($today) {
+                    ->orWhere(function ($q2) use ($now) {
+                        $q2->where(function ($qq) use ($now) {
                             $qq->whereNull('start_date')
-                                ->orWhere('start_date', '<=', $today);
-                        })->where(function ($qq) use ($today) {
-                            $qq->whereNull('end_date')
-                                ->orWhere('end_date', '>=', $today);
-                        });
+                                ->orWhere('start_date', '<=', $now);
+                        })
+                            ->where(function ($qq) use ($now) {
+                                $qq->whereNull('end_date')
+                                    ->orWhere('end_date', '>=', $now);
+                            });
                     });
             })
             ->where(function ($q) use ($dayKey) {

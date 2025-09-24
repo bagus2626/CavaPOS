@@ -137,6 +137,8 @@ class OwnerPromotionController extends Controller
                 'active_days.*'   => ['in:mon,tue,wed,thu,fri,sat,sun'],
             ]);
 
+            $uses_expiry = $request->has('uses_expiry') ? (bool)$request->uses_expiry : false;
+
             // Opsional: guard kepemilikan
             if ((int)$promotion->owner_id !== (int)$owner->id) {
                 abort(403);
@@ -146,6 +148,7 @@ class OwnerPromotionController extends Controller
                 'promotion_name'  => $request->promotion_name,
                 'promotion_type'  => $request->promotion_type,
                 'promotion_value' => $request->promotion_value,
+                'uses_expiry'     => $uses_expiry,
                 'start_date'      => $request->uses_expiry ? $request->start_date : null,
                 'end_date'        => $request->uses_expiry ? $request->end_date : null,
                 'active_days'     => $request->active_days ?: null, // model cast ke array
