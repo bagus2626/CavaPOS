@@ -11,6 +11,7 @@ use App\Models\Product\Product;
 use App\Models\Transaction\OrderPayment;
 use App\Models\Partner\Products\PartnerProduct;
 use App\Models\Partner\Products\PartnerProductParentOption;
+use App\Models\Product\Promotion;
 use App\Models\Partner\Products\PartnerProductOption;
 use App\Models\Transaction\BookingOrder;
 use App\Models\Transaction\OrderDetail;
@@ -168,10 +169,24 @@ class CashierTransactionController extends Controller
                 $optionIds   = data_get($order, 'option_ids', []);
                 $qty         = (int) data_get($order, 'qty', 1);
                 $note        = data_get($order, 'note', '');
+                $promoId    = data_get($order, 'promo_id', null);
 
                 $product = PartnerProduct::findOrFail($productId);
                 $options = PartnerProductOption::with('parent')->whereIn('id', (array)$optionIds)->get();
                 $optionsPrice = $options->sum('price');
+
+                $promoAmount = 0;
+                $promoType = null;
+                if ($promoId) {
+                    $promotion = Promotion::findOrFail($promoId);
+                    if ($promotion->promotion_type === 'percentage') {
+                        $promoAmount = $product->price * $promotion->promotion_value / 100;
+                        $promoType = $promotion->promotion_type;
+                    } else if ($promotion->promotion_type === 'amount') {
+                        $promoAmount = $promotion->promotion_value;
+                        $promoType = $promotion->promotion_type;
+                    }
+                }
 
                 $order_detail = OrderDetail::create([
                     'booking_order_id'  => $booking_order->id,
@@ -179,6 +194,9 @@ class CashierTransactionController extends Controller
                     'product_name'  => $product->name,
                     'partner_product_id'  => $productId,
                     'base_price'    => $product->price,
+                    'promo_id'      => $promoId,
+                    'promo_amount'  => $promoAmount,
+                    'promo_type'    => $promoType,
                     'options_price' => $optionsPrice ?? 0,   // isi jika ingin simpan
                     'quantity'  => $qty,
                     'customer_note' => $note,
@@ -203,7 +221,9 @@ class CashierTransactionController extends Controller
                 $booking_order->save();
             }
 
-            event(new OrderCreated($booking_order));
+            DB::afterCommit(function () use ($booking_order) {
+                event(new OrderCreated($booking_order));
+            });
 
             DB::commit();
 

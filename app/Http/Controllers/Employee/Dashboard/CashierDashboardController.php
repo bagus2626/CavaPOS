@@ -143,7 +143,13 @@ class CashierDashboardController extends Controller
             case 'pembelian':
 
                 $partner = User::findOrFail($partnerId);
-                $partner_products = PartnerProduct::with('category', 'parent_options.options')
+                $partner_products = PartnerProduct::with([
+                    'category',
+                    'parent_options.options',
+                    'promotion' => function ($q) {
+                        $q->activeToday();
+                    }
+                ])
                     ->where('partner_id', $partner->id)
                     ->where('is_active', 1)
                     ->get();
