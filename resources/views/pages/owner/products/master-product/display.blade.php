@@ -9,6 +9,7 @@
                 <th>Jumlah</th>
                 <th>Harga</th>
                 <th>Gambar</th>
+                <th>Promo</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -41,6 +42,15 @@
                             </div>
                         @else
                             <span class="text-muted">No Images</span>
+                        @endif
+                    </td>
+                    <td>
+                        @if($product->promotion)
+                        <span class="badge bg-warning">
+                            {{ $product->promotion->promotion_name }}
+                        </span>
+                        @else
+                        <span class="text-muted">—</span>
                         @endif
                     </td>
                     <td>

@@ -80,6 +80,7 @@
                                     <th>Category</th>
                                     <th>Qty</th>
                                     <th>Status</th>
+                                    <th>Promo</th>
                                     <th class="text-end">Action</th>
                                 </tr>
                             </thead>
@@ -99,6 +100,15 @@
                                             <span class="badge bg-{{ $active ? 'success' : 'secondary' }}">
                                                 {{ $active ? 'Active' : 'Inactive' }}
                                             </span>
+                                        </td>
+                                        <td>
+                                          @if($p->promotion)
+                                            <span class="badge bg-warning">
+                                              {{ $p->promotion->promotion_name }}
+                                            </span>
+                                          @else
+                                            <span class="text-muted">—</span>
+                                          @endif
                                         </td>
                                         <td class="text-end">
                                             <a href="{{ route('owner.user-owner.outlet-products.edit', $p->id) }}"
