@@ -90,9 +90,7 @@ Route::middleware('setlocale')->group(function () {
         Route::post('login',    [OwnerAuthController::class, 'authenticate'])->name('login.attempt');
         Route::post('logout',    [OwnerAuthController::class, 'logout'])->name('logout');
 
-        Route::get('{partner_slug}/menu/{table_code}/login/{provider}', [OwnerAuthController::class, 'redirectToProvider'])->name('social.login');
-        Route::get('/auth/google/callback', [OwnerAuthController::class, 'handleProviderCallback'])->name('social.callback');
-
+        Route::get('/auth/google/redirect', [OwnerAuthController::class, 'redirect'])->name('google.redirect');
 
         // OWNER area
         Route::middleware(['auth:owner', 'is_owner:owner'])->prefix('user-owner')->name('user-owner.')->group(function () {

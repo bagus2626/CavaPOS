@@ -150,13 +150,6 @@ class CustomerAuthController extends Controller
         $partner_slug = $state['partner_slug'];
         $table_code   = $state['table_code'];
 
-
-        // Ambil kembali konteks dari session
-        // $partner_slug = session('oauth.partner_slug');
-        // $table_code   = session('oauth.table_code');
-
-        // dd($partner_slug, $table_code);
-
         // Ambil profil dari Google (stateful dulu; fallback stateless bila perlu)
         try {
             $socialUser = Socialite::driver('google')->user();
@@ -185,50 +178,28 @@ class CustomerAuthController extends Controller
         ]);
     }
 
-    // public function redirectToProvider(Request $request, $partner_slug, $table_code, $provider)
-    // {
-    //     // simpan ke session dulu
-    //     session([
-    //         'oauth.partner_slug' => $partner_slug,
-    //         'oauth.table_code'   => $table_code,
-    //     ]);
+    public function redirect($partner_slug, $table_code)
+    {
+        $state = [
+            'role'         => 'customer',
+            'partner_slug' => $partner_slug,
+            'table_code'   => $table_code,
+            'intended'     => route('customer.menu.index', compact('partner_slug', 'table_code')),
+        ];
 
-    //     return Socialite::driver($provider)->redirect();
-    // }
+        // (opsional) backup ke session
+        session([
+            'oauth.partner_slug' => $partner_slug,
+            'oauth.table_code'   => $table_code,
+            'oauth.intended'     => $state['intended'],
+        ]);
 
-
-    // public function handleProviderCallback() // <- hanya $provider
-    // {
-    //     // Ambil kembali konteks dari session
-    //     $partner_slug = session('oauth.partner_slug');
-    //     $table_code   = session('oauth.table_code');
-
-    //     // Ambil profil dari Google (stateful dulu; fallback stateless bila perlu)
-    //     try {
-    //         $socialUser = Socialite::driver('google')->user();
-    //     } catch (\Laravel\Socialite\Two\InvalidStateException $e) {
-    //         $socialUser = Socialite::driver('google')->stateless()->user();
-    //     }
-
-    //     // Provision / link akun customer
-    //     $customer = Customer::firstOrCreate(
-    //         ['email' => $socialUser->getEmail()],
-    //         [
-    //             'name'     => $socialUser->getName() ?: 'Customer',
-    //             'password' => Hash::make(Str::random(32)),
-    //         ]
-    //     );
-
-    //     Auth::guard('customer')->login($customer, remember: true);
-
-    //     // Bersihkan konteks
-    //     session()->forget(['oauth.partner_slug', 'oauth.table_code']);
-
-    //     // Redirect balik ke menu meja
-    //     return redirect()->route('customer.menu.index', [
-    //         'partner_slug' => $partner_slug,
-    //         'table_code'   => $table_code,
-    //     ]);
-    // }
-
+        return Socialite::driver('google')
+            ->scopes(['openid', 'email', 'profile'])
+            ->with([
+                'prompt' => 'select_account',
+                'state'  => base64_encode(json_encode($state)), // ← ganti .state(...) dengan .with(['state'=>...])
+            ])
+            ->redirect();
+    }
 }
