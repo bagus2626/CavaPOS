@@ -13,7 +13,7 @@ class RedirectIfAuthenticatedWithRole
         if (Auth::check()) {
             $user = Auth::user();
             if ($user->role === 'admin') {
-                return redirect('/admin');
+                return redirect('/admin/dashboard');
             } elseif ($user->role === 'partner') {
                 return redirect('/partner');
             } else {
