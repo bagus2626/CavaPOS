@@ -89,6 +89,7 @@
 
 <body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
+
         <!-- Navbar -->
         <nav class="main-header navbar navbar-expand navbar-white navbar-light border-bottom-0">
             <!-- Left navbar links -->
@@ -296,7 +297,7 @@
 
 
                         @php
-                            $outletRoutes = ['employee.outlet.*'];
+                            $outletRoutes = ['owner.user-owner.outlets.*'];
                         @endphp
 
                         <li class="nav-item {{ Route::is($outletRoutes) ? 'menu-open' : '' }}">
@@ -310,7 +311,7 @@
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
                                     <a href="{{ route('owner.user-owner.outlets.index') }}"
-                                        class="nav-link {{ Route::is('partner.products.*') ? 'active' : '' }}">
+                                        class="nav-link {{ Route::is('owner.user-owner.outlets.*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>All Outlets</p>
                                     </a>
@@ -322,10 +323,11 @@
                         @php
                             $productRoutes = ['owner.user-owner.products.*'];
                             $categoryRoutes = ['owner.user-owner.categories.*'];
+                            $promotionRoutes = ['owner.user-owner.promotions.*'];
                             $masterProductRoutes = ['owner.user-owner.master-products.*'];
                             $outletProductRoutes = ['owner.user-owner.outlet-products.*'];
 
-                            $allProductRoutes = array_merge($productRoutes, $categoryRoutes, $masterProductRoutes, $outletProductRoutes);
+                            $allProductRoutes = array_merge($productRoutes, $categoryRoutes, $promotionRoutes, $masterProductRoutes, $outletProductRoutes);
                         @endphp
 
                         <li class="nav-item {{ Route::is($allProductRoutes) ? 'menu-open' : '' }}">
@@ -365,53 +367,18 @@
                                         <p>Categories</p>
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('owner.user-owner.promotions.index') }}"
+                                        class="nav-link {{ Route::is('owner.user-owner.promotions.*') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Promotions</p>
+                                    </a>
+                                </li>
 
                             </ul>
 
                         </li>
 
-                    @php
-                        $outletRoutes = ['owner.user-owner.outlets.*'];
-                    @endphp
-
-                    <li class="nav-item {{ Route::is($outletRoutes) ? 'menu-open' : '' }}">
-                        <a href="#" class="nav-link {{ Route::is($outletRoutes) ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-store"></i>
-                            <p>
-                                Outlets
-                                <i class="fas fa-angle-left right"></i>
-                            </p>
-                        </a>
-                        <ul class="nav nav-treeview">
-                            <li class="nav-item">
-                                <a href="{{ route('owner.user-owner.outlets.index') }}" class="nav-link {{ Route::is('owner.user-owner.outlets.*') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>All Outlets</p>
-                                </a>
-                            </li>
-
-                        </ul>
-                    </li>
-
-                     @php
-                        $productRoutes = ['owner.user-owner.products.*'];
-                        $categoryRoutes = ['owner.user-owner.categories.*'];
-                        $promotionRoutes = ['owner.user-owner.promotions.*'];
-                        $masterProductRoutes = ['owner.user-owner.master-products.*'];
-                        $outletProductRoutes = ['owner.user-owner.outlet-products.*'];
-
-                        $allProductRoutes = array_merge($productRoutes, $categoryRoutes, $promotionRoutes, $masterProductRoutes, $outletProductRoutes);
-                    @endphp
-
-                    <li class="nav-item {{ Route::is($allProductRoutes) ? 'menu-open' : '' }}">
-                    <a href="#" class="nav-link {{ Route::is($allProductRoutes) ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-shopping-cart"></i>
-                        <p>
-                        Products
-                        <i class="fas fa-angle-left right"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
                         <li class="nav-item">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon fas fa-cog"></i>
@@ -433,14 +400,6 @@
                                 <p>Traffic Reports</p>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="{{ route('owner.user-owner.promotions.index') }}"
-                                class="nav-link {{ Route::is('owner.user-owner.promotions.*') ? 'active' : '' }}">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Promotions</p>
-                            </a>
-                        </li>
-
                     </ul>
                 </nav>
             </div>
@@ -505,9 +464,8 @@
     <!-- CDN SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    
     <script src="{{ asset('js/owner/reports/sales.js') }}"></script>
 
 
@@ -659,7 +617,7 @@
                 @foreach ($errors->all() as $err)
                     toastr.error({!! json_encode($err) !!});
                 @endforeach
-                    });
+                        });
         </script>
     @endif
 
