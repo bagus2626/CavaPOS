@@ -3,24 +3,20 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable; // penting agar bisa auth
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Contracts\Auth\MustVerifyEmail; // ← tambahkan
 
-class Customer extends Authenticatable
+class Customer extends Authenticatable implements MustVerifyEmail // ← implement
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = [
-        'name',
-        'email',
-        'phone',
-        'password',
-        'slug',
-    ];
+    protected $fillable = ['name', 'email', 'phone', 'password', 'slug', 'email_verified_at'];
 
-    protected $hidden = [
-        'password',
-        'remember_token',
+    protected $hidden = ['password', 'remember_token'];
+
+    protected $casts = [
+        'password' => 'hashed',
+        'email_verified_at' => 'datetime', // ← tambahkan
     ];
 }
-// Auth::guard('customer')->attempt(['email'=>$email, 'password'=>$password]);
