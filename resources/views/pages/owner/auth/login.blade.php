@@ -42,9 +42,9 @@
                         <label for="remember" class="ml-2 block text-sm text-gray-900 dark:text-gray-100">Ingat saya</label>
                     </div>
 
-                    @if (Route::has('password.request'))
+                    @if (Route::has('owner.password.request'))
                         <div class="text-sm">
-                            <a href="{{ route('password.request') }}"
+                            <a href="{{ route('owner.password.request') }}"
                                class="text-blue-600 hover:text-blue-800">Lupa password?</a>
                         </div>
                     @endif
