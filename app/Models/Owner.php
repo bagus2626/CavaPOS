@@ -4,11 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable; // jika akan dipakai untuk auth
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 // use Illuminate\Database\Eloquent\Model; // pakai ini jika BUKAN untuk auth
 
-class Owner extends Authenticatable
+class Owner extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory;
+    use Notifiable;
 
     // Jika tidak untuk auth, ganti extends ke Model dan hapus Authenticatable import.
 
@@ -19,7 +22,7 @@ class Owner extends Authenticatable
         'email',
         'role',
         'password',
-        // 'romomber_token', // pakai ini jika kolom custom
+        'email_verified_at',
         'image',
         'phone_number',
         'is_active',
@@ -31,6 +34,7 @@ class Owner extends Authenticatable
     ];
 
     protected $casts = [
+        'email_verified_at' => 'datetime',
         'is_active' => 'boolean',
         'password'  => 'hashed', // Laravel 10+: otomatis di-hash saat set
     ];

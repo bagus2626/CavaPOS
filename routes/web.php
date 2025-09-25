@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\PortfolioController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Owner\Auth\OwnerAuthController;
+use App\Http\Controllers\Owner\Auth\OwnerPasswordResetController;
 use App\Http\Controllers\Owner\OwnerDashboardController;
 use App\Http\Controllers\Admin\Product\CategoryController;
 use App\Http\Controllers\Owner\Outlet\OwnerOutletController;
@@ -35,6 +36,8 @@ use App\Http\Controllers\Customer\Transaction\CustomerPaymentController;
 use App\Http\Controllers\Partner\HumanResource\PartnerEmployeeController;
 use App\Http\Controllers\Employee\Transaction\CashierTransactionController;
 use App\Http\Controllers\Employee\Transaction\KitchenTransactionController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+
 
 Route::post('/set-language', function () {
     $locale = request('locale');
@@ -85,6 +88,7 @@ Route::middleware('setlocale')->group(function () {
         // register owner
         Route::get('register',  [OwnerAuthController::class, 'create'])->name('register');
         Route::post('register', [OwnerAuthController::class, 'store'])->name('register.store');
+
         // Login owner
         Route::get('login',     [OwnerAuthController::class, 'login'])->name('login');
         Route::post('login',    [OwnerAuthController::class, 'authenticate'])->name('login.attempt');
@@ -92,8 +96,40 @@ Route::middleware('setlocale')->group(function () {
 
         Route::get('/auth/google/redirect', [OwnerAuthController::class, 'redirect'])->name('google.redirect');
 
+        Route::middleware('guest:owner')->group(function () {
+            // minta link reset
+            Route::get('forgot-password', [OwnerPasswordResetController::class, 'requestForm'])->name('password.request');
+            Route::post('forgot-password', [OwnerPasswordResetController::class, 'sendLink'])->name('password.email');
+
+            // form reset & submit
+            Route::get('reset-password/{token}', [OwnerPasswordResetController::class, 'resetForm'])->name('password.reset');
+            Route::post('reset-password', [OwnerPasswordResetController::class, 'update'])->name('password.update');
+        });
+
+        // ===== Email Verification (OWNER) =====
+        // Halaman "cek email" dan kirim ulang link verifikasi
+        Route::middleware('auth:owner')->group(function () {
+            // Notice
+            Route::get('/email/verify', function () {
+                return view('pages.owner.auth.verify-email'); // buat view ini
+            })->name('verification.notice');
+
+            // Resend link (rate limited)
+            Route::post('/email/verification-notification', function (Request $request) {
+                $request->user('owner')->sendEmailVerificationNotification();
+                return back()->with('status', 'verification-link-sent');
+            })->middleware('throttle:6,1')->name('verification.send');
+
+            // Verify link (signed)
+            Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+                $request->fulfill(); // set email_verified_at
+                return redirect()->route('owner.user-owner.dashboard')
+                    ->with('success', 'Email Anda berhasil diverifikasi.');
+            })->middleware('signed')->name('verification.verify');
+        });
+
         // OWNER area
-        Route::middleware(['auth:owner', 'is_owner:owner'])->prefix('user-owner')->name('user-owner.')->group(function () {
+        Route::middleware(['auth:owner', 'is_owner:owner', 'verified'])->prefix('user-owner')->name('user-owner.')->group(function () {
             Route::get('/', [OwnerDashboardController::class, 'index'])->name('dashboard');
             Route::get('outlets/check-username', [OwnerOutletController::class, 'checkUsername'])->name('outlets.check-username')->middleware('throttle:30,1');
             Route::get('outlets/check-slug', [OwnerOutletController::class, 'checkSlug'])->name('outlets.check-slug')->middleware('throttle:30,1');
