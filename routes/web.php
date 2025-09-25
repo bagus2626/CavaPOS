@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\Product\CategoryController;
 use App\Http\Controllers\Owner\Outlet\OwnerOutletController;
 use App\Http\Controllers\Owner\Report\SalesReportController;
 use App\Http\Controllers\Partner\PartnerDashboardController;
+use App\Http\Controllers\Auth\GoogleCallbackController;
 use App\Http\Controllers\Owner\Product\OwnerPromotionController;
 use App\Http\Controllers\Customer\Auth\CustomerAuthController;
 use App\Http\Controllers\Customer\Menu\CustomerMenuController;
@@ -65,6 +66,8 @@ Route::middleware('setlocale')->group(function () {
     Route::get('/price/data', [PriceController::class, 'data']);
     Route::get('/price/{product:slug}', [PriceController::class, 'show'])->name('price.show');
 
+    Route::get('/oauth/google/callback', [GoogleCallbackController::class, 'handle'])->name('google.callback');
+
     Route::middleware('guest')->group(function () {});
 
 
@@ -87,6 +90,7 @@ Route::middleware('setlocale')->group(function () {
         Route::post('login',    [OwnerAuthController::class, 'authenticate'])->name('login.attempt');
         Route::post('logout',    [OwnerAuthController::class, 'logout'])->name('logout');
 
+        Route::get('/auth/google/redirect', [OwnerAuthController::class, 'redirect'])->name('google.redirect');
 
         // OWNER area
         Route::middleware(['auth:owner', 'is_owner:owner'])->prefix('user-owner')->name('user-owner.')->group(function () {
@@ -169,8 +173,10 @@ Route::middleware('setlocale')->group(function () {
         });
 
         // Google login (Socialite)
-        Route::get('{partner_slug}/menu/{table_code}/login/{provider}', [CustomerAuthController::class, 'redirectToProvider'])->name('social.login');
-        Route::get('/auth/google/callback', [CustomerAuthController::class, 'handleProviderCallback'])->name('social.callback');
+        // Route::get('{partner_slug}/menu/{table_code}/login/{provider}', [CustomerAuthController::class, 'redirectToProvider'])->name('social.login');
+        // Route::get('/auth/google/callback', [CustomerAuthController::class, 'handleProviderCallback'])->name('social.callback');
+        Route::get('/auth/google/redirect/{partner_slug}/{table_code}', [CustomerAuthController::class, 'redirect'])->name('google.redirect');
+
 
         Route::post('{partner_slug}/menu/{table_code}/guest', [CustomerAuthController::class, 'guestLogin'])->name('guest');
         Route::post('/guest-logout/{partner_slug}/{table_code}', [CustomerAuthController::class, 'guestLogout'])->name('guest-logout');

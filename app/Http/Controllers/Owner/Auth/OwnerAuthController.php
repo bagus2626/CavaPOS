@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Socialite\Facades\Socialite;
 
 class OwnerAuthController extends Controller
 {
@@ -96,5 +97,80 @@ class OwnerAuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('owner.login');
+    }
+
+    public function redirectToProvider(Request $request, $partner_slug, $table_code, $provider)
+    {
+        // simpan ke session dulu
+        session([
+            'oauth.partner_slug' => $partner_slug,
+            'oauth.table_code'   => $table_code,
+        ]);
+
+        // return Socialite::driver($provider)->redirect();
+        return Socialite::driver($provider)
+            ->with(['state' => json_encode([
+                'partner_slug' => $partner_slug,
+                'table_code'   => $table_code,
+            ])])
+            ->redirect();
+    }
+
+
+    public function handleProviderCallback() // <- hanya $provider
+    {
+        // dd(session()->all());
+        $state = json_decode(request()->get('state'), true);
+        $partner_slug = $state['partner_slug'];
+        $table_code   = $state['table_code'];
+
+        // Ambil profil dari Google (stateful dulu; fallback stateless bila perlu)
+        try {
+            $socialUser = Socialite::driver('google')->user();
+        } catch (\Laravel\Socialite\Two\InvalidStateException $e) {
+            $socialUser = Socialite::driver('google')->stateless()->user();
+        }
+
+        // Provision / link akun customer
+        $customer = Customer::firstOrCreate(
+            ['email' => $socialUser->getEmail()],
+            [
+                'name'     => $socialUser->getName() ?: 'Customer',
+                'password' => Hash::make(Str::random(32)),
+            ]
+        );
+
+        Auth::guard('customer')->login($customer, remember: true);
+
+        // Bersihkan konteks
+        session()->forget(['oauth.partner_slug', 'oauth.table_code']);
+
+        // Redirect balik ke menu meja
+        return redirect()->route('customer.menu.index', [
+            'partner_slug' => $partner_slug,
+            'table_code'   => $table_code,
+        ]);
+    }
+
+    public function redirect()
+    {
+        $state = [
+            'role'     => 'owner',
+            // sesuaikan intended ke dashboard owner-mu
+            'intended' => route('owner.user-owner.dashboard'),
+        ];
+
+        // (opsional) backup ke session agar tetap aman bila param 'state' di-strip browser
+        session([
+            'oauth.intended' => $state['intended'],
+        ]);
+
+        return Socialite::driver('google')
+            ->scopes(['openid', 'email', 'profile'])
+            ->with([
+                'prompt' => 'select_account',
+                'state'  => base64_encode(json_encode($state)),
+            ])
+            ->redirect();
     }
 }

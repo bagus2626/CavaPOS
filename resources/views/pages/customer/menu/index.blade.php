@@ -6,9 +6,9 @@
 {{-- Hero Background (logo tetap di belakang) --}}
 <div class="fixed top-0 left-0 w-full h-72 sm:h-72 -z-10">
     @if($partner->logo)
-        <img src="{{ asset($partner->logo) }}"
-             alt="{{ $partner->name }}"
-             class="w-full h-full object-cover">
+        <img src="{{ asset('storage/' . $partner->logo) }}"
+            alt="{{ $partner->name }}"
+            class="w-full h-full object-cover">
     @else
         <div class="absolute inset-0 bg-gradient-to-r from-blue-100 to-blue-200"></div>
     @endif

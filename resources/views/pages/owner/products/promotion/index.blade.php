@@ -46,18 +46,17 @@ function deletePromo(productId) {
         <a href="{{ route('owner.user-owner.promotions.create') }}" class="btn btn-primary mb-3">Add Promotion</a>
         <div class="mb-3">
             <button class="btn btn-outline-primary btn-sm filter-btn rounded-pill active" data-category="all">All</button>
-            @foreach($promotions as $promotion)
-                <button class="btn btn-outline-primary btn-sm filter-btn rounded-pill" data-category="{{ $promotion->promotion_type }}">
-                    @if($promotion->promotion_type == 'percentage')
+
+            @foreach($promotions->pluck('promotion_type')->unique() as $type)
+                <button class="btn btn-outline-primary btn-sm filter-btn rounded-pill" data-category="{{ $type }}">
+                    @if($type == 'percentage')
                         Persentase
                     @else
                         Nominal Tetap
                     @endif
                 </button>
-
             @endforeach
         </div>
-
 
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
