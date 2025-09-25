@@ -7,13 +7,10 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Broadcast;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Public\PriceController;
-use App\Http\Controllers\Admin\ProductController;
-use App\Http\Controllers\Admin\PortfolioController;
-use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\Dashboard\DashboardController;
 use App\Http\Controllers\Owner\Auth\OwnerAuthController;
 use App\Http\Controllers\Owner\Auth\OwnerPasswordResetController;
 use App\Http\Controllers\Owner\OwnerDashboardController;
-use App\Http\Controllers\Admin\Product\CategoryController;
 use App\Http\Controllers\Owner\Outlet\OwnerOutletController;
 use App\Http\Controllers\Owner\Report\SalesReportController;
 use App\Http\Controllers\Partner\PartnerDashboardController;
@@ -76,11 +73,16 @@ Route::middleware('setlocale')->group(function () {
 
     //admin
     Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
-        Route::resource('products', ProductController::class);
-        // Route::resource('specifications', SpecificationController::class);
-        Route::resource('categories', CategoryController::class);
-        Route::resource('portfolios', PortfolioController::class);
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+
+//        Route::prefix('partner')->name('partner.')->group(function () {
+//            Route::prefix('xendit')->name('xendit.')->group(function () {
+//                Route::post('create-account', [SplitRulesController::class, 'createAccount'])->name('create-account');;
+//
+//
+//            });
+//        });
+
     });
 
     // Owner
@@ -162,7 +164,7 @@ Route::middleware('setlocale')->group(function () {
         });
         Route::resource('categories', PartnerCategoryController::class);
         // Route::resource('specifications', SpecificationController::class);
-        Route::resource('portfolios', PortfolioController::class);
+//        Route::resource('portfolios', PortfolioController::class);
     });
 
 

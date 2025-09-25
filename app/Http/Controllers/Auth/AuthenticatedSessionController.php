@@ -37,7 +37,7 @@ class AuthenticatedSessionController extends Controller
                 return redirect()->intended();
             }
 
-            return redirect('/admin');
+            return redirect('/admin/dashboard');
         } elseif ($user->role === 'partner') {
             if ($intended && str_starts_with($intended, url('/partner'))) {
                 return redirect()->intended();
