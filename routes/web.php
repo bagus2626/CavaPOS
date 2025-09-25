@@ -209,10 +209,7 @@ Route::middleware('setlocale')->group(function () {
         });
 
         // Google login (Socialite)
-        // Route::get('{partner_slug}/menu/{table_code}/login/{provider}', [CustomerAuthController::class, 'redirectToProvider'])->name('social.login');
-        // Route::get('/auth/google/callback', [CustomerAuthController::class, 'handleProviderCallback'])->name('social.callback');
         Route::get('/auth/google/redirect/{partner_slug}/{table_code}', [CustomerAuthController::class, 'redirect'])->name('google.redirect');
-
 
         Route::post('{partner_slug}/menu/{table_code}/guest', [CustomerAuthController::class, 'guestLogin'])->name('guest');
         Route::post('/guest-logout/{partner_slug}/{table_code}', [CustomerAuthController::class, 'guestLogout'])->name('guest-logout');
@@ -226,8 +223,33 @@ Route::middleware('setlocale')->group(function () {
         Route::post('login/{partner_slug}/{table_code}', [CustomerAuthController::class, 'login'])->name('login.submit');
 
         Route::post('logout/{partner_slug}/{table_code}', [CustomerAuthController::class, 'logout'])->name('logout');
+        Route::post('logout', [CustomerAuthController::class, 'logoutSimple'])->name('logout.simple');
 
         Route::middleware('auth:customer')->group(function () {
+            // Halaman notice
+            Route::get('/email/verify', function () {
+                return view('pages.customer.auth.verify-email'); // buat view ini
+            })->name('verification.notice');
+
+            // Kirim ulang link (rate limited)
+            Route::post('/email/verification-notification', function (Request $request) {
+                $request->user('customer')->sendEmailVerificationNotification();
+                return back()->with('status', 'verification-link-sent');
+            })->middleware('throttle:6,1')->name('verification.send');
+
+            // Link verifikasi (signed)
+            Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+                $request->fulfill(); // set email_verified_at
+
+                // Ambil tujuan yg kita simpan ketika register/login
+                $dest = session('customer.intended') ?? route('home');
+                session()->forget('customer.intended');
+
+                return redirect($dest)->with('success', 'Email Anda berhasil diverifikasi.');
+            })->middleware('signed')->name('verification.verify');
+        });
+
+        Route::middleware('auth:customer', 'verified')->group(function () {
             Route::get('/dashboard', function () {
                 return view('customer.dashboard');
             })->name('dashboard');
