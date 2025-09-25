@@ -6,12 +6,25 @@ return [
     ],
     'customer' => [
         'navbar' => [
-            'home' => 'Home',
+            'home' => 'Beranda',
             'menu' => 'Menu',
             'contact' => 'Kontak',
         ],
         'menu' => [
-            'table' => 'Meja'
+            'table' => 'Meja',
+            'all' => 'Semua',
+            'search-placeholder' => 'Cari menu… (nama / deskripsi)',
+            'pilih-opsi' => 'Pilih Opsi',
+            'simpan' => 'Simpan',
+            'checkout' => 'Bayar Sekarang',
+            'harga-dasar' => 'Harga Dasar',
+            'konfirmasi-pesanan' => 'Konfirmasi Pesanan',
+            'nama-pemesan' => 'Nama Pemesan',
+            'metode-pembayaran' => 'Metode Pembayaran',
+            'pilih-metode' => 'Pilih Metode',
+            'isi-nama-agar-pesanan-mudah-diambil' => 'Isi nama agar pesanan mudah dipanggil.',
+            'pembayaran' => 'Pembayaran',
+            'batal' => 'Batal'
         ]
     ]
 
