@@ -10,6 +10,7 @@ use App\Http\Controllers\Partner\Store\PartnerTableController;
 use App\Http\Controllers\Admin\PortfolioController;
 use App\Http\Controllers\Admin\Product\CategoryController;
 use App\Http\Controllers\Partner\Product\PartnerCategoryController;
+use App\Http\Controllers\Auth\GoogleCallbackController;
 use App\Http\Controllers\Owner\Product\OwnerCategoryController;
 use App\Http\Controllers\Owner\Product\OwnerPromotionController;
 use App\Http\Controllers\Partner\HumanResource\PartnerEmployeeController;
@@ -64,6 +65,8 @@ Route::middleware('setlocale')->group(function () {
     Route::get('/price/data', [PriceController::class, 'data']);
     Route::get('/price/{product:slug}', [PriceController::class, 'show'])->name('price.show');
 
+    Route::get('/oauth/google/callback', [GoogleCallbackController::class, 'handle'])->name('google.callback');
+
     Route::middleware('guest')->group(function () {});
 
 
@@ -85,6 +88,9 @@ Route::middleware('setlocale')->group(function () {
         Route::get('login',     [OwnerAuthController::class, 'login'])->name('login');
         Route::post('login',    [OwnerAuthController::class, 'authenticate'])->name('login.attempt');
         Route::post('logout',    [OwnerAuthController::class, 'logout'])->name('logout');
+
+        Route::get('{partner_slug}/menu/{table_code}/login/{provider}', [OwnerAuthController::class, 'redirectToProvider'])->name('social.login');
+        Route::get('/auth/google/callback', [OwnerAuthController::class, 'handleProviderCallback'])->name('social.callback');
 
 
         // OWNER area
@@ -164,8 +170,10 @@ Route::middleware('setlocale')->group(function () {
         });
 
         // Google login (Socialite)
-        Route::get('{partner_slug}/menu/{table_code}/login/{provider}', [CustomerAuthController::class, 'redirectToProvider'])->name('social.login');
-        Route::get('/auth/google/callback', [CustomerAuthController::class, 'handleProviderCallback'])->name('social.callback');
+        // Route::get('{partner_slug}/menu/{table_code}/login/{provider}', [CustomerAuthController::class, 'redirectToProvider'])->name('social.login');
+        // Route::get('/auth/google/callback', [CustomerAuthController::class, 'handleProviderCallback'])->name('social.callback');
+        Route::get('/auth/google/redirect/{partner_slug}/{table_code}', [CustomerAuthController::class, 'redirect'])->name('google.redirect');
+
 
         Route::post('{partner_slug}/menu/{table_code}/guest', [CustomerAuthController::class, 'guestLogin'])->name('guest');
         Route::post('/guest-logout/{partner_slug}/{table_code}', [CustomerAuthController::class, 'guestLogout'])->name('guest-logout');

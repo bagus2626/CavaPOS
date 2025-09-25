@@ -40,18 +40,19 @@
     36 => 'Laravel\\Breeze\\BreezeServiceProvider',
     37 => 'Laravel\\Pail\\PailServiceProvider',
     38 => 'Laravel\\Sail\\SailServiceProvider',
-    39 => 'Laravel\\Tinker\\TinkerServiceProvider',
-    40 => 'Livewire\\LivewireServiceProvider',
-    41 => 'Milon\\Barcode\\BarcodeServiceProvider',
-    42 => 'Carbon\\Laravel\\ServiceProvider',
-    43 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
-    44 => 'Termwind\\Laravel\\TermwindServiceProvider',
-    45 => 'Pest\\Laravel\\PestServiceProvider',
-    46 => 'RyanChandler\\BladeCaptureDirective\\BladeCaptureDirectiveServiceProvider',
-    47 => 'SimpleSoftwareIO\\QrCode\\QrCodeServiceProvider',
-    48 => 'Spatie\\MediaLibrary\\MediaLibraryServiceProvider',
-    49 => 'App\\Providers\\AppServiceProvider',
-    50 => 'App\\Providers\\BroadcastServiceProvider',
+    39 => 'Laravel\\Socialite\\SocialiteServiceProvider',
+    40 => 'Laravel\\Tinker\\TinkerServiceProvider',
+    41 => 'Livewire\\LivewireServiceProvider',
+    42 => 'Milon\\Barcode\\BarcodeServiceProvider',
+    43 => 'Carbon\\Laravel\\ServiceProvider',
+    44 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
+    45 => 'Termwind\\Laravel\\TermwindServiceProvider',
+    46 => 'Pest\\Laravel\\PestServiceProvider',
+    47 => 'RyanChandler\\BladeCaptureDirective\\BladeCaptureDirectiveServiceProvider',
+    48 => 'SimpleSoftwareIO\\QrCode\\QrCodeServiceProvider',
+    49 => 'Spatie\\MediaLibrary\\MediaLibraryServiceProvider',
+    50 => 'App\\Providers\\AppServiceProvider',
+    51 => 'App\\Providers\\BroadcastServiceProvider',
   ),
   'eager' => 
   array (
@@ -247,6 +248,7 @@
     'Laravel\\Breeze\\Console\\InstallCommand' => 'Laravel\\Breeze\\BreezeServiceProvider',
     'Laravel\\Sail\\Console\\InstallCommand' => 'Laravel\\Sail\\SailServiceProvider',
     'Laravel\\Sail\\Console\\PublishCommand' => 'Laravel\\Sail\\SailServiceProvider',
+    'Laravel\\Socialite\\Contracts\\Factory' => 'Laravel\\Socialite\\SocialiteServiceProvider',
     'command.tinker' => 'Laravel\\Tinker\\TinkerServiceProvider',
   ),
   'when' => 
@@ -294,6 +296,9 @@
     array (
     ),
     'Laravel\\Sail\\SailServiceProvider' => 
+    array (
+    ),
+    'Laravel\\Socialite\\SocialiteServiceProvider' => 
     array (
     ),
     'Laravel\\Tinker\\TinkerServiceProvider' => 
