@@ -16,12 +16,27 @@
                     {{ config('app.name', 'FoodBee') }}
                 </a>
             </div>
+            @php
+                /** @var \App\Models\Customer|null $authCustomer */
+                $authCustomer = auth('customer')->user();
+                $guest        = session('guest_customer');
+
+                // Nama yang akan ditampilkan
+                $displayName  = $authCustomer?->name ?? ($guest->name ?? null);
+            @endphp
 
             {{-- Menu Desktop --}}
             <div class="hidden md:flex items-center space-x-6">
-                <a href="#" class="text-gray-700 hover:text-blue-500">{{ __('messages.customer.navbar.home') }}</a>
-                <a href="#" class="text-gray-700 hover:text-blue-500">{{ __('messages.customer.navbar.menu') }}</a>
-                <a href="#" class="text-gray-700 hover:text-blue-500">{{ __('messages.customer.navbar.contact') }}</a>
+                @if ($displayName)
+                    <span class="text-gray-700 font-medium max-w-[180px] truncate">
+                        {{ $displayName }}
+                    </span>
+                @else
+                    <a href="#" class="text-gray-700 hover:text-blue-500">{{ __('messages.customer.navbar.home') }}</a>
+                    <a href="#" class="text-gray-700 hover:text-blue-500">{{ __('messages.customer.navbar.menu') }}</a>
+                    <a href="#" class="text-gray-700 hover:text-blue-500">{{ __('messages.customer.navbar.contact') }}</a>
+                @endif
+
                 <div class="relative" id="cust-lang-desktop">
                     {{-- switch language --}}
                 <button
@@ -68,17 +83,27 @@
                     </button>
                 </div>
             </div>
-                @auth('customer') {{-- jika customer login --}}
-                    <form class="my-auto" method="POST" action="{{ route('customer.logout', ['partner_slug' => $partner_slug, 'table_code' => $table_code]) }}">
+                @php
+                    // Ambil context dari variabel view, query, atau session
+                    $ps = ($partner_slug ?? null) ?: request('partner_slug') ?: session('customer.partner_slug');
+                    $tc = ($table_code ?? null)   ?: request('table_code')   ?: session('customer.table_code');
+
+                    // Tentukan action logout yang aman di semua halaman
+                    $logoutAction = ($ps && $tc)
+                        ? route('customer.logout', ['partner_slug' => $ps, 'table_code' => $tc])
+                        : route('customer.logout.simple'); // <-- fallback tanpa parameter
+                @endphp
+
+                @auth('customer')
+                    <form class="my-auto" method="POST" action="{{ $logoutAction }}">
                         @csrf
-                        <button type="submit"
-                            class="w-full text-left px-4 py-2 text-choco hover:bg-red-100">
-                            Logout
+                        <button type="submit" class="w-full text-left px-4 py-2 text-choco hover:bg-red-100">
+                        Logout
                         </button>
                     </form>
                 @endauth
-                @if(session('guest_customer'))
-                    <form class="my-auto" method="POST" action="{{ route('customer.guest-logout', ['partner_slug' => $partner_slug, 'table_code' => $table_code]) }}">
+                @if(session('guest_customer') && $ps && $tc)
+                    <form class="my-auto" method="POST" action="{{ route('customer.guest-logout', ['partner_slug' => $ps, 'table_code' => $tc]) }}">
                         @csrf
                         <button type="submit"
                             class="w-full text-left px-4 py-2 text-choco hover:bg-red-100 rounded-lg">
@@ -103,9 +128,15 @@
 
     {{-- Mobile Menu --}}
     <div id="mobile-menu" class="hidden md:hidden">
-        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">{{ __('messages.customer.navbar.home') }}</a>
-        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">{{ __('messages.customer.navbar.menu') }}</a>
-        <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">{{ __('messages.customer.navbar.contact') }}</a>
+        @if ($displayName)
+            <div class="block px-4 py-2 text-gray-700 font-medium">
+                {{ $displayName }}
+            </div>
+        @else
+            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">{{ __('messages.customer.navbar.home') }}</a>
+            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">{{ __('messages.customer.navbar.menu') }}</a>
+            <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">{{ __('messages.customer.navbar.contact') }}</a>
+        @endif
         {{-- LANG SWITCH (MOBILE) --}}
         <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
@@ -131,17 +162,17 @@
             </div>
         </div>
 
-        @auth('customer') {{-- jika customer login --}}
-            <form method="POST" action="{{ route('customer.logout', ['partner_slug' => $partner_slug, 'table_code' => $table_code]) }}">
+        @auth('customer')
+            <form method="POST" action="{{ $logoutAction }}">
                 @csrf
-                <button type="submit"
-                    class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-100">
-                    Logout
+                <button type="submit" class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-100">
+                Logout
                 </button>
             </form>
         @endauth
-        @if(session('guest_customer'))
-            <form method="POST" action="{{ route('customer.guest-logout', ['partner_slug' => $partner_slug, 'table_code' => $table_code]) }}">
+
+        @if(session('guest_customer') && $ps && $tc)
+            <form method="POST" action="{{ route('customer.guest-logout', ['partner_slug' => $ps, 'table_code' => $tc]) }}">
                 @csrf
                 <button type="submit"
                     class="w-full text-left px-4 py-2 text-choco hover:bg-red-100">

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Auth\Notifications\ResetPassword;
 use App\Models\Owner;
+use App\Models\Customer;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -40,6 +41,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         VerifyEmail::createUrlUsing(function ($notifiable) {
+            $expires = now()->addMinutes(config('auth.verification.expire', 60));
             // Kalau yang diverifikasi adalah Owner → pakai route owner.*
             if ($notifiable instanceof Owner) {
                 return URL::temporarySignedRoute(
@@ -50,6 +52,13 @@ class AppServiceProvider extends ServiceProvider
                         'hash' => sha1($notifiable->getEmailForVerification()),
                     ]
                 );
+            }
+
+            if ($notifiable instanceof Customer) {
+                return URL::temporarySignedRoute('customer.verification.verify', $expires, [
+                    'id' => $notifiable->getKey(),
+                    'hash' => sha1($notifiable->getEmailForVerification()),
+                ]);
             }
 
             // Fallback untuk model lain (mis. User default) jika ada

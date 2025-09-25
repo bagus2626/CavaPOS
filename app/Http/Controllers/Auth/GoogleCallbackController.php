@@ -79,7 +79,7 @@ class GoogleCallbackController extends Controller
             );
 
             // (opsional) lakukan hal yang sama untuk customer
-            if ($isVerified && property_exists($customer, 'email_verified_at') && method_exists($customer, 'hasVerifiedEmail') && ! $customer->hasVerifiedEmail()) {
+            if ($isVerified && is_null($customer->email_verified_at)) {
                 $customer->forceFill(['email_verified_at' => now()])->save();
             }
 
@@ -95,53 +95,4 @@ class GoogleCallbackController extends Controller
 
         return redirect($redirect);
     }
-
-
-    // public function handle() // callback tunggal skema A: /oauth/google/callback
-    // {
-    //     // 1) Ambil state dari query (baru), atau dari session (lama)
-    //     $state = $this->parseState(request('state')) ?? [
-    //         'role'         => 'customer', // default jika tak ada
-    //         'partner_slug' => session('oauth.partner_slug'),
-    //         'table_code'   => session('oauth.table_code'),
-    //         'intended'     => session('oauth.intended'),
-    //     ];
-
-    //     // 2) Ambil profil Google (stateful → fallback stateless bila perlu)
-    //     try {
-    //         $googleUser = Socialite::driver('google')->user();
-    //     } catch (\Laravel\Socialite\Two\InvalidStateException $e) {
-    //         $googleUser = Socialite::driver('google')->stateless()->user();
-    //     }
-
-    //     // 3) Provision / link akun sesuai role
-    //     $email = $googleUser->getEmail();
-    //     $name  = $googleUser->getName() ?: 'User';
-
-    //     if (($state['role'] ?? 'customer') === 'owner') {
-    //         $owner = \App\Models\Owner::firstOrCreate(
-    //             ['email' => $email],
-    //             ['name' => $name, 'password' => Hash::make(Str::random(32))],
-    //         );
-    //         Auth::guard('owner')->login($owner, remember: true);
-    //         $redirect = $state['intended'] ?? route('owner.dashboard');
-    //     } else {
-    //         // default: customer
-    //         $customer = \App\Models\Customer::firstOrCreate(
-    //             ['email' => $email],
-    //             ['name' => $name, 'password' => Hash::make(Str::random(32))]
-    //         );
-    //         Auth::guard('customer')->login($customer, remember: true);
-    //         $redirect = $state['intended']
-    //             ?? route('customer.menu.index', [
-    //                 'partner_slug' => $state['partner_slug'] ?? 'default-partner',
-    //                 'table_code'   => $state['table_code'] ?? 'default-table',
-    //             ]);
-    //     }
-
-    //     // 4) Bersihkan konteks lama
-    //     session()->forget(['oauth.partner_slug', 'oauth.table_code', 'oauth.intended']);
-
-    //     return redirect($redirect);
-    // }
 }

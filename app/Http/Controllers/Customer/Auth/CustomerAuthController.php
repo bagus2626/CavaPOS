@@ -24,13 +24,9 @@ class CustomerAuthController extends Controller
         return view('pages.customer.auth.register', compact('partner_slug', 'table_code'));
     }
 
-    /**
-     * Handle customer registration
-     */
     public function register(Request $request, $partner_slug, $table_code)
     {
         try {
-            // Validasi request
             $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:customers,email',
@@ -38,7 +34,6 @@ class CustomerAuthController extends Controller
                 'password' => 'required|string|min:6|confirmed',
             ]);
 
-            // Simpan customer baru
             $customer = Customer::create([
                 'name' => $request->name,
                 'email' => $request->email,
@@ -46,20 +41,32 @@ class CustomerAuthController extends Controller
                 'password' => Hash::make($request->password),
             ]);
 
-            // Login otomatis setelah register
+            // Login agar bisa akses notice & resend
             Auth::guard('customer')->login($customer);
 
-            return redirect()->route('customer.menu.index', compact('partner_slug', 'table_code'))
-                ->with('success', 'Registrasi berhasil, selamat datang!');
+            // Simpan tujuan setelah verifikasi
+            session([
+                'customer.intended'      => route('customer.menu.index', compact('partner_slug', 'table_code')),
+                'customer.partner_slug'  => $partner_slug,
+                'customer.table_code'    => $table_code,
+            ]);
+
+            // Kirim email verifikasi
+            $customer->sendEmailVerificationNotification();
+
+            session()->flash('status', 'verification-link-sent');
+
+            // Arahkan ke halaman "cek email"
+            return redirect()->route('customer.verification.notice', [
+                'partner_slug' => $partner_slug,
+                'table_code'   => $table_code,
+            ])->with('status', 'Link verifikasi telah dikirim ke email Anda.');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            // Kalau validasi gagal
             return back()->withErrors($e->validator)->withInput();
         } catch (\Exception $e) {
-            // Kalau error lain (misalnya DB error)
             return back()->with('error', 'Terjadi kesalahan saat registrasi. Silakan coba lagi.')->withInput();
         }
     }
-
 
     /**
      * Show login form
@@ -70,9 +77,6 @@ class CustomerAuthController extends Controller
     }
 
 
-    /**
-     * Handle customer login
-     */
     public function login(Request $request, $partner_slug, $table_code)
     {
         $credentials = $request->validate([
@@ -82,6 +86,28 @@ class CustomerAuthController extends Controller
 
         if (Auth::guard('customer')->attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
+
+            /** @var \App\Models\Customer $customer */
+            $customer = Auth::guard('customer')->user();
+
+            if (!$customer->hasVerifiedEmail()) {
+                session([
+                    'customer.partner_slug' => $partner_slug,
+                    'customer.table_code'   => $table_code,
+                ]);
+                // simpan intended agar balik ke menu setelah verif
+                $customer->sendEmailVerificationNotification();
+
+                session()->flash('status', 'verification-link-sent');
+                session(['customer.intended' => route('customer.menu.index', compact('partner_slug', 'table_code'))]);
+
+                // Arahkan ke halaman "cek email"
+                return redirect()->route('customer.verification.notice', [
+                    'partner_slug' => $partner_slug,
+                    'table_code'   => $table_code,
+                ])->with('status', 'Anda belum Verifikasi Email. Link verifikasi telah dikirim ke email Anda.');
+            }
+
             return redirect()->route('customer.menu.index', compact('partner_slug', 'table_code'))
                 ->with('success', 'Login berhasil, selamat datang!');
         }
@@ -90,6 +116,24 @@ class CustomerAuthController extends Controller
             'email' => __('auth.failed'),
         ]);
     }
+
+    // public function login(Request $request, $partner_slug, $table_code)
+    // {
+    //     $credentials = $request->validate([
+    //         'email' => 'required|email',
+    //         'password' => 'required|string',
+    //     ]);
+
+    //     if (Auth::guard('customer')->attempt($credentials, $request->boolean('remember'))) {
+    //         $request->session()->regenerate();
+    //         return redirect()->route('customer.menu.index', compact('partner_slug', 'table_code'))
+    //             ->with('success', 'Login berhasil, selamat datang!');
+    //     }
+
+    //     throw ValidationException::withMessages([
+    //         'email' => __('auth.failed'),
+    //     ]);
+    // }
 
     /**
      * Handle logout
@@ -102,6 +146,16 @@ class CustomerAuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('customer.login', compact('partner_slug', 'table_code'));
+    }
+
+    public function logoutSimple(Request $request)
+    {
+        Auth::guard('customer')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        // aman diarahkan ke home (atau halaman login customer umum jika ada)
+        return redirect()->route('home');
     }
 
     public function guestLogout($partner_slug, $table_code)
