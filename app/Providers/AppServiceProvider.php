@@ -81,6 +81,25 @@ class AppServiceProvider extends ServiceProvider
                 ]);
             }
 
+            if ($notifiable instanceof Customer) {
+                $ps = session('customer.partner_slug');
+                $tc = session('customer.table_code');
+
+                $params = [
+                    'token' => $token,
+                    // email disarankan dikirim via query agar otomatis terisi di form
+                ];
+                $url = route('customer.password.reset', $params);
+
+                $qs = http_build_query([
+                    'email'        => $notifiable->getEmailForPasswordReset(),
+                    'partner_slug' => $ps,
+                    'table_code'   => $tc,
+                ]);
+
+                return $url . '?' . $qs;
+            }
+
             // fallback untuk model lain (jika ada)
             return URL::route('password.reset', [
                 'token' => $token,

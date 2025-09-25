@@ -32,6 +32,7 @@ use App\Http\Controllers\Employee\Dashboard\KitchenDashboardController;
 use App\Http\Controllers\Customer\Transaction\CustomerPaymentController;
 use App\Http\Controllers\Partner\HumanResource\PartnerEmployeeController;
 use App\Http\Controllers\Employee\Transaction\CashierTransactionController;
+use App\Http\Controllers\Customer\Auth\CustomerPasswordResetController;
 use App\Http\Controllers\Employee\Transaction\KitchenTransactionController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
@@ -75,13 +76,13 @@ Route::middleware('setlocale')->group(function () {
     Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
 
-//        Route::prefix('partner')->name('partner.')->group(function () {
-//            Route::prefix('xendit')->name('xendit.')->group(function () {
-//                Route::post('create-account', [SplitRulesController::class, 'createAccount'])->name('create-account');;
-//
-//
-//            });
-//        });
+        //        Route::prefix('partner')->name('partner.')->group(function () {
+        //            Route::prefix('xendit')->name('xendit.')->group(function () {
+        //                Route::post('create-account', [SplitRulesController::class, 'createAccount'])->name('create-account');;
+        //
+        //
+        //            });
+        //        });
 
     });
 
@@ -164,7 +165,7 @@ Route::middleware('setlocale')->group(function () {
         });
         Route::resource('categories', PartnerCategoryController::class);
         // Route::resource('specifications', SpecificationController::class);
-//        Route::resource('portfolios', PortfolioController::class);
+        //        Route::resource('portfolios', PortfolioController::class);
     });
 
 
@@ -226,6 +227,24 @@ Route::middleware('setlocale')->group(function () {
 
         Route::post('logout/{partner_slug}/{table_code}', [CustomerAuthController::class, 'logout'])->name('logout');
         Route::post('logout', [CustomerAuthController::class, 'logoutSimple'])->name('logout.simple');
+
+        Route::middleware('guest:customer')->group(function () {
+            // Form minta link reset (bawa partner_slug & table_code agar bisa direstor)
+            Route::get('forgot-password/{partner_slug}/{table_code}', [CustomerPasswordResetController::class, 'requestForm'])
+                ->name('password.request');
+
+            // Kirim email reset
+            Route::post('forgot-password/{partner_slug}/{table_code}', [CustomerPasswordResetController::class, 'sendLink'])
+                ->name('password.email');
+
+            // Form reset dari email (token + email di query; partner_slug & table_code optional via query)
+            Route::get('reset-password/{token}', [CustomerPasswordResetController::class, 'resetForm'])
+                ->name('password.reset');
+
+            // Submit reset
+            Route::post('reset-password', [CustomerPasswordResetController::class, 'update'])
+                ->name('password.update');
+        });
 
         Route::middleware('auth:customer')->group(function () {
             // Halaman notice
