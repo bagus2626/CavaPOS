@@ -127,10 +127,12 @@
       <td class="label">Waktu</td>
       <td class="value">{{ $data->created_at?->format('d/m/Y H:i') }}</td>
     </tr>
+    @if($cashier)
     <tr>
       <td class="label">Kasir</td>
       <td class="value">{{ $cashier->name ?? '-' }}</td>
     </tr>
+    @endif
   </table>
 
   <hr class="sep">

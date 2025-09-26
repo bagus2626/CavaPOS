@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Events\OrderCreated;
 use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Jobs\SendReceiptEmailJob;
 
 class CashierTransactionController extends Controller
 {
@@ -86,6 +87,10 @@ class CashierTransactionController extends Controller
             $booking_order->save();
 
             DB::commit();
+
+            SendReceiptEmailJob::dispatch($booking_order->id, $request->input('email'))
+                ->onQueue('email')
+                ->afterCommit();
 
             return redirect()->back()->with('success', 'Pembayaran berhasil diproses!');
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
@@ -221,11 +226,11 @@ class CashierTransactionController extends Controller
                 $booking_order->save();
             }
 
+            DB::commit();
+
             DB::afterCommit(function () use ($booking_order) {
                 event(new OrderCreated($booking_order));
             });
-
-            DB::commit();
 
             return response()->json([
                 'status'  => 'success',

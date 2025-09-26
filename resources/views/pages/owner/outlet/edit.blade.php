@@ -239,6 +239,63 @@
                     </div>
                 </div>
 
+                {{-- SECTION: Status Outlet --}}
+                <div class="form-section">
+                    <div class="section-header">
+                        <span class="section-icon"><i class="fas fa-toggle-on"></i></span>
+                        <h6 class="mb-0">Status Outlet</h6>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label d-block">Aktifkan Outlet</label>
+
+                            {{-- hidden agar saat switch off tetap kirim 0 --}}
+                            <input type="hidden" name="is_active" value="0">
+
+                            <div class="form-check form-switch">
+                                <input
+                                    class="form-check-input toggle-ios @error('is_active') is-invalid @enderror"
+                                    type="checkbox" role="switch" id="is_active" name="is_active" value="1"
+                                    {{ old('is_active', (int) $outlet->is_active) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="is_active">
+                                    <span id="isActiveLabel">
+                                        {{ old('is_active', (int) $outlet->is_active) ? 'Aktif' : 'Nonaktif' }}
+                                    </span>
+                                </label>
+                                @error('is_active') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                            </div>
+                            <small class="text-muted">Jika dimatikan, outlet tidak tampil untuk pelanggan.</small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label d-block">Aktifkan QR Order</label>
+
+                            {{-- hidden agar saat switch off tetap kirim 0 --}}
+                            <input type="hidden" name="is_qr_active" value="0">
+
+                            <div class="form-check form-switch">
+                                <input
+                                    class="form-check-input @error('is_qr_active') is-invalid @enderror"
+                                    type="checkbox"
+                                    role="switch"
+                                    id="is_qr_active"
+                                    name="is_qr_active"
+                                    value="1"
+                                    {{ old('is_qr_active', (int) $outlet->is_qr_active) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="is_qr_active">
+                                    <span id="isQrActiveLabel">
+                                        {{ old('is_qr_active', (int) $outlet->is_qr_active) ? 'Aktif' : 'Nonaktif' }}
+                                    </span>
+                                </label>
+                                @error('is_qr_active') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                            </div>
+                            <small class="text-muted">Mengontrol apakah pemesanan via QR untuk outlet ini aktif.</small>
+                        </div>
+                    </div>
+                </div>
+
+
                 {{-- SECTION: Keamanan --}}
                 <div class="form-section">
                     <div class="section-header">
@@ -612,6 +669,24 @@ document.addEventListener('DOMContentLoaded', function () {
             clearTimeout(t);
             t = setTimeout(checkUsername, 500);
         });
+    })();
+
+    (function() {
+        const activeEl = document.getElementById('is_active');
+        const activeLbl = document.getElementById('isActiveLabel');
+        if (activeEl && activeLbl) {
+            activeEl.addEventListener('change', () => {
+                activeLbl.textContent = activeEl.checked ? 'Aktif' : 'Nonaktif';
+            });
+        }
+
+        const qrEl = document.getElementById('is_qr_active');
+        const qrLbl = document.getElementById('isQrActiveLabel');
+        if (qrEl && qrLbl) {
+            qrEl.addEventListener('change', () => {
+                qrLbl.textContent = qrEl.checked ? 'Aktif' : 'Nonaktif';
+            });
+        }
     })();
 });
 </script>

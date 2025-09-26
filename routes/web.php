@@ -205,6 +205,8 @@ Route::middleware('setlocale')->group(function () {
     Route::prefix('customer')->name('customer.')->group(function () {
         Route::get('{partner_slug}/menu/{table_code}', [CustomerMenuController::class, 'index'])->name('menu.index');
         Route::post('{partner_slug}/checkout/{table_code}', [CustomerMenuController::class, 'checkout'])->name('menu.checkout');
+        Route::get('/orders/{id}/receipt', [CustomerMenuController::class, 'printReceipt'])->name('orders.receipt');
+
         Route::prefix('payment')->name('payment.')->group(function () {
             Route::get('{partner_slug}/get-payment-cash/{table_code}', [CustomerPaymentController::class, 'getPaymentCash'])
                 ->name('get-payment-cash')

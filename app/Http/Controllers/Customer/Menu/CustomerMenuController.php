@@ -26,6 +26,8 @@ use Illuminate\Support\Facades\Storage;
 use App\Events\OrderCreated;
 use App\Models\Transaction\OrderPayment;
 use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Jobs\SendReceiptEmailJob;
 
 class CustomerMenuController extends Controller
 {
@@ -165,6 +167,16 @@ class CustomerMenuController extends Controller
 
                 $booking_order->payment_id = $payment->id;
                 $booking_order->save();
+
+                DB::commit();
+                DB::afterCommit(function () use ($booking_order) {
+                    event(new OrderCreated($booking_order));
+                });
+                SendReceiptEmailJob::dispatch($booking_order->id, $request->input('email'))
+                    ->onQueue('email')
+                    ->afterCommit();
+                // return redirect()->route('customer.orders.receipt', $booking_order->id);
+                return redirect()->back()->with('success', 'Product updated successfully!');
             }
 
 
@@ -180,20 +192,17 @@ class CustomerMenuController extends Controller
                 'o' => $booking_order->id,
             ]);
 
-            if ($request->payment_method === 'QRIS') {
-                return redirect()->route('menu.index')->with('success', 'Product updated successfully!');
-            } else {
-                $url = URL::temporarySignedRoute(
-                    'customer.payment.get-payment-cash',
-                    now()->addMinutes(120),
-                    [
-                        'partner_slug' => $partner_slug,
-                        'table_code' => $table_code,
-                        'token' => $token
-                    ]
-                );
-                return redirect()->to($url)->with('success', 'Product updated successfully!');
-            }
+
+            $url = URL::temporarySignedRoute(
+                'customer.payment.get-payment-cash',
+                now()->addMinutes(120),
+                [
+                    'partner_slug' => $partner_slug,
+                    'table_code' => $table_code,
+                    'token' => $token
+                ]
+            );
+            return redirect()->to($url)->with('success', 'Product updated successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->withInput()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
@@ -209,5 +218,47 @@ class CustomerMenuController extends Controller
         } while (BookingOrder::where('booking_order_code', $code)->exists());
 
         return $code;
+    }
+
+    public function printReceipt($id)
+    {
+        // return response("OK RECEIPT $id", 200);
+        $customer = Auth::guard('customer')->user() ?? session('guest_customer');
+
+        $data = BookingOrder::with([
+            'order_details.order_detail_options.option',
+            'order_details.partnerProduct',
+            'payment',
+            'table', // kamu pakai $data->table di view => eager load
+        ])->findOrFail($id);
+
+        // Validasi kepemilikan hanya jika order memang punya customer_id
+        if ($data->customer_id) {
+            if (!$customer || ($customer->id ?? null) !== $data->customer_id) {
+                // jangan redirect/HTML ke login di sini — kirim 403 murni
+                abort(403, 'Tidak bisa print order pelanggan lain');
+            }
+        }
+
+        $partner = User::findOrFail($data->partner_id);
+
+        $customPaper = [0, 0, 227, 600];
+        $pdf = Pdf::loadView('pages.employee.cashier.pdf.receipt', [
+            'data'     => $data,
+            'partner'  => $partner,
+            'cashier'  => null,
+            'customer' => $customer,
+            'payment'  => $data->payment,
+        ])->setPaper($customPaper, 'portrait');
+
+        // ——— KUNCI: bersihkan output buffer supaya header PDF tidak “kotor”
+        if (ob_get_length()) {
+            ob_end_clean();
+        }
+
+        Storage::put("receipts/debug-{$data->booking_order_code}.pdf", $pdf->output());
+
+        // download file hasil simpan
+        return Storage::download("receipts/debug-{$data->booking_order_code}.pdf");
     }
 }
