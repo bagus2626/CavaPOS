@@ -104,6 +104,7 @@ Route::middleware('setlocale')->group(function () {
 
             Route::prefix('report')->name('report.')->group(function () {
                 Route::resource('sales', SalesReportController::class);
+                Route::get('order-details/{id}', [SalesReportController::class, 'getOrderDetails'])->name('order-details'); // <-- BARIS YANG SUDAH DIPERBAIKI
             });
             Route::resource('promotions', OwnerPromotionController::class);
         });

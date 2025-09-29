@@ -1,6 +1,6 @@
-<?php return array(
-  'providers' =>
-  array(
+<?php return array (
+  'providers' => 
+  array (
     0 => 'Illuminate\\Auth\\AuthServiceProvider',
     1 => 'Illuminate\\Broadcasting\\BroadcastServiceProvider',
     2 => 'Illuminate\\Bus\\BusServiceProvider',
@@ -55,8 +55,8 @@
     51 => 'App\\Providers\\AppServiceProvider',
     52 => 'App\\Providers\\BroadcastServiceProvider',
   ),
-  'eager' =>
-  array(
+  'eager' => 
+  array (
     0 => 'Illuminate\\Auth\\AuthServiceProvider',
     1 => 'Illuminate\\Cookie\\CookieServiceProvider',
     2 => 'Illuminate\\Database\\DatabaseServiceProvider',
@@ -94,8 +94,8 @@
     34 => 'App\\Providers\\AppServiceProvider',
     35 => 'App\\Providers\\BroadcastServiceProvider',
   ),
-  'deferred' =>
-  array(
+  'deferred' => 
+  array (
     'Illuminate\\Broadcasting\\BroadcastManager' => 'Illuminate\\Broadcasting\\BroadcastServiceProvider',
     'Illuminate\\Contracts\\Broadcasting\\Factory' => 'Illuminate\\Broadcasting\\BroadcastServiceProvider',
     'Illuminate\\Contracts\\Broadcasting\\Broadcaster' => 'Illuminate\\Broadcasting\\BroadcastServiceProvider',
@@ -248,43 +248,64 @@
     'validation.presence' => 'Illuminate\\Validation\\ValidationServiceProvider',
     'Illuminate\\Contracts\\Validation\\UncompromisedVerifier' => 'Illuminate\\Validation\\ValidationServiceProvider',
     'Laravel\\Breeze\\Console\\InstallCommand' => 'Laravel\\Breeze\\BreezeServiceProvider',
+    'Laravel\\Reverb\\ApplicationManager' => 'Laravel\\Reverb\\ApplicationManagerServiceProvider',
+    'Laravel\\Reverb\\Contracts\\ApplicationProvider' => 'Laravel\\Reverb\\ApplicationManagerServiceProvider',
     'Laravel\\Sail\\Console\\InstallCommand' => 'Laravel\\Sail\\SailServiceProvider',
     'Laravel\\Sail\\Console\\PublishCommand' => 'Laravel\\Sail\\SailServiceProvider',
     'command.tinker' => 'Laravel\\Tinker\\TinkerServiceProvider',
   ),
-  'when' =>
-  array(
-    'Illuminate\\Broadcasting\\BroadcastServiceProvider' =>
-    array(),
-    'Illuminate\\Bus\\BusServiceProvider' =>
-    array(),
-    'Illuminate\\Cache\\CacheServiceProvider' =>
-    array(),
-    'Illuminate\\Foundation\\Providers\\ConsoleSupportServiceProvider' =>
-    array(),
-    'Illuminate\\Concurrency\\ConcurrencyServiceProvider' =>
-    array(),
-    'Illuminate\\Hashing\\HashServiceProvider' =>
-    array(),
-    'Illuminate\\Mail\\MailServiceProvider' =>
-    array(),
-    'Illuminate\\Auth\\Passwords\\PasswordResetServiceProvider' =>
-    array(),
-    'Illuminate\\Pipeline\\PipelineServiceProvider' =>
-    array(),
-    'Illuminate\\Queue\\QueueServiceProvider' =>
-    array(),
-    'Illuminate\\Redis\\RedisServiceProvider' =>
-    array(),
-    'Illuminate\\Translation\\TranslationServiceProvider' =>
-    array(),
-    'Illuminate\\Validation\\ValidationServiceProvider' =>
-    array(),
-    'Laravel\\Breeze\\BreezeServiceProvider' =>
-    array(),
-    'Laravel\\Sail\\SailServiceProvider' =>
-    array(),
-    'Laravel\\Tinker\\TinkerServiceProvider' =>
-    array(),
+  'when' => 
+  array (
+    'Illuminate\\Broadcasting\\BroadcastServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Bus\\BusServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Cache\\CacheServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Foundation\\Providers\\ConsoleSupportServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Concurrency\\ConcurrencyServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Hashing\\HashServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Mail\\MailServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Auth\\Passwords\\PasswordResetServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Pipeline\\PipelineServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Queue\\QueueServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Redis\\RedisServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Translation\\TranslationServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Validation\\ValidationServiceProvider' => 
+    array (
+    ),
+    'Laravel\\Breeze\\BreezeServiceProvider' => 
+    array (
+    ),
+    'Laravel\\Reverb\\ApplicationManagerServiceProvider' => 
+    array (
+    ),
+    'Laravel\\Sail\\SailServiceProvider' => 
+    array (
+    ),
+    'Laravel\\Tinker\\TinkerServiceProvider' => 
+    array (
+    ),
   ),
 );
