@@ -1,564 +1,363 @@
 @extends('layouts.partner')
 
-@section('title', 'Update Product')
-@section('page_title', 'Update Product')
+@section('title', 'Update Product Stock')
+@section('page_title', 'Update Product Stock')
 
 @section('content')
 <section class="content">
-    <div class="container-fluid">
-        <a href="{{ route('partner.products.index') }}" class="btn btn-secondary mb-3">
-            <i class="fas fa-arrow-left mr-2"></i>Back to Products
-        </a>
+  <div class="container-fluid">
+    <a href="{{ route('partner.products.index') }}" class="btn btn-secondary mb-3">
+      <i class="fas fa-arrow-left mr-2"></i>Back to Products
+    </a>
 
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Edit Product</h3>
+    @if ($errors->any())
+      <div class="alert alert-danger">
+        <ul class="mb-0">
+          @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+          @endforeach
+        </ul>
+      </div>
+    @endif
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white">
+        <h3 class="card-title mb-0">Edit Stock</h3>
+      </div>
+
+      <form action="{{ route('partner.products.update', $data->id) }}" method="POST">
+        @csrf
+        @method('PUT')
+
+        <div class="card-body">
+          <div class="row">
+            {{-- LEFT: Ringkasan readonly --}}
+            <div class="col-lg-7">
+              <div class="card border-0 mb-3">
+                <div class="card-body">
+                  <div class="d-flex align-items-start">
+                    <div class="mr-3">
+                      @php
+                        $firstPic = is_array($data->pictures ?? null) && count($data->pictures) ? $data->pictures[0]['path'] : null;
+                      @endphp
+                      <img
+                        src="{{ $firstPic ? asset($firstPic) : 'https://via.placeholder.com/120x120?text=No+Image' }}"
+                        alt="{{ $data->name }}"
+                        class="rounded"
+                        style="width:120px;height:120px;object-fit:cover;"
+                      >
+                    </div>
+                    <div class="flex-fill">
+                      <h4 class="mb-1">{{ $data->name }}</h4>
+                      <div class="mb-2">
+                        <span class="badge badge-info">
+                          {{ optional($data->category)->category_name ?? 'Uncategorized' }}
+                        </span>
+                        <span class="badge badge-light border ml-1">Code: {{ $data->product_code ?? '-' }}</span>
+                        <span class="badge badge-light border ml-1">Outlet ID: {{ $data->partner_id }}</span>
+                      </div>
+
+                      <div class="text-muted small">
+                        <div class="mb-1"><i class="fas fa-tags mr-1"></i>
+                          Price:
+                          <strong>Rp {{ number_format((float)($data->price ?? 0), 0, ',', '.') }}</strong>
+                        </div>
+                        <div class="mb-1"><i class="fas fa-percentage mr-1"></i>
+                          Promotion:
+                          <strong>{{ $data->promotion ? 'Applied' : '—' }}</strong>
+                          @if($data->promotion)
+                            <span class="badge badge-light border ml-1">
+                              {{ $data->promotion->promotion_name ?? '-' }}
+                              (@if($data->promotion->promotion_type === 'percentage')
+                                discount {{ intval($data->promotion->promotion_value ?? 0) }}%
+                              @elseif($data->promotion->promotion_type === 'amount')
+                                potongan Rp {{ number_format((float)($data->promotion->promotion_value ?? 0), 0, ',', '.') }}
+                              @endif)
+                            </span>
+                          @endif
+                        </div>
+                        <div><i class="fas fa-info-circle mr-1"></i>
+                          Master Product:
+                          <strong>{{ $data->master_product_id ?? '-' }}</strong>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {{-- Deskripsi readonly (kalau ada) --}}
+                  @if(!empty($data->description))
+                    <hr>
+                    <div>
+                      <div class="text-muted mb-1"><i class="far fa-file-alt mr-1"></i>Description</div>
+                      <div class="border rounded p-2" style="background:#fcfcfc;">
+                        {!! $data->description !!}
+                      </div>
+                    </div>
+                  @endif
+
+                  {{-- Options: quantity bisa diedit + toggle Always available --}}
+                  @if(($data->parent_options ?? null) && count($data->parent_options))
+                    <hr>
+                    <div class="text-muted mb-2"><i class="fas fa-list-ul mr-1"></i>Options</div>
+
+                    @foreach($data->parent_options as $parent)
+                      <div class="mb-3 p-2 border rounded">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                          <div class="font-weight-bold">
+                            {{ $parent->name }}
+                            @if($parent->provision)
+                              <span class="badge badge-light border ml-1">
+                                {{ $parent->provision }}
+                                {{ $parent->provision_value ? ' : '.$parent->provision_value : '' }}
+                              </span>
+                            @endif
+                          </div>
+                          @if($parent->description)
+                            <div class="text-muted small">{{ $parent->description }}</div>
+                          @endif
+                        </div>
+
+                        @if($parent->options && count($parent->options))
+                          <div class="table-responsive">
+                            <table class="table table-sm mb-0">
+                              <thead class="thead-light">
+                                <tr>
+                                  <th style="width:40%">Option</th>
+                                  <th class="text-right" style="width:20%">Price</th>
+                                  <th class="text-center" style="width:30%">Quantity</th>
+                                  <th class="text-right" style="width:10%">Info</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                @foreach($parent->options as $opt)
+                                  @php
+                                    $optUnlimited = old("options.{$opt->id}.always_available", $opt->always_available_flag ?? ($opt->quantity === null ? 1 : 0));
+                                  @endphp
+                                  <tr>
+                                    <td>{{ $opt->name }}</td>
+                                    <td class="text-right">
+                                      Rp {{ number_format((float)($opt->price ?? 0), 0, ',', '.') }}
+                                    </td>
+                                    <td class="text-center">
+                                      {{-- Always available (option) --}}
+                                      <div class="custom-control custom-switch custom-control-sm mb-2 text-left" style="display:inline-block;">
+                                        <input type="hidden" name="options[{{ $opt->id }}][always_available]" value="0">
+                                        <input
+                                          type="checkbox"
+                                          class="custom-control-input opt-aa"
+                                          id="opt-aa-{{ $opt->id }}"
+                                          name="options[{{ $opt->id }}][always_available]"
+                                          value="1"
+                                          data-qty="#opt-qty-{{ $opt->id }}"
+                                          data-wrap="#opt-qty-wrap-{{ $opt->id }}"
+                                          {{ $optUnlimited ? 'checked' : '' }}
+                                        >
+                                        <label class="custom-control-label" for="opt-aa-{{ $opt->id }}">Always available</label>
+                                      </div>
+
+                                      {{-- Quantity wrapper (option) --}}
+                                      <div id="opt-qty-wrap-{{ $opt->id }}" class="mt-2">
+                                        <div class="input-group input-group-sm justify-content-center" style="max-width:220px;margin:0 auto;">
+                                          <div class="input-group-prepend">
+                                            <button type="button" class="btn btn-outline-secondary btn-opt-dec" data-target="#opt-qty-{{ $opt->id }}">
+                                              <i class="fas fa-minus"></i>
+                                            </button>
+                                          </div>
+                                          <input
+                                            type="number"
+                                            id="opt-qty-{{ $opt->id }}"
+                                            name="options[{{ $opt->id }}][quantity]"
+                                            class="form-control text-center"
+                                            min="0"
+                                            step="1"
+                                            value="{{ old("options.{$opt->id}.quantity", $opt->quantity ?? 0) }}"
+                                            style="max-width:120px"
+                                          >
+                                          <div class="input-group-append">
+                                            <button type="button" class="btn btn-outline-secondary btn-opt-inc" data-target="#opt-qty-{{ $opt->id }}">
+                                              <i class="fas fa-plus"></i>
+                                            </button>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </td>
+                                    <td class="text-right">
+                                      <span class="text-muted small">Last: {{ (int)($opt->quantity ?? 0) }}</span>
+                                    </td>
+                                  </tr>
+                                @endforeach
+                              </tbody>
+                            </table>
+                          </div>
+                        @endif
+                      </div>
+                    @endforeach
+                  @endif
+                </div>
+              </div>
             </div>
 
-            <form action="{{ route('partner.products.update', $data->id) }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
+            {{-- RIGHT: HANYA Quantity produk --}}
+            <div class="col-lg-5">
+              <div class="card border-0">
                 <div class="card-body">
-                    <!-- Basic Product Info -->
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Product Name</label>
-                                <input type="text" name="name" class="form-control" value="{{ $data->name }}" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Category</label>
-                                <select name="product_category" class="form-control" required>
-                                    <option value="">Select Category</option>
-                                    @foreach($categories as $category)
-                                        <option value="{{ $category->id }}"
-                                            @if($data->category_id == $category->id) selected @endif>
-                                            {{ $category->category_name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
+                  <h5 class="mb-3">Update Stock</h5>
+
+                  {{-- Always available (product) --}}
+                  @php
+                    $prodUnlimited = old('always_available', $data->always_available_flag ?? ($data->quantity === null ? 1 : 0));
+                  @endphp
+                  <div class="form-group">
+                    <div class="custom-control custom-switch">
+                      <input type="hidden" name="always_available" value="0">
+                      <input
+                        type="checkbox"
+                        class="custom-control-input"
+                        id="aa_product"
+                        name="always_available"
+                        value="1"
+                        {{ $prodUnlimited ? 'checked' : '' }}
+                      >
+                      <label class="custom-control-label" for="aa_product">
+                        Produk selalu tersedia (tanpa stok)
+                      </label>
                     </div>
+                    <small class="text-muted">Jika aktif, kolom Quantity akan disembunyikan.</small>
+                  </div>
 
-                    <!-- Quantity & Price -->
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Quantity</label>
-                                <div class="input-group">
-                                    <input type="number" id="quantity" name="quantity" class="form-control text-center"
-                                        value="{{ $data->quantity }}" min="0" required>
-                                    <button type="button" class="btn btn-outline-secondary ml-1" onclick="decreaseQuantity()">-</button>
-                                    <button type="button" class="btn btn-outline-secondary ml-1" onclick="increaseQuantity()">+</button>
-                                    <button type="button" class="btn btn-outline-secondary ml-1" onclick="maxQuantity('quantity')">Max</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Price</label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Rp.</span>
-                                    </div>
-                                    <input type="text" id="price" name="price" class="form-control"
-                                        value="{{ number_format($data->price,0,',','.') }}" required>
-                                </div>
-                            </div>
-                        </div>
+                  {{-- Quantity produk --}}
+                  <div class="form-group" id="product_qty_group">
+                    <label class="mb-1">Quantity (Product)</label>
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <button type="button" class="btn btn-outline-secondary" id="btn-qty-dec">
+                          <i class="fas fa-minus"></i>
+                        </button>
+                      </div>
+                      <input
+                        type="number"
+                        id="quantity"
+                        name="quantity"
+                        class="form-control text-center"
+                        min="0"
+                        step="1"
+                        value="{{ old('quantity', $data->quantity ?? 0) }}"
+                        required
+                      >
+                      <div class="input-group-append">
+                        <button type="button" class="btn btn-outline-secondary" id="btn-qty-inc">
+                          <i class="fas fa-plus"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="btn-qty-max">Max</button>
+                      </div>
                     </div>
+                    @error('quantity')
+                      <small class="text-danger d-block mt-1">{{ $message }}</small>
+                    @enderror
+                  </div>
 
-                    <!-- Existing Images -->
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            <label>Existing Images</label>
-                            <div class="d-flex flex-wrap" id="existing-images">
-                                @foreach($data->pictures as $pic)
-                                    <div class="position-relative m-1">
-                                        <img src="{{ asset($pic['path']) }}" style="width:120px;height:120px;" class="img-thumbnail">
-                                        <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0"
-                                            onclick="removeExistingImage(this, '{{ $pic['filename'] }}')">X</button>
-                                        <input type="hidden" name="existing_images[]" value="{{ $pic['filename'] }}">
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Upload New Images -->
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            <label>Add New Images (Max 5)</label>
-                            <input type="file" name="images[]" id="images" class="form-control" multiple accept="image/*">
-                            <small class="text-muted">You can upload up to 5 images.</small>
-                            <div id="image-preview" class="d-flex flex-wrap mt-2"></div>
-                        </div>
-                    </div>
-
-                    <!-- Description -->
-                    <div class="form-group">
-                        <label>Description</label>
-                        <textarea name="description" class="form-control summernote" rows="3">{{ $data->description }}</textarea>
-                    </div>
-
-                    <hr>
-
-
-
-                    <div class="row" id="menu-options-container">
-                        @foreach($data->parent_options as $pIndex => $parent)
-                            <div class="col-12 menu-option mb-3" data-menu-index="{{ $pIndex+1 }}">
-                                <input type="hidden" name="menu_options[{{ $pIndex+1 }}][parent_id]" value="{{ $parent->id }}">
-                                <div class="card h-100">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between mb-2">
-                                            <h5 class="card-title">Menu Option {{ $pIndex+1 }}</h5>
-                                            <button type="button" class="btn btn-sm btn-danger" onclick="removeMenuOption(this)">X</button>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-3">
-                                                <div class="form-group">
-                                                    <label>Menu Name</label>
-                                                    <input type="text" name="menu_options[{{ $pIndex+1 }}][name]"
-                                                        value="{{ $parent->name }}" class="form-control" required>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-5">
-                                                <div class="form-group">
-                                                    <label>Menu Description</label>
-                                                    <input type="text" name="menu_options[{{ $pIndex+1 }}][description]"
-                                                        value="{{ $parent->description }}" class="form-control">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <div class="form-group">
-                                                    <label>Pilihan</label>
-                                                    <select
-                                                    class="form-control provision-select"
-                                                    data-index="{{ $pIndex+1 }}"
-                                                    name="menu_options[{{ $pIndex+1 }}][provision]"
-                                                    id="menu_options[{{ $pIndex+1 }}][provision]"
-                                                    required
-                                                    >
-                                                        <option value="">Select Provision</option>
-                                                        <option value="OPTIONAL" {{ $parent->provision === 'OPTIONAL' ? 'selected' : '' }}>Opsional</option>
-                                                        <option value="OPTIONAL MAX" {{ $parent->provision === 'OPTIONAL MAX' ? 'selected' : '' }}>Opsional, Maksimal Pilih</option>
-                                                        <option value="MAX" {{ $parent->provision === 'MAX' ? 'selected' : '' }}>Wajib, Maksimal Pilih</option>
-                                                        <option value="EXACT" {{ $parent->provision === 'EXACT' ? 'selected' : '' }}>Wajib, Pilih</option>
-                                                        <option value="MIN" {{ $parent->provision === 'MIN' ? 'selected' : '' }}>Wajib, Minimal Pilih</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-2" id="jumlah-options-{{ $pIndex+1 }}">
-                                                <div class="form-group">
-                                                    <label>Jumlah</label>
-                                                    <div class="input-group">
-                                                    <input type="number"
-                                                        id="menu_options[{{ $pIndex+1 }}][provision_value]"
-                                                        name="menu_options[{{ $pIndex+1 }}][provision_value]"
-                                                        class="form-control" min="0" value="{{ $parent->provision_value }}"
-                                                        required>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                        </div>
-
-                                        <div class="options-container" id="options-container-{{ $pIndex+1 }}">
-                                            @foreach($parent->options as $oIndex => $option)
-                                                <div class="card mb-2 option-item">
-                                                    <input type="hidden" name="menu_options[{{ $pIndex+1 }}][options][{{ $oIndex+1 }}][option_id]" value="{{ $option->id }}">
-                                                    <div class="card-body">
-                                                        <div class="d-flex justify-content-between mb-2">
-                                                            <h6>Option {{ $oIndex+1 }}</h6>
-                                                            <button type="button" class="btn btn-sm btn-danger" onclick="removeOption(this)">Remove</button>
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-md-4">
-                                                                <div class="form-group">
-                                                                    <label>Option Name</label>
-                                                                    <input type="text" name="menu_options[{{ $pIndex+1 }}][options][{{ $oIndex+1 }}][name]"
-                                                                        value="{{ $option->name }}" class="form-control" required>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-4">
-                                                                <div class="form-group">
-                                                                    <label>Quantity</label>
-                                                                    <div class="input-group">
-                                                                        <input type="number" name="menu_options[{{ $pIndex+1 }}][options][{{ $oIndex+1 }}][quantity]"
-                                                                            value="{{ $option->quantity }}" class="form-control" min="0" required>
-                                                                        <button type="button" class="btn btn-outline-secondary ml-1" onclick="maxQuantity('')">Max</button>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-4">
-                                                                {{-- <div class="form-group">
-                                                                    <label>Price</label>
-                                                                    <input type="number" name="menu_options[{{ $pIndex+1 }}][options][{{ $oIndex+1 }}][price]"
-                                                                        value="{{ $option->price }}" class="form-control" min="0" required>
-                                                                </div> --}}
-                                                                <div class="form-group">
-                                                                    <label>Price</label>
-                                                                    <input type="text" class="form-control currency-display"
-                                                                            value="{{ number_format((float)$option->price, 0, ',', '.') }}">
-                                                                    <input type="hidden" class="currency-value"
-                                                                            name="menu_options[{{ $pIndex+1 }}][options][{{ $oIndex+1 }}][price]"
-                                                                            value="{{ (float)$option->price }}">
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-12">
-                                                                <div class="form-group">
-                                                                    <label>Description</label>
-                                                                    <textarea name="menu_options[{{ $pIndex+1 }}][options][{{ $oIndex+1 }}][description]" class="form-control" rows="2">{{ $option->description }}</textarea>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            @endforeach
-                                        </div>
-
-                                        <button type="button" class="btn btn-sm btn-success mt-2" onclick="addOption({{ $pIndex+1 }})">+ Add Option</button>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                    <!-- Existing Menu Options -->
-                    <h4 class="mb-3 d-flex justify-content-between align-items-center">
-                        Options
-                        <button type="button" class="btn btn-sm btn-primary" onclick="addMenuOption()">+ Add Menu Option</button>
-                    </h4>
-
+                  <hr>
+                  <div class="d-flex justify-content-end">
+                    <a href="{{ route('partner.products.index') }}" class="btn btn-light border mr-2">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                  </div>
                 </div>
+              </div>
 
-                <div class="card-footer text-right">
-                    <button type="submit" class="btn btn-success">Update Product</button>
+              <div class="card border-0 mt-3">
+                <div class="card-body small text-muted">
+                  <div class="d-flex justify-content-between">
+                    <span>Created</span>
+                    <strong>{{ optional($data->created_at)->format('d M Y, H:i') ?? '-' }}</strong>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span>Last Updated</span>
+                    <strong>{{ optional($data->updated_at)->format('d M Y, H:i') ?? '-' }}</strong>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span>Owner</span>
+                    <strong>{{ $data->owner->name ?? '-' }}</strong>
+                  </div>
                 </div>
+              </div>
+            </div>
 
-            </form>
-        </div>
+          </div>{{-- /row --}}
+        </div>{{-- /card-body --}}
+      </form>
     </div>
+  </div>
 </section>
 @endsection
 
 @section('scripts')
-{{-- @include('pages.partner.products.create') --}}
 <script>
-function removeExistingImage(button, filename) {
-    // Hapus elemen dari DOM
-    button.closest('div.position-relative').remove();
+  // Quantity product
+  (function () {
+    const qty = document.getElementById('quantity');
+    const dec = document.getElementById('btn-qty-dec');
+    const inc = document.getElementById('btn-qty-inc');
+    const max = document.getElementById('btn-qty-max');
+    const toInt = (v) => { const n = parseInt(v, 10); return isNaN(n) ? 0 : n; };
+    dec?.addEventListener('click', () => { if (qty.disabled) return; qty.value = Math.max(0, toInt(qty.value) - 1); });
+    inc?.addEventListener('click', () => { if (qty.disabled) return; qty.value = toInt(qty.value) + 1; });
+    max?.addEventListener('click', () => { if (qty.disabled) return; qty.value = 999999999; });
+  })();
 
-    // Bisa juga menambahkan array input untuk dikirim ke backend agar dihapus dari storage/database
-}
-</script>
-
-<script>
-    function decreaseQuantity() {
-        let input = document.getElementById("quantity");
-        let value = parseInt(input.value) || 0;
-        if (value > 0) {
-            input.value = value - 1;
-        }
-    }
-
-    function increaseQuantity() {
-        let input = document.getElementById("quantity");
-        let value = parseInt(input.value) || 0;
-        input.value = value + 1;
-    }
-
-    function maxQuantity(elementId) {
-        let input = document.getElementById(elementId);
-        let value = parseInt(input.value) || 0;
-        input.value = 999999999;
-    }
-</script>
-<script>
-    const priceInput = document.getElementById('price');
-
-    priceInput.addEventListener('input', function (e) {
-        // Hapus semua non-digit
-        let value = this.value.replace(/[^,\d]/g, '');
-        // Ubah ke format ribuan
-        this.value = new Intl.NumberFormat('id-ID').format(value);
+  // +/- untuk option quantity
+  (function () {
+    const toInt = (v) => { const n = parseInt(v, 10); return isNaN(n) ? 0 : n; };
+    document.addEventListener('click', function (e) {
+      if (e.target.closest('.btn-opt-dec')) {
+        const target = e.target.closest('.btn-opt-dec').dataset.target;
+        const input = document.querySelector(target);
+        if (!input || input.disabled) return;
+        input.value = Math.max(0, toInt(input.value) - 1);
+      }
+      if (e.target.closest('.btn-opt-inc')) {
+        const target = e.target.closest('.btn-opt-inc').dataset.target;
+        const input = document.querySelector(target);
+        if (!input || input.disabled) return;
+        input.value = toInt(input.value) + 1;
+      }
     });
-</script>
-<script>
-    const imageInput = document.getElementById('images');
-    const previewContainer = document.getElementById('image-preview');
+  })();
 
-    imageInput.addEventListener('change', function() {
-        previewContainer.innerHTML = "";
-
-        // Validasi maksimal 5 gambar
-        if (this.files.length > 5) {
-            alert("You can only upload up to 5 images.");
-            this.value = "";
-            return;
-        }
-
-        // Preview gambar
-        Array.from(this.files).forEach(file => {
-            if (file.type.startsWith("image/")) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.createElement("img");
-                    img.src = e.target.result;
-                    img.classList.add("img-thumbnail", "m-1");
-                    img.style.width = "120px";
-                    img.style.height = "120px";
-                    previewContainer.appendChild(img);
-                }
-                reader.readAsDataURL(file);
-            }
-        });
-    });
-</script>
-<script>
-// let menuIndex = 0;
-let menuIndex = {{ isset($data) && isset($data->parent_options) ? $data->parent_options->count() : 0 }};
-
-function addMenuOption() {
-    menuIndex++;
-    let container = document.getElementById('menu-options-container');
-
-    let html = `
-        <div class="col-12 menu-option mb-3" data-menu-index="${menuIndex}">
-            <input type="hidden" name="menu_options[${menuIndex}][parent_id]" value=null>
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between mb-2">
-                        <h5 class="card-title">Menu Option ${menuIndex}</h5>
-                        <button type="button" class="btn btn-sm btn-danger" onclick="removeMenuOption(this)">X</button>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>Menu Name</label>
-                                <input type="text" name="menu_options[${menuIndex}][name]" class="form-control" placeholder="Enter menu name" required>
-                            </div>
-                        </div>
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>Menu Description</label>
-                                <input name="menu_options[${menuIndex}][description]" class="form-control" rows="2"></input>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <label>Pilihan</label>
-                                <select
-                                    class="form-control provision-select"
-                                    data-index="${menuIndex}"
-                                    name="menu_options[${menuIndex}][provision]"
-                                    id="menu_options_${menuIndex}_provision"  <!-- hindari id dengan [] -->
-                                    required
-                                    >
-                                    <option value="">Select Provision</option>
-                                    <option value="OPTIONAL">Opsional</option>
-                                    <option value="OPTIONAL MAX">Opsional, Maksimal Pilih</option>
-                                    <option value="MAX">Wajib, Maksimal Pilih</option>
-                                    <option value="EXACT">Wajib, Pilih</option>
-                                    <option value="MIN">Wajib, Minimal Pilih</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-2" id="jumlah-options-${menuIndex}">
-                            <div class="form-group">
-                                <label>Jumlah</label>
-                                <div class="input-group">
-                                    <input type="number"
-                                        id="menu_options[${menuIndex}][provision_value]"
-                                        name="menu_options[${menuIndex}][provision_value]"
-                                        class="form-control" min="0" value="0"
-                                        required>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <div class="options-container" id="options-container-${menuIndex}"></div>
-
-                    <button type="button" class="btn btn-sm btn-success mt-2" onclick="addOption(${menuIndex})">
-                        + Add Option
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-    container.insertAdjacentHTML('beforeend', html);
-}
-
-function removeMenuOption(button) {
-    button.closest('.menu-option').remove();
-}
-
-
-function addOption(menuIndex) {
-    let container = document.getElementById('options-container-' + menuIndex);
-    let optionIndex = container.querySelectorAll('.option-item').length + 1;
-
-    let html = `
-        <div class="card mb-2 option-item">
-            <input type="hidden" name="menu_options[${menuIndex}][options][${optionIndex}][option_id]" value=null>
-            <div class="card-body">
-                <div class="d-flex justify-content-between mb-2">
-                    <h6>Option ${optionIndex}</h6>
-                    <button type="button" class="btn btn-sm btn-danger" onclick="removeOption(this)">Remove</button>
-                </div>
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label>Option Name</label>
-                            <input type="text" name="menu_options[${menuIndex}][options][${optionIndex}][name]" class="form-control" required>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label>Quantity</label>
-                            <div class="input-group">
-                                <input type="number"
-                                    id="menu_options[${menuIndex}][options][${optionIndex}][quantity]"
-                                    name="menu_options[${menuIndex}][options][${optionIndex}][quantity]"
-                                    class="form-control" min="0" value="0"
-                                    required>
-                                <button type="button"
-                                    class="btn btn-outline-secondary ml-1"
-                                    onclick="maxQuantity('menu_options[${menuIndex}][options][${optionIndex}][quantity]')">
-                                    Max
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label>Price</label>
-                            <input type="text" class="form-control currency-display" value="">
-                            <input type="hidden"
-                                    name="menu_options[${menuIndex}][options][${optionIndex}][price]"
-                                    class="currency-value" value="0">
-                        </div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label>Description</label>
-                            <textarea name="menu_options[${menuIndex}][options][${optionIndex}][description]" class="form-control" rows="2"></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-
-    container.insertAdjacentHTML('beforeend', html);
-}
-
-function removeOption(button) {
-    button.closest('.option-item').remove();
-}
-
-function previewImage(event, menuIndex, optionIndex) {
-    let file = event.target.files[0];
-    let preview = document.getElementById(`preview-${menuIndex}-${optionIndex}`);
-    if (file) {
-        let reader = new FileReader();
-        reader.onload = function(e) {
-            preview.src = e.target.result;
-            preview.style.display = 'block';
-        }
-        reader.readAsDataURL(file);
-    } else {
-        preview.src = "";
-        preview.style.display = "none";
+  // Toggle Always available: product & options
+  (function () {
+    function toggleQty(wrapperEl, inputEl, checked) {
+      if (!wrapperEl || !inputEl) return;
+      if (checked) {
+        if (!inputEl.dataset.prev) inputEl.dataset.prev = inputEl.value || '0';
+        wrapperEl.classList.add('d-none');
+        inputEl.disabled = true;
+      } else {
+        wrapperEl.classList.remove('d-none');
+        inputEl.disabled = false;
+        if (inputEl.dataset.prev) inputEl.value = inputEl.dataset.prev;
+      }
     }
-}
+
+    // Product
+    const aaProd  = document.getElementById('aa_product');
+    const prodWrap = document.getElementById('product_qty_group');
+    const prodQty  = document.getElementById('quantity');
+    function syncProd(){ toggleQty(prodWrap, prodQty, aaProd?.checked); }
+    aaProd?.addEventListener('change', syncProd);
+    syncProd(); // initial
+
+    // Options
+    function syncOneOpt(tg) {
+      const qtySel = tg.getAttribute('data-qty');
+      const wrapSel = tg.getAttribute('data-wrap');
+      const qty = document.querySelector(qtySel);
+      const wrap = document.querySelector(wrapSel);
+      toggleQty(wrap, qty, tg.checked);
+    }
+    document.querySelectorAll('.opt-aa').forEach(tg => {
+      tg.addEventListener('change', () => syncOneOpt(tg));
+      syncOneOpt(tg); // initial
+    });
+  })();
 </script>
-<script>
-function toggleJumlahByIndex(idx, provisionVal) {
-  const box = document.getElementById(`jumlah-options-${idx}`);
-  if (!box) return;
-  const input = box.querySelector('input[name$="[provision_value]"]');
-  const hide = (provisionVal === 'OPTIONAL');
-
-  if (hide) {
-    box.classList.add('d-none');       // sembunyikan
-    if (input) { input.disabled = true; input.required = false; }
-  } else {
-    box.classList.remove('d-none');    // tampilkan
-    if (input) { input.disabled = false; input.required = true; }
-  }
-}
-
-// init untuk yang dirender Blade
-document.addEventListener('DOMContentLoaded', function () {
-  document.querySelectorAll('.provision-select').forEach(sel => {
-    toggleJumlahByIndex(sel.dataset.index, sel.value || '');
-  });
-});
-
-// update saat select berubah
-document.addEventListener('change', function (e) {
-  if (!e.target.matches('.provision-select')) return;
-  toggleJumlahByIndex(e.target.dataset.index, e.target.value || '');
-});
-</script>
-
-<script>
-// --- helper ---
-function unformatRupiah(str) {
-  // ambil hanya digit
-  const digits = String(str || '').replace(/\D+/g, '');
-  return digits ? String(parseInt(digits, 10)) : '';
-}
-function formatRupiahFromDigits(digits) {
-  if (!digits) return '';
-  const n = parseInt(digits, 10);
-  return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0 }).format(n);
-}
-function findHidden(el) {
-  // hidden di sibling berikutnya atau dalam form-group yang sama
-  const next = el.nextElementSibling;
-  if (next && next.classList && next.classList.contains('currency-value')) return next;
-  return el.closest('.form-group')?.querySelector('.currency-value') || null;
-}
-function syncDisplayAndHidden(displayEl) {
-  const hidden = findHidden(displayEl);
-  const raw = unformatRupiah(displayEl.value);
-  if (hidden) hidden.value = raw || '0';
-  displayEl.value = formatRupiahFromDigits(raw);
-}
-
-// --- init untuk semua currency-display yang sudah ada di DOM ---
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.currency-display').forEach((el) => {
-    // jika ada hidden, ambil nilai hidden sebagai sumber kebenaran
-    const hidden = findHidden(el);
-    const digits = hidden ? unformatRupiah(hidden.value) : unformatRupiah(el.value);
-    if (hidden) hidden.value = digits || '0';
-    el.value = formatRupiahFromDigits(digits);
-  });
-});
-
-// --- event delegation: tangkap input apapun dengan class .currency-display ---
-document.addEventListener('input', (e) => {
-  if (!e.target.classList?.contains('currency-display')) return;
-  // simpan posisi caret kasar (opsional: sederhana, caret pindah ke akhir saat format)
-  syncDisplayAndHidden(e.target);
-});
-
-// --- sinkron terakhir saat submit form (jaga-jaga) ---
-document.addEventListener('submit', (e) => {
-  const form = e.target.closest('form');
-  if (!form) return;
-  form.querySelectorAll('.currency-display').forEach(syncDisplayAndHidden);
-});
-</script>
-
-
 @endsection

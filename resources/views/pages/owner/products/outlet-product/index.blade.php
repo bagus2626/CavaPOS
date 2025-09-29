@@ -92,7 +92,13 @@
                                         <td>{{ $no++ }}</td>
                                         <td>{{ $p->name ?? $p->product_name }}</td>
                                         <td>{{ $p->category->category_name ?? '-' }}</td>
-                                        <td>{{ $p->quantity ?? 0 }}</td>
+                                        <td>
+                                          @if($p->always_available_flag === 1)
+                                            <span class="text-muted">Always Available</span>
+                                          @else
+                                            {{ $p->quantity ?? 0 }}
+                                          @endif
+                                        </td>
                                         <td>
                                             @php
                                                 $active = (int)($p->is_active ?? 1);

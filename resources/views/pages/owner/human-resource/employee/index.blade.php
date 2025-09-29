@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if(visibleCount === 0) {
                 const tr = document.createElement('tr');
                 tr.classList.add('empty-row');
-                tr.innerHTML = `<td colspan="5" class="text-center">Data tidak ditemukan</td>`;
+                tr.innerHTML = `<td colspan="9" class="text-center">Data tidak ditemukan</td>`;
                 tableBody.appendChild(tr);
             }
         });

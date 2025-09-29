@@ -37,6 +37,13 @@
 
                 {{-- Deskripsi --}}
                 <p class="fs-5"><strong>Description:</strong> {{$data->description}}</p>
+                <p class="fs-5"><strong>Jumlah:</strong>
+                    @if($data->always_available_flag === 1)
+                        <span class="badge bg-success">Always Available</span>
+                    @else
+                        {{$data->quantity}}
+                    @endif
+                </p>
 
                 {{-- Parent Options --}}
                 @foreach($data->parent_options as $parentOption)
@@ -60,7 +67,13 @@
                                             @foreach($parentOption->options as $option)
                                                 <tr>
                                                     <td>{{ $option->name }}</td>
-                                                    <td>{{ $option->quantity }}</td>
+                                                    <td>
+                                                        @if($option->always_available_flag === 1)
+                                                            <span class="badge bg-success">Always Available</span>
+                                                        @else
+                                                            {{ $option->quantity }}
+                                                        @endif
+                                                    </td>
                                                 </tr>
                                             @endforeach
                                         </tbody>

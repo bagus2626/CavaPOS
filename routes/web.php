@@ -163,7 +163,7 @@ Route::middleware('setlocale')->group(function () {
         Route::prefix('user-management')->name('user-management.')->group(function () {
             Route::resource('employees', PartnerEmployeeController::class);
         });
-        Route::resource('categories', PartnerCategoryController::class);
+        // Route::resource('categories', PartnerCategoryController::class);
         // Route::resource('specifications', SpecificationController::class);
         //        Route::resource('portfolios', PortfolioController::class);
     });

@@ -29,7 +29,7 @@ class CustomerReceiptMail extends Mailable
 
     public function build()
     {
-        return $this->subject('Struk ' . $this->order->booking_order_code)
+        return $this->subject('Struk ' . $this->partner->name)
             ->markdown('emails.customer.receipt', [   // <- gunakan template kamu sendiri (bukan stub default)
                 'order'    => $this->order,
                 'partner'  => $this->partner,

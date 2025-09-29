@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+
 
 class PartnerProductController extends Controller
 {
@@ -65,7 +67,7 @@ class PartnerProductController extends Controller
             $productCode = 'PRD-' . Auth::id() . '-' . strtoupper(uniqid());
 
             $storedImages = [];
-            if($request->hasFile('images')) {
+            if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
                     $path = $image->storeAs('uploads/products', $filename, 'public');
@@ -172,7 +174,7 @@ class PartnerProductController extends Controller
     public function edit(PartnerProduct $product)
     {
         $categories = Category::where('partner_id', Auth::id())->get();
-        $data = PartnerProduct::with('parent_options.options', 'category')
+        $data = PartnerProduct::with('parent_options.options', 'category', 'promotion')
             ->where('partner_id', Auth::id())
             ->where('id', $product->id)
             ->first();
@@ -184,196 +186,93 @@ class PartnerProductController extends Controller
     {
         DB::beginTransaction();
         try {
+            // Ambil produk beserta options yang dimiliki partner ini
             $product = PartnerProduct::with(['parent_options.options'])->findOrFail($id);
-            // dd($request->all());
-            // Validasi
-            $validated = $request->validate([
-                'name'             => 'required|string|max:255',
-                'product_category' => 'required|exists:categories,id',
-                'quantity'         => 'required',
-                'price'            => 'required',
-                'description'      => 'nullable|string',
-                'images'           => 'nullable|array|max:5',
-                'images.*'         => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-                'existing_images'  => 'nullable|array',
-                'menu_options'     => 'nullable|array',
-            ]);
 
-            // Konversi harga ke integer
-            $price = (int) str_replace('.', '', $validated['price']);
+            // ===== Validasi =====
+            $rules = [
+                // Produk
+                'always_available' => ['nullable', 'in:0,1'],
+                'quantity'         => ['nullable', 'integer', 'min:0'], // kewajiban dicek di after()
 
-            // Handle existing images
-            $storedImages = [];
-            $existingFilenames = $request->existing_images ?? [];
+                // Opsi
+                'options'                  => ['nullable', 'array'],
+                'options.*.always_available' => ['nullable', 'in:0,1'],
+                'options.*.quantity'         => ['nullable', 'integer', 'min:0'], // kewajiban dicek di after()
+            ];
 
-            // Hapus gambar yang sudah dihapus
-            foreach ($product->pictures as $pic) {
-                if (!in_array($pic['filename'], $existingFilenames)) {
-                    if (Storage::disk('public')->exists('uploads/products/' . $pic['filename'])) {
-                        Storage::disk('public')->delete('uploads/products/' . $pic['filename']);
-                    }
-                } else {
-                    $storedImages[] = $pic;
-                }
-            }
+            $validator = Validator::make($request->all(), $rules);
 
-            // Upload gambar baru
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-                    $path = $image->storeAs('uploads/products', $filename, 'public');
-
-                    $img = Image::make(storage_path('app/public/' . $path));
-                    $img->resize(800, null, function ($constraint) {
-                        $constraint->aspectRatio();
-                        $constraint->upsize();
-                    })->save();
-
-                    $storedImages[] = [
-                        'path'     => 'storage/' . $path,
-                        'filename' => $filename,
-                        'mime'     => $image->getClientMimeType(),
-                        'size'     => $image->getSize(),
-                    ];
-                }
-            }
-
-            // Update product utama
-            $product->update([
-                'name'        => $request->name,
-                'category_id' => $request->product_category,
-                'quantity'    => $request->quantity,
-                'price'       => $price,
-                'description' => $request->description,
-                'pictures'    => $storedImages,
-            ]);
-
-            // Hapus semua parent & option yang sudah dihapus
-            // $existingParentIds = $request->has('menu_options')
-            //     ? collect($request->menu_options)->pluck('parent_id')->filter()->map(fn($id) => (int) $id)->toArray()
-            //     : [];
-            // Parent IDs (lebih aman dari versi awal)
-            $existingParentIds = collect($request->input('menu_options', []))
-                ->pluck('parent_id')
-                ->filter(fn($id) => is_numeric($id))   // buang "", "null", null, dsb.
-                ->map(fn($id) => (int) $id)
-                ->unique()
-                ->values()
-                ->all();
-
-            // Option IDs
-            $existingOptionIds = collect($request->input('menu_options', []))
-                ->flatMap(function ($parent) {
-                    return collect($parent['options'] ?? [])
-                        ->pluck('option_id');
-                })
-                ->filter(fn($id) => is_numeric($id))   // antisipasi "null" (string) dari form
-                ->map(fn($id) => (int) $id)
-                ->unique()
-                ->values()
-                ->all();
-
-
-            foreach ($product->parent_options as $index => $parentOption) {
-                if (!in_array($parentOption->id, $existingParentIds)) {
-                    // Hapus opsi terkait
-                    $parentOption->options()->delete();
-                    $parentOption->delete();
-                }
-                foreach ($parentOption->options as $index => $option) {
-                    if (!in_array($option->id, $existingOptionIds)) {
-                        $option->delete();
+            // Required-unless untuk product & setiap option
+            $validator->after(function ($v) use ($request) {
+                // Produk
+                $prodAA = (int)$request->input('always_available', 0) === 1;
+                if (!$prodAA) {
+                    $q = $request->input('quantity', null);
+                    if ($q === null || $q === '') {
+                        $v->errors()->add('quantity', 'Quantity is required unless product is set to always available.');
                     }
                 }
-            }
 
-
-            // Update atau create parent & option
-            if ($request->has('menu_options')) {
-                foreach ($request->menu_options as $parentIndex => $parentOption) {
-                    $parent = $parentOption['parent_id'] ? (int) $parentOption['parent_id'] : null;
-
-                    if ($parent) {
-                        // Update parent
-                        $parentModel = PartnerProductParentOption::findOrFail($parent);
-                        $parentModel->update([
-                            'name'              => $parentOption['name'],
-                            'description'       => $parentOption['description'] ?? null,
-                            'provision'         => $parentOption['provision'],
-                            'provision_value'   => $parentOption['provision_value'] ?? null
-                        ]);
-                    } else {
-                        // Create new parent
-                        $parentModel = PartnerProductParentOption::create([
-                            'partner_product_id' => $product->id,
-                            'name'               => $parentOption['name'],
-                            'description'        => $parentOption['description'] ?? null,
-                            'provision'          => $parentOption['provision'],
-                            'provision_value'    => $parentOption['provision_value'] ?? null
-                        ]);
-                    }
-
-                    // Update/Create options
-                    if (isset($parentOption['options']) && is_array($parentOption['options'])) {
-                        foreach ($parentOption['options'] as $optionIndex => $option) {
-                            // $optionId = $option['option_id'] ?? null;
-                            $optionId = $option['option_id'] ? (int) $option['option_id'] : null;
-                            $optionPrice = (int) str_replace('.', '', $option['price']);
-
-                            $optionImages = null;
-                            if (isset($option['image']) && $option['image'] instanceof \Illuminate\Http\UploadedFile) {
-                                $filename = time() . '_' . uniqid() . '.' . $option['image']->getClientOriginalExtension();
-                                $path = $option['image']->storeAs('uploads/product_options', $filename, 'public');
-
-                                $img = Image::make(storage_path('app/public/' . $path));
-                                $img->resize(800, null, function ($constraint) {
-                                    $constraint->aspectRatio();
-                                    $constraint->upsize();
-                                })->save();
-
-                                $optionImages = [[
-                                    'path'     => 'storage/' . $path,
-                                    'filename' => $filename,
-                                    'mime'     => $option['image']->getClientMimeType(),
-                                    'size'     => $option['image']->getSize(),
-                                ]];
-                            }
-
-                            if ($optionId) {
-                                // Update option
-                                $optionModel = PartnerProductOption::find($optionId);
-                                $optionModel->update([
-                                    'name'        => $option['name'],
-                                    'quantity'    => $option['quantity'],
-                                    'price'       => $optionPrice,
-                                    'description' => $option['description'] ?? null,
-                                    'pictures'    => $optionImages ?? $optionModel->pictures,
-                                ]);
-                            } else {
-                                // Create new option
-                                PartnerProductOption::create([
-                                    'partner_product_id' => $product->id,
-                                    'partner_product_parent_option_id' => $parentModel->id,
-                                    'name'        => $option['name'],
-                                    'quantity'    => $option['quantity'],
-                                    'price'       => $optionPrice,
-                                    'description' => $option['description'] ?? null,
-                                    'pictures'    => $optionImages,
-                                ]);
-                            }
+                // Opsi
+                foreach ((array)$request->input('options', []) as $oid => $opt) {
+                    $oa = (int)($opt['always_available'] ?? 0) === 1;
+                    if (!$oa) {
+                        if (!array_key_exists('quantity', $opt) || $opt['quantity'] === '' || $opt['quantity'] === null) {
+                            $v->errors()->add("options.$oid.quantity", 'Quantity is required unless this option is set to always available.');
                         }
                     }
+                }
+            });
+
+            $validated = $validator->validate();
+
+            // ===== Normalisasi & Update Produk =====
+            $productAlways = (int)$request->input('always_available', 0) === 1;
+            $newQuantity   = $productAlways ? 0 : (int)($validated['quantity'] ?? 0);
+
+            // Hanya update stok; kolom lain dibiarkan
+            $product->update([
+                'quantity' => $newQuantity,
+                // Jika punya kolom always_available_flag, kamu bisa aktifkan baris ini:
+                'always_available_flag' => $productAlways ? 1 : 0,
+            ]);
+
+            // ===== Update tiap Option (jika ada input options) =====
+            $optionInputs = $request->input('options', []);
+            if (!empty($optionInputs)) {
+                // Ambil hanya option milik produk ini
+                $optionIds = array_map('intval', array_keys($optionInputs));
+
+                $options = PartnerProductOption::whereIn('id', $optionIds)
+                    ->where('partner_product_id', $product->id)
+                    ->get()
+                    ->keyBy('id');
+
+                foreach ($optionInputs as $optId => $payload) {
+                    $optId = (int)$optId;
+                    if (!isset($options[$optId])) continue;
+
+                    $optAlways = (int)($payload['always_available'] ?? 0) === 1;
+                    $optQty    = $optAlways ? 0 : (int)($payload['quantity'] ?? 0);
+
+                    $options[$optId]->update([
+                        'quantity' => $optQty,
+                        // Jika punya kolom always_available_flag, aktifkan baris ini:
+                        'always_available_flag' => $optAlways ? 1 : 0,
+                    ]);
                 }
             }
 
             DB::commit();
-
-            return redirect()->route('partner.products.index')->with('success', 'Product updated successfully!');
-        } catch (\Exception $e) {
+            return redirect()->route('partner.products.index')->with('success', 'Stock updated successfully!');
+        } catch (\Throwable $e) {
             DB::rollBack();
             return redirect()->back()->withInput()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
+
+
 
 
     public function destroy(PartnerProduct $product)
@@ -387,5 +286,4 @@ class PartnerProductController extends Controller
 
         return redirect()->route('partner.products.index')->with('success', 'Product deleted successfully!');
     }
-
 }

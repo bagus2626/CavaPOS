@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\DB;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Validator;
+
 
 class OwnerOutletProductController extends Controller
 {
@@ -102,35 +104,6 @@ class OwnerOutletProductController extends Controller
         return response()->json($list);
     }
 
-    // public function getMasterProducts(Request $request)
-    // {
-    //     // dd($request->all());
-    //     $request->validate([
-    //         'category_id' => 'required',
-    //         'outlet_id'   => 'required|integer|exists:users,id',
-    //     ]);
-
-    //     // Ambil semua master_product_id yang sudah ada di outlet
-    //     $existing_outlet_products = PartnerProduct::where('partner_id', $request->outlet_id)
-    //         ->pluck('master_product_id') // pluck saja, tidak perlu get()
-    //         ->toArray();
-
-    //     $ownerId = Auth::id();
-
-    //     $list = MasterProduct::query()
-    //         ->where('owner_id', $ownerId)
-    //         ->when($request->category_id !== 'all', function ($query) use ($request) {
-    //             $query->where('category_id', $request->category_id);
-    //         })
-    //         ->whereNotIn('id', $existing_outlet_products)
-    //         ->select('id', 'name', 'pictures')
-    //         ->orderBy('name')
-    //         ->get();
-
-
-    //     return response()->json($list);
-    // }
-
     public function store(Request $request)
     {
         // dd($request->all());
@@ -142,12 +115,14 @@ class OwnerOutletProductController extends Controller
             'category_id'         => 'required',         // karena bisa 'all' dari modal
             'master_product_ids'  => 'required|array|min:1',
             'master_product_ids.*' => 'integer|exists:master_products,id',
-            'quantity'            => 'nullable|integer|min:0',
+            'always_available'     => 'nullable|in:1',
+            'quantity'            => 'nullable|required_unless:always_available,1|integer|min:0',
             'is_active'           => 'required|in:0,1',
         ]);
 
         $outletId   = (int) $validated['outlet_id'];
         $quantity   = (int) ($validated['quantity'] ?? 0);
+        $alwaysAvailable = $request->has('always_available') && $request->input('always_available') == '1';
         $isActive   = (int) $validated['is_active'];
         $ids        = collect($validated['master_product_ids'])->map(fn($id) => (int)$id)->unique()->values()->all();
 
@@ -190,6 +165,7 @@ class OwnerOutletProductController extends Controller
                     'category_id'       => $master->category_id,
                     'price'             => $master->price,
                     'quantity'          => $quantity,
+                    'always_available_flag' => $alwaysAvailable ? 1 : 0,
                     'pictures'          => $master->pictures,
                     'description'       => $master->description,
                     'promo_id'          => $master->promo_id ?? null,
@@ -213,7 +189,8 @@ class OwnerOutletProductController extends Controller
                             'partner_product_id'                 => $partnerProduct->id,
                             'partner_product_parent_option_id'   => $pParent->id,
                             'name'        => $mOpt->name,
-                            'quantity'    => $mOpt->quantity, // kalau stok outlet beda kebijakan, ubah di sini
+                            'quantity'    => $quantity, // kalau stok outlet beda kebijakan, ubah di sini
+                            'always_available_flag' => $alwaysAvailable ? 1 : 0,
                             'price'       => $mOpt->price,
                             'pictures'    => $mOpt->pictures ?? null,
                             'description' => $mOpt->description,
@@ -294,48 +271,74 @@ class OwnerOutletProductController extends Controller
             // Ambil produk + relasi
             $product = PartnerProduct::with(['parent_options.options'])->findOrFail($id);
 
-            // Cek apakah produk ini punya option (pakai flatMap eksplisit biar aman)
+            // Cek apakah produk punya option
             $hasOptions = $product->parent_options
-                ->flatMap(function ($parent) {
-                    return $parent->options ?? collect();
-                })
+                ->flatMap(fn($parent) => $parent->options ?? collect())
                 ->isNotEmpty();
 
-            // Rules dasar
+            // ====== RULES ======
             $rules = [
-                'quantity'      => ['required', 'integer', 'min:0'],
-                'is_active'     => ['required', 'in:0,1'],
-                'promotion_id'  => ['nullable', 'integer', 'exists:promotions,id'],
-                // options hanya wajib bila produk punya option
-                'options'       => [$hasOptions ? 'required' : 'nullable', 'array'],
+                // product
+                'always_available' => ['nullable', 'in:0,1'],
+                'quantity'         => ['nullable', 'integer', 'min:0', 'required_unless:always_available,1'],
+                'is_active'        => ['required', 'in:0,1'],
+                'promotion_id'     => ['nullable', 'integer', 'exists:promotions,id'],
+
+                // options
+                'options'                 => [$hasOptions ? 'required' : 'sometimes', 'array'],
+                'options.*.always_available' => ['nullable', 'in:0,1'],
+                'options.*.quantity'         => ['nullable', 'integer', 'min:0'], // kewajiban dicek di after()
             ];
 
-            // Validasi quantity per option (hanya jika ada options)
-            if ($hasOptions) {
-                $rules['options.*.quantity'] = ['required', 'integer', 'min:0'];
-            } else {
-                // Jika tidak punya option, abaikan bila ada kiriman options
-                $rules['options.*.quantity'] = ['sometimes', 'integer', 'min:0'];
-            }
+            // Validator manual agar bisa pakai after() untuk validasi kondisional per option
+            $validator = Validator::make($request->all(), $rules);
 
-            $validated = $request->validate($rules);
+            $validator->after(function ($v) use ($request, $hasOptions) {
+                // Product: kalau unlimited, abaikan quantity; kalau tidak, pastikan quantity ada
+                $prodAA = (int)$request->input('always_available', 0) === 1;
+                if (!$prodAA) {
+                    $q = $request->input('quantity', null);
+                    if ($q === null || $q === '') {
+                        $v->errors()->add('quantity', 'Quantity is required unless product is set to always available.');
+                    }
+                }
 
-            // Normalisasi nilai
-            $newQuantity  = (int) ($validated['quantity'] ?? 0);
-            $newIsActive  = (int) ($validated['is_active'] ?? 0);
-            $promotionId  = $request->filled('promotion_id') ? (int) $validated['promotion_id'] : null;
+                // Options: untuk setiap option, jika tidak unlimited → quantity wajib
+                if ($hasOptions) {
+                    foreach ((array)$request->input('options', []) as $oid => $opt) {
+                        $oa = (int)($opt['always_available'] ?? 0) === 1;
+                        if (!$oa) {
+                            if (!array_key_exists('quantity', $opt) || $opt['quantity'] === '' || $opt['quantity'] === null) {
+                                $v->errors()->add("options.$oid.quantity", 'Quantity is required unless this option is set to always available.');
+                            }
+                        }
+                    }
+                }
+            });
 
-            // Update field utama produk (termasuk promo)
-            $product->update([
-                'quantity'  => $newQuantity,
-                'is_active' => $newIsActive,
-                'promo_id'  => $promotionId,   // <- tambahkan ini
-            ]);
+            $validated = $validator->validate();
 
-            // === Update quantity per option (jika ada input options) ===
-            $optionInputs = $validated['options'] ?? []; // bisa kosong
+            // ====== NORMALISASI NILAI PRODUK ======
+            $productAlways = (int)($request->input('always_available', 0)) === 1;
+            $newIsActive   = (int) ($validated['is_active'] ?? 0);
+            $promotionId   = $request->filled('promotion_id') ? (int) $validated['promotion_id'] : null;
+
+            // Jika unlimited → simpan quantity = null, set always_available_flag = 1
+            $newQuantity = $productAlways ? 0 : (int) ($validated['quantity'] ?? 0);
+
+            // Update field utama produk (set satu-satu agar aman dari mass assignment)
+            $product->is_active = $newIsActive;
+            $product->promo_id  = $promotionId;
+            $product->quantity  = $newQuantity;
+            // Hanya set jika kolom tersedia di DB (hapus baris ini jika kolom belum ada)
+            $product->always_available_flag = $productAlways ? 1 : 0;
+
+            $product->save();
+
+            // ====== UPDATE QUANTITY PER OPTION (jika ada input options) ======
+            $optionInputs = $request->input('options', []); // bisa kosong walau $hasOptions true
             if (!empty($optionInputs)) {
-                // Struktur diasumsikan: [ optionId => ['quantity' => ...], ... ]
+                // keys = optionId
                 $optionIds = array_map('intval', array_keys($optionInputs));
 
                 // Pastikan hanya option milik produk ini yang diupdate
@@ -343,12 +346,23 @@ class OwnerOutletProductController extends Controller
                     ->whereHas('parent', function ($q) use ($product) {
                         $q->where('partner_product_id', $product->id);
                     })
-                    ->get();
+                    ->get()
+                    ->keyBy('id');
 
-                foreach ($options as $opt) {
-                    $newQty = (int) ($optionInputs[$opt->id]['quantity'] ?? 0);
-                    // Gunakan fill+save agar event model tetap terpanggil (kalau ada)
-                    $opt->fill(['quantity' => $newQty])->save();
+                foreach ($optionInputs as $optId => $payload) {
+                    $optId = (int)$optId;
+                    if (!$options->has($optId)) continue;
+
+                    $optModel = $options[$optId];
+
+                    $optAlways = (int)($payload['always_available'] ?? 0) === 1;
+                    $optQty    = $optAlways ? 0 : (int)($payload['quantity'] ?? 0);
+
+                    $optModel->quantity = $optQty;
+                    // Hanya set jika kolom tersedia (hapus jika tidak punya kolom ini)
+                    $optModel->always_available_flag = $optAlways ? 1 : 0;
+
+                    $optModel->save();
                 }
             }
 
@@ -374,18 +388,24 @@ class OwnerOutletProductController extends Controller
     //         // Ambil produk + relasi
     //         $product = PartnerProduct::with(['parent_options.options'])->findOrFail($id);
 
-    //         // Cek apakah produk ini punya option
-    //         $hasOptions = $product->parent_options->flatMap->options->isNotEmpty();
+    //         // Cek apakah produk ini punya option (pakai flatMap eksplisit biar aman)
+    //         $hasOptions = $product->parent_options
+    //             ->flatMap(function ($parent) {
+    //                 return $parent->options ?? collect();
+    //             })
+    //             ->isNotEmpty();
 
     //         // Rules dasar
     //         $rules = [
-    //             'quantity'  => ['required', 'integer', 'min:0'],
-    //             'is_active' => ['required', 'in:0,1'],
+    //             'always_available' => 'nullable|in:0,1',
+    //             'quantity' => 'nullable|required_unless:always_available,1|integer|min:0',
+    //             'is_active'     => ['required', 'in:0,1'],
+    //             'promotion_id'  => ['nullable', 'integer', 'exists:promotions,id'],
     //             // options hanya wajib bila produk punya option
-    //             'options'   => [$hasOptions ? 'required' : 'nullable', 'array'],
+    //             'options'       => [$hasOptions ? 'required' : 'nullable', 'array'],
     //         ];
 
-    //         // Validasi quantity per option hanya bila memang ada options
+    //         // Validasi quantity per option (hanya jika ada options)
     //         if ($hasOptions) {
     //             $rules['options.*.quantity'] = ['required', 'integer', 'min:0'];
     //         } else {
@@ -395,10 +415,16 @@ class OwnerOutletProductController extends Controller
 
     //         $validated = $request->validate($rules);
 
-    //         // Update field utama produk
+    //         // Normalisasi nilai
+    //         $newQuantity  = (int) ($validated['quantity'] ?? 0);
+    //         $newIsActive  = (int) ($validated['is_active'] ?? 0);
+    //         $promotionId  = $request->filled('promotion_id') ? (int) $validated['promotion_id'] : null;
+
+    //         // Update field utama produk (termasuk promo)
     //         $product->update([
-    //             'quantity'  => (int) $validated['quantity'],
-    //             'is_active' => (int) $validated['is_active'],
+    //             'quantity'  => $newQuantity,
+    //             'is_active' => $newIsActive,
+    //             'promo_id'  => $promotionId,   // <- tambahkan ini
     //         ]);
 
     //         // === Update quantity per option (jika ada input options) ===
@@ -416,7 +442,8 @@ class OwnerOutletProductController extends Controller
 
     //             foreach ($options as $opt) {
     //                 $newQty = (int) ($optionInputs[$opt->id]['quantity'] ?? 0);
-    //                 $opt->update(['quantity' => $newQty]);
+    //                 // Gunakan fill+save agar event model tetap terpanggil (kalau ada)
+    //                 $opt->fill(['quantity' => $newQty])->save();
     //             }
     //         }
 

@@ -283,13 +283,13 @@
                     </li>
 
                     {{-- Seat Layout --}}
-                    <li class="nav-item">
+                    {{-- <li class="nav-item">
                       <a href="{{ route('partner.products.index') }}"
                         class="nav-link {{ Route::is('partner.products.*') ? 'active' : '' }}">
                         <i class="far fa-dot-circle nav-icon"></i>
                         <p>Seat Layout</p>
                       </a>
-                    </li>
+                    </li> --}}
                   </ul>
                 </li>
 
@@ -318,13 +318,13 @@
                     <p>All Products</p>
                   </a>
                 </li>
-                <li class="nav-item">
+                {{-- <li class="nav-item">
                   <a href="{{ route('partner.categories.index') }}"
                     class="nav-link {{ Route::is('partner.categories.*') ? 'active' : '' }}">
                     <i class="far fa-circle nav-icon"></i>
                     <p>Categories</p>
                   </a>
-                </li>
+                </li> --}}
 
               </ul>
             </li>

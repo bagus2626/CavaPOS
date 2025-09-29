@@ -104,7 +104,7 @@
             <div
               @class([
                 'menu-item bg-white flex flex-row transition hover:shadow-lg px-4 border-b border-gray-200',
-                'grayscale' => $product->quantity < 1,
+                'grayscale' => $product->quantity < 1 && $product->always_available_flag === 0,
               ])
               data-category="{{ $product->category_id }}"
             >
@@ -136,7 +136,7 @@
                   <button class="minus-btn w-9 h-9 flex items-center justify-center border border-choco rounded-lg font-bold text-choco hover:bg-gray-100 hidden"
                           data-id="{{ $product->id }}">-</button>
                   <span class="qty text-lg font-semibold text-gray-800 hidden" id="qty-{{ $product->id }}">0</span>
-                  @if ($product->quantity < 1)
+                  @if ($product->quantity < 1 && $product->always_available_flag === 0)
                     <p class="text-gray-700">Habis</p>
                   @else
                     <button class="plus-btn w-9 h-9 flex items-center justify-center border rounded-lg font-bold text-white bg-choco hover:bg-soft-choco"
@@ -538,9 +538,10 @@ window.initPembelianTab = function initPembelianTab() {
         priceSpan.className = 'ml-auto text-sm font-medium';
 
         const qty = Number(opt.quantity) || 0;
+        const alwaysAvailable = Boolean(opt.always_available_flag);
         const priceNum = Number(opt.price) || 0;
 
-        if (qty < 1) {
+        if (qty < 1 && !alwaysAvailable) {
           priceSpan.textContent = 'Habis'; priceSpan.classList.add('text-red-600');
           checkbox.disabled = true; label.classList.add('line-through','opacity-60','cursor-not-allowed');
           const val = parseInt(checkbox.value,10);
@@ -981,6 +982,8 @@ window.initPembelianTab = function initPembelianTab() {
         timer:1400,
         showConfirmButton:false
         });
+        
+        window.location.reload();
 
 
     } catch (err) {

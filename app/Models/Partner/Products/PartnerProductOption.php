@@ -16,6 +16,7 @@ class PartnerProductOption extends Model
         'partner_product_parent_option_id',
         'name',
         'quantity',
+        'always_available_flag',
         'price',
         'pictures',
         'description',
