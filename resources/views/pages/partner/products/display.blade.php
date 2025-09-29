@@ -25,7 +25,13 @@
                             {{ $product->parent_options->pluck('name')->implode(', ') }}
                         @endif
                     </td>
-                    <td>{{ $product->quantity}}</td>
+                    <td>
+                        @if($product->always_available_flag === 1)
+                            <span class="badge bg-success">Always Available</span>
+                        @else
+                            {{ $product->quantity}}
+                        @endif
+                    </td>
                     <td>Rp. {{ number_format($product->price)}}</td>
                     <td>
                         @if(!empty($product->pictures) && is_array($product->pictures))

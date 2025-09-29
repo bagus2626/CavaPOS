@@ -22,6 +22,7 @@ class PartnerProduct extends Model
         'category_id',
         'name',
         'quantity',
+        'always_available_flag',
         'price',
         'pictures',
         'description',

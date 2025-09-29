@@ -206,6 +206,9 @@ class CashierTransactionController extends Controller
                     'quantity'  => $qty,
                     'customer_note' => $note,
                 ]);
+                if ($product->always_available_flag === 0) {
+                    $product->decrement('quantity', $qty);
+                }
 
                 foreach ($options as $opt) {
                     OrderDetailOption::create([
@@ -215,6 +218,9 @@ class CashierTransactionController extends Controller
                         'option_id' => $opt->id,
                         'price' => $opt->price
                     ]);
+                    if ($opt->always_available_flag === 0) {
+                        $opt->decrement('quantity', 1); // kurangi stock option
+                    }
                 }
             }
 
