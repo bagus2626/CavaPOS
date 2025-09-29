@@ -9,11 +9,16 @@ class OrderDetail extends Model
 {
     protected $fillable = [
         'booking_order_id',
+        'product_code',
+        'product_name',
         'partner_product_id',
         'quantity',
         'base_price',
         'options_price',
         'customer_note',
+        'promo_id',
+        'promo_amount',
+        'promo_type',
     ];
 
     protected $casts = [

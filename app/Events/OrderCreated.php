@@ -5,13 +5,15 @@ namespace App\Events;
 use App\Models\Transaction\BookingOrder; // <-- pakai model kamu
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class OrderCreated implements ShouldBroadcastNow
+class OrderCreated implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
+    public bool $afterCommit = true;
+    public string $broadcastQueue = 'broadcasts';
 
     public function __construct(public BookingOrder $order) {}
 

@@ -11,7 +11,7 @@
             </a>
 
             <a class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 block w-full text-center flex items-center justify-center"
-            href="{{ route('customer.social.login', ['provider' => 'google', 'partner_slug' => $partner_slug, 'table_code' => $table_code]) }}">
+            href="{{ route('customer.google.redirect', ['provider' => 'google', 'partner_slug' => $partner_slug, 'table_code' => $table_code]) }}">
                 <div class="bg-white rounded-full flex items-center justify-center mr-2">
                     <img src="{{ asset('images/google-logo.png') }}" class="w-5 h-5" alt="Google">
                 </div>

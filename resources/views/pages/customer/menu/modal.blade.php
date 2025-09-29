@@ -207,8 +207,10 @@
                     class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-choco/40"
                     required>
               <option value="" selected disabled>Pilih metode</option>
-              <option value="CASH">Cash</option>
+              <option value="CASH">Bayar di Kasir</option>
+              @if ($partner->is_qr_active === 1)
               <option value="QRIS">QRIS</option>
+              @endif
             </select>
           </div>
         </div>

@@ -11,6 +11,7 @@ use App\Models\Product\Product;
 use App\Models\Transaction\OrderPayment;
 use App\Models\Partner\Products\PartnerProduct;
 use App\Models\Partner\Products\PartnerProductParentOption;
+use App\Models\Product\Promotion;
 use App\Models\Partner\Products\PartnerProductOption;
 use App\Models\Transaction\BookingOrder;
 use App\Models\Transaction\OrderDetail;
@@ -27,6 +28,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Events\OrderCreated;
 use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Jobs\SendReceiptEmailJob;
 
 class CashierTransactionController extends Controller
 {
@@ -85,6 +87,10 @@ class CashierTransactionController extends Controller
             $booking_order->save();
 
             DB::commit();
+
+            SendReceiptEmailJob::dispatch($booking_order->id, $request->input('email'))
+                ->onQueue('email')
+                ->afterCommit();
 
             return redirect()->back()->with('success', 'Pembayaran berhasil diproses!');
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
@@ -151,6 +157,7 @@ class CashierTransactionController extends Controller
             $booking_order = BookingOrder::create([
                 'booking_order_code' => $booking_order_code,
                 'partner_id' => $partner->id,
+                'partner_name' => $partner->name,
                 'table_id' => $table->id,
                 'customer_id' => null,
                 'employee_order_id' => $employee->id,
@@ -167,26 +174,53 @@ class CashierTransactionController extends Controller
                 $optionIds   = data_get($order, 'option_ids', []);
                 $qty         = (int) data_get($order, 'qty', 1);
                 $note        = data_get($order, 'note', '');
+                $promoId    = data_get($order, 'promo_id', null);
 
                 $product = PartnerProduct::findOrFail($productId);
-                $options = PartnerProductOption::whereIn('id', (array)$optionIds)->get();
+                $options = PartnerProductOption::with('parent')->whereIn('id', (array)$optionIds)->get();
                 $optionsPrice = $options->sum('price');
 
+                $promoAmount = 0;
+                $promoType = null;
+                if ($promoId) {
+                    $promotion = Promotion::findOrFail($promoId);
+                    if ($promotion->promotion_type === 'percentage') {
+                        $promoAmount = $product->price * $promotion->promotion_value / 100;
+                        $promoType = $promotion->promotion_type;
+                    } else if ($promotion->promotion_type === 'amount') {
+                        $promoAmount = $promotion->promotion_value;
+                        $promoType = $promotion->promotion_type;
+                    }
+                }
+
                 $order_detail = OrderDetail::create([
-                    'booking_order_id'    => $booking_order->id,
+                    'booking_order_id'  => $booking_order->id,
+                    'product_code'  => $product->product_code,
+                    'product_name'  => $product->name,
                     'partner_product_id'  => $productId,
-                    'base_price'          => $product->price,
-                    'options_price'     => $optionsPrice ?? 0,   // isi jika ingin simpan
-                    'quantity'          => $qty,
-                    'customer_note'       => $note,
+                    'base_price'    => $product->price,
+                    'promo_id'      => $promoId,
+                    'promo_amount'  => $promoAmount,
+                    'promo_type'    => $promoType,
+                    'options_price' => $optionsPrice ?? 0,   // isi jika ingin simpan
+                    'quantity'  => $qty,
+                    'customer_note' => $note,
                 ]);
+                if ($product->always_available_flag === 0) {
+                    $product->decrement('quantity', $qty);
+                }
 
                 foreach ($options as $opt) {
                     OrderDetailOption::create([
                         'order_detail_id' => $order_detail->id,
+                        'parent_name' => $opt->parent->name ?? null,
+                        'partner_product_option_name' => $opt->name,
                         'option_id' => $opt->id,
                         'price' => $opt->price
                     ]);
+                    if ($opt->always_available_flag === 0) {
+                        $opt->decrement('quantity', 1); // kurangi stock option
+                    }
                 }
             }
 
@@ -198,9 +232,11 @@ class CashierTransactionController extends Controller
                 $booking_order->save();
             }
 
-            event(new OrderCreated($booking_order));
-
             DB::commit();
+
+            DB::afterCommit(function () use ($booking_order) {
+                event(new OrderCreated($booking_order));
+            });
 
             return response()->json([
                 'status'  => 'success',

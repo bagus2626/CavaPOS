@@ -8,6 +8,7 @@
                 <th>email</th>
                 <th>Picture</th>
                 <th>Status</th>
+                <th>QRIS</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -45,6 +46,17 @@
                     </td>
                     <td>
                         @if((int) $outlet->is_active === 1)
+                            <span class="badge bg-success d-inline-flex align-items-center gap-1">
+                                <i class="fas fa-check-circle"></i> Aktif
+                            </span>
+                        @else
+                            <span class="badge bg-secondary d-inline-flex align-items-center gap-1">
+                                <i class="fas fa-minus-circle"></i> Nonaktif
+                            </span>
+                        @endif
+                    </td>
+                    <td>
+                        @if((int) $outlet->is_qr_active === 1)
                             <span class="badge bg-success d-inline-flex align-items-center gap-1">
                                 <i class="fas fa-check-circle"></i> Aktif
                             </span>

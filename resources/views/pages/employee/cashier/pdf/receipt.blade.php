@@ -127,10 +127,12 @@
       <td class="label">Waktu</td>
       <td class="value">{{ $data->created_at?->format('d/m/Y H:i') }}</td>
     </tr>
+    @if($cashier)
     <tr>
       <td class="label">Kasir</td>
       <td class="value">{{ $cashier->name ?? '-' }}</td>
     </tr>
+    @endif
   </table>
 
   <hr class="sep">
@@ -148,8 +150,9 @@
         @php
           $qty = (int) $item->quantity;
           $base = (int) $item->base_price;
+          $withPromo = $base - $item->promo_amount;
           $optSum = (int) $item->options_price;  // total harga opsi per 1 qty
-          $unit = $base + $optSum;               // harga per item termasuk opsi
+          $unit = $withPromo + $optSum;               // harga per item termasuk opsi
           $line = $qty * $unit;                  // subtotal line
         @endphp
 
@@ -157,7 +160,7 @@
         <tr>
           <td class="name">
             {{ $qty }} &times; {{ $item->partnerProduct->name ?? '-' }}
-            <span class="price">Rp {{ number_format($base, 0, ',', '.') }}</span>
+            <span class="price">Rp {{ number_format($withPromo, 0, ',', '.') }}</span>
           </td>
           <td class="right">Rp {{ number_format($line, 0, ',', '.') }}</td>
         </tr>

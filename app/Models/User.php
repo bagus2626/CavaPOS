@@ -43,6 +43,7 @@ class User extends Authenticatable
         'pic_phone_number',
         'pic_role',
         'is_active',
+        'is_qr_active',
     ];
 
     /**

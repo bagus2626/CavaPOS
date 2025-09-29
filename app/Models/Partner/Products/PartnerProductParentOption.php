@@ -13,6 +13,7 @@ class PartnerProductParentOption extends Model
 
     protected $fillable = [
         'partner_product_id',
+        'master_product_parent_option_id',
         'name',
         'description',
         'provision',
@@ -27,6 +28,6 @@ class PartnerProductParentOption extends Model
 
     public function options()
     {
-        return $this->hasMany(PartnerProductOption::class,'partner_product_parent_option_id', 'id');
+        return $this->hasMany(PartnerProductOption::class, 'partner_product_parent_option_id', 'id');
     }
 }

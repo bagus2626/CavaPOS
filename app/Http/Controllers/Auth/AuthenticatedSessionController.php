@@ -37,7 +37,7 @@ class AuthenticatedSessionController extends Controller
                 return redirect()->intended();
             }
 
-            return redirect('/admin');
+            return redirect('/admin/dashboard');
         } elseif ($user->role === 'partner') {
             if ($intended && str_starts_with($intended, url('/partner'))) {
                 return redirect()->intended();
@@ -48,7 +48,6 @@ class AuthenticatedSessionController extends Controller
 
         return redirect()->intended(route('dashboard'));
     }
-
 
 
     /**
@@ -62,6 +61,6 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/partner/login');
     }
 }
