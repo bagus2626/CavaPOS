@@ -30,6 +30,7 @@ class PartnerEmployeeController extends Controller
 
     public function create()
     {
+        abort(404); // disable for now
         $categories = Category::where('partner_id', Auth::id())->get();
         return view('pages.partner.human-resource.employee.create', compact('categories'));
     }
@@ -122,15 +123,13 @@ class PartnerEmployeeController extends Controller
     }
 
 
-    // public function show(PartnerProduct $product)
-    // {
-    //     $categories = Category::where('partner_id', Auth::id())->get();
-    //     $data = PartnerProduct::with('parent_options.options', 'category')
-    //         ->where('partner_id', Auth::id())
-    //         ->where('id', $product->id)
-    //         ->first();
-    //     return view('pages.partner.products.show', compact('data', 'categories'));
-    // }
+    public function show(Employee $employee)
+    {
+        $data = Employee::where('partner_id', Auth::id())
+            ->where('id', $employee->id)
+            ->first();
+        return view('pages.partner.human-resource.employee.show', compact('data'));
+    }
 
     public function edit(Employee $employee)
     {

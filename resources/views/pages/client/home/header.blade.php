@@ -1,8 +1,11 @@
 <header class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-primary/10">
         <nav class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="font-poppins text-xl md:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                CAVAA
+            <div class="font-poppins">
+                <img src="{{ asset('images/cava-logo3-gradient.png') }}" 
+                    alt="CAVAA Logo" 
+                    class="h-8 md:h-10 object-contain" />
             </div>
+
             
             <!-- Desktop & Tablet Menu -->
             <ul class="hidden md:flex space-x-6 items-center">
