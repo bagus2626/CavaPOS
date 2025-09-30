@@ -14,7 +14,7 @@
             <div class="flex-1 flex justify-center">
                 <a href="{{ route('employee.cashier.dashboard') }}">
                         <!-- Logo untuk Light Mode -->
-                        <img src="{{ asset('images/cava-logo2-choco.png') }}"
+                        <img src="{{ asset('images/cava-logo2-gradient.png') }}"
                             class="block h-14 w-auto"
                             alt="Logo Light Mode">
                 </a>

@@ -166,7 +166,7 @@
   /* Filter button style */
   .filter-btn { background-color: white; color: #000000; transition: all 0.2s; }
   .filter-btn:hover { background-color: #eff6ff; } /* blue-50 */
-  .filter-btn.active { background-color: #9A3F3F; color: white; } /* choco */
+  .filter-btn.active { background-color: #CF1A02; color: white; } /* choco */
 
   /* Modal overlay */
   #parentOptionsModal { background-color: rgba(0,0,0,0.4); }
@@ -997,35 +997,6 @@ window.initPembelianTab = function initPembelianTab() {
     }
   });
 
-  // ======== FILTER KATEGORI ========
-  // (function setupCategoryFilter(){
-  //   const filterButtons  = document.querySelectorAll('.filter-btn');
-  //   const categoryGroups = document.querySelectorAll('.category-group');
-  //   const items          = document.querySelectorAll('.menu-item');
-
-  //   function applyFilter(category) {
-  //     // tombol active
-  //     filterButtons.forEach(b => b.classList.remove('active'));
-  //     const btn = document.querySelector(`.filter-btn[data-category="${category}"]`);
-  //     if (btn) btn.classList.add('active');
-
-  //     // tampilkan group heading sesuai pilihan
-  //     categoryGroups.forEach(group => {
-  //       if (category === 'all') group.style.display = 'block';
-  //       else group.style.display = (group.dataset.category === category) ? 'block' : 'none';
-  //     });
-
-  //     // tampilkan item
-  //     items.forEach(item => {
-  //       if (category === 'all' || item.dataset.category === category) item.style.display = 'flex';
-  //       else item.style.display = 'none';
-  //     });
-  //   }
-
-  //   filterButtons.forEach(btn => {
-  //     btn.addEventListener('click', () => applyFilter(btn.dataset.category));
-  //   });
-  // })();
     // ======== FILTER KATEGORI + SEARCH ========
   (function setupCategoryAndSearch(){
     if (window.__CATSEARCH_INITED__) return;

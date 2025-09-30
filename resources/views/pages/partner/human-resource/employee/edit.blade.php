@@ -5,9 +5,11 @@
 
 @section('content')
 <div class="container">
-    <a href="{{ route('partner.user-management.employees.index') }}" class="btn btn-secondary mb-3">
+    <a href="{{ route('partner.user-management.employees.index') }}" 
+        class="btn btn-outline-choco mb-3">
         <i class="fas fa-arrow-left mr-2"></i>Back to Employees
     </a>
+
 
     <div class="card shadow-sm">
         <div class="card-header">
@@ -220,6 +222,142 @@
         </div>
     </div>
 </div>
+
+<style>
+    /* === Edit Employee (page scope) === */
+:root{
+  /* fallback kalau theme/partner.css belum ter-load (aman walau sudah ada) */
+  --choco:#8c1000; 
+  --soft-choco:#c12814;
+  --ink:#22272b;
+  --paper:#f7f7f8;
+  --radius:12px;
+  --shadow:0 6px 20px rgba(0,0,0,.08);
+}
+
+/* Toolbar back button area */
+.container > .btn-back-wrap,
+.container > .btn {
+  margin-bottom: .85rem;
+}
+
+/* Card polish */
+.card.shadow-sm{
+  border:0;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.card-header{
+  background:#fff;
+  border-bottom:1px solid #eef1f4;
+}
+.card-title{
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* Labels & help text */
+.form-label{
+  font-weight: 600;
+  color: #374151; /* slate-700 */
+}
+.text-muted{ color: #6b7280 !important; }
+
+/* Inputs focus brandy */
+.form-control:focus, .custom-select:focus, select.form-control:focus{
+  border-color: var(--choco);
+  box-shadow: 0 0 0 .2rem rgba(140,16,0,.15);
+}
+
+/* Input group token (@) */
+.input-group-text{
+  background: rgba(140,16,0,.08);
+  color: var(--choco);
+  border-color: rgba(140,16,0,.25);
+}
+
+/* Switch (aktif/nonaktif) */
+.form-check-input:checked{
+  background-color: var(--choco);
+  border-color: var(--choco);
+}
+.form-check-input:focus{
+  box-shadow: 0 0 0 .2rem rgba(140,16,0,.15);
+  border-color: var(--soft-choco);
+}
+
+/* Alerts selaras */
+.alert{
+  border-left: 4px solid var(--choco);
+  border-radius: 10px;
+}
+.alert-danger{
+  background: #fff5f5;
+  border-color: #fde2e2;
+  color: #991b1b;
+}
+.alert-success{
+  background: #f0fdf4;
+  border-color: #dcfce7;
+  color: #166534;
+}
+
+/* File preview */
+#imagePreviewWrapper .img-thumbnail{
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border:0;
+}
+#clearImageBtn{
+  transform: translate(35%, -35%);
+  border-radius: 999px;
+  width: 28px; height: 28px;
+  padding: 0; line-height: 26px;
+}
+
+/* Buttons selaras */
+.btn-primary{ /* fallback, kalau masih dipakai */
+  background: var(--choco);
+  border-color: var(--choco);
+}
+.btn-primary:hover{
+  background: var(--soft-choco);
+  border-color: var(--soft-choco);
+}
+.btn-outline-choco{
+  color: var(--choco);
+  border-color: var(--choco);
+  background: #fff;
+}
+.btn-outline-choco:hover{
+  background: var(--choco);
+  color:#fff;
+}
+.btn-choco{
+  background: var(--choco);
+  border-color: var(--choco);
+  color:#fff;
+}
+.btn-choco:hover{
+  background: var(--soft-choco);
+  border-color: var(--soft-choco);
+}
+
+/* Action row */
+.form-actions .btn{
+  min-width: 120px;
+}
+
+/* Select2 (kalau dipakai di Role) nyambung tema */
+.select2-container--bootstrap-5 .select2-selection{
+  border-radius: 10px;
+  border-color: #e5e7eb;
+}
+.select2-container--bootstrap-5 .select2-results__option--highlighted{
+  background: var(--soft-choco);
+}
+
+</style>
 @endsection
 
 @push('scripts')

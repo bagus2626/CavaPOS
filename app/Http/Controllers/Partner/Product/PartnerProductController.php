@@ -21,7 +21,7 @@ class PartnerProductController extends Controller
 {
     public function index()
     {
-        $categories = Category::where('partner_id', Auth::id())->get();
+        $categories = Category::where('owner_id', Auth::user()->owner_id)->get();
         $products = PartnerProduct::with('parent_options.options', 'category')
             ->where('partner_id', Auth::id())
             ->get();
@@ -30,6 +30,7 @@ class PartnerProductController extends Controller
 
     public function create()
     {
+        abort(404); // disable for now
         $categories = Category::where('partner_id', Auth::id())->get();
         return view('pages.partner.products.create', compact('categories'));
     }
