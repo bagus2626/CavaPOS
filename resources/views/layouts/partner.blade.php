@@ -8,8 +8,7 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
   <!-- Vite resources -->
-  {{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
-  @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/css/theme/partner.css'])
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
 
 
   <!-- AdminLTE CSS -->
