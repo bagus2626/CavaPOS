@@ -3,10 +3,6 @@
 @section('title', 'Product List')
 @section('page_title', 'All Products')
 
-@push('styles')
-  @vite('resources/css/pages/products-index.css')
-@endpush
-
 @section('content')
 <section class="content product-index">
   <div class="container-fluid">
@@ -58,7 +54,6 @@
 .btn-outline-choco{
   color: var(--choco);
   border-color: var(--choco);
-  background:#fff;
 }
 .btn-outline-choco:hover{
   color:#fff; background: var(--choco); border-color: var(--choco);

@@ -214,7 +214,7 @@
 
                 {{-- Submit --}}
                 <div class="d-flex justify-content-end">
-                    <a href="{{ route('partner.user-management.employees.index') }}" class="btn btn-secondary me-2">Cancel</a>
+                    <a href="{{ route('partner.user-management.employees.index') }}" class="btn btn-outline-choco me-2">Cancel</a>
                     <button type="submit" class="btn btn-primary">Update</button>
                 </div>
 
@@ -327,7 +327,6 @@
 .btn-outline-choco{
   color: var(--choco);
   border-color: var(--choco);
-  background: #fff;
 }
 .btn-outline-choco:hover{
   background: var(--choco);
