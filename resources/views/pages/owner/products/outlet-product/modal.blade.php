@@ -1,6 +1,6 @@
 {{-- ====== MODAL ADD PRODUCT (satu modal dipakai semua outlet) ====== --}}
 <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
     <form id="outletProductQuickAddForm"
           method="POST"
           action="{{ route('owner.user-owner.outlet-products.store') }}"

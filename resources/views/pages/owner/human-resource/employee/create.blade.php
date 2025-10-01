@@ -4,8 +4,8 @@
 @section('page_title', 'Create New Employee')
 
 @section('content')
-<div class="container">
-    <a href="{{ route('owner.user-owner.employees.index') }}" class="btn btn-secondary mb-3">
+<div class="container owner-emp-create"> {{-- tambahkan class page-scope --}}
+    <a href="{{ route('owner.user-owner.employees.index') }}" class="btn btn-outline-choco mb-3">
         <i class="fas fa-arrow-left mr-2"></i>Back to Employees
     </a>
     <div class="card shadow-sm">
@@ -229,14 +229,115 @@
 
                 {{-- Submit --}}
                 <div class="d-flex justify-content-end">
-                    <a href="{{ route('owner.user-owner.employees.index') }}" class="btn btn-secondary me-2">Cancel</a>
-                    <button type="submit" class="btn btn-primary">Save</button>
+                    <a href="{{ route('owner.user-owner.employees.index') }}" class="btn btn-light border me-2">Cancel</a>
+                    <button type="submit" class="btn btn-choco">Save</button>
                 </div>
-
             </form>
         </div>
     </div>
 </div>
+
+<style>
+    <style>
+/* ===== Owner › Employee Create (page scope) ===== */
+.owner-emp-create{
+  --choco:#8c1000; --soft-choco:#c12814; --ink:#22272b; --paper:#f7f7f8;
+  --radius:12px; --shadow:0 6px 20px rgba(0,0,0,.08);
+}
+
+/* Card polish */
+.owner-emp-create .card{
+  border:0; border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;
+}
+.owner-emp-create .card-header{
+  background:#fff; border-bottom:1px solid #eef1f4; padding:.85rem 1rem;
+}
+.owner-emp-create .card-title{ color:var(--ink); font-weight:600; }
+
+/* Alerts (selaras brand) */
+.owner-emp-create .alert{
+  border-left:4px solid var(--choco);
+  border-radius:10px;
+}
+.owner-emp-create .alert-danger{ background:#fff5f5; border-color:#fde2e2; color:#991b1b; }
+.owner-emp-create .alert-success{ background:#f0fdf4; border-color:#dcfce7; color:#166534; }
+.owner-emp-create .alert-info{ background:#eff6ff; border-color:#dbeafe; color:#1d4ed8; }
+
+/* Label & input */
+.owner-emp-create .form-label{ font-weight:600; color:#374151; }
+.owner-emp-create .form-control:focus,
+.owner-emp-create select.form-control:focus{
+  border-color:var(--choco);
+  box-shadow:0 0 0 .2rem rgba(140,16,0,.15);
+}
+
+/* Input group token (@) & tombol di group */
+.owner-emp-create .input-group-text{
+  background:rgba(140,16,0,.08);
+  color:var(--choco);
+  border-color:rgba(140,16,0,.25);
+}
+.owner-emp-create .input-group .btn{
+  border-radius:0 .5rem .5rem 0;
+}
+
+/* Brand buttons */
+.owner-emp-create .btn-choco{
+  background:var(--choco); border-color:var(--choco); color:#fff;
+}
+.owner-emp-create .btn-choco:hover{
+  background:var(--soft-choco); border-color:var(--soft-choco);
+}
+.owner-emp-create .btn-outline-choco{
+  color:var(--choco); border-color:var(--choco); background:#fff;
+}
+.owner-emp-create .btn-outline-choco:hover{
+  color:#fff; background:var(--choco); border-color:var(--choco);
+}
+
+/* Samakan tombol “Check username” dengan tema */
+.owner-emp-create #btnCheckUsername{
+  border-color:var(--choco); color:var(--choco); background:#fff;
+}
+.owner-emp-create #btnCheckUsername:hover{
+  background:var(--choco); color:#fff; border-color:var(--choco);
+}
+.owner-emp-create #btnCheckUsername .spinner-border{ margin-left:.35rem; }
+
+/* Username availability area */
+.owner-emp-create #usernameStatus .badge{ border-radius:999px; padding:.28rem .6rem; font-weight:600; }
+.owner-emp-create #usernameStatus .bg-success{ background:#ecfdf5 !important; color:#065f46 !important; border:1px solid #a7f3d0; }
+.owner-emp-create #usernameStatus .bg-danger{ background:#fee2e2 !important; color:#991b1b !important; border:1px solid #fecaca; }
+
+/* Switch & focus */
+.owner-emp-create .form-check-input:checked{ background-color:var(--choco); border-color:var(--choco); }
+.owner-emp-create .form-check-input:focus{ box-shadow:0 0 0 .2rem rgba(140,16,0,.15); border-color:var(--soft-choco); }
+
+/* Gambar preview */
+.owner-emp-create #imagePreviewWrapper .img-thumbnail{
+  border:0; border-radius:var(--radius); box-shadow:var(--shadow);
+}
+.owner-emp-create #clearImageBtn{
+  transform:translate(35%,-35%);
+  border-radius:999px; width:28px; height:28px; padding:0; line-height:26px;
+}
+
+/* Action row */
+.owner-emp-create .d-flex .btn{ min-width:120px; }
+
+/* Back button fallback (kalau belum ubah ke btn-outline-choco) */
+.owner-emp-create > .btn.btn-secondary{
+  color:var(--choco); background:#fff; border-color:var(--choco);
+}
+.owner-emp-create > .btn.btn-secondary:hover{
+  color:#fff; background:var(--choco); border-color:var(--choco);
+}
+
+/* Small helpers */
+.owner-emp-create .text-muted{ color:#6b7280 !important; }
+</style>
+
+</style>
 @endsection
 
 @push('scripts')

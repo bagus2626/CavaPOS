@@ -127,15 +127,16 @@ class OwnerEmployeeController extends Controller
     }
 
 
-    // public function show(PartnerProduct $product)
-    // {
-    //     $categories = Category::where('partner_id', Auth::id())->get();
-    //     $data = PartnerProduct::with('parent_options.options', 'category')
-    //         ->where('partner_id', Auth::id())
-    //         ->where('id', $product->id)
-    //         ->first();
-    //     return view('pages.partner.products.show', compact('data', 'categories'));
-    // }
+    public function show(Employee $employee)
+    {
+        $data = Employee::where('id', $employee->id)
+            ->first();
+        $partner = User::where('id', $data->partner_id)->first();
+        if ($partner->owner_id != Auth::id()) {
+            abort(403);
+        }
+        return view('pages.owner.human-resource.employee.show', compact('data'));
+    }
 
     public function edit(Employee $employee)
     {

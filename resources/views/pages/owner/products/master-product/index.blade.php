@@ -4,108 +4,223 @@
 @section('page_title', 'Master Products')
 
 @section('content')
+
+{{-- ===== Delete confirm (tetap) ===== --}}
 <script>
 function deleteProduct(productId) {
-    Swal.fire({
-        title: 'Apakah Anda yakin?',
-        text: "Anda tidak dapat mengembalikan data tersebut!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Ya, Hapus!',
-        cancelButtonText: 'Batalkan'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `/owner/user-owner/master-products/${productId}`;
-            form.style.display = 'none';
+  Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Anda tidak dapat mengembalikan data tersebut!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#8c1000',
+      cancelButtonColor: '#9CA3AF',
+      confirmButtonText: 'Ya, Hapus!',
+      cancelButtonText: 'Batalkan'
+  }).then((result) => {
+      if (result.isConfirmed) {
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = `/owner/user-owner/master-products/${productId}`;
+          form.style.display = 'none';
 
-            const csrf = document.createElement('input');
-            csrf.type = 'hidden';
-            csrf.name = '_token';
-            csrf.value = '{{ csrf_token() }}';
-            form.appendChild(csrf);
+          const csrf = document.createElement('input');
+          csrf.type = 'hidden';
+          csrf.name = '_token';
+          csrf.value = '{{ csrf_token() }}';
+          form.appendChild(csrf);
 
-            const method = document.createElement('input');
-            method.type = 'hidden';
-            method.name = '_method';
-            method.value = 'DELETE';
-            form.appendChild(method);
+          const method = document.createElement('input');
+          method.type = 'hidden';
+          method.name = '_method';
+          method.value = 'DELETE';
+          form.appendChild(method);
 
-            document.body.appendChild(form);
-            form.submit();
-        }
-    });
+          document.body.appendChild(form);
+          form.submit();
+      }
+  });
 }
 </script>
 
 <section class="content">
-    <div class="container-fluid">
-        <a href="{{ route('owner.user-owner.master-products.create') }}" class="btn btn-primary mb-3">Add Product</a>
-        <div class="mb-3">
-            <button class="btn btn-outline-primary btn-sm filter-btn rounded-pill active" data-category="all">All</button>
-            @foreach($categories as $category)
-                <button class="btn btn-outline-primary btn-sm filter-btn rounded-pill" data-category="{{ $category->id }}">
-                    {{ $category->category_name }}
-                </button>
+  <div class="container-fluid owner-products-index"> {{-- PAGE SCOPE --}}
 
-            @endforeach
-        </div>
+    {{-- Toolbar atas --}}
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+      <div class="filter-toolbar d-flex flex-wrap gap-2">
+        <button class="btn btn-outline-choco btn-sm filter-btn rounded-pill active" data-category="all">
+          <i class="fas fa-list-ul me-1"></i> All
+        </button>
+        @foreach($categories as $category)
+          <button class="btn btn-outline-choco btn-sm filter-btn rounded-pill" data-category="{{ $category->id }}">
+            {{ $category->category_name }}
+          </button>
+        @endforeach
+      </div>
 
-
-        @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
-        @include('pages.owner.products.master-product.display')
+      <a href="{{ route('owner.user-owner.master-products.create') }}" class="btn btn-choco">
+        <i class="fas fa-plus me-2"></i>Add Product
+      </a>
     </div>
+
+    {{-- Alerts --}}
+    @if(session('success'))
+      <div class="alert alert-success mb-3">
+        <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
+      </div>
+    @endif
+
+    {{-- Card pembungkus tabel --}}
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-0">
+        @include('pages.owner.products.master-product.display')
+      </div>
+    </div>
+
+  </div>
 </section>
+
+<style>
+/* ===== Master Products (page scope) ===== */
+.owner-products-index{
+  --choco:#8c1000; --soft-choco:#c12814; --ink:#22272b;
+  --radius:12px; --shadow:0 6px 20px rgba(0,0,0,.08);
+}
+
+/* Brand buttons (konsisten) */
+.owner-products-index .btn-choco{
+  background:var(--choco); border-color:var(--choco); color:#fff;
+  border-radius:10px; padding:.5rem .9rem; font-weight:600;
+}
+.owner-products-index .btn-choco:hover{ background:var(--soft-choco); border-color:var(--soft-choco); color:#fff; }
+
+.owner-products-index .btn-outline-choco{
+  color:var(--choco); border-color:var(--choco);
+  border-radius:999px; font-weight:600;
+}
+.owner-products-index .btn-outline-choco:hover,
+.owner-products-index .filter-btn.active{
+  color:#fff; background:var(--choco); border-color:var(--choco);
+}
+
+/* Alerts tone */
+.owner-products-index .alert{
+  border-left:4px solid var(--choco);
+  border-radius:12px; box-shadow:var(--shadow);
+}
+.owner-products-index .alert-success{
+  background:#f0fdf4; border-color:#dcfce7; color:#166534;
+}
+
+/* Card */
+.owner-products-index .card{ border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+
+/* ===== Tabel di dalam page ini (apapun markup partial-nya) ===== */
+.owner-products-index .table{
+  margin-bottom:0; background:#fff;
+  border-collapse:separate; border-spacing:0;
+}
+.owner-products-index .table thead th{
+  background:#fff; color:#374151; font-weight:700;
+  border-bottom:2px solid #eef1f4 !important;
+  white-space:nowrap;
+}
+.owner-products-index .table tbody td{ vertical-align:middle; }
+.owner-products-index .table tbody tr{ transition: background-color .12s ease; }
+.owner-products-index .table tbody tr:hover{ background: rgba(140,16,0,.04); }
+
+/* Avatar/gambar kecil di tabel (jika ada) */
+.owner-products-index .avatar-48{
+  width:48px; height:48px; object-fit:cover; border-radius:12px; border:0; box-shadow:var(--shadow);
+}
+
+/* Badge “soft” (aktif/nonaktif/tersedia) */
+.owner-products-index .badge-soft-success{
+  background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; border-radius:999px; font-weight:600; padding:.3rem .55rem;
+}
+.owner-products-index .badge-soft-secondary{
+  background:#f3f4f6; color:#374151; border:1px solid #e5e7eb; border-radius:999px; font-weight:600; padding:.3rem .55rem;
+}
+.owner-products-index .badge-soft-warning{
+  background:#fffbeb; color:#92400e; border:1px solid #fcd34d; border-radius:999px; font-weight:600; padding:.3rem .55rem;
+}
+
+/* Link ink */
+.owner-products-index .link-ink{ color:#374151; text-decoration:none; }
+.owner-products-index .link-ink:hover{ color:var(--choco); }
+
+/* Actions: rapikan tombol di dalam tabel (baik .btn-group maupun tidak) */
+.owner-products-index td .btn-group.btn-group-sm{
+  display:inline-flex; gap:.4rem;
+}
+.owner-products-index td .btn-group.btn-group-sm > .btn{
+  border-radius:10px !important; padding:.28rem .6rem; min-width:72px; line-height:1.25;
+}
+.owner-products-index td .btn + .btn{ margin-left:0 !important; }
+
+/* Varian tombol tabel */
+.owner-products-index .btn-outline-choco.btn-sm{
+  padding:.28rem .6rem; min-width:72px;
+}
+.owner-products-index .btn-soft-danger{
+  background:#fee2e2; color:#991b1b; border-color:#fecaca; border-radius:10px;
+}
+.owner-products-index .btn-soft-danger:hover{
+  background:#fecaca; color:#7f1d1d; border-color:#fca5a5;
+}
+
+/* Tombol filter: space & focus ring */
+.owner-products-index .filter-toolbar .filter-btn{
+  padding:.3rem .7rem; box-shadow:none; transition:.15s ease;
+}
+.owner-products-index .filter-toolbar .filter-btn:focus{
+  box-shadow:0 0 0 .2rem rgba(140,16,0,.15);
+}
+</style>
 @endsection
+
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const filterButtons = document.querySelectorAll('.filter-btn');
+  const filterButtons = document.querySelectorAll('.filter-btn');
 
-    filterButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            console.log('Tombol diklik:', this.textContent);
-            const categoryId = this.getAttribute('data-category');
+  filterButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const categoryId = this.getAttribute('data-category');
 
-            // hapus class active dari semua tombol
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
+      // toggle active
+      filterButtons.forEach(btn => btn.classList.remove('active'));
+      this.classList.add('active');
 
-            const tableBody = document.querySelector('tbody');
-            const tableRows = document.querySelectorAll('tbody tr');
+      const tableBody = document.querySelector('tbody');
+      const tableRows = document.querySelectorAll('tbody tr');
+      let visibleCount = 0;
 
-            let visibleCount = 0; // hitung row yang tampil
+      tableRows.forEach(row => {
+        if (categoryId === 'all' || row.getAttribute('data-category') === categoryId) {
+          row.style.display = '';
+          visibleCount++;
+          const firstCell = row.querySelector('td');
+          if (firstCell) firstCell.textContent = visibleCount;
+        } else {
+          row.style.display = 'none';
+        }
+      });
 
-            tableRows.forEach((row, index) => {
-                if(categoryId === 'all' || row.getAttribute('data-category') === categoryId) {
-                    row.style.display = '';
-                    visibleCount++;
-                    row.querySelector('td').textContent = visibleCount; // update nomor urut di kolom pertama
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-
-            // hapus row "data tidak ditemukan" dulu kalau ada
-            const emptyRow = tableBody.querySelector('.empty-row');
-            if(emptyRow) emptyRow.remove();
-
-            // jika tidak ada row yang tampil, tampilkan pesan
-            if(visibleCount === 0) {
-                const tr = document.createElement('tr');
-                tr.classList.add('empty-row');
-                tr.innerHTML = `<td colspan="8" class="text-center">Data tidak ditemukan</td>`;
-                tableBody.appendChild(tr);
-            }
-        });
+      // handle empty state
+      const emptyRow = tableBody.querySelector('.empty-row');
+      if (emptyRow) emptyRow.remove();
+      if (visibleCount === 0) {
+        const tr = document.createElement('tr');
+        tr.classList.add('empty-row');
+        tr.innerHTML = `<td colspan="999" class="text-center py-4 text-muted">Data tidak ditemukan</td>`;
+        tableBody.appendChild(tr);
+      }
     });
+  });
 });
 </script>
 @endpush

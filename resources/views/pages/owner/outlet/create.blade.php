@@ -1,19 +1,18 @@
 @extends('layouts.owner')
 
 @section('title', 'Create Outlet')
-@section('page_title', 'Buat Outlet Baru')
+@section('page_title', 'Create New Outlet')
 
 @section('content')
-<div class="container">
-
-    <a href="{{ route('owner.user-owner.outlets.index') }}" class="btn btn-outline-secondary mb-3">
+<div class="container owner-outlet-create"> {{-- PAGE SCOPE --}}
+    <a href="{{ route('owner.user-owner.outlets.index') }}" class="btn btn-outline-choco mb-3">
         <i class="fas fa-arrow-left me-2"></i>Kembali
     </a>
 
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white border-0 py-3">
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
             <h5 class="card-title mb-0 d-flex align-items-center gap-2">
-                <i class="fas fa-store text-primary"></i>
+                <i class="fas fa-store text-choco"></i>
                 Create New Outlet
             </h5>
         </div>
@@ -73,10 +72,10 @@
                                 <input type="text" name="username" id="username"
                                     class="form-control @error('username') is-invalid @enderror"
                                     value="{{ old('username') }}" required minlength="3" maxlength="30"
-                                    pattern="^[A-Za-z0-9._\-]+$"  {{-- <- dash di-escape --}}
+                                    pattern="^[A-Za-z0-9._\-]+$"
                                     placeholder="contoh: budi.setiawan"
                                     autocomplete="username" autocapitalize="none" spellcheck="false">
-                                <button type="button" id="btnCheckUsername" class="btn btn-outline-primary">
+                                <button type="button" id="btnCheckUsername" class="btn btn-outline-choco">
                                     <span class="label">Check</span>
                                     <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                                 </button>
@@ -88,6 +87,7 @@
                             <div id="usernameStatus" class="form-text mt-1"></div>
                         </div>
 
+                        {{-- slug --}}
                         <input type="hidden" id="slugCheckUrl" value="{{ route('owner.user-owner.outlets.check-slug') }}">
 
                         <div class="col-md-6">
@@ -99,17 +99,12 @@
                                     id="slug"
                                     class="form-control @error('slug') is-invalid @enderror"
                                     value="{{ old('slug') }}"
-                                    required
-                                    minlength="3"
-                                    maxlength="30"
+                                    required minlength="3" maxlength="30"
                                     pattern="^[A-Za-z0-9._\-]+$"
                                     placeholder="contoh: cava-coffee-malioboro"
-                                    autocomplete="off"
-                                    autocapitalize="none"
-                                    spellcheck="false"
-                                    {{-- opsional saat form edit: data-exclude-id="{{ $outlet->id ?? '' }}" --}}
+                                    autocomplete="off" autocapitalize="none" spellcheck="false"
                                 >
-                                <button type="button" id="btnCheckSlug" class="btn btn-outline-primary">
+                                <button type="button" id="btnCheckSlug" class="btn btn-outline-choco">
                                     <span class="label">Check</span>
                                     <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                                 </button>
@@ -261,7 +256,7 @@
                                        class="form-control @error('password') is-invalid @enderror"
                                        minlength="8" required autocomplete="new-password"
                                        placeholder="Min. 8 karakter">
-                                <button class="btn btn-outline-secondary" type="button" id="togglePassword" tabindex="-1">
+                                <button class="btn btn-choco" type="button" id="togglePassword" tabindex="-1">
                                     Show
                                 </button>
                                 @error('password') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
@@ -276,7 +271,7 @@
                                        class="form-control @error('password_confirmation') is-invalid @enderror"
                                        minlength="8" required autocomplete="new-password"
                                        placeholder="Ulangi password">
-                                <button class="btn btn-outline-secondary" type="button" id="togglePasswordConfirm" tabindex="-1">
+                                <button class="btn btn-choco" type="button" id="togglePasswordConfirm" tabindex="-1">
                                     Show
                                 </button>
                                 @error('password_confirmation') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
@@ -288,10 +283,10 @@
                 {{-- Sticky Actions --}}
                 <div class="form-actions sticky-actions">
                     <div class="d-flex justify-content-end gap-2">
-                        <a href="{{ route('owner.user-owner.outlets.index') }}" class="btn btn-light border">
+                        <a href="{{ route('owner.user-owner.outlets.index') }}" class="btn btn-outline-choco">
                             <i class="fas fa-xmark me-2"></i>Cancel
                         </a>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-choco">
                             <i class="fas fa-save me-2"></i>Save
                         </button>
                     </div>
@@ -301,22 +296,115 @@
         </div>
     </div>
 </div>
+
+<style>
+/* ===== Owner › Outlet Create (page scope) ===== */
+.owner-outlet-create{
+  --choco:#8c1000; --soft-choco:#c12814; --ink:#22272b; --paper:#f7f7f8;
+  --radius:12px; --shadow:0 6px 20px rgba(0,0,0,.08);
+}
+
+/* Card & header */
+.owner-outlet-create .card{
+  border:0; border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;
+}
+.owner-outlet-create .card-header{
+  background:#fff; border-bottom:1px solid #eef1f4;
+}
+.owner-outlet-create .card-title{ color:var(--ink); font-weight:700; }
+
+/* Brand helpers */
+.owner-outlet-create .text-choco{ color:var(--choco) !important; }
+.owner-outlet-create .btn-choco{
+  background:var(--choco); border-color:var(--choco); color:#fff;
+}
+.owner-outlet-create .btn-choco:hover{
+  background:var(--soft-choco); border-color:var(--soft-choco); color:#fff;
+}
+.owner-outlet-create .btn-outline-choco{
+  color:var(--choco); border-color:var(--choco); background:#fff;
+}
+.owner-outlet-create .btn-outline-choco:hover{
+  color:#fff; background:var(--choco); border-color:var(--choco);
+}
+
+/* Alerts (brand) */
+.owner-outlet-create .alert{ border-left:4px solid var(--choco); border-radius:10px; }
+.owner-outlet-create .alert-danger{ background:#fff5f5; border-color:#fde2e2; color:#991b1b; }
+.owner-outlet-create .alert-success{ background:#f0fdf4; border-color:#dcfce7; color:#166534; }
+.owner-outlet-create .alert-info{ background:#eff6ff; border-color:#dbeafe; color:#1d4ed8; }
+
+/* Labels & fields */
+.owner-outlet-create .form-label{ font-weight:600; color:#374151; }
+.owner-outlet-create .required::after{ content:" *"; color:#dc3545; }
+.owner-outlet-create .form-control:focus,
+.owner-outlet-create .form-select:focus{
+  border-color:var(--choco);
+  box-shadow:0 0 0 .2rem rgba(140,16,0,.15);
+}
+
+/* Input group cosmetics */
+.owner-outlet-create .input-group-text{
+  background:rgba(140,16,0,.08);
+  color:var(--choco);
+  border-color:rgba(140,16,0,.25);
+}
+.owner-outlet-create .input-group .btn{
+  border-radius:0 .5rem .5rem 0;
+}
+.owner-outlet-create .input-group > .form-control{
+  border-right:0;
+}
+
+/* Sectioning */
+.owner-outlet-create .form-section{ padding: 1.15rem 0; border-top:1px solid #eef1f4; }
+.owner-outlet-create .form-section:first-of-type{ border-top:0; }
+.owner-outlet-create .section-header{
+  display:flex; align-items:center; gap:.6rem; margin-bottom:.85rem;
+}
+.owner-outlet-create .section-icon{
+  width:36px; height:36px; border-radius:999px;
+  display:grid; place-items:center;
+  background:rgba(140,16,0,.08); color:var(--choco);
+}
+
+/* Select spinners */
+.owner-outlet-create .loading-spinner{
+  position:absolute; right:.75rem; top:50%; transform:translateY(-50%);
+  width:1rem; height:1rem; border:.15rem solid rgba(140,16,0,.2);
+  border-top-color:var(--choco); border-radius:50%;
+  animation: spin .8s linear infinite;
+}
+.owner-outlet-create .d-none{ display:none !important; }
+@keyframes spin{ to{ transform:translateY(-50%) rotate(360deg); } }
+
+/* Image preview */
+.owner-outlet-create .preview-box{
+  width: 200px;
+  border-radius: var(--radius);
+}
+.owner-outlet-create #imagePreviewWrapper .img-thumbnail{
+  border:0; border-radius:var(--radius); box-shadow:var(--shadow);
+}
+.owner-outlet-create #clearImageBtn{
+  transform: translate(35%,-35%);
+  border-radius:999px; width:28px; height:28px; padding:0; line-height:26px;
+}
+
+/* Sticky actions */
+.owner-outlet-create .sticky-actions{
+  position: sticky; bottom: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0) 0%, #fff 30%);
+  padding-top:.75rem; margin-top:1rem;
+}
+.owner-outlet-create .sticky-actions .btn{ border-radius:10px; min-width:120px; }
+
+/* Small helpers */
+.owner-outlet-create .text-muted{ color:#6b7280 !important; }
+</style>
 @endsection
 
-@push('styles')
-<style>
-    .form-section { padding: 1.25rem 0; border-top: 1px solid rgba(0,0,0,.06); }
-    .form-section:first-of-type { border-top: 0; }
-    .section-header { display:flex; align-items:center; gap:.5rem; margin-bottom:.75rem; }
-    .section-icon { width:34px; height:34px; border-radius:50%; background:#f1f5f9; display:grid; place-items:center; color:#0d6efd; }
-    .required::after { content:" *"; color:#dc3545; }
-    .preview-box { width: 220px; }
-    .sticky-actions { position: sticky; bottom: 0; background: linear-gradient(180deg, rgba(255,255,255,0) 0%, #fff 30%); padding-top: .75rem; margin-top: 1rem; }
-    .loading-spinner { position:absolute; right:.75rem; top:50%; transform:translateY(-50%); width:1rem; height:1rem; border:.15rem solid rgba(13,110,253,.2); border-top-color:#0d6efd; border-radius:50%; animation: spin .8s linear infinite; }
-    .d-none{display:none!important;}
-    @keyframes spin{to{transform:translateY(-50%) rotate(360deg)}}
-</style>
-@endpush
+
 
 @push('scripts')
 <script>

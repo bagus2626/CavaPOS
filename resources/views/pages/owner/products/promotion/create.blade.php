@@ -5,7 +5,7 @@
 
 @section('content')
 <section class="content">
-    <div class="container-fluid">
+    <div class="container-fluid owner-promo-create">
         <div class="row">
             <div class="col-12">
 
@@ -49,7 +49,7 @@
 
                             {{-- Type & Value --}}
                             <div class="row">
-                                <div class="col-md-4">
+                                <div class="col-md-6">
                                     <div class="form-group mb-0">
                                         <label for="promotion_type" class="required">Promotion Type</label>
                                         <select id="promotion_type"
@@ -64,35 +64,35 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-8">
+                                <div class="col-md-6">
                                     <div class="form-group mb-0">
-                                        <label for="promotion_value" class="required">
-                                            Promotion Value
-                                            <small class="text-muted d-block" id="valueHelp">
-                                                @if(old('promotion_type') === 'amount')
-                                                    Masukkan nominal rupiah (contoh: 10000).
-                                                @else
-                                                    Masukkan persen (1–100).
-                                                @endif
-                                            </small>
-                                        </label>
+                                        <label for="promotion_value" class="required">Promotion Value</label>
 
                                         <div class="input-group">
-                                            <div class="input-group-prepend" id="prefixAmount" style="display: none;">
+                                            <div class="input-group-prepend" id="prefixAmount" style="display:none;">
                                                 <span class="input-group-text">Rp</span>
                                             </div>
+
                                             <input type="number"
-                                                   class="form-control text-right @error('promotion_value') is-invalid @enderror"
-                                                   id="promotion_value"
-                                                   name="promotion_value"
-                                                   value="{{ old('promotion_value') }}"
-                                                   inputmode="numeric"
-                                                   required>
-                                            <div class="input-group-append" id="suffixPercent" style="display: none;">
+                                                    class="form-control text-right @error('promotion_value') is-invalid @enderror"
+                                                    id="promotion_value"
+                                                    name="promotion_value"
+                                                    value="{{ old('promotion_value') }}"
+                                                    inputmode="numeric"
+                                                    required>
+
+                                            <div class="input-group-append" id="suffixPercent" style="display:none;">
                                                 <span class="input-group-text">%</span>
                                             </div>
-                                            @error('promotion_value') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
+
+                                        <small class="form-text text-muted mt-1" id="valueHelp">
+                                            @if(old('promotion_type') === 'amount')
+                                                Masukkan nominal rupiah (contoh: 10000).
+                                            @else
+                                                Masukkan persen (1–100).
+                                            @endif
+                                        </small>
                                     </div>
                                 </div>
                             </div>
@@ -240,13 +240,145 @@
         </div>
     </div>
 </section>
+
+<style>
+/* ===== Owner › Promotion Create (page scope) ===== */
+.owner-promo-create{
+  --choco:#8c1000; --soft-choco:#c12814; --ink:#22272b; --paper:#fff;
+  --radius:12px; --shadow:0 6px 20px rgba(0,0,0,.08);
+}
+
+/* Card */
+.owner-promo-create .card{
+  border:0; border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; background:var(--paper);
+}
+.owner-promo-create .card-header{
+  background:#fff; border-bottom:1px solid #eef1f4;
+}
+.owner-promo-create .card-title{ color:var(--ink); font-weight:700; }
+
+/* Alerts */
+.owner-promo-create .alert{
+  border-left:4px solid var(--choco); border-radius:10px;
+}
+
+.btn-secondary{
+  background:var(--choco); border-color:var(--choco);
+}
+.btn-secondary:hover{
+  background:var(--soft-choco); border-color:var(--soft-choco);
+}
+
+/* Buttons – brand choco */
+.owner-promo-create .btn-primary,
+.owner-promo-create .btn-success{
+  background:var(--choco); border-color:var(--choco);
+}
+.owner-promo-create .btn-primary:hover,
+.owner-promo-create .btn-success:hover{
+  background:var(--soft-choco); border-color:var(--soft-choco);
+}
+.owner-promo-create .btn-outline-secondary{
+  border-color:#cbd5e1; color:#374151; background:#fff;
+}
+.owner-promo-create .btn-outline-secondary:hover{
+  color:#fff; background:#6b7280; border-color:#6b7280;
+}
+
+/* Fields */
+.owner-promo-create .form-group label{ font-weight:600; color:#374151; }
+.owner-promo-create .required::after{ content:" *"; color:#dc3545; }
+.owner-promo-create .form-control:focus{
+  border-color:var(--choco);
+  box-shadow:0 0 0 .2rem rgba(140,16,0,.15);
+}
+
+/* Input group cosmetics (Rp / %) */
+.owner-promo-create .input-group-text{
+  background:rgba(140,16,0,.08); color:var(--choco);
+  border-color:rgba(140,16,0,.25);
+}
+
+/* Switch (Bootstrap 4 custom switches) -> choco */
+.owner-promo-create .custom-control-input:focus ~ .custom-control-label::before{
+  box-shadow:0 0 0 .2rem rgba(140,16,0,.15);
+  border-color:var(--choco);
+}
+.owner-promo-create .custom-control-input:checked ~ .custom-control-label::before{
+  background-color:var(--choco); border-color:var(--choco);
+}
+/* Sedikit “iOS-ish” ukuran */
+.owner-promo-create .custom-switch .custom-control-label{
+  padding-left: 1rem;  /* harus > |left| agar switch masuk area label */
+  min-height: 1.8rem;
+}
+.owner-promo-create .custom-switch .custom-control-label::before{
+  width:2.6rem; height:1.4rem; left:-2rem; top:.12rem; border-radius:1.4rem;
+}
+.owner-promo-create .custom-switch .custom-control-label::after{
+  width:1rem; height:1rem; left:calc(-2rem + .2rem); top:.33rem; border-radius:50%;
+}
+.owner-promo-create .custom-control-input:checked ~ .custom-control-label::after{
+  transform:translateX(1.2rem); /* 2.6 - 1.4 = 1.2 */
+}
+
+
+/* Date range wrapper (saat ditampilkan) */
+.owner-promo-create #dateRangeWrap{
+  background:#fff; border:1px solid #eef1f4; border-left:4px solid var(--choco);
+  border-radius:10px; padding: .85rem; margin-top:.5rem;
+}
+
+/* Days grid (checkbox harian) */
+.owner-promo-create #days_grid .custom-control{
+  min-width: 140px;
+}
+
+/* Footer buttons radius */
+.owner-promo-create .card-footer .btn{ border-radius:10px; }
+
+/* Small text */
+.owner-promo-create .text-muted{ color:#6b7280 !important; }
+
+
+/* Kembalikan radius saat tidak ada prefix & suffix */
+.owner-promo-create .input-group:not(.has-prefix):not(.has-suffix) > .form-control{
+  border-radius: .25rem !important;
+}
+
+/* Saat HANYA prefix (Rp) yang aktif, sudut kanan input bulat lagi */
+.owner-promo-create .input-group.has-prefix:not(.has-suffix) > .form-control{
+  border-top-right-radius: .25rem !important;
+  border-bottom-right-radius: .25rem !important;
+}
+.owner-promo-create .input-group.has-prefix .input-group-prepend .input-group-text{
+  border-top-left-radius: .25rem;
+  border-bottom-left-radius: .25rem;
+}
+
+/* Saat HANYA suffix (%) yang aktif, sudut kiri input bulat lagi */
+.owner-promo-create .input-group.has-suffix:not(.has-prefix) > .form-control{
+  border-top-left-radius: .25rem !important;
+  border-bottom-left-radius: .25rem !important;
+}
+.owner-promo-create .input-group.has-suffix .input-group-append .input-group-text{
+  border-top-right-radius: .25rem;
+  border-bottom-right-radius: .25rem;
+}
+
+/* RESET untuk semua (agar checkbox/radio normal) */
+.owner-promo-create .custom-control-input:checked ~ .custom-control-label::after{
+  transform:none;
+}
+
+/* KHUSUS SWITCH: geser knob saat checked */
+.owner-promo-create .custom-switch .custom-control-input:checked ~ .custom-control-label::after{
+  transform: translateX(1.2rem);
+}
+
+</style>
 @endsection
 
-@push('styles')
-<style>
-    .required::after { content:" *"; color:#dc3545; }
-</style>
-@endpush
 
 @section('scripts')
 <script>
@@ -259,31 +391,37 @@
 
     function applyTypeUI() {
         const t = typeSel.value;
+        const ig = document.getElementById('promotion_value').closest('.input-group');
+
         if (t === 'percentage') {
-            // 1–100 %
             prefixAmt.style.display = 'none';
             suffixPct.style.display = '';
-            valInput.min = '1';
-            valInput.max = '100';
-            valInput.step = '1';
+            ig.classList.remove('has-prefix');
+            ig.classList.add('has-suffix');
+
+            valInput.min = '1'; valInput.max = '100'; valInput.step = '1';
             helpText.textContent = 'Masukkan persen (1–100).';
             if (valInput.value && (+valInput.value > 100)) valInput.value = 100;
+
         } else if (t === 'amount') {
-            // rupiah >= 0
             prefixAmt.style.display = '';
             suffixPct.style.display = 'none';
+            ig.classList.add('has-prefix');
+            ig.classList.remove('has-suffix');
+
             valInput.removeAttribute('max');
-            valInput.min = '0';
-            valInput.step = '1';
+            valInput.min = '0'; valInput.step = '1';
             helpText.textContent = 'Masukkan nominal rupiah (contoh: 10000).';
+
         } else {
             prefixAmt.style.display = 'none';
             suffixPct.style.display = 'none';
-            valInput.removeAttribute('min');
-            valInput.removeAttribute('max');
+            ig.classList.remove('has-prefix', 'has-suffix');
+            valInput.removeAttribute('min'); valInput.removeAttribute('max');
             helpText.textContent = '';
         }
     }
+
 
     if (typeSel) {
         typeSel.addEventListener('change', applyTypeUI);

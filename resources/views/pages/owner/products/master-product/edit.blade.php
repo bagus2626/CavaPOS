@@ -37,7 +37,7 @@
                 </button>
             </div>
         @endif
-        <a href="{{ route('owner.user-owner.master-products.index') }}" class="btn btn-secondary mb-3">
+        <a href="{{ route('owner.user-owner.master-products.index') }}" class="btn bg-choco text-white mb-3">
             <i class="fas fa-arrow-left mr-2"></i>Back to Master Products
         </a>
 
