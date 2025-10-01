@@ -103,8 +103,8 @@ Route::middleware('setlocale')->group(function () {
             Route::resource('categories', OwnerCategoryController::class);
 
             Route::prefix('report')->name('report.')->group(function () {
-                Route::resource('sales', SalesReportController::class);
-                Route::get('order-details/{id}', [SalesReportController::class, 'getOrderDetails'])->name('order-details'); // <-- BARIS YANG SUDAH DIPERBAIKI
+                Route::get('sales/export', [SalesReportController::class, 'export'])->name('sales.export');
+                Route::resource('sales', SalesReportController::class)->only(['index']);
             });
             Route::resource('promotions', OwnerPromotionController::class);
         });
