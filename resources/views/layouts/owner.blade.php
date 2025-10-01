@@ -44,47 +44,149 @@
 
 
     <style>
-        /* Custom styles */
-        .brand-link {
-            border-bottom: 1px solid #4b545c;
-        }
+  :root{
+    --choco:#8c1000;
+    --soft-choco:#c12814;
+    --ink:#22272b;
+    --paper:#f7f7f8;
 
-        .main-header {
-            border-bottom: 1px solid #dee2e6;
-        }
+    /* aksen UI */
+    --radius: 12px;
+    --shadow: 0 6px 20px rgba(0,0,0,.08);
 
-        .content-header {
-            padding: 15px 0.5rem;
-        }
+    /* bootstrap override ringan */
+    --primary: var(--choco);
+    --secondary: #6b7280;
+  }
 
-        .card {
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-            margin-bottom: 1rem;
-        }
+  /* ===== Layout polish ===== */
+  body { background: var(--paper); }
 
-        .card-header {
-            border-bottom: 1px solid rgba(0, 0, 0, 0.125);
-            background-color: #f8f9fa;
-        }
+  .card{
+    border: 0;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .card-header{
+    background: #fff;
+    border-bottom: 1px solid #eef1f4;
+    padding: .85rem 1rem;
+  }
 
-        .nav-sidebar .nav-item>.nav-link {
-            border-radius: 0.25rem;
-            margin-bottom: 0.2rem;
-        }
+  .content-header{
+    padding: 18px 0.5rem;
+  }
+  .content-wrapper{
+    background: transparent;
+  }
 
-        .user-panel {
-            border-bottom: 1px solid #4f5962;
-        }
+  /* ===== Navbar ===== */
+  .main-header.navbar{
+    background: #fff !important;
+    border-bottom: 1px solid #eef1f4 !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,.03);
+  }
+  .navbar .nav-link{ color: var(--ink); }
+  .navbar .nav-link:hover{ color: var(--choco); }
 
-        .bg-gradient-primary {
-            background: linear-gradient(135deg, #3f6791 0%, #2c3e50 100%) !important;
-        }
+  /* ===== Brand / Sidebar ===== */
+  .brand-link{
+    background: linear-gradient(135deg,var(--choco),var(--soft-choco)) !important;
+    border-bottom: 0;
+  }
+  .brand-link .brand-image{ background:#fff; }
 
-        .sidebar-dark-primary .nav-sidebar>.nav-item>.nav-link.active {
-            background-color: rgba(255, 255, 255, 0.1);
-            border-left: 3px solid #fff;
-        }
-    </style>
+  .main-sidebar{
+    background: #f3f3f3; /* gelap netral agar choco menonjol */
+  }
+  .sidebar{
+    padding-top: .5rem;
+  }
+
+  /* item level 1 */
+  .nav-sidebar .nav-item > .nav-link{
+    border-radius: 10px;
+    margin: 4px 8px;
+    color: #ac0000;
+    transition: .2s ease;
+  }
+  .nav-sidebar .nav-item > .nav-link:hover{
+    background: rgba(208, 178, 178, 0.06);
+    color: #710000;
+  }
+  .sidebar-dark-primary .nav-sidebar>.nav-item>.nav-link.active{
+    background: linear-gradient(135deg,var(--choco),var(--soft-choco));
+    color: #fff;
+    border-left: 0;
+    box-shadow: 0 6px 16px rgba(207,26,2,.25);
+  }
+
+  /* tree level 2+ */
+  .nav-sidebar .nav-treeview > .nav-item > .nav-link{
+    margin: 2px 16px;
+    border-radius: 20px;
+    color:#c7cdd6;
+  }
+  .nav-sidebar .nav-treeview > .nav-item > .nav-link.active{
+    background: rgba(219,70,48,.18);
+    color:#fff;
+  }
+
+  /* user panel garis halus */
+  .user-panel{ border-bottom: 1px dashed rgba(255,255,255,.08); }
+
+  /* ===== Buttons / Badges ===== */
+  .btn-primary{
+    background: var(--choco);
+    border-color: var(--choco);
+  }
+  .btn-primary:hover{
+    background: var(--soft-choco);
+    border-color: var(--soft-choco);
+  }
+  .badge-warning.navbar-badge{
+    background: var(--soft-choco);
+    color:#fff;
+  }
+
+  /* ===== Tables / DataTables ===== */
+  table.dataTable thead th{
+    border-bottom: 2px solid #eef1f4 !important;
+  }
+  .table thead th{
+    background: #fff;
+  }
+
+  /* ===== Select2 ===== */
+  .select2-container--bootstrap-5 .select2-selection{
+    border-radius: 10px;
+    border-color: #e5e7eb;
+  }
+  .select2-container--bootstrap-5 .select2-results__option--highlighted{
+    background: var(--soft-choco);
+  }
+
+  /* ===== Summernote toolbar ===== */
+  .note-toolbar{
+    border-radius: 10px;
+    border:1px solid #eef1f4;
+  }
+
+  /* ===== Footer ===== */
+  .main-footer{
+    border-top: 1px solid #eef1f4;
+    background:#fff;
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+
+  /* ===== Utility ===== */
+  .bg-choco{ background: var(--choco) !important; }
+  .text-choco{ color: var(--choco) !important; }
+  .soft-shadow{ box-shadow: var(--shadow); }
+  .rounded-2xl{ border-radius: 1rem; }
+</style>
+
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -93,17 +195,17 @@
         <!-- Navbar -->
         <nav class="main-header navbar navbar-expand navbar-white navbar-light border-bottom-0">
             <!-- Left navbar links -->
-            <ul class="navbar-nav">
+            <ul class="navbar-nav bg-choco  rounded-2xl soft-shadow px-3">
                 <li class="nav-item">
                     <a class="nav-link" data-widget="pushmenu" href="#" role="button">
-                        <i class="fas fa-bars"></i>
+                        <i class="fas fa-bars text-white"></i>
                     </a>
                 </li>
                 <li class="nav-item d-none d-sm-inline-block">
-                    <a href="{{ route('owner.user-owner.dashboard') }}" class="nav-link">Dashboard</a>
+                    <a href="{{ route('owner.user-owner.dashboard') }}" class="nav-link text-white">Dashboard</a>
                 </li>
                 <li class="nav-item d-none d-sm-inline-block">
-                    <a href="#" class="nav-link">Support</a>
+                    <a href="#" class="nav-link text-white">Support</a>
                 </li>
             </ul>
 
@@ -115,7 +217,7 @@
                         <i class="far fa-bell"></i>
                         <span class="badge badge-warning navbar-badge">15</span>
                     </a>
-                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right rounded-2xl soft-shadow">
                         <span class="dropdown-item dropdown-header">15 Notifications</span>
                         <div class="dropdown-divider"></div>
                         <a href="#" class="dropdown-item">
@@ -149,16 +251,18 @@
                     <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
                         <img src="https://adminlte.io/themes/v3/dist/img/user2-160x160.jpg"
                             class="user-image img-circle elevation-2" alt="User Image">
-                        <span class="d-none d-md-inline">Owner</span>
+                        <span class="d-none d-md-inline">
+                            @auth {{ auth()->user()->name }} @else User Owner @endauth
+                        </span>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                    <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right rounded-2xl soft-shadow">
                         <!-- User image -->
                         <li class="user-header bg-gradient-primary">
                             <img src="https://adminlte.io/themes/v3/dist/img/user2-160x160.jpg"
                                 class="img-circle elevation-2" alt="User Image">
                             <p>
-                                Owner User
-                                <small>Member since Nov. 2023</small>
+                                @auth {{ auth()->user()->name }} @else User Owner @endauth
+                                <small>Member since @auth {{ auth()->user()->created_at->format('M. Y') }} @else User Owner @endauth</small>
                             </p>
                         </li>
                         <!-- Menu Footer-->
@@ -180,9 +284,9 @@
         <!-- Sidebar -->
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <!-- Brand Logo -->
-            <a href="{{ route('owner.user-owner.dashboard') }}" class="brand-link bg-gradient-primary">
-                <img src="https://adminlte.io/themes/v3/dist/img/AdminLTELogo.png" alt="AdminLTE Logo"
-                    class="brand-image img-circle elevation-3" style="opacity: .8">
+            <a href="{{ route('owner.user-owner.dashboard') }}" class="brand-link bg-choco">
+                <img src="{{ asset('images/cava-logo2-gradient.png') }}" alt="Cavaa Logo"
+                    class="brand-image rounded-full" style="opacity: .8">
                 <span class="brand-text font-weight-light">Owner Panel</span>
             </a>
 
@@ -194,8 +298,10 @@
                         <img src="https://adminlte.io/themes/v3/dist/img/user2-160x160.jpg"
                             class="img-circle elevation-2" alt="User Image">
                     </div>
-                    <div class="info">
-                        <a href="#" class="d-block">User Owner</a>
+                    <div class="info ">
+                        <a href="#" class="d-block text-choco">
+                            @auth {{ auth()->user()->name }} @else User Owner @endauth
+                        </a>
                     </div>
                 </div>
 
@@ -549,19 +655,23 @@
         });
     </script>
     <style>
+        .sidebar-dark-primary .nav-sidebar > .nav-header {
+            color: #8c1000;
+        }
+
         /* level 1 (Store) */
         .nav-sidebar .nav-item {
-            background-color: #343a40;
-            /* abu tua */
-            color: #fff;
+            background-color: #eae4e4;
+            color: #ffffff;
         }
 
         /* level 2 (Table Management) */
         .nav-sidebar .nav-treeview>.nav-item {
-            background-color: #5a6066;
+            background-color: #8c1000;
             /* lebih terang */
             color: #fff;
-            margin-left: 5px;
+            margin-left: 20px;
+            border-radius: 20px;
         }
 
         /* level 3 (Tables, Seat Layout) */
@@ -575,14 +685,18 @@
         .nav-sidebar .nav-item>.nav-link.active {
             background-color: #343a40;
             /* abu tua */
-            color: #fff;
+            color: #ffffff;
         }
 
         /* level 2 (Table Management) */
         .nav-sidebar .nav-treeview>.nav-item>.nav-link.active {
-            background-color: #5a6066;
+            background: linear-gradient(90deg, #bf0303, #620000);
             /* lebih terang */
-            color: #fff;
+            color: #ffffff;
+        }
+
+        .nav-sidebar .nav-treeview>.nav-item>.nav-link.active:hover {
+            color: #d79805;
         }
 
         /* level 3 (Tables, Seat Layout) */
@@ -591,6 +705,20 @@
             /* lebih cerah lagi */
             color: #fff;
         }
+
+        #toast-container > .toast {
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+        #toast-container > .toast-success { background-color: var(--choco); }
+        .swal2-popup{
+            border-radius: 14px !important;
+        }
+        .swal2-confirm{
+            background: var(--choco) !important;
+            border: none !important;
+        }
+
     </style>
 
     @yield('scripts')

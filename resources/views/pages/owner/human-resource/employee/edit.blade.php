@@ -4,8 +4,8 @@
 @section('page_title', 'Edit Employee')
 
 @section('content')
-<div class="container">
-    <a href="{{ route('owner.user-owner.employees.index') }}" class="btn btn-secondary mb-3">
+<div class="container owner-emp-edit"> {{-- tambahkan class page-scope --}}
+    <a href="{{ route('owner.user-owner.employees.index') }}" class="btn btn-outline-choco mb-3">
         <i class="fas fa-arrow-left mr-2"></i>Back to Employees
     </a>
 
@@ -238,14 +238,94 @@
 
                 {{-- Submit --}}
                 <div class="d-flex justify-content-end">
-                    <a href="{{ route('owner.user-owner.employees.index') }}" class="btn btn-secondary me-2">Cancel</a>
-                    <button type="submit" class="btn btn-primary">Update</button>
+                    <a href="{{ route('owner.user-owner.employees.index') }}" class="btn btn-light border me-2">Cancel</a>
+                    <button type="submit" class="btn btn-choco">Update</button>
                 </div>
 
             </form>
         </div>
     </div>
 </div>
+
+<style>
+    <style>
+/* ===== Owner › Employee Edit (page scope) ===== */
+.owner-emp-edit{
+  --choco:#8c1000; --soft-choco:#c12814; --ink:#22272b; --paper:#f7f7f8;
+  --radius:12px; --shadow:0 6px 20px rgba(0,0,0,.08);
+}
+
+/* Card & header */
+.owner-emp-edit .card{
+  border:0; border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;
+}
+.owner-emp-edit .card-header{
+  background:#fff; border-bottom:1px solid #eef1f4; padding:.85rem 1rem;
+}
+.owner-emp-edit .card-title{ color:var(--ink); font-weight:600; }
+
+/* Alerts */
+.owner-emp-edit .alert{ border-left:4px solid var(--choco); border-radius:10px; }
+.owner-emp-edit .alert-danger{ background:#fff5f5; border-color:#fde2e2; color:#991b1b; }
+.owner-emp-edit .alert-success{ background:#f0fdf4; border-color:#dcfce7; color:#166534; }
+
+/* Labels & fields */
+.owner-emp-edit .form-label{ font-weight:600; color:#374151; }
+.owner-emp-edit .form-control:focus,
+.owner-emp-edit select.form-control:focus{
+  border-color:var(--choco);
+  box-shadow:0 0 0 .2rem rgba(140,16,0,.15);
+}
+
+/* Input group “@username” & check button */
+.owner-emp-edit .input-group-text{
+  background:rgba(140,16,0,.08); color:var(--choco); border-color:rgba(140,16,0,.25);
+}
+.owner-emp-edit #btnCheckUsername{
+  border-color:var(--choco); color:var(--choco); background:#fff;
+}
+.owner-emp-edit #btnCheckUsername:hover{
+  background:var(--choco); color:#fff; border-color:var(--choco);
+}
+.owner-emp-edit #btnCheckUsername .spinner-border{ margin-left:.35rem; }
+
+/* Username status badge */
+.owner-emp-edit #usernameStatus .badge{ border-radius:999px; padding:.28rem .6rem; font-weight:600; }
+.owner-emp-edit #usernameStatus .bg-success{ background:#ecfdf5 !important; color:#065f46 !important; border:1px solid #a7f3d0; }
+.owner-emp-edit #usernameStatus .bg-danger{ background:#fee2e2 !important; color:#991b1b !important; border:1px solid #fecaca; }
+
+/* Switch */
+.owner-emp-edit .form-check-input:checked{ background-color:var(--choco); border-color:var(--choco); }
+.owner-emp-edit .form-check-input:focus{ box-shadow:0 0 0 .2rem rgba(140,16,0,.15); border-color:var(--soft-choco); }
+
+/* Image preview */
+.owner-emp-edit #imagePreviewWrapper .img-thumbnail{
+  border:0; border-radius:var(--radius); box-shadow:var(--shadow);
+}
+.owner-emp-edit #clearImageBtn{
+  transform:translate(35%,-35%); border-radius:999px; width:28px; height:28px; padding:0; line-height:26px;
+}
+
+/* Buttons – brand */
+.owner-emp-edit .btn-choco{ background:var(--choco); border-color:var(--choco); color:#fff; }
+.owner-emp-edit .btn-choco:hover{ background:var(--soft-choco); border-color:var(--soft-choco); }
+.owner-emp-edit .btn-outline-choco{ color:var(--choco); border-color:var(--choco);}
+.owner-emp-edit .btn-outline-choco:hover{ color:#fff; background:var(--choco); border-color:var(--choco); }
+
+/* Fallback reskin default buttons (jaga kompatibilitas) */
+.owner-emp-edit .btn-primary{ background:var(--choco); border-color:var(--choco); }
+.owner-emp-edit .btn-primary:hover{ background:var(--soft-choco); border-color:var(--soft-choco); }
+.owner-emp-edit .btn-secondary{ color:var(--choco); background:#fff; border-color:var(--choco); }
+.owner-emp-edit .btn-secondary:hover{ color:#fff; background:var(--choco); border-color:var(--choco); }
+
+/* Action row */
+.owner-emp-edit .d-flex .btn{ min-width:120px; }
+
+/* Small helpers */
+.owner-emp-edit .text-muted{ color:#6b7280 !important; }
+</style>
+
+</style>
 @endsection
 
 @push('scripts')

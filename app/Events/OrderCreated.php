@@ -13,6 +13,7 @@ class OrderCreated implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
     public bool $afterCommit = true;
+    public string $broadcastQueue = 'broadcasts';
 
     public function __construct(public BookingOrder $order) {}
 

@@ -133,6 +133,12 @@ return [
             'expire'   => 60,
             'throttle' => 60,
         ],
+        'owners' => [
+            'provider' => 'owners',                // sudah ada di providers kamu
+            'table'    => 'password_reset_tokens', // pakai default
+            'expire'   => 60,                      // menit
+            'throttle' => 60,                      // detik
+        ],
     ],
 
     /*

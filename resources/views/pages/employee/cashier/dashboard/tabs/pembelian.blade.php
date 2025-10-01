@@ -104,7 +104,7 @@
             <div
               @class([
                 'menu-item bg-white flex flex-row transition hover:shadow-lg px-4 border-b border-gray-200',
-                'grayscale' => $product->quantity < 1,
+                'grayscale' => $product->quantity < 1 && $product->always_available_flag === 0,
               ])
               data-category="{{ $product->category_id }}"
             >
@@ -136,7 +136,7 @@
                   <button class="minus-btn w-9 h-9 flex items-center justify-center border border-choco rounded-lg font-bold text-choco hover:bg-gray-100 hidden"
                           data-id="{{ $product->id }}">-</button>
                   <span class="qty text-lg font-semibold text-gray-800 hidden" id="qty-{{ $product->id }}">0</span>
-                  @if ($product->quantity < 1)
+                  @if ($product->quantity < 1 && $product->always_available_flag === 0)
                     <p class="text-gray-700">Habis</p>
                   @else
                     <button class="plus-btn w-9 h-9 flex items-center justify-center border rounded-lg font-bold text-white bg-choco hover:bg-soft-choco"
@@ -166,7 +166,7 @@
   /* Filter button style */
   .filter-btn { background-color: white; color: #000000; transition: all 0.2s; }
   .filter-btn:hover { background-color: #eff6ff; } /* blue-50 */
-  .filter-btn.active { background-color: #9A3F3F; color: white; } /* choco */
+  .filter-btn.active { background-color: #CF1A02; color: white; } /* choco */
 
   /* Modal overlay */
   #parentOptionsModal { background-color: rgba(0,0,0,0.4); }
@@ -538,9 +538,10 @@ window.initPembelianTab = function initPembelianTab() {
         priceSpan.className = 'ml-auto text-sm font-medium';
 
         const qty = Number(opt.quantity) || 0;
+        const alwaysAvailable = Boolean(opt.always_available_flag);
         const priceNum = Number(opt.price) || 0;
 
-        if (qty < 1) {
+        if (qty < 1 && !alwaysAvailable) {
           priceSpan.textContent = 'Habis'; priceSpan.classList.add('text-red-600');
           checkbox.disabled = true; label.classList.add('line-through','opacity-60','cursor-not-allowed');
           const val = parseInt(checkbox.value,10);
@@ -981,6 +982,8 @@ window.initPembelianTab = function initPembelianTab() {
         timer:1400,
         showConfirmButton:false
         });
+        
+        window.location.reload();
 
 
     } catch (err) {
@@ -994,35 +997,6 @@ window.initPembelianTab = function initPembelianTab() {
     }
   });
 
-  // ======== FILTER KATEGORI ========
-  // (function setupCategoryFilter(){
-  //   const filterButtons  = document.querySelectorAll('.filter-btn');
-  //   const categoryGroups = document.querySelectorAll('.category-group');
-  //   const items          = document.querySelectorAll('.menu-item');
-
-  //   function applyFilter(category) {
-  //     // tombol active
-  //     filterButtons.forEach(b => b.classList.remove('active'));
-  //     const btn = document.querySelector(`.filter-btn[data-category="${category}"]`);
-  //     if (btn) btn.classList.add('active');
-
-  //     // tampilkan group heading sesuai pilihan
-  //     categoryGroups.forEach(group => {
-  //       if (category === 'all') group.style.display = 'block';
-  //       else group.style.display = (group.dataset.category === category) ? 'block' : 'none';
-  //     });
-
-  //     // tampilkan item
-  //     items.forEach(item => {
-  //       if (category === 'all' || item.dataset.category === category) item.style.display = 'flex';
-  //       else item.style.display = 'none';
-  //     });
-  //   }
-
-  //   filterButtons.forEach(btn => {
-  //     btn.addEventListener('click', () => applyFilter(btn.dataset.category));
-  //   });
-  // })();
     // ======== FILTER KATEGORI + SEARCH ========
   (function setupCategoryAndSearch(){
     if (window.__CATSEARCH_INITED__) return;

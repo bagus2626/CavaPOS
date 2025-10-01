@@ -34,7 +34,10 @@
                 <label for="remember" class="ml-2 block text-sm text-gray-900">Ingat saya</label>
             </div>
             <div class="text-sm">
-                {{-- <a href="{{ route('customer.password.request') }}" class="text-blue-600 hover:text-blue-800">Lupa password?</a> --}}
+                <a href="{{ route('customer.password.request', ['partner_slug' => $partner_slug, 'table_code' => $table_code]) }}"
+                class="text-blue-600 hover:text-blue-800">
+                    Lupa password?
+                </a>
             </div>
         </div>
 
@@ -55,8 +58,8 @@
 
     {{-- Login Social --}}
     <div class="space-y-3">
-        {{-- <a href="{{ route('customer.social.login', ['provider' => 'google']) }}" --}}
-        <a href="{{ route('customer.social.login', ['provider' => 'google', 'partner_slug' => $partner_slug, 'table_code' => $table_code]) }}"
+        {{-- <a href="{{ route('customer.google.redirect', ['provider' => 'google']) }}" --}}
+        <a href="{{ route('customer.google.redirect', ['provider' => 'google', 'partner_slug' => $partner_slug, 'table_code' => $table_code]) }}"
            class="w-full inline-flex justify-center items-center border border-gray-300 rounded-md py-2 px-4 mb-2 hover:bg-gray-100 transition">
             <img src="{{ asset('images/google-logo.png') }}" class="w-6 h-6 mr-2" alt="Google">
             Login dengan Google

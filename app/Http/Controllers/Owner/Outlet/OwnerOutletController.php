@@ -178,6 +178,7 @@ class OwnerOutletController extends Controller
     // Update data
     public function update(Request $request, User $outlet)
     {
+        // dd($request->all());
         abort_if($outlet->role !== 'partner', 404);
         abort_if($outlet->owner_id !== Auth::id(), 403);
 
@@ -207,6 +208,8 @@ class OwnerOutletController extends Controller
             'district' => ['required', 'string', 'max:255'],
             'village'  => ['required', 'string', 'max:255'],
             'address'  => ['required', 'string'],
+            'is_active' => ['nullable', 'boolean'],
+            'is_qr_active' => ['nullable', 'boolean'],
 
             'image'    => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:2048'],
         ]);
@@ -266,6 +269,8 @@ class OwnerOutletController extends Controller
                 'urban_village'    => $request->village_name,
                 'urban_village_id' => $request->village,
                 'address'          => $request->address,
+                'is_active'        => $request->is_active ?? 0,
+                'is_qr_active'     => $request->is_qr_active ?? 0,
             ];
 
             if ($request->filled('password')) {

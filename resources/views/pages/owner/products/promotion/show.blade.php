@@ -5,7 +5,7 @@
 
 @section('content')
 <section class="content">
-    <div class="container-fluid">
+    <div class="container-fluid owner-promo-show"> {{-- PAGE SCOPE --}}
         <div class="row">
             <div class="col-12">
 
@@ -31,7 +31,7 @@
                     </div>
                 </div>
 
-                <div class="card shadow-sm">
+                <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h3 class="card-title mb-0">{{ $data->promotion_name }}</h3>
                         <div>
@@ -44,26 +44,13 @@
                     </div>
 
                     @php
-                        // Map hari
-                        $daysMap = [
-                            'mon' => 'Senin',
-                            'tue' => 'Selasa',
-                            'wed' => 'Rabu',
-                            'thu' => 'Kamis',
-                            'fri' => 'Jumat',
-                            'sat' => 'Sabtu',
-                            'sun' => 'Minggu',
-                        ];
-
-                        // Pastikan $data->active_days berupa array (gunakan casts di Model: protected $casts = ['active_days' => 'array'];)
+                        $daysMap = ['mon'=>'Senin','tue'=>'Selasa','wed'=>'Rabu','thu'=>'Kamis','fri'=>'Jumat','sat'=>'Sabtu','sun'=>'Minggu'];
                         $days = is_array($data->active_days) ? $data->active_days : [];
                         $isEveryDay = count($days) === 7;
 
-                        // Format tanggal (handle null)
                         $startLabel = optional($data->start_date)->translatedFormat('d F Y H:i');
                         $endLabel   = optional($data->end_date)->translatedFormat('d F Y H:i');
 
-                        // Teks tipe & nilai
                         $typeLabel = $data->promotion_type === 'percentage' ? 'Percentage' : 'Amount';
                         $valueLabel = $data->promotion_type === 'percentage'
                             ? ($data->promotion_value . '%')
@@ -73,7 +60,7 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-lg-6">
-                                <dl class="row mb-0">
+                                <dl class="row mb-0 info-dl">
                                     <dt class="col-sm-5">Kode Promo</dt>
                                     <dd class="col-sm-7">{{ $data->promotion_code ?? '-' }}</dd>
 
@@ -91,7 +78,7 @@
                             </div>
 
                             <div class="col-lg-6">
-                                <dl class="row mb-0">
+                                <dl class="row mb-0 info-dl">
                                     <dt class="col-sm-5">Gunakan Periode (Expired)?</dt>
                                     <dd class="col-sm-7">
                                         @if((int)($data->uses_expiry ?? 0) === 1)
@@ -134,7 +121,7 @@
 
                         <div class="form-group mb-0">
                             <label class="mb-1">Description</label>
-                            <div class="p-3 border rounded bg-light">
+                            <div class="p-3 border rounded desc-box">
                                 {!! nl2br(e($data->description ?? '-')) !!}
                             </div>
                         </div>
@@ -154,4 +141,72 @@
         </div>
     </div>
 </section>
+
+<style>
+/* ===== Owner › Promotion Show (page scope) ===== */
+.owner-promo-show{
+  --choco:#8c1000; --soft-choco:#c12814; --ink:#22272b; --paper:#fff;
+  --radius:12px; --shadow:0 6px 20px rgba(0,0,0,.08);
+}
+
+.btn-secondary{
+  background:var(--choco); border-color:var(--choco);
+}
+.btn-secondary:hover{
+  background:var(--soft-choco); border-color:var(--soft-choco);
+}
+
+.btn-outline-secondary{
+  color:var(--choco); border-color:var(--choco);
+}
+.btn-outline-secondary:hover{
+  background:var(--choco); border-color:var(--choco); color:#fff;
+}
+
+/* Card */
+.owner-promo-show .card{
+  border:0; border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; background:var(--paper);
+}
+.owner-promo-show .card-header{ background:#fff; border-bottom:1px solid #eef1f4; }
+.owner-promo-show .card-title{ color:var(--ink); font-weight:700; }
+
+/* Buttons */
+.owner-promo-show .btn-primary{ background:var(--choco); border-color:var(--choco); }
+.owner-promo-show .btn-primary:hover{ background:var(--soft-choco); border-color:var(--soft-choco); }
+
+/* Badges (soft) */
+.owner-promo-show .badge{ border-radius:999px; font-weight:600; }
+.owner-promo-show .badge.badge-success{
+  background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0;
+}
+.owner-promo-show .badge.badge-secondary{
+  background:#f3f4f6; color:#374151; border:1px solid #e5e7eb;
+}
+.owner-promo-show .badge.badge-primary{
+  background:rgba(140,16,0,.1); color:var(--choco); border:1px solid rgba(140,16,0,.25);
+}
+.owner-promo-show .badge.badge-info{
+  background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe;
+}
+.owner-promo-show .badge.badge-light{
+  background:#fff; color:#374151; border:1px solid #e5e7eb;
+}
+
+/* Definition list */
+.owner-promo-show .info-dl dt{ color:#6b7280; font-weight:600; }
+.owner-promo-show .info-dl dd{ margin-bottom:.5rem; }
+
+/* Description box */
+.owner-promo-show .desc-box{
+  background:#fcfcfc; border-color:#eef1f4;
+}
+
+/* Small text overrides */
+.owner-promo-show .text-muted{ color:#6b7280 !important; }
+
+/* Responsive tweak */
+@media (max-width: 576px){
+  .owner-promo-show .card-title{ font-size:1.05rem; }
+}
+</style>
 @endsection

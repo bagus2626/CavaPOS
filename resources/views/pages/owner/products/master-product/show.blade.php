@@ -1,111 +1,407 @@
-@extends('layouts.partner')
+@extends('layouts.owner')
 
 @section('title', 'Product Detail')
-@section('page_title', 'Product Detail')
+@section('page_title', 'Master Product Detail')
 
 @section('content')
-<section class="content">
-    <div class="container-fluid">
+@php
+  use Illuminate\Support\Str;
 
-        {{-- Tombol kembali --}}
-        <a href="{{ route('partner.products.index') }}" class="btn btn-outline-secondary mb-4">
-            ← Back to Products
-        </a>
+  // fleksibel: dukung $product atau $data
+  $prod = $product ?? $data ?? null;
 
-        <div class="card shadow-sm rounded-4 border-0">
-            <div class="card-header bg-secondary text-white rounded-top-4">
-                <h3 class="card-title fw-bold mb-0">{{$data->name}}</h3>
-            </div>
-            <div class="card-body">
+  // kategori (opsional)
+  $catName = optional($prod->category)->category_name ?? 'Uncategorized';
 
-                {{-- Gambar produk --}}
-                @if($data->pictures)
-                    @php
-                        $pictures = $data->pictures;
-                    @endphp
-                    <div class="mb-4 d-flex flex-wrap gap-3 justify-content-start">
-                        @foreach($pictures as $pic)
-                            <div class="product-img-wrapper" style="max-width: 220px;">
-                                <img src="{{ asset($pic['path']) }}"
-                                     alt="{{ $pic['filename'] }}"
-                                     class="img-fluid rounded shadow-sm border"
-                                     style="object-fit: cover; width: 100%; height: 150px;">
-                            </div>
-                        @endforeach
-                    </div>
-                @endif
+  // gambar utama (ambil dari pictures[0] jika ada)
+  $firstImg = null;
+  if (!empty($prod->pictures) && is_array($prod->pictures)) {
+      $first = $prod->pictures[0] ?? null;
+      if ($first && !empty($first['path'])) {
+          $firstImg = Str::startsWith($first['path'], ['http://','https://'])
+              ? $first['path']
+              : asset($first['path']);
+      }
+  } elseif (!empty($prod->image)) {
+      $firstImg = Str::startsWith($prod->image, ['http://','https://'])
+          ? $prod->image
+          : asset('storage/'.$prod->image);
+  }
 
-                {{-- Deskripsi --}}
-                <p class="fs-5"><strong>Description:</strong> {{$data->description}}</p>
+  // promo (dukung relasi / field berbeda)
+  $promo = $prod->promotion ?? $prod->promo ?? null;
+  $promoType  = $promo->promotion_type  ?? null;   // 'percentage' atau 'nominal'
+  $promoValue = $promo->promotion_value ?? null;
+  $promoName  = $promo->promotion_name  ?? null;
 
-                {{-- Parent Options --}}
-                @foreach($data->parent_options as $parentOption)
-                    <div class="card mt-4 shadow-sm rounded-4 border-0">
-                        <div class="card-header bg-secondary text-white rounded-top-4">
-                            <h4 class="card-title mb-0 fw-semibold">{{ $parentOption->name }}</h4>
-                        </div>
-                        <div class="card-body">
-                            <p class="mb-3">{{ $parentOption->description }}</p>
+  // harga final setelah promo
+  $basePrice = (float) ($prod->price ?? 0);
+  $finalPrice = $basePrice;
+  if ($promoType && $promoValue !== null) {
+      if ($promoType === 'percentage') {
+          $finalPrice = max(0, $basePrice - ($basePrice * ((float)$promoValue/100)));
+      } else {
+          $finalPrice = max(0, $basePrice - (float)$promoValue);
+      }
+  }
+@endphp
 
-                            @if($parentOption->options->isNotEmpty())
-                                <div class="table-responsive rounded-3 shadow-sm border">
-                                    <table class="table table-striped mb-0">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Options</th>
-                                                <th>Quantity</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach($parentOption->options as $option)
-                                                <tr>
-                                                    <td>{{ $option->name }}</td>
-                                                    <td>{{ $option->quantity }}</td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            @else
-                                <p class="text-muted">No Option found for this package.</p>
-                            @endif
-                        </div>
-                    </div>
-                @endforeach
+<div class="container owner-prod-show">
+  {{-- Toolbar --}}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <a href="{{ route('owner.user-owner.master-products.index') }}" class="btn btn-outline-choco">
+      <i class="fas fa-arrow-left me-2"></i>Back to Products
+    </a>
 
-            </div>
-        </div>
+    <div class="btn-group">
+      <a href="{{ route('owner.user-owner.master-products.edit', $prod->id) }}" class="btn btn-choco">
+        <i class="fas fa-pen me-1"></i> Edit
+      </a>
+      <button class="btn btn-soft-danger"
+              onclick="ownerConfirmDeletion(`{{ route('owner.user-owner.master-products.destroy', $prod->id) }}`)">
+        <i class="fas fa-trash-alt me-1"></i> Delete
+      </button>
     </div>
-</section>
+  </div>
+
+  <div class="card shadow-sm product-card">
+    {{-- Hero --}}
+    <div class="product-hero">
+      <div class="product-avatar">
+        @if($firstImg)
+          <img src="{{ $firstImg }}" alt="{{ $prod->name }}">
+        @else
+          <div class="product-avatar__placeholder">
+            {{ Str::upper(Str::substr($prod->name ?? 'P', 0, 1)) }}
+          </div>
+        @endif
+      </div>
+
+      <div class="product-hero__meta">
+        <h3 class="product-name mb-1">{{ $prod->name }}</h3>
+
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <span class="badge badge-chip">
+            <i class="fas fa-tag me-1"></i>{{ $catName }}
+          </span>
+
+          @if($promo)
+            <span class="badge badge-promo">
+              <i class="fas fa-bolt me-1"></i>{{ $promoName ?? 'Promo' }}
+            </span>
+          @endif
+        </div>
+
+        <div class="price-wrap mt-2">
+          @if($promo && $finalPrice < $basePrice)
+            <div class="d-flex align-items-baseline gap-2 flex-wrap">
+              <span class="price-final">Rp {{ number_format($finalPrice, 0, ',', '.') }}</span>
+              <span class="price-strike text-muted">Rp {{ number_format($basePrice, 0, ',', '.') }}</span>
+              <span class="badge badge-saving">
+                @if($promoType === 'percentage')
+                  -{{ number_format($promoValue, 0, ',', '.') }}%
+                @else
+                  -Rp {{ number_format($promoValue, 0, ',', '.') }}
+                @endif
+              </span>
+            </div>
+          @else
+            <span class="price-final">Rp {{ number_format($basePrice, 0, ',', '.') }}</span>
+          @endif
+        </div>
+      </div>
+    </div>
+
+    {{-- Body --}}
+    <div class="card-body">
+      <div class="row gy-3">
+        {{-- Description --}}
+        <div class="col-12">
+          <div class="section-title">Description</div>
+          <div class="desc-body">
+            @if(!empty($prod->description))
+              {!! $prod->description !!}
+            @else
+              <span class="text-muted">No description.</span>
+            @endif
+          </div>
+        </div>
+
+        {{-- Gallery --}}
+        <div class="col-12">
+          <div class="section-title">Images</div>
+          <div class="thumb-grid">
+            @if(!empty($prod->pictures) && is_array($prod->pictures))
+              @foreach($prod->pictures as $p)
+                @php
+                  $src = !empty($p['path'])
+                        ? (Str::startsWith($p['path'], ['http://','https://']) ? $p['path'] : asset($p['path']))
+                        : null;
+                @endphp
+                @if($src)
+                  <a href="{{ $src }}" target="_blank" rel="noopener" class="thumb-item">
+                    <img src="{{ $src }}" alt="{{ $p['filename'] ?? 'Product Image' }}">
+                  </a>
+                @endif
+              @endforeach
+            @else
+              <span class="text-muted">No images.</span>
+            @endif
+          </div>
+        </div>
+
+        {{-- Meta --}}
+        <div class="col-md-6">
+          <div class="section-title">Meta</div>
+          <dl class="meta-list">
+            <dt>Category</dt>
+            <dd>{{ $catName }}</dd>
+
+            <dt>Base Price</dt>
+            <dd>Rp {{ number_format($basePrice, 0, ',', '.') }}</dd>
+
+            <dt>Final Price</dt>
+            <dd>Rp {{ number_format($finalPrice, 0, ',', '.') }}</dd>
+          </dl>
+        </div>
+
+        <div class="col-md-6">
+          <div class="section-title">Promotion</div>
+          <dl class="meta-list">
+            <dt>Status</dt>
+            <dd>
+              @if($promo)
+                <span class="badge badge-promo">Active</span>
+              @else
+                <span class="badge badge-soft-secondary">None</span>
+              @endif
+            </dd>
+
+            @if($promo)
+              <dt>Promo Name</dt>
+              <dd>{{ $promoName }}</dd>
+
+              <dt>Type</dt>
+              <dd class="text-capitalize">{{ $promoType }}</dd>
+
+              <dt>Value</dt>
+              <dd>
+                @if($promoType === 'percentage')
+                  {{ number_format($promoValue, 0, ',', '.') }}%
+                @else
+                  Rp {{ number_format($promoValue, 0, ',', '.') }}
+                @endif
+              </dd>
+            @endif
+          </dl>
+        </div>
+
+        {{-- Options --}}
+        <div class="col-12">
+          <div class="section-title">Options</div>
+          @php
+            $parents = $prod->parent_options ?? collect();
+          @endphp
+
+          @if($parents && count($parents))
+            <div class="options-stack">
+              @foreach($parents as $parent)
+                <div class="option-card">
+                  <div class="option-head">
+                    <div class="lh-sm">
+                      <div class="option-title">{{ $parent->name }}</div>
+                      @if(!empty($parent->description))
+                        <div class="option-sub">{{ $parent->description }}</div>
+                      @endif
+                    </div>
+                    <div class="option-badges">
+                      <span class="badge badge-chip">
+                        {{ $parent->provision ?? '—' }}
+                        @if(!empty($parent->provision_value) && $parent->provision !== 'OPTIONAL')
+                          : {{ $parent->provision_value }}
+                        @endif
+                      </span>
+                    </div>
+                  </div>
+
+                  @if(!empty($parent->options) && count($parent->options))
+                    <div class="table-responsive">
+                      <table class="table table-sm align-middle mb-0">
+                        <thead>
+                          <tr>
+                            <th style="width:38%">Option</th>
+                            <th style="width:18%">Price</th>
+                            <th>Description</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @foreach($parent->options as $opt)
+                            <tr>
+                              <td class="fw-600">{{ $opt->name }}</td>
+                              <td>Rp {{ number_format((float)$opt->price, 0, ',', '.') }}</td>
+                              <td class="text-muted">{{ $opt->description ?: '—' }}</td>
+                            </tr>
+                          @endforeach
+                        </tbody>
+                      </table>
+                    </div>
+                  @else
+                    <div class="text-muted">No child options.</div>
+                  @endif
+                </div>
+              @endforeach
+            </div>
+          @else
+            <span class="text-muted">No options.</span>
+          @endif
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* ===== Owner › Product Show (page scope) ===== */
+.owner-prod-show{
+  --choco:#8c1000; --soft-choco:#c12814; --ink:#22272b; --paper:#f7f7f8;
+  --radius:12px; --shadow:0 6px 20px rgba(0,0,0,.08);
+}
+
+/* Card */
+.owner-prod-show .product-card{
+  border:0; border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;
+}
+
+/* Hero */
+.owner-prod-show .product-hero{
+  display:flex; align-items:center; gap:12px;
+  padding:12px 16px; background:#fff; border-bottom:1px solid #eef1f4;
+}
+.owner-prod-show .product-avatar{
+  width:64px; height:64px; border-radius:12px; overflow:hidden; flex:0 0 auto;
+  box-shadow:var(--shadow); background:#fff;
+}
+.owner-prod-show .product-avatar img{
+  width:100%; height:100%; object-fit:cover; display:block;
+}
+.owner-prod-show .product-avatar__placeholder{
+  width:100%; height:100%; display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-size:22px; color:#fff;
+  background:linear-gradient(135deg, var(--choco), var(--soft-choco));
+}
+.owner-prod-show .product-hero__meta{ min-width:0; }
+.owner-prod-show .product-name{ font-weight:700; color:var(--ink); margin:0; }
+
+/* Price */
+.owner-prod-show .price-wrap{ line-height:1; }
+.owner-prod-show .price-final{
+  font-size:1.25rem; font-weight:800; color:#111827;
+}
+.owner-prod-show .price-strike{
+  text-decoration: line-through;
+}
+.owner-prod-show .badge-saving{
+  background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; border-radius:999px;
+  padding:.2rem .5rem; font-weight:700;
+}
+
+/* Badges */
+.owner-prod-show .badge-chip{
+  background:#fff1ef; color:#8c1000; border:1px solid #f7c9c2; border-radius:999px;
+  padding:.28rem .6rem; font-weight:600;
+}
+.owner-prod-show .badge-promo{
+  background:#fef3c7; color:#92400e; border:1px solid #fde68a; border-radius:999px;
+  padding:.28rem .6rem; font-weight:700;
+}
+.owner-prod-show .badge-soft-secondary{
+  background:#f3f4f6; color:#374151; border:1px solid #e5e7eb; border-radius:999px;
+  padding:.28rem .6rem; font-weight:600;
+}
+
+/* Sections */
+.owner-prod-show .section-title{
+  font-weight:700; color:#374151; margin-bottom:.5rem;
+}
+
+/* Description */
+.owner-prod-show .desc-body :where(p,ul,ol){ margin-bottom:.5rem; }
+.owner-prod-show .desc-body img{ max-width:100%; height:auto; border-radius:10px; }
+
+/* Meta list */
+.owner-prod-show .meta-list{ margin:0 0 1rem; }
+.owner-prod-show .meta-list dt{ font-weight:700; color:#374151; margin-top:.35rem; }
+.owner-prod-show .meta-list dd{ margin-bottom:.75rem; color:#4b5563; }
+
+/* Gallery */
+.owner-prod-show .thumb-grid{
+  display:flex; flex-wrap:wrap; gap:.6rem;
+}
+.owner-prod-show .thumb-item img{
+  width:96px; height:96px; object-fit:cover; display:block;
+  border-radius:12px; border:0; box-shadow:var(--shadow);
+}
+
+/* Options */
+.owner-prod-show .options-stack{ display:flex; flex-direction:column; gap:.75rem; }
+.owner-prod-show .option-card{
+  border:1px solid #eef1f4; border-radius:12px; padding:.75rem;
+  background:#fff;
+}
+.owner-prod-show .option-head{
+  display:flex; justify-content:space-between; align-items:flex-start; gap:.75rem; margin-bottom:.5rem;
+}
+.owner-prod-show .option-title{ font-weight:700; color:#111827; }
+.owner-prod-show .option-sub{ color:#6b7280; font-size:.95rem; }
+
+/* Buttons */
+.owner-prod-show .btn-choco{ background:var(--choco); border-color:var(--choco); color:#fff; }
+.owner-prod-show .btn-choco:hover{ background:var(--soft-choco); border-color:var(--soft-choco); }
+.owner-prod-show .btn-outline-choco{ color:var(--choco); border-color:var(--choco); }
+.owner-prod-show .btn-outline-choco:hover{ color:#fff; background:var(--choco); border-color:var(--choco); }
+.owner-prod-show .btn-soft-danger{ background:#fee2e2; color:#991b1b; border-color:#fecaca; }
+.owner-prod-show .btn-soft-danger:hover{ background:#fecaca; color:#7f1d1d; border-color:#fca5a5; }
+
+/* Table */
+.owner-prod-show table thead th{
+  background:#fff; border-bottom:2px solid #eef1f4!important; color:#374151; font-weight:700;
+}
+</style>
 @endsection
 
-@push('styles')
-<style>
-    /* Hover effect untuk card parent options */
-    .card:hover {
-        transform: translateY(-3px);
-        transition: all 0.2s ease-in-out;
-    }
 
-    /* Gaya tombol back */
-    .btn-outline-secondary {
-        font-weight: 500;
-        border-radius: 50px;
-        padding: 0.5rem 1.2rem;
-    }
 
-    /* Styling gambar produk */
-    .product-img-wrapper img {
-        transition: transform 0.3s ease;
-    }
 
-    .product-img-wrapper img:hover {
-        transform: scale(1.05);
+@push('scripts')
+<script>
+  function ownerConfirmDeletion(url, opts = {}) {
+    const base = {
+      title: 'Apakah Anda yakin?',
+      text: 'Anda tidak dapat mengembalikan data tersebut!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, Hapus!',
+      cancelButtonText: 'Batalkan'
+    };
+    const swal = window.$swal || window.Swal;
+    if (!swal) {
+      if (confirm(base.title + '\n' + base.text)) ownerPostDelete(url);
+      return;
     }
+    swal.fire(Object.assign(base, opts)).then(r => { if (r.isConfirmed) ownerPostDelete(url); });
+  }
 
-    /* Typography */
-    p, table th, table td {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-</style>
+  function ownerPostDelete(url) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = url;
+    form.style.display = 'none';
+    form.innerHTML = `
+      @csrf
+      <input type="hidden" name="_method" value="DELETE">
+    `;
+    document.body.appendChild(form);
+    form.submit();
+  }
+</script>
 @endpush

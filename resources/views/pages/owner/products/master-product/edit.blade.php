@@ -37,7 +37,7 @@
                 </button>
             </div>
         @endif
-        <a href="{{ route('owner.user-owner.master-products.index') }}" class="btn btn-secondary mb-3">
+        <a href="{{ route('owner.user-owner.master-products.index') }}" class="btn bg-choco text-white mb-3">
             <i class="fas fa-arrow-left mr-2"></i>Back to Master Products
         </a>
 
@@ -76,19 +76,7 @@
 
                     <!-- Quantity & Price -->
                     <div class="row">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Quantity</label>
-                                <div class="input-group">
-                                    <input type="number" id="quantity" name="quantity" class="form-control text-center"
-                                        value="{{ $data->quantity }}" min="0" required>
-                                    <button type="button" class="btn btn-outline-secondary ml-1" onclick="decreaseQuantity()">-</button>
-                                    <button type="button" class="btn btn-outline-secondary ml-1" onclick="increaseQuantity()">+</button>
-                                    <button type="button" class="btn btn-outline-secondary ml-1" onclick="maxQuantity('quantity')">Max</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label>Price</label>
                                 <div class="input-group">
@@ -100,7 +88,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="form-group">
                                 <label class="mb-1" for="promotion_id">Promotion</label>
                                 <select id="promotion_id" name="promotion_id" class="form-control">
@@ -249,16 +237,6 @@
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-4">
-                                                                <div class="form-group">
-                                                                    <label>Quantity</label>
-                                                                    <div class="input-group">
-                                                                        <input type="number" name="menu_options[{{ $pIndex+1 }}][options][{{ $oIndex+1 }}][quantity]"
-                                                                            value="{{ $option->quantity }}" class="form-control" min="0" required>
-                                                                        <button type="button" class="btn btn-outline-secondary ml-1" onclick="maxQuantity('')">Max</button>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-4">
                                                                 {{-- <div class="form-group">
                                                                     <label>Price</label>
                                                                     <input type="number" name="menu_options[{{ $pIndex+1 }}][options][{{ $oIndex+1 }}][price]"
@@ -296,13 +274,11 @@
                         Options
                         <button type="button" class="btn btn-sm btn-primary" onclick="addMenuOption()">+ Add Menu Option</button>
                     </h4>
-
                 </div>
 
                 <div class="card-footer text-right">
                     <button type="submit" class="btn btn-success">Update Product</button>
                 </div>
-
             </form>
         </div>
     </div>
@@ -476,30 +452,13 @@ function addOption(menuIndex) {
                     <button type="button" class="btn btn-sm btn-danger" onclick="removeOption(this)">Remove</button>
                 </div>
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="form-group">
                             <label>Option Name</label>
                             <input type="text" name="menu_options[${menuIndex}][options][${optionIndex}][name]" class="form-control" required>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label>Quantity</label>
-                            <div class="input-group">
-                                <input type="number"
-                                    id="menu_options[${menuIndex}][options][${optionIndex}][quantity]"
-                                    name="menu_options[${menuIndex}][options][${optionIndex}][quantity]"
-                                    class="form-control" min="0" value="0"
-                                    required>
-                                <button type="button"
-                                    class="btn btn-outline-secondary ml-1"
-                                    onclick="maxQuantity('menu_options[${menuIndex}][options][${optionIndex}][quantity]')">
-                                    Max
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="form-group">
                             <label>Price</label>
                             <input type="text" class="form-control currency-display" value="">

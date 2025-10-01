@@ -1,6 +1,6 @@
 {{-- ====== MODAL ADD PRODUCT (satu modal dipakai semua outlet) ====== --}}
 <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
     <form id="outletProductQuickAddForm"
           method="POST"
           action="{{ route('owner.user-owner.outlet-products.store') }}"
@@ -38,49 +38,27 @@
             <input class="form-check-input" type="checkbox" id="qp_check_all" disabled>
             <label class="form-check-label" for="qp_check_all">Select all</label>
           </div>
-          {{-- kotak daftar checkbox --}}
+
           <div id="qp_master_product_box" class="border rounded p-2" style="max-height: 280px; overflow:auto;">
             <div class="text-muted small">Select a category first.</div>
           </div>
 
-          {{-- error helper (frontend) --}}
           <div class="invalid-feedback d-block" id="qp_mp_error" style="display:none;">
             Please pick at least one master product.
           </div>
         </div>
 
+        {{-- ==== Always available toggle (baru) ==== --}}
+        <div class="mb-2 form-check">
+          <input type="checkbox" class="form-check-input" id="qp_always_available" name="always_available" value="1">
+          <label class="form-check-label" for="qp_always_available">Produk selalu tersedia (tanpa stok)</label>
+        </div>
 
         {{-- Quantity --}}
-        <div class="mb-3">
+        <div class="mb-3" id="qp_quantity_group">
           <label for="qp_quantity" class="form-label">Quantity</label>
           <input type="number" min="0" step="1" id="qp_quantity" name="quantity" class="form-control" value="0">
         </div>
-
-        {{-- Promo --}}
-        {{-- <div class="mb-3">
-          <label for="qp_promotion_id" class="form-label">Promotion <span class="text-danger">*</span></label>
-          <select id="qp_promotion_id" name="promotion_id" class="form-control">
-            <option value="">— All Promos —</option>
-            @foreach($promotions as $promo)
-              <option value="{{ $promo->id }}">{{ $promo->promotion_name }} 
-                (
-                @if($promo->promotion_type == 'percentage')
-                  {{ number_format($promo->promotion_value, 0, ',', '.') }}% Off
-                @else
-                  Rp.
-                  @if(fmod($promo->promotion_value, 1) == 0)
-                    {{ number_format($promo->promotion_value, 0, ',', '.') }} Off
-                  @else
-                    {{ number_format($promo->promotion_value, 2, ',', '.') }} Off
-                  @endif
-                @endif
-                )
-
-              </option>
-            @endforeach
-          </select>
-          <div class="invalid-feedback">Please choose a promotion.</div>
-        </div> --}}
 
         {{-- Status --}}
         <div class="mb-3">
@@ -102,3 +80,38 @@
     </form>
   </div>
 </div>
+
+{{-- Toggle logic --}}
+<script>
+(function () {
+  const cb   = document.getElementById('qp_always_available');
+  const wrap = document.getElementById('qp_quantity_group');
+  const qty  = document.getElementById('qp_quantity');
+
+  function syncQtyVisibility() {
+    if (!cb || !wrap || !qty) return;
+    if (cb.checked) {
+      // simpan nilai lama (opsional)
+      if (!qty.dataset.prev) qty.dataset.prev = qty.value || '0';
+      wrap.classList.add('d-none');
+      qty.disabled = true;     // agar tidak ikut terkirim saat submit
+    } else {
+      wrap.classList.remove('d-none');
+      qty.disabled = false;
+      // pulihkan nilai lama (opsional)
+      if (qty.dataset.prev) qty.value = qty.dataset.prev;
+    }
+  }
+
+  cb?.addEventListener('change', syncQtyVisibility);
+
+  // sinkron awal saat modal pertama kali dirender
+  syncQtyVisibility();
+
+  // opsional: reset saat modal dibuka ulang (butuh Bootstrap JS)
+  $('#addProductModal').on('shown.bs.modal', function () {
+    // cb.checked = false; // jika ingin default selalu unchecked setiap buka modal
+    syncQtyVisibility();
+  });
+})();
+</script>

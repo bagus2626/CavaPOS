@@ -5,7 +5,7 @@
 
 @section('content')
 <section class="content">
-    <div class="container-fluid">
+    <div class="container-fluid owner-promo-edit">
         <div class="row">
             <div class="col-12">
 
@@ -50,6 +50,7 @@
                             </div>
 
                             {{-- Type & Value --}}
+                            @php $type = old('promotion_type', $data->promotion_type); @endphp
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group mb-0">
@@ -58,9 +59,6 @@
                                                 name="promotion_type"
                                                 class="form-control @error('promotion_type') is-invalid @enderror"
                                                 required>
-                                            @php
-                                                $type = old('promotion_type', $data->promotion_type);
-                                            @endphp
                                             <option value="">-- Select Type --</option>
                                             <option value="percentage" {{ $type === 'percentage' ? 'selected' : '' }}>Percentage (%)</option>
                                             <option value="amount" {{ $type === 'amount' ? 'selected' : '' }}>Amount (Rp)</option>
@@ -71,15 +69,10 @@
 
                                 <div class="col-md-8">
                                     <div class="form-group mb-0">
-                                        <label for="promotion_value" class="required">
-                                            Promotion Value
-                                            <small class="text-muted d-block" id="valueHelp">
-                                                {{ $type === 'amount' ? 'Masukkan nominal rupiah (contoh: 10000).' : 'Masukkan persen (1–100).' }}
-                                            </small>
-                                        </label>
+                                        <label for="promotion_value" class="required">Promotion Value</label>
 
                                         <div class="input-group">
-                                            <div class="input-group-prepend" id="prefixAmount" style="display: none;">
+                                            <div class="input-group-prepend" id="prefixAmount" style="display:none;">
                                                 <span class="input-group-text">Rp</span>
                                             </div>
                                             <input type="number"
@@ -89,11 +82,15 @@
                                                    value="{{ old('promotion_value', $data->promotion_value) }}"
                                                    inputmode="numeric"
                                                    required>
-                                            <div class="input-group-append" id="suffixPercent" style="display: none;">
+                                            <div class="input-group-append" id="suffixPercent" style="display:none;">
                                                 <span class="input-group-text">%</span>
                                             </div>
                                             @error('promotion_value') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                         </div>
+
+                                        <small class="form-text text-muted mt-1" id="valueHelp">
+                                            {{ $type === 'amount' ? 'Masukkan nominal rupiah (contoh: 10000).' : 'Masukkan persen (1–100).' }}
+                                        </small>
                                     </div>
                                 </div>
                             </div>
@@ -101,10 +98,7 @@
                             <hr>
 
                             {{-- Uses Expiry --}}
-                            @php
-                                // Pakai old jika ada, kalau tidak ada, tentukan dari ada/tidaknya start & end date
-                                $usesExpiryInit = old('uses_expiry', ($data->start_date && $data->end_date) ? 1 : 0);
-                            @endphp
+                            @php $usesExpiryInit = old('uses_expiry', ($data->start_date && $data->end_date) ? 1 : 0); @endphp
                             <div class="form-group mb-1">
                                 <div class="custom-control custom-switch">
                                     <input type="checkbox"
@@ -169,28 +163,14 @@
                             <hr>
                             <div class="form-group">
                                 <label class="d-block">Hari Aktif</label>
-
                                 @php
-                                    $daysMap = [
-                                        'mon' => 'Senin',
-                                        'tue' => 'Selasa',
-                                        'wed' => 'Rabu',
-                                        'thu' => 'Kamis',
-                                        'fri' => 'Jumat',
-                                        'sat' => 'Sabtu',
-                                        'sun' => 'Minggu',
-                                    ];
-
-                                    // $data->active_days diasumsikan sudah cast ke array di model
+                                    $daysMap = ['mon'=>'Senin','tue'=>'Selasa','wed'=>'Rabu','thu'=>'Kamis','fri'=>'Jumat','sat'=>'Sabtu','sun'=>'Minggu'];
                                     $selectedDays = old('active_days', $data->active_days ?: []);
                                     $isEveryDay = is_array($selectedDays) && count($selectedDays) === 7;
                                 @endphp
 
                                 <div class="custom-control custom-checkbox mb-2">
-                                    <input type="checkbox"
-                                        class="custom-control-input"
-                                        id="every_day"
-                                        {{ $isEveryDay ? 'checked' : '' }}>
+                                    <input type="checkbox" class="custom-control-input" id="every_day" {{ $isEveryDay ? 'checked' : '' }}>
                                     <label class="custom-control-label" for="every_day">Setiap Hari</label>
                                 </div>
 
@@ -198,11 +178,11 @@
                                     @foreach($daysMap as $key => $label)
                                         <div class="custom-control custom-checkbox mr-3 mb-2">
                                             <input type="checkbox"
-                                                class="custom-control-input day-checkbox"
-                                                id="day_{{ $key }}"
-                                                name="active_days[]"
-                                                value="{{ $key }}"
-                                                {{ in_array($key, $selectedDays, true) ? 'checked' : '' }}>
+                                                   class="custom-control-input day-checkbox"
+                                                   id="day_{{ $key }}"
+                                                   name="active_days[]"
+                                                   value="{{ $key }}"
+                                                   {{ in_array($key, $selectedDays, true) ? 'checked' : '' }}>
                                             <label class="custom-control-label" for="day_{{ $key }}">{{ $label }}</label>
                                         </div>
                                     @endforeach
@@ -243,13 +223,108 @@
         </div>
     </div>
 </section>
-@endsection
 
-@push('styles')
 <style>
-    .required::after { content:" *"; color:#dc3545; }
+/* ===== Owner › Promotion Edit (page scope) ===== */
+.owner-promo-edit{
+  --choco:#8c1000; --soft-choco:#c12814; --ink:#22272b; --paper:#fff;
+  --radius:12px; --shadow:0 6px 20px rgba(0,0,0,.08);
+}
+
+.btn-secondary{
+  background:var(--choco); border-color:var(--choco);
+}
+.btn-secondary:hover{
+  background:var(--soft-choco); border-color:var(--soft-choco);
+}
+
+/* Card */
+.owner-promo-edit .card{
+  border:0; border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; background:var(--paper);
+}
+.owner-promo-edit .card-header{ background:#fff; border-bottom:1px solid #eef1f4; }
+.owner-promo-edit .card-title{ color:var(--ink); font-weight:700; }
+
+/* Alerts */
+.owner-promo-edit .alert{ border-left:4px solid var(--choco); border-radius:10px; }
+
+/* Buttons – brand choco */
+.owner-promo-edit .btn-primary{ background:var(--choco); border-color:var(--choco); }
+.owner-promo-edit .btn-primary:hover{ background:var(--soft-choco); border-color:var(--soft-choco); }
+.owner-promo-edit .btn-outline-secondary{ border-color:#cbd5e1; color:#374151; background:#fff; }
+.owner-promo-edit .btn-outline-secondary:hover{ color:#fff; background:#6b7280; border-color:#6b7280; }
+
+/* Fields */
+.owner-promo-edit .form-group label{ font-weight:600; color:#374151; }
+.owner-promo-edit .required::after{ content:" *"; color:#dc3545; }
+.owner-promo-edit .form-control:focus{
+  border-color:var(--choco);
+  box-shadow:0 0 0 .2rem rgba(140,16,0,.15);
+}
+
+/* Input group cosmetics (Rp / %) */
+.owner-promo-edit .input-group-text{
+  background:rgba(140,16,0,.08); color:var(--choco);
+  border-color:rgba(140,16,0,.25);
+}
+
+/* Switch (Bootstrap 4 custom switches) -> choco + tidak keluar bingkai */
+.owner-promo-edit .custom-control-input:focus ~ .custom-control-label::before{
+  box-shadow:0 0 0 .2rem rgba(140,16,0,.15);
+  border-color:var(--choco);
+}
+.owner-promo-edit .custom-control-input:checked ~ .custom-control-label::before{
+  background-color:var(--choco); border-color:var(--choco);
+}
+/* ukuran & posisi knob switch */
+.owner-promo-edit .custom-switch .custom-control-label{
+  padding-left: 1rem;
+  min-height: 1.8rem;
+}
+.owner-promo-edit .custom-switch .custom-control-label::before{
+  width:2.6rem; height:1.4rem; left:-2rem; top:.12rem; border-radius:1.4rem;
+}
+.owner-promo-edit .custom-switch .custom-control-label::after{
+  width:1rem; height:1rem; left:calc(-2rem + .2rem); top:.33rem; border-radius:50%;
+}
+/* RESET global transform agar checkbox normal */
+.owner-promo-edit .custom-control-input:checked ~ .custom-control-label::after{ transform:none; }
+/* KHUSUS switch: geser knob */
+.owner-promo-edit .custom-switch .custom-control-input:checked ~ .custom-control-label::after{ transform:translateX(1.2rem); }
+
+/* Date range wrapper */
+.owner-promo-edit #dateRangeWrap{
+  background:#fff; border:1px solid #eef1f4; border-left:4px solid var(--choco);
+  border-radius:10px; padding: .85rem; margin-top:.5rem;
+}
+
+/* Days grid */
+.owner-promo-edit #days_grid .custom-control{ min-width: 140px; }
+
+/* Footer buttons radius */
+.owner-promo-edit .card-footer .btn{ border-radius:10px; }
+
+/* Small text */
+.owner-promo-edit .text-muted{ color:#6b7280 !important; }
+
+/* Input-group radius logic: samakan dengan Create */
+.owner-promo-edit .input-group:not(.has-prefix):not(.has-suffix) > .form-control{
+  border-radius:.25rem !important;
+}
+.owner-promo-edit .input-group.has-prefix:not(.has-suffix) > .form-control{
+  border-top-right-radius:.25rem !important; border-bottom-right-radius:.25rem !important;
+}
+.owner-promo-edit .input-group.has-prefix .input-group-prepend .input-group-text{
+  border-top-left-radius:.25rem; border-bottom-left-radius:.25rem;
+}
+.owner-promo-edit .input-group.has-suffix:not(.has-prefix) > .form-control{
+  border-top-left-radius:.25rem !important; border-bottom-left-radius:.25rem !important;
+}
+.owner-promo-edit .input-group.has-suffix .input-group-append .input-group-text{
+  border-top-right-radius:.25rem; border-bottom-right-radius:.25rem;
+}
 </style>
-@endpush
+@endsection
 
 @section('scripts')
 <script>
@@ -262,34 +337,41 @@
 
     function applyTypeUI() {
         const t = typeSel.value;
+        const ig = document.getElementById('promotion_value').closest('.input-group');
+
         if (t === 'percentage') {
             prefixAmt.style.display = 'none';
             suffixPct.style.display = '';
-            valInput.min = '1';
-            valInput.max = '100';
-            valInput.step = '1';
+            ig.classList.remove('has-prefix');
+            ig.classList.add('has-suffix');
+
+            valInput.min = '1'; valInput.max = '100'; valInput.step = '1';
             helpText.textContent = 'Masukkan persen (1–100).';
+
             if (valInput.value && (+valInput.value > 100)) valInput.value = 100;
+
         } else if (t === 'amount') {
             prefixAmt.style.display = '';
             suffixPct.style.display = 'none';
-            valInput.removeAttribute('max');
-            valInput.min = '0';
-            valInput.step = '1';
+            ig.classList.add('has-prefix');
+            ig.classList.remove('has-suffix');
+
+            valInput.removeAttribute('max'); valInput.min = '0'; valInput.step = '1';
             helpText.textContent = 'Masukkan nominal rupiah (contoh: 10000).';
+
         } else {
             prefixAmt.style.display = 'none';
             suffixPct.style.display = 'none';
-            valInput.removeAttribute('min');
-            valInput.removeAttribute('max');
+            ig.classList.remove('has-prefix','has-suffix');
+
+            valInput.removeAttribute('min'); valInput.removeAttribute('max'); valInput.removeAttribute('step');
             helpText.textContent = '';
         }
     }
-    if (typeSel) {
-        typeSel.addEventListener('change', applyTypeUI);
-        applyTypeUI();
-    }
+    typeSel?.addEventListener('change', applyTypeUI);
+    applyTypeUI();
 
+    // Uses expiry
     const usesExpiry = document.getElementById('uses_expiry');
     const dateWrap   = document.getElementById('dateRangeWrap');
     const startDate  = document.getElementById('start_date');
@@ -298,43 +380,33 @@
     function toggleDateRange() {
         const show = usesExpiry.checked;
         dateWrap.classList.toggle('d-none', !show);
-        [startDate, endDate].forEach(el => {
-            if (!el) return;
-            el.required = show;
-        });
+        [startDate, endDate].forEach(el => { if (el){ el.required = show; } });
     }
-    if (usesExpiry) {
-        usesExpiry.addEventListener('change', toggleDateRange);
-        toggleDateRange();
-    }
+    usesExpiry?.addEventListener('change', toggleDateRange);
+    toggleDateRange();
 
-    // Client check end > start
+    // Guard end > start
     const form = document.getElementById('promotionForm');
-    if (form) {
-        form.addEventListener('submit', function (e) {
-            if (usesExpiry && usesExpiry.checked && startDate.value && endDate.value) {
-                const s = new Date(startDate.value);
-                const ed = new Date(endDate.value);
-                if (ed <= s) {
-                    e.preventDefault();
-                    alert('End Date harus lebih besar dari Start Date.');
-                    endDate.focus();
-                }
+    form?.addEventListener('submit', function (e) {
+        if (usesExpiry?.checked && startDate.value && endDate.value) {
+            const s = new Date(startDate.value);
+            const ed = new Date(endDate.value);
+            if (ed <= s) {
+                e.preventDefault();
+                alert('End Date harus lebih besar dari Start Date.');
+                endDate.focus();
             }
-        });
-    }
+        }
+    });
 
     // Active days
     const everyDay = document.getElementById('every_day');
     const dayCheckboxes = Array.from(document.querySelectorAll('.day-checkbox'));
-    function setAllDays(checked) { dayCheckboxes.forEach(cb => cb.checked = checked); }
-    function syncEveryDayFromDays() {
-        const allChecked = dayCheckboxes.length > 0 && dayCheckboxes.every(cb => cb.checked);
-        everyDay.checked = allChecked;
+    function setAllDays(checked){ dayCheckboxes.forEach(cb => cb.checked = checked); }
+    function syncEveryDayFromDays(){
+        everyDay.checked = (dayCheckboxes.length > 0 && dayCheckboxes.every(cb => cb.checked));
     }
-    if (everyDay) {
-        everyDay.addEventListener('change', () => setAllDays(everyDay.checked));
-    }
+    everyDay?.addEventListener('change', () => setAllDays(everyDay.checked));
     dayCheckboxes.forEach(cb => cb.addEventListener('change', syncEveryDayFromDays));
     syncEveryDayFromDays();
 })();

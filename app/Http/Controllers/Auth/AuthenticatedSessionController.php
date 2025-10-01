@@ -19,9 +19,6 @@ class AuthenticatedSessionController extends Controller
         return view('auth.login');
     }
 
-    /**
-     * Handle an incoming authentication request.
-     */
     public function store(LoginRequest $request): RedirectResponse
     {
         // dd($request->all());
@@ -37,7 +34,7 @@ class AuthenticatedSessionController extends Controller
                 return redirect()->intended();
             }
 
-            return redirect('/admin');
+            return redirect('/admin/dashboard');
         } elseif ($user->role === 'partner') {
             if ($intended && str_starts_with($intended, url('/partner'))) {
                 return redirect()->intended();

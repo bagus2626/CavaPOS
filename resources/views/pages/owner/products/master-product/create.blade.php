@@ -8,7 +8,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-12">
-                <a href="{{ route('owner.user-owner.master-products.index') }}" class="btn btn-secondary mb-3">
+                <a href="{{ route('owner.user-owner.master-products.index') }}" class="btn bg-choco text-white mb-3">
                     <i class="fas fa-arrow-left mr-2"></i>Back to Products
                 </a>
 
@@ -44,7 +44,7 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-md-4">
+                                {{-- <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Quantity</label>
                                         <div class="input-group">
@@ -54,7 +54,7 @@
                                             <button type="button" class="btn btn-outline-secondary ml-1" onclick="maxQuantity('quantity')">Max</button>
                                         </div>
                                     </div>
-                                </div>
+                                </div> --}}
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Price</label>
@@ -77,13 +77,7 @@
                                         </select>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row">
-
-                            </div>
-                            {{-- upload picture --}}
-                            <div class="row">
-                                <div class="col-md-12">
+                                <div class="col-md-4">
                                     <div class="form-group">
                                         <label>Product Images (Max 5)</label>
                                         <input type="file" id="images" name="images[]" class="form-control" accept="image/*" multiple required>
@@ -280,30 +274,13 @@ function addOption(menuIndex) {
                     <button type="button" class="btn btn-sm btn-danger" onclick="removeOption(this)">Remove</button>
                 </div>
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="form-group">
                             <label>Option Name</label>
                             <input type="text" name="menu_options[${menuIndex}][options][${optionIndex}][name]" class="form-control" required>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label>Quantity</label>
-                            <div class="input-group">
-                                <input type="number"
-                                    id="menu_options[${menuIndex}][options][${optionIndex}][quantity]"
-                                    name="menu_options[${menuIndex}][options][${optionIndex}][quantity]"
-                                    class="form-control" min="0" value="0"
-                                    required>
-                                <button type="button"
-                                    class="btn btn-outline-secondary ml-1"
-                                    onclick="maxQuantity('menu_options[${menuIndex}][options][${optionIndex}][quantity]')">
-                                    Max
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="form-group">
                             <label>Price</label>
                             <input type="number" name="menu_options[${menuIndex}][options][${optionIndex}][price]" class="form-control" min="0" required>

@@ -6,17 +6,17 @@
 @section('content')
 
 <section class="content">
-    <div class="container-fluid">
+    <div class="container-fluid owner-outlet-products">
 
         {{-- ====== OUTLET PILLS (TOP) ====== --}}
         <div class="mb-3">
             <div class="d-flex flex-wrap gap-2">
                 {{-- Opsional: tombol "All Outlets" --}}
-                <button class="btn btn-outline-dark btn-sm rounded-pill outlet-pill active"
+                <button class="btn btn-sm rounded-pill outlet-pill active"
                         data-outlet="all">All Outlets</button>
 
                 @foreach($outlets as $o)
-                    <button class="btn btn-outline-primary btn-sm rounded-pill outlet-pill"
+                    <button class="btn  btn-sm rounded-pill outlet-pill"
                             data-outlet="{{ $o->id }}">
                         {{ $o->name }}
                     </button>
@@ -59,10 +59,10 @@
                     {{-- Category filter (per outlet) --}}
                     <div class="mb-3">
                         <div class="d-flex flex-wrap gap-2">
-                            <button class="btn btn-outline-secondary btn-sm rounded-pill category-pill active"
+                            <button class="btn btn-sm rounded-pill category-pill active"
                                     data-category="all">All</button>
                             @foreach($categories as $c)
-                                <button class="btn btn-outline-secondary btn-sm rounded-pill category-pill"
+                                <button class="btn btn-sm rounded-pill category-pill"
                                         data-category="{{ $c->id }}">
                                     {{ $c->category_name }}
                                 </button>
@@ -92,7 +92,13 @@
                                         <td>{{ $no++ }}</td>
                                         <td>{{ $p->name ?? $p->product_name }}</td>
                                         <td>{{ $p->category->category_name ?? '-' }}</td>
-                                        <td>{{ $p->quantity ?? 0 }}</td>
+                                        <td>
+                                          @if($p->always_available_flag === 1)
+                                            <span class="text-muted">Always Available</span>
+                                          @else
+                                            {{ $p->quantity ?? 0 }}
+                                          @endif
+                                        </td>
                                         <td>
                                             @php
                                                 $active = (int)($p->is_active ?? 1);
@@ -112,15 +118,15 @@
                                         </td>
                                         <td class="text-end">
                                             <a href="{{ route('owner.user-owner.outlet-products.edit', $p->id) }}"
-                                               class="btn btn-sm btn-warning">Edit</a>
-                                            <button class="btn btn-sm btn-danger" onclick="deleteProduct({{ $p->id }})">
+                                               class="btn btn-outline-dark btn-sm">Edit</a>
+                                            <button class="btn btn-primary btn-sm" onclick="deleteProduct({{ $p->id }})">
                                                 Delete
                                             </button>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr class="empty-row">
-                                        <td colspan="6" class="text-center text-muted">Belum ada produk</td>
+                                        <td colspan="7" class="text-center text-muted">Belum ada produk</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -135,91 +141,150 @@
 
     </div>
 </section>
-@endsection
 
-@push('styles')
 <style>
-  /* Grid container untuk kotak checkbox */
-  #qp_master_product_box.mp-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: .5rem;
-  }
+/* ===== Owner › Outlet Products (page scope) ===== */
+.owner-outlet-products{
+  --choco:#8c1000; --soft-choco:#c12814; --ink:#22272b;
+  --radius:12px; --shadow:0 6px 20px rgba(0,0,0,.08);
+}
 
-  /* Tile/label yang clickable */
-  .mp-item {
-    display: flex;
-    align-items: center;
-    gap: .6rem;
-    padding: .6rem .8rem;
-    border: 1px solid #e5e7eb;            /* gray-200 */
-    border-radius: 9999px;                 /* pill */
-    background: #fff;
-    cursor: pointer;
-    transition: box-shadow .15s ease, border-color .15s ease, background-color .15s ease;
-    user-select: none;
-  }
-  .mp-item:hover {
-    border-color: #cfe2ff;                 /* soft primary */
-    box-shadow: 0 2px 10px rgba(13,110,253,.10);
-  }
+/* Cards */
+.owner-outlet-products .card{
+  border:0; border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;
+}
+.owner-outlet-products .card-header{
+  background:#fff; border-bottom:1px solid #eef1f4;
+}
+.owner-outlet-products .card-header h5{ color:var(--ink); font-weight:700; }
+.owner-outlet-products .card-header small{ font-weight:500; }
 
-  /* Checkbox custom: bulat */
-  .mp-check {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 1.15rem;
-    height: 1.15rem;
-    border: 2px solid #6c757d;             /* bootstrap secondary */
-    border-radius: 9999px;
-    display: inline-grid;
-    place-content: center;
-    outline: none;
-    transition: border-color .12s ease, background-color .12s ease;
-    background: #fff;
-    flex: 0 0 auto;
-  }
-  .mp-check::before {
-    content: "";
-    width: .6rem;
-    height: .6rem;
-    border-radius: 9999px;
-    transform: scale(0);
-    transition: transform .12s ease;
-    background: #0d6efd;                   /* bootstrap primary */
-  }
-  .mp-check:checked {
-    border-color: #0d6efd;
-    background: #fff;
-  }
-  .mp-check:checked::before {
-    transform: scale(1);
-  }
-  .mp-check:focus-visible {
-    outline: 2px solid rgba(13,110,253,.35);
-    outline-offset: 2px;
-  }
+/* Brand buttons (fallback) */
+.owner-outlet-products .btn-primary{
+  background:var(--choco); border-color:var(--choco);
+}
+.owner-outlet-products .btn-primary:hover{
+  background:var(--soft-choco); border-color:var(--soft-choco);
+}
+.owner-outlet-products .btn-outline-dark{ color:var(--choco); border-color:var(--choco); }
+.owner-outlet-products .btn-outline-dark:not(.outlet-pill):hover{
+  color:#fff;
+  background:var(--choco);
+  border-color:var(--choco);
+}
 
-  /* Teks & thumb */
-  .mp-text {
-    line-height: 1.2;
-    color: #111827;                         /* gray-900 */
-    font-weight: 500;
-  }
-  .mp-thumb {
-    width: 28px;
-    height: 28px;
-    border-radius: 9999px;
-    object-fit: cover;
-    border: 1px solid #e5e7eb;
-    background: #f8f9fa;
-    flex: 0 0 auto;
-  }
+/* “Add Product” button */
+.owner-outlet-products .btn-add-product{
+  border-radius:10px; min-width:140px;
+}
 
-  /* Select All baris kecil */
-  #qp_check_all { transform: translateY(1px); }
+/* Top outlet pills */
+/* ===== Outlet pills: outline saat idle, filled saat active ===== */
+.owner-outlet-products .outlet-pill{
+  /* brand */
+  --choco:#8c1000;
+  /* base (idle) */
+  border:1px solid var(--choco) !important;
+  color:var(--choco) !important;
+  border-radius:999px;
+  padding:.25rem .75rem;
+  transition:all .15s ease;
+}
+
+/* Hover saat idle: tipis saja */
+.owner-outlet-products .outlet-pill:hover{
+  background:rgba(140,16,0,.06) !important;
+  color:var(--choco) !important;
+  border-color:var(--choco) !important;
+}
+
+/* Active/pressed: filled choco */
+.owner-outlet-products .outlet-pill.active,
+.owner-outlet-products .outlet-pill[aria-pressed="true"]{
+  background:var(--choco) !important;
+  color:#fff !important;
+  border-color:var(--choco) !important;
+  box-shadow:0 2px 8px rgba(140,16,0,.18);
+}
+
+/* Matikan warna bawaan .btn-outline-primary/.btn-outline-dark pada outlet-pill */
+.owner-outlet-products .outlet-pill.btn-outline-primary,
+.owner-outlet-products .outlet-pill.btn-outline-dark{
+  /* pastikan tidak kebawa palette bootstrap */
+  --bs-btn-color: var(--choco);
+  --bs-btn-border-color: var(--choco);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--choco);
+  --bs-btn-hover-border-color: var(--choco);
+}
+
+
+/* Category pills per card */
+.owner-outlet-products .category-pill{
+  border-radius:999px;
+  border:1px solid #8c10008e;
+  color:#8c1000;
+  background:#fff;
+  padding:.22rem .7rem;
+  transition:all .15s ease;
+}
+.owner-outlet-products .category-pill:hover{ border-color:var(--choco); color:var(--choco); }
+.owner-outlet-products .category-pill.active{
+  background:rgba(140,16,0,.08);
+  color:var(--choco);
+  border-color:var(--choco);
+}
+
+/* Table */
+.owner-outlet-products .table{
+  background:#fff; margin-bottom:0;
+}
+.owner-outlet-products thead th{
+  background:#fff; border-bottom:2px solid #eef1f4 !important;
+  color:#374151; font-weight:700; white-space:nowrap;
+}
+.owner-outlet-products tbody td{
+  vertical-align:middle;
+}
+.owner-outlet-products tbody tr{
+  transition:background-color .12s ease;
+}
+.owner-outlet-products tbody tr:hover{
+  background:rgba(140,16,0,.04);
+}
+
+/* Status & promo badges – soft */
+.owner-outlet-products .badge{ border-radius:999px; font-weight:600; padding:.32rem .55rem; }
+.owner-outlet-products .badge.bg-success{
+  background:#ecfdf5 !important; color:#065f46 !important; border:1px solid #a7f3d0;
+}
+.owner-outlet-products .badge.bg-secondary{
+  background:#f3f4f6 !important; color:#374151 !important; border:1px solid #e5e7eb;
+}
+.owner-outlet-products .badge.bg-warning{
+  background:#fef3c7 !important; color:#92400e !important; border:1px solid #fde68a;
+}
+
+/* Actions */
+.owner-outlet-products td.text-end .btn{
+  border-radius:10px; padding:.28rem .6rem; min-width:70px;
+}
+
+/* Empty row */
+.owner-outlet-products .empty-row td{
+  background:#fafafa; color:#6b7280; font-style:italic;
+}
+
+/* Small helpers */
+.owner-outlet-products .text-muted{ color:#6b7280 !important; }
+
+/* Responsive tweaks */
+@media (max-width: 576px){
+  .owner-outlet-products .card-header h5{ font-size:1rem; }
+  .owner-outlet-products .btn-add-product{ min-width:120px; padding:.3rem .6rem; }
+}
 </style>
-@endpush
+@endsection
 
 
 @push('scripts')
@@ -284,7 +349,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (visibleCount === 0) {
           const tr = document.createElement('tr');
           tr.classList.add('empty-row');
-          tr.innerHTML = `<td colspan="6" class="text-center">Data tidak ditemukan</td>`;
+          tr.innerHTML = `<td colspan="7" class="text-center">Data tidak ditemukan</td>`;
           tableBody.appendChild(tr);
         }
       });

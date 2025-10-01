@@ -6,9 +6,9 @@
 {{-- Hero Background (logo tetap di belakang) --}}
 <div class="fixed top-0 left-0 w-full h-72 sm:h-72 -z-10">
     @if($partner->logo)
-        <img src="{{ asset($partner->logo) }}"
-             alt="{{ $partner->name }}"
-             class="w-full h-full object-cover">
+        <img src="{{ asset('storage/' . $partner->logo) }}"
+            alt="{{ $partner->name }}"
+            class="w-full h-full object-cover">
     @else
         <div class="absolute inset-0 bg-gradient-to-r from-blue-100 to-blue-200"></div>
     @endif
@@ -120,7 +120,7 @@
                             @class([
                                 'menu-item bg-white flex flex-row transition hover:shadow-lg px-4 border-b border-gray-200',
                                 // tailwind grayscale
-                                'grayscale' => $product->quantity < 1,
+                                'grayscale' => $product->quantity < 1 && $product->always_available_flag == false,
                             ])
                             data-category="{{ $product->category_id }}"
                             >
@@ -164,7 +164,7 @@
                                     <button class="minus-btn w-9 h-9 flex items-center justify-center border border-choco rounded-lg font-bold text-choco hover:bg-gray-100 hidden"
                                             data-id="{{ $product->id }}">-</button>
                                     <span class="qty text-lg font-semibold text-gray-800 hidden" id="qty-{{ $product->id }}">0</span>
-                                    @if ($product->quantity < 1)
+                                    @if ($product->quantity < 1 && $product->always_available_flag == false)
                                         <p class="text-gray-700">Habis</p>
                                     @else
                                         <button class="plus-btn w-9 h-9 flex items-center justify-center border rounded-lg font-bold text-white bg-choco hover:bg-soft-choco"
@@ -593,9 +593,10 @@ function recomputeLineTotal(key) {
         priceSpan.classList.add('ml-auto','text-sm','font-medium');
 
         const qty = Number(opt.quantity) || 0;
+        const alwaysAvailable = opt.always_available_flag === 1;
         const priceNum = Number(opt.price) || 0;
 
-        if (qty < 1) {
+        if (qty < 1 && !alwaysAvailable) {
             priceSpan.textContent = 'Habis';
             priceSpan.classList.add('text-red-600');
             checkbox.disabled = true;

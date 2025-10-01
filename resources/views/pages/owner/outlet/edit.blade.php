@@ -4,16 +4,16 @@
 @section('page_title', 'Ubah Data Outlet')
 
 @section('content')
-<div class="container">
+<div class="container owner-outlet-edit"> {{-- PAGE SCOPE --}}
 
-    <a href="{{ route('owner.user-owner.outlets.index') }}" class="btn btn-outline-secondary mb-3">
+    <a href="{{ route('owner.user-owner.outlets.index') }}" class="btn btn-outline-choco mb-3">
         <i class="fas fa-arrow-left me-2"></i>Kembali
     </a>
 
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white border-0 py-3">
+    <div class="card shadow-sm">
+        <div class="card-header bg-white">
             <h5 class="card-title mb-0 d-flex align-items-center gap-2">
-                <i class="fas fa-store text-primary"></i>
+                <i class="fas fa-store text-choco"></i>
                 Edit Outlet: {{ $outlet->name }}
             </h5>
         </div>
@@ -73,16 +73,12 @@
                                     id="username"
                                     class="form-control @error('username') is-invalid @enderror"
                                     value="{{ old('username', $outlet->username) }}"
-                                    required
-                                    minlength="3"
-                                    maxlength="30"
-                                    pattern="^[A-Za-z0-9._\-]+$"  {{-- NOTE: dash di-escape agar aman di HTML pattern --}}
-                                    autocomplete="username"
-                                    autocapitalize="none"
-                                    spellcheck="false"
-                                    data-exclude-id="{{ $outlet->id }}"   {{-- <- penting untuk edit --}}
+                                    required minlength="3" maxlength="30"
+                                    pattern="^[A-Za-z0-9._\-]+$"
+                                    autocomplete="username" autocapitalize="none" spellcheck="false"
+                                    data-exclude-id="{{ $outlet->id }}"
                                 >
-                                <button type="button" id="btnCheckUsername" class="btn btn-outline-primary">
+                                <button type="button" id="btnCheckUsername" class="btn btn-outline-choco">
                                     <span class="label">Check</span>
                                     <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                                 </button>
@@ -90,7 +86,6 @@
                             </div>
                             <small class="text-muted">3–30 karakter: huruf/angka, titik (.), underscore (_), dash (-).</small>
 
-                            {{-- status ketersediaan --}}
                             <div id="usernameStatus" class="form-text mt-1"></div>
                         </div>
 
@@ -103,21 +98,14 @@
                                     id="slug"
                                     class="form-control @error('slug') is-invalid @enderror"
                                     value="{{ old('slug', $outlet->slug) }}"
-                                    required
-                                    minlength="3"
-                                    maxlength="30"
+                                    required minlength="3" maxlength="30"
                                     pattern="^[A-Za-z0-9._\-]+$"
                                     placeholder="contoh: cava-coffee-malioboro"
-                                    autocomplete="off"
-                                    autocapitalize="none"
-                                    spellcheck="false"
+                                    autocomplete="off" autocapitalize="none" spellcheck="false"
                                     disabled
-                                    {{-- opsional saat form edit: data-exclude-id="{{ $outlet->id ?? '' }}" --}}
                                 >
                             </div>
-                            <small class="text-muted">slug sudah tidak dapat diganti</small>
-
-                            {{-- status ketersediaan --}}
+                            <small class="text-muted">Slug tidak dapat diubah.</small>
                             <div id="slugStatus" class="form-text mt-1"></div>
                         </div>
                     </div>
@@ -223,7 +211,7 @@
                             <input type="file" name="image" id="image"
                                    class="form-control @error('image') is-invalid @enderror" accept="image/*">
                             <small class="text-muted">JPG/PNG/WEBP, maks 2 MB. Biarkan kosong jika tidak mengubah gambar.</small>
-                            @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror>
+                            @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
 
                             {{-- Preview --}}
                             <div id="imagePreviewWrapper" class="mt-2 {{ $outlet->logo ? '' : 'd-none' }}">
@@ -235,6 +223,48 @@
                                 </div>
                                 <small id="imageInfo" class="text-muted d-block mt-1">{{ $outlet->logo ? basename($outlet->logo) : '' }}</small>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- SECTION: Status Outlet --}}
+                <div class="form-section">
+                    <div class="section-header">
+                        <span class="section-icon"><i class="fas fa-toggle-on"></i></span>
+                        <h6 class="mb-0">Status Outlet</h6>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label d-block">Aktifkan Outlet</label>
+                            <input type="hidden" name="is_active" value="0">
+                            <div class="form-check form-switch">
+                                <input
+                                    class="form-check-input toggle-ios @error('is_active') is-invalid @enderror"
+                                    type="checkbox" role="switch" id="is_active" name="is_active" value="1"
+                                    {{ old('is_active', (int) $outlet->is_active) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="is_active">
+                                    <span id="isActiveLabel">{{ old('is_active', (int) $outlet->is_active) ? 'Aktif' : 'Nonaktif' }}</span>
+                                </label>
+                                @error('is_active') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                            </div>
+                            <small class="text-muted">Jika dimatikan, outlet tidak tampil untuk pelanggan.</small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label d-block">Aktifkan QR Order</label>
+                            <input type="hidden" name="is_qr_active" value="0">
+                            <div class="form-check form-switch">
+                                <input
+                                    class="form-check-input toggle-ios @error('is_qr_active') is-invalid @enderror"
+                                    type="checkbox" role="switch" id="is_qr_active" name="is_qr_active" value="1"
+                                    {{ old('is_qr_active', (int) $outlet->is_qr_active) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="is_qr_active">
+                                    <span id="isQrActiveLabel">{{ old('is_qr_active', (int) $outlet->is_qr_active) ? 'Aktif' : 'Nonaktif' }}</span>
+                                </label>
+                                @error('is_qr_active') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                            </div>
+                            <small class="text-muted">Mengontrol apakah pemesanan via QR untuk outlet ini aktif.</small>
                         </div>
                     </div>
                 </div>
@@ -253,7 +283,7 @@
                                 <input type="password" name="password" id="password"
                                        class="form-control @error('password') is-invalid @enderror"
                                        minlength="8" autocomplete="new-password" placeholder="Kosongkan jika tidak diubah">
-                                <button class="btn btn-outline-secondary" type="button" id="togglePassword" tabindex="-1">Show</button>
+                                <button class="btn btn-outline-choco" type="button" id="togglePassword" tabindex="-1">Show</button>
                                 @error('password') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                             </div>
                         </div>
@@ -264,7 +294,7 @@
                                 <input type="password" name="password_confirmation" id="password_confirmation"
                                        class="form-control @error('password_confirmation') is-invalid @enderror"
                                        minlength="8" autocomplete="new-password" placeholder="Ulangi password jika diganti">
-                                <button class="btn btn-outline-secondary" type="button" id="togglePasswordConfirm" tabindex="-1">Show</button>
+                                <button class="btn btn-outline-choco" type="button" id="togglePasswordConfirm" tabindex="-1">Show</button>
                                 @error('password_confirmation') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                             </div>
                         </div>
@@ -274,10 +304,10 @@
                 {{-- Sticky Actions --}}
                 <div class="form-actions sticky-actions mt-4">
                     <div class="d-flex justify-content-end gap-2">
-                        <a href="{{ route('owner.user-owner.outlets.index') }}" class="btn btn-light border">
+                        <a href="{{ route('owner.user-owner.outlets.index') }}" class="btn btn-outline-choco">
                             <i class="fas fa-xmark me-2"></i>Cancel
                         </a>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-choco">
                             <i class="fas fa-save me-2"></i>Update
                         </button>
                     </div>
@@ -287,22 +317,124 @@
         </div>
     </div>
 </div>
+
+<style>
+/* ===== Owner › Outlet Edit (page scope) ===== */
+.owner-outlet-edit{
+  --choco:#8c1000; --soft-choco:#c12814; --ink:#22272b; --paper:#f7f7f8;
+  --radius:12px; --shadow:0 6px 20px rgba(0,0,0,.08);
+  --switch-w: 2.6rem;   /* lebar switch yang kamu mau */
+  --switch-h: 1.4rem;   /* tinggi switch */
+  --switch-gap: .65rem;
+}
+
+.owner-outlet-edit .form-check.form-switch{
+  padding-left: calc(var(--switch-w) + var(--switch-gap));
+}
+
+.owner-outlet-edit .form-check.form-switch .form-check-input{
+  width: var(--switch-w);
+  height: var(--switch-h);
+  margin-left: calc(-1 * (var(--switch-w) + var(--switch-gap)));
+}
+
+.owner-outlet-edit .form-check.form-switch .form-check-label{
+  margin-left: .1rem;
+}
+
+/* Card & header */
+.owner-outlet-edit .card{
+  border:0; border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;
+}
+.owner-outlet-edit .card-header{
+  background:#fff; border-bottom:1px solid #eef1f4;
+}
+.owner-outlet-edit .card-title{ color:var(--ink); font-weight:700; }
+
+/* Brand helpers */
+.owner-outlet-edit .text-choco{ color:var(--choco) !important; }
+.owner-outlet-edit .btn-choco{ background:var(--choco); border-color:var(--choco); color:#fff; }
+.owner-outlet-edit .btn-choco:hover{ background:var(--soft-choco); border-color:var(--soft-choco); color:#fff; }
+.owner-outlet-edit .btn-outline-choco{ color:var(--choco); border-color:var(--choco);}
+.owner-outlet-edit .btn-outline-choco:hover{ color:#fff; background:var(--choco); border-color:var(--choco); }
+
+/* Alerts */
+.owner-outlet-edit .alert{ border-left:4px solid var(--choco); border-radius:10px; }
+.owner-outlet-edit .alert-danger{ background:#fff5f5; border-color:#fde2e2; color:#991b1b; }
+.owner-outlet-edit .alert-success{ background:#f0fdf4; border-color:#dcfce7; color:#166534; }
+.owner-outlet-edit .alert-info{ background:#eff6ff; border-color:#dbeafe; color:#1d4ed8; }
+
+/* Labels & fields */
+.owner-outlet-edit .form-label{ font-weight:600; color:#374151; }
+.owner-outlet-edit .required::after{ content:" *"; color:#dc3545; }
+.owner-outlet-edit .form-control:focus,
+.owner-outlet-edit .form-select:focus{
+  border-color:var(--choco);
+  box-shadow:0 0 0 .2rem rgba(140,16,0,.15);
+}
+
+/* Input group cosmetics */
+.owner-outlet-edit .input-group-text{
+  background:rgba(140,16,0,.08); color:var(--choco);
+  border-color:rgba(140,16,0,.25);
+}
+.owner-outlet-edit .input-group > .form-control{ border-right:0; }
+.owner-outlet-edit .input-group .btn{ border-radius:0 .5rem .5rem 0; }
+
+/* Sectioning */
+.owner-outlet-edit .form-section{ padding: 1.15rem 0; border-top:1px solid #eef1f4; }
+.owner-outlet-edit .form-section:first-of-type{ border-top:0; }
+.owner-outlet-edit .section-header{ display:flex; align-items:center; gap:.6rem; margin-bottom:.85rem; }
+.owner-outlet-edit .section-icon{
+  width:36px; height:36px; border-radius:999px; display:grid; place-items:center;
+  background:rgba(140,16,0,.08); color:var(--choco);
+}
+
+/* Select spinners */
+.owner-outlet-edit .loading-spinner{
+  position:absolute; right:.75rem; top:50%; transform:translateY(-50%);
+  width:1rem; height:1rem; border:.15rem solid rgba(140,16,0,.2);
+  border-top-color:var(--choco); border-radius:50%;
+  animation: spin .8s linear infinite;
+}
+.owner-outlet-edit .d-none{ display:none !important; }
+@keyframes spin{ to{ transform:translateY(-50%) rotate(360deg); } }
+
+/* Switch (form-check-input) */
+.owner-outlet-edit .form-check-input:checked{
+  background-color:var(--choco); border-color:var(--choco);
+}
+.owner-outlet-edit .form-check-input:focus{
+  box-shadow:0 0 0 .2rem rgba(140,16,0,.15);
+}
+/* iOS-ish bigger toggle */
+.owner-outlet-edit .toggle-ios:focus{ outline:0; }
+
+/* Image preview */
+.owner-outlet-edit .preview-box{ width: 200px; border-radius: var(--radius); }
+.owner-outlet-edit #imagePreviewWrapper .img-thumbnail{
+  border:0; border-radius:var(--radius); box-shadow:var(--shadow);
+}
+.owner-outlet-edit #clearImageBtn{
+  transform: translate(35%,-35%);
+  border-radius:999px; width:28px; height:28px; padding:0; line-height:26px;
+}
+
+/* Sticky actions */
+.owner-outlet-edit .sticky-actions{
+  position: sticky; bottom: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0) 0%, #fff 30%);
+  padding-top:.75rem; margin-top:1rem;
+}
+.owner-outlet-edit .sticky-actions .btn{ border-radius:10px; min-width:120px; }
+
+/* Small helpers */
+.owner-outlet-edit .text-muted{ color:#6b7280 !important; }
+</style>
 @endsection
 
-@push('styles')
-<style>
-    .form-section { padding: 1.25rem 0; border-top: 1px solid rgba(0,0,0,.06); }
-    .form-section:first-of-type { border-top: 0; }
-    .section-header { display:flex; align-items:center; gap:.5rem; margin-bottom:.75rem; }
-    .section-icon { width:34px; height:34px; border-radius:50%; background:#f1f5f9; display:grid; place-items:center; color:#0d6efd; }
-    .required::after { content:" *"; color:#dc3545; }
-    .preview-box { width: 220px; }
-    .sticky-actions { position: sticky; bottom: 0; background: linear-gradient(180deg, rgba(255,255,255,0) 0%, #fff 30%); padding-top: .75rem; margin-top: 1rem; }
-    .loading-spinner { position:absolute; right:.75rem; top:50%; transform:translateY(-50%); width:1rem; height:1rem; border:.15rem solid rgba(13,110,253,.2); border-top-color:#0d6efd; border-radius:50%; animation: spin .8s linear infinite; }
-    .d-none{display:none!important;}
-    @keyframes spin{to{transform:translateY(-50%) rotate(360deg)}}
-</style>
-@endpush
+
+
 
 @push('scripts')
 <script>
@@ -612,6 +744,24 @@ document.addEventListener('DOMContentLoaded', function () {
             clearTimeout(t);
             t = setTimeout(checkUsername, 500);
         });
+    })();
+
+    (function() {
+        const activeEl = document.getElementById('is_active');
+        const activeLbl = document.getElementById('isActiveLabel');
+        if (activeEl && activeLbl) {
+            activeEl.addEventListener('change', () => {
+                activeLbl.textContent = activeEl.checked ? 'Aktif' : 'Nonaktif';
+            });
+        }
+
+        const qrEl = document.getElementById('is_qr_active');
+        const qrLbl = document.getElementById('isQrActiveLabel');
+        if (qrEl && qrLbl) {
+            qrEl.addEventListener('change', () => {
+                qrLbl.textContent = qrEl.checked ? 'Aktif' : 'Nonaktif';
+            });
+        }
     })();
 });
 </script>

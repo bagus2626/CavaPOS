@@ -104,15 +104,15 @@
 
 <!-- Checkout Confirmation Modal -->
 @php
-  $customerUser = Illuminate\Support\Facades\Auth::guard('customer')->user();
-  $autofillName = optional($customerUser)->name
-    ?? optional(session('guest_customer'))->name
-    ?? '';
-  if (!$customerUser && session()->has('guest_customer')) {
-    $autofillName = '';
-  }
-  // Kunci nama hanya jika benar-benar login sebagai customer (bukan guest)
-  $lockName = filled($autofillName) && $customerUser;
+$customerUser = Illuminate\Support\Facades\Auth::guard('customer')->user();
+$autofillName = optional($customerUser)->name
+  ?? optional(session('guest_customer'))->name
+  ?? '';
+if (!$customerUser && session()->has('guest_customer')) {
+  $autofillName = '';
+}
+// Kunci nama hanya jika benar-benar login sebagai customer (bukan guest)
+$lockName = filled($autofillName) && $customerUser;
 @endphp
 
 <div id="checkoutModal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true"
@@ -182,10 +182,13 @@
           <div>
             <label for="paymentMethod" class="block text-sm font-medium mb-1">{{__('messages.customer.menu.metode-pembayaran')}}</label>
             <select id="paymentMethod"
-              class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-choco/40" required>
+                    class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-choco/40"
+                    required>
               <option value="" selected disabled>{{__('messages.customer.menu.pilih-metode')}}</option>
-              <option value="CASH">Cash</option>
+              <option value="CASH">Bayar di Kasir</option>
+              @if ($partner->is_qr_active === 1)
               <option value="QRIS">QRIS</option>
+              @endif
             </select>
           </div>
         </div>

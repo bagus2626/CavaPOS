@@ -5,7 +5,7 @@
 
 @section('content')
 <section class="content">
-  <div class="container-fluid">
+  <div class="container-fluid owner-op-edit">
     <a href="{{ route('owner.user-owner.outlet-products.index') }}" class="btn btn-secondary mb-3">
       <i class="fas fa-arrow-left mr-2"></i>Back to Outlet Products
     </a>
@@ -102,7 +102,7 @@
                     </div>
                   @endif
 
-                  {{-- Opsi: SEKARANG quantity tiap option bisa diedit --}}
+                  {{-- Opsi: quantity tiap option bisa diedit + toggle always available --}}
                   @if(($data->parent_options ?? null) && count($data->parent_options))
                     <hr>
                     <div class="text-muted mb-2"><i class="fas fa-list-ul mr-1"></i>Options</div>
@@ -153,31 +153,49 @@
                                       Rp {{ number_format((float)($opt->price ?? 0), 0, ',', '.') }}
                                     </td>
                                     <td class="text-center">
-                                      <div class="input-group input-group-sm justify-content-center" style="max-width:220px;margin:0 auto;">
-                                        <div class="input-group-prepend">
-                                          <button type="button" class="btn btn-outline-secondary btn-opt-dec" data-target="#opt-qty-{{ $opt->id }}">
-                                            <i class="fas fa-minus"></i>
-                                          </button>
-                                        </div>
+                                      {{-- NEW: toggle always available per-option --}}
+                                      <div class="custom-control custom-switch custom-control-sm mb-2 text-left" style="display:inline-block;">
+                                        <input type="hidden" name="options[{{ $opt->id }}][always_available]" value="0">
                                         <input
-                                          type="number"
-                                          id="opt-qty-{{ $opt->id }}"
-                                          name="options[{{ $opt->id }}][quantity]"
-                                          class="form-control text-center"
-                                          min="0"
-                                          step="1"
-                                          value="{{ old("options.{$opt->id}.quantity", $opt->quantity ?? 0) }}"
-                                          style="max-width:120px"
+                                          type="checkbox"
+                                          class="custom-control-input opt-aa"
+                                          id="opt-aa-{{ $opt->id }}"
+                                          name="options[{{ $opt->id }}][always_available]"
+                                          value="1"
+                                          data-qty="#opt-qty-{{ $opt->id }}"
+                                          data-wrap="#opt-qty-wrap-{{ $opt->id }}"
+                                          {{ old("options.{$opt->id}.always_available", $opt->always_available_flag ?? 0) ? 'checked' : '' }}
                                         >
-                                        <div class="input-group-append">
-                                          <button type="button" class="btn btn-outline-secondary btn-opt-inc" data-target="#opt-qty-{{ $opt->id }}">
-                                            <i class="fas fa-plus"></i>
-                                          </button>
+                                        <label class="custom-control-label" for="opt-aa-{{ $opt->id }}">Always available</label>
+                                      </div>
+
+                                      {{-- NEW: bungkus quantity input agar bisa di-hide --}}
+                                      <div id="opt-qty-wrap-{{ $opt->id }}" class="mt-2">
+                                        <div class="input-group input-group-sm justify-content-center" style="max-width:220px;margin:0 auto;">
+                                          <div class="input-group-prepend">
+                                            <button type="button" class="btn btn-outline-secondary btn-opt-dec" data-target="#opt-qty-{{ $opt->id }}">
+                                              <i class="fas fa-minus"></i>
+                                            </button>
+                                          </div>
+                                          <input
+                                            type="number"
+                                            id="opt-qty-{{ $opt->id }}"
+                                            name="options[{{ $opt->id }}][quantity]"
+                                            class="form-control text-center"
+                                            min="0"
+                                            step="1"
+                                            value="{{ old("options.{$opt->id}.quantity", $opt->quantity ?? 0) }}"
+                                            style="max-width:120px"
+                                          >
+                                          <div class="input-group-append">
+                                            <button type="button" class="btn btn-outline-secondary btn-opt-inc" data-target="#opt-qty-{{ $opt->id }}">
+                                              <i class="fas fa-plus"></i>
+                                            </button>
+                                          </div>
                                         </div>
                                       </div>
                                     </td>
                                     <td class="text-right">
-                                      {{-- tampilkan ulang value sebagai info --}}
                                       <span class="text-muted small">{{ old("options.{$opt->id}.quantity", $opt->quantity ?? 0) }}</span>
                                     </td>
                                   </tr>
@@ -199,8 +217,27 @@
                 <div class="card-body">
                   <h5 class="mb-3">Update Stock & Status</h5>
 
-                  {{-- Quantity produk --}}
+                  {{-- NEW: toggle always available (product) --}}
                   <div class="form-group">
+                    <div class="custom-control custom-switch">
+                      <input type="hidden" name="always_available" value="0">
+                      <input
+                        type="checkbox"
+                        class="custom-control-input"
+                        id="aa_product"
+                        name="always_available"
+                        value="1"
+                        {{ old('always_available', $data->always_available_flag ?? 0) ? 'checked' : '' }}
+                      >
+                      <label class="custom-control-label" for="aa_product">
+                        Produk selalu tersedia (tanpa stok)
+                      </label>
+                    </div>
+                    <small class="text-muted">Jika aktif, kolom Quantity akan disembunyikan.</small>
+                  </div>
+
+                  {{-- Quantity produk --}}
+                  <div class="form-group" id="product_qty_group">
                     <label class="mb-1">Quantity (Product)</label>
                     <div class="input-group">
                       <div class="input-group-prepend">
@@ -251,11 +288,10 @@
                     @enderror
                   </div>
                   
-                  {{-- Promotion --}}
+                  {{-- Promotion (owner punya hak; biarkan ada) --}}
                   <div class="form-group">
                     <label class="mb-1" for="promotion_id">Promotion</label>
                     <select id="promotion_id" name="promotion_id" class="form-control">
-                      {{-- kosong = tanpa promo --}}
                       @php
                         $selectedPromoId = old('promotion_id', $data->promo_id);
                       @endphp
@@ -318,6 +354,82 @@
     </div>
   </div>
 </section>
+
+<style>
+/* ===== Owner › Outlet Product Edit (page scope) ===== */
+.owner-op-edit{
+  --choco:#8c1000; --soft-choco:#c12814; --ink:#22272b;
+  --radius:12px; --shadow:0 6px 20px rgba(0,0,0,.08);
+}
+
+/* Card & header */
+.owner-op-edit .card{
+  border:0; border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;
+}
+.owner-op-edit .card-header{
+  background:#fff; border-bottom:1px solid #eef1f4;
+}
+.owner-op-edit .card-title{ color:var(--ink); font-weight:700; }
+
+/* Back button -> outline choco */
+.owner-op-edit .btn.btn-secondary{
+  background:#ffffff00; color:var(--choco); border:1px solid var(--choco);
+}
+.owner-op-edit .btn.btn-secondary:hover{
+  background:var(--choco); color:#fff; border-color:var(--choco);
+}
+
+/* Primary / light buttons (brand) */
+.owner-op-edit .btn-primary{ background:var(--choco); border-color:var(--choco); }
+.owner-op-edit .btn-primary:hover{ background:var(--soft-choco); border-color:var(--soft-choco); }
+.owner-op-edit .btn-light.border{ color:var(--choco); border-color:var(--choco); background:#fff; }
+.owner-op-edit .btn-light.border:hover{ color:#fff; background:var(--choco); }
+
+/* Badges (soft) */
+.owner-op-edit .badge-info{
+  background:#eff6ff; color:#1d4ed8; border:1px solid #dbeafe;
+}
+.owner-op-edit .badge-light.border{
+  background:#fff; color:#374151; border:1px solid #e5e7eb;
+}
+
+/* Readonly gallery / thumbnails */
+.owner-op-edit img.rounded{ border-radius:12px !important; box-shadow:var(--shadow); }
+
+/* Tables (options) */
+.owner-op-edit .table{ background:#fff; margin-bottom:0; }
+.owner-op-edit .table thead th{
+  background:#fff; border-bottom:2px solid #eef1f4 !important;
+  color:#374151; font-weight:700; white-space:nowrap;
+}
+.owner-op-edit .table tbody tr{ transition:background-color .12s ease; }
+.owner-op-edit .table tbody tr:hover{ background:rgba(140,16,0,.04); }
+
+/* Input groups */
+.owner-op-edit .input-group .btn-outline-secondary{ border-color:#d1d5db; }
+.owner-op-edit .input-group .btn-outline-secondary:hover{ background:#f3f4f6; }
+
+/* ==== Bootstrap 4 custom switch: cegah toggle nutup label ==== */
+.owner-op-edit .custom-control{ min-height:1.75rem; }
+.owner-op-edit .custom-switch{ padding-left:2.6rem; } /* beri ruang untuk switch */
+.owner-op-edit .custom-switch .custom-control-label{ cursor:pointer; padding-left:.25rem; }
+.owner-op-edit .custom-switch .custom-control-input:focus ~ .custom-control-label::before{
+  border-color:var(--choco); box-shadow:0 0 0 .2rem rgba(140,16,0,.15);
+}
+.owner-op-edit .custom-switch .custom-control-input:checked ~ .custom-control-label::before{
+  background-color:var(--choco); border-color:var(--choco);
+}
+
+/* Quantity groups (smooth hide) */
+.owner-op-edit #product_qty_group,
+.owner-op-edit [id^="opt-qty-wrap-"]{ transition:opacity .15s ease, transform .15s ease; }
+.owner-op-edit #product_qty_group.d-none,
+.owner-op-edit [id^="opt-qty-wrap-"].d-none{ opacity:0; transform:translateY(-4px); }
+
+/* Small helpers */
+.owner-op-edit .text-muted{ color:#6b7280 !important; }
+</style>
+
 @endsection
 
 @section('scripts')
@@ -330,9 +442,9 @@
     const max = document.getElementById('btn-qty-max');
     const toInt = (v) => { const n = parseInt(v, 10); return isNaN(n) ? 0 : n; };
 
-    dec?.addEventListener('click', () => { qty.value = Math.max(0, toInt(qty.value) - 1); });
-    inc?.addEventListener('click', () => { qty.value = toInt(qty.value) + 1; });
-    max?.addEventListener('click', () => { qty.value = 999999999; });
+    dec?.addEventListener('click', () => { if (qty.disabled) return; qty.value = Math.max(0, toInt(qty.value) - 1); });
+    inc?.addEventListener('click', () => { if (qty.disabled) return; qty.value = toInt(qty.value) + 1; });
+    max?.addEventListener('click', () => { if (qty.disabled) return; qty.value = 999999999; });
   })();
 
   // is_active switch <-> hidden input
@@ -347,22 +459,60 @@
     sw?.addEventListener('change', sync);
   })();
 
-  // +/- untuk option quantity
+  // +/- untuk option quantity (hindari update saat disabled)
   (function () {
     const toInt = (v) => { const n = parseInt(v, 10); return isNaN(n) ? 0 : n; };
     document.addEventListener('click', function (e) {
       if (e.target.closest('.btn-opt-dec')) {
         const target = e.target.closest('.btn-opt-dec').dataset.target;
         const input = document.querySelector(target);
-        if (!input) return;
+        if (!input || input.disabled) return;
         input.value = Math.max(0, toInt(input.value) - 1);
       }
       if (e.target.closest('.btn-opt-inc')) {
         const target = e.target.closest('.btn-opt-inc').dataset.target;
         const input = document.querySelector(target);
-        if (!input) return;
+        if (!input || input.disabled) return;
         input.value = toInt(input.value) + 1;
       }
+    });
+  })();
+
+  // NEW: toggle logic product & options (always available)
+  (function () {
+    function hideQty(wrapperEl, inputEl, checked) {
+      if (!wrapperEl || !inputEl) return;
+      if (checked) {
+        if (!inputEl.dataset.prev) inputEl.dataset.prev = inputEl.value || '0';
+        wrapperEl.classList.add('d-none');
+        inputEl.disabled = true;
+      } else {
+        wrapperEl.classList.remove('d-none');
+        inputEl.disabled = false;
+        if (inputEl.dataset.prev) inputEl.value = inputEl.dataset.prev;
+      }
+    }
+
+    // Product toggle
+    const aaProd = document.getElementById('aa_product');
+    const prodWrap = document.getElementById('product_qty_group');
+    const prodQty = document.getElementById('quantity');
+    function syncProd() { hideQty(prodWrap, prodQty, aaProd?.checked); }
+    aaProd?.addEventListener('change', syncProd);
+    syncProd(); // initial
+
+    // Option toggles
+    function syncOneOpt(toggle) {
+      const qtySel = toggle.getAttribute('data-qty');
+      const wrapSel = toggle.getAttribute('data-wrap');
+      const qty = document.querySelector(qtySel);
+      const wrap = document.querySelector(wrapSel);
+      hideQty(wrap, qty, toggle.checked);
+    }
+    document.querySelectorAll('.opt-aa').forEach(tg => {
+      tg.addEventListener('change', () => syncOneOpt(tg));
+      // initial
+      syncOneOpt(tg);
     });
   })();
 </script>

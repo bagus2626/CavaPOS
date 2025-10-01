@@ -51,7 +51,6 @@ class OwnerMasterProductController extends Controller
             $validated = $request->validate([
                 'name'             => 'required|string|max:255',
                 'product_category' => 'required|exists:categories,id',
-                'quantity'         => 'required',
                 'price'            => 'required',
                 'description'      => 'nullable|string',
                 'images'           => 'nullable|array|max:5',
@@ -63,7 +62,6 @@ class OwnerMasterProductController extends Controller
                 'name.string'               => 'Nama produk harus berupa teks.',
                 'product_category.required' => 'Kategori produk wajib dipilih.',
                 'product_category.exists'   => 'Kategori produk tidak valid.',
-                'quantity.required'         => 'Jumlah produk wajib diisi.',
                 'price.required'            => 'Harga produk wajib diisi.',
                 'images.array'              => 'Gambar harus dalam bentuk array.',
                 'options.array'             => 'Options harus dalam bentuk array.',
@@ -102,7 +100,7 @@ class OwnerMasterProductController extends Controller
                 'owner_id'   => $owner->id, // pastikan ini valid
                 'name'         => $request->name,
                 'category_id'  => $request->product_category,
-                'quantity'     => $request->quantity,
+                'quantity'     => 0,
                 'price'        => $price,
                 'description'  => $request->description,
                 'promo_id' => $request->promotion_id ?? null,
@@ -147,7 +145,7 @@ class OwnerMasterProductController extends Controller
                                 'master_product_id' => $product->id,
                                 'master_product_parent_option_id' => $parent->id,
                                 'name'        => $option['name'],
-                                'quantity'    => $option['quantity'],
+                                'quantity'    => 0,
                                 'price'       => $optionPrice,
                                 'description' => $option['description'] ?? null,
                                 'pictures'    => $optionImages ?? null,
@@ -172,14 +170,14 @@ class OwnerMasterProductController extends Controller
     }
 
 
-    public function show(PartnerProduct $product)
+    public function show(MasterProduct $master_product)
     {
-        $categories = Category::where('partner_id', Auth::id())->get();
-        $data = PartnerProduct::with('parent_options.options', 'category')
-            ->where('partner_id', Auth::id())
-            ->where('id', $product->id)
+        $categories = Category::where('owner_id', Auth::id())->get();
+        $data = MasterProduct::with('parent_options.options', 'category')
+            ->where('owner_id', Auth::id())
+            ->where('id', $master_product->id)
             ->first();
-        return view('pages.partner.products.show', compact('data', 'categories'));
+        return view('pages.owner.products.master-product.show', compact('data', 'categories'));
     }
 
     public function edit(MasterProduct $master_product)
@@ -207,7 +205,6 @@ class OwnerMasterProductController extends Controller
             $validated = $request->validate([
                 'name'             => 'required|string|max:255',
                 'product_category' => 'required|exists:categories,id',
-                'quantity'         => 'required',
                 'price'            => 'required',
                 'description'      => 'nullable|string',
                 'promotion_id'     => 'nullable|integer|exists:promotions,id',
@@ -278,7 +275,6 @@ class OwnerMasterProductController extends Controller
             $product->update([
                 'name'        => $request->name,
                 'category_id' => $request->product_category,
-                'quantity'    => $request->quantity,
                 'price'       => $price,
                 'promo_id'    => $request->promotion_id,
                 'description' => $request->description,
@@ -378,7 +374,6 @@ class OwnerMasterProductController extends Controller
                                 $optionModel = MasterProductOption::find($optionId);
                                 $optionModel->update([
                                     'name'        => $option['name'],
-                                    'quantity'    => $option['quantity'],
                                     'price'       => $optionPrice,
                                     'description' => $option['description'] ?? null,
                                     'pictures'    => $optionImages ?? $optionModel->pictures,
@@ -389,7 +384,6 @@ class OwnerMasterProductController extends Controller
                                     'master_product_id' => $product->id,
                                     'master_product_parent_option_id' => $parentModel->id,
                                     'name'        => $option['name'],
-                                    'quantity'    => $option['quantity'],
                                     'price'       => $optionPrice,
                                     'description' => $option['description'] ?? null,
                                     'pictures'    => $optionImages,
