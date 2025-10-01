@@ -5,7 +5,7 @@
 
 @section('content')
 <section class="content">
-  <div class="container-fluid">
+  <div class="container-fluid owner-op-edit">
     <a href="{{ route('owner.user-owner.outlet-products.index') }}" class="btn btn-secondary mb-3">
       <i class="fas fa-arrow-left mr-2"></i>Back to Outlet Products
     </a>
@@ -354,6 +354,82 @@
     </div>
   </div>
 </section>
+
+<style>
+/* ===== Owner › Outlet Product Edit (page scope) ===== */
+.owner-op-edit{
+  --choco:#8c1000; --soft-choco:#c12814; --ink:#22272b;
+  --radius:12px; --shadow:0 6px 20px rgba(0,0,0,.08);
+}
+
+/* Card & header */
+.owner-op-edit .card{
+  border:0; border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;
+}
+.owner-op-edit .card-header{
+  background:#fff; border-bottom:1px solid #eef1f4;
+}
+.owner-op-edit .card-title{ color:var(--ink); font-weight:700; }
+
+/* Back button -> outline choco */
+.owner-op-edit .btn.btn-secondary{
+  background:#ffffff00; color:var(--choco); border:1px solid var(--choco);
+}
+.owner-op-edit .btn.btn-secondary:hover{
+  background:var(--choco); color:#fff; border-color:var(--choco);
+}
+
+/* Primary / light buttons (brand) */
+.owner-op-edit .btn-primary{ background:var(--choco); border-color:var(--choco); }
+.owner-op-edit .btn-primary:hover{ background:var(--soft-choco); border-color:var(--soft-choco); }
+.owner-op-edit .btn-light.border{ color:var(--choco); border-color:var(--choco); background:#fff; }
+.owner-op-edit .btn-light.border:hover{ color:#fff; background:var(--choco); }
+
+/* Badges (soft) */
+.owner-op-edit .badge-info{
+  background:#eff6ff; color:#1d4ed8; border:1px solid #dbeafe;
+}
+.owner-op-edit .badge-light.border{
+  background:#fff; color:#374151; border:1px solid #e5e7eb;
+}
+
+/* Readonly gallery / thumbnails */
+.owner-op-edit img.rounded{ border-radius:12px !important; box-shadow:var(--shadow); }
+
+/* Tables (options) */
+.owner-op-edit .table{ background:#fff; margin-bottom:0; }
+.owner-op-edit .table thead th{
+  background:#fff; border-bottom:2px solid #eef1f4 !important;
+  color:#374151; font-weight:700; white-space:nowrap;
+}
+.owner-op-edit .table tbody tr{ transition:background-color .12s ease; }
+.owner-op-edit .table tbody tr:hover{ background:rgba(140,16,0,.04); }
+
+/* Input groups */
+.owner-op-edit .input-group .btn-outline-secondary{ border-color:#d1d5db; }
+.owner-op-edit .input-group .btn-outline-secondary:hover{ background:#f3f4f6; }
+
+/* ==== Bootstrap 4 custom switch: cegah toggle nutup label ==== */
+.owner-op-edit .custom-control{ min-height:1.75rem; }
+.owner-op-edit .custom-switch{ padding-left:2.6rem; } /* beri ruang untuk switch */
+.owner-op-edit .custom-switch .custom-control-label{ cursor:pointer; padding-left:.25rem; }
+.owner-op-edit .custom-switch .custom-control-input:focus ~ .custom-control-label::before{
+  border-color:var(--choco); box-shadow:0 0 0 .2rem rgba(140,16,0,.15);
+}
+.owner-op-edit .custom-switch .custom-control-input:checked ~ .custom-control-label::before{
+  background-color:var(--choco); border-color:var(--choco);
+}
+
+/* Quantity groups (smooth hide) */
+.owner-op-edit #product_qty_group,
+.owner-op-edit [id^="opt-qty-wrap-"]{ transition:opacity .15s ease, transform .15s ease; }
+.owner-op-edit #product_qty_group.d-none,
+.owner-op-edit [id^="opt-qty-wrap-"].d-none{ opacity:0; transform:translateY(-4px); }
+
+/* Small helpers */
+.owner-op-edit .text-muted{ color:#6b7280 !important; }
+</style>
+
 @endsection
 
 @section('scripts')

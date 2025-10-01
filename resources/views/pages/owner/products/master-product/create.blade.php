@@ -8,7 +8,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-12">
-                <a href="{{ route('owner.user-owner.master-products.index') }}" class="btn btn-secondary mb-3">
+                <a href="{{ route('owner.user-owner.master-products.index') }}" class="btn bg-choco text-white mb-3">
                     <i class="fas fa-arrow-left mr-2"></i>Back to Products
                 </a>
 

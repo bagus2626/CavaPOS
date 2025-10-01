@@ -170,14 +170,14 @@ class OwnerMasterProductController extends Controller
     }
 
 
-    public function show(PartnerProduct $product)
+    public function show(MasterProduct $master_product)
     {
-        $categories = Category::where('partner_id', Auth::id())->get();
-        $data = PartnerProduct::with('parent_options.options', 'category')
-            ->where('partner_id', Auth::id())
-            ->where('id', $product->id)
+        $categories = Category::where('owner_id', Auth::id())->get();
+        $data = MasterProduct::with('parent_options.options', 'category')
+            ->where('owner_id', Auth::id())
+            ->where('id', $master_product->id)
             ->first();
-        return view('pages.partner.products.show', compact('data', 'categories'));
+        return view('pages.owner.products.master-product.show', compact('data', 'categories'));
     }
 
     public function edit(MasterProduct $master_product)
