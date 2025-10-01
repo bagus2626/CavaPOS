@@ -43,8 +43,7 @@
 .filter-btn:not(.active){
   color: var(--choco);
   border-color: var(--choco);
-  background: #fff;
-}
+  background: transparent;}
 .filter-btn:not(.active):hover{
   background: rgba(140,16,0,.08);
 }

@@ -3,10 +3,6 @@
 @section('title', 'Create Tables')
 @section('page_title', 'Create New Table')
 
-@push('styles')
-  @vite('resources/css/pages/tables-create.css')
-@endpush
-
 @section('content')
 <div class="container">
   <a href="{{ route('partner.store.tables.index') }}" class="btn btn-outline-choco mb-3">

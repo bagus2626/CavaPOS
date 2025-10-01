@@ -84,7 +84,7 @@ function deleteProduct(productId) {
   box-shadow:0 6px 14px rgba(140,16,0,.18);
 }
 .tables-index .filter-btn:not(.active){
-  color:var(--choco); border-color:var(--choco); background:#fff;
+  color:var(--choco); border-color:var(--choco); background:transparent;
 }
 .tables-index .filter-btn:not(.active):hover{
   background: rgba(140,16,0,.08);

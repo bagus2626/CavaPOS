@@ -309,7 +309,7 @@
 /* Buttons – brand */
 .owner-emp-edit .btn-choco{ background:var(--choco); border-color:var(--choco); color:#fff; }
 .owner-emp-edit .btn-choco:hover{ background:var(--soft-choco); border-color:var(--soft-choco); }
-.owner-emp-edit .btn-outline-choco{ color:var(--choco); border-color:var(--choco); background:#fff; }
+.owner-emp-edit .btn-outline-choco{ color:var(--choco); border-color:var(--choco);}
 .owner-emp-edit .btn-outline-choco:hover{ color:#fff; background:var(--choco); border-color:var(--choco); }
 
 /* Fallback reskin default buttons (jaga kompatibilitas) */

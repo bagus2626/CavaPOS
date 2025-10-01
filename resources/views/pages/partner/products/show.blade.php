@@ -3,10 +3,6 @@
 @section('title', 'Product Detail')
 @section('page_title', 'Product Detail')
 
-@push('styles')
-  @vite('resources/css/pages/product-show.css')
-@endpush
-
 @section('content')
 <section class="content product-show">
   <div class="container-fluid">
@@ -118,7 +114,7 @@
 /* Back button & brand buttons (selaras) */
 .btn-pill{ border-radius:999px; }
 .btn-outline-choco{
-  color: var(--choco); border-color: var(--choco); background:#fff;
+  color: var(--choco); border-color: var(--choco);
 }
 .btn-outline-choco:hover{
   color:#fff; background: var(--choco); border-color: var(--choco);

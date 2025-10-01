@@ -3,10 +3,6 @@
 @section('title', 'Table Detail')
 @section('page_title', 'Table Detail')
 
-@push('styles')
-  @vite('resources/css/pages/tables-show.css')
-@endpush
-
 @section('content')
 <div class="container">
   <a href="{{ route('partner.store.tables.index') }}" class="btn btn-outline-choco mb-3">
@@ -134,7 +130,7 @@
 /* Buttons (fallback bila belum di global theme) */
 .btn-choco{ background:var(--choco); border-color:var(--choco); color:#fff; }
 .btn-choco:hover{ background:var(--soft-choco); border-color:var(--soft-choco); color:#fff; }
-.btn-outline-choco{ color:var(--choco); border-color:var(--choco); background:#fff; }
+.btn-outline-choco{ color:var(--choco); border-color:var(--choco); }
 .btn-outline-choco:hover{ color:#fff; background:var(--choco); border-color:var(--choco); }
 .btn-soft-danger{ background:#fee2e2; color:#991b1b; border-color:#fecaca; }
 .btn-soft-danger:hover{ background:#fecaca; color:#7f1d1d; border-color:#fca5a5; }

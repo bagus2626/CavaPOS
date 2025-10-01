@@ -3,10 +3,6 @@
 @section('title', 'Edit Table')
 @section('page_title', 'Edit Table')
 
-@push('styles')
-  @vite('resources/css/pages/tables-edit.css')
-@endpush
-
 @section('content')
 <div class="container">
   <a href="{{ route('partner.store.tables.index') }}" class="btn btn-outline-choco mb-3">
@@ -186,7 +182,7 @@
 /* Buttons brand (fallback jika belum ada global) */
 .btn-choco{ background:var(--choco); border-color:var(--choco); color:#fff; }
 .btn-choco:hover{ background:var(--soft-choco); border-color:var(--soft-choco); color:#fff; }
-.btn-outline-choco{ color:var(--choco); border-color:var(--choco); background:#fff; }
+.btn-outline-choco{ color:var(--choco); border-color:var(--choco); }
 .btn-outline-choco:hover{ color:#fff; background:var(--choco); border-color:var(--choco); }
 
 /* Thumbnails (baru & lama) */

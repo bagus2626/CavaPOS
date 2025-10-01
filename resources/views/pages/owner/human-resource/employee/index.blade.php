@@ -3,10 +3,6 @@
 @section('title', 'Employee List')
 @section('page_title', 'All Employees')
 
-@push('styles')
-  @vite('resources/css/pages/owner-employee-index.css')
-@endpush
-
 @section('content')
 <section class="content owner-emp">
   <div class="container-fluid">

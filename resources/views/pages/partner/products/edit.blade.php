@@ -3,10 +3,6 @@
 @section('title', 'Update Product Stock')
 @section('page_title', 'Update Product Stock')
 
-@push('styles')
-  @vite('resources/css/pages/product-stock.css')
-@endpush
-
 @section('content')
 <section class="content product-stock">
   <div class="container-fluid">
@@ -300,7 +296,7 @@
 .btn-pill{ border-radius:999px; }
 .btn-choco{ background:var(--choco); border-color:var(--choco); color:#fff; }
 .btn-choco:hover{ background:var(--soft-choco); border-color:var(--soft-choco); }
-.btn-outline-choco{ color:var(--choco); border-color:var(--choco); background:#fff; }
+.btn-outline-choco{ color:var(--choco); border-color:var(--choco); }
 .btn-outline-choco:hover{ color:#fff; background:var(--choco); border-color:var(--choco); }
 
 .brand-alert{
