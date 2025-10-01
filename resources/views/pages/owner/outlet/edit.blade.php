@@ -355,7 +355,7 @@
 .owner-outlet-edit .text-choco{ color:var(--choco) !important; }
 .owner-outlet-edit .btn-choco{ background:var(--choco); border-color:var(--choco); color:#fff; }
 .owner-outlet-edit .btn-choco:hover{ background:var(--soft-choco); border-color:var(--soft-choco); color:#fff; }
-.owner-outlet-edit .btn-outline-choco{ color:var(--choco); border-color:var(--choco); background:#fff; }
+.owner-outlet-edit .btn-outline-choco{ color:var(--choco); border-color:var(--choco);}
 .owner-outlet-edit .btn-outline-choco:hover{ color:#fff; background:var(--choco); border-color:var(--choco); }
 
 /* Alerts */

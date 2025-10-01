@@ -267,7 +267,6 @@
 .owner-emp-show .btn-outline-choco{
   color:var(--choco);
   border-color:var(--choco);
-  background:#fff;
 }
 .owner-emp-show .btn-outline-choco:hover{
   color:#fff;

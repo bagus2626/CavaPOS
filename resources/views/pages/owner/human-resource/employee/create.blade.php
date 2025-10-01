@@ -289,7 +289,7 @@
   background:var(--soft-choco); border-color:var(--soft-choco);
 }
 .owner-emp-create .btn-outline-choco{
-  color:var(--choco); border-color:var(--choco); background:#fff;
+  color:var(--choco); border-color:var(--choco);
 }
 .owner-emp-create .btn-outline-choco:hover{
   color:#fff; background:var(--choco); border-color:var(--choco);
