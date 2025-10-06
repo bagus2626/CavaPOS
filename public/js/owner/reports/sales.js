@@ -1,142 +1,234 @@
+/**
+ * Sales Report Charts
+ * File: public/js/sales.js
+ */
 
-const staticDataForJs = {
-  // Data untuk chart garis dan tabel "Recent Transactions"
-  revenue: {
-    labels: [
-      "15 Sep",
-      "16 Sep",
-      "17 Sep",
-      "18 Sep",
-      "19 Sep",
-      "20 Sep",
-      "21 Sep",
-      "22 Sep",
-    ],
-    data: [390000, 480000, 550000, 510000, 430000, 460000, 520000, 480000],
+// ==================== KONFIGURASI WARNA ====================
+const colorScheme = {
+  primary: {
+    start: "rgba(139, 69, 19, 0.8)",
+    mid: "rgba(160, 82, 45, 0.6)",
+    end: "rgba(139, 69, 19, 0.1)",
+    solid: "#8B4513",
   },
-  // Data dasar untuk proporsi chart kategori
-  category: {
-    labels: ["Makanan", "Minuman", "Dessert", "Snack"],
-    data: [850, 620, 280, 125], // Rasio
-    colors: ["#667eea", "#764ba2", "#f093fb", "#f5576c"],
-  },
-  // Data dasar untuk proporsi tabel "Top Products"
-  topProducts: [
-    { name: "Nasi Goreng Spesial", weight: 0.25 },
-    { name: "Es Kopi Susu", weight: 0.18 },
-    { name: "Ayam Geprek", weight: 0.12 },
-    { name: "Milkshake Oreo", weight: 0.1 },
-    { name: "Mie Goreng Seafood", weight: 0.09 },
-    { name: "Jus Alpukat", weight: 0.08 },
-    { name: "Pisang Goreng", weight: 0.07 },
+  // Palet warna tema cokelat dengan variasi yang kontras
+  categories: [
+    "#8B4513", // Saddle Brown (Cokelat tua)
+    "#D2691E", // Chocolate (Cokelat medium)
+    "#CD853F", // Peru (Cokelat keemasan)
+    "#DEB887", // Burlywood (Cokelat muda)
+    "#F4A460", // Sandy Brown (Cokelat pastel)
+    "#BC8F8F", // Rosy Brown (Cokelat kemerahan)
+    "#A0522D", // Sienna (Cokelat tanah)
+    "#B8860B", // Dark Goldenrod (Emas tua)
+    "#DAA520", // Goldenrod (Emas medium)
+    "#F5DEB3", // Wheat (Gandum)
   ],
+  grid: "rgba(0, 0, 0, 0.05)",
+  text: "#4B5563",
 };
 
-// Variabel global untuk instance chart
-let revenueTrendChart;
-let categoryChart;
-
-// Opsi default untuk semua chart
+// ==================== OPSI DEFAULT CHART ====================
 const defaultOptions = {
   responsive: true,
   maintainAspectRatio: false,
-  animation: { duration: 600, easing: "easeInOutQuart" },
+  animation: {
+    duration: 1200,
+    easing: "easeInOutCubic",
+  },
   plugins: {
     legend: {
       position: "bottom",
-      labels: { padding: 15, usePointStyle: true },
+      labels: {
+        padding: 20,
+        usePointStyle: true,
+        font: {
+          size: 12,
+          family: "'Inter', sans-serif",
+        },
+        color: colorScheme.text,
+      },
+    },
+    tooltip: {
+      backgroundColor: "rgba(255, 255, 255, 0.95)",
+      titleColor: colorScheme.text,
+      bodyColor: colorScheme.text,
+      borderColor: colorScheme.primary.solid,
+      borderWidth: 1,
+      padding: 12,
+      displayColors: true,
+      bodyFont: {
+        size: 13,
+      },
+      titleFont: {
+        size: 14,
+        weight: "bold",
+      },
+      cornerRadius: 8,
+      callbacks: {
+        label: function (context) {
+          let label = context.dataset.label || "";
+          if (label) {
+            label += ": ";
+          }
+          if (context.parsed.y !== null) {
+            label +=
+              "Rp " + new Intl.NumberFormat("id-ID").format(context.parsed.y);
+          }
+          return label;
+        },
+      },
     },
   },
 };
 
-function initializeJsComponents() {
-  const revenueData = staticDataForJs.revenue;
-  const totalRevenue = revenueData.data.reduce((sum, value) => sum + value, 0);
+// ==================== FUNGSI HELPER ====================
 
-  // 1. Inisialisasi kedua chart
-  initRevenueTrendChart(revenueData);
-  initCategoryChart();
-
-  // 2. Perbarui chart kategori dan kedua tabel berdasarkan total pendapatan dari data statis JS
-  updateCategoryChartByTotal(totalRevenue);
-  updateTopProducts(totalRevenue);
-  updateRecentTransactions(revenueData);
-
-  // 3. Set teks indikator (opsional, bisa juga statis di Blade)
-  document.getElementById("chart-period-indicator").textContent =
-    "Tampilan Data Statis";
+/**
+ * Membuat gradient background untuk line chart
+ */
+function createGradient(ctx, area) {
+  const gradient = ctx.createLinearGradient(0, area.bottom, 0, area.top);
+  gradient.addColorStop(0, colorScheme.primary.end);
+  gradient.addColorStop(0.5, colorScheme.primary.mid);
+  gradient.addColorStop(1, colorScheme.primary.start);
+  return gradient;
 }
 
-function initRevenueTrendChart(data) {
-  const ctx = document.getElementById("revenueTrendChart")?.getContext("2d");
-  if (!ctx) return;
-  revenueTrendChart = new Chart(ctx, {
+/**
+ * Validasi dan sanitasi nilai numerik
+ */
+function sanitizeNumber(value) {
+  const num = parseFloat(value);
+  return !isNaN(num) && isFinite(num) ? num : 0;
+}
+
+/**
+ * Hitung persentase dengan validasi
+ */
+function calculatePercentage(value, total) {
+  const sanitizedValue = sanitizeNumber(value);
+  const sanitizedTotal = sanitizeNumber(total);
+
+  if (sanitizedTotal === 0) {
+    return "0.0";
+  }
+
+  return ((sanitizedValue / sanitizedTotal) * 100).toFixed(1);
+}
+
+// ==================== LINE CHART: REVENUE TREND ====================
+
+/**
+ * Inisialisasi chart trend pendapatan
+ */
+function initRevenueTrendChart() {
+  const canvas = document.getElementById("revenueTrendChart");
+  if (!canvas) {
+    console.warn("Canvas revenueTrendChart tidak ditemukan");
+    return;
+  }
+
+  if (
+    typeof revenueChartData === "undefined" ||
+    !revenueChartData.labels ||
+    revenueChartData.labels.length === 0
+  ) {
+    canvas.parentElement.innerHTML =
+      '<div class="flex items-center justify-center h-full">' +
+      '<p class="text-gray-500 text-center">Tidak ada data pendapatan untuk periode ini.</p>' +
+      "</div>";
+    return;
+  }
+
+  const ctx = canvas.getContext("2d");
+
+  new Chart(ctx, {
     type: "line",
     data: {
-      labels: data.labels,
+      labels: revenueChartData.labels,
       datasets: [
         {
           label: "Pendapatan",
-          data: data.data,
-          borderColor: "#667eea",
-          backgroundColor: "rgba(102, 126, 234, 0.08)",
-          borderWidth: 2,
+          data: revenueChartData.data.map((v) => sanitizeNumber(v)),
+          borderColor: colorScheme.primary.solid,
+          backgroundColor: function (context) {
+            const chart = context.chart;
+            const { ctx, chartArea } = chart;
+            if (!chartArea) {
+              return null;
+            }
+            return createGradient(ctx, chartArea);
+          },
+          borderWidth: 3,
           fill: true,
-          tension: 0.3,
+          tension: 0.4,
+          pointRadius: 5,
+          pointHoverRadius: 8,
+          pointBackgroundColor: "#fff",
+          pointBorderColor: colorScheme.primary.solid,
+          pointBorderWidth: 3,
+          pointHoverBackgroundColor: colorScheme.primary.solid,
+          pointHoverBorderColor: "#fff",
+          pointHoverBorderWidth: 3,
         },
       ],
     },
     options: {
       ...defaultOptions,
-      plugins: { legend: { display: false } },
+      interaction: {
+        intersect: false,
+        mode: "index",
+      },
+      plugins: {
+        ...defaultOptions.plugins,
+        legend: {
+          display: false,
+        },
+        tooltip: {
+          ...defaultOptions.plugins.tooltip,
+          callbacks: {
+            label: function (context) {
+              const value = sanitizeNumber(context.parsed.y);
+              return (
+                "Pendapatan: Rp " + new Intl.NumberFormat("id-ID").format(value)
+              );
+            },
+          },
+        },
+      },
       scales: {
         y: {
           beginAtZero: true,
+          grid: {
+            color: colorScheme.grid,
+            drawBorder: false,
+          },
           ticks: {
-            callback: (value) => "Rp " + (value / 1000).toFixed(0) + "K",
+            color: colorScheme.text,
+            font: {
+              size: 11,
+            },
+            callback: function (value) {
+              return (
+                "Rp " +
+                new Intl.NumberFormat("id-ID", {
+                  notation: "compact",
+                  compactDisplay: "short",
+                }).format(value)
+              );
+            },
           },
         },
-        x: { grid: { display: false } },
-      },
-    },
-  });
-}
-
-function initCategoryChart() {
-  const ctx = document.getElementById("categoryChart")?.getContext("2d");
-  if (!ctx) return;
-  categoryChart = new Chart(ctx, {
-    type: "doughnut",
-    data: {
-      labels: staticDataForJs.category.labels,
-      datasets: [
-        {
-          data: staticDataForJs.category.data,
-          backgroundColor: staticDataForJs.category.colors,
-          borderWidth: 0,
-          hoverOffset: 6,
-        },
-      ],
-    },
-    options: {
-      ...defaultOptions,
-      cutout: "55%",
-      plugins: {
-        legend: {
-          ...defaultOptions.plugins.legend,
-          labels: {
-            ...defaultOptions.plugins.legend.labels,
-            generateLabels: (chart) => {
-              const data = chart.data;
-              const total =
-                data.datasets[0].data.reduce((a, b) => a + b, 0) || 1;
-              return data.labels.map((label, i) => ({
-                text: `${label} (${(
-                  (data.datasets[0].data[i] / total) *
-                  100
-                ).toFixed(1)}%)`,
-                fillStyle: data.datasets[0].backgroundColor[i],
-              }));
+        x: {
+          grid: {
+            display: false,
+            drawBorder: false,
+          },
+          ticks: {
+            color: colorScheme.text,
+            font: {
+              size: 11,
             },
           },
         },
@@ -145,86 +237,131 @@ function initCategoryChart() {
   });
 }
 
-function updateCategoryChartByTotal(totalRevenue) {
-  if (!categoryChart) return;
-  const baseData = staticDataForJs.category.data;
-  const sumBase = baseData.reduce((a, b) => a + b, 0) || 1;
-  const scaledData = baseData.map((v) =>
-    Math.round((v / sumBase) * totalRevenue)
-  );
-  categoryChart.data.datasets[0].data = scaledData;
-  categoryChart.update();
-}
+// ==================== DOUGHNUT CHART: CATEGORY ====================
 
-function updateTopProducts(totalRevenue) {
-  const container = document.getElementById("top-products-list");
-  if (!container) return;
-  const computed = staticDataForJs.topProducts
-    .map((p) => ({ name: p.name, amount: Math.round(p.weight * totalRevenue) }))
-    .sort((a, b) => b.amount - a.amount);
-  container.innerHTML = computed
-    .map(
-      (item) =>
-        `<div class="flex justify-between items-center p-3 hover:bg-gray-50 rounded-xl"><span class="font-medium text-gray-800">${
-          item.name
-        }</span><span class="font-bold text-indigo-600">${formatCurrency(
-          item.amount
-        )}</span></div>`
-    )
-    .join("");
-}
+/**
+ * Inisialisasi chart kategori
+ */
+function initCategoryChart() {
+  const canvas = document.getElementById("categoryChart");
+  if (!canvas) {
+    console.warn("Canvas categoryChart tidak ditemukan");
+    return;
+  }
 
-function updateRecentTransactions(data) {
-  const container = document.getElementById("recent-transactions-list");
-  if (!container) return;
-  const items = data.labels
-    .map((label, i) => ({
-      orderNo: 1234 - (data.labels.length - 1 - i),
-      label: label,
-      amount: data.data[i],
-    }))
-    .reverse()
-    .slice(0, 8);
-  container.innerHTML = items
-    .map(
-      (item) =>
-        `<div class="flex justify-between items-center p-3 hover:bg-gray-50 rounded-xl"><div><p class="font-medium text-gray-800">Order #${
-          item.orderNo
-        }</p><p class="text-sm text-gray-500">${
-          item.label
-        }</p></div><span class="font-bold text-green-600">${formatCurrency(
-          item.amount
-        )}</span></div>`
-    )
-    .join("");
-}
+  if (
+    typeof categoryChartData === "undefined" ||
+    !categoryChartData.labels ||
+    categoryChartData.labels.length === 0
+  ) {
+    canvas.parentElement.innerHTML =
+      '<div class="flex items-center justify-center h-full">' +
+      '<p class="text-gray-500 text-center">Tidak ada data kategori untuk periode ini.</p>' +
+      "</div>";
+    return;
+  }
 
+  const ctx = canvas.getContext("2d");
 
+  new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: categoryChartData.labels,
+      datasets: [
+        {
+          data: categoryChartData.data.map((v) => sanitizeNumber(v)),
+          backgroundColor: colorScheme.categories,
+          borderWidth: 3,
+          borderColor: "#fff",
+          hoverOffset: 15,
+          hoverBorderWidth: 4,
+          hoverBorderColor: "#fff",
+        },
+      ],
+    },
+    options: {
+      ...defaultOptions,
+      cutout: "50%", // [PERUBAHAN] Lubang dibuat lebih besar
+      plugins: {
+        ...defaultOptions.plugins,
+        legend: {
+          position: "bottom", // [PERUBAHAN] Legenda dipindah ke bawah
+          align: "center", // [PERUBAHAN] Teks legenda dibuat rata kiri
+          labels: {
+            padding: 20, // Jarak dari chart
+            boxWidth: 12, // Ukuran kotak warna
+            usePointStyle: true,
+            pointStyle: "circle",
+            font: {
+              size: 12, // Ukuran font
+              family: "'Inter', sans-serif",
+            },
+            color: colorScheme.text,
+            generateLabels: function (chart) {
+              const data = chart.data;
+              if (data.labels.length && data.datasets.length) {
+                return data.labels.map((label, i) => {
+                  const value = sanitizeNumber(data.datasets[0].data[i]);
+                  const total = data.datasets[0].data
+                    .map((v) => sanitizeNumber(v))
+                    .reduce((a, b) => a + b, 0);
 
-function applyGlobalFilters() {
-  // Sengaja dikosongkan agar filter tidak berfungsi.
-}
+                  const percentage = calculatePercentage(value, total);
 
-function changeFilterPeriod(period) {
-  document.querySelectorAll('[id^="filter-btn-"]').forEach((btn) => {
-    btn.classList.remove("bg-indigo-600", "text-white");
-    btn.classList.add("text-gray-600");
+                  return {
+                    text: `${label} (${percentage}%)`,
+                    fillStyle: data.datasets[0].backgroundColor[i],
+                    hidden: false,
+                    index: i,
+                  };
+                });
+              }
+              return [];
+            },
+          },
+        },
+        tooltip: {
+          ...defaultOptions.plugins.tooltip,
+          callbacks: {
+            label: function (context) {
+              const label = context.label || "";
+              const value = sanitizeNumber(context.parsed);
+              const total = context.dataset.data
+                .map((v) => sanitizeNumber(v))
+                .reduce((a, b) => a + b, 0);
+
+              const percentage = calculatePercentage(value, total);
+
+              return `${label}: Rp ${new Intl.NumberFormat("id-ID").format(
+                value
+              )} (${percentage}%)`;
+            },
+          },
+        },
+      },
+    },
   });
-  document
-    .getElementById(`filter-btn-${period}`)
-    .classList.add("bg-indigo-600", "text-white");
-  document
-    .getElementById(`filter-btn-${period}`)
-    .classList.remove("text-gray-600");
-
-  document.querySelectorAll(".period-filter").forEach((filter) => {
-    filter.classList.add("hidden");
-  });
-  document.getElementById(`global-${period}-filter`).classList.remove("hidden");
 }
 
-function formatCurrency(amount) {
-  return "Rp " + Number(amount).toLocaleString("id-ID");
-}
+// ==================== INISIALISASI ====================
 
-document.addEventListener("DOMContentLoaded", initializeJsComponents);
+/**
+ * Inisialisasi semua chart setelah DOM ready
+ */
+document.addEventListener("DOMContentLoaded", function () {
+  console.log("Menginisialisasi charts...");
+
+  try {
+    initRevenueTrendChart();
+    console.log("✓ Revenue Trend Chart berhasil diinisialisasi");
+  } catch (error) {
+    console.error("✗ Error pada Revenue Trend Chart:", error);
+  }
+
+  try {
+    initCategoryChart();
+    console.log("✓ Category Chart berhasil diinisialisasi");
+  } catch (error) {
+    console.error("✗ Error pada Category Chart:", error);
+  }
+});
