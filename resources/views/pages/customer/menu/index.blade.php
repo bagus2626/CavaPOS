@@ -37,7 +37,7 @@
         {{-- Kategori: scroll horizontal, berhenti sebelum search --}}
         <div class="category-bar md:flex-1 md:min-w-0 overflow-x-auto overflow-y-hidden pr-1">
             <div id="categoryWrapper" class="category-track inline-flex items-center gap-2 min-w-max">
-            <div class="filter-btn px-4 py-2 text-sm rounded-md active cursor-pointer" data-category="all">All</div>
+            <div class="filter-btn px-4 py-2 text-sm rounded-md active cursor-pointer" data-category="all">{{ __('messages.customer.menu.all') }}</div>
             @foreach($categories as $category)
                 <div class="filter-btn px-4 py-2 text-sm rounded-md cursor-pointer" data-category="{{ $category->id }}">
                 {{ $category->category_name }}
@@ -52,7 +52,7 @@
             <input
                 id="menuSearch"
                 type="search"
-                placeholder="Cari menu… (nama / deskripsi)"
+                placeholder="{{ __('messages.customer.menu.search-placeholder') }}"
                 class="w-full h-10 rounded-md border border-gray-300 bg-white px-3 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-choco/40"
                 autocomplete="off"
             />
