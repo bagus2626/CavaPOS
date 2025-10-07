@@ -201,15 +201,49 @@
           </a>
         </li>
         <li class="nav-item d-none d-sm-inline-block">
-          <a href="{{ route('partner.dashboard') }}" class="nav-link">Dashboard</a>
+          <a href="{{ route('partner.dashboard') }}" class="nav-link">{{ __('messages.partner.layout.dashboard') }}</a>
         </li>
         <li class="nav-item d-none d-sm-inline-block">
-          <a href="#" class="nav-link">Support</a>
+          <a href="#" class="nav-link">{{ __('messages.partner.layout.support') }}</a>
         </li>
       </ul>
 
       <!-- Right navbar links -->
       <ul class="navbar-nav ml-auto">
+        <!-- Language Switcher -->
+        <li class="nav-item dropdown">
+            <button
+                class="btn btn-sm d-inline-flex align-items-center gap-2 rounded-2 lang-btn"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+                type="button"
+            >
+                <!-- Globe icon -->
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="mr-1">
+                <path d="M12 2a10 10 0 100 20 10 10 0 000-20Zm0 2c1.49 0 2.86.41 4.04 1.12A13.8 13.8 0 0014 8H10a13.8 13.8 0 00-2.04-2.88A7.97 7.97 0 0112 4Z"/>
+                </svg>
+                <span class="font-weight-medium">
+                {{ app()->getLocale() === 'id' ? 'Bahasa' : 'English' }}
+                </span>
+                <!-- Caret -->
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" class="ml-1" style="opacity:.7">
+                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.25 8.27a.75.75 0 01-.02-1.06z" clip-rule="evenodd"/>
+                </svg>
+            </button>
+
+            <div class="dropdown-menu dropdown-menu-right rounded-2xl soft-shadow p-0 overflow-hidden">
+                <a href="{{ route('language.set.get', ['locale'=>'id']) }}" class="dropdown-item d-flex align-items-center">
+                <span class="mr-2">🇮🇩</span> Bahasa Indonesia
+                @if(app()->getLocale()==='id') <i class="fas fa-check ml-auto text-choco"></i> @endif
+                </a>
+                <a href="{{ route('language.set.get', ['locale'=>'en']) }}" class="dropdown-item d-flex align-items-center">
+                <span class="mr-2">🇬🇧</span> English
+                @if(app()->getLocale()==='en') <i class="fas fa-check ml-auto text-choco"></i> @endif
+                </a>
+
+            </div>
+        </li>
         <!-- Notifications Dropdown Menu -->
         <li class="nav-item dropdown">
           <a class="nav-link" data-toggle="dropdown" href="#">
@@ -286,7 +320,7 @@
       <a href="{{ route('partner.dashboard') }}" class="brand-link bg-choco">
         <img src="{{ asset('images/cava-logo2-gradient.png') }}" alt="Cavaa Logo"
                     class="brand-image rounded-full" style="opacity: .8">
-        <span class="brand-text font-weight-light">Partner Panel</span>
+        <span class="brand-text font-weight-light">{{ __('messages.partner.layout.partner_panel') }}</span>
       </a>
 
       <!-- Sidebar -->
@@ -323,7 +357,7 @@
               <a href="#" class="nav-link {{ Route::is($employeeRoutes) ? 'active' : '' }}">
                 <i class="nav-icon fas fa-users"></i>
                 <p>
-                  User Management
+                  {{ __('messages.partner.layout.user_management') }}
                   <i class="fas fa-angle-left right"></i>
                 </p>
               </a>
@@ -332,7 +366,7 @@
                   <a href="{{ route('partner.user-management.employees.index') }}"
                     class="nav-link {{ Route::is('partner.user-management.employees.*') ? 'active' : '' }}">
                     <i class="far fa-circle nav-icon"></i>
-                    <p>Employees</p>
+                    <p>{{ __('messages.partner.layout.employees') }}</p>
                   </a>
                 </li>
                 {{-- <li class="nav-item">
@@ -359,7 +393,7 @@
               <a href="#" class="nav-link {{ Route::is($storeRoutes) ? 'active' : '' }}">
                 <i class="nav-icon fas fa-shopping-cart"></i>
                 <p>
-                  Store
+                  {{ __('messages.partner.layout.outlet') }}
                   <i class="fas fa-angle-left right"></i>
                 </p>
               </a>
@@ -373,7 +407,7 @@
                     class="nav-link {{ Route::is('partner.store.tables.*') || Route::is('partner.store.seat-layouts.*') ? 'active' : '' }}">
                     <i class="fas fa-table nav-icon"></i>
                     <p>
-                      Table Management
+                      {{ __('messages.partner.layout.table_management') }}
                       <i class="fas fa-angle-left right"></i>
                     </p>
                   </a>
@@ -384,7 +418,7 @@
                       <a href="{{ route('partner.store.tables.index') }}"
                         class="nav-link {{ Route::is('partner.store.tables.*') ? 'active' : '' }}">
                         <i class="far fa-dot-circle nav-icon"></i>
-                        <p>Tables</p>
+                        <p>{{ __('messages.partner.layout.tables') }}</p>
                       </a>
                     </li>
 
@@ -412,7 +446,7 @@
               <a href="#" class="nav-link {{ Route::is($productRoutes) ? 'active' : '' }}">
                 <i class="nav-icon fas fa-shopping-cart"></i>
                 <p>
-                  Products
+                  {{ __('messages.partner.layout.products') }}
                   <i class="fas fa-angle-left right"></i>
                 </p>
               </a>
@@ -421,7 +455,7 @@
                   <a href="{{ route('partner.products.index') }}"
                     class="nav-link {{ Route::is('partner.products.*') ? 'active' : '' }}">
                     <i class="far fa-circle nav-icon"></i>
-                    <p>All Products</p>
+                    <p>{{ __('messages.partner.layout.all_products') }}</p>
                   </a>
                 </li>
                 {{-- <li class="nav-item">
@@ -438,21 +472,21 @@
             <li class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-cog"></i>
-                <p>Settings</p>
+                <p>{{ __('messages.partner.layout.settings') }}</p>
               </a>
             </li>
 
-            <li class="nav-header">REPORTS</li>
+            <li class="nav-header">{{ __('messages.partner.layout.reports') }}</li>
             <li class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-chart-line"></i>
-                <p>Sales Analytics</p>
+                <p>{{ __('messages.partner.layout.sales_report') }}</p>
               </a>
             </li>
             <li class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-chart-pie"></i>
-                <p>Traffic Reports</p>
+                <p>{{ __('messages.partner.layout.traffict_report') }}</p>
               </a>
             </li>
           </ul>
