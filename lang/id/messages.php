@@ -44,7 +44,10 @@ return [
             'settings' => 'Pengaturan',
             'reports' => 'LAPORAN',
             'sales_report' => 'Laporan Penjualan',
-            'traffict_report' => 'Laporan Arus'
+            'traffict_report' => 'Laporan Arus',
+            'member_since' => 'Member sejak',
+            'profile' => 'Profil',
+            'sign_out' => 'Keluar'
         ],
         'dashboard' => [
             'total_users' => 'Total Pengguna'
@@ -65,7 +68,44 @@ return [
             'settings' => 'Pengaturan',
             'reports' => 'LAPORAN',
             'sales_report' => 'Laporan Penjualan',
-            'traffict_report' => 'Laporan Arus'
+            'traffict_report' => 'Laporan Arus',
+            'member_since' => 'Member sejak',
+            'profile' => 'Profil',
+            'sign_out' => 'Keluar'
+        ],
+        'user_management' => [
+            'employees' => [
+                'employee_list' => 'Daftar Pegawai',
+                'all_employees' => 'Semua Pegawai',
+                'all' => 'Semua',
+                'employee_name' => 'Nama Pegawai',
+                'username' => 'Username',
+                'email' => 'Email',
+                'employee_email' => 'Email Pegawai',
+                'role' => 'Sebagai',
+                'picture' => 'Gambar',
+                'status' => 'Status',
+                'actions' => 'Aksi',
+                'active' => 'Aktif',
+                'non_active' => 'Non Aktif',
+                'upload_image' => 'Unggah Gambar',
+                'edit' => 'Ubah',
+                'edit_employee' => 'Ubah Pegawai',
+                'back_to_employees' => 'Kembali ke Pegawai',
+                'cashier' => 'Kasir',
+                'kitchen' => 'Dapur',
+                'waiter' => 'Pelayan',
+                'password_optional' => 'Password (opsional)',
+                'password_placeholder_1' => 'Kosongkan jika tidak diubah',
+                'password_confirmation' => 'Konfirmasi Password',
+                'password_placeholder_2' => 'Ulangi password jika diisi',
+                'show' => 'Tampilkan',
+                'cancel' => 'Batalkan',
+                'update' => 'Perbaharui',
+                'alert_1' => 'Periksa kembali input kamu:',
+                'muted_text_1' => '3–30 karakter, boleh huruf/angka, titik (.), underscore (_), dan dash (-).',
+                'muted_text_2' => 'Isi untuk mengganti password. Minimal 8 karakter.'
+            ],
         ],
     ],
 

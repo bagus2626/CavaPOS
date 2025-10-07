@@ -44,7 +44,10 @@ return [
             'settings' => 'Settings',
             'reports' => 'REPORTS',
             'sales_report' => 'Sales Report',
-            'traffict_report' => 'Traffict Report'
+            'traffict_report' => 'Traffict Report',
+            'member_since' => 'Member since',
+            'profile' => 'Profile',
+            'sign_out' => 'Sign Out'
         ],
         'dashboard' => [
             'total_users' => 'Total Users'
@@ -65,7 +68,44 @@ return [
             'settings' => 'Settings',
             'reports' => 'REPORTS',
             'sales_report' => 'Sales Report',
-            'traffict_report' => 'Traffict Report'
+            'traffict_report' => 'Traffict Report',
+            'member_since' => 'Member since',
+            'profile' => 'Profile',
+            'sign_out' => 'Sign Out'
+        ],
+        'user_management' => [
+            'employees' => [
+                'employee_list' => 'Employee List',
+                'all_employees' => 'All Employees',
+                'all' => 'All',
+                'employee_name' => 'Employee Name',
+                'username' => 'Username',
+                'email' => 'Email',
+                'employee_email' => 'Employee Email',
+                'role' => 'Role',
+                'picture' => 'Picture',
+                'status' => 'Status',
+                'actions' => 'Actions',
+                'active' => 'Active',
+                'non_active' => 'Inactive',
+                'upload_image' => 'Upload Image',
+                'edit' => 'Edit',
+                'edit_employee' => 'Edit Employee',
+                'back_to_employees' => 'Back to Employees',
+                'cashier' => 'Cashier',
+                'kitchen' => 'Kitchen',
+                'waiter' => 'Waiter',
+                'password_optional' => 'Password (optional)',
+                'password_placeholder_1' => 'Leave blank if not changed',
+                'password_confirmation' => 'Password Confirmation',
+                'password_placeholder_2' => 'Repeat password if filled in',
+                'show' => 'Show',
+                'cancel' => 'Cancel',
+                'update' => 'Update',
+                'alert_1' => 'Please double check your input:',
+                'muted_text_1' => '3–30 characters, may be letters/numbers, period (.), underscore (_), and dash (-).',
+                'muted_text_2' => 'Fill in the fields to change your password. Minimum 8 characters.'
+            ],
         ],
     ],
 ];

@@ -3,13 +3,13 @@
     <thead class="thead-light">
       <tr>
         <th style="width:56px">#</th>
-        <th>Nama Pegawai</th>
-        <th>Username</th>
-        <th>Email</th>
-        <th>Role</th>
-        <th style="width:80px">Picture</th>
-        <th style="width:110px">Status</th>
-        <th style="width:220px">Actions</th>
+        <th>{{ __('messages.partner.user_management.employees.employee_name') }}</th>
+        <th>{{ __('messages.partner.user_management.employees.username') }}</th>
+        <th>{{ __('messages.partner.user_management.employees.email') }}</th>
+        <th>{{ __('messages.partner.user_management.employees.role') }}</th>
+        <th style="width:80px">{{ __('messages.partner.user_management.employees.picture') }}</th>
+        <th style="width:110px">{{ __('messages.partner.user_management.employees.status') }}</th>
+        <th style="width:220px">{{ __('messages.partner.user_management.employees.actions') }}</th>
       </tr>
     </thead>
     <tbody>
@@ -45,11 +45,11 @@
           <td>
             @if((int) $employee->is_active === 1)
               <span class="badge badge-status badge-status--active">
-                <i class="fas fa-check-circle mr-1"></i> Aktif
+                <i class="fas fa-check-circle mr-1"></i> {{ __('messages.partner.user_management.employees.active') }}
               </span>
             @else
               <span class="badge badge-status badge-status--inactive">
-                <i class="fas fa-minus-circle mr-1"></i> Nonaktif
+                <i class="fas fa-minus-circle mr-1"></i> {{ __('messages.partner.user_management.employees.non_active') }}
               </span>
             @endif
           </td>
@@ -60,7 +60,7 @@
                 <i class="fas fa-eye mr-1"></i> Detail
               </a>
               <a href="{{ route('partner.user-management.employees.edit', $employee->id) }}" class="btn btn-choco">
-                <i class="fas fa-pen mr-1"></i> Edit
+                <i class="fas fa-pen mr-1"></i> {{ __('messages.partner.user_management.employees.edit') }}
               </a>
               <button onclick="deleteEmployee({{ $employee->id }})" class="btn btn-soft-danger">
                 <i class="fas fa-trash-alt mr-1"></i> Delete

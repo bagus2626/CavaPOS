@@ -300,21 +300,21 @@
           </a>
           <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
             <!-- User image -->
-            <li class="user-header bg-gradient-primary">
+            <li class="user-header bg-choco text-white">
               <img src="https://adminlte.io/themes/v3/dist/img/user2-160x160.jpg" class="img-circle elevation-2"
                 alt="User Image">
               <p>
                 @auth {{ auth()->user()->name }} @else User Partner @endauth
-                <small>Member since @auth {{ auth()->user()->created_at->format('M. Y') }} @else User Partner @endauth</small>
+                <small>{{ __('messages.partner.layout.member_since') }} @auth {{ auth()->user()->created_at->format('M. Y') }} @else User Partner @endauth</small>
               </p>
             </li>
             <!-- Menu Footer-->
             <li class="user-footer">
-              <a href="#" class="btn btn-default btn-flat">Profile</a>
+              <a href="#" class="btn btn-default btn-flat">{{ __('messages.partner.layout.profile') }}</a>
               <form method="POST" action="{{ route('logout') }}" class="d-inline">
                 @csrf
                 <button type="submit" class="btn btn-default btn-flat float-right">
-                  Sign out
+                  {{ __('messages.partner.layout.sign_out') }}
                 </button>
               </form>
 
