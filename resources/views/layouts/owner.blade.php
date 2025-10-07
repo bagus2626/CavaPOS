@@ -214,36 +214,46 @@
                 <!-- Language Switcher -->
                 <li class="nav-item dropdown">
                     <button
-                        class="btn btn-sm d-inline-flex align-items-center gap-2 rounded-2 lang-btn"
+                        class="btn btn-sm d-inline-flex align-items-center rounded-2 lang-btn"
                         data-toggle="dropdown"
                         aria-haspopup="true"
                         aria-expanded="false"
                         type="button"
-                    >
-                        <!-- Globe icon -->
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="mr-1">
-                        <path d="M12 2a10 10 0 100 20 10 10 0 000-20Zm0 2c1.49 0 2.86.41 4.04 1.12A13.8 13.8 0 0014 8H10a13.8 13.8 0 00-2.04-2.88A7.97 7.97 0 0112 4Z"/>
-                        </svg>
+                        >
+                        <!-- Globe image -->
+                        <img
+                            src="{{ asset('icons/icon-globe-50.png') }}"
+                            alt="Language"
+                            class="mr-1 lang-globe"
+                            width="16" height="16"
+                            loading="lazy" decoding="async"
+                        />
+
                         <span class="font-weight-medium">
-                        {{ app()->getLocale() === 'id' ? 'Bahasa' : 'English' }}
+                            {{ app()->getLocale() === 'id' ? 'Bahasa' : 'English' }}
                         </span>
+
                         <!-- Caret -->
                         <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" class="ml-1" style="opacity:.7">
-                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.25 8.27a.75.75 0 01-.02-1.06z" clip-rule="evenodd"/>
+                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.25 8.27a.75.75 0 01-.02-1.06z" clip-rule="evenodd"/>
                         </svg>
                     </button>
 
+
                     <div class="dropdown-menu dropdown-menu-right rounded-2xl soft-shadow p-0 overflow-hidden">
                         <a href="{{ route('language.set.get', ['locale'=>'id']) }}" class="dropdown-item d-flex align-items-center">
-                        <span class="mr-2">🇮🇩</span> Bahasa Indonesia
-                        @if(app()->getLocale()==='id') <i class="fas fa-check ml-auto text-choco"></i> @endif
-                        </a>
-                        <a href="{{ route('language.set.get', ['locale'=>'en']) }}" class="dropdown-item d-flex align-items-center">
-                        <span class="mr-2">🇬🇧</span> English
-                        @if(app()->getLocale()==='en') <i class="fas fa-check ml-auto text-choco"></i> @endif
+                            <img src="{{ asset('icons/icon-indonesia-96.png') }}" alt="Indonesia" class="mr-2 lang-flag" width="18" height="18" loading="lazy" decoding="async">
+                            Bahasa
+                            @if(app()->getLocale()==='id') <i class="fas fa-check ml-auto text-choco"></i> @endif
                         </a>
 
+                        <a href="{{ route('language.set.get', ['locale'=>'en']) }}" class="dropdown-item d-flex align-items-center">
+                            <img src="{{ asset('icons/icon-english-96.png') }}" alt="English" class="mr-2 lang-flag" width="18" height="18" loading="lazy" decoding="async">
+                            English
+                            @if(app()->getLocale()==='en') <i class="fas fa-check ml-auto text-choco"></i> @endif
+                        </a>
                     </div>
+
                 </li>
 
                 <!-- Notifications Dropdown Menu -->
