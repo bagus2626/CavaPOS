@@ -254,41 +254,58 @@
     'Laravel\\Socialite\\Contracts\\Factory' => 'Laravel\\Socialite\\SocialiteServiceProvider',
     'command.tinker' => 'Laravel\\Tinker\\TinkerServiceProvider',
   ),
-  'when' =>
-  array(
-    'Illuminate\\Broadcasting\\BroadcastServiceProvider' =>
-    array(),
-    'Illuminate\\Bus\\BusServiceProvider' =>
-    array(),
-    'Illuminate\\Cache\\CacheServiceProvider' =>
-    array(),
-    'Illuminate\\Foundation\\Providers\\ConsoleSupportServiceProvider' =>
-    array(),
-    'Illuminate\\Concurrency\\ConcurrencyServiceProvider' =>
-    array(),
-    'Illuminate\\Hashing\\HashServiceProvider' =>
-    array(),
-    'Illuminate\\Mail\\MailServiceProvider' =>
-    array(),
-    'Illuminate\\Auth\\Passwords\\PasswordResetServiceProvider' =>
-    array(),
-    'Illuminate\\Pipeline\\PipelineServiceProvider' =>
-    array(),
-    'Illuminate\\Queue\\QueueServiceProvider' =>
-    array(),
-    'Illuminate\\Redis\\RedisServiceProvider' =>
-    array(),
-    'Illuminate\\Translation\\TranslationServiceProvider' =>
-    array(),
-    'Illuminate\\Validation\\ValidationServiceProvider' =>
-    array(),
-    'Laravel\\Breeze\\BreezeServiceProvider' =>
-    array(),
-    'Laravel\\Sail\\SailServiceProvider' =>
-    array(),
-    'Laravel\\Socialite\\SocialiteServiceProvider' =>
-    array(),
-    'Laravel\\Tinker\\TinkerServiceProvider' =>
-    array(),
+  'when' => 
+  array (
+    'Illuminate\\Broadcasting\\BroadcastServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Bus\\BusServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Cache\\CacheServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Foundation\\Providers\\ConsoleSupportServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Concurrency\\ConcurrencyServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Hashing\\HashServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Mail\\MailServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Auth\\Passwords\\PasswordResetServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Pipeline\\PipelineServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Queue\\QueueServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Redis\\RedisServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Translation\\TranslationServiceProvider' => 
+    array (
+    ),
+    'Illuminate\\Validation\\ValidationServiceProvider' => 
+    array (
+    ),
+    'Laravel\\Breeze\\BreezeServiceProvider' => 
+    array (
+    ),
+    'Laravel\\Sail\\SailServiceProvider' => 
+    array (
+    ),
+    'Laravel\\Socialite\\SocialiteServiceProvider' => 
+    array (
+    ),
+    'Laravel\\Tinker\\TinkerServiceProvider' => 
+    array (
+    ),
   ),
 );
