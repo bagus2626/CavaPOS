@@ -147,6 +147,7 @@ Route::middleware('setlocale')->group(function () {
 
             Route::prefix('report')->name('report.')->group(function () {
                 Route::get('sales/export', [SalesReportController::class, 'export'])->name('sales.export');
+                Route::get('sales/products', [SalesReportController::class, 'getTopProductsAjax'])->name('sales.products'); // ROUTE BARU
                 Route::get('order-details/{id}', [SalesReportController::class, 'getOrderDetails'])->name('order-details');
                 Route::resource('sales', SalesReportController::class)->only(['index']);
             });
