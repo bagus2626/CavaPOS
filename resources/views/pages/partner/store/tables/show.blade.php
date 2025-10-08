@@ -6,40 +6,40 @@
 @section('content')
 <div class="container">
   <a href="{{ route('partner.store.tables.index') }}" class="btn btn-outline-choco mb-3">
-    <i class="fas fa-arrow-left mr-2"></i>Back to Tables
+    <i class="fas fa-arrow-left mr-2"></i>{{ __('messages.partner.outlet.table_management.tables.back_to_tables') }}
   </a>
 
   <div class="card table-show shadow-sm rounded-xl">
     <div class="card-header d-flex justify-content-between align-items-center">
-      <h4 class="mb-0">Detail Table #{{ $data->table_no }}</h4>
+      <h4 class="mb-0">{{ __('messages.partner.outlet.table_management.tables.detail_table') }} #{{ $data->table_no }}</h4>
     </div>
 
     <div class="card-body">
       <div class="row mb-3">
-        <div class="col-md-4 meta-label">Table No</div>
+        <div class="col-md-4 meta-label">{{ __('messages.partner.outlet.table_management.tables.table_no') }}</div>
         <div class="col-md-8 meta-value">{{ $data->table_no }}</div>
       </div>
 
       <div class="row mb-3">
-        <div class="col-md-4 meta-label">Class / Type</div>
+        <div class="col-md-4 meta-label">{{ __('messages.partner.outlet.table_management.tables.class_type') }}</div>
         <div class="col-md-8 meta-value">{{ $data->table_class }}</div>
       </div>
 
       <div class="row mb-3">
-        <div class="col-md-4 meta-label">Description</div>
+        <div class="col-md-4 meta-label">{{ __('messages.partner.outlet.table_management.tables.description') }}</div>
         <div class="col-md-8 meta-value">{{ $data->description ?? '—' }}</div>
       </div>
 
       <div class="row mb-3">
-        <div class="col-md-4 meta-label">Status</div>
+        <div class="col-md-4 meta-label">{{ __('messages.partner.outlet.table_management.tables.status') }}</div>
         <div class="col-md-8 meta-value">
           @php $status = strtolower($data->status); @endphp
           @if($status === 'available')
-            <span class="badge badge-status badge-status--available">Available</span>
+            <span class="badge badge-status badge-status--available">{{ __('messages.partner.outlet.table_management.tables.available') }}</span>
           @elseif($status === 'occupied')
-            <span class="badge badge-status badge-status--occupied">Occupied</span>
+            <span class="badge badge-status badge-status--occupied">{{ __('messages.partner.outlet.table_management.tables.occupied') }}</span>
           @elseif($status === 'reserved')
-            <span class="badge badge-status badge-status--reserved">Reserved</span>
+            <span class="badge badge-status badge-status--reserved">{{ __('messages.partner.outlet.table_management.tables.reserved') }}</span>
           @else
             <span class="badge badge-status badge-status--neutral">{{ $data->status }}</span>
           @endif
@@ -47,7 +47,7 @@
       </div>
 
       <div class="row mb-3">
-        <div class="col-md-4 meta-label">Pictures</div>
+        <div class="col-md-4 meta-label">{{ __('messages.partner.outlet.table_management.tables.picture') }}</div>
         <div class="col-md-8 meta-value">
           @if(!empty($data->images) && is_array($data->images))
             <div class="thumb-list">
@@ -59,7 +59,7 @@
               @endforeach
             </div>
           @else
-            <span class="text-muted">No Images</span>
+            <span class="text-muted">{{ __('messages.partner.outlet.table_management.tables.no_images') }}</span>
           @endif
         </div>
       </div>
@@ -67,10 +67,10 @@
 
     <div class="card-footer text-end">
       <a href="{{ route('partner.store.tables.edit', $data->id) }}" class="btn btn-choco">
-        <i class="fas fa-pen mr-1"></i> Edit
+        <i class="fas fa-pen mr-1"></i> {{ __('messages.partner.outlet.table_management.tables.edit') }}
       </a>
       <button onclick="deleteTable({{ $data->id }})" class="btn btn-soft-danger">
-        <i class="fas fa-trash-alt mr-1"></i> Delete
+        <i class="fas fa-trash-alt mr-1"></i> {{ __('messages.partner.outlet.table_management.tables.delete') }}
       </button>
     </div>
   </div>
