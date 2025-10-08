@@ -1,22 +1,22 @@
 @extends('layouts.owner')
 
-@section('title', 'Create Employees')
-@section('page_title', 'Create New Employee')
+@section('title',  __('messages.owner.user_management.employees.create_employees'))
+@section('page_title',  __('messages.owner.user_management.employees.create_new_employee'))
 
 @section('content')
 <div class="container owner-emp-create"> {{-- tambahkan class page-scope --}}
     <a href="{{ route('owner.user-owner.employees.index') }}" class="btn btn-outline-choco mb-3">
-        <i class="fas fa-arrow-left mr-2"></i>Back to Employees
+        <i class="fas fa-arrow-left mr-2"></i>{{ __('messages.owner.user_management.employees.back_to_employees') }}
     </a>
     <div class="card shadow-sm">
         <div class="card-header">
-            <h5 class="card-title mb-0">Create New Employee</h5>
+            <h5 class="card-title mb-0">{{ __('messages.owner.user_management.employees.create_new_employee') }}</h5>
         </div>
         <div class="card-body">
             {{-- Rangkuman semua error validasi --}}
             @if ($errors->any())
             <div class="alert alert-danger">
-                <strong>Periksa kembali input kamu:</strong>
+                <strong>{{ __('messages.owner.user_management.employees.recheck_input') }}:</strong>
                 <ul class="mb-0 mt-2">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -47,7 +47,7 @@
                 <div class="row">
                     {{-- Employee name --}}
                     <div class="col-md-6 mb-3">
-                        <label for="name" class="form-label">Employee Name</label>
+                        <label for="name" class="form-label">{{ __('messages.owner.user_management.employees.employee_name') }}</label>
                         <input type="text" name="name" id="name"
                                class="form-control @error('name') is-invalid @enderror"
                                value="{{ old('name') }}" required>
@@ -59,13 +59,13 @@
                     {{-- Role --}}
                     <div class="col-md-6 mb-3">
                         <div class="form-group">
-                            <label for="role" class="form-label">Role</label>
+                            <label for="role" class="form-label">{{ __('messages.owner.user_management.employees.role') }}</label>
                             <select name="role" id="role"
                                     class="form-control @error('role') is-invalid @enderror" required>
-                                <option value="">-- Pilih Status --</option>
-                                <option value="CASHIER" {{ old('role') == 'CASHIER' ? 'selected' : '' }}>Kasir</option>
-                                <option value="KITCHEN" {{ old('role') == 'KITCHEN' ? 'selected' : '' }}>Kitchen</option>
-                                <option value="WAITER"  {{ old('role') == 'WAITER'  ? 'selected' : '' }}>Waiter</option>
+                                <option value="">{{ __('messages.owner.user_management.employees.select_status') }}</option>
+                                <option value="CASHIER" {{ old('role') == 'CASHIER' ? 'selected' : '' }}>{{ __('messages.owner.user_management.employees.cashier') }}</option>
+                                <option value="KITCHEN" {{ old('role') == 'KITCHEN' ? 'selected' : '' }}>{{ __('messages.owner.user_management.employees.kitchen') }}</option>
+                                <option value="WAITER"  {{ old('role') == 'WAITER'  ? 'selected' : '' }}>{{ __('messages.owner.user_management.employees.waiter') }}</option>
                             </select>
                             @error('role')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -77,7 +77,7 @@
                 {{-- Username --}}
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
+                        <label for="username" class="form-label">{{ __('messages.owner.user_management.employees.username') }} <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <span class="input-group-text">@</span>
                             <input
@@ -90,17 +90,17 @@
                                 minlength="3"
                                 maxlength="30"
                                 pattern="^[A-Za-z0-9._-]+$"
-                                placeholder="contoh: budi.setiawan"
+                                placeholder="{{ __('messages.owner.user_management.employees.username_example') }}"
                                 autocomplete="username"
                                 autocapitalize="none"
                                 spellcheck="false"
                             >
                             <button type="button" id="btnCheckUsername" class="btn btn-outline-primary">
-                                <span class="label">Check</span>
+                                <span class="label">{{ __('messages.owner.user_management.employees.check') }}</span>
                                 <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                             </button>
                         </div>
-                        <small class="text-muted">3–30 karakter, boleh huruf/angka, titik (.), underscore (_), dan dash (-).</small>
+                        <small class="text-muted">{{ __('messages.owner.user_management.employees.muted_text_1') }}</small>
 
                         {{-- area status --}}
                         <div id="usernameStatus" class="form-text mt-1"></div>
@@ -111,10 +111,10 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <div class="form-group">
-                            <label for="partner" class="form-label">Outlet</label>
+                            <label for="partner" class="form-label">{{ __('messages.owner.user_management.employees.outlet') }}</label>
                             <select name="partner" id="partner"
                                     class="form-control @error('partner') is-invalid @enderror" required>
-                                <option value="">-- Pilih Status --</option>
+                                <option value="">{{ __('messages.owner.user_management.employees.select_status') }}</option>
                                 @foreach ($partners as $partner)
                                     <option value="{{ $partner->id }}">{{ $partner->name }}</option>
                                 @endforeach
@@ -130,7 +130,7 @@
                     {{-- Email --}}
                     <div class="col-md-6 mb-3">
                         <div class="form-group">
-                            <label for="email" class="form-label">Employee Email <span class="text-danger">*</span></label>
+                            <label for="email" class="form-label">{{ __('messages.owner.user_management.employees.employee_email') }} <span class="text-danger">*</span></label>
                             <input
                                 type="email"
                                 name="email"
@@ -153,7 +153,7 @@
 
                     {{-- Image --}}
                     <div class="col-md-6 mb-3">
-                        <label for="image" class="form-label">Upload Image</label>
+                        <label for="image" class="form-label">{{ __('messages.owner.user_management.employees.upload_image') }}</label>
                         <input
                             type="file"
                             name="image"
@@ -161,7 +161,7 @@
                             class="form-control @error('image') is-invalid @enderror"
                             accept="image/*"
                         >
-                        <small class="text-muted">Format: JPG, PNG, WEBP. Maks 2 MB.</small>
+                        <small class="text-muted">Format: JPG, PNG, WEBP. Max 2 MB.</small>
                         @error('image')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -196,18 +196,18 @@
                                 minlength="8"
                                 required
                                 autocomplete="new-password"
-                                placeholder="Min. 8 karakter"
+                                placeholder="{{ __('messages.owner.user_management.employees.muted_text_2') }}"
                             >
-                            <button class="btn btn-outline-secondary" type="button" id="togglePassword" tabindex="-1">Show</button>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword" tabindex="-1">{{ __('messages.owner.user_management.employees.show') }}</button>
                         </div>
-                        <small class="text-muted">Minimal 8 karakter, disarankan kombinasi huruf & angka.</small>
+                        <small class="text-muted">{{ __('messages.owner.user_management.employees.muted_text_2') }}</small>
                         @error('password')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label for="password_confirmation" class="form-label">Konfirmasi Password <span class="text-danger">*</span></label>
+                        <label for="password_confirmation" class="form-label">{{ __('messages.owner.user_management.employees.password_confirmation') }} <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <input
                                 type="password"
@@ -217,9 +217,9 @@
                                 minlength="8"
                                 required
                                 autocomplete="new-password"
-                                placeholder="Ulangi password"
+                                placeholder="{{ __('messages.owner.user_management.employees.password_placeholder_3') }}"
                             >
-                            <button class="btn btn-outline-secondary" type="button" id="togglePasswordConfirm" tabindex="-1">Show</button>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePasswordConfirm" tabindex="-1">{{ __('messages.owner.user_management.employees.show') }}</button>
                         </div>
                         @error('password_confirmation')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -229,8 +229,8 @@
 
                 {{-- Submit --}}
                 <div class="d-flex justify-content-end">
-                    <a href="{{ route('owner.user-owner.employees.index') }}" class="btn btn-light border me-2">Cancel</a>
-                    <button type="submit" class="btn btn-choco">Save</button>
+                    <a href="{{ route('owner.user-owner.employees.index') }}" class="btn btn-light border me-2">{{ __('messages.owner.user_management.employees.cancel') }}</a>
+                    <button type="submit" class="btn btn-choco">{{ __('messages.owner.user_management.employees.save') }}</button>
                 </div>
             </form>
         </div>
@@ -372,13 +372,13 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!file) { resetPreview(); return; }
 
             if (!ALLOWED.includes(file.type)) {
-                alert('Tipe file tidak didukung. Gunakan JPG, PNG, atau WEBP.');
+                alert('File not supported. Use JPG, PNG, atau WEBP.');
                 input.value = '';
                 resetPreview();
                 return;
             }
             if (file.size > MAX_SIZE) {
-                alert('Ukuran file melebihi 2 MB.');
+                alert('File size more than 2 MB.');
                 input.value = '';
                 resetPreview();
                 return;
@@ -421,13 +421,13 @@ document.addEventListener('DOMContentLoaded', function () {
         form.addEventListener('submit', function (e) {
             if (pw.value.length < 8) {
                 e.preventDefault();
-                alert('Password minimal 8 karakter.');
+                alert('Password minimal 8 characters.');
                 pw.focus();
                 return;
             }
             if (pw.value !== pwc.value) {
                 e.preventDefault();
-                alert('Konfirmasi password tidak sama.');
+                alert('Password confirmation is not the same.');
                 pwc.focus();
             }
         });
@@ -459,11 +459,11 @@ document.addEventListener('DOMContentLoaded', function () {
     function showStatus(ok, msg) {
         statusEl.className = 'form-text mt-1';
         if (ok) {
-            statusEl.innerHTML = `<span class="badge bg-success">Available</span> <span class="text-success ms-1">${msg}</span>`;
+            statusEl.innerHTML = `<span class="badge bg-success">{{ __('messages.owner.user_management.employees.available') }}</span> <span class="text-success ms-1">${msg}</span>`;
             inputUsername.classList.remove('is-invalid');
             inputUsername.classList.add('is-valid');
         } else {
-            statusEl.innerHTML = `<span class="badge bg-danger">Taken</span> <span class="text-danger ms-1">${msg}</span>`;
+            statusEl.innerHTML = `<span class="badge bg-danger">{{ __('messages.owner.user_management.employees.taken') }}</span> <span class="text-danger ms-1">${msg}</span>`;
             inputUsername.classList.remove('is-valid');
             inputUsername.classList.add('is-invalid');
         }
@@ -499,14 +499,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (res.status === 422) {
                 // validasi server gagal → tampilkan pesan singkat
-                showStatus(false, 'Format tidak valid.');
+                showStatus(false, 'Format not valid.');
                 return;
             }
 
             const data = await res.json();
             if (data && typeof data.available !== 'undefined') {
-                if (data.available) showStatus(true, 'Username tersedia 🎉');
-                else showStatus(false, 'Username sudah dipakai.');
+                if (data.available) showStatus(true, '{{ __('messages.owner.user_management.employees.username_available') }} 🎉');
+                else showStatus(false, '{{ __('messages.owner.user_management.employees.username_used') }}');
             } else {
                 showNeutral('Tidak bisa memeriksa saat ini.');
             }

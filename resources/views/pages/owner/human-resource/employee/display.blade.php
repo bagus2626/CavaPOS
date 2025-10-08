@@ -7,14 +7,14 @@
     <thead>
       <tr>
         <th>#</th>
-        <th>Outlet</th>
-        <th>Nama Pegawai</th>
-        <th>Username</th>
-        <th>Email</th>
-        <th>Role</th>
-        <th>Picture</th>
-        <th>Status</th>
-        <th class="text-nowrap">Actions</th>
+        <th>{{ __('messages.owner.user_management.employees.outlet') }}</th>
+        <th>{{ __('messages.owner.user_management.employees.employee_name') }}</th>
+        <th>{{ __('messages.owner.user_management.employees.username') }}</th>
+        <th>{{ __('messages.owner.user_management.employees.email') }}</th>
+        <th>{{ __('messages.owner.user_management.employees.role') }}</th>
+        <th>{{ __('messages.owner.user_management.employees.picture') }}</th>
+        <th>{{ __('messages.owner.user_management.employees.status') }}</th>
+        <th class="text-nowrap">{{ __('messages.owner.user_management.employees.actions') }}</th>
       </tr>
     </thead>
     <tbody>
@@ -49,11 +49,11 @@
           <td class="col-status">
             @if((int) $employee->is_active === 1)
               <span class="badge badge-soft-success d-inline-flex align-items-center gap-1">
-                <i class="fas fa-check-circle mr-1"></i> Aktif
+                <i class="fas fa-check-circle mr-1"></i> {{ __('messages.owner.user_management.employees.active') }}
               </span>
             @else
               <span class="badge badge-soft-secondary d-inline-flex align-items-center gap-1">
-                <i class="fas fa-minus-circle mr-1"></i> Nonaktif
+                <i class="fas fa-minus-circle mr-1"></i> {{ __('messages.owner.user_management.employees.non_active') }}
               </span>
             @endif
           </td>
@@ -64,10 +64,10 @@
                     <i class="fas fa-eye"></i><span>Detail</span>
                     </a>
                     <a href="{{ route('owner.user-owner.employees.edit', $employee->id) }}" class="btn btn-outline-choco">
-                    <i class="fas fa-pen"></i><span>Edit</span>
+                    <i class="fas fa-pen"></i><span>{{ __('messages.owner.user_management.employees.edit') }}</span>
                     </a>
                     <button onclick="deleteEmployee({{ $employee->id }})" class="btn btn-soft-danger">
-                    <i class="fas fa-trash"></i><span>Delete</span>
+                    <i class="fas fa-trash"></i><span>{{ __('messages.owner.user_management.employees.delete') }}</span>
                     </button>
                 </div>
           </td>
@@ -177,12 +177,12 @@
 <script>
 function deleteEmployee(employeeId) {
   Swal.fire({
-    title: 'Apakah Anda yakin?',
-    text: "Anda tidak dapat mengembalikan data tersebut!",
+    title: '{{ __('messages.owner.user_management.employees.delete_confirmation_1') }}',
+    text: '{{ __('messages.owner.user_management.employees.delete_confirmation_2') }}',
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonText: 'Ya, Hapus!',
-    cancelButtonText: 'Batalkan'
+    confirmButtonText: '{{ __('messages.owner.user_management.employees.delete_confirmation_3') }}',
+    cancelButtonText: '{{ __('messages.owner.user_management.employees.cancel') }}'
   }).then((result) => {
     if (result.isConfirmed) {
       const form = document.createElement('form');
