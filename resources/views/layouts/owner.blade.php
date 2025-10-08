@@ -302,21 +302,21 @@
                     </a>
                     <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right rounded-2xl soft-shadow">
                         <!-- User image -->
-                        <li class="user-header bg-gradient-primary">
+                        <li class="user-header bg-choco text-white">
                             <img src="https://adminlte.io/themes/v3/dist/img/user2-160x160.jpg"
                                 class="img-circle elevation-2" alt="User Image">
                             <p>
                                 @auth {{ auth()->user()->name }} @else User Owner @endauth
-                                <small>Member since @auth {{ auth()->user()->created_at->format('M. Y') }} @else User Owner @endauth</small>
+                                <small>{{ __('messages.owner.layout.member_since') }} @auth {{ auth()->user()->created_at->format('M. Y') }} @else User Owner @endauth</small>
                             </p>
                         </li>
                         <!-- Menu Footer-->
                         <li class="user-footer">
-                            <a href="#" class="btn btn-default btn-flat">Profile</a>
+                            <a href="#" class="btn btn-default btn-flat">{{ __('messages.owner.layout.profile') }}</a>
                             <form method="POST" action="{{ route('owner.logout') }}" class="d-inline">
                                 @csrf
                                 <button type="submit" class="btn btn-default btn-flat float-right">
-                                    Sign out
+                                    {{ __('messages.owner.layout.sign_out') }}
                                 </button>
                             </form>
 

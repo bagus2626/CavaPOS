@@ -3,13 +3,13 @@
     <thead class="thead-light">
       <tr>
         <th style="width:56px">#</th>
-        <th>Table No</th>
-        <th>Class/Type</th>
-        <th>Description</th>
-        <th style="width:120px">Status</th>
-        <th style="width:140px">Picture</th>
+        <th>{{ __('messages.partner.outlet.table_management.tables.table_no') }}</th>
+        <th>{{ __('messages.partner.outlet.table_management.tables.class_type') }}</th>
+        <th>{{ __('messages.partner.outlet.table_management.tables.description') }}</th>
+        <th style="width:120px">{{ __('messages.partner.outlet.table_management.tables.status') }}</th>
+        <th style="width:140px">{{ __('messages.partner.outlet.table_management.tables.picture') }}</th>
         <th style="width:140px">Barcode</th>
-        <th style="width:220px">Actions</th>
+        <th style="width:220px">{{ __('messages.partner.outlet.table_management.tables.actions') }}</th>
       </tr>
     </thead>
     <tbody>
@@ -31,7 +31,15 @@
 
           <td>
             <span class="{{ $statusClass }}">
-              {{ $table->status }}
+              @if ($table->status === 'available')
+                {{ __('messages.partner.outlet.table_management.tables.available') }}
+              @elseif ($table->status === 'occupied')
+                {{ __('messages.partner.outlet.table_management.tables.occupied') }}
+              @elseif ($table->status === 'reserved')
+                {{ __('messages.partner.outlet.table_management.tables.reserved') }}
+              @else
+                -
+              @endif
             </span>
           </td>
 
@@ -46,13 +54,13 @@
                 @endforeach
               </div>
             @else
-              <span class="text-muted">No Images</span>
+              <span class="text-muted">{{ __('messages.partner.outlet.table_management.tables.no_images') }}</span>
             @endif
           </td>
 
           <td>
             <button onclick="generateBarcode({{ $table->id }})" class="btn btn-sm btn-outline-choco">
-              <i class="fas fa-qrcode mr-1"></i> Table Barcode
+              <i class="fas fa-qrcode mr-1"></i> {{ __('messages.partner.outlet.table_management.tables.table_barcode') }}
             </button>
           </td>
 
@@ -62,10 +70,10 @@
                 <i class="fas fa-eye mr-1"></i> Detail
               </a>
               <a href="{{ route('partner.store.tables.edit', $table->id) }}" class="btn btn-choco">
-                <i class="fas fa-pen mr-1"></i> Edit
+                <i class="fas fa-pen mr-1"></i> {{ __('messages.partner.outlet.table_management.tables.edit') }}
               </a>
               <button onclick="deleteTable({{ $table->id }})" class="btn btn-soft-danger">
-                <i class="fas fa-trash-alt mr-1"></i> Delete
+                <i class="fas fa-trash-alt mr-1"></i> {{ __('messages.partner.outlet.table_management.tables.delete') }}
               </button>
             </div>
           </td>
