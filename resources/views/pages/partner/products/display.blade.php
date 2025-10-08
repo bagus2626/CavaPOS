@@ -3,13 +3,13 @@
     <thead>
       <tr>
         <th>#</th>
-        <th>Nama Produk</th>
-        <th>Deskripsi</th>
-        <th>Pilihan</th>
-        <th>Jumlah</th>
-        <th>Harga</th>
-        <th>Gambar</th>
-        <th>Actions</th>
+        <th>{{ __('messages.partner.product.all_product.product_name') }}</th>
+        <th>{{ __('messages.partner.product.all_product.description') }}</th>
+        <th>{{ __('messages.partner.product.all_product.options') }}</th>
+        <th>{{ __('messages.partner.product.all_product.quantity') }}</th>
+        <th>{{ __('messages.partner.product.all_product.price') }}</th>
+        <th>{{ __('messages.partner.product.all_product.pictures') }}</th>
+        <th>{{ __('messages.partner.product.all_product.actions') }}</th>
       </tr>
     </thead>
     <tbody>
@@ -35,7 +35,7 @@
 
           <td>
             @if((int) $product->always_available_flag === 1)
-              <span class="badge badge-soft-success">Always Available</span>
+              <span class="badge badge-soft-success">{{ __('messages.partner.product.all_product.always_available') }}</span>
             @else
               {{ (int) $product->quantity }}
             @endif
@@ -54,7 +54,7 @@
                 @endforeach
               </div>
             @else
-              <span class="text-muted">No Images</span>
+              <span class="text-muted">{{ __('messages.partner.product.all_product.no_images') }}</span>
             @endif
           </td>
 
@@ -64,10 +64,10 @@
                     <i class="fas fa-eye"></i> <span>Detail</span>
                     </a>
                     <a href="{{ route('partner.products.edit', $product->id) }}" class="btn btn-outline-choco btn-pill">
-                    <i class="fas fa-pen"></i> <span>Edit</span>
+                    <i class="fas fa-pen"></i> <span>{{ __('messages.partner.product.all_product.edit') }}</span>
                     </a>
                     <button onclick="deleteProduct({{ $product->id }})" class="btn btn-soft-danger btn-pill">
-                    <i class="fas fa-trash-alt"></i> <span>Delete</span>
+                    <i class="fas fa-trash-alt"></i> <span>{{ __('messages.partner.product.all_product.delete') }}</span>
                     </button>
                 </div>
           </td>

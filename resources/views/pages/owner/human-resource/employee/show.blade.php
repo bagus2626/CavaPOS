@@ -1,7 +1,7 @@
 @extends('layouts.owner')
 
-@section('title', 'Employee Detail')
-@section('page_title', 'Employee Detail')
+@section('title',  __('messages.owner.user_management.employees.employee_detail'))
+@section('page_title',  __('messages.owner.user_management.employees.employee_detail'))
 
 @section('content')
 @php
@@ -24,16 +24,16 @@
   {{-- Toolbar --}}
   <div class="d-flex justify-content-between align-items-center mb-3">
     <a href="{{ route('owner.user-owner.employees.index') }}" class="btn btn-outline-choco">
-      <i class="fas fa-arrow-left mr-2"></i> Back to Employees
+      <i class="fas fa-arrow-left mr-2"></i> {{ __('messages.owner.user_management.employees.back_to_employees') }}
     </a>
 
     <div class="btn-group">
       <a href="{{ route('owner.user-owner.employees.edit', $emp->id) }}" class="btn btn-choco">
-        <i class="fas fa-pen mr-1"></i> Edit
+        <i class="fas fa-pen mr-1"></i> {{ __('messages.owner.user_management.employees.edit') }}
       </a>
       <button class="btn btn-soft-danger"
               onclick="ownerConfirmDeletion(`{{ route('owner.user-owner.employees.destroy', $emp->id) }}`)">
-        <i class="fas fa-trash-alt mr-1"></i> Delete
+        <i class="fas fa-trash-alt mr-1"></i> {{ __('messages.owner.user_management.employees.delete') }}
       </button>
     </div>
   </div>
@@ -58,11 +58,11 @@
           <span class="badge badge-role">{{ $emp->role ?? '—' }}</span>
           @if($isActive)
             <span class="badge badge-status badge-status--active">
-              <i class="fas fa-check-circle mr-1"></i>Aktif
+              <i class="fas fa-check-circle mr-1"></i>{{ __('messages.owner.user_management.employees.active') }}
             </span>
           @else
             <span class="badge badge-status badge-status--inactive">
-              <i class="fas fa-minus-circle mr-1"></i>Nonaktif
+              <i class="fas fa-minus-circle mr-1"></i>{{ __('messages.owner.user_management.employees.non_active') }}
             </span>
           @endif
         </div>
@@ -74,13 +74,13 @@
       <div class="row gy-3">
         <div class="col-md-6">
           <dl class="meta-list">
-            <dt>Outlet</dt>
+            <dt>{{ __('messages.owner.user_management.employees.outlet') }}</dt>
             <dd>{{ optional($emp->partner)->name ?? '—' }}</dd>
 
-            <dt>Username</dt>
+            <dt>{{ __('messages.owner.user_management.employees.username') }}</dt>
             <dd>{{ $emp->user_name ?? '—' }}</dd>
 
-            <dt>Email</dt>
+            <dt>{{ __('messages.owner.user_management.employees.email') }}</dt>
             <dd>
               @if(!empty($emp->email))
                 <a class="link-ink" href="mailto:{{ $emp->email }}">{{ $emp->email }}</a>
@@ -95,16 +95,16 @@
             <dt>Status</dt>
             <dd>
               @if($isActive)
-                <span class="badge badge-status badge-status--active">Aktif</span>
+                <span class="badge badge-status badge-status--active">{{ __('messages.owner.user_management.employees.active') }}</span>
               @else
-                <span class="badge badge-status badge-status--inactive">Nonaktif</span>
+                <span class="badge badge-status badge-status--inactive">{{ __('messages.owner.user_management.employees.non_active') }}</span>
               @endif
             </dd>
 
-            <dt>Dibuat</dt>
+            <dt>{{ __('messages.owner.user_management.employees.created') }}</dt>
             <dd>{{ optional($emp->created_at)->format('d M Y, H:i') ?? '—' }}</dd>
 
-            <dt>Diperbarui</dt>
+            <dt>{{ __('messages.owner.user_management.employees.updated') }}</dt>
             <dd>{{ optional($emp->updated_at)->format('d M Y, H:i') ?? '—' }}</dd>
           </dl>
         </div>

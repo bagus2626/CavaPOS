@@ -7,13 +7,13 @@
     <thead>
       <tr>
         <th>#</th>
-        <th>Nama Outlet</th>
-        <th>Username</th>
-        <th>Email</th>
-        <th>Logo</th>
-        <th>Status</th>
+        <th>{{ __('messages.owner.outlet.all_outlets.outlet_name') }}</th>
+        <th>{{ __('messages.owner.outlet.all_outlets.username') }}</th>
+        <th>{{ __('messages.owner.outlet.all_outlets.email') }}</th>
+        <th>{{ __('messages.owner.outlet.all_outlets.logo') }}</th>
+        <th>{{ __('messages.owner.outlet.all_outlets.status') }}</th>
         <th>QRIS</th>
-        <th class="text-nowrap">Actions</th>
+        <th class="text-nowrap">{{ __('messages.owner.outlet.all_outlets.actions') }}</th>
       </tr>
     </thead>
     <tbody>
@@ -50,11 +50,11 @@
           <td class="col-status">
             @if((int) $outlet->is_active === 1)
               <span class="badge badge-soft-success d-inline-flex align-items-center gap-1">
-                <i class="fas fa-check-circle"></i> Aktif
+                <i class="fas fa-check-circle"></i> {{ __('messages.owner.outlet.all_outlets.active') }}
               </span>
             @else
               <span class="badge badge-soft-secondary d-inline-flex align-items-center gap-1">
-                <i class="fas fa-minus-circle"></i> Nonaktif
+                <i class="fas fa-minus-circle"></i> {{ __('messages.owner.outlet.all_outlets.inactive') }}
               </span>
             @endif
           </td>
@@ -62,19 +62,19 @@
           <td class="col-status">
             @if((int) $outlet->is_qr_active === 1)
               <span class="badge badge-soft-success d-inline-flex align-items-center gap-1">
-                <i class="fas fa-check-circle"></i> Aktif
+                <i class="fas fa-check-circle"></i> {{ __('messages.owner.outlet.all_outlets.active') }}
               </span>
             @else
               <span class="badge badge-soft-secondary d-inline-flex align-items-center gap-1">
-                <i class="fas fa-minus-circle"></i> Nonaktif
+                <i class="fas fa-minus-circle"></i> {{ __('messages.owner.outlet.all_outlets.inactive') }}
               </span>
             @endif
           </td>
 
           <td class="col-actions">
             <div class="action-btns d-inline-flex">
-                <a href="{{ route('owner.user-owner.outlets.edit', $outlet->id) }}" class="btn btn-outline-choco mr-1">Edit</a>
-                <button onclick="deleteOutlet({{ $outlet->id }})" class="btn btn-soft-danger">Delete</button>
+                <a href="{{ route('owner.user-owner.outlets.edit', $outlet->id) }}" class="btn btn-outline-choco mr-1">{{ __('messages.owner.outlet.all_outlets.edit') }}</a>
+                <button onclick="deleteOutlet({{ $outlet->id }})" class="btn btn-soft-danger">{{ __('messages.owner.outlet.all_outlets.delete') }}</button>
             </div>
           </td>
 
@@ -162,12 +162,12 @@
 <script>
 function deleteOutlet(outletId) {
   Swal.fire({
-    title: 'Apakah Anda yakin?',
-    text: "Anda tidak dapat mengembalikan data tersebut!",
+    title: '{{ __('messages.owner.outlet.all_outlets.delete_confirmation_1') }}',
+    text: '{{ __('messages.owner.outlet.all_outlets.delete_confirmation_2') }}',
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonText: 'Ya, Hapus!',
-    cancelButtonText: 'Batalkan'
+    confirmButtonText: '{{ __('messages.owner.outlet.all_outlets.delete_confirmation_3') }}',
+    cancelButtonText: '{{ __('messages.owner.outlet.all_outlets.cancel') }}'
   }).then((result) => {
     if (result.isConfirmed) {
       const form = document.createElement('form');
@@ -198,7 +198,7 @@ function generateBarcode(tableId) {
         link.click();
     })
     .catch(error => {
-        console.error('Gagal generate barcode:', error);
+        console.error('Generate barcode failed:', error);
     });
 }
 
