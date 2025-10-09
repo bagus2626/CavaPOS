@@ -1,7 +1,7 @@
 @extends('layouts.owner')
 
-@section('title', 'Edit Promotion')
-@section('page_title', 'Edit Promotion')
+@section('title', __('messages.owner.products.promotions.edit_promotion'))
+@section('page_title', __('messages.owner.products.promotions.edit_promotion'))
 
 @section('content')
 <section class="content">
@@ -10,12 +10,12 @@
             <div class="col-12">
 
                 <a href="{{ route('owner.user-owner.promotions.index') }}" class="btn btn-secondary mb-3">
-                    <i class="fas fa-arrow-left mr-2"></i>Back to Promotions
+                    <i class="fas fa-arrow-left mr-2"></i>{{ __('messages.owner.products.promotions.back_to_promotions') }}
                 </a>
 
                 @if ($errors->any())
                     <div class="alert alert-danger">
-                        <strong>Periksa kembali input kamu:</strong>
+                        <strong>{{ __('messages.owner.products.promotions.re_check_input') }}</strong>
                         <ul class="mb-0 mt-2">
                             @foreach ($errors->all() as $e)
                                 <li>{{ $e }}</li>
@@ -26,7 +26,7 @@
 
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Promotion Information</h3>
+                        <h3 class="card-title">{{ __('messages.owner.products.promotions.promotion_information') }}</h3>
                     </div>
 
                     <form action="{{ route('owner.user-owner.promotions.update', $data->id) }}"
@@ -37,13 +37,13 @@
                         <div class="card-body">
                             {{-- Promotion Name --}}
                             <div class="form-group">
-                                <label for="promotion_name" class="required">Promotion Name</label>
+                                <label for="promotion_name" class="required">{{ __('messages.owner.products.promotions.promotion_name') }}</label>
                                 <input type="text"
                                        class="form-control @error('promotion_name') is-invalid @enderror"
                                        id="promotion_name"
                                        name="promotion_name"
                                        value="{{ old('promotion_name', $data->promotion_name) }}"
-                                       placeholder="e.g. Weekend Discount"
+                                       placeholder="{{ __('messages.owner.products.promotions.promotion_name_placeholder') }}"
                                        required
                                        maxlength="150">
                                 @error('promotion_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -54,14 +54,14 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group mb-0">
-                                        <label for="promotion_type" class="required">Promotion Type</label>
+                                        <label for="promotion_type" class="required">{{ __('messages.owner.products.promotions.promotion_type') }}</label>
                                         <select id="promotion_type"
                                                 name="promotion_type"
                                                 class="form-control @error('promotion_type') is-invalid @enderror"
                                                 required>
-                                            <option value="">-- Select Type --</option>
-                                            <option value="percentage" {{ $type === 'percentage' ? 'selected' : '' }}>Percentage (%)</option>
-                                            <option value="amount" {{ $type === 'amount' ? 'selected' : '' }}>Amount (Rp)</option>
+                                            <option value="">{{ __('messages.owner.products.promotions.select_type_dropdown') }}</option>
+                                            <option value="percentage" {{ $type === 'percentage' ? 'selected' : '' }}>{{ __('messages.owner.products.promotions.percentage') }} (%)</option>
+                                            <option value="amount" {{ $type === 'amount' ? 'selected' : '' }}>{{ __('messages.owner.products.promotions.reduced_fare') }} (Rp)</option>
                                         </select>
                                         @error('promotion_type') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                     </div>
@@ -69,7 +69,7 @@
 
                                 <div class="col-md-8">
                                     <div class="form-group mb-0">
-                                        <label for="promotion_value" class="required">Promotion Value</label>
+                                        <label for="promotion_value" class="required">{{ __('messages.owner.products.promotions.promotion_value') }}</label>
 
                                         <div class="input-group">
                                             <div class="input-group-prepend" id="prefixAmount" style="display:none;">
@@ -89,7 +89,7 @@
                                         </div>
 
                                         <small class="form-text text-muted mt-1" id="valueHelp">
-                                            {{ $type === 'amount' ? 'Masukkan nominal rupiah (contoh: 10000).' : 'Masukkan persen (1–100).' }}
+                                            {{ $type === 'amount' ? __('messages.owner.products.promotions.reduced_fare_example') : __('messages.owner.products.promotions.percentage_example') }}
                                         </small>
                                     </div>
                                 </div>
@@ -108,10 +108,10 @@
                                            value="1"
                                            {{ $usesExpiryInit ? 'checked' : '' }}>
                                     <label class="custom-control-label" for="uses_expiry">
-                                        Menggunakan tanggal berlaku (expired)?
+                                        {{ __('messages.owner.products.promotions.is_use_expiry') }}
                                     </label>
                                 </div>
-                                <small class="text-muted">Aktifkan jika promosi memiliki periode mulai & berakhir.</small>
+                                <small class="text-muted">{{ __('messages.owner.products.promotions.activate_if_has_expiry') }}</small>
                             </div>
 
                             {{-- Date Range --}}
@@ -119,7 +119,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group mb-0">
-                                            <label for="start_date" class="required">Start Date</label>
+                                            <label for="start_date" class="required">{{ __('messages.owner.products.promotions.start_date') }}</label>
                                             <input type="datetime-local"
                                                    class="form-control @error('start_date') is-invalid @enderror"
                                                    id="start_date"
@@ -130,7 +130,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group mb-0">
-                                            <label for="end_date" class="required">End Date</label>
+                                            <label for="end_date" class="required">{{ __('messages.owner.products.promotions.end_date') }}</label>
                                             <input type="datetime-local"
                                                    class="form-control @error('end_date') is-invalid @enderror"
                                                    id="end_date"
@@ -140,7 +140,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <small class="text-muted">End Date harus lebih besar dari Start Date.</small>
+                                <small class="text-muted">{{ __('messages.owner.products.promotions.end_date_alert') }}</small>
                             </div>
 
                             <hr>
@@ -154,24 +154,32 @@
                                            name="is_active"
                                            value="1"
                                            {{ old('is_active', $data->is_active) ? 'checked' : '' }}>
-                                    <label class="custom-control-label" for="is_active">Aktifkan promosi</label>
+                                    <label class="custom-control-label" for="is_active">{{ __('messages.owner.products.promotions.activate_promotion') }}</label>
                                 </div>
-                                <small class="text-muted">Jika dinonaktifkan, promosi tidak akan diterapkan.</small>
+                                <small class="text-muted">{{ __('messages.owner.products.promotions.if_inactive_promo_disabled') }}</small>
                             </div>
 
                             {{-- Active Days --}}
                             <hr>
                             <div class="form-group">
-                                <label class="d-block">Hari Aktif</label>
+                                <label class="d-block">{{ __('messages.owner.products.promotions.active_day') }}</label>
                                 @php
-                                    $daysMap = ['mon'=>'Senin','tue'=>'Selasa','wed'=>'Rabu','thu'=>'Kamis','fri'=>'Jumat','sat'=>'Sabtu','sun'=>'Minggu'];
+                                    $daysMap = [
+                                        'sun' => __('messages.owner.products.promotions.sunday'),
+                                        'mon' => __('messages.owner.products.promotions.monday'),
+                                        'tue' => __('messages.owner.products.promotions.tuesday'),
+                                        'wed' => __('messages.owner.products.promotions.wednesday'),
+                                        'thu' => __('messages.owner.products.promotions.thursday'),
+                                        'fri' => __('messages.owner.products.promotions.friday'),
+                                        'sat' => __('messages.owner.products.promotions.saturday'),
+                                    ];
                                     $selectedDays = old('active_days', $data->active_days ?: []);
                                     $isEveryDay = is_array($selectedDays) && count($selectedDays) === 7;
                                 @endphp
 
                                 <div class="custom-control custom-checkbox mb-2">
                                     <input type="checkbox" class="custom-control-input" id="every_day" {{ $isEveryDay ? 'checked' : '' }}>
-                                    <label class="custom-control-label" for="every_day">Setiap Hari</label>
+                                    <label class="custom-control-label" for="every_day">{{ __('messages.owner.products.promotions.every_day') }}</label>
                                 </div>
 
                                 <div id="days_grid" class="d-flex flex-wrap gap-2">
@@ -189,7 +197,7 @@
                                 </div>
 
                                 <small class="text-muted d-block">
-                                    Centang <em>"Setiap Hari"</em> atau pilih satu/lebih hari secara manual.
+                                    {{ __('messages.owner.products.promotions.tick') }} <em>"{{ __('messages.owner.products.promotions.every_day') }}"</em> {{ __('messages.owner.products.promotions.to_activate_promo_everyday') }}
                                 </small>
 
                                 @error('active_days') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
@@ -198,22 +206,22 @@
 
                             {{-- Description --}}
                             <div class="form-group">
-                                <label for="description">Description</label>
+                                <label for="description">{{ __('messages.owner.products.promotions.description') }}</label>
                                 <textarea id="description"
                                           name="description"
                                           class="form-control @error('description') is-invalid @enderror"
                                           rows="3"
-                                          placeholder="Tulis keterangan promosi (opsional)">{{ old('description', $data->description) }}</textarea>
+                                          placeholder="{{ __('messages.owner.products.promotions.description_placeholder') }}">{{ old('description', $data->description) }}</textarea>
                                 @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                         </div>
 
                         <div class="card-footer text-right">
                             <a href="{{ route('owner.user-owner.promotions.index') }}" class="btn btn-outline-secondary mr-2">
-                                <i class="fas fa-times mr-1"></i>Cancel
+                                <i class="fas fa-times mr-1"></i>{{ __('messages.owner.products.promotions.cancel') }}
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save mr-1"></i>Update Promotion
+                                <i class="fas fa-save mr-1"></i>{{ __('messages.owner.products.promotions.update_promotion') }}
                             </button>
                         </div>
                     </form>
@@ -346,7 +354,7 @@
             ig.classList.add('has-suffix');
 
             valInput.min = '1'; valInput.max = '100'; valInput.step = '1';
-            helpText.textContent = 'Masukkan persen (1–100).';
+            helpText.textContent = '{{ __('messages.owner.products.promotions.percentage_example') }}';
 
             if (valInput.value && (+valInput.value > 100)) valInput.value = 100;
 
@@ -357,7 +365,7 @@
             ig.classList.remove('has-suffix');
 
             valInput.removeAttribute('max'); valInput.min = '0'; valInput.step = '1';
-            helpText.textContent = 'Masukkan nominal rupiah (contoh: 10000).';
+            helpText.textContent = '{{ __('messages.owner.products.promotions.reduced_fare_example') }}';
 
         } else {
             prefixAmt.style.display = 'none';
@@ -393,7 +401,7 @@
             const ed = new Date(endDate.value);
             if (ed <= s) {
                 e.preventDefault();
-                alert('End Date harus lebih besar dari Start Date.');
+                alert('{{ __('messages.owner.products.promotions.end_date_alert') }}');
                 endDate.focus();
             }
         }
