@@ -11,6 +11,7 @@
         <th>{{ __('messages.owner.outlet.all_outlets.username') }}</th>
         <th>{{ __('messages.owner.outlet.all_outlets.email') }}</th>
         <th>{{ __('messages.owner.outlet.all_outlets.logo') }}</th>
+        <th>{{ __('messages.owner.outlet.all_outlets.background_picture') }}</th>
         <th>{{ __('messages.owner.outlet.all_outlets.status') }}</th>
         <th>QRIS</th>
         <th class="text-nowrap">{{ __('messages.owner.outlet.all_outlets.actions') }}</th>
@@ -35,6 +36,24 @@
                 ? (Str::startsWith($outlet->logo, ['http://','https://'])
                     ? $outlet->logo
                     : asset('storage/'.$outlet->logo))
+                : null;
+            @endphp
+
+            @if($img)
+              <a href="{{ $img }}" target="_blank" rel="noopener">
+                <img src="{{ $img }}" alt="{{ $outlet->name }}" class="avatar-48" loading="lazy">
+              </a>
+            @else
+              <span class="text-muted">—</span>
+            @endif
+          </td>
+
+          <td class="col-photo">
+            @php
+              $img = $outlet->background_picture
+                ? (Str::startsWith($outlet->background_picture, ['http://','https://'])
+                    ? $outlet->background_picture
+                    : asset('storage/'.$outlet->background_picture))
                 : null;
             @endphp
 
