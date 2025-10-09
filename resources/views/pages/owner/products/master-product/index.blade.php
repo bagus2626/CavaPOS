@@ -1,7 +1,7 @@
 @extends('layouts.owner')
 
-@section('title', 'Product List')
-@section('page_title', 'Master Products')
+@section('title', __('messages.owner.products.master_products.master_product_list'))
+@section('page_title', __('messages.owner.products.master_products.master_products'))
 
 @section('content')
 
@@ -9,14 +9,14 @@
 <script>
 function deleteProduct(productId) {
   Swal.fire({
-      title: 'Apakah Anda yakin?',
-      text: "Anda tidak dapat mengembalikan data tersebut!",
+      title: '{{ __('messages.owner.products.master_products.delete_confirmation_1') }}',
+      text: "{{ __('messages.owner.products.master_products.delete_confirmation_2') }}",
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#8c1000',
       cancelButtonColor: '#9CA3AF',
-      confirmButtonText: 'Ya, Hapus!',
-      cancelButtonText: 'Batalkan'
+      confirmButtonText: '{{ __('messages.owner.products.master_products.delete_confirmation_3') }}',
+      cancelButtonText: '{{ __('messages.owner.products.master_products.cancel') }}'
   }).then((result) => {
       if (result.isConfirmed) {
           const form = document.createElement('form');
@@ -50,7 +50,7 @@ function deleteProduct(productId) {
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
       <div class="filter-toolbar d-flex flex-wrap gap-2">
         <button class="btn btn-outline-choco btn-sm filter-btn rounded-pill active" data-category="all">
-          <i class="fas fa-list-ul me-1"></i> All
+          <i class="fas fa-list-ul me-1"></i> {{ __('messages.owner.products.master_products.all') }}
         </button>
         @foreach($categories as $category)
           <button class="btn btn-outline-choco btn-sm filter-btn rounded-pill" data-category="{{ $category->id }}">
@@ -60,7 +60,7 @@ function deleteProduct(productId) {
       </div>
 
       <a href="{{ route('owner.user-owner.master-products.create') }}" class="btn btn-choco">
-        <i class="fas fa-plus me-2"></i>Add Product
+        <i class="fas fa-plus me-2"></i>{{ __('messages.owner.products.master_products.add_product') }}
       </a>
     </div>
 
@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (visibleCount === 0) {
         const tr = document.createElement('tr');
         tr.classList.add('empty-row');
-        tr.innerHTML = `<td colspan="999" class="text-center py-4 text-muted">Data tidak ditemukan</td>`;
+        tr.innerHTML = `<td colspan="999" class="text-center py-4 text-muted">{{ __('messages.owner.products.master_products.data_not_found') }}</td>`;
         tableBody.appendChild(tr);
       }
     });
