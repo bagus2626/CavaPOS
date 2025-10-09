@@ -1,7 +1,7 @@
 @extends('layouts.owner')
 
-@section('title', 'Create Product')
-@section('page_title', 'Create New Master Product')
+@section('title', __('messages.owner.products.master_products.create_product'))
+@section('page_title', __('messages.owner.products.master_products.create_new_master_product'))
 
 @section('content')
 <section class="content">
@@ -9,12 +9,12 @@
         <div class="row">
             <div class="col-12">
                 <a href="{{ route('owner.user-owner.master-products.index') }}" class="btn bg-choco text-white mb-3">
-                    <i class="fas fa-arrow-left mr-2"></i>Back to Products
+                    <i class="fas fa-arrow-left mr-2"></i>{{ __('messages.owner.products.master_products.back_to_products') }}
                 </a>
 
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Product Information</h3>
+                        <h3 class="card-title">{{ __('messages.owner.products.master_products.product_information') }}</h3>
                         <div class="card-tools">
 
                         </div>
@@ -27,15 +27,15 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>Product Name</label>
-                                        <input type="text" name="name" class="form-control" placeholder="Enter product name" required>
+                                        <label>{{ __('messages.owner.products.master_products.product_name') }}</label>
+                                        <input type="text" name="name" class="form-control" placeholder="{{ __('messages.owner.products.master_products.product_name_placeholder') }}" required>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>Category</label>
+                                        <label>{{ __('messages.owner.products.master_products.category') }}</label>
                                         <select class="form-control" name="product_category" id="product_category" required>
-                                            <option value="">Select Category</option>
+                                            <option value="">{{ __('messages.owner.products.master_products.select_category') }}</option>
                                             @foreach($categories as $category)
                                                 <option value="{{ $category->id }}">{{ $category->category_name }}</option>
                                             @endforeach
@@ -57,20 +57,20 @@
                                 </div> --}}
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label>Price</label>
+                                        <label>{{ __('messages.owner.products.master_products.price') }}</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text">Rp.</span>
                                             </div>
-                                            <input type="text" id="price" name="price" class="form-control" placeholder="Enter product price" required>
+                                            <input type="text" id="price" name="price" class="form-control" placeholder="{{ __('messages.owner.products.master_products.product_price_placeholder') }}" required>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label>Promo</label>
+                                        <label>{{ __('messages.owner.products.master_products.promo') }}</label>
                                         <select class="form-control" name="promotion_id" id="promotion_id">
-                                            <option value="">Select Promotion</option>
+                                            <option value="">{{ __('messages.owner.products.master_products.select_promotion') }}</option>
                                             @foreach($promotions as $promotion)
                                                 <option value="{{ $promotion->id }}">{{ $promotion->promotion_name }}</option>
                                             @endforeach
@@ -79,9 +79,9 @@
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label>Product Images (Max 5)</label>
+                                        <label>{{ __('messages.owner.products.master_products.product_images_max') }}</label>
                                         <input type="file" id="images" name="images[]" class="form-control" accept="image/*" multiple required>
-                                        <small class="text-muted">You can upload up to 5 images.</small>
+                                        <small class="text-muted">{{ __('messages.owner.products.master_products.can_upload_to_5') }}</small>
                                     </div>
 
                                     <!-- Preview -->
@@ -90,8 +90,8 @@
                             </div>
 
                             <div class="form-group">
-                                <label>Description</label>
-                                <textarea name="description" class="form-control summernote" rows="3" placeholder="Enter detailed product description"></textarea>
+                                <label>{{ __('messages.owner.products.master_products.description') }}</label>
+                                <textarea name="description" class="form-control summernote" rows="3" placeholder="{{ __('messages.owner.products.master_products.product_description_placeholder') }}"></textarea>
                             </div>
 
                             <hr>
@@ -102,9 +102,9 @@
 
                             <!-- Options -->
                             <h4 class="mb-3 d-flex justify-content-between align-items-center">
-                                Options
+                                {{ __('messages.owner.products.master_products.options') }}
                                 <button type="button" class="btn btn-sm btn-primary" onclick="addMenuOption()">
-                                    + Add Menu Option
+                                    + {{ __('messages.owner.products.master_products.add_menu_option') }}
                                 </button>
                             </h4>
 
@@ -113,10 +113,10 @@
 
                         <div class="card-footer text-right">
                             <button type="reset" class="btn btn-outline-secondary mr-2">
-                                <i class="fas fa-undo mr-1"></i>Reset
+                                <i class="fas fa-undo mr-1"></i>{{ __('messages.owner.products.master_products.reset') }}
                             </button>
                             <button type="submit" class="btn btn-success">
-                                <i class="fas fa-save mr-1"></i>Create Product
+                                <i class="fas fa-save mr-1"></i>{{ __('messages.owner.products.master_products.create_product') }}
                             </button>
                         </div>
                     </form>
@@ -202,19 +202,19 @@ function addMenuOption() {
             <div class="card h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-2">
-                        <h5 class="card-title">Menu Option ${menuIndex}</h5>
+                        <h5 class="card-title">{{ __('messages.owner.products.master_products.category_option') }} ${menuIndex}</h5>
                         <button type="button" class="btn btn-sm btn-danger" onclick="removeMenuOption(this)">X</button>
                     </div>
                     <div class="row">
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>Menu Name</label>
-                                <input type="text" name="menu_options[${menuIndex}][name]" class="form-control" placeholder="Enter menu name" required>
+                                <label>{{ __('messages.owner.products.master_products.menu_name') }}</label>
+                                <input type="text" name="menu_options[${menuIndex}][name]" class="form-control" placeholder="{{ __('messages.owner.products.master_products.enter_menu_name') }}" required>
                             </div>
                         </div>
                         <div class="col-md-5">
                             <div class="form-group">
-                                <label>Menu Description</label>
+                                <label>{{ __('messages.owner.products.master_products.menu_description') }}</label>
                                 <input name="menu_options[${menuIndex}][description]" class="form-control" rows="2"></input>
                             </div>
                         </div>
@@ -222,18 +222,18 @@ function addMenuOption() {
                             <div class="form-group">
                                 <label>Pilihan</label>
                                 <select class="form-control" name="menu_options[${menuIndex}][provision]" id="menu_options[${menuIndex}][provision]" required>
-                                    <option value="">Select Provision</option>
-                                    <option value="OPTIONAL">Opsional</option>
-                                    <option value="OPTIONAL MAX">Opsional, Maksimal Pilih</option>
-                                    <option value="MAX">Wajib, Maksimal Pilih</option>
-                                    <option value="EXACT">Wajib, Pilih</option>
-                                    <option value="MIN">Wajib, Minimal Pilih</option>
+                                    <option value="">{{ __('messages.owner.products.master_products.select_provision') }}</option>
+                                    <option value="OPTIONAL">{{ __('messages.owner.products.master_products.optional') }}</option>
+                                    <option value="OPTIONAL MAX">{{ __('messages.owner.products.master_products.optional_max') }}</option>
+                                    <option value="MAX">{{ __('messages.owner.products.master_products.max_provision') }}</option>
+                                    <option value="EXACT">{{ __('messages.owner.products.master_products.exact_provision') }}</option>
+                                    <option value="MIN">{{ __('messages.owner.products.master_products.min_provision') }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-2 jumlah-pilihan">
                             <div class="form-group">
-                                <label>Jumlah</label>
+                                <label>{{ __('messages.owner.products.master_products.amount') }}</label>
                                 <div class="input-group">
                                     <input type="number"
                                         id="menu_options[${menuIndex}][provision_value]"
@@ -249,7 +249,7 @@ function addMenuOption() {
                     <div class="options-container" id="options-container-${menuIndex}"></div>
 
                     <button type="button" class="btn btn-sm btn-success mt-2" onclick="addOption(${menuIndex})">
-                        + Add Option
+                        + {{ __('messages.owner.products.master_products.add_option') }}
                     </button>
                 </div>
             </div>
@@ -271,24 +271,24 @@ function addOption(menuIndex) {
             <div class="card-body">
                 <div class="d-flex justify-content-between mb-2">
                     <h6>Option ${optionIndex}</h6>
-                    <button type="button" class="btn btn-sm btn-danger" onclick="removeOption(this)">Remove</button>
+                    <button type="button" class="btn btn-sm btn-danger" onclick="removeOption(this)">{{ __('messages.owner.products.master_products.remove') }}</button>
                 </div>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label>Option Name</label>
+                            <label>{{ __('messages.owner.products.master_products.option_name') }}</label>
                             <input type="text" name="menu_options[${menuIndex}][options][${optionIndex}][name]" class="form-control" required>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label>Price</label>
+                            <label>{{ __('messages.owner.products.master_products.price') }}</label>
                             <input type="number" name="menu_options[${menuIndex}][options][${optionIndex}][price]" class="form-control" min="0" required>
                         </div>
                     </div>
                     <div class="col-md-12">
                         <div class="form-group">
-                            <label>Description</label>
+                            <label>{{ __('messages.owner.products.master_products.description') }}</label>
                             <textarea name="menu_options[${menuIndex}][options][${optionIndex}][description]" class="form-control" rows="2"></textarea>
                         </div>
                     </div>
