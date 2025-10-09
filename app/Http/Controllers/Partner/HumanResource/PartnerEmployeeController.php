@@ -229,6 +229,7 @@ class PartnerEmployeeController extends Controller
 
     public function destroy(Employee $employee)
     {
+        abort(404);
         // (opsional tapi bagus) pastikan employee milik partner yang login
         $partnerId = Auth::id();
         if ($employee->partner_id !== $partnerId) {

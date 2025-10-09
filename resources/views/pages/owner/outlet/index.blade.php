@@ -1,49 +1,13 @@
 @extends('layouts.owner')
 
-@section('title', 'Product List')
-@section('page_title', 'All Products')
+@section('title', __('messages.owner.outlet.all_outlets.outlet_list'))
+@section('page_title', __('messages.owner.outlet.all_outlets.all_outlets'))
 
 @section('content')
-<script>
-function deleteProduct(productId) {
-    Swal.fire({
-        title: 'Apakah Anda yakin?',
-        text: "Anda tidak dapat mengembalikan data tersebut!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Ya, Hapus!',
-        cancelButtonText: 'Batalkan'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `/partner/products/${productId}`;
-            form.style.display = 'none';
-
-            const csrf = document.createElement('input');
-            csrf.type = 'hidden';
-            csrf.name = '_token';
-            csrf.value = '{{ csrf_token() }}';
-            form.appendChild(csrf);
-
-            const method = document.createElement('input');
-            method.type = 'hidden';
-            method.name = '_method';
-            method.value = 'DELETE';
-            form.appendChild(method);
-
-            document.body.appendChild(form);
-            form.submit();
-        }
-    });
-}
-</script>
 
 <section class="content">
     <div class="container-fluid">
-        <a href="{{ route('owner.user-owner.outlets.create') }}" class="btn btn-primary mb-3">Add Outlet</a>
+        <a href="{{ route('owner.user-owner.outlets.create') }}" class="btn btn-primary mb-3">{{ __('messages.owner.outlet.all_outlets.add_outlet') }}</a>
         {{-- <div class="mb-3">
             <button class="btn btn-outline-primary btn-sm filter-btn rounded-pill active" data-category="all">All</button>
             @foreach($table_classes as $table_class)
@@ -71,7 +35,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     filterButtons.forEach(button => {
         button.addEventListener('click', function() {
-            console.log('Tombol diklik:', this.textContent);
             const categoryId = this.getAttribute('data-category');
 
             // hapus class active dari semua tombol
@@ -101,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if(visibleCount === 0) {
                 const tr = document.createElement('tr');
                 tr.classList.add('empty-row');
-                tr.innerHTML = `<td colspan="5" class="text-center">Data tidak ditemukan</td>`;
+                tr.innerHTML = `<td colspan="5" class="text-center">{{ __('messages.owner.outlet.all_outlets.data_not_found') }}</td>`;
                 tableBody.appendChild(tr);
             }
         });

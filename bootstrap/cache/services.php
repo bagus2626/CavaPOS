@@ -302,9 +302,6 @@
     'Laravel\\Breeze\\BreezeServiceProvider' => 
     array (
     ),
-    'Laravel\\Reverb\\ApplicationManagerServiceProvider' => 
-    array (
-    ),
     'Laravel\\Sail\\SailServiceProvider' => 
     array (
     ),

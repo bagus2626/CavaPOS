@@ -1,14 +1,14 @@
 @extends('layouts.partner')
 
-@section('title', 'Update Product Stock')
-@section('page_title', 'Update Product Stock')
+@section('title', __('messages.partner.product.all_product.update_product'))
+@section('page_title', __('messages.partner.product.all_product.update_product'))
 
 @section('content')
 <section class="content product-stock">
   <div class="container-fluid">
 
     <a href="{{ route('partner.products.index') }}" class="btn btn-outline-choco mb-3 btn-pill">
-      <i class="fas fa-arrow-left mr-2"></i> Back to Products
+      <i class="fas fa-arrow-left mr-2"></i> {{ __('messages.partner.product.all_product.back_to_products') }}
     </a>
 
     @if ($errors->any())
@@ -23,7 +23,7 @@
 
     <div class="card card-shell border-0 shadow-sm">
       <div class="card-header brand-header">
-        <h3 class="card-title mb-0">Edit Stock</h3>
+        <h3 class="card-title mb-0">{{ __('messages.partner.product.all_product.edit_stock') }}</h3>
       </div>
 
       <form action="{{ route('partner.products.update', $data->id) }}" method="POST">
@@ -55,8 +55,8 @@
                         <span class="badge badge-soft-info">
                           {{ optional($data->category)->category_name ?? 'Uncategorized' }}
                         </span>
-                        <span class="badge badge-soft-neutral">Code: {{ $data->product_code ?? '-' }}</span>
-                        <span class="badge badge-soft-neutral">Outlet ID: {{ $data->partner_id }}</span>
+                        <span class="badge badge-soft-neutral">{{ __('messages.partner.product.all_product.code') }}: {{ $data->product_code ?? '-' }}</span>
+                        <span class="badge badge-soft-neutral">{{ __('messages.partner.product.all_product.outlet_id') }}: {{ $data->partner_id }}</span>
                       </div>
 
                       <div class="meta small text-muted">
@@ -66,22 +66,22 @@
                         </div>
 
                         <div class="mb-1 d-flex flex-wrap align-items-center">
-                          <span class="me-1"><i class="fas fa-percentage me-1"></i>Promotion:</span>
+                          <span class="me-1"><i class="fas fa-percentage me-1"></i>{{ __('messages.partner.product.all_product.promotion') }}:</span>
                           <strong class="me-2">{{ $data->promotion ? 'Applied' : '—' }}</strong>
                           @if($data->promotion)
                             <span class="badge badge-soft-neutral">
                               {{ $data->promotion->promotion_name ?? '-' }}
                               (@if($data->promotion->promotion_type === 'percentage')
-                                discount {{ intval($data->promotion->promotion_value ?? 0) }}%
+                                {{ __('messages.partner.product.all_product.discount') }} {{ intval($data->promotion->promotion_value ?? 0) }}%
                               @elseif($data->promotion->promotion_type === 'amount')
-                                potongan Rp {{ number_format((float)($data->promotion->promotion_value ?? 0), 0, ',', '.') }}
+                                {{ __('messages.partner.product.all_product.reduced_fare') }} Rp {{ number_format((float)($data->promotion->promotion_value ?? 0), 0, ',', '.') }}
                               @endif)
                             </span>
                           @endif
                         </div>
 
                         <div><i class="fas fa-info-circle me-1"></i>
-                          Master Product:
+                          {{ __('messages.partner.product.all_product.master_product') }}:
                           <strong>{{ $data->master_product_id ?? '-' }}</strong>
                         </div>
                       </div>
@@ -91,7 +91,7 @@
                   @if(!empty($data->description))
                     <hr>
                     <div>
-                      <div class="text-muted mb-1 fw-600"><i class="far fa-file-alt me-1"></i>Description</div>
+                      <div class="text-muted mb-1 fw-600"><i class="far fa-file-alt me-1"></i>{{ __('messages.partner.product.all_product.description') }}</div>
                       <div class="desc-box">
                         {!! $data->description !!}
                       </div>
@@ -100,7 +100,7 @@
 
                   @if(($data->parent_options ?? null) && count($data->parent_options))
                     <hr>
-                    <div class="text-muted mb-2 fw-600"><i class="fas fa-list-ul me-1"></i>Options</div>
+                    <div class="text-muted mb-2 fw-600"><i class="fas fa-list-ul me-1"></i>{{ __('messages.partner.product.all_product.options') }}</div>
 
                     @foreach($data->parent_options as $parent)
                       <div class="mb-3 p-2 border rounded-3 option-group">
@@ -124,9 +124,9 @@
                             <table class="table table-sm table-hover align-middle options-table mb-0">
                               <thead>
                                 <tr>
-                                  <th style="width:40%">Option</th>
-                                  <th class="text-end" style="width:20%">Price</th>
-                                  <th class="text-center" style="width:30%">Quantity</th>
+                                  <th style="width:40%">{{ __('messages.partner.product.all_product.options') }}</th>
+                                  <th class="text-end" style="width:20%">{{ __('messages.partner.product.all_product.price') }}</th>
+                                  <th class="text-center" style="width:30%">{{ __('messages.partner.product.all_product.quantity') }}</th>
                                   <th class="text-end" style="width:10%">Info</th>
                                 </tr>
                               </thead>
@@ -156,7 +156,7 @@
                                           data-wrap="#opt-qty-wrap-{{ $opt->id }}"
                                           {{ $optUnlimited ? 'checked' : '' }}
                                         >
-                                        <label class="custom-control-label" for="opt-aa-{{ $opt->id }}">Always available</label>
+                                        <label class="custom-control-label" for="opt-aa-{{ $opt->id }}">{{ __('messages.partner.product.all_product.always_available') }}</label>
                                       </div>
 
                                       {{-- qty --}}
@@ -182,7 +182,7 @@
                                     </td>
 
                                     <td class="text-end">
-                                      <span class="text-muted small">Last: {{ (int)($opt->quantity ?? 0) }}</span>
+                                      <span class="text-muted small">{{ __('messages.partner.product.all_product.last') }}: {{ (int)($opt->quantity ?? 0) }}</span>
                                     </td>
                                   </tr>
                                 @endforeach
@@ -201,7 +201,7 @@
             <div class="col-lg-5">
               <div class="card border-0 inner-card">
                 <div class="card-body">
-                  <h5 class="mb-3 fw-600">Update Stock</h5>
+                  <h5 class="mb-3 fw-600">{{ __('messages.partner.product.all_product.update_stock') }}</h5>
 
                   @php
                     $prodUnlimited = old('always_available', $data->always_available_flag ?? ($data->quantity === null ? 1 : 0));
@@ -219,14 +219,14 @@
                         {{ $prodUnlimited ? 'checked' : '' }}
                       >
                       <label class="custom-control-label" for="aa_product">
-                        Produk selalu tersedia (tanpa stok)
+                        {{ __('messages.partner.product.all_product.product_always_available') }}
                       </label>
                     </div>
-                    <small class="text-muted">Jika aktif, kolom Quantity akan disembunyikan.</small>
+                    <small class="text-muted">{{ __('messages.partner.product.all_product.muted_text_1') }}</small>
                   </div>
 
                   <div class="form-group" id="product_qty_group">
-                    <label class="mb-1 fw-600">Quantity (Product)</label>
+                    <label class="mb-1 fw-600">{{ __('messages.partner.product.all_product.quantity_product') }}</label>
                     <div class="input-group qty-group">
                       <button type="button" class="btn btn-qty btn-outline-secondary" id="btn-qty-dec">
                         <i class="fas fa-minus"></i>
@@ -246,7 +246,7 @@
                       <button type="button" class="btn btn-qty btn-outline-secondary" id="btn-qty-inc">
                         <i class="fas fa-plus"></i>
                       </button>
-                      <button type="button" class="btn btn-outline-choco" id="btn-qty-max">Max</button>
+                      <button type="button" class="btn btn-outline-choco" id="btn-qty-max">{{ __('messages.partner.product.all_product.max') }}</button>
                     </div>
                     @error('quantity')
                       <small class="text-danger d-block mt-1">{{ $message }}</small>
@@ -255,17 +255,17 @@
 
                   <hr>
                   <div class="d-flex justify-content-end">
-                    <a href="{{ route('partner.products.index') }}" class="btn btn-outline-choco me-2">Cancel</a>
-                    <button type="submit" class="btn btn-choco">Save Changes</button>
+                    <a href="{{ route('partner.products.index') }}" class="btn btn-outline-choco me-2">{{ __('messages.partner.product.all_product.cancel') }}</a>
+                    <button type="submit" class="btn btn-choco">{{ __('messages.partner.product.all_product.save_changes') }}</button>
                   </div>
                 </div>
               </div>
 
               <div class="card border-0 inner-card mt-3">
                 <div class="card-body small text-muted">
-                  <div class="d-flex justify-content-between"><span>Created</span><strong>{{ optional($data->created_at)->format('d M Y, H:i') ?? '-' }}</strong></div>
-                  <div class="d-flex justify-content-between"><span>Last Updated</span><strong>{{ optional($data->updated_at)->format('d M Y, H:i') ?? '-' }}</strong></div>
-                  <div class="d-flex justify-content-between"><span>Owner</span><strong>{{ $data->owner->name ?? '-' }}</strong></div>
+                  <div class="d-flex justify-content-between"><span>{{ __('messages.partner.product.all_product.created') }}</span><strong>{{ optional($data->created_at)->format('d M Y, H:i') ?? '-' }}</strong></div>
+                  <div class="d-flex justify-content-between"><span>{{ __('messages.partner.product.all_product.last_updated') }}</span><strong>{{ optional($data->updated_at)->format('d M Y, H:i') ?? '-' }}</strong></div>
+                  <div class="d-flex justify-content-between"><span>{{ __('messages.partner.product.all_product.owner') }}</span><strong>{{ $data->owner->name ?? '-' }}</strong></div>
                 </div>
               </div>
             </div>
