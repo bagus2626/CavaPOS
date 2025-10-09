@@ -228,7 +228,7 @@
 
                         {{-- logo --}}
                         <div class="col-md-6">
-                            <label for="logo" class="form-label">{{ __('messages.owner.outlet.all_outlets.upload_picture_optional') }}</label>
+                            <label for="logo" class="form-label">{{ __('messages.owner.outlet.all_outlets.upload_logo_optional') }}</label>
                             <input type="file" name="logo" id="logo"
                                    class="form-control @error('logo') is-invalid @enderror" accept="image/*">
                             <small class="text-muted">{{ __('messages.owner.outlet.all_outlets.muted_text_2') }}</small>
