@@ -62,7 +62,7 @@
                             <label for="role" class="form-label">{{ __('messages.owner.user_management.employees.role') }}</label>
                             <select name="role" id="role"
                                     class="form-control @error('role') is-invalid @enderror" required>
-                                <option value="">{{ __('messages.owner.user_management.employees.select_status') }}</option>
+                                <option value="">{{ __('messages.owner.user_management.employees.select_role') }}</option>
                                 <option value="CASHIER" {{ old('role') == 'CASHIER' ? 'selected' : '' }}>{{ __('messages.owner.user_management.employees.cashier') }}</option>
                                 <option value="KITCHEN" {{ old('role') == 'KITCHEN' ? 'selected' : '' }}>{{ __('messages.owner.user_management.employees.kitchen') }}</option>
                                 <option value="WAITER"  {{ old('role') == 'WAITER'  ? 'selected' : '' }}>{{ __('messages.owner.user_management.employees.waiter') }}</option>

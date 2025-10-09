@@ -206,6 +206,7 @@
                             @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
+                        {{-- background picture --}}
                         <div class="col-md-6">
                             <label for="image" class="form-label">{{ __('messages.owner.outlet.all_outlets.upload_picture_optional') }}</label>
                             <input type="file" name="image" id="image"
@@ -214,14 +215,34 @@
                             @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
 
                             {{-- Preview --}}
-                            <div id="imagePreviewWrapper" class="mt-2 {{ $outlet->logo ? '' : 'd-none' }}">
+                            <div id="imagePreviewWrapper" class="mt-2 {{ $outlet->background_picture ? '' : 'd-none' }}">
                                 <div class="position-relative preview-box">
-                                    <img id="imagePreview" src="{{ $outlet->logo ? asset('storage/'.$outlet->logo) : '' }}" alt="Preview" class="img-thumbnail rounded w-100 h-auto">
-                                    <button type="button" id="clearImageBtn" class="btn btn-sm btn-danger position-absolute top-0 end-0" aria-label="Hapus gambar">
+                                    <img id="imagePreview" src="{{ $outlet->background_picture ? asset('storage/'.$outlet->background_picture) : '' }}" alt="Preview" class="img-thumbnail rounded w-100 h-auto">
+                                    <button type="button" id="clearImageBtn" class="btn btn-sm btn-danger position-absolute top-0 end-0" aria-label="Remove Picture">
                                         &times;
                                     </button>
                                 </div>
-                                <small id="imageInfo" class="text-muted d-block mt-1">{{ $outlet->logo ? basename($outlet->logo) : '' }}</small>
+                                <small id="imageInfo" class="text-muted d-block mt-1">{{ $outlet->background_picture ? basename($outlet->background_picture) : '' }}</small>
+                            </div>
+                        </div>
+
+                        {{-- logo --}}
+                        <div class="col-md-6">
+                            <label for="logo" class="form-label">{{ __('messages.owner.outlet.all_outlets.upload_picture_optional') }}</label>
+                            <input type="file" name="logo" id="logo"
+                                   class="form-control @error('logo') is-invalid @enderror" accept="image/*">
+                            <small class="text-muted">{{ __('messages.owner.outlet.all_outlets.muted_text_2') }}</small>
+                            @error('logo') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
+                            {{-- Preview --}}
+                            <div id="imagePreviewWrapper2" class="mt-2 {{ $outlet->logo ? '' : 'd-none' }}">
+                                <div class="position-relative preview-box">
+                                    <img id="imagePreview2" src="{{ $outlet->logo ? asset('storage/'.$outlet->logo) : '' }}" alt="Preview" class="img-thumbnail rounded w-100 h-auto">
+                                    <button type="button" id="clearImageBtn2" class="btn btn-sm btn-danger position-absolute top-0 end-0" aria-label="Remove Logo">
+                                        &times;
+                                    </button>
+                                </div>
+                                <small id="imageInfo2" class="text-muted d-block mt-1">{{ $outlet->logo ? basename($outlet->logo) : '' }}</small>
                             </div>
                         </div>
                     </div>
@@ -415,6 +436,10 @@
 .owner-outlet-edit #imagePreviewWrapper .img-thumbnail{
   border:0; border-radius:var(--radius); box-shadow:var(--shadow);
 }
+
+.owner-outlet-edit #imagePreviewWrapper2 .img-thumbnail{
+  border:0; border-radius:var(--radius); box-shadow:var(--shadow);
+}
 .owner-outlet-edit #clearImageBtn{
   transform: translate(35%,-35%);
   border-radius:999px; width:28px; height:28px; padding:0; line-height:26px;
@@ -445,12 +470,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const preview  = document.getElementById('imagePreview');
     const info     = document.getElementById('imageInfo');
     const clearBtn = document.getElementById('clearImageBtn');
+    const input2    = document.getElementById('logo');
+    const wrapper2  = document.getElementById('imagePreviewWrapper2');
+    const preview2  = document.getElementById('imagePreview2');
+    const info2     = document.getElementById('imageInfo2');
+    const clearBtn2 = document.getElementById('clearImageBtn2');
 
     const MAX_SIZE = 2 * 1024 * 1024;
     const ALLOWED  = ['image/jpeg', 'image/png', 'image/webp'];
 
     function bytesToSize(bytes){const u=['B','KB','MB','GB'];let i=0,n=bytes;while(n>=1024&&i<u.length-1){n/=1024;i++;}return `${n.toFixed(n<10&&i>0?1:0)} ${u[i]}`;}
     function resetPreview(){ if (!wrapper) return; preview.src=''; info.textContent=''; wrapper.classList.add('d-none'); }
+    function resetPreview2(){ if (!wrapper2) return; preview2.src=''; info2.textContent=''; wrapper2.classList.add('d-none'); }
 
     if (input) {
         input.addEventListener('change', function () {
@@ -464,7 +495,21 @@ document.addEventListener('DOMContentLoaded', function () {
             if (info) info.textContent = `${file.name} • ${bytesToSize(file.size)}`;
         });
     }
+
+    if (input2) {
+        input2.addEventListener('change', function () {
+            const file = input2.files?.[0];
+            if (!file) { resetPreview2(); return; }
+            if (!ALLOWED.includes(file.type)) { alert('FIle type not supported. Use JPG, PNG, atau WEBP.'); input2.value=''; resetPreview2(); return; }
+            if (file.size > MAX_SIZE) { alert('File size more than 2 MB.'); input2.value=''; resetPreview2(); return; }
+            const url = URL.createObjectURL(file);
+            if (wrapper2) wrapper2.classList.remove('d-none');
+            preview2.src = url;
+            if (info2) info2.textContent = `${file.name} • ${bytesToSize(file.size)}`;
+        });
+    }
     if (clearBtn) { clearBtn.addEventListener('click', function(){ if (input) input.value=''; resetPreview(); }); }
+    if (clearBtn2) { clearBtn2.addEventListener('click', function(){ if (input2) input2.value=''; resetPreview2(); }); }
 
     // ==== Toggle password ====
     function bindToggle(btnId, inputId){const btn=document.getElementById(btnId),inp=document.getElementById(inputId); if(!btn||!inp) return; btn.addEventListener('click',()=>{const isPw=inp.type==='password'; inp.type=isPw?'text':'password'; btn.textContent=isPw?'Hide':'Show';});}
