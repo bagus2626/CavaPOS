@@ -1,7 +1,7 @@
 @extends('layouts.owner')
 
-@section('title', 'Promotion Detail')
-@section('page_title', 'Promotion Detail')
+@section('title',  __('messages.owner.products.promotions.promotion_detail'))
+@section('page_title',  __('messages.owner.products.promotions.promotion_detail'))
 
 @section('content')
 <section class="content">
@@ -11,12 +11,12 @@
 
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <a href="{{ route('owner.user-owner.promotions.index') }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left mr-2"></i>Back to Promotions
+                        <i class="fas fa-arrow-left mr-2"></i>{{ __('messages.owner.products.promotions.back_to_promotions') }}
                     </a>
 
                     <div>
                         <a href="{{ route('owner.user-owner.promotions.edit', $data->id) }}" class="btn btn-warning mr-2">
-                            <i class="fas fa-edit mr-1"></i>Edit
+                            <i class="fas fa-edit mr-1"></i>{{ __('messages.owner.products.promotions.edit') }}
                         </a>
                         {{-- contoh tombol hapus (opsional)
                         <form action="{{ route('owner.user-owner.promotions.destroy', $data->id) }}" method="POST" class="d-inline"
@@ -36,15 +36,23 @@
                         <h3 class="card-title mb-0">{{ $data->promotion_name }}</h3>
                         <div>
                             @if ($data->is_active)
-                                <span class="badge badge-success px-3 py-2">Aktif</span>
+                                <span class="badge badge-success px-3 py-2">{{ __('messages.owner.products.promotions.active') }}</span>
                             @else
-                                <span class="badge badge-secondary px-3 py-2">Nonaktif</span>
+                                <span class="badge badge-secondary px-3 py-2">{{ __('messages.owner.products.promotions.inactive') }}</span>
                             @endif
                         </div>
                     </div>
 
                     @php
-                        $daysMap = ['mon'=>'Senin','tue'=>'Selasa','wed'=>'Rabu','thu'=>'Kamis','fri'=>'Jumat','sat'=>'Sabtu','sun'=>'Minggu'];
+                        $daysMap = [
+                            'sun' => __('messages.owner.products.promotions.sunday'),
+                            'mon' => __('messages.owner.products.promotions.monday'),
+                            'tue' => __('messages.owner.products.promotions.tuesday'),
+                            'wed' => __('messages.owner.products.promotions.wednesday'),
+                            'thu' => __('messages.owner.products.promotions.thursday'),
+                            'fri' => __('messages.owner.products.promotions.friday'),
+                            'sat' => __('messages.owner.products.promotions.saturday'),
+                        ];
                         $days = is_array($data->active_days) ? $data->active_days : [];
                         $isEveryDay = count($days) === 7;
 
@@ -61,34 +69,34 @@
                         <div class="row">
                             <div class="col-lg-6">
                                 <dl class="row mb-0 info-dl">
-                                    <dt class="col-sm-5">Kode Promo</dt>
+                                    <dt class="col-sm-5">{{ __('messages.owner.products.promotions.promo_code') }}</dt>
                                     <dd class="col-sm-7">{{ $data->promotion_code ?? '-' }}</dd>
 
-                                    <dt class="col-sm-5">Nama Promo</dt>
+                                    <dt class="col-sm-5">{{ __('messages.owner.products.promotions.promo_name') }}</dt>
                                     <dd class="col-sm-7">{{ $data->promotion_name ?? '-' }}</dd>
 
-                                    <dt class="col-sm-5">Tipe Promo</dt>
+                                    <dt class="col-sm-5">{{ __('messages.owner.products.promotions.promo_type') }}</dt>
                                     <dd class="col-sm-7">
                                         <span class="badge badge-info">{{ $typeLabel }}</span>
                                     </dd>
 
-                                    <dt class="col-sm-5">Nilai</dt>
+                                    <dt class="col-sm-5">{{ __('messages.owner.products.promotions.value') }}</dt>
                                     <dd class="col-sm-7"><strong>{{ $valueLabel }}</strong></dd>
                                 </dl>
                             </div>
 
                             <div class="col-lg-6">
                                 <dl class="row mb-0 info-dl">
-                                    <dt class="col-sm-5">Gunakan Periode (Expired)?</dt>
+                                    <dt class="col-sm-5">{{ __('messages.owner.products.promotions.is_use_expiry') }}</dt>
                                     <dd class="col-sm-7">
                                         @if((int)($data->uses_expiry ?? 0) === 1)
-                                            <span class="badge badge-primary">Ya</span>
+                                            <span class="badge badge-primary">{{ __('messages.owner.products.promotions.yes') }}</span>
                                         @else
-                                            <span class="badge badge-light border">Tidak</span>
+                                            <span class="badge badge-light border">{{ __('messages.owner.products.promotions.no') }}</span>
                                         @endif
                                     </dd>
 
-                                    <dt class="col-sm-5">Periode Berlaku</dt>
+                                    <dt class="col-sm-5">{{ __('messages.owner.products.promotions.valid_period') }}</dt>
                                     <dd class="col-sm-7">
                                         @if((int)($data->uses_expiry ?? 0) === 1 && $data->start_date && $data->end_date)
                                             {{ $startLabel }} &mdash; {{ $endLabel }}
@@ -97,10 +105,10 @@
                                         @endif
                                     </dd>
 
-                                    <dt class="col-sm-5">Hari Aktif</dt>
+                                    <dt class="col-sm-5">{{ __('messages.owner.products.promotions.active_day') }}</dt>
                                     <dd class="col-sm-7">
                                         @if($isEveryDay)
-                                            <span class="badge badge-success">Setiap Hari</span>
+                                            <span class="badge badge-success">{{ __('messages.owner.products.promotions.every_day') }}</span>
                                         @elseif(!empty($days))
                                             <div class="d-flex flex-wrap">
                                                 @foreach($days as $d)
@@ -120,7 +128,7 @@
                         <hr>
 
                         <div class="form-group mb-0">
-                            <label class="mb-1">Description</label>
+                            <label class="mb-1">{{ __('messages.owner.products.promotions.description') }}</label>
                             <div class="p-3 border rounded desc-box">
                                 {!! nl2br(e($data->description ?? '-')) !!}
                             </div>
@@ -129,10 +137,10 @@
 
                     <div class="card-footer text-right">
                         <a href="{{ route('owner.user-owner.promotions.index') }}" class="btn btn-outline-secondary mr-2">
-                            <i class="fas fa-list mr-1"></i>Back to List
+                            <i class="fas fa-list mr-1"></i>{{ __('messages.owner.products.promotions.back_to_list') }}
                         </a>
                         <a href="{{ route('owner.user-owner.promotions.edit', $data->id) }}" class="btn btn-primary">
-                            <i class="fas fa-edit mr-1"></i>Edit Promotion
+                            <i class="fas fa-edit mr-1"></i>{{ __('messages.owner.products.promotions.edit_promotion') }}
                         </a>
                     </div>
                 </div>

@@ -2,9 +2,9 @@
 
 @section('content')
 <div class="container owner-categories mt-4"> {{-- PAGE SCOPE --}}
-    <h1 class="page-title">Categories</h1>
+    <h1 class="page-title">{{ __('messages.owner.products.categories.categories') }}</h1>
     <a href="{{ route('owner.user-owner.categories.create') }}" class="btn btn-primary mb-3">
-        + Add Category
+        + {{ __('messages.owner.products.categories.add_category') }}
     </a>
 
     @if(session('success'))
@@ -16,10 +16,10 @@
           <thead>
               <tr>
                   <th class="w-[5%]">#</th>
-                  <th class="w-[20%]">Name</th>
-                  <th class="w-[35%]">Description</th>
-                  <th class="w-[20%]">Picture</th>
-                  <th class="w-[10%]">Actions</th>
+                  <th class="w-[20%]">{{ __('messages.owner.products.categories.category_name') }}</th>
+                  <th class="w-[35%]">{{ __('messages.owner.products.categories.description') }}</th>
+                  <th class="w-[20%]">{{ __('messages.owner.products.categories.picture') }}</th>
+                  <th class="w-[10%]">{{ __('messages.owner.products.categories.actions') }}</th>
               </tr>
           </thead>
           <tbody>
@@ -41,19 +41,19 @@
                               </a>
                               @include('pages.owner.products.categories.modal')
                           @else
-                              <span class="text-muted">Belum ada gambar</span>
+                              <span class="text-muted">{{ __('messages.owner.products.categories.no_pictures_yet') }}</span>
                           @endif
                       </td>
 
                       <td class="text-nowrap">
-                          <a href="{{ route('owner.user-owner.categories.edit', $category) }}" class="btn btn-sm btn-outline-choco me-1">Edit</a>
+                          <a href="{{ route('owner.user-owner.categories.edit', $category) }}" class="btn btn-sm btn-outline-choco me-1">{{ __('messages.owner.products.categories.edit') }}</a>
                           <form action="{{ route('owner.user-owner.categories.destroy', $category) }}"
                                 method="POST"
                                 class="d-inline js-delete-form"
                                 data-name="{{ $category->category_name }}">
                             @csrf
                             @method('DELETE')
-                            <button class="btn btn-sm btn-soft-danger">Delete</button>
+                            <button class="btn btn-sm btn-soft-danger">{{ __('messages.owner.products.categories.delete') }}</button>
                           </form>
 
                       </td>
@@ -173,12 +173,12 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!window.Swal) { if (confirm(`Delete ${name}?`)) form.submit(); return; }
 
       Swal.fire({
-        title: 'Hapus kategori?',
-        text: `Anda akan menghapus "${name}". Tindakan ini tidak dapat dibatalkan.`,
+        title: '{{ __('messages.owner.products.categories.delete_confirmation_1') }}',
+        text: `{{ __('messages.owner.products.categories.delete_confirmation_2') }} "${name}". {{ __('messages.owner.products.categories.delete_confirmation_3') }}`,
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: 'Ya, hapus',
-        cancelButtonText: 'Batal',
+        confirmButtonText: '{{ __('messages.owner.products.categories.delete_confirmation_4') }}',
+        cancelButtonText: '{{ __('messages.owner.products.categories.cancel') }}',
         reverseButtons: true,
         confirmButtonColor: '#8c1000', // choco
         cancelButtonColor: '#6b7280'
