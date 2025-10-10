@@ -1,7 +1,7 @@
 @extends('layouts.partner')
 
-@section('title', 'Employee List')
-@section('page_title', 'All Employees')
+@section('title', __('messages.partner.user_management.employees.employee_list'))
+@section('page_title', __('messages.partner.user_management.employees.all_employees'))
 
 @section('content')
 

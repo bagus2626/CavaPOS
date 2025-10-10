@@ -300,10 +300,10 @@
     'Laravel\\Breeze\\BreezeServiceProvider' => 
     array (
     ),
-    'Laravel\\Reverb\\ApplicationManagerServiceProvider' => 
+    'Laravel\\Sail\\SailServiceProvider' => 
     array (
     ),
-    'Laravel\\Sail\\SailServiceProvider' => 
+    'Laravel\\Socialite\\SocialiteServiceProvider' => 
     array (
     ),
     'Laravel\\Tinker\\TinkerServiceProvider' => 

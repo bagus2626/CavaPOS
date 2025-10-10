@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container owner-category-create mt-4"> {{-- PAGE SCOPE --}}
-    <h1 class="page-title mb-3">Add Category</h1>
+    <h1 class="page-title mb-3">{{ __('messages.owner.products.categories.add_category') }}</h1>
 
     <form method="POST"
           action="{{ route('owner.user-owner.categories.store') }}"
@@ -11,19 +11,19 @@
         @csrf
 
         <div class="form-group">
-            <label for="category_name" class="form-label required">Category Name</label>
+            <label for="category_name" class="form-label required">{{ __('messages.owner.products.categories.category_name') }}</label>
             <input type="text" name="category_name" id="category_name" class="form-control" required>
             @error('category_name') <div class="invalid-hint">{{ $message }}</div> @enderror
         </div>
 
         <div class="form-group">
-            <label for="description" class="form-label">Category Description</label>
+            <label for="description" class="form-label">{{ __('messages.owner.products.categories.description') }}</label>
             <textarea name="description" id="description" class="form-control" rows="3"></textarea>
             @error('description') <div class="invalid-hint">{{ $message }}</div> @enderror
         </div>
 
         <div class="form-group">
-            <label for="images" class="form-label">Category Image</label>
+            <label for="images" class="form-label">{{ __('messages.owner.products.categories.picture') }}</label>
             <input type="file" name="images" id="images" class="form-control" accept="image/*" onchange="previewImage(event)">
             @error('images') <div class="invalid-hint">{{ $message }}</div> @enderror
 
@@ -34,10 +34,10 @@
 
         <div class="d-flex gap-2 mt-3">
             <button type="submit" class="btn btn-primary">
-                Save
+                {{ __('messages.owner.products.categories.save') }}
             </button>
             <a href="{{ route('owner.user-owner.categories.index') }}" class="btn btn-outline-choco">
-                Back
+                {{ __('messages.owner.products.categories.back') }}
             </a>
         </div>
     </form>

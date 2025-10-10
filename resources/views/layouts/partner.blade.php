@@ -201,15 +201,59 @@
           </a>
         </li>
         <li class="nav-item d-none d-sm-inline-block">
-          <a href="{{ route('partner.dashboard') }}" class="nav-link">Dashboard</a>
+          <a href="{{ route('partner.dashboard') }}" class="nav-link">{{ __('messages.partner.layout.dashboard') }}</a>
         </li>
         <li class="nav-item d-none d-sm-inline-block">
-          <a href="#" class="nav-link">Support</a>
+          <a href="#" class="nav-link">{{ __('messages.partner.layout.support') }}</a>
         </li>
       </ul>
 
       <!-- Right navbar links -->
       <ul class="navbar-nav ml-auto">
+        <!-- Language Switcher -->
+        <li class="nav-item dropdown">
+            <button
+                class="btn btn-sm d-inline-flex align-items-center rounded-2 lang-btn"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+                type="button"
+                >
+                <!-- Globe image -->
+                <img
+                    src="{{ asset('icons/icon-globe-50.png') }}"
+                    alt="Language"
+                    class="mr-1 lang-globe"
+                    width="16" height="16"
+                    loading="lazy" decoding="async"
+                />
+
+                <span class="font-weight-medium">
+                    {{ app()->getLocale() === 'id' ? 'Bahasa' : 'English' }}
+                </span>
+
+                <!-- Caret -->
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" class="ml-1" style="opacity:.7">
+                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.25 8.27a.75.75 0 01-.02-1.06z" clip-rule="evenodd"/>
+                </svg>
+            </button>
+
+
+            <div class="dropdown-menu dropdown-menu-right rounded-2xl soft-shadow p-0 overflow-hidden">
+                <a href="{{ route('language.set.get', ['locale'=>'id']) }}" class="dropdown-item d-flex align-items-center">
+                    <img src="{{ asset('icons/icon-indonesia-96.png') }}" alt="Indonesia" class="mr-2 lang-flag" width="18" height="18" loading="lazy" decoding="async">
+                    Bahasa
+                    @if(app()->getLocale()==='id') <i class="fas fa-check ml-auto text-choco"></i> @endif
+                </a>
+
+                <a href="{{ route('language.set.get', ['locale'=>'en']) }}" class="dropdown-item d-flex align-items-center">
+                    <img src="{{ asset('icons/icon-english-96.png') }}" alt="English" class="mr-2 lang-flag" width="18" height="18" loading="lazy" decoding="async">
+                    English
+                    @if(app()->getLocale()==='en') <i class="fas fa-check ml-auto text-choco"></i> @endif
+                </a>
+            </div>
+
+        </li>
         <!-- Notifications Dropdown Menu -->
         <li class="nav-item dropdown">
           <a class="nav-link" data-toggle="dropdown" href="#">
@@ -248,29 +292,32 @@
         <!-- User Dropdown Menu -->
         <li class="nav-item dropdown user-menu">
           <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-            <img src="https://adminlte.io/themes/v3/dist/img/user2-160x160.jpg"
-              class="user-image img-circle elevation-2" alt="User Image">
+            <img src="{{ auth()->user()->logo 
+              ? asset('storage/' . auth()->user()->logo) 
+              : asset('icons/icons-person-96.png') }}"
+              class="user-image img-circle elevation-2" alt="User Image"
+              style="width: 35px; height: 35px; object-fit: cover; border-radius: 50%;">
             <span class="d-none d-md-inline">
               @auth {{ auth()->user()->name }} @else User Partner @endauth
             </span>
           </a>
           <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
             <!-- User image -->
-            <li class="user-header bg-gradient-primary">
+            <li class="user-header bg-choco text-white">
               <img src="https://adminlte.io/themes/v3/dist/img/user2-160x160.jpg" class="img-circle elevation-2"
                 alt="User Image">
               <p>
                 @auth {{ auth()->user()->name }} @else User Partner @endauth
-                <small>Member since @auth {{ auth()->user()->created_at->format('M. Y') }} @else User Partner @endauth</small>
+                <small>{{ __('messages.partner.layout.member_since') }} @auth {{ auth()->user()->created_at->format('M. Y') }} @else User Partner @endauth</small>
               </p>
             </li>
             <!-- Menu Footer-->
             <li class="user-footer">
-              <a href="#" class="btn btn-default btn-flat">Profile</a>
+              <a href="#" class="btn btn-default btn-flat">{{ __('messages.partner.layout.profile') }}</a>
               <form method="POST" action="{{ route('logout') }}" class="d-inline">
                 @csrf
                 <button type="submit" class="btn btn-default btn-flat float-right">
-                  Sign out
+                  {{ __('messages.partner.layout.sign_out') }}
                 </button>
               </form>
 
@@ -286,7 +333,7 @@
       <a href="{{ route('partner.dashboard') }}" class="brand-link bg-choco">
         <img src="{{ asset('images/cava-logo2-gradient.png') }}" alt="Cavaa Logo"
                     class="brand-image rounded-full" style="opacity: .8">
-        <span class="brand-text font-weight-light">Partner Panel</span>
+        <span class="brand-text font-weight-light">{{ __('messages.partner.layout.partner_panel') }}</span>
       </a>
 
       <!-- Sidebar -->
@@ -294,8 +341,12 @@
         <!-- Sidebar user panel (optional) -->
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
           <div class="image">
-            <img src="https://adminlte.io/themes/v3/dist/img/user2-160x160.jpg" class="img-circle elevation-2"
-              alt="User Image">
+            <img src="{{ auth()->user()->logo
+              ? asset('storage/' . auth()->user()->logo) 
+              : asset('icons/icons-person-96.png') }}"
+              class="img-circle elevation-2"
+              alt="User Image"
+              style="width: 35px; height: 35px; object-fit: cover; border-radius: 50%;">
           </div>
           <div class="info">
             <a href="#" class="d-block text-choco">
@@ -323,7 +374,7 @@
               <a href="#" class="nav-link {{ Route::is($employeeRoutes) ? 'active' : '' }}">
                 <i class="nav-icon fas fa-users"></i>
                 <p>
-                  User Management
+                  {{ __('messages.partner.layout.user_management') }}
                   <i class="fas fa-angle-left right"></i>
                 </p>
               </a>
@@ -332,7 +383,7 @@
                   <a href="{{ route('partner.user-management.employees.index') }}"
                     class="nav-link {{ Route::is('partner.user-management.employees.*') ? 'active' : '' }}">
                     <i class="far fa-circle nav-icon"></i>
-                    <p>Employees</p>
+                    <p>{{ __('messages.partner.layout.employees') }}</p>
                   </a>
                 </li>
                 {{-- <li class="nav-item">
@@ -359,7 +410,7 @@
               <a href="#" class="nav-link {{ Route::is($storeRoutes) ? 'active' : '' }}">
                 <i class="nav-icon fas fa-shopping-cart"></i>
                 <p>
-                  Store
+                  {{ __('messages.partner.layout.outlet') }}
                   <i class="fas fa-angle-left right"></i>
                 </p>
               </a>
@@ -373,7 +424,7 @@
                     class="nav-link {{ Route::is('partner.store.tables.*') || Route::is('partner.store.seat-layouts.*') ? 'active' : '' }}">
                     <i class="fas fa-table nav-icon"></i>
                     <p>
-                      Table Management
+                      {{ __('messages.partner.layout.table_management') }}
                       <i class="fas fa-angle-left right"></i>
                     </p>
                   </a>
@@ -384,7 +435,7 @@
                       <a href="{{ route('partner.store.tables.index') }}"
                         class="nav-link {{ Route::is('partner.store.tables.*') ? 'active' : '' }}">
                         <i class="far fa-dot-circle nav-icon"></i>
-                        <p>Tables</p>
+                        <p>{{ __('messages.partner.layout.tables') }}</p>
                       </a>
                     </li>
 
@@ -412,7 +463,7 @@
               <a href="#" class="nav-link {{ Route::is($productRoutes) ? 'active' : '' }}">
                 <i class="nav-icon fas fa-shopping-cart"></i>
                 <p>
-                  Products
+                  {{ __('messages.partner.layout.products') }}
                   <i class="fas fa-angle-left right"></i>
                 </p>
               </a>
@@ -421,7 +472,7 @@
                   <a href="{{ route('partner.products.index') }}"
                     class="nav-link {{ Route::is('partner.products.*') ? 'active' : '' }}">
                     <i class="far fa-circle nav-icon"></i>
-                    <p>All Products</p>
+                    <p>{{ __('messages.partner.layout.all_products') }}</p>
                   </a>
                 </li>
                 {{-- <li class="nav-item">
@@ -438,21 +489,21 @@
             <li class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-cog"></i>
-                <p>Settings</p>
+                <p>{{ __('messages.partner.layout.settings') }}</p>
               </a>
             </li>
 
-            <li class="nav-header">REPORTS</li>
+            <li class="nav-header">{{ __('messages.partner.layout.reports') }}</li>
             <li class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-chart-line"></i>
-                <p>Sales Analytics</p>
+                <p>{{ __('messages.partner.layout.sales_report') }}</p>
               </a>
             </li>
             <li class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-chart-pie"></i>
-                <p>Traffic Reports</p>
+                <p>{{ __('messages.partner.layout.traffict_report') }}</p>
               </a>
             </li>
           </ul>

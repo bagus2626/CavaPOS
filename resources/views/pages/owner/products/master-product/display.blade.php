@@ -7,14 +7,14 @@
     <thead>
       <tr>
         <th>#</th>
-        <th>Nama Produk</th>
-        <th class="col-desc">Deskripsi</th>
-        <th>Pilihan</th>
-        <th>Jumlah</th>
-        <th>Harga</th>
-        <th>Gambar</th>
-        <th>Promo</th>
-        <th class="text-nowrap">Actions</th>
+        <th>{{ __('messages.owner.products.master_products.product_name') }}</th>
+        <th class="col-desc">{{ __('messages.owner.products.master_products.description') }}</th>
+        <th>{{ __('messages.owner.products.master_products.options') }}</th>
+        <th>{{ __('messages.owner.products.master_products.quantity') }}</th>
+        <th>{{ __('messages.owner.products.master_products.price') }}</th>
+        <th>{{ __('messages.owner.products.master_products.picture') }}</th>
+        <th>{{ __('messages.owner.products.master_products.promo') }}</th>
+        <th class="text-nowrap">{{ __('messages.owner.products.master_products.actions') }}</th>
       </tr>
     </thead>
     <tbody>
@@ -30,7 +30,7 @@
 
           <td>
             @if($product->parent_options->isEmpty())
-              <em class="text-muted">No packages</em>
+              <em class="text-muted">{{ __('messages.owner.products.master_products.no_options') }}</em>
             @else
               {{ $product->parent_options->pluck('name')->implode(', ') }}
             @endif
@@ -53,7 +53,7 @@
                 @endforeach
               </div>
             @else
-              <span class="text-muted">No Images</span>
+              <span class="text-muted">{{ __('messages.owner.products.master_products.no_images') }}</span>
             @endif
           </td>
 
@@ -69,9 +69,9 @@
 
           <td class="col-actions">
             <div class="btn-group btn-group-sm">
-              <a href="{{ route('owner.user-owner.master-products.show', $product->id) }}" class="btn btn-outline-secondary">Detail</a>
-              <a href="{{ route('owner.user-owner.master-products.edit', $product->id) }}"  class="btn btn-outline-choco">Edit</a>
-              <button onclick="deleteProduct({{ $product->id }})" class="btn btn-soft-danger">Delete</button>
+              <a href="{{ route('owner.user-owner.master-products.show', $product->id) }}" class="btn btn-outline-secondary">{{ __('messages.owner.products.master_products.detail') }}</a>
+              <a href="{{ route('owner.user-owner.master-products.edit', $product->id) }}"  class="btn btn-outline-choco">{{ __('messages.owner.products.master_products.edit') }}</a>
+              <button onclick="deleteProduct({{ $product->id }})" class="btn btn-soft-danger">{{ __('messages.owner.products.master_products.delete') }}</button>
             </div>
           </td>
         </tr>

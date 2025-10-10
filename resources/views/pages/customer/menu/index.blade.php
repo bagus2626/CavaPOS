@@ -3,10 +3,10 @@
 @section('title', 'Menu ' . $partner->name)
 
 @section('content')
-{{-- Hero Background (logo tetap di belakang) --}}
+{{-- Hero Background (background_picture tetap di belakang) --}}
 <div class="fixed top-0 left-0 w-full h-72 sm:h-72 -z-10">
-    @if($partner->logo)
-        <img src="{{ asset('storage/' . $partner->logo) }}"
+    @if($partner->background_picture)
+        <img src="{{ asset('storage/' . $partner->background_picture) }}"
             alt="{{ $partner->name }}"
             class="w-full h-full object-cover">
     @else
