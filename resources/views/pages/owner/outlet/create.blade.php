@@ -1,19 +1,19 @@
 @extends('layouts.owner')
 
-@section('title', 'Create Outlet')
-@section('page_title', 'Create New Outlet')
+@section('title', __('messages.owner.outlet.all_outlets.create_outlet'))
+@section('page_title',  __('messages.owner.outlet.all_outlets.create_new_outlet'))
 
 @section('content')
 <div class="container owner-outlet-create"> {{-- PAGE SCOPE --}}
     <a href="{{ route('owner.user-owner.outlets.index') }}" class="btn btn-outline-choco mb-3">
-        <i class="fas fa-arrow-left me-2"></i>Kembali
+        <i class="fas fa-arrow-left me-2"></i>{{ __('messages.owner.outlet.all_outlets.back') }}
     </a>
 
     <div class="card shadow-sm">
         <div class="card-header bg-white">
             <h5 class="card-title mb-0 d-flex align-items-center gap-2">
                 <i class="fas fa-store text-choco"></i>
-                Create New Outlet
+                {{ __('messages.owner.outlet.all_outlets.create_new_outlet') }}
             </h5>
         </div>
 
@@ -23,7 +23,7 @@
                 <div class="alert alert-danger d-flex align-items-start gap-2">
                     <i class="fas fa-circle-exclamation mt-1"></i>
                     <div>
-                        <strong>Periksa kembali input kamu:</strong>
+                        <strong>{{ __('messages.owner.outlet.all_outlets.re_check_input') }}</strong>
                         <ul class="mb-0 mt-2 ps-3">
                             @foreach ($errors->all() as $error)
                                 <li>{{ $error }}</li>
@@ -49,16 +49,16 @@
                 <div class="form-section">
                     <div class="section-header">
                         <span class="section-icon"><i class="fas fa-id-card"></i></span>
-                        <h6 class="mb-0">Informasi Dasar</h6>
+                        <h6 class="mb-0">{{ __('messages.owner.outlet.all_outlets.base_information') }}</h6>
                     </div>
 
                     <div class="row g-3">
                         {{-- Outlet name --}}
                         <div class="col-md-6">
-                            <label for="name" class="form-label required">Nama Outlet</label>
+                            <label for="name" class="form-label required">{{ __('messages.owner.outlet.all_outlets.outlet_name') }}</label>
                             <input type="text" name="name" id="name"
                                    class="form-control @error('name') is-invalid @enderror"
-                                   value="{{ old('name') }}" placeholder="cth: Cava Coffee - Malioboro" required>
+                                   value="{{ old('name') }}" placeholder="ex: Cava Coffee - Malioboro" required>
                             @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
@@ -66,7 +66,7 @@
                         <input type="hidden" id="usernameCheckUrl" value="{{ route('owner.user-owner.outlets.check-username') }}">
 
                         <div class="col-md-6">
-                            <label for="username" class="form-label required">Username</label>
+                            <label for="username" class="form-label required">{{ __('messages.owner.outlet.all_outlets.username') }}</label>
                             <div class="input-group has-validation">
                                 <span class="input-group-text">@</span>
                                 <input type="text" name="username" id="username"
@@ -76,12 +76,12 @@
                                     placeholder="contoh: budi.setiawan"
                                     autocomplete="username" autocapitalize="none" spellcheck="false">
                                 <button type="button" id="btnCheckUsername" class="btn btn-outline-choco">
-                                    <span class="label">Check</span>
+                                    <span class="label">{{ __('messages.owner.outlet.all_outlets.check') }}</span>
                                     <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                                 </button>
                                 @error('username') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                             </div>
-                            <small class="text-muted">3–30 karakter: huruf/angka, titik (.), underscore (_), dash (-).</small>
+                            <small class="text-muted">{{ __('messages.owner.outlet.all_outlets.muted_text_1') }}</small>
 
                             {{-- status ketersediaan --}}
                             <div id="usernameStatus" class="form-text mt-1"></div>
@@ -105,12 +105,12 @@
                                     autocomplete="off" autocapitalize="none" spellcheck="false"
                                 >
                                 <button type="button" id="btnCheckSlug" class="btn btn-outline-choco">
-                                    <span class="label">Check</span>
+                                    <span class="label">{{ __('messages.owner.outlet.all_outlets.check') }}</span>
                                     <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                                 </button>
                                 @error('slug') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                             </div>
-                            <small class="text-muted">3–30 karakter: huruf/angka, titik (.), underscore (_), dash (-).</small>
+                            <small class="text-muted">{{ __('messages.owner.outlet.all_outlets.muted_text_1') }}</small>
 
                             {{-- status ketersediaan --}}
                             <div id="slugStatus" class="form-text mt-1"></div>
@@ -123,17 +123,17 @@
                 <div class="form-section">
                     <div class="section-header">
                         <span class="section-icon"><i class="fas fa-location-dot"></i></span>
-                        <h6 class="mb-0">Alamat Outlet</h6>
+                        <h6 class="mb-0">{{ __('messages.owner.outlet.all_outlets.outlet_address') }}</h6>
                     </div>
 
                     <div class="row g-3">
                         {{-- Province --}}
                         <div class="col-md-6">
-                            <label for="province" class="form-label">Provinsi</label>
+                            <label for="province" class="form-label">{{ __('messages.owner.outlet.all_outlets.province') }}</label>
                             <div class="position-relative">
                                 <select id="province" name="province"
                                         class="form-select w-100 @error('province') is-invalid @enderror" disabled>
-                                    <option value="">Memuat provinsi…</option>
+                                    <option value="">{{ __('messages.owner.outlet.all_outlets.load_province') }}</option>
                                 </select>
                                 <span class="loading-spinner d-none" id="spnProvince"></span>
                             </div>
@@ -143,11 +143,11 @@
 
                         {{-- City --}}
                         <div class="col-md-6">
-                            <label for="city" class="form-label">Kota/Kabupaten</label>
+                            <label for="city" class="form-label">{{ __('messages.owner.outlet.all_outlets.city') }}</label>
                             <div class="position-relative">
                                 <select id="city" name="city"
                                         class="form-select w-100 @error('city') is-invalid @enderror" disabled>
-                                    <option value="">Pilih provinsi dahulu</option>
+                                    <option value="">{{ __('messages.owner.outlet.all_outlets.select_province_first') }}</option>
                                 </select>
                                 <span class="loading-spinner d-none" id="spnCity"></span>
                             </div>
@@ -157,11 +157,11 @@
 
                         {{-- District --}}
                         <div class="col-md-6">
-                            <label for="district" class="form-label">Kecamatan</label>
+                            <label for="district" class="form-label">{{ __('messages.owner.outlet.all_outlets.district') }}</label>
                             <div class="position-relative">
                                 <select id="district" name="district"
                                         class="form-select w-100 @error('district') is-invalid @enderror" disabled>
-                                    <option value="">Pilih kota dahulu</option>
+                                    <option value="">{{ __('messages.owner.outlet.all_outlets.select_city_first') }}</option>
                                 </select>
                                 <span class="loading-spinner d-none" id="spnDistrict"></span>
                             </div>
@@ -171,11 +171,11 @@
 
                         {{-- Village --}}
                         <div class="col-md-6">
-                            <label for="village" class="form-label">Kelurahan/Desa</label>
+                            <label for="village" class="form-label">{{ __('messages.owner.outlet.all_outlets.village') }}</label>
                             <div class="position-relative">
                                 <select id="village" name="village"
                                         class="form-select w-100 @error('village') is-invalid @enderror" disabled>
-                                    <option value="">Pilih kecamatan dahulu</option>
+                                    <option value="">{{ __('messages.owner.outlet.all_outlets.select_district_first') }}</option>
                                 </select>
                                 <span class="loading-spinner d-none" id="spnVillage"></span>
                             </div>
@@ -185,12 +185,12 @@
 
                         {{-- Address detail --}}
                         <div class="col-12">
-                            <label for="address" class="form-label mt-2">Alamat Detail</label>
+                            <label for="address" class="form-label mt-2">{{ __('messages.owner.outlet.all_outlets.detail_address') }}</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-road"></i></span>
                                 <input type="text" id="address" name="address"
                                        class="form-control @error('address') is-invalid @enderror"
-                                       value="{{ old('address') }}" placeholder="Nama jalan, RT/RW, nomor, patokan">
+                                       value="{{ old('address') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.detail_address_placeholder') }}">
                                 @error('address') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                         </div>
@@ -201,13 +201,13 @@
                 <div class="form-section">
                     <div class="section-header">
                         <span class="section-icon"><i class="fas fa-envelope"></i></span>
-                        <h6 class="mb-0">Kontak & Gambar</h6>
+                        <h6 class="mb-0">{{ __('messages.owner.outlet.all_outlets.contact_picture') }}</h6>
                     </div>
 
                     <div class="row g-3">
                         {{-- Email --}}
                         <div class="col-md-6">
-                            <label for="email" class="form-label required">Email Outlet</label>
+                            <label for="email" class="form-label required">{{ __('messages.owner.outlet.all_outlets.email_outlet') }}</label>
                             <input type="email" name="email" id="email"
                                    class="form-control @error('email') is-invalid @enderror"
                                    value="{{ old('email', $employee->email ?? '') }}"
@@ -216,12 +216,12 @@
                             @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
-                        {{-- Image --}}
+                        {{-- Background picture --}}
                         <div class="col-md-6">
-                            <label for="image" class="form-label">Unggah Gambar</label>
+                            <label for="image" class="form-label">{{ __('messages.owner.outlet.all_outlets.upload_picture') }}</label>
                             <input type="file" name="image" id="image"
                                    class="form-control @error('image') is-invalid @enderror" accept="image/*">
-                            <small class="text-muted">JPG/PNG/WEBP, maks 2 MB.</small>
+                            <small class="text-muted">JPG/PNG/WEBP, max 2 MB.</small>
                             @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
 
                             {{-- Preview --}}
@@ -238,6 +238,28 @@
                                 <small id="imageInfo" class="text-muted d-block mt-1"></small>
                             </div>
                         </div>
+                        {{-- Logo --}}
+                        <div class="col-md-6">
+                            <label for="logo" class="form-label">{{ __('messages.owner.outlet.all_outlets.upload_logo') }}</label>
+                            <input type="file" name="logo" id="logo"
+                                   class="form-control @error('logo') is-invalid @enderror" accept="image/*">
+                            <small class="text-muted">JPG/PNG/WEBP, max 2 MB.</small>
+                            @error('logo') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
+                            {{-- Preview --}}
+                            <div id="imagePreviewWrapper2" class="mt-2 d-none">
+                                <div class="position-relative preview-box">
+                                    <img id="imagePreview2" src="" alt="Preview"
+                                         class="img-thumbnail rounded w-100 h-auto">
+                                    <button type="button" id="clearImageBtn2"
+                                            class="btn btn-sm btn-danger position-absolute top-0 end-0"
+                                            aria-label="Hapus gambar">
+                                        &times;
+                                    </button>
+                                </div>
+                                <small id="imageInfo2" class="text-muted d-block mt-1"></small>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -245,34 +267,34 @@
                 <div class="form-section">
                     <div class="section-header">
                         <span class="section-icon"><i class="fas fa-lock"></i></span>
-                        <h6 class="mb-0">Keamanan</h6>
+                        <h6 class="mb-0">{{ __('messages.owner.outlet.all_outlets.security') }}</h6>
                     </div>
 
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label for="password" class="form-label required">Password</label>
+                            <label for="password" class="form-label required">{{ __('messages.owner.outlet.all_outlets.password') }}</label>
                             <div class="input-group has-validation">
                                 <input type="password" name="password" id="password"
                                        class="form-control @error('password') is-invalid @enderror"
                                        minlength="8" required autocomplete="new-password"
-                                       placeholder="Min. 8 karakter">
+                                       placeholder="{{ __('messages.owner.outlet.all_outlets.min_character') }}">
                                 <button class="btn btn-choco" type="button" id="togglePassword" tabindex="-1">
-                                    Show
+                                    {{ __('messages.owner.outlet.all_outlets.show') }}
                                 </button>
                                 @error('password') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                             </div>
-                            <small class="text-muted">Disarankan kombinasi huruf, angka, dan simbol.</small>
+                            <small class="text-muted">{{ __('messages.owner.outlet.all_outlets.muted_text_5') }}</small>
                         </div>
 
                         <div class="col-md-6">
-                            <label for="password_confirmation" class="form-label required">Konfirmasi Password</label>
+                            <label for="password_confirmation" class="form-label required">{{ __('messages.owner.outlet.all_outlets.password_confirmation') }}</label>
                             <div class="input-group has-validation">
                                 <input type="password" name="password_confirmation" id="password_confirmation"
                                        class="form-control @error('password_confirmation') is-invalid @enderror"
                                        minlength="8" required autocomplete="new-password"
-                                       placeholder="Ulangi password">
+                                       placeholder="{{ __('messages.owner.outlet.all_outlets.repeat_password') }}">
                                 <button class="btn btn-choco" type="button" id="togglePasswordConfirm" tabindex="-1">
-                                    Show
+                                    {{ __('messages.owner.outlet.all_outlets.show') }}
                                 </button>
                                 @error('password_confirmation') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                             </div>
@@ -284,10 +306,10 @@
                 <div class="form-actions sticky-actions">
                     <div class="d-flex justify-content-end gap-2">
                         <a href="{{ route('owner.user-owner.outlets.index') }}" class="btn btn-outline-choco">
-                            <i class="fas fa-xmark me-2"></i>Cancel
+                            <i class="fas fa-xmark me-2"></i>{{ __('messages.owner.outlet.all_outlets.cancel') }}
                         </a>
                         <button type="submit" class="btn btn-choco">
-                            <i class="fas fa-save me-2"></i>Save
+                            <i class="fas fa-save me-2"></i>{{ __('messages.owner.outlet.all_outlets.save') }}
                         </button>
                     </div>
                 </div>
@@ -386,7 +408,15 @@
 .owner-outlet-create #imagePreviewWrapper .img-thumbnail{
   border:0; border-radius:var(--radius); box-shadow:var(--shadow);
 }
+.owner-outlet-create #imagePreviewWrapper2 .img-thumbnail{
+  border:0; border-radius:var(--radius); box-shadow:var(--shadow);
+}
 .owner-outlet-create #clearImageBtn{
+  transform: translate(35%,-35%);
+  border-radius:999px; width:28px; height:28px; padding:0; line-height:26px;
+}
+
+.owner-outlet-create #clearImageBtn2{
   transform: translate(35%,-35%);
   border-radius:999px; width:28px; height:28px; padding:0; line-height:26px;
 }
@@ -411,10 +441,15 @@
 document.addEventListener('DOMContentLoaded', function () {
     // ===== Image preview (tetap) =====
     const input    = document.getElementById('image');
+    const input2    = document.getElementById('logo');
     const wrapper  = document.getElementById('imagePreviewWrapper');
+    const wrapper2  = document.getElementById('imagePreviewWrapper2');
     const preview  = document.getElementById('imagePreview');
+    const preview2  = document.getElementById('imagePreview2');
     const info     = document.getElementById('imageInfo');
+    const info2     = document.getElementById('imageInfo2');
     const clearBtn = document.getElementById('clearImageBtn');
+    const clearBtn2 = document.getElementById('clearImageBtn2');
 
     const MAX_SIZE = 2 * 1024 * 1024; // 2 MB
     const ALLOWED  = ['image/jpeg', 'image/png', 'image/webp'];
@@ -430,16 +465,21 @@ document.addEventListener('DOMContentLoaded', function () {
         info.textContent = '';
         wrapper.classList.add('d-none');
     }
+    function resetPreview2() {
+        preview2.src = '';
+        info2.textContent = '';
+        wrapper2.classList.add('d-none');
+    }
     if (input) {
         input.addEventListener('change', function () {
             const file = input.files && input.files[0];
             if (!file) { resetPreview(); return; }
             if (!ALLOWED.includes(file.type)) {
-                alert('Tipe file tidak didukung. Gunakan JPG, PNG, atau WEBP.');
+                alert('File not supported. Use JPG, PNG, atau WEBP.');
                 input.value = ''; resetPreview(); return;
             }
             if (file.size > MAX_SIZE) {
-                alert('Ukuran file melebihi 2 MB.');
+                alert('File size more than 2 MB.');
                 input.value = ''; resetPreview(); return;
             }
             const url = URL.createObjectURL(file);
@@ -448,7 +488,26 @@ document.addEventListener('DOMContentLoaded', function () {
             wrapper.classList.remove('d-none');
         });
     }
+    if (input2) {
+        input2.addEventListener('change', function () {
+            const file = input2.files && input2.files[0];
+            if (!file) { resetPreview2(); return; }
+            if (!ALLOWED.includes(file.type)) {
+                alert('File not supported. Use JPG, PNG, atau WEBP.');
+                input2.value = ''; resetPreview2(); return;
+            }
+            if (file.size > MAX_SIZE) {
+                alert('File size more than 2 MB.');
+                input2.value = ''; resetPreview2(); return;
+            }
+            const url = URL.createObjectURL(file);
+            preview2.src = url;
+            info2.textContent = `${file.name} • ${bytesToSize(file.size)}`;
+            wrapper2.classList.remove('d-none');
+        });
+    }
     if (clearBtn) { clearBtn.addEventListener('click', function () { if (input) input.value = ''; resetPreview(); }); }
+    if (clearBtn2) { clearBtn2.addEventListener('click', function () { if (input2) input2.value = ''; resetPreview2(); }); }
 
     // ===== Password show/hide (tetap) =====
     function bindToggle(btnId, inputId) {
@@ -470,8 +529,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const pwc  = document.getElementById('password_confirmation');
     if (form && pw && pwc) {
         form.addEventListener('submit', function (e) {
-            if (pw.value.length < 8) { e.preventDefault(); alert('Password minimal 8 karakter.'); pw.focus(); return; }
-            if (pw.value !== pwc.value) { e.preventDefault(); alert('Konfirmasi password tidak sama.'); pwc.focus(); }
+            if (pw.value.length < 8) { e.preventDefault(); alert('Password minimal 8 characters.'); pw.focus(); return; }
+            if (pw.value !== pwc.value) { e.preventDefault(); alert('Password confirmation is not the same'); pwc.focus(); }
         });
     }
 
@@ -509,80 +568,80 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // Load provinces
-    setLoading(provinceSelect, spnProvince, true, 'Memuat provinsi…');
+    setLoading(provinceSelect, spnProvince, true, '{{ __('messages.owner.outlet.all_outlets.load_province') }}');
     fetch(`${API_BASE}/provinces.json`)
         .then(r => r.json())
         .then(list => {
-            resetSelect(provinceSelect, '-- Pilih Provinsi --');
+            resetSelect(provinceSelect, '{{ __('messages.owner.outlet.all_outlets.select_province') }}');
             list.forEach(item => {
                 const opt = document.createElement("option");
                 opt.value = item.id; opt.textContent = item.name;
                 provinceSelect.appendChild(opt);
             });
         })
-        .catch(() => { resetSelect(provinceSelect, 'Gagal memuat provinsi'); alert("Gagal memuat daftar provinsi. Coba reload."); })
+        .catch(() => { resetSelect(provinceSelect, 'Fetch province failed'); alert("Fetch province failed. Try to reload."); })
         .finally(() => setLoading(provinceSelect, spnProvince, false));
 
     // Province -> Cities
     provinceSelect.addEventListener("change", function () {
         fillAndStoreName(provinceSelect, provinceNameInput);
-        resetSelect(citySelect, '-- Pilih Kota --'); resetSelect(districtSelect, '-- Pilih Kecamatan --'); resetSelect(villageSelect, '-- Pilih Kelurahan --');
+        resetSelect(citySelect, '{{ __('messages.owner.outlet.all_outlets.select_city') }}'); resetSelect(districtSelect, '{{ __('messages.owner.outlet.all_outlets.select_district') }}'); resetSelect(villageSelect, '{{ __('messages.owner.outlet.all_outlets.select_village') }}');
         if (!this.value) { citySelect.disabled = true; districtSelect.disabled = true; villageSelect.disabled = true; return; }
 
-        setLoading(citySelect, spnCity, true, 'Memuat kota…');
+        setLoading(citySelect, spnCity, true, '{{ __('messages.owner.outlet.all_outlets.load_city') }}');
         fetch(`${API_BASE}/regencies/${this.value}.json`)
             .then(r => r.json())
             .then(list => {
-                resetSelect(citySelect, '-- Pilih Kota --');
+                resetSelect(citySelect, '{{ __('messages.owner.outlet.all_outlets.select_city') }}');
                 list.forEach(item => {
                     const opt = document.createElement("option");
                     opt.value = item.id; opt.textContent = item.name;
                     citySelect.appendChild(opt);
                 });
             })
-            .catch(() => alert("Gagal memuat daftar kota."))
+            .catch(() => alert("Fetch city failed"))
             .finally(() => setLoading(citySelect, spnCity, false));
     });
 
     // City -> Districts
     citySelect.addEventListener("change", function () {
         fillAndStoreName(citySelect, cityNameInput);
-        resetSelect(districtSelect, '-- Pilih Kecamatan --'); resetSelect(villageSelect, '-- Pilih Kelurahan --');
+        resetSelect(districtSelect, '{{ __('messages.owner.outlet.all_outlets.select_district') }}'); resetSelect(villageSelect, '{{ __('messages.owner.outlet.all_outlets.select_village') }}');
         if (!this.value) { districtSelect.disabled = true; villageSelect.disabled = true; return; }
 
-        setLoading(districtSelect, spnDistrict, true, 'Memuat kecamatan…');
+        setLoading(districtSelect, spnDistrict, true, '{{ __('messages.owner.outlet.all_outlets.load_district') }}');
         fetch(`${API_BASE}/districts/${this.value}.json`)
             .then(r => r.json())
             .then(list => {
-                resetSelect(districtSelect, '-- Pilih Kecamatan --');
+                resetSelect(districtSelect, '-{{ __('messages.owner.outlet.all_outlets.select_district') }}');
                 list.forEach(item => {
                     const opt = document.createElement("option");
                     opt.value = item.id; opt.textContent = item.name;
                     districtSelect.appendChild(opt);
                 });
             })
-            .catch(() => alert("Gagal memuat daftar kecamatan."))
+            .catch(() => alert("Fetch district failed."))
             .finally(() => setLoading(districtSelect, spnDistrict, false));
     });
 
     // District -> Villages
     districtSelect.addEventListener("change", function () {
         fillAndStoreName(districtSelect, districtNameInput);
-        resetSelect(villageSelect, '-- Pilih Kelurahan --');
+        resetSelect(villageSelect, '{{ __('messages.owner.outlet.all_outlets.select_village') }}');
         if (!this.value) { villageSelect.disabled = true; return; }
 
-        setLoading(villageSelect, spnVillage, true, 'Memuat kelurahan…');
+        setLoading(villageSelect, spnVillage, true, '{{ __('messages.owner.outlet.all_outlets.load_village') }}');
         fetch(`${API_BASE}/villages/${this.value}.json`)
             .then(r => r.json())
             .then(list => {
-                resetSelect(villageSelect, '-- Pilih Kelurahan --');
+                resetSelect(villageSelect, '{{ __('messages.owner.outlet.all_outlets.select_village') }}');
                 list.forEach(item => {
                     const opt = document.createElement("option");
                     opt.value = item.id; opt.textContent = item.name;
                     villageSelect.appendChild(opt);
                 });
             })
-            .catch(() => alert("Gagal memuat daftar kelurahan."))
+            .catch(() => alert("Fetch village failed"))
             .finally(() => setLoading(villageSelect, spnVillage, false));
     });
 
@@ -620,11 +679,11 @@ document.addEventListener('DOMContentLoaded', function () {
         function showStatus(ok, msg) {
             statusEl.className = 'form-text mt-1';
             if (ok) {
-                statusEl.innerHTML = `<span class="badge bg-success">Available</span> <span class="text-success ms-1">${msg}</span>`;
+                statusEl.innerHTML = `<span class="badge bg-success">{{ __('messages.owner.outlet.all_outlets.available') }}</span> <span class="text-success ms-1">${msg}</span>`;
                 inputUsername.classList.remove('is-invalid');
                 inputUsername.classList.add('is-valid');
             } else {
-                statusEl.innerHTML = `<span class="badge bg-danger">Taken</span> <span class="text-danger ms-1">${msg}</span>`;
+                statusEl.innerHTML = `<span class="badge bg-danger">{{ __('messages.owner.outlet.all_outlets.taken') }}</span> <span class="text-danger ms-1">${msg}</span>`;
                 inputUsername.classList.remove('is-valid');
                 inputUsername.classList.add('is-invalid');
             }
@@ -642,7 +701,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Validasi ringan di client – harus sesuai pattern HTML
             if (val.length < 3 || val.length > 30 || !/^[A-Za-z0-9._\-]+$/.test(val)) {
-                showStatus(false, 'Format tidak valid.');
+                showStatus(false, 'Format not valid.');
                 return;
             }
 
@@ -661,20 +720,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (res.status === 422) {
                     // salah format / validasi gagal
-                    showStatus(false, 'Format tidak valid.');
+                    showStatus(false, 'Format not valid.');
                     return;
                 }
 
                 const data = await res.json();
                 if (typeof data.available !== 'undefined') {
                     data.available
-                        ? showStatus(true, 'Username tersedia 🎉')
-                        : showStatus(false, 'Username sudah dipakai.');
+                        ? showStatus(true, '{{ __('messages.owner.outlet.all_outlets.username_available') }} 🎉')
+                        : showStatus(false, '{{ __('messages.owner.outlet.all_outlets.suername_used') }}');
                 } else {
-                    showNeutral('Tidak bisa memeriksa saat ini.');
+                    showNeutral("Can't check at this time.");
                 }
             } catch (e) {
-                showNeutral('Terjadi kesalahan jaringan.');
+                showNeutral('A network error occurred.');
             } finally {
                 setUsernameLoading(false);
             }
@@ -720,11 +779,11 @@ document.addEventListener('DOMContentLoaded', function () {
         function showStatus(ok, msg) {
             statusEl.className = 'form-text mt-1';
             if (ok) {
-                statusEl.innerHTML = `<span class="badge bg-success">Available</span> <span class="text-success ms-1">${msg}</span>`;
+                statusEl.innerHTML = `<span class="badge bg-success">{{ __('messages.owner.outlet.all_outlets.available') }}</span> <span class="text-success ms-1">${msg}</span>`;
                 inputSlug.classList.remove('is-invalid');
                 inputSlug.classList.add('is-valid');
             } else {
-                statusEl.innerHTML = `<span class="badge bg-danger">Taken</span> <span class="text-danger ms-1">${msg}</span>`;
+                statusEl.innerHTML = `<span class="badge bg-danger">{{ __('messages.owner.outlet.all_outlets.taken') }}</span> <span class="text-danger ms-1">${msg}</span>`;
                 inputSlug.classList.remove('is-valid');
                 inputSlug.classList.add('is-invalid');
             }
@@ -759,7 +818,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Validasi ringan sesuai pattern HTML
             if (val.length < 3 || val.length > 30 || !/^[a-z0-9._\-]+$/.test(val)) {
-                showStatus(false, 'Format tidak valid.');
+                showStatus(false, 'Format not valid.');
                 return;
             }
 
@@ -777,20 +836,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
 
                 if (res.status === 422) {
-                    showStatus(false, 'Format tidak valid.');
+                    showStatus(false, 'Format not valid.');
                     return;
                 }
 
                 const data = await res.json();
                 if (typeof data.available !== 'undefined') {
                     data.available
-                        ? showStatus(true, 'Slug tersedia 🎉')
-                        : showStatus(false, 'Slug sudah dipakai.');
+                        ? showStatus(true, '{{ __('messages.owner.outlet.all_outlets.slug_availabel') }} 🎉')
+                        : showStatus(false, '{{ __('messages.owner.outlet.all_outlets.slug_used') }}');
                 } else {
-                    showNeutral('Tidak bisa memeriksa saat ini.');
+                    showNeutral("Can't check at this time.");
                 }
             } catch (e) {
-                showNeutral('Terjadi kesalahan jaringan.');
+                showNeutral('A network error occurred.');
             } finally {
                 setLoading(false);
             }

@@ -1,54 +1,18 @@
 @extends('layouts.partner')
 
-@section('title', 'Product List')
-@section('page_title', 'All Products')
+@section('title', __('messages.partner.outlet.table_management.tables.table_list'))
+@section('page_title', __('messages.partner.outlet.table_management.tables.table_list'))
 
 @section('content')
-<script>
-function deleteProduct(productId) {
-    Swal.fire({
-        title: 'Apakah Anda yakin?',
-        text: "Anda tidak dapat mengembalikan data tersebut!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Ya, Hapus!',
-        cancelButtonText: 'Batalkan'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `/partner/products/${productId}`;
-            form.style.display = 'none';
-
-            const csrf = document.createElement('input');
-            csrf.type = 'hidden';
-            csrf.name = '_token';
-            csrf.value = '{{ csrf_token() }}';
-            form.appendChild(csrf);
-
-            const method = document.createElement('input');
-            method.type = 'hidden';
-            method.name = '_method';
-            method.value = 'DELETE';
-            form.appendChild(method);
-
-            document.body.appendChild(form);
-            form.submit();
-        }
-    });
-}
-</script>
 
 <section class="content">
   <div class="container-fluid tables-index">
     <a href="{{ route('partner.store.tables.create') }}" class="btn btn-choco mb-3">
-      <i class="fas fa-plus mr-1"></i> Add Table
+      <i class="fas fa-plus mr-1"></i> {{ __('messages.partner.outlet.table_management.tables.add_table') }}
     </a>
 
     <div class="mb-3">
-      <button class="btn btn-outline-choco btn-sm filter-btn rounded-pill active" data-category="all">All</button>
+      <button class="btn btn-outline-choco btn-sm filter-btn rounded-pill active" data-category="all">{{ __('messages.partner.outlet.table_management.tables.all') }}</button>
       @foreach($table_classes as $table_class)
         <button class="btn btn-outline-choco btn-sm filter-btn rounded-pill" data-category="{{ $table_class }}">
           {{ $table_class }}

@@ -202,15 +202,60 @@
                     </a>
                 </li>
                 <li class="nav-item d-none d-sm-inline-block">
-                    <a href="{{ route('owner.user-owner.dashboard') }}" class="nav-link text-white">Dashboard</a>
+                    <a href="{{ route('owner.user-owner.dashboard') }}" class="nav-link text-white">{{ __('messages.owner.layout.dashboard') }}</a>
                 </li>
                 <li class="nav-item d-none d-sm-inline-block">
-                    <a href="#" class="nav-link text-white">Support</a>
+                    <a href="#" class="nav-link text-white">{{ __('messages.owner.layout.support') }}</a>
                 </li>
             </ul>
 
             <!-- Right navbar links -->
             <ul class="navbar-nav ml-auto">
+                <!-- Language Switcher -->
+                <li class="nav-item dropdown">
+                    <button
+                        class="btn btn-sm d-inline-flex align-items-center rounded-2 lang-btn"
+                        data-toggle="dropdown"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                        type="button"
+                        >
+                        <!-- Globe image -->
+                        <img
+                            src="{{ asset('icons/icon-globe-50.png') }}"
+                            alt="Language"
+                            class="mr-1 lang-globe"
+                            width="16" height="16"
+                            loading="lazy" decoding="async"
+                        />
+
+                        <span class="font-weight-medium">
+                            {{ app()->getLocale() === 'id' ? 'Bahasa' : 'English' }}
+                        </span>
+
+                        <!-- Caret -->
+                        <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" class="ml-1" style="opacity:.7">
+                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.25 8.27a.75.75 0 01-.02-1.06z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
+
+
+                    <div class="dropdown-menu dropdown-menu-right rounded-2xl soft-shadow p-0 overflow-hidden">
+                        <a href="{{ route('language.set.get', ['locale'=>'id']) }}" class="dropdown-item d-flex align-items-center">
+                            <img src="{{ asset('icons/icon-indonesia-96.png') }}" alt="Indonesia" class="mr-2 lang-flag" width="18" height="18" loading="lazy" decoding="async">
+                            Bahasa
+                            @if(app()->getLocale()==='id') <i class="fas fa-check ml-auto text-choco"></i> @endif
+                        </a>
+
+                        <a href="{{ route('language.set.get', ['locale'=>'en']) }}" class="dropdown-item d-flex align-items-center">
+                            <img src="{{ asset('icons/icon-english-96.png') }}" alt="English" class="mr-2 lang-flag" width="18" height="18" loading="lazy" decoding="async">
+                            English
+                            @if(app()->getLocale()==='en') <i class="fas fa-check ml-auto text-choco"></i> @endif
+                        </a>
+                    </div>
+
+                </li>
+
                 <!-- Notifications Dropdown Menu -->
                 <li class="nav-item dropdown">
                     <a class="nav-link" data-toggle="dropdown" href="#">
@@ -257,21 +302,21 @@
                     </a>
                     <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right rounded-2xl soft-shadow">
                         <!-- User image -->
-                        <li class="user-header bg-gradient-primary">
+                        <li class="user-header bg-choco text-white">
                             <img src="https://adminlte.io/themes/v3/dist/img/user2-160x160.jpg"
                                 class="img-circle elevation-2" alt="User Image">
                             <p>
                                 @auth {{ auth()->user()->name }} @else User Owner @endauth
-                                <small>Member since @auth {{ auth()->user()->created_at->format('M. Y') }} @else User Owner @endauth</small>
+                                <small>{{ __('messages.owner.layout.member_since') }} @auth {{ auth()->user()->created_at->format('M. Y') }} @else User Owner @endauth</small>
                             </p>
                         </li>
                         <!-- Menu Footer-->
                         <li class="user-footer">
-                            <a href="#" class="btn btn-default btn-flat">Profile</a>
+                            <a href="#" class="btn btn-default btn-flat">{{ __('messages.owner.layout.profile') }}</a>
                             <form method="POST" action="{{ route('owner.logout') }}" class="d-inline">
                                 @csrf
                                 <button type="submit" class="btn btn-default btn-flat float-right">
-                                    Sign out
+                                    {{ __('messages.owner.layout.sign_out') }}
                                 </button>
                             </form>
 
@@ -287,7 +332,7 @@
             <a href="{{ route('owner.user-owner.dashboard') }}" class="brand-link bg-choco">
                 <img src="{{ asset('images/cava-logo2-gradient.png') }}" alt="Cavaa Logo"
                     class="brand-image rounded-full" style="opacity: .8">
-                <span class="brand-text font-weight-light">Owner Panel</span>
+                <span class="brand-text font-weight-light">{{ __('messages.owner.layout.owner_panel') }}</span>
             </a>
 
             <!-- Sidebar -->
@@ -313,7 +358,7 @@
                             <a href="{{ route('owner.user-owner.dashboard') }}"
                                 class="nav-link @if(Route::is('owner.user-owner.dashboard')) active @endif">
                                 <i class="nav-icon fas fa-tachometer-alt"></i>
-                                <p>Dashboard</p>
+                                <p>{{ __('messages.owner.layout.dashboard') }}</p>
                             </a>
                         </li>
 
@@ -325,7 +370,7 @@
                             <a href="#" class="nav-link {{ Route::is($employeeRoutes) ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-users"></i>
                                 <p>
-                                    User Management
+                                    {{ __('messages.owner.layout.user_management') }}
                                     <i class="fas fa-angle-left right"></i>
                                 </p>
                             </a>
@@ -334,7 +379,7 @@
                                     <a href="{{ route('owner.user-owner.employees.index') }}"
                                         class="nav-link {{ Route::is('owner.user-owner.employees.*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>Employees</p>
+                                        <p>{{ __('messages.owner.layout.employees') }}</p>
                                     </a>
                                 </li>
                                 {{-- <li class="nav-item">
@@ -410,7 +455,7 @@
                             <a href="#" class="nav-link {{ Route::is($outletRoutes) ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-store"></i>
                                 <p>
-                                    Outlets
+                                    {{ __('messages.owner.layout.outlets') }}
                                     <i class="fas fa-angle-left right"></i>
                                 </p>
                             </a>
@@ -419,7 +464,7 @@
                                     <a href="{{ route('owner.user-owner.outlets.index') }}"
                                         class="nav-link {{ Route::is('owner.user-owner.outlets.*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>All Outlets</p>
+                                        <p>{{ __('messages.owner.layout.all_outlets') }}</p>
                                     </a>
                                 </li>
 
@@ -440,7 +485,7 @@
                             <a href="#" class="nav-link {{ Route::is($allProductRoutes) ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-shopping-cart"></i>
                                 <p>
-                                    Products
+                                    {{ __('messages.owner.layout.products') }}
                                     <i class="fas fa-angle-left right"></i>
                                 </p>
                             </a>
@@ -449,14 +494,14 @@
                                     <a href="{{ route('owner.user-owner.master-products.index') }}"
                                         class="nav-link {{ Route::is('owner.user-owner.master-products.*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>Master Products</p>
+                                        <p>{{ __('messages.owner.layout.master_products') }}</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a href="{{ route('owner.user-owner.outlet-products.index') }}"
                                         class="nav-link {{ Route::is('owner.user-owner.outlet-products.*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>Outlet Products</p>
+                                        <p>{{ __('messages.owner.layout.outlet_products') }}</p>
                                     </a>
                                 </li>
                                 {{-- <li class="nav-item">
@@ -470,14 +515,14 @@
                                     <a href="{{ route('owner.user-owner.categories.index') }}"
                                         class="nav-link {{ Route::is('owner.user-owner.categories.*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>Categories</p>
+                                        <p>{{ __('messages.owner.layout.categories') }}</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a href="{{ route('owner.user-owner.promotions.index') }}"
                                         class="nav-link {{ Route::is('owner.user-owner.promotions.*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>Promotions</p>
+                                        <p>{{ __('messages.owner.layout.promotions') }}</p>
                                     </a>
                                 </li>
 
@@ -488,22 +533,22 @@
                         <li class="nav-item">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon fas fa-cog"></i>
-                                <p>Settings</p>
+                                <p>{{ __('messages.owner.layout.settings') }}</p>
                             </a>
                         </li>
 
-                        <li class="nav-header">REPORTS</li>
+                        <li class="nav-header">{{ __('messages.owner.layout.reports') }}</li>
                         <li class="nav-item">
                             <a href="{{ route('owner.user-owner.report.sales.index') }}"
                                 class="nav-link {{ Route::is('owner.user-owner.report.sales.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-chart-line"></i>
-                                <p>Sales Report</p>
+                                <p>{{ __('messages.owner.layout.sales_report') }}</p>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon fas fa-chart-pie"></i>
-                                <p>Traffic Reports</p>
+                                <p>{{ __('messages.owner.layout.traffict_report') }}</p>
                             </a>
                         </li>
                     </ul>

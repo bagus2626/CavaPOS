@@ -1,7 +1,7 @@
 @extends('layouts.partner')
 
-@section('title', 'Product List')
-@section('page_title', 'All Products')
+@section('title', __('messages.partner.product.all_product.product_list'))
+@section('page_title', __('messages.partner.product.all_product.all_products'))
 
 @section('content')
 <section class="content product-index">
@@ -12,7 +12,7 @@
     </a> --}}
 
     <div class="filter-group mb-3">
-      <button class="btn btn-outline-choco btn-sm filter-btn rounded-pill active" data-category="all">All</button>
+      <button class="btn btn-outline-choco btn-sm filter-btn rounded-pill active" data-category="all">{{ __('messages.partner.product.all_product.all') }}</button>
       @foreach($categories as $category)
         <button
           class="btn btn-outline-choco btn-sm filter-btn rounded-pill"
@@ -116,12 +116,12 @@
     function deleteProduct(productId) {
       const swal = window.$swal || window.Swal;
       swal.fire({
-        title: 'Apakah Anda yakin?',
-        text: 'Anda tidak dapat mengembalikan data tersebut!',
+        title: '{{ __('messages.partner.product.all_product.delete_confirmation_1') }}',
+        text: '{{ __('messages.partner.product.all_product.delete_confirmation_2') }}',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: 'Ya, Hapus!',
-        cancelButtonText: 'Batalkan'
+        confirmButtonText: '{{ __('messages.partner.product.all_product.delete_confirmation_3') }}',
+        cancelButtonText: '{{ __('messages.partner.product.all_product.delete_confirmation_4') }}'
       }).then((result) => {
         if (!result.isConfirmed) return;
 
