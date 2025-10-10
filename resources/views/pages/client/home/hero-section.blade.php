@@ -48,4 +48,4 @@
                  alt="CAVAA Dashboard Interface" 
                  class="w-[520px] h-auto object-contain">
         </div>
-    </section>
+    </section> 
