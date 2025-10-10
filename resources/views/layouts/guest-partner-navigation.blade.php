@@ -1,4 +1,4 @@
-<nav
+{{-- <nav
     x-data="{ open: false, scrolled: false }"
     x-init="window.addEventListener('scroll', () => {
         scrolled = window.scrollY > 10;
@@ -48,7 +48,7 @@
                     </x-nav-link>
 
                     {{-- harga --}}
-                    @php
+                    {{-- @php
                         $isPriceActive = request()->routeIs('price') || request()->routeIs('price.show');
                         $classes = $isPriceActive
                             ? 'inline-flex items-center px-1 pt-1 border-b-2 border-gray-800 dark:border-gray-200 text-sm font-medium leading-5 text-gray-900 focus:outline-none focus:border-indigo-700 transition duration-150 ease-in-out dark:text-gray-100'
@@ -64,10 +64,10 @@
                             <svg class="ml-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.939l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0l-4.24-4.25a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                             </svg>
-                        </a>
+                        </a> 
 
                         <!-- Dropdown -->
-                        <div id="priceDropdown" class="absolute z-50 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 dark:bg-gray-800" style="display: none; max-height: 300px; overflow-y: auto;">
+                        {{-- <div id="priceDropdown" class="absolute z-50 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 dark:bg-gray-800" style="display: none; max-height: 300px; overflow-y: auto;">
                             @if ($products->isEmpty())
                                 <div class="px-4 py-2 text-sm text-gray-500 dark:text-gray-300">Tidak ada produk</div>
                             @else
@@ -83,11 +83,11 @@
                             @endif
                         </div>
 
-                    </li>
+                    </li> --}}
                     {{-- harga --}}
 
 
-                    <x-nav-link :href="route('contact')" :active="request()->routeIs('contact')">
+                    {{-- <x-nav-link :href="route('contact')" :active="request()->routeIs('contact')">
                         {{ __('Contact') }}
                     </x-nav-link>
                 </div>
@@ -106,16 +106,16 @@
                         alt="Light Mode"
                         class="absolute left-1 top-1 w-4 h-4 transition-opacity duration-300 ease-in-out"
                         :class="$store.darkMode.on ? 'opacity-0' : 'opacity-100'"
-                    >
+                    > --}}
 
                     <!-- Bulan -->
-                    <img
+                    {{-- <img
                         src="/icons/icon-darkmode.png"
                         alt="Dark Mode"
                         class="absolute right-1 top-1 w-4 h-4 transition-opacity duration-300 ease-in-out"
                         :class="$store.darkMode.on ? 'opacity-100' : 'opacity-0'"
                     >
-                </button>
+                </button> --}}
                 {{-- Language switcher (desktop) --}}
                 {{-- <div x-data="langSwitcher()" class="relative mr-3">
                     <button
@@ -168,7 +168,7 @@
                         @csrf
                         <input type="hidden" name="locale" x-model="value">
                     </form>
-                </div> --}}
+                </div> 
 
 
 
@@ -202,17 +202,17 @@
                     </x-dropdown>
                 @endauth
 
-                @guest
+                {{-- @guest
                     <div class="space-x-4">
                         <a href="{{ route('login') }}" class="ml-4 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                             Login
                         </a>
                     </div>
                 @endguest
-            </div>
+            </div> --}}
 
             <!-- Mobile Hamburger -->
-            <div class="-me-2 flex items-center sm:hidden">
+            {{-- <div class="-me-2 flex items-center sm:hidden">
                 <button @click="open = ! open" class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none">
                     <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none">
                         <path :class="{ 'hidden': open, 'inline-flex': !open }" class="inline-flex"
@@ -223,7 +223,7 @@
                               d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
-            </div>
+            </div> --}}
         </div>
     </div>
 
