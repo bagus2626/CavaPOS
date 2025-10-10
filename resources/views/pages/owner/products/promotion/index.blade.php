@@ -1,22 +1,22 @@
 @extends('layouts.owner')
 
-@section('title', 'Product List')
-@section('page_title', 'All Products')
+@section('title', __('messages.owner.products.promotions.promotion_list'))
+@section('page_title', __('messages.owner.products.promotions.all_promotions'))
 
 @section('content')
 <section class="content">
   <div class="container-fluid owner-promotions"> {{-- PAGE SCOPE --}}
 
     <a href="{{ route('owner.user-owner.promotions.create') }}" class="btn btn-primary mb-3">
-      + Add Promotion
+      + {{ __('messages.owner.products.promotions.add_promotion') }}
     </a>
 
     {{-- Filter pills --}}
     <div class="mb-3">
-      <button class="btn btn-sm filter-btn rounded-pill active" data-category="all">All</button>
+      <button class="btn btn-sm filter-btn rounded-pill active" data-category="all">{{ __('messages.owner.products.promotions.all') }}</button>
       @foreach($promotions->pluck('promotion_type')->unique() as $type)
         <button class="btn btn-sm filter-btn rounded-pill" data-category="{{ $type }}">
-          @if($type == 'percentage') Persentase @else Nominal Tetap @endif
+          @if($type == 'percentage') {{ __('messages.owner.products.promotions.percentage') }} @else {{ __('messages.owner.products.promotions.reduced_fare') }} @endif
         </button>
       @endforeach
     </div>
@@ -73,7 +73,7 @@
 
 /* Table container (partial-friendly) */
 .owner-promotions .table-responsive{
-  border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; background:#fff;
+  border-radius:var(--radius); box-shadow:var(--shadow); overflow-y:hidden; background:#fff;
 }
 .owner-promotions .table{
   margin-bottom:0; background:#fff;
@@ -120,14 +120,14 @@
 <script>
 function deletePromo(productId) {
   Swal.fire({
-    title: 'Apakah Anda yakin?',
-    text: "Anda tidak dapat mengembalikan data tersebut!",
+    title: '{{ __('messages.owner.products.promotions.delete_confirmation_1') }}',
+    text: "{{ __('messages.owner.products.promotions.delete_confirmation_2') }}",
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#8c1000', // brand choco
     cancelButtonColor: '#6b7280',
-    confirmButtonText: 'Ya, Hapus!',
-    cancelButtonText: 'Batalkan',
+    confirmButtonText: '{{ __('messages.owner.products.promotions.delete_confirmation_3') }}',
+    cancelButtonText: '{{ __('messages.owner.products.promotions.cancel') }}',
     reverseButtons: true
   }).then((result) => {
     if (result.isConfirmed) {
@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (visibleCount === 0 && tableBody) {
         const tr = document.createElement('tr');
         tr.classList.add('empty-row');
-        tr.innerHTML = `<td colspan="8" class="text-center text-muted">Data tidak ditemukan</td>`;
+        tr.innerHTML = `<td colspan="8" class="text-center text-muted">{{ __('messages.owner.products.promotions.data_not_found') }}</td>`;
         tableBody.appendChild(tr);
       }
     });

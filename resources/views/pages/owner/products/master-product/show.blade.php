@@ -1,7 +1,7 @@
 @extends('layouts.owner')
 
-@section('title', 'Product Detail')
-@section('page_title', 'Master Product Detail')
+@section('title',  __('messages.owner.products.master_products.product_detail'))
+@section('page_title',  __('messages.owner.products.master_products.master_product_detail'))
 
 @section('content')
 @php
@@ -11,7 +11,7 @@
   $prod = $product ?? $data ?? null;
 
   // kategori (opsional)
-  $catName = optional($prod->category)->category_name ?? 'Uncategorized';
+  $catName = optional($prod->category)->category_name ??  __('messages.owner.products.master_products.uncategorized');
 
   // gambar utama (ambil dari pictures[0] jika ada)
   $firstImg = null;
@@ -50,16 +50,16 @@
   {{-- Toolbar --}}
   <div class="d-flex justify-content-between align-items-center mb-3">
     <a href="{{ route('owner.user-owner.master-products.index') }}" class="btn btn-outline-choco">
-      <i class="fas fa-arrow-left me-2"></i>Back to Products
+      <i class="fas fa-arrow-left me-2"></i>{{ __('messages.owner.products.master_products.back_to_products') }}
     </a>
 
     <div class="btn-group">
       <a href="{{ route('owner.user-owner.master-products.edit', $prod->id) }}" class="btn btn-choco">
-        <i class="fas fa-pen me-1"></i> Edit
+        <i class="fas fa-pen me-1"></i> {{ __('messages.owner.products.master_products.edit') }}
       </a>
       <button class="btn btn-soft-danger"
               onclick="ownerConfirmDeletion(`{{ route('owner.user-owner.master-products.destroy', $prod->id) }}`)">
-        <i class="fas fa-trash-alt me-1"></i> Delete
+        <i class="fas fa-trash-alt me-1"></i> {{ __('messages.owner.products.master_products.delete') }}
       </button>
     </div>
   </div>
@@ -117,19 +117,19 @@
       <div class="row gy-3">
         {{-- Description --}}
         <div class="col-12">
-          <div class="section-title">Description</div>
+          <div class="section-title">{{ __('messages.owner.products.master_products.description') }}</div>
           <div class="desc-body">
             @if(!empty($prod->description))
               {!! $prod->description !!}
             @else
-              <span class="text-muted">No description.</span>
+              <span class="text-muted">{{ __('messages.owner.products.master_products.no_description') }}</span>
             @endif
           </div>
         </div>
 
         {{-- Gallery --}}
         <div class="col-12">
-          <div class="section-title">Images</div>
+          <div class="section-title">{{ __('messages.owner.products.master_products.images') }}</div>
           <div class="thumb-grid">
             @if(!empty($prod->pictures) && is_array($prod->pictures))
               @foreach($prod->pictures as $p)
@@ -145,7 +145,7 @@
                 @endif
               @endforeach
             @else
-              <span class="text-muted">No images.</span>
+              <span class="text-muted">{{ __('messages.owner.products.master_products.no_images') }}</span>
             @endif
           </div>
         </div>
@@ -154,37 +154,37 @@
         <div class="col-md-6">
           <div class="section-title">Meta</div>
           <dl class="meta-list">
-            <dt>Category</dt>
+            <dt>{{ __('messages.owner.products.master_products.category') }}</dt>
             <dd>{{ $catName }}</dd>
 
-            <dt>Base Price</dt>
+            <dt>{{ __('messages.owner.products.master_products.base_price') }}</dt>
             <dd>Rp {{ number_format($basePrice, 0, ',', '.') }}</dd>
 
-            <dt>Final Price</dt>
+            <dt>{{ __('messages.owner.products.master_products.final_price') }}</dt>
             <dd>Rp {{ number_format($finalPrice, 0, ',', '.') }}</dd>
           </dl>
         </div>
 
         <div class="col-md-6">
-          <div class="section-title">Promotion</div>
+          <div class="section-title">{{ __('messages.owner.products.master_products.promotion') }}</div>
           <dl class="meta-list">
-            <dt>Status</dt>
+            <dt>{{ __('messages.owner.products.master_products.status') }}</dt>
             <dd>
               @if($promo)
-                <span class="badge badge-promo">Active</span>
+                <span class="badge badge-promo">{{ __('messages.owner.products.master_products.active') }}</span>
               @else
-                <span class="badge badge-soft-secondary">None</span>
+                <span class="badge badge-soft-secondary">{{ __('messages.owner.products.master_products.none') }}</span>
               @endif
             </dd>
 
             @if($promo)
-              <dt>Promo Name</dt>
+              <dt>{{ __('messages.owner.products.master_products.promo_name') }}</dt>
               <dd>{{ $promoName }}</dd>
 
-              <dt>Type</dt>
+              <dt>{{ __('messages.owner.products.master_products.type') }}</dt>
               <dd class="text-capitalize">{{ $promoType }}</dd>
 
-              <dt>Value</dt>
+              <dt>{{ __('messages.owner.products.master_products.value') }}</dt>
               <dd>
                 @if($promoType === 'percentage')
                   {{ number_format($promoValue, 0, ',', '.') }}%
@@ -198,7 +198,7 @@
 
         {{-- Options --}}
         <div class="col-12">
-          <div class="section-title">Options</div>
+          <div class="section-title">{{ __('messages.owner.products.master_products.options') }}</div>
           @php
             $parents = $prod->parent_options ?? collect();
           @endphp
@@ -216,7 +216,19 @@
                     </div>
                     <div class="option-badges">
                       <span class="badge badge-chip">
-                        {{ $parent->provision ?? '—' }}
+                        @if ($parent->provision)
+                          @if ($parent->provision === 'OPTIONAL')
+                            {{ __('messages.owner.products.master_products.optional') }}
+                          @elseif ($parent->provision === 'OPTIONAL MAX')
+                            {{ __('messages.owner.products.master_products.optional_max') }}
+                          @elseif ($parent->provision === 'MAX')
+                            {{ __('messages.owner.products.master_products.max_provision') }}
+                          @elseif ($parent->provision === 'EXACT')
+                            {{ __('messages.owner.products.master_products.exact_provision') }}
+                          @elseif ($parent->provision === 'MIN')
+                            {{ __('messages.owner.products.master_products.min_provision') }}
+                          @endif
+                        @endif
                         @if(!empty($parent->provision_value) && $parent->provision !== 'OPTIONAL')
                           : {{ $parent->provision_value }}
                         @endif
@@ -229,9 +241,9 @@
                       <table class="table table-sm align-middle mb-0">
                         <thead>
                           <tr>
-                            <th style="width:38%">Option</th>
-                            <th style="width:18%">Price</th>
-                            <th>Description</th>
+                            <th style="width:38%">{{ __('messages.owner.products.master_products.options') }}</th>
+                            <th style="width:18%">{{ __('messages.owner.products.master_products.price') }}</th>
+                            <th>{{ __('messages.owner.products.master_products.description') }}</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -246,13 +258,13 @@
                       </table>
                     </div>
                   @else
-                    <div class="text-muted">No child options.</div>
+                    <div class="text-muted">{{ __('messages.owner.products.master_products.no_child_options') }}</div>
                   @endif
                 </div>
               @endforeach
             </div>
           @else
-            <span class="text-muted">No options.</span>
+            <span class="text-muted">{{ __('messages.owner.products.master_products.no_options') }}</span>
           @endif
         </div>
       </div>
@@ -376,12 +388,12 @@
 <script>
   function ownerConfirmDeletion(url, opts = {}) {
     const base = {
-      title: 'Apakah Anda yakin?',
-      text: 'Anda tidak dapat mengembalikan data tersebut!',
+      title: '{{ __('messages.owner.products.master_products.delete_confirmation_1') }}',
+      text: '{{ __('messages.owner.products.master_products.delete_confirmation_2') }}',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Ya, Hapus!',
-      cancelButtonText: 'Batalkan'
+      confirmButtonText: '{{ __('messages.owner.products.master_products.delete_confirmation_3') }}',
+      cancelButtonText: '{{ __('messages.owner.products.master_products.cancel') }}'
     };
     const swal = window.$swal || window.Swal;
     if (!swal) {

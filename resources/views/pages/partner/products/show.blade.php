@@ -1,7 +1,7 @@
 @extends('layouts.partner')
 
-@section('title', 'Product Detail')
-@section('page_title', 'Product Detail')
+@section('title', __('messages.partner.product.all_product.product_detail'))
+@section('page_title', __('messages.partner.product.all_product.always_available'))
 
 @section('content')
 <section class="content product-show">
@@ -9,7 +9,7 @@
 
     {{-- Tombol kembali --}}
     <a href="{{ route('partner.products.index') }}" class="btn btn-outline-choco mb-4 btn-pill">
-      <i class="fas fa-arrow-left mr-2"></i> Back to Products
+      <i class="fas fa-arrow-left mr-2"></i> {{ __('messages.partner.product.all_product.back_to_products') }}
     </a>
 
     <div class="card shadow-sm border-0 rounded-4">
@@ -33,10 +33,10 @@
 
         {{-- Deskripsi & jumlah --}}
         <div class="product-meta mb-3">
-          <p class="lead mb-2"><strong>Description:</strong> {{ $data->description ?? '—' }}</p>
-          <p class="lead mb-0"><strong>Jumlah:</strong>
+          <p class="lead mb-2"><strong>{{ __('messages.partner.product.all_product.description') }}:</strong> {{ $data->description ?? '—' }}</p>
+          <p class="lead mb-0"><strong>{{ __('messages.partner.product.all_product.quantity') }}:</strong>
             @if((int) $data->always_available_flag === 1)
-              <span class="badge badge-soft-success">Always Available</span>
+              <span class="badge badge-soft-success">{{ __('messages.partner.product.all_product.always_available') }}</span>
             @else
               {{ (int) $data->quantity }}
             @endif
@@ -59,8 +59,8 @@
                   <table class="table table-hover align-middle product-options-table mb-0">
                     <thead>
                       <tr>
-                        <th>Options</th>
-                        <th class="text-center">Quantity</th>
+                        <th>{{ __('messages.partner.product.all_product.options') }}</th>
+                        <th class="text-center">{{ __('messages.partner.product.all_product.quantity') }}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -69,7 +69,7 @@
                           <td class="fw-600">{{ $option->name }}</td>
                           <td class="text-center">
                             @if((int) $option->always_available_flag === 1)
-                              <span class="badge badge-soft-success">Always Available</span>
+                              <span class="badge badge-soft-success">{{ __('messages.partner.product.all_product.always_available') }}</span>
                             @else
                               {{ (int) $option->quantity }}
                             @endif
@@ -80,7 +80,7 @@
                   </table>
                 </div>
               @else
-                <p class="text-muted mb-0">No Option found for this package.</p>
+                <p class="text-muted mb-0">{{ __('messages.partner.product.all_product.no_option') }}</p>
               @endif
             </div>
           </div>

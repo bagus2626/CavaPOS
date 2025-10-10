@@ -52,6 +52,7 @@ class OwnerOutletController extends Controller
             $request->merge(['partner_code' => $partnerCode]);
 
             $imagePath = null;
+            $imagePathLogo = null;
             // dd($request->all());
             $request->validate([
                 'name' => ['required', 'string', 'max:255'],
@@ -103,6 +104,43 @@ class OwnerOutletController extends Controller
                 // Simpan path relatif untuk database
                 $imagePath = $path;
             }
+
+            if ($request->hasFile('logo')) {
+                $fileLogo = $request->file('logo');
+
+                // Baca & perbaiki orientasi EXIF
+                $lg = Image::make($fileLogo->getPathname())->orientate();
+
+                // Batasi dimensi supaya aman (maks 1600x1600, tetap proporsional)
+                $lg->resize(1600, 1600, function ($c) {
+                    $c->aspectRatio();
+                    $c->upsize();
+                });
+
+                $diskLogo = Storage::disk('public');
+                $dirLogo  = 'outlets';
+                $diskLogo->makeDirectory($dirLogo);
+
+                $basenameLogo = Str::uuid()->toString();
+                $pathLogo     = null;
+                $binaryLogo   = null;
+
+                // Coba simpan sebagai WebP (ukuran kecil, modern)
+                try {
+                    $binaryLogo = (string) $lg->encode('webp', 78); // kualitas 0-100
+                    $pathLogo   = "{$dirLogo}/{$basenameLogo}.webp";
+                } catch (\Throwable $e) {
+                    // Fallback ke JPEG kalau WebP tidak didukung di server
+                    $binaryLogo = (string) $lg->encode('jpg', 80);
+                    $pathLogo   = "{$dirLogo}/{$basenameLogo}.jpg";
+                }
+
+                // Tulis ke disk public
+                $diskLogo->put($pathLogo, $binaryLogo);
+
+                // Simpan path relatif untuk database
+                $imagePathLogo = $pathLogo;
+            }
             $auth = Auth::user();
             // dd($auth);
 
@@ -114,7 +152,8 @@ class OwnerOutletController extends Controller
                 'role' => 'partner',
                 'slug' => $request->slug,
                 'partner_code' => $request->partner_code,
-                'logo' => $imagePath,
+                'logo' => $imagePathLogo,
+                'background_picture' => $imagePath,
                 'password' => Hash::make($request->password),
                 'province' => $request->province_name,
                 'province_id' => $request->province,
@@ -218,7 +257,8 @@ class OwnerOutletController extends Controller
             DB::beginTransaction();
 
             // Upload gambar baru bila ada
-            $newImagePath = $outlet->logo;
+            $newImagePath = $outlet->background_picture;
+            $newImagePathLogo = $outlet->logo;
             if ($request->hasFile('image')) {
                 $file = $request->file('image');
 
@@ -245,11 +285,44 @@ class OwnerOutletController extends Controller
                 $disk->put($path, $binary);
 
                 // Hapus lama bila ada
-                if ($outlet->logo && $disk->exists($outlet->logo)) {
-                    $disk->delete($outlet->logo);
+                if ($outlet->background_picture && $disk->exists($outlet->background_picture)) {
+                    $disk->delete($outlet->background_picture);
                 }
 
                 $newImagePath = $path;
+            }
+
+            if ($request->hasFile('logo')) {
+                $fileLogo = $request->file('logo');
+
+                $imgLogo = Image::make($fileLogo->getPathname())->orientate();
+                $imgLogo->resize(1600, 1600, function ($cLogo) {
+                    $cLogo->aspectRatio();
+                    $cLogo->upsize();
+                });
+
+                $diskLogo = Storage::disk('public');
+                $dirLogo  = 'outlets';
+                $diskLogo->makeDirectory($dirLogo);
+
+                $basenameLogo = Str::uuid()->toString();
+
+                try {
+                    $binaryLogo = (string) $imgLogo->encode('webp', 78);
+                    $pathLogo   = "{$dirLogo}/{$basenameLogo}.webp";
+                } catch (\Throwable $e) {
+                    $binaryLogo = (string) $imgLogo->encode('jpg', 80);
+                    $pathLogo   = "{$dirLogo}/{$basenameLogo}.jpg";
+                }
+
+                $diskLogo->put($pathLogo, $binaryLogo);
+
+                // Hapus lama bila ada
+                if ($outlet->logo && $diskLogo->exists($outlet->logo)) {
+                    $diskLogo->delete($outlet->logo);
+                }
+
+                $newImagePathLogo = $pathLogo;
             }
 
             // Data update
@@ -257,7 +330,8 @@ class OwnerOutletController extends Controller
                 'name'   => $request->name,
                 'email'  => $request->email,
                 'username' => $request->username,
-                'logo'   => $newImagePath,
+                'logo' => $newImagePathLogo,
+                'background_picture'   => $newImagePath,
 
                 // alamat simpan nama & id
                 'province'         => $request->province_name,
@@ -302,10 +376,10 @@ class OwnerOutletController extends Controller
 
         try {
             // Hapus file gambar jika ada
-            if (!empty($outlet->image)) {
+            if (!empty($outlet->background_picture)) {
                 $disk = Storage::disk('public');       // path DB: "employees/xxxx.webp"
-                if ($disk->exists($outlet->image)) {
-                    $disk->delete($outlet->image);
+                if ($disk->exists($outlet->background_picture)) {
+                    $disk->delete($outlet->background_picture);
                 }
             }
 

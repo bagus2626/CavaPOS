@@ -6,12 +6,80 @@
 @section('content')
     <section class="content">
         <div class="container-fluid">
-            {{-- Form Filter --}}
+            <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                <form method="GET" action="{{ route('owner.user-owner.report.sales.index') }}" id="partner-filter-form">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                        <div class="flex-1">
+
+                            <select name="partner_id" id="partner-select"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-choco focus:border-transparent">
+                                <option value="">All Partners/Outlets</option>
+                                @foreach($partners as $partner)
+                                    <option value="{{ $partner->id }}" {{ ($filters['partner_id'] ?? '') == $partner->id ? 'selected' : '' }}>
+                                        {{ $partner->name }} ({{ $partner->partner_code }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="flex gap-2 items-end">
+                            <button type="submit"
+                                class="px-6 py-2 bg-choco text-white text-sm font-medium rounded-lg hover:bg-opacity-90 transition duration-200">
+                                Apply
+                            </button>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="period" value="{{ $filters['period'] ?? 'daily' }}">
+                    @if(isset($filters['year_from']))
+                        <input type="hidden" name="year_from" value="{{ $filters['year_from'] }}">
+                    @endif
+                    @if(isset($filters['year_to']))
+                        <input type="hidden" name="year_to" value="{{ $filters['year_to'] }}">
+                    @endif
+                    @if(isset($filters['month_year']))
+                        <input type="hidden" name="month_year" value="{{ $filters['month_year'] }}">
+                    @endif
+                    @if(isset($filters['month_from']))
+                        <input type="hidden" name="month_from" value="{{ $filters['month_from'] }}">
+                    @endif
+                    @if(isset($filters['month_to']))
+                        <input type="hidden" name="month_to" value="{{ $filters['month_to'] }}">
+                    @endif
+                    @if(isset($filters['from']))
+                        <input type="hidden" name="from" value="{{ $filters['from'] }}">
+                    @endif
+                    @if(isset($filters['to']))
+                        <input type="hidden" name="to" value="{{ $filters['to'] }}">
+                    @endif
+                </form>
+
+                @if(isset($selectedPartner))
+                    <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-info-circle text-blue-600"></i>
+                            <div>
+                                <p class="text-sm font-medium text-blue-900">
+                                    Showing data for: <span class="font-bold">{{ $selectedPartner->name }}</span>
+                                </p>
+                                <p class="text-xs text-blue-700 mt-1">
+                                    Partner Code: {{ $selectedPartner->partner_code }} |
+                                    Location: {{ $selectedPartner->city }}, {{ $selectedPartner->province }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+            </div>
+
             <form method="GET" action="{{ route('owner.user-owner.report.sales.index') }}">
+                @if(isset($filters['partner_id']) && $filters['partner_id'])
+                    <input type="hidden" name="partner_id" value="{{ $filters['partner_id'] }}">
+                @endif
+
                 <div class="bg-white rounded-xl shadow-md p-6 mb-8">
                     <div class="flex flex-col space-y-6">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            {{-- Bagian Kiri: Tombol Filter Periode --}}
                             <div class="flex flex-wrap gap-2">
                                 <div class="flex bg-gray-100 rounded-lg p-1">
                                     <button type="button" onclick="changeFilterPeriod('yearly')" id="filter-btn-yearly"
@@ -23,7 +91,6 @@
                                 </div>
                             </div>
 
-                            {{-- Bagian Kanan: Tombol Export Excel --}}
                             <div>
                                 <a href="{{ route('owner.user-owner.report.sales.export', request()->query()) }}"
                                     class="inline-flex items-center px-4 py-2 bg-choco text-white text-sm font-medium rounded-lg hover:bg-green-700 transition duration-200">
@@ -38,8 +105,8 @@
                             </div>
                         </div>
 
-                        {{-- Input Filter --}}
                         <div id="global-period-filters">
+                            {{-- YEARLY FILTER --}}
                             <div id="global-yearly-filter"
                                 class="period-filter hidden grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
                                 <div>
@@ -64,14 +131,75 @@
                                         Filters</button>
                                 </div>
                             </div>
+
+                            {{-- MONTHLY FILTER --}}
                             <div id="global-monthly-filter"
-                                class="period-filter hidden grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                                class="period-filter hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Select Year</label>
                                     <select name="month_year" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
                                         @for ($year = date('Y'); $year >= date('Y') - 5; $year--)
-                                            <option value="{{ $year }}" {{ ($filters['month_year'] ?? date('Y')) == $year ? 'selected' : '' }}>{{ $year }}</option>
+                                            <option value="{{ $year }}" {{ ($filters['month_year'] ?? date('Y')) == $year ? 'selected' : '' }}>{{ $year }}
+                                            </option>
                                         @endfor
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">From Month</label>
+                                    <select name="month_from" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                        <option value="1" {{ ($filters['month_from'] ?? 1) == 1 ? 'selected' : '' }}>Januari
+                                        </option>
+                                        <option value="2" {{ ($filters['month_from'] ?? 1) == 2 ? 'selected' : '' }}>Februari
+                                        </option>
+                                        <option value="3" {{ ($filters['month_from'] ?? 1) == 3 ? 'selected' : '' }}>Maret
+                                        </option>
+                                        <option value="4" {{ ($filters['month_from'] ?? 1) == 4 ? 'selected' : '' }}>April
+                                        </option>
+                                        <option value="5" {{ ($filters['month_from'] ?? 1) == 5 ? 'selected' : '' }}>Mei
+                                        </option>
+                                        <option value="6" {{ ($filters['month_from'] ?? 1) == 6 ? 'selected' : '' }}>Juni
+                                        </option>
+                                        <option value="7" {{ ($filters['month_from'] ?? 1) == 7 ? 'selected' : '' }}>Juli
+                                        </option>
+                                        <option value="8" {{ ($filters['month_from'] ?? 1) == 8 ? 'selected' : '' }}>Agustus
+                                        </option>
+                                        <option value="9" {{ ($filters['month_from'] ?? 1) == 9 ? 'selected' : '' }}>September
+                                        </option>
+                                        <option value="10" {{ ($filters['month_from'] ?? 1) == 10 ? 'selected' : '' }}>Oktober
+                                        </option>
+                                        <option value="11" {{ ($filters['month_from'] ?? 1) == 11 ? 'selected' : '' }}>
+                                            November</option>
+                                        <option value="12" {{ ($filters['month_from'] ?? 1) == 12 ? 'selected' : '' }}>
+                                            Desember</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">To Month</label>
+                                    <select name="month_to" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                        <option value="1" {{ ($filters['month_to'] ?? date('n')) == 1 ? 'selected' : '' }}>
+                                            Januari</option>
+                                        <option value="2" {{ ($filters['month_to'] ?? date('n')) == 2 ? 'selected' : '' }}>
+                                            Februari</option>
+                                        <option value="3" {{ ($filters['month_to'] ?? date('n')) == 3 ? 'selected' : '' }}>
+                                            Maret</option>
+                                        <option value="4" {{ ($filters['month_to'] ?? date('n')) == 4 ? 'selected' : '' }}>
+                                            April</option>
+                                        <option value="5" {{ ($filters['month_to'] ?? date('n')) == 5 ? 'selected' : '' }}>Mei
+                                        </option>
+                                        <option value="6" {{ ($filters['month_to'] ?? date('n')) == 6 ? 'selected' : '' }}>
+                                            Juni</option>
+                                        <option value="7" {{ ($filters['month_to'] ?? date('n')) == 7 ? 'selected' : '' }}>
+                                            Juli</option>
+                                        <option value="8" {{ ($filters['month_to'] ?? date('n')) == 8 ? 'selected' : '' }}>
+                                            Agustus</option>
+                                        <option value="9" {{ ($filters['month_to'] ?? date('n')) == 9 ? 'selected' : '' }}>
+                                            September</option>
+                                        <option value="10" {{ ($filters['month_to'] ?? date('n')) == 10 ? 'selected' : '' }}>
+                                            Oktober</option>
+                                        <option value="11" {{ ($filters['month_to'] ?? date('n')) == 11 ? 'selected' : '' }}>
+                                            November</option>
+                                        <option value="12" {{ ($filters['month_to'] ?? date('n')) == 12 ? 'selected' : '' }}>
+                                            Desember</option>
                                     </select>
                                 </div>
                                 <div class="flex justify-start">
@@ -80,6 +208,7 @@
                                         Filters</button>
                                 </div>
                             </div>
+
                             <div id="global-daily-filter"
                                 class="period-filter hidden grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
                                 <div>
@@ -142,15 +271,36 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div class="bg-white rounded-xl shadow-md overflow-hidden">
                     <div class="px-6 py-4 bg-choco flex justify-between items-center">
-                        <h3 class="text-lg font-semibold text-white mb-0">Top Products by Quantity</h3>
+                        <h3 class="text-lg font-semibold text-white mb-0">Products by Quantity</h3>
+                        <div class="flex items-center gap-2">
+                            <div class="relative inline-block">
+                                <select id="sort-products-filter"
+                                    class="px-2 py-1 w-24 text-sm border border-white rounded-lg bg-choco text-white focus:outline-none focus:ring-2 focus:ring-white/50  pr-8"
+                                    style="-webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: none;">
+                                    <option value="desc" {{ ($filters['sort_products'] ?? 'desc') == 'desc' ? 'selected' : '' }}>
+                                        Highest
+                                    </option>
+                                    <option value="asc" {{ ($filters['sort_products'] ?? 'desc') == 'asc' ? 'selected' : '' }}>
+                                        Lowest
+                                    </option>
+                                </select>
+
+                                <svg class="w-4 h-4 text-white absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none"
+                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                        </div>
                     </div>
                     <div class="p-6 max-h-[48rem] overflow-y-auto">
                         <div class="space-y-4" id="top-products-list">
                             @forelse ($topProducts ?? [] as $product)
-                                <div class="flex justify-between items-center p-3 hover:bg-gray-50 rounded-xl">
+                                <div class="flex justify-between items-center p-2 m-0 hover:bg-gray-50 rounded-xl">
                                     <div>
-                                        <p class="font-medium text-gray-800">{{ $product->name }}</p>
-                                        <p class="text-sm text-gray-500">{{ $product->total_quantity }} Terjual</p>
+                                        <p class="font-medium text-gray-800 m-0">{{ $product->name }}</p>
+                                        <p class="text-sm text-gray-500 m-0">{{ $product->total_quantity }} Sold</p>
                                     </div>
                                     <span class="font-bold text-green-600">Rp
                                         {{ number_format($product->total_sales, 0, ',', '.') }}</span>
@@ -161,6 +311,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="bg-white rounded-xl shadow-md overflow-hidden">
                     <div class="px-6 py-4 bg-choco flex justify-between items-center">
                         <h3 class="text-lg font-semibold text-white mb-0">Recent Transactions</h3>
@@ -168,11 +319,12 @@
                     <div class="p-6 max-h-[48rem] overflow-y-auto">
                         <div class="space-y-4" id="recent-transactions-list">
                             @forelse ($recentTransactions ?? [] as $transaction)
-                                <div class="transaction-row flex justify-between items-center p-3 hover:bg-gray-50 rounded-xl cursor-pointer"
+                                <div class="transaction-row flex justify-between items-center p-2 m-0 hover:bg-gray-50 rounded-xl cursor-pointer"
                                     data-order-id="{{ $transaction->id }}">
                                     <div>
-                                        <p class="font-medium text-gray-800">Order #{{ $transaction->booking_order_code }}</p>
-                                        <p class="text-sm text-gray-500">
+                                        <p class="font-medium text-gray-800 m-0">Order #{{ $transaction->booking_order_code }}
+                                        </p>
+                                        <p class="text-sm text-gray-500 m-0">
                                             {{ \Carbon\Carbon::parse($transaction->created_at)->format('d M Y, H:i') }}
                                         </p>
                                     </div>
@@ -218,9 +370,6 @@
         const revenueChartData = @json($revenueChartData ?? ['labels' => [], 'data' => []]);
         const categoryChartData = @json($categoryChartData ?? ['labels' => [], 'data' => []]);
     </script>
-
-    {{-- Memuat file JavaScript utama Anda (untuk render chart) --}}
-    <script src="{{ asset('js/sales.js') }}"></script>
 
     {{-- Menggabungkan semua script UI dan Modal ke dalam satu blok --}}
     <script>
@@ -311,6 +460,59 @@
                 closeModalBtns.forEach(btn => btn.addEventListener('click', hideModal));
                 modal.addEventListener('click', (e) => {
                     if (e.target === modal) hideModal();
+                });
+            }
+
+            // --- BAGIAN 3: LOGIKA FILTER TOP PRODUCTS ---
+            const sortFilter = document.getElementById('sort-products-filter');
+            const productsList = document.getElementById('top-products-list');
+
+            if (sortFilter && productsList) {
+                sortFilter.addEventListener('change', async function () {
+                    const sortValue = this.value;
+
+                    // Show loading state
+                    productsList.innerHTML = '<p class="text-gray-500 text-center py-4">Memuat data...</p>';
+
+                    try {
+                        // Get current URL parameters
+                        const urlParams = new URLSearchParams(window.location.search);
+                        urlParams.set('sort_products', sortValue);
+
+                        // Fetch sorted data
+                        const response = await fetch(`{{ route('owner.user-owner.report.sales.products') }}?${urlParams.toString()}`);
+
+                        if (!response.ok) throw new Error('Gagal mengambil data produk');
+
+                        const products = await response.json();
+
+                        // Update the list
+                        if (products.length > 0) {
+                            let html = '';
+                            products.forEach(product => {
+                                html += `
+                                            <div class="flex justify-between items-center p-2 m-0 hover:bg-gray-50 rounded-xl">
+                                                <div>
+                                                    <p class="font-medium text-gray-800 m-0">${product.name}</p>
+                                                    <p class="text-sm text-gray-500 m-0">${product.total_quantity} Sold</p>
+                                                </div>
+                                                <span class="font-bold text-green-600">Rp ${Number(product.total_sales).toLocaleString('id-ID')}</span>
+                                            </div>
+                                        `;
+                            });
+                            productsList.innerHTML = html;
+                        } else {
+                            productsList.innerHTML = '<p class="text-gray-500 text-center">Tidak ada data produk.</p>';
+                        }
+
+                        // Update URL without refresh
+                        const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+                        window.history.pushState({ path: newUrl }, '', newUrl);
+
+                    } catch (error) {
+                        console.error(error);
+                        productsList.innerHTML = '<p class="text-red-500 text-center">Gagal memuat data produk</p>';
+                    }
                 });
             }
         });

@@ -1,18 +1,18 @@
 @extends('layouts.owner')
 
-@section('title', 'Employee List')
-@section('page_title', 'All Employees')
+@section('title', __('messages.owner.user_management.employees.employee_list'))
+@section('page_title', __('messages.owner.user_management.employees.all_employees'))
 
 @section('content')
 <section class="content owner-emp">
   <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
       <a href="{{ route('owner.user-owner.employees.create') }}" class="btn btn-choco btn-pill">
-        <i class="fas fa-user-plus mr-2"></i> Add Employee
+        <i class="fas fa-user-plus mr-2"></i> {{ __('messages.owner.user_management.employees.add_employee') }}
       </a>
 
       <div class="filter-bar mb-3">
-        <button class="btn filter-btn rounded-pill active" data-category="all">All</button>
+        <button class="btn filter-btn rounded-pill active" data-category="all">{{ __('messages.owner.user_management.employees.all') }}</button>
         @foreach($partners as $partner)
           <button class="btn filter-btn rounded-pill" data-category="{{ $partner->id }}">
             {{ $partner->name }}

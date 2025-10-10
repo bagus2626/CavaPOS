@@ -29,6 +29,7 @@ class User extends Authenticatable
         'email_verified_at',
         'remember_token',
         'logo',
+        'background_picture',
         'province',
         'province_id',
         'city',

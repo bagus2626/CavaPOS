@@ -1,20 +1,20 @@
 @extends('layouts.owner')
 
-@section('title', 'Edit Outlet')
-@section('page_title', 'Ubah Data Outlet')
+@section('title',  __('messages.owner.outlet.all_outlets.edit_outlet'))
+@section('page_title', __('messages.owner.outlet.all_outlets.edit_outlet_data'))
 
 @section('content')
 <div class="container owner-outlet-edit"> {{-- PAGE SCOPE --}}
 
     <a href="{{ route('owner.user-owner.outlets.index') }}" class="btn btn-outline-choco mb-3">
-        <i class="fas fa-arrow-left me-2"></i>Kembali
+        <i class="fas fa-arrow-left me-2"></i>{{ __('messages.owner.outlet.all_outlets.back') }}
     </a>
 
     <div class="card shadow-sm">
         <div class="card-header bg-white">
             <h5 class="card-title mb-0 d-flex align-items-center gap-2">
                 <i class="fas fa-store text-choco"></i>
-                Edit Outlet: {{ $outlet->name }}
+                {{ __('messages.owner.outlet.all_outlets.edit_outlet') }}: {{ $outlet->name }}
             </h5>
         </div>
 
@@ -24,7 +24,7 @@
                 <div class="alert alert-danger d-flex align-items-start gap-2">
                     <i class="fas fa-circle-exclamation mt-1"></i>
                     <div>
-                        <strong>Periksa kembali input kamu:</strong>
+                        <strong>{{ __('messages.owner.outlet.all_outlets.re_check_input') }}</strong>
                         <ul class="mb-0 mt-2 ps-3">
                             @foreach ($errors->all() as $error)
                                 <li>{{ $error }}</li>
@@ -48,12 +48,12 @@
                 <div class="form-section">
                     <div class="section-header">
                         <span class="section-icon"><i class="fas fa-id-card"></i></span>
-                        <h6 class="mb-0">Informasi Dasar</h6>
+                        <h6 class="mb-0">{{ __('messages.owner.outlet.all_outlets.base_information') }}</h6>
                     </div>
 
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label for="name" class="form-label required">Nama Outlet</label>
+                            <label for="name" class="form-label required">{{ __('messages.owner.outlet.all_outlets.outlet_name') }}</label>
                             <input type="text" name="name" id="name"
                                    class="form-control @error('name') is-invalid @enderror"
                                    value="{{ old('name', $outlet->name) }}" required>
@@ -64,7 +64,7 @@
                         <input type="hidden" id="usernameCheckUrl" value="{{ route('owner.user-owner.outlets.check-username') }}">
 
                         <div class="col-md-6">
-                            <label for="username" class="form-label required">Username</label>
+                            <label for="username" class="form-label required">{{ __('messages.owner.outlet.all_outlets.username') }}</label>
                             <div class="input-group has-validation">
                                 <span class="input-group-text">@</span>
                                 <input
@@ -84,7 +84,7 @@
                                 </button>
                                 @error('username') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                             </div>
-                            <small class="text-muted">3–30 karakter: huruf/angka, titik (.), underscore (_), dash (-).</small>
+                            <small class="text-muted">{{ __('messages.owner.outlet.all_outlets.muted_text_1') }}</small>
 
                             <div id="usernameStatus" class="form-text mt-1"></div>
                         </div>
@@ -105,7 +105,7 @@
                                     disabled
                                 >
                             </div>
-                            <small class="text-muted">Slug tidak dapat diubah.</small>
+                            <small class="text-muted">{{ __('messages.owner.outlet.all_outlets.slug_cant_change') }}</small>
                             <div id="slugStatus" class="form-text mt-1"></div>
                         </div>
                     </div>
@@ -115,17 +115,17 @@
                 <div class="form-section">
                     <div class="section-header">
                         <span class="section-icon"><i class="fas fa-location-dot"></i></span>
-                        <h6 class="mb-0">Alamat Outlet</h6>
+                        <h6 class="mb-0">{{ __('messages.owner.outlet.all_outlets.outlet_address') }}</h6>
                     </div>
 
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label for="province" class="form-label">Provinsi</label>
+                            <label for="province" class="form-label">{{ __('messages.owner.outlet.all_outlets.province') }}</label>
                             <div class="position-relative">
                                 <select id="province" name="province"
                                         class="form-select w-100 @error('province') is-invalid @enderror" disabled
                                         data-selected-id="{{ old('province', $outlet->province_id) }}">
-                                    <option value="">Memuat provinsi…</option>
+                                    <option value="">{{ __('messages.owner.outlet.all_outlets.load_province') }}</option>
                                 </select>
                                 <span class="loading-spinner d-none" id="spnProvince"></span>
                             </div>
@@ -134,12 +134,12 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label for="city" class="form-label">Kota/Kabupaten</label>
+                            <label for="city" class="form-label">{{ __('messages.owner.outlet.all_outlets.city') }}</label>
                             <div class="position-relative">
                                 <select id="city" name="city"
                                         class="form-select w-100 @error('city') is-invalid @enderror" disabled
                                         data-selected-id="{{ old('city', $outlet->city_id) }}">
-                                    <option value="">Pilih provinsi dahulu</option>
+                                    <option value="">{{ __('messages.owner.outlet.all_outlets.select_province_first') }}</option>
                                 </select>
                                 <span class="loading-spinner d-none" id="spnCity"></span>
                             </div>
@@ -148,12 +148,12 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label for="district" class="form-label">Kecamatan</label>
+                            <label for="district" class="form-label">{{ __('messages.owner.outlet.all_outlets.district') }}</label>
                             <div class="position-relative">
                                 <select id="district" name="district"
                                         class="form-select w-100 @error('district') is-invalid @enderror" disabled
                                         data-selected-id="{{ old('district', $outlet->subdistrict_id) }}">
-                                    <option value="">Pilih kota dahulu</option>
+                                    <option value="">{{ __('messages.owner.outlet.all_outlets.select_city_first') }}</option>
                                 </select>
                                 <span class="loading-spinner d-none" id="spnDistrict"></span>
                             </div>
@@ -162,12 +162,12 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label for="village" class="form-label">Kelurahan/Desa</label>
+                            <label for="village" class="form-label">{{ __('messages.owner.outlet.all_outlets.village') }}</label>
                             <div class="position-relative">
                                 <select id="village" name="village"
                                         class="form-select w-100 @error('village') is-invalid @enderror" disabled
                                         data-selected-id="{{ old('village', $outlet->urban_village_id) }}">
-                                    <option value="">Pilih kecamatan dahulu</option>
+                                    <option value="">{{ __('messages.owner.outlet.all_outlets.select_district_first') }}</option>
                                 </select>
                                 <span class="loading-spinner d-none" id="spnVillage"></span>
                             </div>
@@ -176,12 +176,12 @@
                         </div>
 
                         <div class="col-12">
-                            <label for="address" class="form-label mt-2">Alamat Detail</label>
+                            <label for="address" class="form-label mt-2">{{ __('messages.owner.outlet.all_outlets.detail_address') }}</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-road"></i></span>
                                 <input type="text" id="address" name="address"
                                        class="form-control @error('address') is-invalid @enderror"
-                                       value="{{ old('address', $outlet->address) }}" placeholder="Nama jalan, RT/RW, nomor, patokan">
+                                       value="{{ old('address', $outlet->address) }}" placeholder="{{ __('messages.owner.outlet.all_outlets.detail_address_placeholder') }}">
                                 @error('address') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                         </div>
@@ -192,12 +192,12 @@
                 <div class="form-section">
                     <div class="section-header">
                         <span class="section-icon"><i class="fas fa-envelope"></i></span>
-                        <h6 class="mb-0">Kontak & Gambar</h6>
+                        <h6 class="mb-0">{{ __('messages.owner.outlet.all_outlets.contact_picture') }}</h6>
                     </div>
 
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label for="email" class="form-label required">Email Outlet</label>
+                            <label for="email" class="form-label required">{{ __('messages.owner.outlet.all_outlets.email_outlet') }}</label>
                             <input type="email" name="email" id="email"
                                    class="form-control @error('email') is-invalid @enderror"
                                    value="{{ old('email', $outlet->email) }}"
@@ -206,22 +206,43 @@
                             @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
+                        {{-- background picture --}}
                         <div class="col-md-6">
-                            <label for="image" class="form-label">Unggah Gambar (opsional)</label>
+                            <label for="image" class="form-label">{{ __('messages.owner.outlet.all_outlets.upload_picture_optional') }}</label>
                             <input type="file" name="image" id="image"
                                    class="form-control @error('image') is-invalid @enderror" accept="image/*">
-                            <small class="text-muted">JPG/PNG/WEBP, maks 2 MB. Biarkan kosong jika tidak mengubah gambar.</small>
+                            <small class="text-muted">{{ __('messages.owner.outlet.all_outlets.muted_text_2') }}</small>
                             @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
 
                             {{-- Preview --}}
-                            <div id="imagePreviewWrapper" class="mt-2 {{ $outlet->logo ? '' : 'd-none' }}">
+                            <div id="imagePreviewWrapper" class="mt-2 {{ $outlet->background_picture ? '' : 'd-none' }}">
                                 <div class="position-relative preview-box">
-                                    <img id="imagePreview" src="{{ $outlet->logo ? asset('storage/'.$outlet->logo) : '' }}" alt="Preview" class="img-thumbnail rounded w-100 h-auto">
-                                    <button type="button" id="clearImageBtn" class="btn btn-sm btn-danger position-absolute top-0 end-0" aria-label="Hapus gambar">
+                                    <img id="imagePreview" src="{{ $outlet->background_picture ? asset('storage/'.$outlet->background_picture) : '' }}" alt="Preview" class="img-thumbnail rounded w-100 h-auto">
+                                    <button type="button" id="clearImageBtn" class="btn btn-sm btn-danger position-absolute top-0 end-0" aria-label="Remove Picture">
                                         &times;
                                     </button>
                                 </div>
-                                <small id="imageInfo" class="text-muted d-block mt-1">{{ $outlet->logo ? basename($outlet->logo) : '' }}</small>
+                                <small id="imageInfo" class="text-muted d-block mt-1">{{ $outlet->background_picture ? basename($outlet->background_picture) : '' }}</small>
+                            </div>
+                        </div>
+
+                        {{-- logo --}}
+                        <div class="col-md-6">
+                            <label for="logo" class="form-label">{{ __('messages.owner.outlet.all_outlets.upload_logo_optional') }}</label>
+                            <input type="file" name="logo" id="logo"
+                                   class="form-control @error('logo') is-invalid @enderror" accept="image/*">
+                            <small class="text-muted">{{ __('messages.owner.outlet.all_outlets.muted_text_2') }}</small>
+                            @error('logo') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
+                            {{-- Preview --}}
+                            <div id="imagePreviewWrapper2" class="mt-2 {{ $outlet->logo ? '' : 'd-none' }}">
+                                <div class="position-relative preview-box">
+                                    <img id="imagePreview2" src="{{ $outlet->logo ? asset('storage/'.$outlet->logo) : '' }}" alt="Preview" class="img-thumbnail rounded w-100 h-auto">
+                                    <button type="button" id="clearImageBtn2" class="btn btn-sm btn-danger position-absolute top-0 end-0" aria-label="Remove Logo">
+                                        &times;
+                                    </button>
+                                </div>
+                                <small id="imageInfo2" class="text-muted d-block mt-1">{{ $outlet->logo ? basename($outlet->logo) : '' }}</small>
                             </div>
                         </div>
                     </div>
@@ -231,12 +252,12 @@
                 <div class="form-section">
                     <div class="section-header">
                         <span class="section-icon"><i class="fas fa-toggle-on"></i></span>
-                        <h6 class="mb-0">Status Outlet</h6>
+                        <h6 class="mb-0">{{ __('messages.owner.outlet.all_outlets.outlet_status') }}</h6>
                     </div>
 
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label d-block">Aktifkan Outlet</label>
+                            <label class="form-label d-block">{{ __('messages.owner.outlet.all_outlets.activate_outlet') }}</label>
                             <input type="hidden" name="is_active" value="0">
                             <div class="form-check form-switch">
                                 <input
@@ -248,11 +269,11 @@
                                 </label>
                                 @error('is_active') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                             </div>
-                            <small class="text-muted">Jika dimatikan, outlet tidak tampil untuk pelanggan.</small>
+                            <small class="text-muted">{{ __('messages.owner.outlet.all_outlets.muted_text_3') }}</small>
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label d-block">Aktifkan QR Order</label>
+                            <label class="form-label d-block">{{ __('messages.owner.outlet.all_outlets.activate_qr') }}</label>
                             <input type="hidden" name="is_qr_active" value="0">
                             <div class="form-check form-switch">
                                 <input
@@ -264,7 +285,7 @@
                                 </label>
                                 @error('is_qr_active') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                             </div>
-                            <small class="text-muted">Mengontrol apakah pemesanan via QR untuk outlet ini aktif.</small>
+                            <small class="text-muted">{{ __('messages.owner.outlet.all_outlets.muted_text_4') }}</small>
                         </div>
                     </div>
                 </div>
@@ -273,28 +294,28 @@
                 <div class="form-section">
                     <div class="section-header">
                         <span class="section-icon"><i class="fas fa-lock"></i></span>
-                        <h6 class="mb-0">Keamanan</h6>
+                        <h6 class="mb-0">{{ __('messages.owner.outlet.all_outlets.security') }}</h6>
                     </div>
 
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label for="password" class="form-label">Password (opsional)</label>
+                            <label for="password" class="form-label">{{ __('messages.owner.outlet.all_outlets.password_optional') }}</label>
                             <div class="input-group has-validation">
                                 <input type="password" name="password" id="password"
                                        class="form-control @error('password') is-invalid @enderror"
-                                       minlength="8" autocomplete="new-password" placeholder="Kosongkan jika tidak diubah">
-                                <button class="btn btn-outline-choco" type="button" id="togglePassword" tabindex="-1">Show</button>
+                                       minlength="8" autocomplete="new-password" placeholder="{{ __('messages.owner.outlet.all_outlets.password_optional_placeholder') }}">
+                                <button class="btn btn-outline-choco" type="button" id="togglePassword" tabindex="-1">{{ __('messages.owner.outlet.all_outlets.show') }}</button>
                                 @error('password') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                             </div>
                         </div>
 
                         <div class="col-md-6">
-                            <label for="password_confirmation" class="form-label">Konfirmasi Password</label>
+                            <label for="password_confirmation" class="form-label">{{ __('messages.owner.outlet.all_outlets.password_confirmation') }}</label>
                             <div class="input-group has-validation">
                                 <input type="password" name="password_confirmation" id="password_confirmation"
                                        class="form-control @error('password_confirmation') is-invalid @enderror"
                                        minlength="8" autocomplete="new-password" placeholder="Ulangi password jika diganti">
-                                <button class="btn btn-outline-choco" type="button" id="togglePasswordConfirm" tabindex="-1">Show</button>
+                                <button class="btn btn-outline-choco" type="button" id="togglePasswordConfirm" tabindex="-1">{{ __('messages.owner.outlet.all_outlets.show') }}</button>
                                 @error('password_confirmation') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                             </div>
                         </div>
@@ -305,10 +326,10 @@
                 <div class="form-actions sticky-actions mt-4">
                     <div class="d-flex justify-content-end gap-2">
                         <a href="{{ route('owner.user-owner.outlets.index') }}" class="btn btn-outline-choco">
-                            <i class="fas fa-xmark me-2"></i>Cancel
+                            <i class="fas fa-xmark me-2"></i>{{ __('messages.owner.outlet.all_outlets.cancel') }}
                         </a>
                         <button type="submit" class="btn btn-choco">
-                            <i class="fas fa-save me-2"></i>Update
+                            <i class="fas fa-save me-2"></i>{{ __('messages.owner.outlet.all_outlets.update') }}
                         </button>
                     </div>
                 </div>
@@ -415,6 +436,10 @@
 .owner-outlet-edit #imagePreviewWrapper .img-thumbnail{
   border:0; border-radius:var(--radius); box-shadow:var(--shadow);
 }
+
+.owner-outlet-edit #imagePreviewWrapper2 .img-thumbnail{
+  border:0; border-radius:var(--radius); box-shadow:var(--shadow);
+}
 .owner-outlet-edit #clearImageBtn{
   transform: translate(35%,-35%);
   border-radius:999px; width:28px; height:28px; padding:0; line-height:26px;
@@ -445,26 +470,46 @@ document.addEventListener('DOMContentLoaded', function () {
     const preview  = document.getElementById('imagePreview');
     const info     = document.getElementById('imageInfo');
     const clearBtn = document.getElementById('clearImageBtn');
+    const input2    = document.getElementById('logo');
+    const wrapper2  = document.getElementById('imagePreviewWrapper2');
+    const preview2  = document.getElementById('imagePreview2');
+    const info2     = document.getElementById('imageInfo2');
+    const clearBtn2 = document.getElementById('clearImageBtn2');
 
     const MAX_SIZE = 2 * 1024 * 1024;
     const ALLOWED  = ['image/jpeg', 'image/png', 'image/webp'];
 
     function bytesToSize(bytes){const u=['B','KB','MB','GB'];let i=0,n=bytes;while(n>=1024&&i<u.length-1){n/=1024;i++;}return `${n.toFixed(n<10&&i>0?1:0)} ${u[i]}`;}
     function resetPreview(){ if (!wrapper) return; preview.src=''; info.textContent=''; wrapper.classList.add('d-none'); }
+    function resetPreview2(){ if (!wrapper2) return; preview2.src=''; info2.textContent=''; wrapper2.classList.add('d-none'); }
 
     if (input) {
         input.addEventListener('change', function () {
             const file = input.files?.[0];
             if (!file) { resetPreview(); return; }
-            if (!ALLOWED.includes(file.type)) { alert('Tipe file tidak didukung. Gunakan JPG, PNG, atau WEBP.'); input.value=''; resetPreview(); return; }
-            if (file.size > MAX_SIZE) { alert('Ukuran file melebihi 2 MB.'); input.value=''; resetPreview(); return; }
+            if (!ALLOWED.includes(file.type)) { alert('FIle type not supported. Use JPG, PNG, atau WEBP.'); input.value=''; resetPreview(); return; }
+            if (file.size > MAX_SIZE) { alert('File size more than 2 MB.'); input.value=''; resetPreview(); return; }
             const url = URL.createObjectURL(file);
             if (wrapper) wrapper.classList.remove('d-none');
             preview.src = url;
             if (info) info.textContent = `${file.name} • ${bytesToSize(file.size)}`;
         });
     }
+
+    if (input2) {
+        input2.addEventListener('change', function () {
+            const file = input2.files?.[0];
+            if (!file) { resetPreview2(); return; }
+            if (!ALLOWED.includes(file.type)) { alert('FIle type not supported. Use JPG, PNG, atau WEBP.'); input2.value=''; resetPreview2(); return; }
+            if (file.size > MAX_SIZE) { alert('File size more than 2 MB.'); input2.value=''; resetPreview2(); return; }
+            const url = URL.createObjectURL(file);
+            if (wrapper2) wrapper2.classList.remove('d-none');
+            preview2.src = url;
+            if (info2) info2.textContent = `${file.name} • ${bytesToSize(file.size)}`;
+        });
+    }
     if (clearBtn) { clearBtn.addEventListener('click', function(){ if (input) input.value=''; resetPreview(); }); }
+    if (clearBtn2) { clearBtn2.addEventListener('click', function(){ if (input2) input2.value=''; resetPreview2(); }); }
 
     // ==== Toggle password ====
     function bindToggle(btnId, inputId){const btn=document.getElementById(btnId),inp=document.getElementById(inputId); if(!btn||!inp) return; btn.addEventListener('click',()=>{const isPw=inp.type==='password'; inp.type=isPw?'text':'password'; btn.textContent=isPw?'Hide':'Show';});}
@@ -477,8 +522,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const pwc  = document.getElementById('password_confirmation');
     if (form) {
         form.addEventListener('submit', function(e){
-            if (pw.value.length > 0 && pw.value.length < 8) { e.preventDefault(); alert('Password minimal 8 karakter.'); pw.focus(); return; }
-            if (pw.value.length > 0 && pw.value !== pwc.value) { e.preventDefault(); alert('Konfirmasi password tidak sama.'); pwc.focus(); }
+            if (pw.value.length > 0 && pw.value.length < 8) { e.preventDefault(); alert('Password minimal 8 characters.'); pw.focus(); return; }
+            if (pw.value.length > 0 && pw.value !== pwc.value) { e.preventDefault(); alert('Password confirmation is not the same.'); pwc.focus(); }
         });
     }
 
@@ -513,11 +558,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const selectedVillage  = villageSelect?.dataset.selectedId || '';
 
     // 1) provinces
-    setLoading(provinceSelect, spnProvince, true, 'Memuat provinsi…');
+    setLoading(provinceSelect, spnProvince, true, '{{ __('messages.owner.outlet.all_outlets.load_province') }}');
     fetch(`${API_BASE}/provinces.json`)
       .then(r => r.json())
       .then(list => {
-        resetSelect(provinceSelect, '-- Pilih Provinsi --');
+        resetSelect(provinceSelect, '{{ __('messages.owner.outlet.all_outlets.select_province') }}');
         list.forEach(item => {
           const opt = document.createElement('option');
           opt.value = item.id; opt.textContent = item.name;
@@ -525,17 +570,17 @@ document.addEventListener('DOMContentLoaded', function () {
           provinceSelect.appendChild(opt);
         });
       })
-      .catch(() => { resetSelect(provinceSelect, 'Gagal memuat provinsi'); alert('Gagal memuat daftar provinsi.'); })
+      .catch(() => { resetSelect(provinceSelect, 'Fetch province failed'); alert('Fetch province failed'); })
       .finally(() => {
         setLoading(provinceSelect, spnProvince, false);
         if (selectedProvince) {
             fillHiddenName(provinceSelect, provinceNameInput);
             // 2) cities
-            setLoading(citySelect, spnCity, true, 'Memuat kota…');
+            setLoading(citySelect, spnCity, true, '{{ __('messages.owner.outlet.all_outlets.load_city') }}');
             fetch(`${API_BASE}/regencies/${selectedProvince}.json`)
               .then(r => r.json())
               .then(list => {
-                resetSelect(citySelect, '-- Pilih Kota --');
+                resetSelect(citySelect, '{{ __('messages.owner.outlet.all_outlets.select_city') }}');
                 list.forEach(item => {
                   const opt = document.createElement('option');
                   opt.value = item.id; opt.textContent = item.name;
@@ -548,11 +593,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (selectedCity) {
                     fillHiddenName(citySelect, cityNameInput);
                     // 3) districts
-                    setLoading(districtSelect, spnDistrict, true, 'Memuat kecamatan…');
+                    setLoading(districtSelect, spnDistrict, true, '{{ __('messages.owner.outlet.all_outlets.load_district') }}');
                     fetch(`${API_BASE}/districts/${selectedCity}.json`)
                       .then(r => r.json())
                       .then(list => {
-                        resetSelect(districtSelect, '-- Pilih Kecamatan --');
+                        resetSelect(districtSelect, '{{ __('messages.owner.outlet.all_outlets.select_district') }}');
                         list.forEach(item => {
                           const opt = document.createElement('option');
                           opt.value = item.id; opt.textContent = item.name;
@@ -565,11 +610,11 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (selectedDistrict) {
                             fillHiddenName(districtSelect, districtNameInput);
                             // 4) villages
-                            setLoading(villageSelect, spnVillage, true, 'Memuat kelurahan…');
+                            setLoading(villageSelect, spnVillage, true, '{{ __('messages.owner.outlet.all_outlets.load_village') }}');
                             fetch(`${API_BASE}/villages/${selectedDistrict}.json`)
                               .then(r => r.json())
                               .then(list => {
-                                resetSelect(villageSelect, '-- Pilih Kelurahan --');
+                                resetSelect(villageSelect, '{{ __('messages.owner.outlet.all_outlets.select_village') }}');
                                 list.forEach(item => {
                                   const opt = document.createElement('option');
                                   opt.value = item.id; opt.textContent = item.name;
@@ -591,16 +636,16 @@ document.addEventListener('DOMContentLoaded', function () {
     // Perubahan manual (jika user ganti lagi)
     provinceSelect.addEventListener('change', function(){
         fillHiddenName(provinceSelect, provinceNameInput);
-        resetSelect(citySelect,'-- Pilih Kota --'); resetSelect(districtSelect,'-- Pilih Kecamatan --'); resetSelect(villageSelect,'-- Pilih Kelurahan --');
+        resetSelect(citySelect,'{{ __('messages.owner.outlet.all_outlets.select_city') }}'); resetSelect(districtSelect,'{{ __('messages.owner.outlet.all_outlets.select_district') }}'); resetSelect(villageSelect,'{{ __('messages.owner.outlet.all_outlets.select_village') }}');
         citySelect.disabled = districtSelect.disabled = villageSelect.disabled = true;
 
         if (!this.value) return;
 
-        setLoading(citySelect, spnCity, true, 'Memuat kota…');
+        setLoading(citySelect, spnCity, true, '{{ __('messages.owner.outlet.all_outlets.load_city') }}');
         fetch(`${API_BASE}/regencies/${this.value}.json`)
             .then(r=>r.json())
             .then(list=>{
-                resetSelect(citySelect,'-- Pilih Kota --');
+                resetSelect(citySelect,'{{ __('messages.owner.outlet.all_outlets.select_city') }}');
                 list.forEach(item=>{
                     const opt=document.createElement('option'); opt.value=item.id; opt.textContent=item.name;
                     citySelect.appendChild(opt);
@@ -611,15 +656,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     citySelect.addEventListener('change', function(){
         fillHiddenName(citySelect, cityNameInput);
-        resetSelect(districtSelect,'-- Pilih Kecamatan --'); resetSelect(villageSelect,'-- Pilih Kelurahan --');
+        resetSelect(districtSelect,'{{ __('messages.owner.outlet.all_outlets.select_district') }}'); resetSelect(villageSelect,'{{ __('messages.owner.outlet.all_outlets.select_village') }}');
         districtSelect.disabled = villageSelect.disabled = true;
         if (!this.value) return;
 
-        setLoading(districtSelect, spnDistrict, true, 'Memuat kecamatan…');
+        setLoading(districtSelect, spnDistrict, true, '{{ __('messages.owner.outlet.all_outlets.load_district') }}');
         fetch(`${API_BASE}/districts/${this.value}.json`)
             .then(r=>r.json())
             .then(list=>{
-                resetSelect(districtSelect,'-- Pilih Kecamatan --');
+                resetSelect(districtSelect,'{{ __('messages.owner.outlet.all_outlets.select_district') }}');
                 list.forEach(item=>{
                     const opt=document.createElement('option'); opt.value=item.id; opt.textContent=item.name;
                     districtSelect.appendChild(opt);
@@ -630,15 +675,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     districtSelect.addEventListener('change', function(){
         fillHiddenName(districtSelect, districtNameInput);
-        resetSelect(villageSelect,'-- Pilih Kelurahan --');
+        resetSelect(villageSelect,'{{ __('messages.owner.outlet.all_outlets.select_village') }}');
         villageSelect.disabled = true;
         if (!this.value) return;
 
-        setLoading(villageSelect, spnVillage, true, 'Memuat kelurahan…');
+        setLoading(villageSelect, spnVillage, true, '{{ __('messages.owner.outlet.all_outlets.load_village') }}');
         fetch(`${API_BASE}/villages/${this.value}.json`)
             .then(r=>r.json())
             .then(list=>{
-                resetSelect(villageSelect,'-- Pilih Kelurahan --');
+                resetSelect(villageSelect,'{{ __('messages.owner.outlet.all_outlets.select_village') }}');
                 list.forEach(item=>{
                     const opt=document.createElement('option'); opt.value=item.id; opt.textContent=item.name;
                     villageSelect.appendChild(opt);
@@ -679,11 +724,11 @@ document.addEventListener('DOMContentLoaded', function () {
         function showStatus(ok, msg) {
             statusEl.className = 'form-text mt-1';
             if (ok) {
-                statusEl.innerHTML = `<span class="badge bg-success">Available</span> <span class="text-success ms-1">${msg}</span>`;
+                statusEl.innerHTML = `<span class="badge bg-success">{{ __('messages.owner.outlet.all_outlets.available') }}</span> <span class="text-success ms-1">${msg}</span>`;
                 inputUsername.classList.remove('is-invalid');
                 inputUsername.classList.add('is-valid');
             } else {
-                statusEl.innerHTML = `<span class="badge bg-danger">Taken</span> <span class="text-danger ms-1">${msg}</span>`;
+                statusEl.innerHTML = `<span class="badge bg-danger">{{ __('messages.owner.outlet.all_outlets.taken') }}</span> <span class="text-danger ms-1">${msg}</span>`;
                 inputUsername.classList.remove('is-valid');
                 inputUsername.classList.add('is-invalid');
             }
@@ -701,7 +746,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Validasi ringan di client – harus cocok dengan HTML pattern
             if (val.length < 3 || val.length > 30 || !/^[A-Za-z0-9._\-]+$/.test(val)) {
-                showStatus(false, 'Format tidak valid.');
+                showStatus(false, 'Format not valid.');
                 return;
             }
 
@@ -718,17 +763,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     headers: { 'Accept': 'application/json' },
                 });
 
-                if (res.status === 422) { showStatus(false, 'Format tidak valid.'); return; }
+                if (res.status === 422) { showStatus(false, 'Format not valid.'); return; }
 
                 const data = await res.json();
                 if (typeof data.available !== 'undefined') {
-                    data.available ? showStatus(true, 'Username tersedia 🎉')
-                                   : showStatus(false, 'Username sudah dipakai.');
+                    data.available ? showStatus(true, '{{ __('messages.owner.outlet.all_outlets.username_available') }} 🎉')
+                                   : showStatus(false, '{{ __('messages.owner.outlet.all_outlets.username_used') }}');
                 } else {
-                    showNeutral('Tidak bisa memeriksa saat ini.');
+                    showNeutral("Can't check at this time");
                 }
             } catch (e) {
-                showNeutral('Terjadi kesalahan jaringan.');
+                showNeutral('A network error occurred.');
             } finally {
                 setUsernameLoading(false);
             }
@@ -751,7 +796,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const activeLbl = document.getElementById('isActiveLabel');
         if (activeEl && activeLbl) {
             activeEl.addEventListener('change', () => {
-                activeLbl.textContent = activeEl.checked ? 'Aktif' : 'Nonaktif';
+                activeLbl.textContent = activeEl.checked ? '{{ __('messages.owner.outlet.all_outlets.active') }}' : '{{ __('messages.owner.outlet.all_outlets.inactive') }}';
             });
         }
 
@@ -759,7 +804,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const qrLbl = document.getElementById('isQrActiveLabel');
         if (qrEl && qrLbl) {
             qrEl.addEventListener('change', () => {
-                qrLbl.textContent = qrEl.checked ? 'Aktif' : 'Nonaktif';
+                qrLbl.textContent = qrEl.checked ? '{{ __('messages.owner.outlet.all_outlets.active') }}' : '{{ __('messages.owner.outlet.all_outlets.inactive') }}';
             });
         }
     })();

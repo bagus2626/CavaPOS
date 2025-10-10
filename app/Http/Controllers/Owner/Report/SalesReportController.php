@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Owner\Report;
 
 use App\Http\Controllers\Controller;
 use App\Exports\SalesReportExport;
+use App\Models\User;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,21 +13,38 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class SalesReportController extends Controller
 {
-    /**
-     * Display sales report dashboard
-     */
+
     public function index(Request $request)
     {
         $filters = $this->getFilters($request);
+
+        // Get owner's partners/outlets
+        $ownerId = auth('owner')->id();
+        $partners = User::where('owner_id', $ownerId)
+            ->where('role', 'partner')
+            ->where('is_active', 1)
+            ->orderBy('name')
+            ->get(['id', 'name', 'partner_code', 'city', 'province']);
+
+        // Get selected partner info if filtered
+        $selectedPartner = null;
+        if (!empty($filters['partner_id'])) {
+            $selectedPartner = User::where('id', $filters['partner_id'])
+                ->where('owner_id', $ownerId)
+                ->first();
+        }
+
         $baseQuery = $this->buildFilteredQuery($filters);
 
         $data = [
+            'partners'           => $partners,
+            'selectedPartner'    => $selectedPartner,
             'totalRevenue'       => $this->calculateTotalRevenue(clone $baseQuery),
             'totalOrders'        => $this->calculateTotalItemsSold(clone $baseQuery),
             'totalBookingOrders' => $this->calculateTotalDiscreetOrders(clone $baseQuery),
             'revenueChartData'   => $this->getRevenueChartData(clone $baseQuery, $filters['period']),
             'categoryChartData'  => $this->getCategoryChartData(clone $baseQuery),
-            'topProducts'        => $this->getTopProducts(clone $baseQuery),
+            'topProducts'        => $this->getTopProducts(clone $baseQuery, $filters),
             'recentTransactions' => $this->getRecentTransactions(clone $baseQuery),
             'indicatorText'      => $this->getIndicatorText($filters),
             'filters'            => $filters,
@@ -35,9 +53,17 @@ class SalesReportController extends Controller
         return view('pages.owner.reports.sales', $data);
     }
 
-    /**
-     * Export sales report to Excel
-     */
+    public function getTopProductsAjax(Request $request)
+    {
+        $filters = $this->getFilters($request);
+        $baseQuery = $this->buildFilteredQuery($filters);
+
+        $products = $this->getTopProducts(clone $baseQuery, $filters);
+
+        return response()->json($products);
+    }
+
+
     public function export(Request $request)
     {
         $filters = $this->getFilters($request);
@@ -46,9 +72,6 @@ class SalesReportController extends Controller
         return Excel::download(new SalesReportExport($filters), $fileName);
     }
 
-    /**
-     * Get order details by ID (for modal)
-     */
     public function getOrderDetails(Request $request, $id)
     {
         $orderDetails = DB::table('order_details')
@@ -76,15 +99,15 @@ class SalesReportController extends Controller
         return response()->json($orderDetails);
     }
 
-    // ====== PRIVATE HELPER METHODS ======
 
-    /**
-     * Get and validate filters from request
-     */
+
     private function getFilters(Request $request): array
     {
         $period = $request->input('period', 'daily');
         $filters = ['period' => $period];
+
+        // Partner filter
+        $filters['partner_id'] = $request->input('partner_id', '');
 
         switch ($period) {
             case 'yearly':
@@ -94,9 +117,11 @@ class SalesReportController extends Controller
 
             case 'monthly':
                 $filters['month_year'] = $request->input('month_year', date('Y'));
+                $filters['month_from'] = $request->input('month_from', 1);
+                $filters['month_to'] = $request->input('month_to', date('n'));
                 break;
 
-            default: // daily
+            default:
                 $from = $request->input('from');
                 $to = $request->input('to');
 
@@ -113,7 +138,6 @@ class SalesReportController extends Controller
                 break;
         }
 
-        // Ensure from and to dates are always set
         if (!isset($filters['from'])) {
             $filters['from'] = now()->toDateString();
         }
@@ -121,16 +145,31 @@ class SalesReportController extends Controller
             $filters['to'] = now()->toDateString();
         }
 
+        $filters['sort_products'] = $request->input('sort_products', 'desc');
+
         return $filters;
     }
 
-    /**
-     * Build base query with filters
-     */
+
     private function buildFilteredQuery(array $filters): Builder
     {
+        $ownerId = auth('owner')->id();
+
         $query = DB::table('booking_orders')
             ->whereIn('order_status', ['PAID', 'PROCESSED', 'SERVED']);
+
+        // Filter by owner's partners
+        if (!empty($filters['partner_id'])) {
+            // Specific partner selected
+            $query->where('booking_orders.partner_id', $filters['partner_id']);
+        } else {
+            // All owner's partners
+            $partnerIds = User::where('owner_id', $ownerId)
+                ->where('role', 'partner')
+                ->pluck('id');
+
+            $query->whereIn('booking_orders.partner_id', $partnerIds);
+        }
 
         switch ($filters['period']) {
             case 'yearly':
@@ -139,7 +178,14 @@ class SalesReportController extends Controller
                 break;
 
             case 'monthly':
-                $query->whereYear('booking_orders.created_at', $filters['month_year']);
+                $year = $filters['month_year'];
+                $monthFrom = $filters['month_from'];
+                $monthTo = $filters['month_to'];
+
+                $startDate = Carbon::createFromDate($year, $monthFrom, 1)->startOfMonth();
+                $endDate = Carbon::createFromDate($year, $monthTo, 1)->endOfMonth();
+
+                $query->whereBetween('booking_orders.created_at', [$startDate, $endDate]);
                 break;
 
             default: // daily
@@ -229,11 +275,12 @@ class SalesReportController extends Controller
         ];
     }
 
-    /**
-     * Get top selling products
-     */
-    private function getTopProducts(Builder $query, ?int $paginate = null)
+
+    private function getTopProducts(Builder $query, array $filters, ?int $paginate = null)
     {
+
+        $sortDirection = $filters['sort_products'] === 'asc' ? 'asc' : 'desc';
+
         $query = $query
             ->join('order_details', 'booking_orders.id', '=', 'order_details.booking_order_id')
             ->join('partner_products', 'order_details.partner_product_id', '=', 'partner_products.id')
@@ -243,19 +290,19 @@ class SalesReportController extends Controller
                 DB::raw('SUM(order_details.quantity) as total_quantity')
             )
             ->groupBy('partner_products.name')
-            ->orderBy('total_quantity', 'desc');
+            ->orderBy('total_quantity', $sortDirection);
 
         if ($paginate) {
             return $query->paginate($paginate)->withQueryString();
         }
 
-        return $query->get();
+        return $query->limit(7)->get();
     }
 
     /**
      * Get recent transactions
      */
-    private function getRecentTransactions(Builder $query): \Illuminate\Support\Collection
+    private function getRecentTransactions(Builder $query)
     {
         return $query
             ->select('id', 'booking_order_code', 'total_order_value', 'created_at')
@@ -268,11 +315,49 @@ class SalesReportController extends Controller
      */
     private function getIndicatorText(array $filters): string
     {
-        return match ($filters['period']) {
+        $periodText = match ($filters['period']) {
             'yearly'  => "Tampilan Tahunan ({$filters['year_from']} - {$filters['year_to']})",
-            'monthly' => "Tampilan Bulanan ({$filters['month_year']})",
+            'monthly' => $this->getMonthlyIndicatorText($filters),
             default   => 'Tampilan Harian (' . Carbon::parse($filters['from'])->format('d M') . ' - ' . Carbon::parse($filters['to'])->format('d M, Y') . ')',
         };
+
+        // Add partner name if filtered
+        if (!empty($filters['partner_id'])) {
+            $partner = User::find($filters['partner_id']);
+            if ($partner) {
+                $periodText .= " - {$partner->name}";
+            }
+        }
+
+        return $periodText;
+    }
+
+    private function getMonthlyIndicatorText(array $filters): string
+    {
+        $monthNames = [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember'
+        ];
+
+        $year = $filters['month_year'];
+        $monthFrom = $monthNames[$filters['month_from']] ?? 'Januari';
+        $monthTo = $monthNames[$filters['month_to']] ?? 'Desember';
+
+        if ($filters['month_from'] == $filters['month_to']) {
+            return "Tampilan Bulanan ({$monthFrom} {$year})";
+        }
+
+        return "Tampilan Bulanan ({$monthFrom} - {$monthTo} {$year})";
     }
 
     /**
@@ -282,6 +367,14 @@ class SalesReportController extends Controller
     {
         $baseName = 'laporan-penjualan';
 
+        // Add partner name if filtered
+        if (!empty($filters['partner_id'])) {
+            $partner = User::find($filters['partner_id']);
+            if ($partner) {
+                $baseName .= '-' . strtolower(str_replace(' ', '-', $partner->name));
+            }
+        }
+
         switch ($filters['period']) {
             case 'yearly':
                 if ($filters['year_from'] == $filters['year_to']) {
@@ -290,7 +383,14 @@ class SalesReportController extends Controller
                 return "{$baseName}-tahunan-{$filters['year_from']}-{$filters['year_to']}.xlsx";
 
             case 'monthly':
-                return "{$baseName}-bulanan-{$filters['month_year']}.xlsx";
+                $year = $filters['month_year'];
+                $monthFrom = str_pad($filters['month_from'], 2, '0', STR_PAD_LEFT);
+                $monthTo = str_pad($filters['month_to'], 2, '0', STR_PAD_LEFT);
+
+                if ($filters['month_from'] == $filters['month_to']) {
+                    return "{$baseName}-bulanan-{$year}-{$monthFrom}.xlsx";
+                }
+                return "{$baseName}-bulanan-{$year}-{$monthFrom}_sampai_{$monthTo}.xlsx";
 
             default: // daily
                 $from = Carbon::parse($filters['from'])->format('d-m-Y');

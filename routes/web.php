@@ -36,7 +36,12 @@ use App\Http\Controllers\Customer\Auth\CustomerPasswordResetController;
 use App\Http\Controllers\Employee\Transaction\KitchenTransactionController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
-
+Route::get('/set-language', function () {
+    $locale = request('locale');
+    abort_unless(in_array($locale, ['en', 'id'], true), 400);
+    session(['app_locale' => $locale]);
+    return back();
+})->name('language.set.get');
 Route::post('/set-language', function () {
     $locale = request('locale');
     abort_unless(in_array($locale, ['en', 'id'], true), 400);
@@ -147,6 +152,7 @@ Route::middleware('setlocale')->group(function () {
 
             Route::prefix('report')->name('report.')->group(function () {
                 Route::get('sales/export', [SalesReportController::class, 'export'])->name('sales.export');
+                Route::get('sales/products', [SalesReportController::class, 'getTopProductsAjax'])->name('sales.products'); // ROUTE BARU
                 Route::get('order-details/{id}', [SalesReportController::class, 'getOrderDetails'])->name('order-details');
                 Route::resource('sales', SalesReportController::class)->only(['index']);
             });

@@ -3,22 +3,27 @@
     <thead>
       <tr>
         <th>#</th>
-        <th>Kode Promo</th>
-        <th>Nama Promo</th>
-        <th>Tipe Promo</th>
-        <th>Nilai</th>
-        <th>Tanggal Aktif</th>
-        <th>Hari Aktif</th>
-        <th>Status</th>
-        <th class="text-nowrap">Action</th>
+        <th>{{ __('messages.owner.products.promotions.promo_code') }}</th>
+        <th>{{ __('messages.owner.products.promotions.promo_name') }}</th>
+        <th>{{ __('messages.owner.products.promotions.promo_type') }}</th>
+        <th>{{ __('messages.owner.products.promotions.value') }}</th>
+        <th>{{ __('messages.owner.products.promotions.active_date') }}</th>
+        <th>{{ __('messages.owner.products.promotions.active_day') }}</th>
+        <th>{{ __('messages.owner.products.promotions.status') }}</th>
+        <th class="text-nowrap">{{ __('messages.owner.products.promotions.actions') }}</th>
       </tr>
     </thead>
     <tbody>
       @foreach ($promotions as $index => $promotion)
         @php
           $daysMap = [
-            'sun' => 'Minggu','mon' => 'Senin','tue' => 'Selasa','wed' => 'Rabu',
-            'thu' => 'Kamis','fri' => 'Jumat','sat' => 'Sabtu',
+            'sun' => __('messages.owner.products.promotions.sunday'),
+            'mon' => __('messages.owner.products.promotions.monday'),
+            'tue' => __('messages.owner.products.promotions.tuesday'),
+            'wed' => __('messages.owner.products.promotions.wednesday'),
+            'thu' => __('messages.owner.products.promotions.thursday'),
+            'fri' => __('messages.owner.products.promotions.friday'),
+            'sat' => __('messages.owner.products.promotions.saturday'),
           ];
           $activeDaysArr = is_array($promotion->active_days) ? $promotion->active_days : [];
           $activeDays = count($activeDaysArr) === 7
@@ -27,12 +32,12 @@
 
           // Status badge class (akan di-soft oleh CSS)
           if (!$promotion->is_active) {
-            $label = 'Nonaktif';   $class = 'badge-secondary';
+            $label = __('messages.owner.products.promotions.inactive');   $class = 'badge-secondary';
           } else {
             $now = now(); $start = $promotion->start_date; $end = $promotion->end_date;
-            if ($start && $now->lt($start)) { $label = 'Akan Aktif'; $class = 'badge-warning'; }
-            elseif ($end && $now->gt($end)) { $label = 'Kadaluarsa'; $class = 'badge-danger'; }
-            else { $label = 'Aktif'; $class = 'badge-success'; }
+            if ($start && $now->lt($start)) { $label = __('messages.owner.products.promotions.will_be_active'); $class = 'badge-warning'; }
+            elseif ($end && $now->gt($end)) { $label = __('messages.owner.products.promotions.expired'); $class = 'badge-danger'; }
+            else { $label = __('messages.owner.products.promotions.active'); $class = 'badge-success'; }
           }
         @endphp
 
@@ -43,9 +48,9 @@
 
           <td>
             @if($promotion->promotion_type === 'percentage')
-              <span class="badge badge-type">Persentase</span>
+              <span class="badge badge-type">{{ __('messages.owner.products.promotions.percentage') }}</span>
             @else
-              <span class="badge badge-type">Nominal</span>
+              <span class="badge badge-type">{{ __('messages.owner.products.promotions.reduced_fare') }}</span>
             @endif
           </td>
 
@@ -62,11 +67,11 @@
               {{ $promotion->start_date->translatedFormat('d F Y') }} ({{ $promotion->start_date->format('H:i') }}) – 
               {{ $promotion->end_date->translatedFormat('d F Y') }} ({{ $promotion->end_date->format('H:i') }})
             @elseif($promotion->start_date)
-              Mulai {{ $promotion->start_date->translatedFormat('d F Y') }} ({{ $promotion->start_date->format('H:i') }})
+              {{ __('messages.owner.products.promotions.start') }} {{ $promotion->start_date->translatedFormat('d F Y') }} ({{ $promotion->start_date->format('H:i') }})
             @elseif($promotion->end_date)
-              Sampai {{ $promotion->end_date->translatedFormat('d F Y') }} ({{ $promotion->end_date->format('H:i') }})
+              {{ __('messages.owner.products.promotions.until') }} {{ $promotion->end_date->translatedFormat('d F Y') }} ({{ $promotion->end_date->format('H:i') }})
             @else
-              <span class="text-muted">Tidak terbatas</span>
+              <span class="text-muted">{{ __('messages.owner.products.promotions.unlimited') }}</span>
             @endif
           </td>
 
@@ -77,9 +82,9 @@
           </td>
 
           <td class="text-nowrap">
-            <a href="{{ route('owner.user-owner.promotions.show', $promotion->id) }}" class="btn btn-sm btn-outline-choco me-1">Detail</a>
-            <a href="{{ route('owner.user-owner.promotions.edit', $promotion->id) }}" class="btn btn-sm btn-outline-choco me-1">Edit</a>
-            <button onclick="deletePromo({{ $promotion->id }})" class="btn btn-sm btn-soft-danger">Delete</button>
+            <a href="{{ route('owner.user-owner.promotions.show', $promotion->id) }}" class="btn btn-sm btn-outline-choco me-1">{{ __('messages.owner.products.promotions.detail') }}</a>
+            <a href="{{ route('owner.user-owner.promotions.edit', $promotion->id) }}" class="btn btn-sm btn-outline-choco me-1">{{ __('messages.owner.products.promotions.edit') }}</a>
+            <button onclick="deletePromo({{ $promotion->id }})" class="btn btn-sm btn-soft-danger">{{ __('messages.owner.products.promotions.delete') }}</button>
           </td>
         </tr>
       @endforeach
@@ -90,7 +95,7 @@
 <style>
 /* ===== Promotions table (scoped to the parent page .owner-promotions) ===== */
 .owner-promotions .owner-promotions-table{
-  border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,.08); overflow:hidden; background:#fff;
+  border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,.08); overflow-y:hidden; background:#fff;
 }
 .owner-promotions .table{ margin-bottom:0; background:#fff; }
 .owner-promotions thead th{

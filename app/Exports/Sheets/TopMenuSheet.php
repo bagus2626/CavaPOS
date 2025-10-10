@@ -2,6 +2,7 @@
 
 namespace App\Exports\Sheets;
 
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -14,6 +15,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use Carbon\Carbon;
 
 class TopMenuSheet implements FromArray, WithHeadings, WithEvents, WithColumnWidths, WithStyles, WithTitle
 {
@@ -128,12 +130,27 @@ class TopMenuSheet implements FromArray, WithHeadings, WithEvents, WithColumnWid
     private function fetchTopMenuData()
     {
         $filters = $this->exportFilters;
+        $ownerId = auth('owner')->id();
 
         $query = DB::table('booking_orders')
             ->join('order_details', 'booking_orders.id', '=', 'order_details.booking_order_id')
             ->join('partner_products', 'order_details.partner_product_id', '=', 'partner_products.id')
             ->whereIn('booking_orders.order_status', ['PAID', 'PROCESSED', 'SERVED']);
 
+        // CRITICAL FIX: Apply partner filter
+        if (!empty($filters['partner_id'])) {
+            // Specific partner selected
+            $query->where('booking_orders.partner_id', $filters['partner_id']);
+        } else {
+            // All owner's partners
+            $partnerIds = User::where('owner_id', $ownerId)
+                ->where('role', 'partner')
+                ->pluck('id');
+
+            $query->whereIn('booking_orders.partner_id', $partnerIds);
+        }
+
+        // Apply date filters
         switch ($filters['period']) {
             case 'yearly':
                 $query->whereYear('booking_orders.created_at', '>=', $filters['year_from'])
@@ -141,7 +158,14 @@ class TopMenuSheet implements FromArray, WithHeadings, WithEvents, WithColumnWid
                 break;
 
             case 'monthly':
-                $query->whereYear('booking_orders.created_at', $filters['month_year']);
+                $year = $filters['month_year'];
+                $monthFrom = $filters['month_from'];
+                $monthTo = $filters['month_to'];
+
+                $startDate = Carbon::createFromDate($year, $monthFrom, 1)->startOfMonth();
+                $endDate = Carbon::createFromDate($year, $monthTo, 1)->endOfMonth();
+
+                $query->whereBetween('booking_orders.created_at', [$startDate, $endDate]);
                 break;
 
             default:

@@ -2,6 +2,7 @@
 
 namespace App\Exports\Sheets;
 
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromArray;
@@ -137,11 +138,51 @@ class TransactionSheet implements FromArray, WithHeadings, WithEvents, WithColum
     private function fetchTransactionData()
     {
         $filters = $this->exportFilters;
+        $ownerId = auth('owner')->id();
 
         $query = DB::table('booking_orders')
             ->join('order_details', 'booking_orders.id', '=', 'order_details.booking_order_id')
             ->join('partner_products', 'order_details.partner_product_id', '=', 'partner_products.id')
-            ->whereIn('booking_orders.order_status', ['PAID', 'PROCESSED', 'SERVED'])
+            ->whereIn('booking_orders.order_status', ['PAID', 'PROCESSED', 'SERVED']);
+
+        // CRITICAL FIX: Apply partner filter
+        if (!empty($filters['partner_id'])) {
+            // Specific partner selected
+            $query->where('booking_orders.partner_id', $filters['partner_id']);
+        } else {
+            // All owner's partners
+            $partnerIds = User::where('owner_id', $ownerId)
+                ->where('role', 'partner')
+                ->pluck('id');
+
+            $query->whereIn('booking_orders.partner_id', $partnerIds);
+        }
+
+        // Apply date filters
+        switch ($filters['period']) {
+            case 'yearly':
+                $query->whereYear('booking_orders.created_at', '>=', $filters['year_from'])
+                    ->whereYear('booking_orders.created_at', '<=', $filters['year_to']);
+                break;
+
+            case 'monthly':
+                $year = $filters['month_year'];
+                $monthFrom = $filters['month_from'];
+                $monthTo = $filters['month_to'];
+
+                $startDate = Carbon::createFromDate($year, $monthFrom, 1)->startOfMonth();
+                $endDate = Carbon::createFromDate($year, $monthTo, 1)->endOfMonth();
+
+                $query->whereBetween('booking_orders.created_at', [$startDate, $endDate]);
+                break;
+
+            default:
+                $query->whereDate('booking_orders.created_at', '>=', $filters['from'])
+                    ->whereDate('booking_orders.created_at', '<=', $filters['to']);
+                break;
+        }
+
+        return $query
             ->select(
                 'booking_orders.id as booking_order_id',
                 'booking_orders.created_at',
@@ -153,25 +194,8 @@ class TransactionSheet implements FromArray, WithHeadings, WithEvents, WithColum
                 'order_details.options_price'
             )
             ->orderBy('booking_orders.created_at', 'desc')
-            ->orderBy('booking_orders.id', 'asc');
-
-        switch ($filters['period']) {
-            case 'yearly':
-                $query->whereYear('booking_orders.created_at', '>=', $filters['year_from'])
-                    ->whereYear('booking_orders.created_at', '<=', $filters['year_to']);
-                break;
-
-            case 'monthly':
-                $query->whereYear('booking_orders.created_at', $filters['month_year']);
-                break;
-
-            default:
-                $query->whereDate('booking_orders.created_at', '>=', $filters['from'])
-                    ->whereDate('booking_orders.created_at', '<=', $filters['to']);
-                break;
-        }
-
-        return $query->get();
+            ->orderBy('booking_orders.id', 'asc')
+            ->get();
     }
 
     private function groupTransactionsByDate($items): array

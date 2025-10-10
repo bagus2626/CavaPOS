@@ -1,25 +1,25 @@
 @extends('layouts.partner')
 
-@section('title', 'Edit Employee')
-@section('page_title', 'Edit Employee')
+@section('title', __('messages.partner.user_management.employees.edit_employee'))
+@section('page_title', __('messages.partner.user_management.employees.edit_employee'))
 
 @section('content')
 <div class="container">
     <a href="{{ route('partner.user-management.employees.index') }}" 
         class="btn btn-outline-choco mb-3">
-        <i class="fas fa-arrow-left mr-2"></i>Back to Employees
+        <i class="fas fa-arrow-left mr-2"></i>{{ __('messages.partner.user_management.employees.back_to_employees') }}
     </a>
 
 
     <div class="card shadow-sm">
         <div class="card-header">
-            <h5 class="card-title mb-0">Edit Employee</h5>
+            <h5 class="card-title mb-0">{{ __('messages.partner.user_management.employees.edit_employee') }}</h5>
         </div>
         <div class="card-body">
             {{-- Error list --}}
             @if ($errors->any())
                 <div class="alert alert-danger">
-                    <strong>Periksa kembali input kamu:</strong>
+                    <strong>{{ __('messages.partner.user_management.employees.alert_1') }}</strong>
                     <ul class="mb-0 mt-2">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
@@ -41,7 +41,7 @@
                 <div class="row">
                     {{-- Name --}}
                     <div class="col-md-6 mb-3">
-                        <label for="name" class="form-label">Employee Name</label>
+                        <label for="name" class="form-label">{{ __('messages.partner.user_management.employees.employee_name') }}</label>
                         <input type="text" name="name" id="name"
                                class="form-control @error('name') is-invalid @enderror"
                                value="{{ old('name', $employee->name) }}" required>
@@ -52,13 +52,13 @@
 
                     {{-- Role --}}
                     <div class="col-md-6 mb-3">
-                        <label for="role" class="form-label">Role</label>
+                        <label for="role" class="form-label">{{ __('messages.partner.user_management.employees.role') }}</label>
                         <select name="role" id="role"
                                 class="form-control @error('role') is-invalid @enderror" required>
                             <option value="">-- Pilih Status --</option>
-                            <option value="CASHIER" {{ old('role', $employee->role) === 'CASHIER' ? 'selected' : '' }}>Kasir</option>
-                            <option value="KITCHEN" {{ old('role', $employee->role) === 'KITCHEN' ? 'selected' : '' }}>Kitchen</option>
-                            <option value="WAITER"  {{ old('role', $employee->role) === 'WAITER'  ? 'selected' : '' }}>Waiter</option>
+                            <option value="CASHIER" {{ old('role', $employee->role) === 'CASHIER' ? 'selected' : '' }}>{{ __('messages.partner.user_management.employees.cashier') }}</option>
+                            <option value="KITCHEN" {{ old('role', $employee->role) === 'KITCHEN' ? 'selected' : '' }}>{{ __('messages.partner.user_management.employees.kitchen') }}</option>
+                            <option value="WAITER"  {{ old('role', $employee->role) === 'WAITER'  ? 'selected' : '' }}>{{ __('messages.partner.user_management.employees.waiter') }}</option>
                         </select>
                         @error('role')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -69,7 +69,7 @@
                 {{-- Username --}}
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
+                        <label for="username" class="form-label">{{ __('messages.partner.user_management.employees.username') }} <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <span class="input-group-text">@</span>
                             <input
@@ -88,7 +88,7 @@
                                 spellcheck="false"
                             >
                         </div>
-                        <small class="text-muted">3–30 karakter, boleh huruf/angka, titik (.), underscore (_), dan dash (-).</small>
+                        <small class="text-muted">{{ __('messages.partner.user_management.employees.muted_text_1') }}</small>
                         @error('username')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
@@ -96,13 +96,16 @@
 
                     {{-- Aktif / Nonaktif --}}
                     <div class="col-md-6 mb-3">
-                        <label class="form-label d-block">Status</label>
+                        <label class="form-label d-block">{{ __('messages.partner.user_management.employees.status') }}</label>
+                        <input type="hidden" name="is_active" value="0">
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox"
                                    id="is_active" name="is_active" value="1"
                                    {{ old('is_active', $employee->is_active) ? 'checked' : '' }}>
-                            <label class="form-check-label" for="is_active">
-                                {{ old('is_active', $employee->is_active) ? 'Aktif' : 'Nonaktif' }}
+                            <label class="form-check-label" for="is_active"
+                                    data-active="{{ __('messages.partner.user_management.employees.active') }}"
+                                    data-inactive="{{ __('messages.partner.user_management.employees.non_active') }}">
+                                {{ old('is_active', $employee->is_active) ? __('messages.partner.user_management.employees.active') : __('messages.partner.user_management.employees.non_active') }}
                             </label>
                         </div>
                     </div>
@@ -111,7 +114,7 @@
                 <div class="row">
                     {{-- Email --}}
                     <div class="col-md-6 mb-3">
-                        <label for="email" class="form-label">Employee Email <span class="text-danger">*</span></label>
+                        <label for="email" class="form-label">{{ __('messages.partner.user_management.employees.employee_email') }} <span class="text-danger">*</span></label>
                         <input
                             type="email"
                             name="email"
@@ -133,7 +136,7 @@
 
                     {{-- Image --}}
                     <div class="col-md-6 mb-3">
-                        <label for="image" class="form-label">Upload Image</label>
+                        <label for="image" class="form-label">{{ __('messages.partner.user_management.employees.upload_image') }}</label>
                         <input
                             type="file"
                             name="image"
@@ -141,7 +144,7 @@
                             class="form-control @error('image') is-invalid @enderror"
                             accept="image/*"
                         >
-                        <small class="text-muted d-block">Format: JPG, PNG, WEBP. Maks 2 MB.</small>
+                        <small class="text-muted d-block">Format: JPG, PNG, WEBP. Max 2 MB.</small>
                         @error('image')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror>
@@ -173,7 +176,7 @@
                 {{-- Password (opsional) --}}
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="password" class="form-label">Password (opsional)</label>
+                        <label for="password" class="form-label">{{ __('messages.partner.user_management.employees.password_optional') }}</label>
                         <div class="input-group">
                             <input
                                 type="password"
@@ -182,18 +185,18 @@
                                 class="form-control @error('password') is-invalid @enderror"
                                 minlength="8"
                                 autocomplete="new-password"
-                                placeholder="Kosongkan jika tidak diubah"
+                                placeholder="{{ __('messages.partner.user_management.employees.password_placeholder_1') }}"
                             >
-                            <button class="btn btn-outline-secondary" type="button" id="togglePassword" tabindex="-1">Show</button>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword" tabindex="-1">{{ __('messages.partner.user_management.employees.show') }}</button>
                         </div>
-                        <small class="text-muted">Isi untuk mengganti password. Minimal 8 karakter.</small>
+                        <small class="text-muted">{{ __('messages.partner.user_management.employees.muted_text_2') }}</small>
                         @error('password')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label for="password_confirmation" class="form-label">Konfirmasi Password</label>
+                        <label for="password_confirmation" class="form-label">{{ __('messages.partner.user_management.employees.password_confirmation') }}</label>
                         <div class="input-group">
                             <input
                                 type="password"
@@ -202,9 +205,9 @@
                                 class="form-control @error('password_confirmation') is-invalid @enderror"
                                 minlength="8"
                                 autocomplete="new-password"
-                                placeholder="Ulangi password jika diisi"
+                                placeholder="{{ __('messages.partner.user_management.employees.password_placeholder_2') }}"
                             >
-                            <button class="btn btn-outline-secondary" type="button" id="togglePasswordConfirm" tabindex="-1">Show</button>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePasswordConfirm" tabindex="-1">{{ __('messages.partner.user_management.employees.show') }}</button>
                         </div>
                         @error('password_confirmation')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -214,8 +217,8 @@
 
                 {{-- Submit --}}
                 <div class="d-flex justify-content-end">
-                    <a href="{{ route('partner.user-management.employees.index') }}" class="btn btn-outline-choco me-2">Cancel</a>
-                    <button type="submit" class="btn btn-primary">Update</button>
+                    <a href="{{ route('partner.user-management.employees.index') }}" class="btn btn-outline-choco me-2">{{ __('messages.partner.user_management.employees.cancel') }}</a>
+                    <button type="submit" class="btn btn-primary">{{ __('messages.partner.user_management.employees.update') }}</button>
                 </div>
 
             </form>
@@ -368,7 +371,7 @@ document.addEventListener('DOMContentLoaded', function () {
         isActive.addEventListener('change', function () {
             const label = document.querySelector('label[for="is_active"] + .form-check .form-check-label') ||
                           this.closest('.form-check').querySelector('.form-check-label');
-            if (label) label.textContent = this.checked ? 'Aktif' : 'Nonaktif';
+            if (label) label.textContent = this.checked ? label.dataset.active : label.dataset.inactive;
         });
     }
 
