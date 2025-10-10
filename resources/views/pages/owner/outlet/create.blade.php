@@ -216,7 +216,7 @@
                             @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
-                        {{-- Image --}}
+                        {{-- Background picture --}}
                         <div class="col-md-6">
                             <label for="image" class="form-label">{{ __('messages.owner.outlet.all_outlets.upload_picture') }}</label>
                             <input type="file" name="image" id="image"
@@ -236,6 +236,28 @@
                                     </button>
                                 </div>
                                 <small id="imageInfo" class="text-muted d-block mt-1"></small>
+                            </div>
+                        </div>
+                        {{-- Logo --}}
+                        <div class="col-md-6">
+                            <label for="logo" class="form-label">{{ __('messages.owner.outlet.all_outlets.upload_logo') }}</label>
+                            <input type="file" name="logo" id="logo"
+                                   class="form-control @error('logo') is-invalid @enderror" accept="image/*">
+                            <small class="text-muted">JPG/PNG/WEBP, max 2 MB.</small>
+                            @error('logo') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
+                            {{-- Preview --}}
+                            <div id="imagePreviewWrapper2" class="mt-2 d-none">
+                                <div class="position-relative preview-box">
+                                    <img id="imagePreview2" src="" alt="Preview"
+                                         class="img-thumbnail rounded w-100 h-auto">
+                                    <button type="button" id="clearImageBtn2"
+                                            class="btn btn-sm btn-danger position-absolute top-0 end-0"
+                                            aria-label="Hapus gambar">
+                                        &times;
+                                    </button>
+                                </div>
+                                <small id="imageInfo2" class="text-muted d-block mt-1"></small>
                             </div>
                         </div>
                     </div>
@@ -386,7 +408,15 @@
 .owner-outlet-create #imagePreviewWrapper .img-thumbnail{
   border:0; border-radius:var(--radius); box-shadow:var(--shadow);
 }
+.owner-outlet-create #imagePreviewWrapper2 .img-thumbnail{
+  border:0; border-radius:var(--radius); box-shadow:var(--shadow);
+}
 .owner-outlet-create #clearImageBtn{
+  transform: translate(35%,-35%);
+  border-radius:999px; width:28px; height:28px; padding:0; line-height:26px;
+}
+
+.owner-outlet-create #clearImageBtn2{
   transform: translate(35%,-35%);
   border-radius:999px; width:28px; height:28px; padding:0; line-height:26px;
 }
@@ -411,10 +441,15 @@
 document.addEventListener('DOMContentLoaded', function () {
     // ===== Image preview (tetap) =====
     const input    = document.getElementById('image');
+    const input2    = document.getElementById('logo');
     const wrapper  = document.getElementById('imagePreviewWrapper');
+    const wrapper2  = document.getElementById('imagePreviewWrapper2');
     const preview  = document.getElementById('imagePreview');
+    const preview2  = document.getElementById('imagePreview2');
     const info     = document.getElementById('imageInfo');
+    const info2     = document.getElementById('imageInfo2');
     const clearBtn = document.getElementById('clearImageBtn');
+    const clearBtn2 = document.getElementById('clearImageBtn2');
 
     const MAX_SIZE = 2 * 1024 * 1024; // 2 MB
     const ALLOWED  = ['image/jpeg', 'image/png', 'image/webp'];
@@ -429,6 +464,11 @@ document.addEventListener('DOMContentLoaded', function () {
         preview.src = '';
         info.textContent = '';
         wrapper.classList.add('d-none');
+    }
+    function resetPreview2() {
+        preview2.src = '';
+        info2.textContent = '';
+        wrapper2.classList.add('d-none');
     }
     if (input) {
         input.addEventListener('change', function () {
@@ -448,7 +488,26 @@ document.addEventListener('DOMContentLoaded', function () {
             wrapper.classList.remove('d-none');
         });
     }
+    if (input2) {
+        input2.addEventListener('change', function () {
+            const file = input2.files && input2.files[0];
+            if (!file) { resetPreview2(); return; }
+            if (!ALLOWED.includes(file.type)) {
+                alert('File not supported. Use JPG, PNG, atau WEBP.');
+                input2.value = ''; resetPreview2(); return;
+            }
+            if (file.size > MAX_SIZE) {
+                alert('File size more than 2 MB.');
+                input2.value = ''; resetPreview2(); return;
+            }
+            const url = URL.createObjectURL(file);
+            preview2.src = url;
+            info2.textContent = `${file.name} • ${bytesToSize(file.size)}`;
+            wrapper2.classList.remove('d-none');
+        });
+    }
     if (clearBtn) { clearBtn.addEventListener('click', function () { if (input) input.value = ''; resetPreview(); }); }
+    if (clearBtn2) { clearBtn2.addEventListener('click', function () { if (input2) input2.value = ''; resetPreview2(); }); }
 
     // ===== Password show/hide (tetap) =====
     function bindToggle(btnId, inputId) {

@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container owner-category-edit mt-4"> {{-- PAGE SCOPE --}}
-    <h1 class="page-title mb-3">Edit Category</h1>
+    <h1 class="page-title mb-3">{{ __('messages.owner.products.categories.edit_category') }}</h1>
 
     <form method="POST"
           action="{{ route('owner.user-owner.categories.update', $category) }}"
@@ -13,7 +13,7 @@
 
         {{-- Category Name --}}
         <div class="form-group">
-            <label for="category_name" class="form-label required">Category Name</label>
+            <label for="category_name" class="form-label required">{{ __('messages.owner.products.categories.category_name') }}</label>
             <input type="text"
                    name="category_name"
                    id="category_name"
@@ -25,14 +25,14 @@
 
         {{-- Description --}}
         <div class="form-group">
-            <label for="description" class="form-label">Category Description</label>
+            <label for="description" class="form-label">{{ __('messages.owner.products.categories.description') }}</label>
             <textarea name="description" id="description" class="form-control" rows="3">{{ old('description', $category->description) }}</textarea>
             @error('description') <div class="invalid-hint">{{ $message }}</div> @enderror
         </div>
 
         {{-- Image --}}
         <div class="form-group">
-            <label for="images" class="form-label">Category Image</label>
+            <label for="images" class="form-label">{{ __('messages.owner.products.categories.picture') }}</label>
             <input type="file" name="images" id="images" class="form-control" accept="image/*" onchange="previewImage(event)">
             @error('images') <div class="invalid-hint">{{ $message }}</div> @enderror
 
@@ -49,8 +49,8 @@
         </div>
 
         <div class="d-flex gap-2 mt-3">
-            <button type="submit" class="btn btn-primary">Update</button>
-            <a href="{{ route('owner.user-owner.categories.index') }}" class="btn btn-outline-choco">Back</a>
+            <button type="submit" class="btn btn-primary">{{ __('messages.owner.products.categories.update') }}</button>
+            <a href="{{ route('owner.user-owner.categories.index') }}" class="btn btn-outline-choco">{{ __('messages.owner.products.categories.back') }}</a>
         </div>
     </form>
 </div>

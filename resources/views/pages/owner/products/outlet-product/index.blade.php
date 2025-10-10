@@ -1,7 +1,7 @@
 @extends('layouts.owner')
 
-@section('title', 'Product List')
-@section('page_title', 'Outlet Products')
+@section('title', __('messages.owner.products.outlet_products.product_list'))
+@section('page_title', __('messages.owner.products.outlet_products.outlet_products'))
 
 @section('content')
 
@@ -13,7 +13,7 @@
             <div class="d-flex flex-wrap gap-2">
                 {{-- Opsional: tombol "All Outlets" --}}
                 <button class="btn btn-sm rounded-pill outlet-pill active"
-                        data-outlet="all">All Outlets</button>
+                        data-outlet="all">{{ __('messages.owner.products.outlet_products.all_outlets') }}</button>
 
                 @foreach($outlets as $o)
                     <button class="btn  btn-sm rounded-pill outlet-pill"
@@ -44,13 +44,13 @@
                 <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
                         {{ $o->name }}
-                        <small class="text-muted">— {{ $rows->count() }} items</small>
+                        <small class="text-muted">— {{ $rows->count() }} {{ __('messages.owner.products.outlet_products.items') }}</small>
                     </h5>
                     <button class="btn btn-primary btn-add-product"
                             data-toggle="modal"
                             data-target="#addProductModal"
                             data-outlet="{{ $o->id }}">
-                        Add Product
+                        {{ __('messages.owner.products.outlet_products.add_product') }}
                     </button>
                 </div>
 
@@ -60,7 +60,7 @@
                     <div class="mb-3">
                         <div class="d-flex flex-wrap gap-2">
                             <button class="btn btn-sm rounded-pill category-pill active"
-                                    data-category="all">All</button>
+                                    data-category="all">{{ __('messages.owner.products.outlet_products.all') }}</button>
                             @foreach($categories as $c)
                                 <button class="btn btn-sm rounded-pill category-pill"
                                         data-category="{{ $c->id }}">
@@ -76,12 +76,12 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Product</th>
-                                    <th>Category</th>
-                                    <th>Qty</th>
-                                    <th>Status</th>
-                                    <th>Promo</th>
-                                    <th class="text-end">Action</th>
+                                    <th>{{ __('messages.owner.products.outlet_products.product') }}</th>
+                                    <th>{{ __('messages.owner.products.outlet_products.category') }}</th>
+                                    <th>{{ __('messages.owner.products.outlet_products.stock') }}</th>
+                                    <th>{{ __('messages.owner.products.outlet_products.status') }}</th>
+                                    <th>{{ __('messages.owner.products.outlet_products.promo') }}</th>
+                                    <th class="text-end">{{ __('messages.owner.products.outlet_products.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -94,7 +94,7 @@
                                         <td>{{ $p->category->category_name ?? '-' }}</td>
                                         <td>
                                           @if($p->always_available_flag === 1)
-                                            <span class="text-muted">Always Available</span>
+                                            <span class="text-muted">{{ __('messages.owner.products.outlet_products.always_available') }}</span>
                                           @else
                                             {{ $p->quantity ?? 0 }}
                                           @endif
@@ -118,15 +118,15 @@
                                         </td>
                                         <td class="text-end">
                                             <a href="{{ route('owner.user-owner.outlet-products.edit', $p->id) }}"
-                                               class="btn btn-outline-dark btn-sm">Edit</a>
+                                               class="btn btn-outline-dark btn-sm">{{ __('messages.owner.products.outlet_products.edit') }}</a>
                                             <button class="btn btn-primary btn-sm" onclick="deleteProduct({{ $p->id }})">
-                                                Delete
+                                                {{ __('messages.owner.products.outlet_products.delete') }}
                                             </button>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr class="empty-row">
-                                        <td colspan="7" class="text-center text-muted">Belum ada produk</td>
+                                        <td colspan="7" class="text-center text-muted">{{ __('messages.owner.products.outlet_products.no_product_yet') }}</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -349,7 +349,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (visibleCount === 0) {
           const tr = document.createElement('tr');
           tr.classList.add('empty-row');
-          tr.innerHTML = `<td colspan="7" class="text-center">Data tidak ditemukan</td>`;
+          tr.innerHTML = `<td colspan="7" class="text-center">{{ __('messages.owner.products.outlet_products.data_not_found') }}</td>`;
           tableBody.appendChild(tr);
         }
       });
@@ -384,7 +384,7 @@ $(function () {
     $cat.val(''); // kalau pakai select2, pakai $cat.val(null).trigger('change.select2')
 
     // reset box checkbox
-    $mpBox.html('<div class="text-muted small">Select a category first.</div>');
+    $mpBox.html('<div class="text-muted small">{{ __('messages.owner.products.outlet_products.select_category_first') }}</div>');
     $mpSelectAll.prop('disabled', true).prop('checked', false);
     $mpError.hide();
 
@@ -409,7 +409,7 @@ $(function () {
     $mpSelectAll.prop('disabled', true).prop('checked', false);
 
     if (!Array.isArray(items) || items.length === 0) {
-      $mpBox.html('<div class="text-muted small">No master products found for this filter.</div>');
+      $mpBox.html('<div class="text-muted small">{{ __('messages.owner.products.outlet_products.no_master_product_filter') }}</div>');
       return;
     }
 
@@ -488,7 +488,7 @@ $(function () {
 
   // === FETCH: load master products (by category + outlet)
   async function loadMasterProducts(categoryId, outletId) {
-    $mpBox.html('<div class="text-muted small">Loading…</div>');
+    $mpBox.html('<div class="text-muted small">{{ __('messages.owner.products.outlet_products.loading') }}</div>');
     $mpSelectAll.prop('disabled', true).prop('checked', false);
     $mpError.hide();
 
@@ -506,7 +506,7 @@ $(function () {
 
       renderMasterProductCheckboxes(data);
     } catch {
-      $mpBox.html('<div class="text-danger small">Failed to load master products.</div>');
+      $mpBox.html('<div class="text-danger small">{{ __('messages.owner.products.outlet_products.failed_load_master_products') }}</div>');
     }
   }
 
@@ -524,14 +524,14 @@ $(function () {
 
         // Konfirmasi dengan SweetAlert2
         const result = await Swal.fire({
-            title: 'Yakin ingin menghapus produk ini?',
-            text: "Data yang dihapus tidak bisa dikembalikan!",
+            title: '{{ __('messages.owner.products.outlet_products.delete_confirmation_1') }}',
+            text: "{{ __('messages.owner.products.outlet_products.delete_confirmation_2') }}",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Ya, hapus!',
-            cancelButtonText: 'Batal'
+            confirmButtonText: '{{ __('messages.owner.products.outlet_products.delete_confirmation_3') }}',
+            cancelButtonText: '{{ __('messages.owner.products.outlet_products.cancel') }}'
         });
 
         if (!result.isConfirmed) return; // jika batal, keluar
@@ -555,8 +555,8 @@ $(function () {
 
             if (res.ok) {
                 await Swal.fire({
-                    title: 'Berhasil!',
-                    text: 'Produk berhasil dihapus.',
+                    title: '{{ __('messages.owner.products.outlet_products.success') }}',
+                    text: '{{ __('messages.owner.products.outlet_products.delete_success') }}',
                     icon: 'success',
                     confirmButtonText: 'OK'
                 });
@@ -564,7 +564,7 @@ $(function () {
             } else {
                 const data = await res.json();
                 Swal.fire({
-                    title: 'Gagal!',
+                    title: '{{ __('messages.owner.products.outlet_products.failed') }}',
                     text: data.message || res.statusText,
                     icon: 'error',
                     confirmButtonText: 'OK'
@@ -573,8 +573,8 @@ $(function () {
         } catch (err) {
             console.error(err);
             Swal.fire({
-                title: 'Kesalahan!',
-                text: 'Terjadi kesalahan saat menghapus.',
+                title: '{{ __('messages.owner.products.outlet_products.error') }}',
+                text: '{{ __('messages.owner.products.outlet_products.delete_error') }}',
                 icon: 'error',
                 confirmButtonText: 'OK'
             });

@@ -1,13 +1,13 @@
 @extends('layouts.owner')
 
-@section('title', 'Update Outlet Product')
-@section('page_title', 'Update Outlet Product')
+@section('title',  __('messages.owner.products.outlet_products.update_outlet_product'))
+@section('page_title',  __('messages.owner.products.outlet_products.update_outlet_product'))
 
 @section('content')
 <section class="content">
   <div class="container-fluid owner-op-edit">
     <a href="{{ route('owner.user-owner.outlet-products.index') }}" class="btn btn-secondary mb-3">
-      <i class="fas fa-arrow-left mr-2"></i>Back to Outlet Products
+      <i class="fas fa-arrow-left mr-2"></i>{{ __('messages.owner.products.outlet_products.back_to_outlet_products') }}
     </a>
 
     {{-- Alerts (fallback; toastr sudah di layout) --}}
@@ -23,7 +23,7 @@
 
     <div class="card border-0 shadow-sm">
       <div class="card-header bg-white">
-        <h3 class="card-title mb-0">Edit Outlet Product</h3>
+        <h3 class="card-title mb-0">{{ __('messages.owner.products.outlet_products.edit_outlet_product') }}</h3>
       </div>
 
       <form action="{{ route('owner.user-owner.outlet-products.update', $data->id) }}" method="POST">
@@ -55,21 +55,21 @@
                         <span class="badge badge-info">
                           {{ optional($data->category)->category_name ?? 'Uncategorized' }}
                         </span>
-                        <span class="badge badge-light border ml-1">Code: {{ $data->product_code ?? '-' }}</span>
-                        <span class="badge badge-light border ml-1">Outlet ID: {{ $data->partner_id }}</span>
+                        <span class="badge badge-light border ml-1">{{ __('messages.owner.products.outlet_products.code') }}: {{ $data->product_code ?? '-' }}</span>
+                        <span class="badge badge-light border ml-1">{{ __('messages.owner.products.outlet_products.outlet_id') }}: {{ $data->partner_id }}</span>
                       </div>
 
                       <div class="d-flex flex-wrap text-muted small">
                         <div class="mr-4">
                           <i class="fas fa-tags mr-1"></i>
-                          Price:
+                          {{ __('messages.owner.products.outlet_products.price') }}:
                           <strong>
                             Rp {{ number_format((float)($data->price ?? 0), 0, ',', '.') }}
                           </strong>
                         </div>
                         <div class="mr-4">
                           <i class="fas fa-barcode mr-1"></i>
-                          Master Product:
+                          {{ __('messages.owner.products.outlet_products.master_product') }}:
                           <strong>{{ $data->master_product_id ?? '-' }}</strong>
                         </div>
                       </div>
@@ -95,7 +95,7 @@
                   @if(!empty($data->description))
                     <hr>
                     <div>
-                      <div class="text-muted mb-1"><i class="far fa-file-alt mr-1"></i>Description</div>
+                      <div class="text-muted mb-1"><i class="far fa-file-alt mr-1"></i>{{ __('messages.owner.products.outlet_products.description') }}</div>
                       <div class="border rounded p-2" style="background:#fcfcfc;">
                         {!! $data->description !!}
                       </div>
@@ -105,7 +105,7 @@
                   {{-- Opsi: quantity tiap option bisa diedit + toggle always available --}}
                   @if(($data->parent_options ?? null) && count($data->parent_options))
                     <hr>
-                    <div class="text-muted mb-2"><i class="fas fa-list-ul mr-1"></i>Options</div>
+                    <div class="text-muted mb-2"><i class="fas fa-list-ul mr-1"></i>{{ __('messages.owner.products.outlet_products.options') }}</div>
 
                     @foreach($data->parent_options as $parent)
                       <div class="mb-3 p-2 border rounded">
@@ -115,15 +115,15 @@
                             @if($parent->provision)
                               <span class="badge badge-light border ml-1">
                                 @if ($parent->provision === 'OPTIONAL')
-                                    Opsional
+                                    {{ __('messages.owner.products.outlet_products.optional') }}
                                 @elseif ($parent->provision === 'OPTIONAL MAX')
-                                    Opsional, Maksimal Pilih
+                                    {{ __('messages.owner.products.outlet_products.optional_max') }}
                                 @elseif ($parent->provision === 'MAX')
-                                    Wajib, Maksimal Pilih
+                                    {{ __('messages.owner.products.outlet_products.max_provision') }}
                                 @elseif ($parent->provision === 'EXACT')
-                                    Wajib, Pilih
+                                    {{ __('messages.owner.products.outlet_products.exact_provision') }}
                                 @elseif ($parent->provision === 'MIN')
-                                    Wajib, Minimal Pilih
+                                    {{ __('messages.owner.products.outlet_products.min_provision') }}
                                 @endif
                                 {{ $parent->provision_value ? ' : '.$parent->provision_value : '' }}
                               </span>
@@ -139,10 +139,10 @@
                             <table class="table table-sm mb-0">
                               <thead class="thead-light">
                                 <tr>
-                                  <th style="width:40%">Option</th>
-                                  <th class="text-right" style="width:20%">Price</th>
-                                  <th class="text-center" style="width:30%">Quantity</th>
-                                  <th class="text-right" style="width:10%">Stock</th>
+                                  <th style="width:40%">{{ __('messages.owner.products.outlet_products.option') }}</th>
+                                  <th class="text-right" style="width:20%">{{ __('messages.owner.products.outlet_products.price') }}</th>
+                                  <th class="text-center" style="width:30%">{{ __('messages.owner.products.outlet_products.new_stock') }}</th>
+                                  <th class="text-right" style="width:10%">{{ __('messages.owner.products.outlet_products.old_stock') }}</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -166,7 +166,7 @@
                                           data-wrap="#opt-qty-wrap-{{ $opt->id }}"
                                           {{ old("options.{$opt->id}.always_available", $opt->always_available_flag ?? 0) ? 'checked' : '' }}
                                         >
-                                        <label class="custom-control-label" for="opt-aa-{{ $opt->id }}">Always available</label>
+                                        <label class="custom-control-label" for="opt-aa-{{ $opt->id }}">{{ __('messages.owner.products.outlet_products.always_available') }}</label>
                                       </div>
 
                                       {{-- NEW: bungkus quantity input agar bisa di-hide --}}
@@ -215,7 +215,7 @@
             <div class="col-lg-5">
               <div class="card border-0">
                 <div class="card-body">
-                  <h5 class="mb-3">Update Stock & Status</h5>
+                  <h5 class="mb-3">{{ __('messages.owner.products.outlet_products.update_stock_status') }}</h5>
 
                   {{-- NEW: toggle always available (product) --}}
                   <div class="form-group">
@@ -230,15 +230,15 @@
                         {{ old('always_available', $data->always_available_flag ?? 0) ? 'checked' : '' }}
                       >
                       <label class="custom-control-label" for="aa_product">
-                        Produk selalu tersedia (tanpa stok)
+                        {{ __('messages.owner.products.outlet_products.always_available_product') }}
                       </label>
                     </div>
-                    <small class="text-muted">Jika aktif, kolom Quantity akan disembunyikan.</small>
+                    <small class="text-muted">{{ __('messages.owner.products.outlet_products.if_active_stock_hidden') }}</small>
                   </div>
 
                   {{-- Quantity produk --}}
                   <div class="form-group" id="product_qty_group">
-                    <label class="mb-1">Quantity (Product)</label>
+                    <label class="mb-1">{{ __('messages.owner.products.outlet_products.stock_product') }}</label>
                     <div class="input-group">
                       <div class="input-group-prepend">
                         <button type="button" class="btn btn-outline-secondary" id="btn-qty-dec">
@@ -259,7 +259,7 @@
                         <button type="button" class="btn btn-outline-secondary" id="btn-qty-inc">
                           <i class="fas fa-plus"></i>
                         </button>
-                        <button type="button" class="btn btn-outline-secondary" id="btn-qty-max">Max</button>
+                        <button type="button" class="btn btn-outline-secondary" id="btn-qty-max">{{ __('messages.owner.products.outlet_products.max') }}</button>
                       </div>
                     </div>
                     @error('quantity')
@@ -269,7 +269,7 @@
 
                   {{-- Status (is_active) --}}
                   <div class="form-group">
-                    <label class="mb-1">Status</label>
+                    <label class="mb-1">{{ __('messages.owner.products.outlet_products.status') }}</label>
                     <div class="custom-control custom-switch">
                       <input
                         type="checkbox"
@@ -278,7 +278,7 @@
                         {{ old('is_active', $data->is_active ?? 1) ? 'checked' : '' }}
                       >
                       <label class="custom-control-label" for="is_active_switch">
-                        <span id="is_active_label">{{ old('is_active', $data->is_active ?? 1) ? 'Active' : 'Inactive' }}</span>
+                        <span id="is_active_label">{{ old('is_active', $data->is_active ?? 1) ? __('messages.owner.products.outlet_products.active') : __('messages.owner.products.outlet_products.inactive') }}</span>
                       </label>
                     </div>
                     {{-- hidden value yang dikirim --}}
@@ -290,12 +290,12 @@
                   
                   {{-- Promotion (owner punya hak; biarkan ada) --}}
                   <div class="form-group">
-                    <label class="mb-1" for="promotion_id">Promotion</label>
+                    <label class="mb-1" for="promotion_id">{{ __('messages.owner.products.outlet_products.promotion') }}</label>
                     <select id="promotion_id" name="promotion_id" class="form-control">
                       @php
                         $selectedPromoId = old('promotion_id', $data->promo_id);
                       @endphp
-                      <option value="">— No Promotion —</option>
+                      <option value="">{{ __('messages.owner.products.outlet_products.no_promotion_dropdown') }}</option>
                       @foreach($promotions as $promo)
                         <option value="{{ $promo->id }}" {{ (string)$selectedPromoId === (string)$promo->id ? 'selected' : '' }}>
                           {{ $promo->promotion_name }}
@@ -322,8 +322,8 @@
                   {{-- Submit --}}
                   <hr>
                   <div class="d-flex justify-content-end">
-                    <a href="{{ route('owner.user-owner.outlet-products.index') }}" class="btn btn-light border mr-2">Cancel</a>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a href="{{ route('owner.user-owner.outlet-products.index') }}" class="btn btn-light border mr-2">{{ __('messages.owner.products.outlet_products.cancel') }}</a>
+                    <button type="submit" class="btn btn-primary">{{ __('messages.owner.products.outlet_products.save_changes') }}</button>
                   </div>
 
                 </div>
@@ -333,15 +333,15 @@
               <div class="card border-0 mt-3">
                 <div class="card-body small text-muted">
                   <div class="d-flex justify-content-between">
-                    <span>Created</span>
+                    <span>{{ __('messages.owner.products.outlet_products.created') }}</span>
                     <strong>{{ optional($data->created_at)->format('d M Y, H:i') ?? '-' }}</strong>
                   </div>
                   <div class="d-flex justify-content-between">
-                    <span>Last Updated</span>
+                    <span>{{ __('messages.owner.products.outlet_products.last_updated') }}</span>
                     <strong>{{ optional($data->updated_at)->format('d M Y, H:i') ?? '-' }}</strong>
                   </div>
                   <div class="d-flex justify-content-between">
-                    <span>Owner </span>
+                    <span>{{ __('messages.owner.products.outlet_products.owner') }} </span>
                     <strong>{{ $data->owner->name ?? '-' }}</strong>
                   </div>
                 </div>
