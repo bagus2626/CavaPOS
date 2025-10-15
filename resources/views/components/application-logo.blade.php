@@ -1,4 +1,4 @@
-<img src="{{ asset('images/cava-logo2-black.png') }}"
+<img src="{{ asset('images/cava-logo2-choco.png') }}"
      alt="Cava Logo"
      class="block dark:hidden w-40 h-auto">
 
