@@ -3,158 +3,477 @@
 namespace App\Http\Controllers\Employee\Dashboard;
 
 use App\Http\Controllers\Controller;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Partner\HumanResource\Employee;
-use App\Models\Product\Product;
-use App\Models\Partner\Products\PartnerProduct;
-use App\Models\Partner\Products\PartnerProductParentOption;
-use App\Models\Partner\Products\PartnerProductOption;
+use Illuminate\Support\Facades\Log;
 use App\Models\Transaction\BookingOrder;
 use App\Models\Transaction\OrderDetail;
-use App\Models\Transaction\OrderDetailOption;
-use App\Models\Product\Specification;
-use App\Models\Admin\Product\Category;
-use App\Models\User;
-use App\Models\Store\Table;
-use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
-use Intervention\Image\Facades\Image;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class KitchenDashboardController extends Controller
 {
     public function index(Request $request)
     {
-        $employee = Employee::findOrFail(Auth::id());
-        $partner  = $employee->partner;
-
-        // Ambil filter dari query string
-        $payment = $request->string('payment')->toString(); // 'CASH' | 'QRIS' | ''
-        $status  = $request->string('status')->toString();  // 'PAID' | 'UNPAID' | ''
-        $from    = $request->date('from');
-        $to      = $request->date('to');
-        $q       = $request->string('q')->toString();
-
-        // Default: hari ini
-        if (!$from && !$to) {
-            $from = $to = Carbon::today();
-            $periodLabel = "Hari ini";
-        } elseif ($from && !$to) {
-            $to = $from;
-            $periodLabel = $from->translatedFormat('d F Y');
-        } elseif (!$from && $to) {
-            $from = $to;
-            $periodLabel = $to->translatedFormat('d F Y');
-        } else {
-            if ($from->equalTo($to)) {
-                $periodLabel = $from->translatedFormat('d F Y');
-            } else {
-                $periodLabel = $from->translatedFormat('d F Y') . " - " . $to->translatedFormat('d F Y');
-            }
-        }
-
-        // Base query: partner + rentang tanggal (inklusif)
-        $base = BookingOrder::query()
-            ->with('table')
-            ->where('partner_id', $partner->id)
-            ->whereBetween('created_at', [
-                Carbon::parse($from)->startOfDay(),
-                Carbon::parse($to)->endOfDay(),
-            ])
-            ->when($payment, fn($q2) => $q2->where('payment_method', $payment))
-            ->when($status,  fn($q2) => $q2->where('order_status', $status))
-            ->when($q, function ($q2) use ($q) {
-                $q2->where(function ($qq) use ($q) {
-                    $qq->where('booking_order_code', 'like', "%{$q}%")
-                        ->orWhere('customer_name', 'like', "%{$q}%")
-                        ->orWhereHas('table', fn($t) => $t->where('table_no', 'like', "%{$q}%"));
-                });
-            })
-            ->orderBy('created_at', 'ASC');
-
-        $ordersToday = (clone $base)->latest()->get();
-        $pendingCashOrders = (clone $base)
-            ->where('payment_method', 'CASH')
-            ->where('payment_flag', 0)
-            ->latest()->get();
-
-        $metrics = [
-            'qris_paid'     => (clone $base)->where('payment_method', 'QRIS')->where('order_status', 'PAID')->count(),
-            'revenue_today' => (clone $base)->where('order_status', 'PAID')->sum('total_order_value'),
-        ];
-
-        return view('pages.employee.kitchen.dashboard.index', compact(
-            'employee',
-            'partner',
-            'pendingCashOrders',
-            'ordersToday',
-            'metrics',
-            'periodLabel'
-        ));
+        return view('pages.employee.kitchen.dashboard.index');
     }
 
-    public function show(Request $request, string $tab)
+    /**
+     * GET ORDER QUEUE (PAID)
+     */
+    public function getOrderQueue(Request $request)
     {
-        $partnerId = auth('employee')->user()->partner_id;
+        try {
+            $employee = Auth::guard('employee')->user();
+            
+            if (!$employee) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
 
-        $payment = $request->string('payment')->toString();
-        $status  = $request->string('order_status')->toString();
-        $from    = $request->date('from') ?: Carbon::today();
-        $to      = $request->date('to')   ?: Carbon::today();
-        $q       = $request->string('q')->toString();
-
-        $base = BookingOrder::query()
-            ->with('table')
-            ->where('partner_id', $partnerId)
-            ->whereBetween('created_at', [
-                Carbon::parse($from)->startOfDay(),
-                Carbon::parse($to)->endOfDay(),
-            ])
-            ->when($payment, fn($q2) => $q2->where('payment_method', $payment))
-            // ->when($status,  fn($q2) => $q2->where('order_status', $status))
-            ->when($status !== null && $status !== '', function ($q2) use ($status) {
-                if (in_array($status, [0, 1], true)) {
-                    // kalau status berupa flag 0/1
-                    $q2->where('payment_flag', $status);
-                } else {
-                    // kalau status berupa string (PAID/UNPAID)
-                    $q2->where('order_status', $status);
+            // Get only PAID orders untuk queue
+            $orders = BookingOrder::with([
+                'order_details' => function($query) {
+                    $query->select([
+                        'id', 
+                        'booking_order_id', 
+                        'partner_product_id',
+                        'product_name',
+                        'quantity', 
+                        'base_price', 
+                        'options_price',
+                        'customer_note'
+                    ]);
+                },
+                'order_details.order_detail_options' => function($query) {
+                    $query->select([
+                        'id',
+                        'order_detail_id', 
+                        'partner_product_option_name',
+                        'price'
+                    ]);
                 }
-            })
-            ->when($q, function ($q2) use ($q) {
-                $q2->where(function ($qq) use ($q) {
-                    $qq->where('booking_order_code', 'like', "%{$q}%")
-                        ->orWhere('customer_name', 'like', "%{$q}%")
-                        ->orWhereHas('table', fn($t) => $t->where('table_no', 'like', "%{$q}%"));
-                });
-            })
+            ])
+            ->where('partner_id', $employee->partner_id)
+            ->where('order_status', 'PAID') 
+            ->orderBy('created_at', 'asc') 
+            ->get();
 
-            ->orderBy('created_at', 'ASC');
+            // Transform data untuk queue
+            $queueOrders = $orders->map(function($order, $index) {
+                return $this->transformOrderData($order, $index + 1);
+            });
 
-        switch ($tab) {
-            case 'pembelian':
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'queue_orders' => $queueOrders,
+                    'total_waiting' => $orders->count()
+                ]
+            ]);
 
-                $partner = User::findOrFail($partnerId);
-                $partner_products = PartnerProduct::with('category', 'parent_options.options')->where('partner_id', $partner->id)->get();
-                $categories = Category::where('partner_id', $partner->id)->get();
-                $tables = Table::where('partner_id', $partner->id)->orderBy('table_no', 'ASC')->get();
-
-                return view('pages.employee.cashier.dashboard.tabs.pembelian', compact('partner', 'partner_products', 'categories', 'tables'));
-            case 'pembayaran':
-                $items = (clone $base)->where('payment_method', 'CASH')->where('order_status', 'UNPAID')->latest()->limit(20)->get();
-                return view('pages.employee.cashier.dashboard.tabs.pembayaran', compact('items'));
-            case 'proses':
-                $items = (clone $base)->where('order_status', 'PROCESSED')->latest()->limit(20)->get();
-                return view('pages.employee.cashier.dashboard.tabs.proses', compact('items'));
-            case 'selesai':
-                $items = (clone $base)->where('order_status', 'SERVED')->latest()->limit(20)->get();
-                return view('pages.employee.cashier.dashboard.tabs.selesai', compact('items'));
-            default:
-                abort(404);
+        } catch (\Exception $e) {
+            Log::error('Order Queue Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch order queue: ' . $e->getMessage()
+            ], 500);
         }
+    }
+
+    /**
+     * GET ACTIVE ORDERS - Order dengan status PROCESSED (Cooking)
+     */
+    public function getActiveOrders(Request $request)
+    {
+        try {
+            $employee = Auth::guard('employee')->user();
+            
+            if (!$employee) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
+
+            // Get PROCESSED orders untuk active orders (Cooking)
+            $orders = BookingOrder::with([
+                'order_details' => function($query) {
+                    $query->select([
+                        'id', 
+                        'booking_order_id', 
+                        'partner_product_id',
+                        'product_name',
+                        'quantity', 
+                        'base_price', 
+                        'options_price',
+                        'customer_note',
+                        'status',
+                        'done_flag'
+                    ]);
+                },
+                'order_details.order_detail_options' => function($query) {
+                    $query->select([
+                        'id',
+                        'order_detail_id', 
+                        'partner_product_option_name',
+                        'price'
+                    ]);
+                }
+            ])
+            ->where('partner_id', $employee->partner_id)
+            ->where('order_status', 'PROCESSED') 
+            ->orderBy('updated_at', 'desc') 
+            ->get();
+
+            // Transform data untuk active orders
+            $activeOrders = $orders->map(function($order) {
+                return $this->transformOrderData($order);
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'active_orders' => $activeOrders,
+                    'total_cooking' => $orders->count()
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Active Orders Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch active orders: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * GET SERVED ORDERS - Order dengan status SERVED (sudah disajikan)
+     */
+    public function getServedOrders(Request $request)
+    {
+        try {
+            $employee = Auth::guard('employee')->user();
+            
+            if (!$employee) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
+
+            $query = BookingOrder::with([
+                    'order_details' => function($query) {
+                        $query->select([
+                            'id', 
+                            'booking_order_id', 
+                            'partner_product_id',
+                            'product_name',
+                            'quantity', 
+                            'base_price', 
+                            'options_price',
+                            'customer_note'
+                        ]);
+                    },
+                    'order_details.order_detail_options' => function($query) {
+                        $query->select([
+                            'id',
+                            'order_detail_id', 
+                            'partner_product_option_name',
+                            'price'
+                        ]);
+                    }
+                ])
+                ->where('partner_id', $employee->partner_id)
+                ->where('order_status', 'SERVED');
+
+            // Filter by date jika ada
+            if ($request->has('date') && $request->get('date') !== 'all') {
+                $date = $request->get('date');
+                try {
+                    $parsedDate = Carbon::parse($date)->format('Y-m-d');
+                    $query->whereDate('updated_at', $parsedDate);
+                } catch (\Exception $e) {
+                    // Jika date invalid, tampilkan semua
+                }
+            }
+
+            $orders = $query->orderBy('updated_at', 'desc')
+                ->limit(200)
+                ->get();
+
+            $servedOrders = $orders->map(function($order) {
+                return $this->transformOrderData($order);
+            });
+
+            $appliedDate = $request->get('date', 'all');
+            $displayDate = $appliedDate === 'all' ? 'All Dates' : Carbon::parse($appliedDate)->format('d/m/Y');
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'served_orders' => $servedOrders,
+                    'total_served' => $orders->count(),
+                    'applied_date' => $appliedDate,
+                    'display_date' => $displayDate
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Served Orders Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch served orders: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * PICK UP ORDER - Ubah status dari PAID ke PROCESSED (Cooking)
+     */
+    public function pickUpOrder(Request $request, $orderId)
+    {
+        try {
+            $employee = Auth::guard('employee')->user();
+
+            $order = BookingOrder::where('id', $orderId)
+                ->where('partner_id', $employee->partner_id)
+                ->where('order_status', 'PAID')
+                ->first();
+
+            if (!$order) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Order not found or already processed'
+                ], 404);
+            }
+
+            // Update status ke PROCESSED (Cooking)
+            $order->update([
+                'order_status' => 'PROCESSED',
+                'updated_at' => now()
+            ]);
+
+            Log::info('Order picked up to active orders', [
+                'order_id' => $order->id,
+                'order_code' => $order->booking_order_code,
+                'updated_by' => $employee->id
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Order moved to active orders (Cooking)',
+                'data' => [
+                    'order_id' => $order->id,
+                    'order_code' => $order->booking_order_code,
+                    'new_status' => 'PROCESSED'
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Pick Up Order Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to pick up order: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * MARK AS SERVED - Ubah status dari PROCESSED ke SERVED
+     */
+    public function markAsServed(Request $request, $orderId)
+    {
+        try {
+            $employee = Auth::guard('employee')->user();
+
+            $order = BookingOrder::where('id', $orderId)
+                ->where('partner_id', $employee->partner_id)
+                ->where('order_status', 'PROCESSED')
+                ->first();
+
+            if (!$order) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Order not found or already served'
+                ], 404);
+            }
+
+            // Update status ke SERVED
+            $order->update([
+                'order_status' => 'SERVED',
+                'updated_at' => now()
+            ]);
+
+            Log::info('Order marked as served', [
+                'order_id' => $order->id,
+                'order_code' => $order->booking_order_code,
+                'updated_by' => $employee->id
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Order marked as served',
+                'data' => [
+                    'order_id' => $order->id,
+                    'order_code' => $order->booking_order_code,
+                    'new_status' => 'SERVED'
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Mark as Served Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to mark order as served: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Helper function untuk transform order data
+     */
+    private function transformOrderData($order, $queueNumber = null)
+    {
+        // Pastikan created_at adalah Carbon instance
+        $orderTime = $order->created_at ? Carbon::parse($order->created_at)->format('H:i') : '00:00';
+        $servedTime = ($order->order_status === 'SERVED' && $order->updated_at) 
+            ? Carbon::parse($order->updated_at)->format('H:i') 
+            : null;
+        
+        $orderDetails = $order->order_details ?? collect();
+        $totalItems = $orderDetails->sum('quantity');
+        
+        // Format product names untuk display
+        $productNames = $orderDetails->map(function($detail) {
+            if (!$detail) return 'Unknown Product';
+            
+            $productName = $detail->product_name ?: 'Product';
+            $optionsText = '';
+            
+            $options = $detail->order_detail_options ?? collect();
+            if ($options->isNotEmpty()) {
+                $optionNames = $options->pluck('partner_product_option_name')->filter()->toArray();
+                if (!empty($optionNames)) {
+                    $optionsText = ' (' . implode(', ', $optionNames) . ')';
+                }
+            }
+            
+            return "{$productName} x{$detail->quantity}{$optionsText}";
+        })->implode(', ');
+
+        // HAPUS KATA "GUEST" DARI NAMA CUSTOMER
+        $customerName = $this->cleanCustomerName($order->customer_name);
+
+        // Ambil catatan khusus dari order (jika ada)
+        $customerOrderNote = $order->customer_order_note ?? '';
+
+        // Ambil catatan khusus dari order details (jika ada)
+        $orderDetailsNotes = $orderDetails->filter(function($detail) {
+            return !empty($detail->customer_note);
+        })->map(function($detail) {
+            return [
+                'product_name' => $detail->product_name ?? 'Product',
+                'note' => $detail->customer_note
+            ];
+        })->values();
+
+        // Determine status config
+        $statusConfig = $this->getStatusConfig($order->order_status);
+
+        return [
+            'id' => $order->id,
+            'queue_number' => $queueNumber,
+            'booking_order_code' => $order->booking_order_code ?? 'N/A',
+            'customer_name' => $customerName,
+            'order_status' => $order->order_status,
+            'status_badge' => $statusConfig['badge'],
+            'status_color' => $statusConfig['color'],
+            'order_time' => $orderTime,
+            'served_time' => $servedTime,
+            'total_items' => $totalItems,
+            'product_names' => $productNames ?: 'No items',
+            'total_order_value' => number_format($order->total_order_value ?? 0, 0, ',', '.'),
+            'table_id' => $order->table_id ?? 'T',
+            'order_type' => $order->order_type ?? 'Dine-in',
+            'customer_order_note' => $customerOrderNote,
+            'order_details_notes' => $orderDetailsNotes,
+            'has_special_notes' => !empty($customerOrderNote) || $orderDetailsNotes->isNotEmpty(),
+            'created_at' => $order->created_at ? $order->created_at->toISOString() : now()->toISOString(),
+            'updated_at' => $order->updated_at ? $order->updated_at->toISOString() : now()->toISOString(),
+            'order_details' => $orderDetails->map(function($detail) {
+                $options = $detail->order_detail_options ?? collect();
+                
+                return [
+                    'id' => $detail->id,
+                    'product_name' => $detail->product_name ?? 'Product',
+                    'quantity' => $detail->quantity ?? 1,
+                    'base_price' => $detail->base_price ?? 0,
+                    'options_price' => $detail->options_price ?? 0,
+                    'customer_note' => $detail->customer_note ?? '',
+                    'status' => $detail->status ?? 'pending',
+                    'done_flag' => $detail->done_flag ?? false,
+                    'options' => $options->map(function($option) {
+                        return [
+                            'name' => $option->partner_product_option_name ?? 'Option',
+                            'price' => $option->price ?? 0
+                        ];
+                    })
+                ];
+            })
+        ];
+    }
+
+    /**
+     * Helper untuk membersihkan nama customer dari kata "Guest"
+     */
+    private function cleanCustomerName($name)
+    {
+        if (empty($name)) {
+            return 'Customer';
+        }
+
+        // Hapus semua kemunculan kata "Guest" (case insensitive)
+        $cleaned = preg_replace('/\bguest\b/i', '', $name);
+        
+        // Hapus karakter khusus dan spasi berlebih
+        $cleaned = preg_replace('/\s+/', ' ', $cleaned);
+        $cleaned = preg_replace('/[^\w\s]/', '', $cleaned);
+        $cleaned = trim($cleaned);
+        
+        if (empty($cleaned)) {
+            return 'Customer';
+        }
+        
+        return $cleaned;
+    }
+
+    /**
+     * Status configuration
+     */
+    private function getStatusConfig($status)
+    {
+        $configs = [
+            'PAID' => [
+                'badge' => 'Waiting',
+                'color' => 'red'
+            ],
+            'PROCESSED' => [
+                'badge' => 'Cooking', 
+                'color' => 'yellow'
+            ],
+            'SERVED' => [
+                'badge' => 'Served',
+                'color' => 'green'
+            ]
+        ];
+
+        return $configs[$status] ?? [
+            'badge' => $status,
+            'color' => 'gray'
+        ];
     }
 }

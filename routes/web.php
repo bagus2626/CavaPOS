@@ -202,10 +202,18 @@ Route::middleware('setlocale')->group(function () {
             Route::post('checkout-order', [CashierTransactionController::class, 'checkout'])->name('checkout');
         });
 
-        // KITCHEN area
+
+       // KITCHEN area
+                
         Route::middleware(['auth:employee', 'is_employee:KITCHEN'])->prefix('kitchen')->name('kitchen.')->group(function () {
             Route::get('dashboard', [KitchenDashboardController::class, 'index'])->name('dashboard');
-            Route::get('tab/{tab}', [KitchenDashboardController::class, 'show'])->name('tab');
+            
+            // API Endpoints
+            Route::get('orders/queue', [KitchenDashboardController::class, 'getOrderQueue'])->name('orders.queue');
+            Route::get('orders/active', [KitchenDashboardController::class, 'getActiveOrders'])->name('orders.active');
+            Route::get('orders/served', [KitchenDashboardController::class, 'getServedOrders'])->name('orders.served');
+            Route::put('orders/{orderId}/pickup', [KitchenDashboardController::class, 'pickUpOrder'])->name('orders.pickup');
+            Route::put('orders/{orderId}/serve', [KitchenDashboardController::class, 'markAsServed'])->name('orders.serve');
         });
     });
 
