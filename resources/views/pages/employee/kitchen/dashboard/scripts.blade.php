@@ -40,7 +40,13 @@ class KitchenApiService {
 
     async pickUpOrder(orderId) {
         const endpoint = KITCHEN_CONFIG.endpoints.pickup.replace(':id', orderId);
-        console.log('🚀 Pickup Endpoint:', endpoint);
+        
+        // === DEBUGGING API CALL ===
+        console.log('🌐 [DEBUG] Making pickup API call to:', endpoint);
+        console.log('🔑 [DEBUG] CSRF Token exists:', !!this.csrfToken);
+        console.log('📦 [DEBUG] Order ID:', orderId);
+        // === END DEBUGGING ===
+        
         return this._fetch(endpoint, 'PUT');
     }
 
@@ -51,6 +57,10 @@ class KitchenApiService {
     }
 
     async _fetch(endpoint, method = 'GET', body = null) {
+        // === DEBUGGING REQUEST ===
+        console.log('🌐 [DEBUG] _fetch called:', { endpoint, method, body });
+        // === END DEBUGGING ===
+
         const headers = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -71,25 +81,40 @@ class KitchenApiService {
             options.body = JSON.stringify(body);
         }
 
-        console.log(`🌐 API Call: ${method} ${endpoint}`, { headers, body });
+        // === DEBUGGING REQUEST DETAILS ===
+        console.log('📤 [DEBUG] Request options:', options);
+        // === END DEBUGGING ===
 
         try {
             const response = await fetch(endpoint, options);
             
-            console.log(`📡 Response Status: ${response.status} ${response.statusText}`);
+            // === DEBUGGING RESPONSE ===
+            console.log('📥 [DEBUG] Response status:', response.status, response.statusText);
+            // === END DEBUGGING ===
             
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error('❌ Response Error:', errorText);
-                throw new Error(`HTTP error! status: ${response.status}`);
+                console.error('❌ [DEBUG] Response error text:', errorText);
+                
+                // Try to parse JSON error message
+                let errorMessage = `HTTP error! status: ${response.status}`;
+                try {
+                    const errorJson = JSON.parse(errorText);
+                    errorMessage = errorJson.message || errorMessage;
+                } catch (e) {
+                    // If not JSON, use the text as is
+                    errorMessage = errorText || errorMessage;
+                }
+                
+                throw new Error(errorMessage);
             }
             
             const result = await response.json();
-            console.log('✅ Response Data:', result);
+            console.log('✅ [DEBUG] Response JSON:', result);
             return result;
             
         } catch (error) {
-            console.error('❌ Fetch Error:', error);
+            console.error('❌ [DEBUG] Fetch error:', error);
             throw error;
         }
     }
@@ -128,6 +153,12 @@ class KitchenUIRenderer {
     }
 
     static createActiveOrderCard(order) {
+    console.log('🖼️ [CARD DEBUG] Creating card for order:', {
+        id: order.id,
+        customer: order.customer_name,
+        details_count: order.order_details ? order.order_details.length : 0
+    });
+
     const orderDetails = order.order_details || [];
     const displayItems = orderDetails.slice(0, 2);
     const remainingItems = orderDetails.length - displayItems.length;
@@ -136,31 +167,43 @@ class KitchenUIRenderer {
         detail.customer_note && detail.customer_note.trim() !== ''
     );
 
-    const menuItemsHTML = displayItems.map(detail => {
-        const productName = detail.product_name || '';
-        const quantity = detail.quantity || 1;
-        const optionsText = detail.options && detail.options.length > 0 
-            ? ` (${detail.options[0].name})`
-            : '';
-        
-        return `
+    // **FIX: Handle empty order details**
+    let menuItemsHTML = '';
+    if (displayItems.length === 0) {
+        menuItemsHTML = `
             <div class="flex items-start mb-1.5">
-                <span class="text-gray-900 dark:text-white text-xs lg:text-sm font-medium typography-enhanced line-clamp-1">
-                    ${productName}
-                </span>
-                <span class="text-gray-500 dark:text-gray-400 text-xs ml-1 typography-enhanced flex-shrink-0">
-                    ×${quantity}
+                <span class="text-gray-500 dark:text-gray-400 text-xs lg:text-sm font-medium typography-enhanced">
+                    No items details available
                 </span>
             </div>
         `;
-    }).join('');
+    } else {
+        menuItemsHTML = displayItems.map(detail => {
+            const productName = detail.product_name || 'Unknown Product';
+            const quantity = detail.quantity || 1;
+            const optionsText = detail.options && detail.options.length > 0 
+                ? ` (${detail.options[0].name})`
+                : '';
+            
+            return `
+                <div class="flex items-start mb-1.5">
+                    <span class="text-gray-900 dark:text-white text-xs lg:text-sm font-medium typography-enhanced line-clamp-1">
+                        ${productName}
+                    </span>
+                    <span class="text-gray-500 dark:text-gray-400 text-xs ml-1 typography-enhanced flex-shrink-0">
+                        ×${quantity}
+                    </span>
+                </div>
+            `;
+        }).join('');
+    }
     
-    return `
+    const cardHTML = `
         <div class="relative bg-white dark:bg-gray-800 rounded-xl lg:rounded-2xl shadow-lg overflow-hidden kitchen-active-order h-full min-h-[200px] lg:min-h-[240px] flex flex-col border-r-4 border-primary" data-order-id="${order.id}">
             <div class="p-2.5 lg:p-4 pb-2 lg:pb-3 flex justify-between items-start border-b border-gray-100 dark:border-gray-700">
                 <div class="min-w-0 flex-1">
-                    <h3 class="font-bold text-sm lg:text-base text-gray-900 dark:text-white truncate typography-heading">${order.customer_name}</h3>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 typography-enhanced">${order.order_time}</p>
+                    <h3 class="font-bold text-sm lg:text-base text-gray-900 dark:text-white truncate typography-heading">${order.customer_name || 'Customer'}</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 typography-enhanced">${order.order_time || '00:00'}</p>
                 </div>
                 <div class="flex items-center gap-1.5 lg:gap-2 flex-shrink-0">
                     ${hasNotes ? `
@@ -189,6 +232,9 @@ class KitchenUIRenderer {
             </div>
         </div>
     `;
+
+    console.log('🖼️ [CARD DEBUG] Card HTML generated for order:', order.id);
+    return cardHTML;
 }
 
     static createServedOrderItem(order, showDate = false) {
@@ -343,34 +389,60 @@ class KitchenDashboard {
     }
 
     async loadAllData() {
-        console.log('🚀 Loading all data...');
-        try {
-            await this.loadOrderQueue();
-            await this.loadActiveOrders();
-            await this.loadServedOrders();
-            console.log('✅ All data loaded successfully');
-        } catch (error) {
-            console.error('❌ Error loading data:', error);
-            this.showNotification('Failed to load data: ' + error.message, 'error');
-        }
+    console.log('🚀 [DEBUG] loadAllData called');
+    try {
+        console.log('📥 [DEBUG] Starting to load all data...');
+        
+        await this.loadOrderQueue();
+        console.log('✅ [DEBUG] Queue data loaded');
+        
+        await this.loadActiveOrders();
+        console.log('✅ [DEBUG] Active orders data loaded');
+        
+        await this.loadServedOrders();
+        console.log('✅ [DEBUG] Served orders data loaded');
+        
+        // **FIX: Force update UI setelah semua data loaded**
+        this.renderOrderQueue();
+        this.renderActiveOrders();
+        this.renderServedOrders();
+        this.updateCounters();
+        
+        console.log('🎉 [DEBUG] All data loaded and rendered successfully');
+        console.log('📊 Final counts - Queue:', this.queueOrders.length, 'Active:', this.activeOrders.length, 'Served:', this.servedOrders.length);
+        
+    } catch (error) {
+        console.error('❌ [DEBUG] Error in loadAllData:', error);
+        this.showNotification('Failed to load data: ' + error.message, 'error');
     }
+}
 
     async loadOrderQueue() {
         try {
-            console.log('📋 Loading order queue...');
+            console.log('📋 [DEBUG] loadOrderQueue called');
             const result = await this.api.getOrderQueue();
+            
+            console.log('📡 [DEBUG] Queue API Response:', result);
             
             if (result.success) {
                 this.queueOrders = result.data.queue_orders || [];
-                console.log(`✅ Loaded ${this.queueOrders.length} queue orders`);
+                console.log(`✅ [DEBUG] Loaded ${this.queueOrders.length} queue orders:`, 
+                    this.queueOrders.map(o => ({ 
+                        id: o.id, 
+                        customer: o.customer_name,
+                        code: o.booking_order_code,
+                        status: o.order_status 
+                    }))
+                );
                 this.filterAllSections();
                 this.renderOrderQueue();
                 this.updateCounters();
             } else {
+                console.error('❌ [DEBUG] Queue API failed:', result.message);
                 throw new Error(result.message || 'Failed to load order queue');
             }
         } catch (error) {
-            console.error('❌ Error loading order queue:', error);
+            console.error('❌ [DEBUG] Error in loadOrderQueue:', error);
             const container = document.getElementById('orderQueue');
             if (container) {
                 KitchenUIRenderer.showErrorState(container, error.message);
@@ -379,26 +451,42 @@ class KitchenDashboard {
     }
 
     async loadActiveOrders() {
-        try {
-            console.log('🔥 Loading active orders...');
-            const result = await this.api.getActiveOrders();
+    try {
+        console.log('🔥 [DEBUG] loadActiveOrders called');
+        const result = await this.api.getActiveOrders();
+        
+        console.log('📡 [DEBUG] Active Orders API Response:', result);
+        
+        if (result.success) {
+            this.activeOrders = result.data.active_orders || [];
             
-            if (result.success) {
-                this.activeOrders = result.data.active_orders || [];
-                console.log(`✅ Loaded ${this.activeOrders.length} active orders`);
-                this.renderActiveOrders();
-                this.updateCounters();
-            } else {
-                throw new Error(result.message || 'Failed to load active orders');
-            }
-        } catch (error) {
-            console.error('❌ Error loading active orders:', error);
-            const container = document.getElementById('activeOrders');
-            if (container) {
-                KitchenUIRenderer.showErrorState(container, error.message);
-            }
+            console.log(`✅ [DEBUG] Loaded ${this.activeOrders.length} active orders:`, 
+                this.activeOrders.map(o => ({ 
+                    id: o.id, 
+                    customer: o.customer_name,
+                    code: o.booking_order_code,
+                    status: o.order_status,
+                    order_details_count: o.order_details ? o.order_details.length : 0,
+                    has_order_details: !!o.order_details && o.order_details.length > 0
+                }))
+            );
+            
+            // **FIX: Force render dan update counters**
+            this.renderActiveOrders();
+            this.updateCounters();
+            
+        } else {
+            console.error('❌ [DEBUG] Active Orders API failed:', result.message);
+            throw new Error(result.message || 'Failed to load active orders');
+        }
+    } catch (error) {
+        console.error('❌ [DEBUG] Error in loadActiveOrders:', error);
+        const container = document.getElementById('activeOrders');
+        if (container) {
+            KitchenUIRenderer.showErrorState(container, error.message);
         }
     }
+}
 
     async loadServedOrders() {
         try {
@@ -480,9 +568,15 @@ class KitchenDashboard {
 
             // Tombol start cooking
             if (e.target.id === 'startCookingBtn') {
-                console.log('👨‍🍳 Start cooking button clicked, orderId:', this.currentOrderId);
+                console.log('🎯 [DEBUG] Start Cooking button clicked!');
+                console.log('📝 [DEBUG] Current orderId:', this.currentOrderId);
+                console.log('🔍 [DEBUG] Event target:', e.target);
+                
                 if (this.currentOrderId) {
+                    console.log('🚀 [DEBUG] Calling pickUpOrder with:', this.currentOrderId);
                     this.pickUpOrder(this.currentOrderId);
+                } else {
+                    console.error('❌ [DEBUG] currentOrderId is null/undefined!');
                 }
             }
 
@@ -496,10 +590,21 @@ class KitchenDashboard {
             }
 
             // Tombol confirm serve
-            if (e.target.id === 'confirmServeBtn') {
+            if (e.target.id === 'confirmServeBtn' || e.target.closest('#confirmServeBtn')) {
                 console.log('✅ Confirm serve button clicked, confirmationOrderId:', this.confirmationOrderId);
+                
+                // **FIX: Validasi sebelum eksekusi**
                 if (this.confirmationOrderId) {
-                    this.markAsServed(this.confirmationOrderId);
+                    const order = this.activeOrders.find(o => o.id == this.confirmationOrderId);
+                    if (order) {
+                        this.markAsServed(this.confirmationOrderId);
+                    } else {
+                        this.showNotification('Order tidak ditemukan di daftar aktif', 'error');
+                        this.closeModal('serveConfirmationModal');
+                        this.loadAllData(); // Refresh data
+                    }
+                } else {
+                    this.showNotification('Order ID tidak valid', 'error');
                 }
             }
 
@@ -659,10 +764,19 @@ class KitchenDashboard {
     }
 
     showServeConfirmation(orderId) {
-        console.log('📢 Showing serve confirmation for order:', orderId);
+        console.log('📢 [SERVE FIXED] Showing serve confirmation for order:', orderId);
+        
+        // **FIX: Validasi order masih ada di active orders**
         const order = this.activeOrders.find(o => o.id == orderId);
         if (!order) {
-            this.showNotification('Order not found', 'error');
+            this.showNotification('Order tidak ditemukan di daftar aktif. Memuat ulang data...', 'warning');
+            this.loadAllData(); // Refresh data
+            return;
+        }
+        
+        // **FIX: Validasi order status**
+        if (order.order_status !== 'PROCESSED') {
+            this.showNotification(`Order status: ${order.order_status}. Tidak bisa ditandai sebagai served.`, 'error');
             return;
         }
 
@@ -771,7 +885,6 @@ class KitchenDashboard {
         console.log('🔧 Setting up checkbox functionality...');
         console.log('📊 Total checkboxes:', checkboxes.length);
         console.log('🔘 Serve button found:', !!serveBtn);
-        console.log('🔘 Serve button initial disabled state:', serveBtn ? serveBtn.disabled : 'N/A');
 
         const updateButtonStates = () => {
             const checkedCount = Array.from(checkboxes).filter(checkbox => checkbox.checked).length;
@@ -934,18 +1047,48 @@ class KitchenDashboard {
     }
 
     renderActiveOrders() {
-        const container = document.getElementById('activeOrders');
-        if (!container) return;
-        
-        if (this.activeOrders.length === 0) {
-            KitchenUIRenderer.showEmptyState(container, 'active');
-            return;
-        }
-
-        container.innerHTML = this.activeOrders.map(order => 
-            KitchenUIRenderer.createActiveOrderCard(order)
-        ).join('');
+    const container = document.getElementById('activeOrders');
+    if (!container) {
+        console.error('❌ [RENDER DEBUG] Active orders container not found!');
+        return;
     }
+    
+    console.log('🎨 [RENDER DEBUG] Rendering active orders:', this.activeOrders.length);
+    
+    if (this.activeOrders.length === 0) {
+        console.log('🎨 [RENDER DEBUG] No active orders, showing empty state');
+        KitchenUIRenderer.showEmptyState(container, 'active');
+        return;
+    }
+
+    // **FIX: Pastikan data order_details ada**
+    const ordersWithDetails = this.activeOrders.map(order => {
+        console.log('📦 [RENDER DEBUG] Order details for:', order.customer_name, order.order_details);
+        return {
+            ...order,
+            order_details: order.order_details || [] // Pastikan tidak undefined
+        };
+    });
+
+    const html = ordersWithDetails.map(order => 
+        KitchenUIRenderer.createActiveOrderCard(order)
+    ).join('');
+    
+    console.log('🎨 [RENDER DEBUG] Generated HTML length:', html.length);
+    container.innerHTML = html;
+    
+    // **FIX: Log untuk debugging render**
+    const renderedCards = container.querySelectorAll('.kitchen-active-order');
+    console.log('🎨 [RENDER DEBUG] Rendered cards count:', renderedCards.length);
+    
+    renderedCards.forEach((card, index) => {
+        const orderId = card.dataset.orderId;
+        console.log(`🎨 [RENDER DEBUG] Card ${index + 1}:`, { 
+            orderId, 
+            hasDetails: card.innerHTML.length > 0 
+        });
+    });
+}
 
     renderServedOrders() {
         const container = document.getElementById('servedOrders');
@@ -1029,58 +1172,172 @@ updatePendingOrdersBadge() {
 }
 
     async pickUpOrder(orderId) {
-        try {
-            console.log('👨‍🍳 Picking up order:', orderId);
-            this.showNotification('Processing order...', 'info');
-            const result = await this.api.pickUpOrder(orderId);
+    try {
+        console.log('🔍 [DEBUG] pickUpOrder called with orderId:', orderId);
+        console.log('📋 [DEBUG] Current queue orders:', this.queueOrders.map(o => ({ 
+            id: o.id, 
+            customer: o.customer_name,
+            code: o.booking_order_code 
+        })));
+
+        console.log('👨‍🍳 Picking up order:', orderId);
+        this.showNotification('Processing order...', 'info');
+        
+        const result = await this.api.pickUpOrder(orderId);
+        
+        console.log('📡 [DEBUG] Pickup API Response:', result);
+        console.log('✅ [DEBUG] Response success:', result.success);
+        console.log('📝 [DEBUG] Response message:', result.message);
+        
+        if (result.success) {
+            console.log('🔄 [DEBUG] Before updating queues - Queue count:', this.queueOrders.length);
+            console.log('🔄 [DEBUG] Before updating queues - Active count:', this.activeOrders.length);
+
+            // **FIX: Hapus dari queue orders secara langsung untuk UX yang lebih baik**
+            this.queueOrders = this.queueOrders.filter(order => order.id != orderId);
+            this.filteredQueueOrders = this.filteredQueueOrders.filter(order => order.id != orderId);
             
-            if (result.success) {
-                this.showNotification('Order moved to active orders! 🎯 Now Cooking', 'success');
-                this.closeModal('queueOrderModal');
-                setTimeout(() => this.loadAllData(), 1000);
-            } else {
-                this.showNotification(result.message || 'Failed to pick up order', 'error');
-            }
-        } catch (error) {
-            console.error('❌ Error picking up order:', error);
-            this.showNotification('Error picking up order: ' + error.message, 'error');
+            // **FIX: Update UI queue segera**
+            this.renderOrderQueue();
+            this.updateCounters();
+            
+            this.showNotification('Order moved to active orders! 🎯 Now Cooking', 'success');
+            this.closeModal('queueOrderModal');
+            
+            // **FIX: Refresh active orders secara agresif**
+            console.log('🔄 [DEBUG] Immediately refreshing active orders...');
+            await this.loadActiveOrders();
+            await this.loadOrderQueue(); // Refresh queue juga untuk konsistensi
+            
+            // **FIX: Force render ulang active orders**
+            this.renderActiveOrders();
+            this.updateCounters();
+            
+            console.log('✅ [DEBUG] After refresh - Active count:', this.activeOrders.length);
+            console.log('✅ [DEBUG] After refresh - Queue count:', this.queueOrders.length);
+
+        } else {
+            console.error('❌ [DEBUG] Pickup failed with message:', result.message);
+            this.showNotification(result.message || 'Failed to pick up order', 'error');
         }
+    } catch (error) {
+        console.error('❌ [DEBUG] Error in pickUpOrder:', error);
+        console.error('❌ [DEBUG] Error stack:', error.stack);
+        this.showNotification('Error picking up order: ' + error.message, 'error');
     }
+}
 
     async markAsServed(orderId) {
         try {
-            console.log('✅ Marking order as served:', orderId);
+            console.log('✅ [SERVE FIXED] Marking order as served:', orderId);
             
+            // **FIX: Validasi orderId**
+            if (!orderId) {
+                this.showNotification('Order ID tidak valid', 'error');
+                return;
+            }
+
+            // **FIX: Cari order di active orders untuk memastikan masih ada**
+            const order = this.activeOrders.find(o => o.id == orderId);
+            if (!order) {
+                this.showNotification('Order tidak ditemukan di daftar aktif. Memuat ulang data...', 'warning');
+                this.closeModal('serveConfirmationModal');
+                // Refresh data karena mungkin sudah berubah
+                await this.loadAllData();
+                return;
+            }
+
+            console.log('📦 [SERVE FIXED] Order details before serve:', {
+                orderId: orderId,
+                orderCode: order.booking_order_code,
+                orderStatus: order.order_status,
+                inActiveOrders: !!order
+            });
+
             this.closeModal('serveConfirmationModal');
             
-            this.showNotification('Marking order as served...', 'info');
+            // **FIX: Show loading state**
+            this.showNotification('Menandai order sebagai served...', 'info');
+            
+            // **FIX: Disable button untuk prevent multiple clicks**
+            const serveBtn = document.getElementById('confirmServeBtn');
+            if (serveBtn) {
+                serveBtn.disabled = true;
+                serveBtn.innerHTML = '<span class="material-icons mr-2 text-sm">hourglass_empty</span>Processing...';
+            }
+
             const result = await this.api.markAsServed(orderId);
             
             if (result.success) {
-                console.log('🎉 Order successfully marked as served');
+                console.log('🎉 [SERVE FIXED] Order successfully marked as served:', result.data);
                 
+                // **FIX: Hapus dari active orders secara langsung**
                 this.activeOrders = this.activeOrders.filter(order => order.id != orderId);
                 
-                await this.loadServedOrders();
-                await this.loadActiveOrders();
-                await this.loadOrderQueue();
-                
+                // **FIX: Update UI segera**
                 this.renderActiveOrders();
                 this.updateCounters();
                 
-                this.showNotification('Order marked as served! ✅', 'success');
+                this.showNotification('Order berhasil ditandai sebagai served! ✅', 'success');
+                
+                // **FIX: Refresh data dari server untuk konsistensi**
+                setTimeout(async () => {
+                    await this.loadServedOrders();
+                    await this.loadActiveOrders();
+                    this.updateCounters();
+                }, 500);
                 
                 this.closeModal('orderDetailsModal');
                 
-                this.confirmationOrderId = null;
-                this.currentOrderId = null;
-                
             } else {
-                this.showNotification(result.message || 'Failed to mark order as served', 'error');
+                // **FIX: Handle specific error messages**
+                const errorMessage = result.message || 'Gagal menandai order sebagai served';
+                console.error('❌ [SERVE FIXED] Serve failed:', errorMessage);
+                
+                // **FIX: Berikan pesan yang lebih spesifik**
+                if (errorMessage.includes('tidak dalam status PROCESSED')) {
+                    this.showNotification('Order status sudah berubah. Memuat ulang data...', 'warning');
+                } else if (errorMessage.includes('tidak ditemukan')) {
+                    this.showNotification('Order tidak ditemukan. Memuat ulang data...', 'warning');
+                } else {
+                    this.showNotification(errorMessage, 'error');
+                }
+                
+                // **FIX: Refresh data karena ada ketidaksesuaian**
+                await this.loadAllData();
             }
+            
         } catch (error) {
-            console.error('❌ Error marking order as served:', error);
-            this.showNotification('Error marking order as served: ' + error.message, 'error');
+            console.error('❌ [SERVE FIXED] Error marking order as served:', error);
+            
+            // **FIX: Handle different error types**
+            let userMessage = 'Error menandai order sebagai served: ';
+            
+            if (error.message.includes('404')) {
+                userMessage = 'Order tidak ditemukan. Memuat ulang data...';
+                // Refresh data
+                await this.loadAllData();
+            } else if (error.message.includes('500')) {
+                userMessage = 'Terjadi kesalahan server. Silakan coba lagi.';
+            } else if (error.message.includes('403')) {
+                userMessage = 'Order sedang diproses oleh koki lain.';
+            } else {
+                userMessage += error.message;
+            }
+            
+            this.showNotification(userMessage, 'error');
+            
+        } finally {
+            // **FIX: Reset button state**
+            const serveBtn = document.getElementById('confirmServeBtn');
+            if (serveBtn) {
+                serveBtn.disabled = false;
+                serveBtn.innerHTML = '<span class="material-icons mr-2 text-sm">check_circle</span>Confirm Serve';
+            }
+            
+            // **FIX: Reset confirmation state**
+            this.confirmationOrderId = null;
+            this.currentOrderId = null;
         }
     }
 
@@ -1179,6 +1436,7 @@ function refreshKitchenDashboard() {
     }
 }
 </script>
+
 
 <style>
 /* Sidebar Fixed Width */
