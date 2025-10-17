@@ -19,7 +19,7 @@ class KitchenDashboardController extends Controller
     }
 
     /**
-     * GET ORDER QUEUE (PAID)
+     * GET ORDER QUEUE (PAID + WAITING)
      */
     public function getOrderQueue(Request $request)
     {
@@ -33,35 +33,37 @@ class KitchenDashboardController extends Controller
                 ], 401);
             }
 
-            // Get only PAID orders untuk queue
-            $orders = BookingOrder::with([
-                'order_details' => function($query) {
-                    $query->select([
-                        'id', 
-                        'booking_order_id', 
-                        'partner_product_id',
-                        'product_name',
-                        'quantity', 
-                        'base_price', 
-                        'options_price',
-                        'customer_note'
-                    ]);
-                },
-                'order_details.order_detail_options' => function($query) {
-                    $query->select([
-                        'id',
-                        'order_detail_id', 
-                        'partner_product_option_name',
-                        'price'
-                    ]);
-                }
-            ])
-            ->where('partner_id', $employee->partner_id)
-            ->where('order_status', 'PAID') 
-            ->orderBy('created_at', 'asc') 
-            ->get();
+            Log::debug('🔍 [QUEUE DEBUG] Fetching order queue', [
+                'partner_id' => $employee->partner_id,
+                'employee_id' => $employee->id
+            ]);
 
-            // Transform data untuk queue
+            // Query dengan kondisi yang benar - hanya berdasarkan order_status
+            $orders = BookingOrder::with([
+                    'order_details' => function($query) {
+                        $query->select([
+                            'id', 'booking_order_id', 'partner_product_id',
+                            'product_name', 'quantity', 'base_price', 
+                            'options_price', 'customer_note'
+                        ]);
+                    },
+                    'order_details.order_detail_options' => function($query) {
+                        $query->select([
+                            'id', 'order_detail_id', 'partner_product_option_name', 'price'
+                        ]);
+                    }
+                ])
+                ->where('partner_id', $employee->partner_id)
+                ->where('order_status', 'PAID') // Hanya order dengan status PAID
+                ->orderBy('created_at', 'asc')
+                ->get();
+
+            Log::debug('✅ [QUEUE DEBUG] Query results', [
+                'total_orders' => $orders->count(),
+                'order_ids' => $orders->pluck('id')->toArray()
+            ]);
+
+            // Transform data
             $queueOrders = $orders->map(function($order, $index) {
                 return $this->transformOrderData($order, $index + 1);
             });
@@ -75,7 +77,7 @@ class KitchenDashboardController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Order Queue Error: ' . $e->getMessage());
+            Log::error('❌ [QUEUE DEBUG] Error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to fetch order queue: ' . $e->getMessage()
@@ -84,7 +86,7 @@ class KitchenDashboardController extends Controller
     }
 
     /**
-     * GET ACTIVE ORDERS - Order dengan status PROCESSED (Cooking)
+     * GET ACTIVE ORDERS - Order dengan order_status PROCESSED
      */
     public function getActiveOrders(Request $request)
     {
@@ -98,37 +100,45 @@ class KitchenDashboardController extends Controller
                 ], 401);
             }
 
-            // Get PROCESSED orders untuk active orders (Cooking)
-            $orders = BookingOrder::with([
-                'order_details' => function($query) {
-                    $query->select([
-                        'id', 
-                        'booking_order_id', 
-                        'partner_product_id',
-                        'product_name',
-                        'quantity', 
-                        'base_price', 
-                        'options_price',
-                        'customer_note',
-                        'status',
-                        'done_flag'
-                    ]);
-                },
-                'order_details.order_detail_options' => function($query) {
-                    $query->select([
-                        'id',
-                        'order_detail_id', 
-                        'partner_product_option_name',
-                        'price'
-                    ]);
-                }
-            ])
-            ->where('partner_id', $employee->partner_id)
-            ->where('order_status', 'PROCESSED') 
-            ->orderBy('updated_at', 'desc') 
-            ->get();
+            Log::info('🔥 [ACTIVE ORDERS DEBUG] Fetching active orders', [
+                'partner_id' => $employee->partner_id,
+                'employee_id' => $employee->id
+            ]);
 
-            // Transform data untuk active orders
+            // Query dengan kondisi PROCESSED saja
+            $orders = BookingOrder::with([
+                    'order_details' => function($query) {
+                        $query->select([
+                            'id', 'booking_order_id', 'partner_product_id',
+                            'product_name', 'quantity', 'base_price', 
+                            'options_price', 'customer_note',
+                            'status', 'done_flag'
+                        ]);
+                    },
+                    'order_details.order_detail_options' => function($query) {
+                        $query->select([
+                            'id', 'order_detail_id', 'partner_product_option_name', 'price'
+                        ]);
+                    }
+                ])
+                ->where('partner_id', $employee->partner_id)
+                ->where('order_status', 'PROCESSED') // ORDER STATUS: PROCESSED
+                ->orderBy('updated_at', 'asc')
+                ->get();
+
+            Log::info('✅ [ACTIVE ORDERS DEBUG] Final query results', [
+                'total_orders_loaded' => $orders->count(),
+                'order_ids_loaded' => $orders->pluck('id')->toArray(),
+                'order_details' => $orders->map(function($order) {
+                    return [
+                        'id' => $order->id,
+                        'code' => $order->booking_order_code,
+                        'order_status' => $order->order_status,
+                        'order_details_count' => $order->order_details ? $order->order_details->count() : 0
+                    ];
+                })
+            ]);
+
             $activeOrders = $orders->map(function($order) {
                 return $this->transformOrderData($order);
             });
@@ -142,7 +152,7 @@ class KitchenDashboardController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Active Orders Error: ' . $e->getMessage());
+            Log::error('❌ [ACTIVE ORDERS DEBUG] Error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to fetch active orders: ' . $e->getMessage()
@@ -151,7 +161,7 @@ class KitchenDashboardController extends Controller
     }
 
     /**
-     * GET SERVED ORDERS - Order dengan status SERVED (sudah disajikan)
+     * GET SERVED ORDERS - Order dengan order_status SERVED
      */
     public function getServedOrders(Request $request)
     {
@@ -168,29 +178,21 @@ class KitchenDashboardController extends Controller
             $query = BookingOrder::with([
                     'order_details' => function($query) {
                         $query->select([
-                            'id', 
-                            'booking_order_id', 
-                            'partner_product_id',
-                            'product_name',
-                            'quantity', 
-                            'base_price', 
-                            'options_price',
-                            'customer_note'
+                            'id', 'booking_order_id', 'partner_product_id',
+                            'product_name', 'quantity', 'base_price', 
+                            'options_price', 'customer_note'
                         ]);
                     },
                     'order_details.order_detail_options' => function($query) {
                         $query->select([
-                            'id',
-                            'order_detail_id', 
-                            'partner_product_option_name',
-                            'price'
+                            'id', 'order_detail_id', 'partner_product_option_name', 'price'
                         ]);
                     }
                 ])
                 ->where('partner_id', $employee->partner_id)
-                ->where('order_status', 'SERVED');
+                ->where('order_status', 'SERVED'); // ORDER STATUS: SERVED
 
-            // Filter by date jika ada
+            // Filter by date
             if ($request->has('date') && $request->get('date') !== 'all') {
                 $date = $request->get('date');
                 try {
@@ -204,6 +206,11 @@ class KitchenDashboardController extends Controller
             $orders = $query->orderBy('updated_at', 'desc')
                 ->limit(200)
                 ->get();
+
+            Log::debug('✅ SERVED ORDERS RESULTS', [
+                'total_orders' => $orders->count(),
+                'date_filter' => $request->get('date', 'all')
+            ]);
 
             $servedOrders = $orders->map(function($order) {
                 return $this->transformOrderData($order);
@@ -223,7 +230,7 @@ class KitchenDashboardController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Served Orders Error: ' . $e->getMessage());
+            Log::error('❌ SERVED ORDERS ERROR: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to fetch served orders: ' . $e->getMessage()
@@ -232,49 +239,89 @@ class KitchenDashboardController extends Controller
     }
 
     /**
-     * PICK UP ORDER - Ubah status dari PAID ke PROCESSED (Cooking)
+     * PICK UP ORDER - Ambil order dari antrian (PAID → PROCESSED)
      */
     public function pickUpOrder(Request $request, $orderId)
     {
+        DB::beginTransaction();
         try {
             $employee = Auth::guard('employee')->user();
+            
 
+            Log::info('🔍 [PICKUP FIXED] Starting pickup process', [
+                'order_id' => $orderId,
+                'employee_id' => $employee->id,
+                'partner_id' => $employee->partner_id
+            ]);
+
+            // Cari order dengan kondisi PAID saja
             $order = BookingOrder::where('id', $orderId)
                 ->where('partner_id', $employee->partner_id)
                 ->where('order_status', 'PAID')
+                ->lockForUpdate()
                 ->first();
 
             if (!$order) {
+                DB::rollBack();
+                
+                Log::warning('❌ [PICKUP FIXED] Order not found or invalid', [
+                    'order_id' => $orderId,
+                    'expected_conditions' => [
+                        'partner_id' => $employee->partner_id,
+                        'order_status' => 'PAID'
+                    ]
+                ]);
+                
                 return response()->json([
                     'success' => false,
-                    'message' => 'Order not found or already processed'
+                    'message' => 'Order not found'
+                ], 404);
+            }
+            
+            if ($order->kitchen_process_id !== null || $order->cashier_process_id !== null) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Order already taken by another chef'
                 ], 404);
             }
 
-            // Update status ke PROCESSED (Cooking)
+
+            Log::info('✅ [PICKUP FIXED] Order found, updating to PROCESSED', [
+                'order_id' => $order->id,
+                'current_order_status' => $order->order_status
+            ]);
+
+            // UPDATE: order_status ke PROCESSED
             $order->update([
                 'order_status' => 'PROCESSED',
+                'kitchen_process_id' => $employee->id,
                 'updated_at' => now()
             ]);
 
-            Log::info('Order picked up to active orders', [
+            $order->refresh();
+
+            Log::info('🎯 [PICKUP FIXED] Order successfully picked up', [
                 'order_id' => $order->id,
                 'order_code' => $order->booking_order_code,
-                'updated_by' => $employee->id
+                'new_order_status' => $order->order_status, // Sekarang PROCESSED
+                'chef_id' => $employee->id
             ]);
+
+            DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Order moved to active orders (Cooking)',
+                'message' => 'Order successfully picked up',
                 'data' => [
                     'order_id' => $order->id,
                     'order_code' => $order->booking_order_code,
-                    'new_status' => 'PROCESSED'
+                    'order_status' => $order->order_status, // Sekarang PROCESSED
                 ]
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Pick Up Order Error: ' . $e->getMessage());
+            DB::rollBack();
+            Log::error('❌ [PICKUP FIXED] Pick up order error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to pick up order: ' . $e->getMessage()
@@ -287,48 +334,76 @@ class KitchenDashboardController extends Controller
      */
     public function markAsServed(Request $request, $orderId)
     {
+        DB::beginTransaction();
         try {
             $employee = Auth::guard('employee')->user();
 
+            Log::info('✅ [SERVE FIXED] Starting mark as served process', [
+                'order_id' => $orderId,
+                'employee_id' => $employee->id,
+                'partner_id' => $employee->partner_id
+            ]);
+
+            // Cari order dengan kondisi PROCESSED
             $order = BookingOrder::where('id', $orderId)
                 ->where('partner_id', $employee->partner_id)
-                ->where('order_status', 'PROCESSED')
+                ->where('order_status', 'PROCESSED') // Pastikan order_status PROCESSED
                 ->first();
 
             if (!$order) {
+                DB::rollBack();
+                
+                Log::error('❌ [SERVE FIXED] Order tidak ditemukan atau tidak dalam status PROCESSED', [
+                    'order_id' => $orderId,
+                    'employee_id' => $employee->id
+                ]);
+                
                 return response()->json([
                     'success' => false,
-                    'message' => 'Order not found or already served'
+                    'message' => 'Order tidak ditemukan atau tidak dalam status PROCESSED'
                 ], 404);
             }
 
-            // Update status ke SERVED
+            Log::info('📊 [SERVE FIXED] Order ditemukan, updating to SERVED', [
+                'order_id' => $order->id,
+                'order_code' => $order->booking_order_code,
+                'current_order_status' => $order->order_status
+            ]);
+
+            // UPDATE: order_status diubah ke SERVED
             $order->update([
-                'order_status' => 'SERVED',
+                'order_status' => 'SERVED', // DIUBAH dari PROCESSED ke SERVED
                 'updated_at' => now()
             ]);
 
-            Log::info('Order marked as served', [
+            DB::commit();
+
+            $order->refresh();
+
+            Log::info('🎉 [SERVE FIXED] Order successfully marked as served', [
                 'order_id' => $order->id,
                 'order_code' => $order->booking_order_code,
-                'updated_by' => $employee->id
+                'new_order_status' => $order->order_status, // Sekarang SERVED
+                'served_by' => $employee->name
             ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Order marked as served',
+                'message' => 'Order berhasil ditandai sebagai served',
                 'data' => [
                     'order_id' => $order->id,
                     'order_code' => $order->booking_order_code,
-                    'new_status' => 'SERVED'
+                    'order_status' => $order->order_status, // SEKARANG 'SERVED'
+                    'served_at' => now()->toISOString()
                 ]
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Mark as Served Error: ' . $e->getMessage());
+            DB::rollBack();
+            Log::error('❌ [SERVE FIXED] Mark as served error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to mark order as served: ' . $e->getMessage()
+                'message' => 'Gagal menandai order sebagai served: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -338,16 +413,12 @@ class KitchenDashboardController extends Controller
      */
     private function transformOrderData($order, $queueNumber = null)
     {
-        // Pastikan created_at adalah Carbon instance
         $orderTime = $order->created_at ? Carbon::parse($order->created_at)->format('H:i') : '00:00';
-        $servedTime = ($order->order_status === 'SERVED' && $order->updated_at) 
-            ? Carbon::parse($order->updated_at)->format('H:i') 
-            : null;
+        $updatedTime = $order->updated_at ? Carbon::parse($order->updated_at)->format('H:i') : null;
         
         $orderDetails = $order->order_details ?? collect();
         $totalItems = $orderDetails->sum('quantity');
         
-        // Format product names untuk display
         $productNames = $orderDetails->map(function($detail) {
             if (!$detail) return 'Unknown Product';
             
@@ -365,13 +436,9 @@ class KitchenDashboardController extends Controller
             return "{$productName} x{$detail->quantity}{$optionsText}";
         })->implode(', ');
 
-        // HAPUS KATA "GUEST" DARI NAMA CUSTOMER
         $customerName = $this->cleanCustomerName($order->customer_name);
-
-        // Ambil catatan khusus dari order (jika ada)
         $customerOrderNote = $order->customer_order_note ?? '';
 
-        // Ambil catatan khusus dari order details (jika ada)
         $orderDetailsNotes = $orderDetails->filter(function($detail) {
             return !empty($detail->customer_note);
         })->map(function($detail) {
@@ -381,7 +448,6 @@ class KitchenDashboardController extends Controller
             ];
         })->values();
 
-        // Determine status config
         $statusConfig = $this->getStatusConfig($order->order_status);
 
         return [
@@ -393,12 +459,11 @@ class KitchenDashboardController extends Controller
             'status_badge' => $statusConfig['badge'],
             'status_color' => $statusConfig['color'],
             'order_time' => $orderTime,
-            'served_time' => $servedTime,
+            'updated_time' => $updatedTime,
             'total_items' => $totalItems,
             'product_names' => $productNames ?: 'No items',
             'total_order_value' => number_format($order->total_order_value ?? 0, 0, ',', '.'),
             'table_id' => $order->table_id ?? 'T',
-            'order_type' => $order->order_type ?? 'Dine-in',
             'customer_order_note' => $customerOrderNote,
             'order_details_notes' => $orderDetailsNotes,
             'has_special_notes' => !empty($customerOrderNote) || $orderDetailsNotes->isNotEmpty(),
@@ -436,10 +501,7 @@ class KitchenDashboardController extends Controller
             return 'Customer';
         }
 
-        // Hapus semua kemunculan kata "Guest" (case insensitive)
         $cleaned = preg_replace('/\bguest\b/i', '', $name);
-        
-        // Hapus karakter khusus dan spasi berlebih
         $cleaned = preg_replace('/\s+/', ' ', $cleaned);
         $cleaned = preg_replace('/[^\w\s]/', '', $cleaned);
         $cleaned = trim($cleaned);
@@ -452,27 +514,31 @@ class KitchenDashboardController extends Controller
     }
 
     /**
-     * Status configuration
+     * Status configuration berdasarkan order_status saja
      */
-    private function getStatusConfig($status)
+    private function getStatusConfig($orderStatus)
     {
         $configs = [
             'PAID' => [
                 'badge' => 'Waiting',
-                'color' => 'red'
+                'color' => 'orange'
             ],
             'PROCESSED' => [
                 'badge' => 'Cooking', 
-                'color' => 'yellow'
+                'color' => 'blue'
             ],
             'SERVED' => [
                 'badge' => 'Served',
                 'color' => 'green'
+            ],
+            'UNPAID' => [
+                'badge' => 'Unpaid',
+                'color' => 'gray'
             ]
         ];
 
-        return $configs[$status] ?? [
-            'badge' => $status,
+        return $configs[$orderStatus] ?? [
+            'badge' => $orderStatus ?? 'Unknown',
             'color' => 'gray'
         ];
     }
