@@ -34,6 +34,7 @@ use App\Http\Controllers\Partner\HumanResource\PartnerEmployeeController;
 use App\Http\Controllers\Employee\Transaction\CashierTransactionController;
 use App\Http\Controllers\Customer\Auth\CustomerPasswordResetController;
 use App\Http\Controllers\Employee\Transaction\KitchenTransactionController;
+use App\Http\Controllers\Owner\Verification\VerificationController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 Route::get('/set-language', function () {
@@ -138,25 +139,36 @@ Route::middleware('setlocale')->group(function () {
 
         // OWNER area
         Route::middleware(['auth:owner', 'is_owner:owner', 'verified'])->prefix('user-owner')->name('user-owner.')->group(function () {
-            Route::get('/', [OwnerDashboardController::class, 'index'])->name('dashboard');
-            Route::get('outlets/check-username', [OwnerOutletController::class, 'checkUsername'])->name('outlets.check-username')->middleware('throttle:30,1');
-            Route::get('outlets/check-slug', [OwnerOutletController::class, 'checkSlug'])->name('outlets.check-slug')->middleware('throttle:30,1');
-            Route::resource('outlets', OwnerOutletController::class);
-            Route::get('employees/check-username', [OwnerEmployeeController::class, 'checkUsername'])->name('employees.check-username');
-            Route::resource('employees', OwnerEmployeeController::class);
-            Route::resource('master-products', OwnerMasterProductController::class);
-            Route::get('outlet-products/get-master-products', [OwnerOutletProductController::class, 'getMasterProducts'])->name('outlet-products.get-master-products');
-            Route::resource('outlet-products', OwnerOutletProductController::class);
-            Route::resource('products', OwnerProductController::class);
-            Route::resource('categories', OwnerCategoryController::class);
 
-            Route::prefix('report')->name('report.')->group(function () {
-                Route::get('sales/export', [SalesReportController::class, 'export'])->name('sales.export');
-                Route::get('sales/products', [SalesReportController::class, 'getTopProductsAjax'])->name('sales.products'); // ROUTE BARU
-                Route::get('order-details/{id}', [SalesReportController::class, 'getOrderDetails'])->name('order-details');
-                Route::resource('sales', SalesReportController::class)->only(['index']);
+            Route::middleware('verified.owner')->group(function () {
+                Route::get('/', [OwnerDashboardController::class, 'index'])->name('dashboard');
+                Route::get('outlets/check-username', [OwnerOutletController::class, 'checkUsername'])->name('outlets.check-username')->middleware('throttle:30,1');
+                Route::get('outlets/check-slug', [OwnerOutletController::class, 'checkSlug'])->name('outlets.check-slug')->middleware('throttle:30,1');
+                Route::resource('outlets', OwnerOutletController::class);
+                Route::get('employees/check-username', [OwnerEmployeeController::class, 'checkUsername'])->name('employees.check-username');
+                Route::resource('employees', OwnerEmployeeController::class);
+                Route::resource('master-products', OwnerMasterProductController::class);
+                Route::get('outlet-products/get-master-products', [OwnerOutletProductController::class, 'getMasterProducts'])->name('outlet-products.get-master-products');
+                Route::resource('outlet-products', OwnerOutletProductController::class);
+                Route::resource('products', OwnerProductController::class);
+                Route::resource('categories', OwnerCategoryController::class);
+
+                Route::prefix('report')->name('report.')->group(function () {
+                    Route::get('sales/export', [SalesReportController::class, 'export'])->name('sales.export');
+                    Route::get('sales/products', [SalesReportController::class, 'getTopProductsAjax'])->name('sales.products'); // ROUTE BARU
+                    Route::get('order-details/{id}', [SalesReportController::class, 'getOrderDetails'])->name('order-details');
+                    Route::resource('sales', SalesReportController::class)->only(['index']);
+                });
+                Route::resource('promotions', OwnerPromotionController::class);
             });
-            Route::resource('promotions', OwnerPromotionController::class);
+
+
+            // Tambahkan ->middleware('owner.not_approved') sebelum ->prefix()
+            Route::middleware('owner.not_approved')->prefix('verification')->name('verification.')->group(function () {
+                Route::get('/', [VerificationController::class, 'index'])->name('index');
+                Route::post('/', [VerificationController::class, 'store'])->name('store');
+                Route::get('/status', [VerificationController::class, 'status'])->name('status');
+            });
         });
     });
 
