@@ -24,6 +24,8 @@ class BookingOrder extends Model
         'discount_value',
         'total_order_value',
         'customer_order_note',
+        'cashier_process_id',
+        'kitchen_process_id',
         'payment_id',
         'payment_flag',
     ];
