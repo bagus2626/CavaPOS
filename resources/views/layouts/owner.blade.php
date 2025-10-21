@@ -475,10 +475,11 @@
                             $productRoutes = ['owner.user-owner.products.*'];
                             $categoryRoutes = ['owner.user-owner.categories.*'];
                             $promotionRoutes = ['owner.user-owner.promotions.*'];
+                            $stockRoutes = ['owner.user-owner.stocks.*'];
                             $masterProductRoutes = ['owner.user-owner.master-products.*'];
                             $outletProductRoutes = ['owner.user-owner.outlet-products.*'];
 
-                            $allProductRoutes = array_merge($productRoutes, $categoryRoutes, $promotionRoutes, $masterProductRoutes, $outletProductRoutes);
+                            $allProductRoutes = array_merge($productRoutes, $categoryRoutes, $promotionRoutes, $masterProductRoutes, $outletProductRoutes, $stockRoutes);
                         @endphp
 
                         <li class="nav-item {{ Route::is($allProductRoutes) ? 'menu-open' : '' }}">
@@ -504,6 +505,13 @@
                                         <p>{{ __('messages.owner.layout.outlet_products') }}</p>
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('owner.user-owner.stocks.index') }}"
+                                        class="nav-link {{ Route::is('owner.user-owner.stocks.*') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>{{ __('messages.owner.layout.stocks') }}</p>
+                                    </a>
+                                </li>
                                 {{-- <li class="nav-item">
                                     <a href="{{ route('owner.user-owner.products.index') }}"
                                         class="nav-link {{ Route::is('owner.user-owner.products.*') ? 'active' : '' }}">
@@ -525,7 +533,6 @@
                                         <p>{{ __('messages.owner.layout.promotions') }}</p>
                                     </a>
                                 </li>
-
                             </ul>
 
                         </li>
