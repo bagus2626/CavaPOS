@@ -29,7 +29,11 @@
             <div class="hidden md:flex items-center space-x-6">
                 @if ($displayName)
                     <span class="text-gray-700 font-medium max-w-[180px] truncate">
-                        {{ $displayName }}
+                        @if ($displayName === 'Guest')
+                            {{ __('messages.customer.navbar.guest') }}
+                        @else
+                            {{ $displayName }}
+                        @endif
                     </span>
                 @else
                     <a href="#" class="text-gray-700 hover:text-blue-500">{{ __('messages.customer.navbar.home') }}</a>
@@ -98,7 +102,7 @@
                     <form class="my-auto" method="POST" action="{{ $logoutAction }}">
                         @csrf
                         <button type="submit" class="w-full text-left px-4 py-2 text-choco hover:bg-red-100">
-                        Logout
+                        {{ __('messages.customer.navbar.logout') }}
                         </button>
                     </form>
                 @endauth
@@ -107,7 +111,7 @@
                         @csrf
                         <button type="submit"
                             class="w-full text-left px-4 py-2 text-choco hover:bg-red-100 rounded-lg">
-                            Logout (Guest)
+                            {{ __('messages.customer.navbar.logout_guest') }}
                         </button>
                     </form>
                 @endif
@@ -130,7 +134,11 @@
     <div id="mobile-menu" class="hidden md:hidden">
         @if ($displayName)
             <div class="block px-4 py-2 text-gray-700 font-medium">
-                {{ $displayName }}
+                @if ($displayName === 'Guest')
+                    {{ __('messages.customer.navbar.guest') }}
+                @else
+                    {{ $displayName }}
+                @endif
             </div>
         @else
             <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">{{ __('messages.customer.navbar.home') }}</a>
@@ -140,7 +148,7 @@
         {{-- LANG SWITCH (MOBILE) --}}
         <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
-                <span class="text-sm text-gray-700 dark:text-gray-500">Language</span>
+                <span class="text-sm text-gray-700 dark:text-gray-500">{{ __('messages.customer.navbar.language') }}</span>
                 <div class="inline-flex rounded-md overflow-hidden border border-choco dark:border-choco">
                     <button
                         type="button"
@@ -166,7 +174,7 @@
             <form method="POST" action="{{ $logoutAction }}">
                 @csrf
                 <button type="submit" class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-100">
-                Logout
+                {{ __('messages.customer.navbar.logout') }}
                 </button>
             </form>
         @endauth
@@ -176,7 +184,7 @@
                 @csrf
                 <button type="submit"
                     class="w-full text-left px-4 py-2 text-choco hover:bg-red-100">
-                    Logout (Guest)
+                    {{ __('messages.customer.navbar.logout_guest') }}
                 </button>
             </form>
         @endif
