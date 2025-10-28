@@ -17,6 +17,7 @@ use App\Http\Controllers\Owner\Report\SalesReportController;
 use App\Http\Controllers\Partner\PartnerDashboardController;
 use App\Http\Controllers\Auth\GoogleCallbackController;
 use App\Http\Controllers\Owner\Product\OwnerPromotionController;
+use App\Http\Controllers\Owner\Product\OwnerStockController;
 use App\Http\Controllers\Customer\Auth\CustomerAuthController;
 use App\Http\Controllers\Customer\Menu\CustomerMenuController;
 use App\Http\Controllers\Employee\Auth\EmployeeAuthController;
@@ -177,6 +178,7 @@ Route::middleware('setlocale')->group(function () {
                     Route::resource('sales', SalesReportController::class)->only(['index']);
                 });
                 Route::resource('promotions', OwnerPromotionController::class);
+                Route::resource('stocks', OwnerStockController::class);
             });
 
 

@@ -36,7 +36,7 @@
               max-h-[80vh] overflow-y-auto transform translate-y-full
               transition-transform duration-300" id="cartManagerSheet">
     <div class="p-4 border-b border-gray-100 flex items-center justify-between">
-      <h3 class="text-lg font-semibold">Keranjang</h3>
+      <h3 class="text-lg font-semibold">{{__('messages.customer.menu.cart')}}</h3>
       <button id="closeCartManager" class="text-2xl leading-none px-2">&times;</button>
     </div>
 
@@ -50,7 +50,7 @@
         <p id="cartManagerTotal" class="text-xl font-extrabold">Rp 0</p>
       </div>
       <button id="cartManagerDone" class="px-4 py-2 rounded-lg bg-choco text-white font-semibold hover:bg-soft-choco">
-        Selesai
+        {{__('messages.customer.menu.finish')}}
       </button>
     </div>
   </div>
@@ -69,7 +69,7 @@
       {{-- Diisi via JS: gambar + nama + deskripsi --}}
     </div>
 
-    <h3 class="shrink-0 text-lg font-semibold mt-2">{{ __('messages.customer.menu.pilih-opsi')}}</h3>
+    <h3 class="shrink-0 text-lg font-semibold mt-2">{{ __('messages.customer.menu.pilih_opsi')}}</h3>
 
     {{-- AREA SCROLLABLE: hanya parent options + note yang bisa di-scroll --}}
     <div id="modalScrollArea" class="min-h-0 flex-1 overflow-y-auto pr-1 -mr-1"
@@ -127,7 +127,7 @@ $lockName = filled($autofillName) && $customerUser;
                 flex flex-col max-h-[85vh] overflow-hidden">
       <!-- Header (tetap) -->
       <div class="p-4 border-b flex items-center justify-between">
-        <h3 id="checkoutTitle" class="text-lg font-semibold">Konfirmasi Pesanan</h3>
+        <h3 id="checkoutTitle" class="text-lg font-semibold">{{__('messages.customer.menu.order_confirmation')}}</h3>
         <button id="checkoutCloseBtn" type="button" class="p-2 rounded-md hover:bg-gray-100" aria-label="Tutup">
           ✕
         </button>
@@ -150,7 +150,7 @@ $lockName = filled($autofillName) && $customerUser;
 
           <!-- Nama Pemesan -->
           <div>
-            <label for="orderName" class="block text-sm font-medium mb-1">{{__('messages.customer.menu.nama-pemesan')}}</label>
+            <label for="orderName" class="block text-sm font-medium mb-1">{{__('messages.customer.menu.nama_pemesan')}}</label>
             <div class="relative">
               <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
@@ -160,7 +160,7 @@ $lockName = filled($autofillName) && $customerUser;
                 </svg>
               </span>
               <input id="orderName" name="customer_name" type="text" inputmode="text"
-                placeholder="Contoh: Budi Setiawan" value="{{ old('customer_name', $autofillName ?? '') }}"
+                placeholder="{{__('messages.customer.menu.customer_name_example')}}" value="{{ old('customer_name', $autofillName ?? '') }}"
                 data-default-name="{{ $autofillName ?? '' }}" autocomplete="name" autocapitalize="words" maxlength="60"
                 @if(!empty($lockName)) readonly aria-readonly="true" @endif class="w-full rounded-lg border border-gray-300 pl-10 pr-10 py-2
                        placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-choco/40 focus:border-choco"
@@ -172,20 +172,20 @@ $lockName = filled($autofillName) && $customerUser;
               @endempty
             </div>
             @if(!empty($lockName))
-              <p class="mt-1 text-xs text-gray-500">Nama diambil dari akun Anda.</p>
+              <p class="mt-1 text-xs text-gray-500">{{__('messages.customer.menu.name_select_from_account')}}</p>
             @else
-              <p class="mt-1 text-xs text-gray-500">{{__('messages.customer.menu.isi-nama-agar-pesanan-mudah-diambil')}}</p>
+              <p class="mt-1 text-xs text-gray-500">{{__('messages.customer.menu.isi_nama_agar_pesanan_mudah_diambil')}}</p>
             @endif
           </div>
 
           <!-- Metode Pembayaran -->
           <div>
-            <label for="paymentMethod" class="block text-sm font-medium mb-1">{{__('messages.customer.menu.metode-pembayaran')}}</label>
+            <label for="paymentMethod" class="block text-sm font-medium mb-1">{{__('messages.customer.menu.metode_pembayaran')}}</label>
             <select id="paymentMethod"
                     class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-choco/40"
                     required>
-              <option value="" selected disabled>{{__('messages.customer.menu.pilih-metode')}}</option>
-              <option value="CASH">Bayar di Kasir</option>
+              <option value="" selected disabled>{{__('messages.customer.menu.pilih_metode')}}</option>
+              <option value="CASH">{{__('messages.customer.menu.pay_at_cashier')}}</option>
               @if ($partner->is_qr_active === 1)
               <option value="QRIS">QRIS</option>
               @endif
@@ -199,11 +199,11 @@ $lockName = filled($autofillName) && $customerUser;
         <div class="flex gap-2">
           <button id="checkoutCancelBtn" type="button"
             class="flex-1 py-2 rounded-lg border border-gray-300 hover:bg-gray-50">
-            Batal
+            {{__('messages.customer.menu.cancel')}}
           </button>
           <button id="checkoutPayBtn" type="button"
             class="flex-1 py-2 rounded-lg bg-choco text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
-            Pembayaran
+            {{__('messages.customer.menu.payment')}}
           </button>
         </div>
       </div>
