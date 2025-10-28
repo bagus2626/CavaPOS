@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Broadcast;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Public\PriceController;
 use App\Http\Controllers\Admin\Dashboard\DashboardController;
+use App\Http\Controllers\Admin\OwnerVerification\OwnerVerificationController;
 use App\Http\Controllers\Owner\Auth\OwnerAuthController;
 use App\Http\Controllers\Owner\Auth\OwnerPasswordResetController;
 use App\Http\Controllers\Owner\OwnerDashboardController;
@@ -35,6 +36,7 @@ use App\Http\Controllers\Partner\HumanResource\PartnerEmployeeController;
 use App\Http\Controllers\Employee\Transaction\CashierTransactionController;
 use App\Http\Controllers\Customer\Auth\CustomerPasswordResetController;
 use App\Http\Controllers\Employee\Transaction\KitchenTransactionController;
+use App\Http\Controllers\Owner\Verification\VerificationController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 Route::get('/set-language', function () {
@@ -81,7 +83,14 @@ Route::middleware('setlocale')->group(function () {
     //admin
     Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+        Route::get('/owner-verification', [OwnerVerificationController::class, 'index'])->name('owner-verification');
 
+        Route::get('/owner-verification/{id}', [OwnerVerificationController::class, 'show'])->name('owner-verification.show');
+
+        Route::post('/owner-verification/{id}/approve', [OwnerVerificationController::class, 'approve'])->name('owner-verification.approve');
+        Route::post('/owner-verification/{id}/reject', [OwnerVerificationController::class, 'reject'])->name('owner-verification.reject');
+
+        Route::get('/owner-verification/{id}/ktp-image', [OwnerVerificationController::class, 'showKtpImage'])->name('owner-verification.ktp-image');
         //        Route::prefix('partner')->name('partner.')->group(function () {
         //            Route::prefix('xendit')->name('xendit.')->group(function () {
         //                Route::post('create-account', [SplitRulesController::class, 'createAccount'])->name('create-account');;
@@ -139,26 +148,47 @@ Route::middleware('setlocale')->group(function () {
 
         // OWNER area
         Route::middleware(['auth:owner', 'is_owner:owner', 'verified'])->prefix('user-owner')->name('user-owner.')->group(function () {
-            Route::get('/', [OwnerDashboardController::class, 'index'])->name('dashboard');
-            Route::get('outlets/check-username', [OwnerOutletController::class, 'checkUsername'])->name('outlets.check-username')->middleware('throttle:30,1');
-            Route::get('outlets/check-slug', [OwnerOutletController::class, 'checkSlug'])->name('outlets.check-slug')->middleware('throttle:30,1');
-            Route::resource('outlets', OwnerOutletController::class);
-            Route::get('employees/check-username', [OwnerEmployeeController::class, 'checkUsername'])->name('employees.check-username');
-            Route::resource('employees', OwnerEmployeeController::class);
-            Route::resource('master-products', OwnerMasterProductController::class);
-            Route::get('outlet-products/get-master-products', [OwnerOutletProductController::class, 'getMasterProducts'])->name('outlet-products.get-master-products');
-            Route::resource('outlet-products', OwnerOutletProductController::class);
-            Route::resource('products', OwnerProductController::class);
-            Route::resource('categories', OwnerCategoryController::class);
 
-            Route::prefix('report')->name('report.')->group(function () {
-                Route::get('sales/export', [SalesReportController::class, 'export'])->name('sales.export');
-                Route::get('sales/products', [SalesReportController::class, 'getTopProductsAjax'])->name('sales.products'); // ROUTE BARU
-                Route::get('order-details/{id}', [SalesReportController::class, 'getOrderDetails'])->name('order-details');
-                Route::resource('sales', SalesReportController::class)->only(['index']);
+
+            Route::middleware('owner.verification.access')->prefix('verification')->name('verification.')->group(function () {
+                Route::get('/', [VerificationController::class, 'index'])->name('index');
+                Route::post('/', [VerificationController::class, 'store'])->name('store');
+                Route::get('/status', [VerificationController::class, 'status'])->name('status');
+                Route::get('verification/ktp-image', [VerificationController::class, 'showKtpImage'])->name('ktp-image');
             });
-            Route::resource('promotions', OwnerPromotionController::class);
-            Route::resource('stocks', OwnerStockController::class);
+
+
+            Route::middleware('owner.verification.access')->group(function () {
+                Route::get('/', [OwnerDashboardController::class, 'index'])->name('dashboard');
+                Route::get('outlets/check-username', [OwnerOutletController::class, 'checkUsername'])->name('outlets.check-username')->middleware('throttle:30,1');
+                Route::get('outlets/check-slug', [OwnerOutletController::class, 'checkSlug'])->name('outlets.check-slug')->middleware('throttle:30,1');
+                Route::resource('outlets', OwnerOutletController::class);
+                Route::get('employees/check-username', [OwnerEmployeeController::class, 'checkUsername'])->name('employees.check-username');
+                Route::resource('employees', OwnerEmployeeController::class);
+                Route::resource('master-products', OwnerMasterProductController::class);
+                Route::get('outlet-products/get-master-products', [OwnerOutletProductController::class, 'getMasterProducts'])->name('outlet-products.get-master-products');
+                Route::resource('outlet-products', OwnerOutletProductController::class);
+                Route::resource('products', OwnerProductController::class);
+                Route::resource('categories', OwnerCategoryController::class);
+
+                Route::prefix('report')->name('report.')->group(function () {
+                    Route::get('sales/export', [SalesReportController::class, 'export'])->name('sales.export');
+                    Route::get('sales/products', [SalesReportController::class, 'getTopProductsAjax'])->name('sales.products'); // ROUTE BARU
+                    Route::get('order-details/{id}', [SalesReportController::class, 'getOrderDetails'])->name('order-details');
+                    Route::resource('sales', SalesReportController::class)->only(['index']);
+                });
+                Route::resource('promotions', OwnerPromotionController::class);
+                Route::resource('stocks', OwnerStockController::class);
+            });
+
+
+            // Route::middleware('owner.not_approved')->prefix('verification')->name('verification.')->group(function () {
+            //     Route::get('/', [VerificationController::class, 'index'])->name('index');
+            //     Route::post('/', [VerificationController::class, 'store'])->name('store');
+            //     Route::get('/status', [VerificationController::class, 'status'])->name('status');
+
+            //     Route::get('verification/ktp-image', [VerificationController::class, 'showKtpImage'])->name('ktp-image');
+            // });
         });
     });
 
@@ -205,18 +235,18 @@ Route::middleware('setlocale')->group(function () {
         });
 
 
-       // KITCHEN area
-                
+        // KITCHEN area
+
         Route::middleware(['auth:employee', 'is_employee:KITCHEN'])->prefix('kitchen')->name('kitchen.')->group(function () {
             Route::get('dashboard', [KitchenDashboardController::class, 'index'])->name('dashboard');
-            
+
             // API Endpoints - UPDATE YANG SUDAH ADA
             Route::get('orders/queue', [KitchenDashboardController::class, 'getOrderQueue'])->name('orders.queue');
             Route::get('orders/active', [KitchenDashboardController::class, 'getActiveOrders'])->name('orders.active');
             Route::get('orders/served', [KitchenDashboardController::class, 'getServedOrders'])->name('orders.served');
             Route::put('orders/{orderId}/pickup', [KitchenDashboardController::class, 'pickUpOrder'])->name('orders.pickup');
             Route::put('orders/{orderId}/serve', [KitchenDashboardController::class, 'markAsServed'])->name('orders.serve');
-            
+
             // TAMBAH ROUTE BARU UNTUK KITCHEN_STATUS
             Route::get('orders/my-active', [KitchenDashboardController::class, 'getMyActiveOrders'])->name('orders.my-active');
             Route::get('summary', [KitchenDashboardController::class, 'getKitchenSummary'])->name('summary');

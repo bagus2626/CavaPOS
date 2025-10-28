@@ -4,11 +4,15 @@
             <li class="nav-item mr-auto">
                 <a class="navbar-brand" href="#">
                     <div class="brand-logo">
-                        <img class="logo" src="{{asset('images/cava-logo2-black.png')}}" style="width:150px; height:auto; margin-top:-20px"/>
+                        <img class="logo" src="{{asset('images/cava-logo2-black.png')}}"
+                            style="width:150px; height:auto; margin-top:-20px" />
                     </div>
                 </a>
             </li>
-            <li class="nav-item nav-toggle"><a class="nav-link modern-nav-toggle pr-0" data-toggle="collapse"><i class="bx bx-x d-block d-xl-none font-medium-4 primary toggle-icon"></i><i class="toggle-icon bx bx-disc font-medium-4 d-none d-xl-block collapse-toggle-icon primary" data-ticon="bx-disc"></i></a></li>
+            <li class="nav-item nav-toggle"><a class="nav-link modern-nav-toggle pr-0" data-toggle="collapse"><i
+                        class="bx bx-x d-block d-xl-none font-medium-4 primary toggle-icon"></i><i
+                        class="toggle-icon bx bx-disc font-medium-4 d-none d-xl-block collapse-toggle-icon primary"
+                        data-ticon="bx-disc"></i></a></li>
         </ul>
     </div>
     <div class="shadow-bottom"></div>
@@ -24,6 +28,12 @@
                             <span class="menu-item" data-i18n="eCommerce">Partner Accounts</span></a>
                     </li>
                 </ul>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('admin.owner-verification') }}">
+                    <i class="bx bx-user"></i>
+                    <span class="menu-title">Owner Verification</span>
+                </a>
             </li>
         </ul>
     </div>

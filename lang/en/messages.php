@@ -75,6 +75,7 @@ return [
         'layout' => [
             'owner_panel' => 'Owner Panel',
             'dashboard' => 'Dashboard',
+            'verification' => 'Verification',
             'support' => 'Support',
             'user_management' => 'User Management',
             'employees' => 'Employees',
