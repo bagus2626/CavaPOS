@@ -88,17 +88,6 @@
       0 => 'Filament\\Widgets\\WidgetsServiceProvider',
     ),
   ),
-  'intervention/image' => 
-  array (
-    'aliases' => 
-    array (
-      'Image' => 'Intervention\\Image\\Facades\\Image',
-    ),
-    'providers' => 
-    array (
-      0 => 'Intervention\\Image\\ImageServiceProvider',
-    ),
-  ),
   'kirschbaum-development/eloquent-power-joins' => 
   array (
     'providers' => 
@@ -120,23 +109,22 @@
       0 => 'Laravel\\Pail\\PailServiceProvider',
     ),
   ),
-  'laravel/reverb' => 
-  array (
-    'aliases' => 
-    array (
-      'Output' => 'Laravel\\Reverb\\Output',
-    ),
-    'providers' => 
-    array (
-      0 => 'Laravel\\Reverb\\ApplicationManagerServiceProvider',
-      1 => 'Laravel\\Reverb\\ReverbServiceProvider',
-    ),
-  ),
   'laravel/sail' => 
   array (
     'providers' => 
     array (
       0 => 'Laravel\\Sail\\SailServiceProvider',
+    ),
+  ),
+  'laravel/socialite' => 
+  array (
+    'aliases' => 
+    array (
+      'Socialite' => 'Laravel\\Socialite\\Facades\\Socialite',
+    ),
+    'providers' => 
+    array (
+      0 => 'Laravel\\Socialite\\SocialiteServiceProvider',
     ),
   ),
   'laravel/tinker' => 
@@ -206,13 +194,6 @@
     'providers' => 
     array (
       0 => 'Pest\\Laravel\\PestServiceProvider',
-    ),
-  ),
-  'phiki/phiki' => 
-  array (
-    'providers' => 
-    array (
-      0 => 'Phiki\\Adapters\\Laravel\\PhikiServiceProvider',
     ),
   ),
   'ryangjchandler/blade-capture-directive' => 
