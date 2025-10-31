@@ -320,40 +320,74 @@
 
     @push('scripts')
     <script>
-    function openImageModal(src, caption) {
-        document.getElementById('modalImage').src = src;
-        document.getElementById('modalCaption').textContent = caption;
-        document.getElementById('imageModal').classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-    }
+        function openImageModal(src, caption) {
+            document.getElementById('modalImage').src = src;
+            document.getElementById('modalCaption').textContent = caption;
+            document.getElementById('imageModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
 
-    function closeImageModal() {
-        document.getElementById('imageModal').classList.add('hidden');
-        document.body.style.overflow = 'auto';
-    }
+        function closeImageModal() {
+            document.getElementById('imageModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
 
-    // Auto refresh every 30 seconds if status is pending
-    @if($verification->status === 'pending')
-    let refreshInterval = setInterval(function() {
-        fetch(window.location.href, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status && data.status !== 'pending') {
-                clearInterval(refreshInterval);
-                location.reload();
-            }
-        })
-        .catch(error => {
-            console.log('Auto refresh error:', error);
+        // Auto refresh every 30 seconds if status is pending
+        @if($verification->status === 'pending')
+        let refreshInterval = setInterval(function() {
+            fetch(window.location.href, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status && data.status !== 'pending') {
+                    clearInterval(refreshInterval);
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                console.log('Auto refresh error:', error);
+            });
+        }, 30000); // 30 seconds
+        @endif
+
+        document.addEventListener('DOMContentLoaded', function () {
+        // Cek apakah ada flash message 'success' dari controller
+        @if (session('success'))
+            Swal.fire({
+                title: 'Verifikasi Terkirim!',
+                icon: 'success',
+                html: `
+                            <div class="text-left text-gray-700 leading-relaxed px-4">
+                                <p class="mb-3">
+                                    Data verifikasi Anda telah berhasil dikirim.
+                                    Kami akan segera memprosesnya (maks. 2x24 jam kerja).
+                                </p>
+                                <p class="font-medium">
+                                    Status verifikasi akan kami informasikan melalui email ke:
+                                    <strong class="text-gray-900">{{ auth()->guard('owner')->user()->email }}</strong>
+                                </p>
+                                <br>
+                                <p class="bg-yellow-50 border border-yellow-200 text-yellow-800 p-3 rounded-lg">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                                    Harap <strong>periksa email Anda secara berkala</strong>,
+                                    termasuk folder <strong>Spam</strong>.
+                                </p>
+                            </div>
+                        `,
+                confirmButtonText: 'Baik, Mengerti',
+                confirmButtonColor: '#8c1000', // Sesuai tema warna Anda
+                customClass: {
+                    popup: 'rounded-2xl',
+                }
+            });
+
+        @endif
         });
-    }, 30000); // 30 seconds
-    @endif
     </script>
     @endpush
 @endsection

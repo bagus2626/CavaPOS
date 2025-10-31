@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\OwnerVerification;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendEmailVerification;
 use App\Models\Owner;
 use App\Models\Owner\Businesses;
 use App\Models\Owner\OwnerProfile;
@@ -107,6 +108,8 @@ public function approve($id)
 
             DB::commit();
 
+            SendEmailVerification::dispatch($owner, $verification)->onQueue('send-email-verification');
+
             return redirect()->route('admin.owner-verification.show', $id)
                 ->with('success', 'Verification approved successfully! Business has been created.');
         } catch (\Exception $e) {
@@ -119,12 +122,6 @@ public function approve($id)
 
     public function reject(Request $request, $id)
     {
-        $request->validate([
-            'rejection_reason' => 'required|string|min:10|max:1000',
-        ]);
-
-
-
         try {
             DB::beginTransaction();
 
@@ -152,6 +149,8 @@ public function approve($id)
             ]);
 
             DB::commit();
+
+            SendEmailVerification::dispatch($owner, $verification)->onQueue('send-email-verification');
 
             return redirect()->route('admin.owner-verification.show', $id)
                 ->with('success', 'Verification rejected successfully.');

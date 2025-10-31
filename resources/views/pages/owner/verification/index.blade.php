@@ -109,9 +109,6 @@
                                         value="{{ $owner->email }}" 
                                         disabled
                                         class="w-full px-4 py-3 pr-10 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed">
-                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <i class="fas fa-lock text-gray-400"></i>
-                                    </div>
                                 </div>
                                 <p class="text-xs text-gray-500 flex items-center">
                                     <i class="fas fa-info-circle mr-1"></i>
