@@ -130,9 +130,9 @@ class VerificationController extends Controller
 
             DB::commit();
 
-            SendEmailVerification::dispatch($owner, $verification)->onQueue('send-email-verification');
+            SendEmailVerification::dispatch($owner, $verification)->onQueue('email');
 
-            SendAdminEmailVerification::dispatch($owner, $verification)->onQueue('send-email-verification');
+            SendAdminEmailVerification::dispatch($owner, $verification)->onQueue('email');
 
             return redirect()->route('owner.user-owner.verification.status')
                 ->with('success', 'Data verifikasi berhasil dikirim! Mohon tunggu proses review.');
