@@ -10,7 +10,7 @@
                         <li class="breadcrumb-item"><a href=""><i class="bx bx-home-alt"></i></a></li>
                         <li class="breadcrumb-item"><a href="{{ route('admin.owner-verification') }}">Owner Verification</a>
                         </li>
-                        <li class="breadcrumb-item active">Detail</li>
+                        <li class="breadcrumb-item active"><a href="{{ route('admin.owner-verification.show', $verification->id) }}">Detail</a></li>
                     </ol>
                 </div>
             </div>
@@ -19,6 +19,32 @@
 @endsection
 
 @section('content')
+
+
+    {{-- Alert Section --}}
+    <div class="row">
+        <div class="col-12">
+            @if (session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <strong>Success!</strong> {{ session('success') }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>Error!</strong> {{ session('error') }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            @endif
+        </div>
+    </div>
+    {{-- End Alert Section --}}
+
     <section class="invoice-view-wrapper">
         <div class="row">
             <!-- invoice view page -->
@@ -253,7 +279,7 @@
                     <div class="alert bg-rgba-danger">
                         <p class="mb-0" id="confirmRejectionReason"></p>
                     </div>
-                    <div class="alert alert-warning" id="rejectTimer">
+                    <div class="alert bg-rgba-warning" id="rejectTimer">
                         <p class="mb-0 text-center">Please wait <span id="rejectCountdown">5</span> seconds</p>
                     </div>
                 </div>

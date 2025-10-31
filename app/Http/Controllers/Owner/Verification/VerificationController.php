@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Owner\Verification;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendAdminEmailVerification;
+use App\Jobs\SendEmailVerification;
 use App\Models\Owner\BusinessCategory;
 use App\Models\Owner\OwnerVerification;
 use Illuminate\Http\Request;
@@ -31,7 +33,7 @@ class VerificationController extends Controller
                 ->latest()
                 ->first();
 
-            // Decrypt KTP number jika ada
+            // Decrypt no KTP
             if ($latestVerification) {
                 try {
                     $latestVerification->ktp_number_decrypted = Crypt::decryptString($latestVerification->ktp_number);
@@ -68,7 +70,6 @@ class VerificationController extends Controller
         $validatedData = $request->validate([
             'owner_name' => 'required|string|min:3|max:255',
             'owner_phone' => ['required', 'string', 'min:10', 'max:15', 'regex:/^(08|62)\d{8,12}$/'],
-            // owner_email dihapus dari validasi
             'ktp_number' => 'required|string|digits:16',
             'ktp_photo' => $ktpPhotoRule,
             'business_name' => 'required|string|min:3|max:255',
@@ -88,7 +89,6 @@ class VerificationController extends Controller
                     ->with('warning', 'Anda tidak dapat mengirimkan ulang data verifikasi.');
             }
 
-            // Handle KTP Photo
             $ktpPhotoPath = null;
             if ($request->hasFile('ktp_photo')) {
                 // Upload foto baru
@@ -98,7 +98,6 @@ class VerificationController extends Controller
                 $ktpPhotoPath = $latestVerification->ktp_photo_path;
             }
 
-            // Handle Business Logo
             $businessLogoPath = null;
             if ($request->hasFile('business_logo')) {
                 // Upload logo baru
@@ -110,7 +109,7 @@ class VerificationController extends Controller
 
             $encryptedKtpNumber = Crypt::encryptString($validatedData['ktp_number']);
 
-            OwnerVerification::create([
+            $verification = OwnerVerification::create([
                 'owner_id' => $owner->id,
                 'owner_name' => $validatedData['owner_name'],
                 'owner_phone' => $validatedData['owner_phone'],
@@ -130,6 +129,10 @@ class VerificationController extends Controller
             $owner->save();
 
             DB::commit();
+
+            SendEmailVerification::dispatch($owner, $verification)->onQueue('send-email-verification');
+
+            SendAdminEmailVerification::dispatch($owner, $verification)->onQueue('send-email-verification');
 
             return redirect()->route('owner.user-owner.verification.status')
                 ->with('success', 'Data verifikasi berhasil dikirim! Mohon tunggu proses review.');

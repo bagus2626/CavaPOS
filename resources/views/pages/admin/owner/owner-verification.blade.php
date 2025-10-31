@@ -7,9 +7,9 @@
                 <h5 class="content-header-title float-left pr-1 mb-0">Owner Verification</h5>
                 <div class="breadcrumb-wrapper col-12">
                     <ol class="breadcrumb p-0 mb-0">
-                        <li class="breadcrumb-item"><a href="index.html"><i class="bx bx-home-alt"></i></a>
+                        <li class="breadcrumb-item"><a href=""><i class="bx bx-home-alt"></i></a>
                         </li>
-                        <li class="breadcrumb-item active">Owner Verification
+                        <li class="breadcrumb-item active"><a href="{{ route('admin.owner-verification') }}">Owner Verification</a>
                         </li>
                     </ol>
                 </div>
