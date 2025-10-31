@@ -32,9 +32,8 @@ class SendAdminEmailVerification implements ShouldQueue
      */
     public function handle(): void
     {
-
         // sleep(10);
-        Mail::to('prabawikan1@gmail.com')->send(new AdminVerificationMail(
+        Mail::send(new AdminVerificationMail(
             $this->owner,
             $this->verification
         ));
