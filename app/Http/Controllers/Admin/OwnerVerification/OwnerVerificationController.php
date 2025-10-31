@@ -150,7 +150,7 @@ public function approve($id)
 
             DB::commit();
 
-            SendEmailVerification::dispatch($owner, $verification)->onQueue('send-email-verification');
+            SendEmailVerification::dispatch($owner, $verification)->onQueue('email');
 
             return redirect()->route('admin.owner-verification.show', $id)
                 ->with('success', 'Verification rejected successfully.');

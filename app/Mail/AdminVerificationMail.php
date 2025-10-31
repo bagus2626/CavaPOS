@@ -31,7 +31,7 @@ class AdminVerificationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Notifikasi Verifikasi Owner Baru',
+            subject: 'Verifikasi Owner Baru',
         );
     }
 
