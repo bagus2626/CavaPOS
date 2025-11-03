@@ -6,10 +6,9 @@
 <div class="max-w-md mx-auto px-4 py-8">
   <div class="bg-white rounded-2xl shadow p-6 text-center">
 
-    <h1 class="text-xl font-semibold">Tunjukkan Kode Pemesanan</h1>
+    <h1 class="text-xl font-semibold">{{__('messages.customer.payment.show_order_code')}}</h1>
     <p class="text-sm text-gray-600 mt-1">
-      Silakan melakukan pembayaran <b>cash</b> ke kasir dan tunjukkan <b>QR code</b> ini atau
-      sebutkan <b>nama pemesan</b> kepada kasir.
+      {{__('messages.customer.payment.please_to_cashier')}}
     </p>
 
     {{-- QR CODE (2D only) --}}
@@ -38,11 +37,11 @@
     {{-- Detail pemesan & meja --}}
     <div class="mt-6 grid grid-cols-2 gap-4 text-left text-sm">
       <div>
-        <div class="text-gray-500">Nama Pemesan</div>
+        <div class="text-gray-500">{{__('messages.customer.payment.orderers_name')}}</div>
         <div class="font-semibold">{{ $order->customer_name }}</div>
       </div>
       <div>
-        <div class="text-gray-500">Nomor Meja</div>
+        <div class="text-gray-500">{{__('messages.customer.payment.table_no')}}</div>
         <div class="font-semibold">{{ $table->table_no }}</div>
       </div>
     </div>
@@ -51,11 +50,11 @@
     <div class="mt-6 flex items-center justify-center gap-3">
       <button onclick="window.print()"
               class="px-4 py-2 rounded-lg border hover:bg-gray-50">
-        Cetak
+        {{__('messages.customer.payment.print')}}
       </button>
       <a href="{{ route('customer.menu.index', [$partner?->slug ?? '', $table->table_code]) }}"
          class="px-4 py-2 rounded-lg bg-choco text-white hover:bg-soft-choco">
-        Kembali ke Menu
+        {{__('messages.customer.payment.back_to_menu')}}
       </a>
     </div>
 
