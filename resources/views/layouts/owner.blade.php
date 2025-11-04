@@ -44,148 +44,244 @@
 
 
     <style>
-  :root{
-    --choco:#8c1000;
-    --soft-choco:#c12814;
-    --ink:#22272b;
-    --paper:#f7f7f8;
+        :root {
+            --choco: #8c1000;
+            --soft-choco: #c12814;
+            --ink: #22272b;
+            --paper: #f7f7f8;
 
-    /* aksen UI */
-    --radius: 12px;
-    --shadow: 0 6px 20px rgba(0,0,0,.08);
+            /* aksen UI */
+            --radius: 12px;
+            --shadow: 0 6px 20px rgba(0, 0, 0, .08);
 
-    /* bootstrap override ringan */
-    --primary: var(--choco);
-    --secondary: #6b7280;
-  }
+            /* bootstrap override ringan */
+            --primary: var(--choco);
+            --secondary: #6b7280;
+        }
 
-  /* ===== Layout polish ===== */
-  body { background: var(--paper); }
+        /* ===== Layout polish ===== */
+        body {
+            background: var(--paper);
+        }
 
-  .card{
-    border: 0;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    overflow: hidden;
-  }
-  .card-header{
-    background: #fff;
-    border-bottom: 1px solid #eef1f4;
-    padding: .85rem 1rem;
-  }
+        .card {
+            border: 0;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
 
-  .content-header{
-    padding: 18px 0.5rem;
-  }
-  .content-wrapper{
-    background: transparent;
-  }
+        .card-header {
+            background: #fff;
+            border-bottom: 1px solid #eef1f4;
+            padding: .85rem 1rem;
+        }
 
-  /* ===== Navbar ===== */
-  .main-header.navbar{
-    background: #fff !important;
-    border-bottom: 1px solid #eef1f4 !important;
-    box-shadow: 0 2px 10px rgba(0,0,0,.03);
-  }
-  .navbar .nav-link{ color: var(--ink); }
-  .navbar .nav-link:hover{ color: var(--choco); }
+        .content-header {
+            padding: 18px 0.5rem;
+        }
 
-  /* ===== Brand / Sidebar ===== */
-  .brand-link{
-    background: linear-gradient(135deg,var(--choco),var(--soft-choco)) !important;
-    border-bottom: 0;
-  }
-  .brand-link .brand-image{ background:#fff; }
+        .content-wrapper {
+            background: transparent;
+        }
 
-  .main-sidebar{
-    background: #f3f3f3; /* gelap netral agar choco menonjol */
-  }
-  .sidebar{
-    padding-top: .5rem;
-  }
+        /* ===== Navbar ===== */
+        .main-header.navbar {
+            background: #fff !important;
+            border-bottom: 1px solid #eef1f4 !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .03);
+        }
 
-  /* item level 1 */
-  .nav-sidebar .nav-item > .nav-link{
-    border-radius: 10px;
-    margin: 4px 8px;
-    color: #ac0000;
-    transition: .2s ease;
-  }
-  .nav-sidebar .nav-item > .nav-link:hover{
-    background: rgba(208, 178, 178, 0.06);
-    color: #710000;
-  }
-  .sidebar-dark-primary .nav-sidebar>.nav-item>.nav-link.active{
-    background: linear-gradient(135deg,var(--choco),var(--soft-choco));
-    color: #fff;
-    border-left: 0;
-    box-shadow: 0 6px 16px rgba(207,26,2,.25);
-  }
+        .navbar .nav-link {
+            color: var(--ink);
+        }
 
-  /* tree level 2+ */
-  .nav-sidebar .nav-treeview > .nav-item > .nav-link{
-    margin: 2px 16px;
-    border-radius: 20px;
-    color:#c7cdd6;
-  }
-  .nav-sidebar .nav-treeview > .nav-item > .nav-link.active{
-    background: rgba(219,70,48,.18);
-    color:#fff;
-  }
+        .navbar .nav-link:hover {
+            color: var(--choco);
+        }
 
-  /* user panel garis halus */
-  .user-panel{ border-bottom: 1px dashed rgba(255,255,255,.08); }
+        /* ===== Brand / Sidebar ===== */
+        .brand-link {
+            background: linear-gradient(135deg, var(--choco), var(--soft-choco)) !important;
+            border-bottom: 0;
+        }
 
-  /* ===== Buttons / Badges ===== */
-  .btn-primary{
-    background: var(--choco);
-    border-color: var(--choco);
-  }
-  .btn-primary:hover{
-    background: var(--soft-choco);
-    border-color: var(--soft-choco);
-  }
-  .badge-warning.navbar-badge{
-    background: var(--soft-choco);
-    color:#fff;
-  }
+        .brand-link .brand-image {
+            background: #fff;
+        }
 
-  /* ===== Tables / DataTables ===== */
-  table.dataTable thead th{
-    border-bottom: 2px solid #eef1f4 !important;
-  }
-  .table thead th{
-    background: #fff;
-  }
+        .main-sidebar {
+            background: #f3f3f3;
+            /* gelap netral agar choco menonjol */
+        }
 
-  /* ===== Select2 ===== */
-  .select2-container--bootstrap-5 .select2-selection{
-    border-radius: 10px;
-    border-color: #e5e7eb;
-  }
-  .select2-container--bootstrap-5 .select2-results__option--highlighted{
-    background: var(--soft-choco);
-  }
+        .sidebar {
+            padding-top: .5rem;
+        }
 
-  /* ===== Summernote toolbar ===== */
-  .note-toolbar{
-    border-radius: 10px;
-    border:1px solid #eef1f4;
-  }
+        /* item level 1 */
+        .nav-sidebar .nav-item>.nav-link {
+            border-radius: 10px;
+            margin: 4px 8px;
+            color: #ac0000;
+            transition: .2s ease;
+        }
 
-  /* ===== Footer ===== */
-  .main-footer{
-    border-top: 1px solid #eef1f4;
-    background:#fff;
-    border-radius: var(--radius) var(--radius) 0 0;
-  }
+        .nav-sidebar .nav-item>.nav-link:hover {
+            background: rgba(208, 178, 178, 0.06);
+            color: #710000;
+        }
 
-  /* ===== Utility ===== */
-  .bg-choco{ background: var(--choco) !important; }
-  .text-choco{ color: var(--choco) !important; }
-  .soft-shadow{ box-shadow: var(--shadow); }
-  .rounded-2xl{ border-radius: 1rem; }
-</style>
+        .sidebar-dark-primary .nav-sidebar>.nav-item>.nav-link.active {
+            background: linear-gradient(135deg, var(--choco), var(--soft-choco));
+            color: #fff;
+            border-left: 0;
+            box-shadow: 0 6px 16px rgba(207, 26, 2, .25);
+        }
+
+        /* tree level 2+ */
+        .nav-sidebar .nav-treeview>.nav-item>.nav-link {
+            margin: 2px 16px;
+            border-radius: 20px;
+            color: #c7cdd6;
+        }
+
+        .nav-sidebar .nav-treeview>.nav-item>.nav-link.active {
+            background: rgba(219, 70, 48, .18);
+            color: #fff;
+        }
+
+        /* user panel garis halus */
+        .user-panel {
+            border-bottom: 1px dashed rgba(255, 255, 255, .08);
+        }
+
+        /* ===== Buttons / Badges ===== */
+        .btn-primary {
+            background: var(--choco);
+            border-color: var(--choco);
+        }
+
+        .btn-primary:hover {
+            background: var(--soft-choco);
+            border-color: var(--soft-choco);
+        }
+
+        .badge-warning.navbar-badge {
+            background: var(--soft-choco);
+            color: #fff;
+        }
+
+        /* ===== Tables / DataTables ===== */
+        table.dataTable thead th {
+            border-bottom: 2px solid #eef1f4 !important;
+        }
+
+        .table thead th {
+            background: #fff;
+        }
+
+        /* ===== Select2 ===== */
+        .select2-container--bootstrap-5 .select2-selection {
+            border-radius: 10px;
+            border-color: #e5e7eb;
+        }
+
+        .select2-container--bootstrap-5 .select2-results__option--highlighted {
+            background: var(--soft-choco);
+        }
+
+        /* ===== Summernote toolbar ===== */
+        .note-toolbar {
+            border-radius: 10px;
+            border: 1px solid #eef1f4;
+        }
+
+        /* ===== Footer ===== */
+        .main-footer {
+            border-top: 1px solid #eef1f4;
+            background: #fff;
+            border-radius: var(--radius) var(--radius) 0 0;
+        }
+
+        /* ===== Utility ===== */
+        .bg-choco {
+            background: var(--choco) !important;
+        }
+
+        .text-choco {
+            color: var(--choco) !important;
+        }
+
+        .soft-shadow {
+            box-shadow: var(--shadow);
+        }
+
+        .rounded-2xl {
+            border-radius: 1rem;
+        }
+
+        /* ===== Disabled Menu State ===== */
+        .disabled-link {
+            opacity: 0.4 !important;
+            cursor: not-allowed !important;
+            pointer-events: auto !important;
+            position: relative;
+            background-color: rgba(0, 0, 0, 0.02) !important;
+            filter: grayscale(80%);
+        }
+
+        .disabled-link:hover {
+            background-color: rgba(0, 0, 0, 0.05) !important;
+            color: inherit !important;
+        }
+
+        .disabled-link::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(0, 0, 0, 0.03) 10px,
+                    rgba(0, 0, 0, 0.03) 20px);
+            pointer-events: none;
+        }
+
+        /* Disabled icon style */
+        .disabled-link .nav-icon {
+            opacity: 0.3;
+        }
+
+        /* Disabled submenu */
+        .nav-treeview.disabled {
+            display: none !important;
+        }
+
+        /* Style untuk nav-header yang disabled */
+        .nav-header.disabled-header {
+            opacity: 0.4;
+            color: #999 !important;
+        }
+
+        /* Badge untuk menu yang terkunci */
+        .locked-badge {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            background: rgba(255, 193, 7, 0.2);
+            color: #ff9800;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+    </style>
 
 </head>
 
@@ -202,7 +298,8 @@
                     </a>
                 </li>
                 <li class="nav-item d-none d-sm-inline-block">
-                    <a href="{{ route('owner.user-owner.dashboard') }}" class="nav-link text-white">{{ __('messages.owner.layout.dashboard') }}</a>
+                    <a href="{{ route('owner.user-owner.dashboard') }}"
+                        class="nav-link text-white">{{ __('messages.owner.layout.dashboard') }}</a>
                 </li>
                 <li class="nav-item d-none d-sm-inline-block">
                     <a href="#" class="nav-link text-white">{{ __('messages.owner.layout.support') }}</a>
@@ -213,44 +310,41 @@
             <ul class="navbar-nav ml-auto">
                 <!-- Language Switcher -->
                 <li class="nav-item dropdown">
-                    <button
-                        class="btn btn-sm d-inline-flex align-items-center rounded-2 lang-btn"
-                        data-toggle="dropdown"
-                        aria-haspopup="true"
-                        aria-expanded="false"
-                        type="button"
-                        >
+                    <button class="btn btn-sm d-inline-flex align-items-center rounded-2 lang-btn"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button">
                         <!-- Globe image -->
-                        <img
-                            src="{{ asset('icons/icon-globe-50.png') }}"
-                            alt="Language"
-                            class="mr-1 lang-globe"
-                            width="16" height="16"
-                            loading="lazy" decoding="async"
-                        />
+                        <img src="{{ asset('icons/icon-globe-50.png') }}" alt="Language" class="mr-1 lang-globe"
+                            width="16" height="16" loading="lazy" decoding="async" />
 
                         <span class="font-weight-medium">
                             {{ app()->getLocale() === 'id' ? 'Bahasa' : 'English' }}
                         </span>
 
                         <!-- Caret -->
-                        <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" class="ml-1" style="opacity:.7">
-                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.25 8.27a.75.75 0 01-.02-1.06z" clip-rule="evenodd"/>
+                        <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" class="ml-1"
+                            style="opacity:.7">
+                            <path fill-rule="evenodd"
+                                d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.25 8.27a.75.75 0 01-.02-1.06z"
+                                clip-rule="evenodd" />
                         </svg>
                     </button>
 
 
                     <div class="dropdown-menu dropdown-menu-right rounded-2xl soft-shadow p-0 overflow-hidden">
-                        <a href="{{ route('language.set.get', ['locale'=>'id']) }}" class="dropdown-item d-flex align-items-center">
-                            <img src="{{ asset('icons/icon-indonesia-96.png') }}" alt="Indonesia" class="mr-2 lang-flag" width="18" height="18" loading="lazy" decoding="async">
+                        <a href="{{ route('language.set.get', ['locale' => 'id']) }}"
+                            class="dropdown-item d-flex align-items-center">
+                            <img src="{{ asset('icons/icon-indonesia-96.png') }}" alt="Indonesia" class="mr-2 lang-flag"
+                                width="18" height="18" loading="lazy" decoding="async">
                             Bahasa
-                            @if(app()->getLocale()==='id') <i class="fas fa-check ml-auto text-choco"></i> @endif
+                            @if(app()->getLocale() === 'id') <i class="fas fa-check ml-auto text-choco"></i> @endif
                         </a>
 
-                        <a href="{{ route('language.set.get', ['locale'=>'en']) }}" class="dropdown-item d-flex align-items-center">
-                            <img src="{{ asset('icons/icon-english-96.png') }}" alt="English" class="mr-2 lang-flag" width="18" height="18" loading="lazy" decoding="async">
+                        <a href="{{ route('language.set.get', ['locale' => 'en']) }}"
+                            class="dropdown-item d-flex align-items-center">
+                            <img src="{{ asset('icons/icon-english-96.png') }}" alt="English" class="mr-2 lang-flag"
+                                width="18" height="18" loading="lazy" decoding="async">
                             English
-                            @if(app()->getLocale()==='en') <i class="fas fa-check ml-auto text-choco"></i> @endif
+                            @if(app()->getLocale() === 'en') <i class="fas fa-check ml-auto text-choco"></i> @endif
                         </a>
                     </div>
 
@@ -307,7 +401,8 @@
                                 class="img-circle elevation-2" alt="User Image">
                             <p>
                                 @auth {{ auth()->user()->name }} @else User Owner @endauth
-                                <small>{{ __('messages.owner.layout.member_since') }} @auth {{ auth()->user()->created_at->format('M. Y') }} @else User Owner @endauth</small>
+                                <small>{{ __('messages.owner.layout.member_since') }} @auth
+                                {{ auth()->user()->created_at->format('M. Y') }} @else User Owner @endauth</small>
                             </p>
                         </li>
                         <!-- Menu Footer-->
@@ -351,30 +446,52 @@
                 </div>
 
                 <!-- Sidebar Menu -->
+                <!-- Sidebar Menu -->
                 <nav class="mt-2">
+                    @php
+                        $isVerified = auth('owner')->check() && auth('owner')->user()->verification_status === 'approved';
+                    @endphp
+
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                         data-accordion="false">
+
+                        {{-- Verification Menu (commented) --}}
+                        {{-- <li class="nav-item">
+                            <a href="{{ route('owner.user-owner.verification') }}"
+                                class="nav-link @if(Route::is('owner.user-owner.verification')) active @endif">
+                                <i class="nav-icon fas fa-tachometer-alt"></i>
+                                <p>{{ __('messages.owner.layout.verification') }}</p>
+                            </a>
+                        </li> --}}
+
+                        {{-- Dashboard --}}
                         <li class="nav-item">
-                            <a href="{{ route('owner.user-owner.dashboard') }}"
-                                class="nav-link @if(Route::is('owner.user-owner.dashboard')) active @endif">
+                            <a href="{{ $isVerified ? route('owner.user-owner.dashboard') : 'javascript:void(0)' }}"
+                                class="nav-link {{ !$isVerified ? 'disabled-link' : '' }} @if(Route::is('owner.user-owner.dashboard')) active @endif"
+                                onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
                                 <i class="nav-icon fas fa-tachometer-alt"></i>
                                 <p>{{ __('messages.owner.layout.dashboard') }}</p>
                             </a>
                         </li>
 
+                        {{-- User Management --}}
                         @php
                             $employeeRoutes = ['owner.user-owner.employees.*'];
                         @endphp
 
                         <li class="nav-item {{ Route::is($employeeRoutes) ? 'menu-open' : '' }}">
-                            <a href="#" class="nav-link {{ Route::is($employeeRoutes) ? 'active' : '' }}">
+                            <a href="javascript:void(0)"
+                                class="nav-link {{ !$isVerified ? 'disabled-link' : '' }} {{ Route::is($employeeRoutes) ? 'active' : '' }}"
+                                onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
                                 <i class="nav-icon fas fa-users"></i>
                                 <p>
                                     {{ __('messages.owner.layout.user_management') }}
-                                    <i class="fas fa-angle-left right"></i>
+                                    @if($isVerified)
+                                        <i class="fas fa-angle-left right"></i>
+                                    @endif
                                 </p>
                             </a>
-                            <ul class="nav nav-treeview">
+                            <ul class="nav nav-treeview {{ !$isVerified ? 'disabled' : '' }}">
                                 <li class="nav-item">
                                     <a href="{{ route('owner.user-owner.employees.index') }}"
                                         class="nav-link {{ Route::is('owner.user-owner.employees.*') ? 'active' : '' }}">
@@ -397,7 +514,7 @@
                             </ul>
                         </li>
 
-                        {{-- store --}}
+                        {{-- Store (commented section) --}}
                         {{-- @php
                         $storeRoutes = ['partner.store.*'];
                         @endphp
@@ -446,20 +563,24 @@
                             </ul>
                         </li> --}}
 
-
+                        {{-- Outlets --}}
                         @php
                             $outletRoutes = ['owner.user-owner.outlets.*'];
                         @endphp
 
                         <li class="nav-item {{ Route::is($outletRoutes) ? 'menu-open' : '' }}">
-                            <a href="#" class="nav-link {{ Route::is($outletRoutes) ? 'active' : '' }}">
+                            <a href="javascript:void(0)"
+                                class="nav-link {{ !$isVerified ? 'disabled-link' : '' }} {{ Route::is($outletRoutes) ? 'active' : '' }}"
+                                onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
                                 <i class="nav-icon fas fa-store"></i>
                                 <p>
                                     {{ __('messages.owner.layout.outlets') }}
-                                    <i class="fas fa-angle-left right"></i>
+                                    @if($isVerified)
+                                        <i class="fas fa-angle-left right"></i>
+                                    @endif
                                 </p>
                             </a>
-                            <ul class="nav nav-treeview">
+                            <ul class="nav nav-treeview {{ !$isVerified ? 'disabled' : '' }}">
                                 <li class="nav-item">
                                     <a href="{{ route('owner.user-owner.outlets.index') }}"
                                         class="nav-link {{ Route::is('owner.user-owner.outlets.*') ? 'active' : '' }}">
@@ -467,29 +588,34 @@
                                         <p>{{ __('messages.owner.layout.all_outlets') }}</p>
                                     </a>
                                 </li>
-
                             </ul>
                         </li>
 
+                        {{-- Products --}}
                         @php
                             $productRoutes = ['owner.user-owner.products.*'];
                             $categoryRoutes = ['owner.user-owner.categories.*'];
                             $promotionRoutes = ['owner.user-owner.promotions.*'];
+                            $stockRoutes = ['owner.user-owner.stocks.*'];
                             $masterProductRoutes = ['owner.user-owner.master-products.*'];
                             $outletProductRoutes = ['owner.user-owner.outlet-products.*'];
 
-                            $allProductRoutes = array_merge($productRoutes, $categoryRoutes, $promotionRoutes, $masterProductRoutes, $outletProductRoutes);
+                            $allProductRoutes = array_merge($productRoutes, $categoryRoutes, $promotionRoutes, $masterProductRoutes, $outletProductRoutes, $stockRoutes);
                         @endphp
 
                         <li class="nav-item {{ Route::is($allProductRoutes) ? 'menu-open' : '' }}">
-                            <a href="#" class="nav-link {{ Route::is($allProductRoutes) ? 'active' : '' }}">
+                            <a href="javascript:void(0)"
+                                class="nav-link {{ !$isVerified ? 'disabled-link' : '' }} {{ Route::is($allProductRoutes) ? 'active' : '' }}"
+                                onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
                                 <i class="nav-icon fas fa-shopping-cart"></i>
                                 <p>
                                     {{ __('messages.owner.layout.products') }}
-                                    <i class="fas fa-angle-left right"></i>
+                                    @if($isVerified)
+                                        <i class="fas fa-angle-left right"></i>
+                                    @endif
                                 </p>
                             </a>
-                            <ul class="nav nav-treeview">
+                            <ul class="nav nav-treeview {{ !$isVerified ? 'disabled' : '' }}">
                                 <li class="nav-item">
                                     <a href="{{ route('owner.user-owner.master-products.index') }}"
                                         class="nav-link {{ Route::is('owner.user-owner.master-products.*') ? 'active' : '' }}">
@@ -502,6 +628,13 @@
                                         class="nav-link {{ Route::is('owner.user-owner.outlet-products.*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>{{ __('messages.owner.layout.outlet_products') }}</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('owner.user-owner.stocks.index') }}"
+                                        class="nav-link {{ Route::is('owner.user-owner.stocks.*') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>{{ __('messages.owner.layout.stocks') }}</p>
                                     </a>
                                 </li>
                                 {{-- <li class="nav-item">
@@ -525,28 +658,37 @@
                                         <p>{{ __('messages.owner.layout.promotions') }}</p>
                                     </a>
                                 </li>
-
                             </ul>
-
                         </li>
 
+                        {{-- Settings --}}
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
+                            <a href="javascript:void(0)" class="nav-link {{ !$isVerified ? 'disabled-link' : '' }}"
+                                onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
                                 <i class="nav-icon fas fa-cog"></i>
                                 <p>{{ __('messages.owner.layout.settings') }}</p>
                             </a>
                         </li>
 
-                        <li class="nav-header">{{ __('messages.owner.layout.reports') }}</li>
+                        {{-- Reports Header --}}
+                        <li class="nav-header {{ !$isVerified ? 'disabled-header' : '' }}">
+                            {{ __('messages.owner.layout.reports') }}
+                        </li>
+
+                        {{-- Sales Report --}}
                         <li class="nav-item">
-                            <a href="{{ route('owner.user-owner.report.sales.index') }}"
-                                class="nav-link {{ Route::is('owner.user-owner.report.sales.*') ? 'active' : '' }}">
+                            <a href="{{ $isVerified ? route('owner.user-owner.report.sales.index') : 'javascript:void(0)' }}"
+                                class="nav-link {{ !$isVerified ? 'disabled-link' : '' }} {{ Route::is('owner.user-owner.report.sales.*') ? 'active' : '' }}"
+                                onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
                                 <i class="nav-icon fas fa-chart-line"></i>
                                 <p>{{ __('messages.owner.layout.sales_report') }}</p>
                             </a>
                         </li>
+
+                        {{-- Traffic Report --}}
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
+                            <a href="javascript:void(0)" class="nav-link {{ !$isVerified ? 'disabled-link' : '' }}"
+                                onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
                                 <i class="nav-icon fas fa-chart-pie"></i>
                                 <p>{{ __('messages.owner.layout.traffict_report') }}</p>
                             </a>
@@ -616,7 +758,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <script src="{{ asset('js/owner/reports/sales.js') }}"></script>
 
 
@@ -698,9 +840,52 @@
                 }
             });
         });
+
+        // Function untuk menampilkan alert verifikasi
+        function showVerificationAlert(event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            Swal.fire({
+                icon: 'warning',
+                title: '<strong>Akses Terbatas</strong>',
+                html: `
+                <div style="text-align: left; padding: 10px;">
+                    <p style="margin-bottom: 15px; color: #666;">
+                        <strong>Akun Anda belum diverifikasi oleh admin.</strong>
+                    </p>
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #ffc107;">
+                        <p style="margin: 0; color: #856404;">
+                            <i class="fas fa-info-circle"></i> 
+                            Anda tidak dapat mengakses fitur ini sampai proses verifikasi selesai.
+                        </p>
+                    </div>
+
+                </div>
+            `,
+               
+                customClass: {
+                    popup: 'rounded-2xl',
+                    cancelButton: 'rounded-2xl px-4'
+                },
+                allowOutsideClick: true,
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown animate__faster'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp animate__faster'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '{{ route("owner.user-owner.verification.index") }}';
+                }
+            });
+
+            return false;
+        }
     </script>
     <style>
-        .sidebar-dark-primary .nav-sidebar > .nav-header {
+        .sidebar-dark-primary .nav-sidebar>.nav-header {
             color: #8c1000;
         }
 
@@ -751,19 +936,23 @@
             color: #fff;
         }
 
-        #toast-container > .toast {
+        #toast-container>.toast {
             border-radius: 10px;
             box-shadow: var(--shadow);
         }
-        #toast-container > .toast-success { background-color: var(--choco); }
-        .swal2-popup{
+
+        #toast-container>.toast-success {
+            background-color: var(--choco);
+        }
+
+        .swal2-popup {
             border-radius: 14px !important;
         }
-        .swal2-confirm{
+
+        .swal2-confirm {
             background: var(--choco) !important;
             border: none !important;
         }
-
     </style>
 
     @yield('scripts')
@@ -790,7 +979,7 @@
                 @foreach ($errors->all() as $err)
                     toastr.error({!! json_encode($err) !!});
                 @endforeach
-                        });
+                                            });
         </script>
     @endif
 

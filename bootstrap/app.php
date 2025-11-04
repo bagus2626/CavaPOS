@@ -24,6 +24,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'redirect.auth.role' => \App\Http\Middleware\RedirectIfAuthenticatedWithRole::class,
             'auth' => \App\Http\Middleware\Authenticate::class,
             'setlocale' => \App\Http\Middleware\SetLocale::class,
+            'owner.verification.access' => \App\Http\Middleware\OwnerVerification::class,
+
         ]);
 
         $middleware->appendToGroup('web', \Illuminate\Session\Middleware\StartSession::class);
