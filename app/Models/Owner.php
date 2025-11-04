@@ -38,4 +38,10 @@ class Owner extends Authenticatable implements MustVerifyEmail
         'is_active' => 'boolean',
         'password'  => 'hashed', // Laravel 10+: otomatis di-hash saat set
     ];
+
+        public function users()
+    {
+        return $this->hasMany(User::class, 'owner_id', 'id')
+            ->where('role', 'partner');
+    }
 }

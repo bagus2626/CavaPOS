@@ -14,15 +14,42 @@
     <div class="shadow-bottom"></div>
     <div class="main-menu-content">
         <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation" data-icon-style="">
+            
             <li class=" nav-item"><a href="index.html">
-                    <i class="bx bx-group"></i>
-                    <span class="menu-title" data-i18n="Dashboard">XenPlatform</span>
+                <i class="bx bx-group"></i>
+                <span class="menu-title" data-i18n="Dashboard">XenPlatform</span>
+            </a>
+            <ul class="menu-content">
+                <li><a href="dashboard-ecommerce.html">
+                        <i class="bx bx-right-arrow-alt"></i>
+                        <span class="menu-item" data-i18n="eCommerce">Partner Accounts</span></a>
+                </li>
+            </ul>
+            </li>
+
+            <li class=" nav-item">
+                <a href="#">
+                    <i class="bx bx-user-check"></i>
+                    <span class="menu-title" data-i18n="OwnerManagement">Owner Management</span>
                 </a>
                 <ul class="menu-content">
-                    <li><a href="dashboard-ecommerce.html">
+                    
+                    {{-- Sub-menu 1: Daftar Owner --}}
+                    <li>
+                        <a href="{{ route('admin.owner-management.owner-list.index') }}">
                             <i class="bx bx-right-arrow-alt"></i>
-                            <span class="menu-item" data-i18n="eCommerce">Partner Accounts</span></a>
+                            <span class="menu-item" data-i18n="OwnerList">Owner List</span>
+                        </a>
                     </li>
+                    
+                    {{-- Sub-menu 2: Data Outlet (Partner) --}}
+                    <li>
+                        <a href="outlet-list.html">
+                            <i class="bx bx-right-arrow-alt"></i>
+                            <span class="menu-item" data-i18n="OutletData">Outlet Data</span>
+                        </a>
+                    </li>
+
                 </ul>
             </li>
         </ul>

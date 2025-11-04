@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Broadcast;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Public\PriceController;
 use App\Http\Controllers\Admin\Dashboard\DashboardController;
+use App\Http\Controllers\Admin\OwnerManagement\OwnerListController;
 use App\Http\Controllers\Owner\Auth\OwnerAuthController;
 use App\Http\Controllers\Owner\Auth\OwnerPasswordResetController;
 use App\Http\Controllers\Owner\OwnerDashboardController;
@@ -80,6 +81,12 @@ Route::middleware('setlocale')->group(function () {
     //admin
     Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+        Route::prefix('owner-management')->name('owner-management.')->group(function () {
+                Route::get('/owner-list', [OwnerListController::class, 'index'])->name('owner-list.index');
+                Route::get('/owner-list/{ownerId}/outlets', [OwnerListController::class, 'showOutlets'])->name('owner-outlets');
+                Route::get('/owner-list/{ownerId}/outlets/{outletId}/data', [OwnerListController::class, 'showOutletData'])->name('outlet-data');
+            });
+        
 
         //        Route::prefix('partner')->name('partner.')->group(function () {
         //            Route::prefix('xendit')->name('xendit.')->group(function () {
