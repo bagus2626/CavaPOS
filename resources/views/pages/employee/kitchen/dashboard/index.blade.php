@@ -1,19 +1,81 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Kitchen Dashboard</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <!-- Performance Optimization - Preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="{{ url('/') }}">
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="{{ url('/') }}">
+
+    <!-- Styles with display=swap for better performance -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=info&display=swap" />
     
-    <!-- Styles -->
-    <link href="https://fonts.googleapis.com" rel="preconnect"/>
-    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=info" />
+    <!-- Critical CSS Inline -->
+    <style>
+        /* Critical CSS untuk First Paint - Mobile Optimized */
+        body { 
+            margin: 0; 
+            padding: 0; 
+            font-family: Inter, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .bg-background-light { background-color: #f5f5f5; }
+        .bg-background-dark { background-color: #111827; }
+        .bg-card-light { background-color: #ffffff; }
+        .bg-card-dark { background-color: #1f2937; }
+        .flex { display: flex; }
+        .h-screen { height: 100vh; }
+        .overflow-hidden { overflow: hidden; }
+        
+        /* Scrollbar styles */
+        .scrollbar-thin {
+            scrollbar-width: thin;
+            scrollbar-color: #c1c1c1 #f1f1f1;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+        .scrollbar-thin::-webkit-scrollbar-track { 
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb { 
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        
+        /* Reduce animations on mobile for performance */
+        @media (max-width: 768px) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            
+            /* Reduce expensive CSS on mobile */
+            .shadow-sm, .shadow, .shadow-md, .shadow-lg, .shadow-xl {
+                box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+            }
+        }
+    </style>
+
+    <!-- Preload Tailwind -->
+    <link rel="preload" href="https://cdn.tailwindcss.com?plugins=forms,typography" as="script">
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
-    
+
     <script>
         tailwind.config = {
             darkMode: "class",
@@ -23,11 +85,10 @@
                         primary: '#b91c1c',
                         'primary-dark': '#991b1b',
                         'primary-hover': '#dc2626',
-                        'background-light': '#f9fafb',
+                        'background-light': '#f5f5f5',
                         'background-dark': '#111827',
                         'card-light': '#ffffff',
                         'card-dark': '#1f2937',
-                        'pink': '#FFD9D9',
                         'text-light': '#1f2937',
                         'text-dark': '#f9fafb',
                         'text-secondary-light': '#6b7280',
@@ -37,214 +98,197 @@
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
-                        display: ['Inter', 'system-ui', 'sans-serif'],
-                    },
-                    fontWeight: {
-                        'medium': 500,
-                        'semibold': 600,
-                        'bold': 700,
                     },
                     borderRadius: {
                         DEFAULT: '0.75rem',
                     },
-                    boxShadow: {
-                        'card': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                        'card-hover': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-                        'elegant': '0 8px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 10px -2px rgba(0, 0, 0, 0.04)',
-                    },
                     width: {
                         '120': '28rem',
-                    },
-                    screens: {
-                        'xs': '475px',
-                        'sm': '640px',
-                        'md': '768px',
-                        'lg': '1024px',
-                        'xl': '1280px',
                     }
                 },
             },
         };
     </script>
 </head>
+
 <body class="bg-background-light dark:bg-background-dark font-sans">
-    <div class="flex flex-col lg:flex-row min-h-screen">
+    <div class="flex h-screen overflow-hidden">
         <!-- Main Content -->
-        <div class="flex-1 flex flex-col min-w-0 order-2 lg:order-1">
-            <!-- Header -->
+        <div class="flex-1 flex flex-col min-w-0">
             @include('pages.employee.kitchen.dashboard.header-new')
-            
+
             <!-- Mobile Floating Button -->
-        <button 
-        id="mobileSidebarToggle" 
-        class="lg:hidden fixed bottom-6 right-6 bg-primary hover:bg-primary-hover text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg z-[60] transition-all duration-300">
-            <span class="material-icons">menu</span>
-            <!-- Notification Badge -->
-            <span id="pendingOrdersBadge" class="hidden absolute -top-1 -right-1 bg-yellow-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-md animate-pulse">
-                0
-            </span>
-        </button>
-            
+            <button id="mobileSidebarToggle"
+                class="lg:hidden fixed bottom-4 right-4 md:bottom-6 md:right-6 bg-primary hover:bg-primary-hover text-white rounded-full w-12 h-12 md:w-14 md:h-14 flex items-center justify-center shadow-lg z-[60] transition-all">
+                <span class="material-icons text-xl md:text-2xl">menu</span>
+                <span id="pendingOrdersBadge" class="hidden absolute -top-1 -right-1 bg-yellow-500 text-white text-xs font-bold rounded-full w-5 h-5 md:w-6 md:h-6 flex items-center justify-center">0</span>
+            </button>
+
             <!-- Main Content -->
-            <main class="flex-1 p-4 md:p-6 space-y-4 md:space-y-6 min-w-0">
+            <main class="flex-1 p-3 md:p-4 lg:p-6 overflow-auto pb-20 lg:pb-6">
+                
                 <!-- Status Cards -->
-                <!-- Status Cards -->
-                    <div class="grid grid-cols-3 gap-2 md:gap-4 lg:gap-6">
-                        <div class="bg-pink dark:bg-card-dark p-3 md:p-4 lg:p-6 rounded-xl shadow-elegant border border-white/20">
-                        <div>
-                            <p class="text-pink text-primary font-bold font-display dark:text-text-secondary-dark text-xs md:text-sm lg:text-base tracking-wide">WAITING</p>
-<p class="text-2xl md:text-3xl lg:text-4xl font-bold text-primary font-display" id="waitingCount">0</p>
+                <div class="grid grid-cols-3 gap-2 md:gap-3 lg:gap-4 mb-4 md:mb-5 lg:mb-6">
+                    
+                    <!-- Status cards  -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg lg:rounded-xl shadow border border-gray-200 dark:border-gray-700 p-2.5 md:p-3 lg:p-4">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white" id="waitingCount">0</p>
+                                <p class="text-xs font-semibold text-red-500 uppercase">Waiting</p>
+                            </div>
+                            <span class="material-icons text-red-500 text-2xl">schedule</span>
                         </div>
                     </div>
-                    <div class="bg-card-light dark:bg-card-dark p-4 md:p-6 rounded-xl shadow-elegant border border-border-light/50 dark:border-border-dark/50">
-                        <div>
-                            <p class="text-text-secondary-light dark:text-text-secondary-dark text-xs md:text-sm lg:text-base font-medium tracking-wide">COOKING</p>
-<p class="text-2xl md:text-3xl lg:text-4xl font-bold text-text-light dark:text-text-dark font-display" id="cookingCount">0</p>
+
+                    <div class="bg-white dark:bg-gray-800 rounded-lg lg:rounded-xl shadow border border-gray-200 dark:border-gray-700 p-2.5 md:p-3 lg:p-4">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white" id="cookingCount">0</p>
+                                <p class="text-xs font-semibold text-blue-500 uppercase">Cooking</p>
+                            </div>
+                            <span class="material-icons text-blue-500 text-2xl">restaurant</span>
                         </div>
                     </div>
-                    <div class="bg-card-light dark:bg-card-dark p-4 md:p-6 rounded-xl shadow-elegant border border-border-light/50 dark:border-border-dark/50">
-                        <div>
-                            <p class="text-text-secondary-light dark:text-text-secondary-dark text-xs md:text-sm lg:text-base font-medium tracking-wide">SERVED</p>
-<p class="text-2xl md:text-3xl lg:text-4xl font-bold text-text-light dark:text-text-dark font-display" id="completedCount">0</p>
+
+                    <div class="bg-white dark:bg-gray-800 rounded-lg lg:rounded-xl shadow border border-gray-200 dark:border-gray-700 p-2.5 md:p-3 lg:p-4">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white" id="completedCount">0</p>
+                                <p class="text-xs font-semibold text-green-500 uppercase">Served</p>
+                            </div>
+                            <span class="material-icons text-green-500 text-2xl">check_circle</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Active Orders Section -->
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                    <h2 class="text-lg md:text-xl font-semibold text-text-light dark:text-text-dark">
-                        Active Orders 
-                        <span class="text-sm md:text-base text-text-secondary-light dark:text-text-secondary-dark ml-2" id="activeOrdersCount">
-                            0 orders cooking
-                        </span>
-                    </h2>
-                    {{-- <button class="flex items-center space-x-2 text-primary hover:text-primary-hover text-sm md:text-base" onclick="window.kitchenDashboard.loadAllData()">
-                        <span class="material-icons text-lg">refresh</span>
-                        <span>Refresh</span>
-                    </button> --}}
-                </div>
+                <!-- Active Orders Rafi --> 
+                <div class="mb-4 md:mb-5 lg:mb-6">
+                    <h2 class="text-base md:text-lg lg:text-xl font-bold text-gray-900 dark:text-white mb-3 md:mb-4">
+                        Active Orders
+                    </h2> 
 
-                <!-- Active Orders Grid -->
-<div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4 lg:gap-6" id="activeOrders">
-                    <div class="col-span-full flex flex-col items-center justify-center text-center py-8">
-                        <div class="text-4xl mb-4">👨‍🍳</div>
-                        <div class="text-texta-secondary-light dark:text-text-secondary-dark text-lg">Loading active orders...</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 lg:gap-5" id="activeOrders">
+                        <div class="col-span-full flex flex-col items-center justify-center text-center py-10 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <div class="text-4xl mb-3 text-gray-400"></div>
+                            <div class="text-gray-500 dark:text-gray-400 text-sm">Loading active orders...</div>
+                        </div>
                     </div>
                 </div>
             </main>
         </div>
-        
+
         <!-- Desktop Sidebar -->
-        <aside class="hidden lg:block w-120 bg-card-light dark:bg-card-dark border-l border-border-light dark:border-border-dark p-6 flex-col sticky top-0 h-screen flex-shrink-0 order-2">
-            <!-- Order Queue Section -->
-            <div class="flex flex-col h-1/2 min-h-0">
+        <aside class="hidden lg:flex w-120 bg-card-light dark:bg-card-dark border-l border-border-light dark:border-border-dark flex-col h-screen sticky top-0">
+            <div class="flex-1 min-h-0 border-b border-border-light dark:border-border-dark">
                 @include('pages.employee.kitchen.dashboard.order-queue-new')
             </div>
-            
-            <!-- Divider -->
-            <div class="flex-shrink-0 border-t border-border-light dark:border-border-dark my-4"></div>
-            
-            <!-- Served Orders Section -->
-            <div class="flex flex-col h-1/2 min-h-0">
+            <div class="flex-1 min-h-0">
                 @include('pages.employee.kitchen.dashboard.served-orders-new')
             </div>
         </aside>
 
-        <!-- Mobile Sidebar Overlay -->
-        <div 
-            id="mobileSidebarOverlay" 
-            class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-[45] hidden transition-opacity duration-300"
-        ></div>
+       <!-- Mobile Sidebar -->
+<div id="mobileSidebarOverlay" class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-[45] hidden"></div>
 
-        <!-- Mobile Sidebar -->
-        <aside 
-            id="mobileSidebar" 
-            class="lg:hidden fixed right-0 top-0 h-full w-full sm:w-96 bg-card-light dark:bg-card-dark shadow-2xl z-[50] transform translate-x-full transition-transform duration-300 flex flex-col"
-        >
-            <!-- Mobile Sidebar Header -->
-            <div class="flex items-center justify-between p-4 border-b border-border-light dark:border-border-dark flex-shrink-0">
-                <h2 class="text-lg font-bold text-text-light dark:text-text-dark typography-heading">Orders</h2>
-                <button 
-                    id="closeMobileSidebar"
-                    class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
-                >
-                    <span class="material-icons">close</span>
-                </button>
-            </div>
-
-            <!-- Tab Navigation -->
-            <div class="flex border-b border-border-light dark:border-border-dark flex-shrink-0">
-                <button 
-                    id="queueTabBtn"
-                    class="flex-1 py-3 px-4 text-sm font-semibold text-primary border-b-2 border-primary transition-colors"
-                >
-                    Order Queue
-                    <span id="queueTabCount" class="ml-1 text-xs">(0)</span>
-                </button>
-                <button 
-                    id="servedTabBtn"
-                    class="flex-1 py-3 px-4 text-sm font-semibold text-text-secondary-light dark:text-text-secondary-dark border-b-2 border-transparent transition-colors"
-                >
-                    Served Orders
-                    <span id="servedTabCount" class="ml-1 text-xs">(0)</span>
-                </button>
-            </div>
-
-            <!-- Tab Content -->
-            <div class="flex-1 overflow-hidden">
-                <!-- Queue Tab -->
-                <div id="queueTabContent" class="h-full p-4">
-                    <div class="flex flex-col h-full">
-                        <div class="relative mb-4 flex-shrink-0">
-                            <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary-light dark:text-text-secondary-dark text-sm">search</span>
-                            <input 
-                                class="w-full pl-10 pr-4 py-2 bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark rounded-xl focus:ring-primary focus:border-primary text-text-light dark:text-text-dark typography-enhanced" 
-                                placeholder="Search orders" 
-                                type="text" 
-                                id="mobileQueueSearch"
-                                autocomplete="off"
-                            />
-                        </div>
-                        <div class="flex-1 overflow-y-auto custom-scrollbar" id="mobileOrderQueue">
-                            <div class="text-center text-text-secondary-light dark:text-text-secondary-dark py-8">
-                                <div class="text-lg mb-2">🔭</div>
-                                <div>Loading orders...</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Served Tab -->
-                <div id="servedTabContent" class="h-full p-4 hidden">
-                    <div class="flex flex-col h-full">
-                        <div class="mb-4 flex-shrink-0">
-                            <input 
-                                type="date" 
-                                id="mobileDatePicker" 
-                                class="w-full bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark rounded-xl px-3 py-2 text-sm focus:ring-primary focus:border-primary transition-colors typography-enhanced"
-                                max="<?php echo date('Y-m-d'); ?>"
-                                onchange="window.kitchenDashboard.applyDateFilter(this.value)"
-                            >
-                        </div>
-                        <div class="flex-1 overflow-y-auto custom-scrollbar" id="mobileServedOrders">
-                            <div class="text-center text-text-secondary-light dark:text-text-secondary-dark py-8">
-                                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mx-auto mb-2"></div>
-                                <div>Loading served orders...</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </aside>
+<aside id="mobileSidebar" class="lg:hidden fixed right-0 top-0 h-full w-full max-w-sm bg-card-light dark:bg-card-dark shadow-xl z-[50] transform translate-x-full transition-transform flex flex-col">
+    <!-- Header -->
+    <div class="p-4 border-b border-border-light dark:border-border-dark bg-white dark:bg-gray-800">
+        <div class="flex items-center justify-between mb-3">
+            {{-- <h2 class="text-base font-bold text-text-light dark:text-text-dark">Orders</h2> --}}
+            <button id="closeMobileSidebar" class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <span class="material-icons text-xl">close</span>
+            </button>
+        </div>
+        
+        <!-- Search Bar -->
+        <div class="relative">
+            <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary-light dark:text-text-secondary-dark text-sm">search</span>
+            <input 
+                class="w-full pl-10 pr-4 py-2.5 bg-background-light dark:bg-gray-700 border border-border-light dark:border-border-dark rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-sm placeholder-gray-400 dark:placeholder-gray-500" 
+                placeholder="Search by name or code" 
+                type="text" 
+                id="mobileQueueSearch"
+                autocomplete="off"
+            />
+        </div>
     </div>
 
-    <!-- Notification Container -->
-    <div id="notificationContainer"></div>
-    
-    <!-- Modals -->
+    <!-- Tabs -->
+    <div class="flex border-b border-border-light dark:border-border-dark bg-white dark:bg-gray-800">
+        <button id="queueTabBtn" class="flex-1 py-3 px-2 text-sm font-semibold text-primary border-b-2 border-primary transition-colors">
+            Order Queue <span id="queueTabCount" class="ml-1 text-xs">(0)</span>
+        </button>
+        <button id="servedTabBtn" class="flex-1 py-3 px-2 text-sm font-semibold text-text-secondary-light dark:text-text-secondary-dark border-b-2 border-transparent transition-colors">
+            Served Orders <span id="servedTabCount" class="ml-1 text-xs">(0)</span>
+        </button>
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 overflow-hidden bg-background-light dark:bg-background-dark">
+        <!-- Queue Tab Content Rafi -->
+        <div id="queueTabContent" class="h-full p-3">
+            <div class="flex flex-col h-full">
+                <div class="flex-1 overflow-y-auto scrollbar-thin" id="mobileOrderQueue">
+                    <div class="text-center text-text-secondary-light dark:text-text-secondary-dark py-10">
+                        <div class="text-4xl mb-2"></div>
+                        <div class="text-sm">Loading orders...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Served Tab Content Rafi -->
+        <div id="servedTabContent" class="h-full p-3 hidden">
+            <div class="flex flex-col h-full">
+                <div class="mb-3">
+                    <div class="relative">
+                        <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-base">calendar_today</span>
+                        <input 
+                            type="date" 
+                            id="mobileDatePicker" 
+                            class="w-full pl-10 pr-3 py-2.5 bg-white dark:bg-gray-800 border border-border-light dark:border-border-dark rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary" 
+                            max="<?php echo date('Y-m-d'); ?>"
+                        />
+                    </div>
+                </div>
+                <div class="flex-1 overflow-y-auto scrollbar-thin" id="mobileServedOrders">
+                    <div class="text-center text-text-secondary-light dark:text-text-secondary-dark py-10">
+                        <div class="text-4xl mb-2"></div>
+                        <div class="text-sm">Loading served orders...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</aside>
+
+    <!-- Modals & Scripts -->
     @include('pages.employee.kitchen.dashboard.modals')
-    
-    <!-- JavaScript -->
     @include('pages.employee.kitchen.dashboard.scripts')
+    
+    <!-- Load Alpine.js dengan defer untuk mobile -->
+    <script>
+        if (window.innerWidth < 768) {
+            setTimeout(() => {
+                const script = document.createElement('script');
+                script.src = '//unpkg.com/alpinejs';
+                script.defer = true;
+                document.body.appendChild(script);
+            }, 1000);
+        } else {
+            document.write('<script src="//unpkg.com/alpinejs" defer><\/script>');
+        }
+    </script>
+
+    <!-- Service Worker Registration for Mobile -->
+    <script>
+        if ('serviceWorker' in navigator && window.innerWidth < 768) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .catch(err => console.log('SW registration failed'));
+            });
+        }
+    </script>
 </body>
 </html>
