@@ -1,31 +1,32 @@
 <div class="flex flex-col h-full">
-    <div class="flex-shrink-0">
-        <h2 class="text-xl font-semibold text-text-light dark:text-text-dark typography-heading">
-            Order Queue 
-            <span class="text-base text-text-secondary-light dark:text-text-secondary-dark ml-2 typography-enhanced" id="queueOrdersCount">
-                0 orders waiting
-            </span>
+    <div class="flex-shrink-0 px-4 pt-5 pb-4 border-b border-gray-200 dark:border-gray-700">
+        <h2 class="text-2xl font-black text-gray-900 dark:text-white typography-heading mb-4">
+            Order Queue
         </h2>
-        <div class="relative mt-4">
-            <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary-light dark:text-text-secondary-dark text-sm">search</span>
-            <input class="w-full pl-10 pr-4 py-2 bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark rounded-xl focus:ring-primary focus:border-primary text-text-light dark:text-text-dark typography-enhanced" 
+        
+        <div class="relative">
+            <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
+            <input class="w-full pl-10 pr-10 py-3 text-base bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent text-gray-800 dark:text-gray-200 placeholder-gray-400 hover:shadow transition-all typography-enhanced" 
                    placeholder="Search all orders" 
                    type="text" 
                    id="globalSearch"
                    autocomplete="off"/>
-            <button class="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary-light dark:text-text-secondary-dark hover:text-text-light dark:hover:text-text-dark hidden" 
+            <button class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-600 hidden p-1 rounded transition-colors" 
                     id="clearGlobalSearch"
                     type="button">
-                <span class="material-icons text-sm">close</span>
+                <span class="material-icons text-lg">close</span>
             </button>
         </div>
     </div>
     
-    <div class="flex-1 overflow-hidden mt-4">
-        <div class="h-full overflow-y-auto custom-scrollbar space-y-3 pr-2" id="orderQueue">
-            <div class="text-center text-text-secondary-light dark:text-text-secondary-dark py-8">
-                <div class="text-lg mb-2">📭</div>
-                <div>Loading orders...</div>
+    <div class="flex-1 overflow-hidden px-4">
+        <div class="h-full overflow-y-auto scrollbar-thin space-y-3 py-4" id="orderQueue">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-8 text-center border border-gray-200 dark:border-gray-700">
+                <div class="w-14 h-14 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span class="text-3xl">🔭</span>
+                </div>
+                <p class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Loading orders...</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Please wait</p>
             </div>
         </div>
     </div>
