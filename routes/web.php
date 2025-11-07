@@ -203,18 +203,19 @@ Route::middleware('setlocale')->group(function () {
         });
 
 
-       // KITCHEN area
-                
+        // KITCHEN area
+
         Route::middleware(['auth:employee', 'is_employee:KITCHEN'])->prefix('kitchen')->name('kitchen.')->group(function () {
             Route::get('dashboard', [KitchenDashboardController::class, 'index'])->name('dashboard');
-            
+
             // API Endpoints - UPDATE YANG SUDAH ADA
             Route::get('orders/queue', [KitchenDashboardController::class, 'getOrderQueue'])->name('orders.queue');
             Route::get('orders/active', [KitchenDashboardController::class, 'getActiveOrders'])->name('orders.active');
             Route::get('orders/served', [KitchenDashboardController::class, 'getServedOrders'])->name('orders.served');
             Route::put('orders/{orderId}/pickup', [KitchenDashboardController::class, 'pickUpOrder'])->name('orders.pickup');
             Route::put('orders/{orderId}/serve', [KitchenDashboardController::class, 'markAsServed'])->name('orders.serve');
-            
+            Route::put('orders/{orderId}/cancel', [KitchenDashboardController::class, 'cancelOrder'])->name('orders.cancel');
+
             // TAMBAH ROUTE BARU UNTUK KITCHEN_STATUS
             Route::get('orders/my-active', [KitchenDashboardController::class, 'getMyActiveOrders'])->name('orders.my-active');
             Route::get('summary', [KitchenDashboardController::class, 'getKitchenSummary'])->name('summary');
