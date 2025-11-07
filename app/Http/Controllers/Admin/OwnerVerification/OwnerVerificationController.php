@@ -30,19 +30,30 @@ class OwnerVerificationController extends Controller
         $rejectedCount = OwnerVerification::where('status', 'rejected')->count();
         $totalCount = OwnerVerification::count();
 
-        $verifications = OwnerVerification::with(['owner.xenditSubAccount', 'owner.latestSplitRule'])
-            ->where('status', $status)
+        $pendingVerifications = OwnerVerification::with(['owner', 'businessCategory'])
+            ->where('status', 'pending')
             ->orderBy('created_at', 'asc')
-            ->paginate(10)
-            ->appends(['status' => $status]);
+            ->paginate(10, ['*'], 'pending_page');
+
+        $approvedVerifications = OwnerVerification::with(['owner.xenditSubAccount', 'owner.latestSplitRule', 'businessCategory'])
+            ->where('status', 'approved')
+            ->orderBy('reviewed_at', 'desc')
+            ->paginate(10, ['*'], 'approved_page');
+
+        $rejectedVerifications = OwnerVerification::with(['owner', 'businessCategory'])
+            ->where('status', 'rejected')
+            ->orderBy('reviewed_at', 'desc')
+            ->paginate(10, ['*'], 'rejected_page');
 
         return view('pages.admin.owner.owner-verification', compact(
-            'verifications',
             'status',
             'pendingCount',
             'approvedCount',
             'rejectedCount',
-            'totalCount'
+            'totalCount',
+            'pendingVerifications',
+            'approvedVerifications',
+            'rejectedVerifications'
         ));
     }
 
@@ -60,14 +71,12 @@ class OwnerVerificationController extends Controller
         return view('pages.admin.owner.owner-verification-detail', compact('verification'));
     }
 
-public function approve($id)
+    public function approve($id)
     {
-
         try {
             DB::beginTransaction();
 
             $verification = OwnerVerification::findOrFail($id);
-
 
             if ($verification->status !== 'pending') {
                 DB::rollBack();
@@ -116,8 +125,7 @@ public function approve($id)
         } catch (\Exception $e) {
             DB::rollBack();
 
-
-            return redirect()->back()->with('error', 'Failed to approve verification: '. $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to approve verification: ' . $e->getMessage());
         }
     }
 

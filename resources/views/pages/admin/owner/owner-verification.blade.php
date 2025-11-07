@@ -95,214 +95,271 @@
                     </div>
 
                     <!-- Filter Status -->
-                    <div class="card-body border-bottom">
-                        <div class="d-flex align-items-center">
-                            <div class="btn-group" role="group">
-                                <a href="{{ route('admin.owner-verification', ['status' => 'pending']) }}"
-                                    class="btn {{ $status == 'pending' ? 'btn-warning' : 'btn-outline-warning' }} btn-sm">
-                                    Pending
-                                    @if ($pendingCount > 0 && $status != 'pending')
-                                        <span
-                                            class="badge badge-pill badge-round badge-danger ml-1">{{ $pendingCount }}</span>
-                                        {{-- <span class="badge badge-pill badge-danger badge-up badge-round">2</span> --}}
+                    <div class="card-body">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link {{ $status == 'pending' ? 'active' : '' }}" id="pending-tab"
+                                    data-toggle="tab" href="#pending-content" aria-controls="pending" role="tab"
+                                    aria-selected="{{ $status == 'pending' ? 'true' : 'false' }}">
+                                    <span class="align-middle">Pending</span>
+                                    @if ($pendingCount > 0)
+                                        <span class="badge badge-pill badge-round badge-danger ml-1">{{ $pendingCount }}</span>
                                     @endif
                                 </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ $status == 'approved' ? 'active' : '' }}" id="approved-tab"
+                                    data-toggle="tab" href="#approved-content" aria-controls="approved" role="tab"
+                                    aria-selected="{{ $status == 'approved' ? 'true' : 'false' }}">
+                                    <span class="align-middle">Approved</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ $status == 'rejected' ? 'active' : '' }}" id="rejected-tab"
+                                    data-toggle="tab" href="#rejected-content" aria-controls="rejected" role="tab"
+                                    aria-selected="{{ $status == 'rejected' ? 'true' : 'false' }}">
+                                    <span class="align-middle">Rejected</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
 
-                                <a href="{{ route('admin.owner-verification', ['status' => 'approved']) }}"
-                                    class="btn {{ $status == 'approved' ? 'btn-success' : 'btn-outline-success' }} btn-sm">
-                                    Approved
-                                </a>
-                                <a href="{{ route('admin.owner-verification', ['status' => 'rejected']) }}"
-                                    class="btn {{ $status == 'rejected' ? 'btn-danger' : 'btn-outline-danger' }} btn-sm">
-                                    Rejected
-                                </a>
+                    <!-- Tab Content -->
+                    <div class="tab-content">
+                        <!-- Pending Tab -->
+                        <div class="tab-pane {{ $status == 'pending' ? 'show active' : '' }}" id="pending-content" role="tabpanel" aria-labelledby="pending-tab">
+                            <div class="table-responsive">
+                                <table class="table mb-0">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>NO</th>
+                                            <th>OWNER INFO</th>
+                                            <th>BUSINESS</th>
+                                            <th>SUBMITTED</th>
+                                            <th>STATUS</th>
+                                            <th>ACTIONS</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($pendingVerifications as $index => $verification)
+                                            <tr>
+                                                <td>{{ $pendingVerifications->firstItem() + $index }}</td>
+                                                <td>
+                                                    <span>{{ $verification->owner_name }}</span>
+                                                    <small class="d-block">{{ $verification->owner_email }}</small>
+                                                </td>
+                                                <td>
+                                                    <span>{{ $verification->business_name }}</span>
+                                                    <small class="d-block">{{ $verification->businessCategory->name ?? '-' }}</small>
+                                                </td>
+                                                <td>
+                                                    <span>{{ $verification->created_at ? $verification->created_at->format('d M Y') : '-' }}</span>
+                                                    <small class="d-block">{{ $verification->created_at ? $verification->created_at->format('H:i') : '' }}</small>
+                                                </td>
+                                                <td>
+                                                    <span class="badge badge-pill badge-warning">Pending</span>
+                                                </td>
+                                                <td>
+                                                    <a href="#" onclick="viewDetails({{ $verification->id }})">
+                                                        <i class="badge-circle badge-circle-light-secondary bx bx-show font-medium-1"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="6" class="text-center">No pending verifications found.</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
                             </div>
-                        </div>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table mb-0">
-                            <thead class="thead-dark">
-                                <tr>
-                                    <th>NO</th>
-                                    <th>OWNER INFO</th>
-                                    <th>BUSINESS</th>
-                                    <th>SUBMITTED</th>
-                                    @if ($status == 'approved')
-                                        <th>APPROVED DATE</th>
-                                        <th>XENDIT REGISTER</th>
-                                        <th>SPLIT RULES</th>
-                                    @elseif($status == 'rejected')
-                                        <th>REJECTED DATE</th>
-                                    @endif
-                                    <th>STATUS</th>
-                                    <th>ACTIONS</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($verifications as $index => $verification)
-                                    <tr>
-                                        <td>{{ $verifications->firstItem() + $index }}</td>
-                                        <td>
-                                            <span>{{ $verification->owner_name }}</span>
-                                            <small class="d-block">{{ $verification->owner_email }}</small>
-                                        </td>
-                                        <td>
-                                            <span>{{ $verification->business_name }}</span>
-                                            <small
-                                                class="d-block">{{ $verification->businessCategory->name ?? '-' }}</small>
-                                        </td>
-                                        <td>
-                                            <span>{{ $verification->created_at ? $verification->created_at->format('d M Y') : '-' }}</span>
-                                            <small
-                                                class="d-block">{{ $verification->created_at ? $verification->created_at->format('H:i') : '' }}</small>
-                                        </td>
-                                        @if ($status == 'approved')
-                                            <td>
-                                                <span>{{ $verification->reviewed_at ? $verification->reviewed_at->format('d M Y') : '-' }}</span>
-                                                <small
-                                                    class="d-block">{{ $verification->reviewed_at ? $verification->reviewed_at->format('H:i') : '' }}</small>
-                                            </td>
-                                            <td>
-                                                @php
-                                                    $xenditStatus = $verification->owner->xenditSubAccount->status ?? null;
-                                                    $badgeColors = [
-                                                        'INVITED' => 'warning',
-                                                        'REGISTERED' => 'success',
-                                                        'AWAITING_DOCS' => 'primary',
-                                                        'LIVE' => 'info',
-                                                        'LIVE_TESTMODE' => 'info',
-                                                        'SUSPENDED' => 'danger',
-                                                    ];
-                                                @endphp
 
-                                                @if ($xenditStatus && isset($badgeColors[$xenditStatus]))
-                                                    <span class="badge badge-light-{{ $badgeColors[$xenditStatus] }} badge-pill">{{ $xenditStatus }}</span>
-                                                @else
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary"
-                                                            onclick="openXenditRegistrationModal('{{ $verification->owner_id }}', '{{ $verification->owner_email }}', '{{ $verification->business_name }}')">
-                                                        <i class="bx bx-id-card"></i> CREATE ACCOUNT
-                                                    </button>
-                                                @endif
-                                            </td>
-                                            <td class="text-center">
-                                                @php
-                                                    $hasSplitRule = $verification->owner && $verification->owner->latestSplitRule;
-                                                @endphp
-
-                                                @if($hasSplitRule)
-                                                    <i class="bx bx-check-circle text-success bx-md" title="Split Rule Created"></i>
-                                                @else
-                                                    <i class="bx bx-x-circle text-danger bx-md" title="No Split Rule"></i>
-                                                @endif
-                                            </td>
-
-                                        @elseif($status == 'rejected')
-                                            <td>
-                                                <span>{{ $verification->reviewed_at ? $verification->reviewed_at->format('d M Y') : '-' }}</span>
-                                                <small
-                                                    class="d-block">{{ $verification->reviewed_at ? $verification->reviewed_at->format('H:i') : '' }}</small>
-                                            </td>
-                                        @endif
-                                        <td>
-                                            @if ($verification->status == 'pending')
-                                                <span class="badge badge-pill badge-warning">Pending</span>
-                                            @elseif($verification->status == 'approved')
-                                                <span class="badge badge-pill badge-success">Approved</span>
-                                            @elseif($verification->status == 'rejected')
-                                                <span class="badge badge-pill badge-danger">Rejected</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <a href="#" onclick="viewDetails({{ $verification->id }})">
-                                                <i
-                                                    class="badge-circle badge-circle-light-secondary bx bx-show font-medium-1"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="{{ $status == 'pending' ? '6' : '7' }}" class="text-center">
-                                            No {{ $status }} verifications found.
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Pagination -->
-                    @if ($verifications->hasPages())
-                        <div class="card-body">
-                            <div id="paginationContainer">
-                                <div class="mt-2">
-                                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center">
-                                        <span class="text-muted mb-2 mb-sm-0">
-                                            Showing {{ $verifications->firstItem() }} to {{ $verifications->lastItem() }}
-                                            of
-                                            {{ $verifications->total() }} entries
-                                        </span>
-                                        <nav aria-label="Page navigation">
-                                            <ul class="pagination justify-content-center mb-0">
-                                                @if ($verifications->onFirstPage())
-                                                    <li class="page-item previous disabled"><a class="page-link"
-                                                            href="#"><i class="bx bx-chevron-left"></i></a></li>
-                                                @else
-                                                    <li class="page-item previous"><a class="page-link"
-                                                            href="{{ $verifications->previousPageUrl() }}"><i
-                                                                class="bx bx-chevron-left"></i></a></li>
-                                                @endif
-
-                                                @php
-                                                    $currentPage = $verifications->currentPage();
-                                                    $lastPage = $verifications->lastPage();
-                                                    $maxVisible = 5;
-
-                                                    if ($lastPage <= $maxVisible) {
-                                                        $start = 1;
-                                                        $end = $lastPage;
-                                                    } else {
-                                                        $start = max(1, $currentPage - 2);
-                                                        $end = min($lastPage, $currentPage + 2);
-
-                                                        if ($currentPage <= 3) {
-                                                            $start = 1;
-                                                            $end = $maxVisible;
-                                                        }
-
-                                                        if ($currentPage >= $lastPage - 2) {
-                                                            $start = $lastPage - $maxVisible + 1;
-                                                            $end = $lastPage;
-                                                        }
-                                                    }
-                                                @endphp
-
-                                                @for ($page = $start; $page <= $end; $page++)
-                                                    @if ($page == $currentPage)
-                                                        <li class="page-item active" aria-current="page"><a
-                                                                class="page-link" href="#">{{ $page }}</a>
-                                                        </li>
-                                                    @else
-                                                        <li class="page-item"><a class="page-link"
-                                                                href="{{ $verifications->url($page) }}">{{ $page }}</a>
-                                                        </li>
-                                                    @endif
-                                                @endfor
-
-                                                @if ($verifications->hasMorePages())
-                                                    <li class="page-item next"><a class="page-link"
-                                                            href="{{ $verifications->nextPageUrl() }}"><i
-                                                                class="bx bx-chevron-right"></i></a></li>
-                                                @else
-                                                    <li class="page-item next disabled"><a class="page-link"
-                                                            href="#"><i class="bx bx-chevron-right"></i></a></li>
-                                                @endif
-                                            </ul>
-                                        </nav>
+                            <!-- Pagination for Pending -->
+                            @if ($pendingVerifications->total() > 0)
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mt-1">
+                                        <div class="pagination-summary text-muted">
+                                            Showing {{ $pendingVerifications->firstItem() }} - {{ $pendingVerifications->lastItem() }} from {{ $pendingVerifications->total() }} entries
+                                        </div>
+                                        <div class="pagination-links">
+                                            {{ $pendingVerifications->appends(['status' => 'pending'])->links('vendor.pagination.custom-limited') }}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            @endif
                         </div>
-                    @endif
+
+                        <!-- Approved Tab -->
+                        <div class="tab-pane {{ $status == 'approved' ? 'show active' : '' }}" id="approved-content" role="tabpanel" aria-labelledby="approved-tab">
+                            <div class="table-responsive">
+                                <table class="table mb-0">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>NO</th>
+                                            <th>OWNER INFO</th>
+                                            <th>BUSINESS</th>
+                                            <th>SUBMITTED</th>
+                                            <th>APPROVED DATE</th>
+                                            <th>XENDIT REGISTER</th>
+                                            <th>SPLIT RULES</th>
+                                            <th>STATUS</th>
+                                            <th>ACTIONS</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($approvedVerifications as $index => $verification)
+                                            <tr>
+                                                <td>{{ $approvedVerifications->firstItem() + $index }}</td>
+                                                <td>
+                                                    <span>{{ $verification->owner_name }}</span>
+                                                    <small class="d-block">{{ $verification->owner_email }}</small>
+                                                </td>
+                                                <td>
+                                                    <span>{{ $verification->business_name }}</span>
+                                                    <small class="d-block">{{ $verification->businessCategory->name ?? '-' }}</small>
+                                                </td>
+                                                <td>
+                                                    <span>{{ $verification->created_at ? $verification->created_at->format('d M Y') : '-' }}</span>
+                                                    <small class="d-block">{{ $verification->created_at ? $verification->created_at->format('H:i') : '' }}</small>
+                                                </td>
+                                                <td>
+                                                    <span>{{ $verification->reviewed_at ? $verification->reviewed_at->format('d M Y') : '-' }}</span>
+                                                    <small class="d-block">{{ $verification->reviewed_at ? $verification->reviewed_at->format('H:i') : '' }}</small>
+                                                </td>
+                                                <td>
+                                                    @php
+                                                        $xenditStatus = $verification->owner->xenditSubAccount->status ?? null;
+                                                        $badgeColors = [
+                                                            'INVITED' => 'warning',
+                                                            'REGISTERED' => 'success',
+                                                            'AWAITING_DOCS' => 'primary',
+                                                            'LIVE' => 'info',
+                                                            'LIVE_TESTMODE' => 'info',
+                                                            'SUSPENDED' => 'danger',
+                                                        ];
+                                                    @endphp
+
+                                                    @if ($xenditStatus && isset($badgeColors[$xenditStatus]))
+                                                        <span class="badge badge-light-{{ $badgeColors[$xenditStatus] }} badge-pill">{{ $xenditStatus }}</span>
+                                                    @else
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                            onclick="openXenditRegistrationModal('{{ $verification->owner_id }}', '{{ $verification->owner_email }}', '{{ $verification->business_name }}')">
+                                                            <i class="bx bx-id-card"></i> CREATE ACCOUNT
+                                                        </button>
+                                                    @endif
+                                                </td>
+                                                <td class="text-center">
+                                                    @php
+                                                        $hasSplitRule = $verification->owner && $verification->owner->latestSplitRule;
+                                                    @endphp
+
+                                                    @if ($hasSplitRule)
+                                                        <i class="bx bx-check-circle text-success bx-md" title="Split Rule Created"></i>
+                                                    @else
+                                                        <i class="bx bx-x-circle text-danger bx-md" title="No Split Rule"></i>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <span class="badge badge-pill badge-success">Approved</span>
+                                                </td>
+                                                <td>
+                                                    <a href="#" onclick="viewDetails({{ $verification->id }})">
+                                                        <i class="badge-circle badge-circle-light-secondary bx bx-show font-medium-1"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="9" class="text-center">No approved verifications found.</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Pagination for Approved -->
+                            @if ($approvedVerifications->total() > 0)
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mt-1">
+                                        <div class="pagination-summary text-muted">
+                                            Showing {{ $approvedVerifications->firstItem() }} - {{ $approvedVerifications->lastItem() }} from {{ $approvedVerifications->total() }} entries
+                                        </div>
+                                        <div class="pagination-links">
+                                            {{ $approvedVerifications->appends(['status' => 'approved'])->links('vendor.pagination.custom-limited') }}
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Rejected Tab -->
+                        <div class="tab-pane {{ $status == 'rejected' ? 'show active' : '' }}" id="rejected-content" role="tabpanel" aria-labelledby="rejected-tab">
+                            <div class="table-responsive">
+                                <table class="table mb-0">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>NO</th>
+                                            <th>OWNER INFO</th>
+                                            <th>BUSINESS</th>
+                                            <th>SUBMITTED</th>
+                                            <th>REJECTED DATE</th>
+                                            <th>STATUS</th>
+                                            <th>ACTIONS</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($rejectedVerifications as $index => $verification)
+                                            <tr>
+                                                <td>{{ $rejectedVerifications->firstItem() + $index }}</td>
+                                                <td>
+                                                    <span>{{ $verification->owner_name }}</span>
+                                                    <small class="d-block">{{ $verification->owner_email }}</small>
+                                                </td>
+                                                <td>
+                                                    <span>{{ $verification->business_name }}</span>
+                                                    <small class="d-block">{{ $verification->businessCategory->name ?? '-' }}</small>
+                                                </td>
+                                                <td>
+                                                    <span>{{ $verification->created_at ? $verification->created_at->format('d M Y') : '-' }}</span>
+                                                    <small class="d-block">{{ $verification->created_at ? $verification->created_at->format('H:i') : '' }}</small>
+                                                </td>
+                                                <td>
+                                                    <span>{{ $verification->reviewed_at ? $verification->reviewed_at->format('d M Y') : '-' }}</span>
+                                                    <small class="d-block">{{ $verification->reviewed_at ? $verification->reviewed_at->format('H:i') : '' }}</small>
+                                                </td>
+                                                <td>
+                                                    <span class="badge badge-pill badge-danger">Rejected</span>
+                                                </td>
+                                                <td>
+                                                    <a href="#" onclick="viewDetails({{ $verification->id }})">
+                                                        <i class="badge-circle badge-circle-light-secondary bx bx-show font-medium-1"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="7" class="text-center">No rejected verifications found.</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Pagination for Rejected -->
+                            @if ($rejectedVerifications->total() > 0)
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mt-1">
+                                        <div class="pagination-summary text-muted">
+                                            Showing {{ $rejectedVerifications->firstItem() }} - {{ $rejectedVerifications->lastItem() }} from {{ $rejectedVerifications->total() }} entries
+                                        </div>
+                                        <div class="pagination-links">
+                                            {{ $rejectedVerifications->appends(['status' => 'rejected'])->links('vendor.pagination.custom-limited') }}
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -316,7 +373,6 @@
 @push('page-scripts')
     <script>
         function viewDetails(id) {
-            // Redirect ke halaman detail atau buka modal
             window.location.href = `/admin/owner-verification/${id}`;
         }
 
@@ -329,11 +385,10 @@
             modal.show();
         }
 
-        $(document).ready(function () {
-            $('#createAccountForm').on('submit', function () {
+        $(document).ready(function() {
+            $('#createAccountForm').on('submit', function() {
                 showPageLoader("Registering Xendit Account...");
             });
         });
-
     </script>
 @endpush
