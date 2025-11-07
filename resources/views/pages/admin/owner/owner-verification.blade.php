@@ -9,7 +9,8 @@
                     <ol class="breadcrumb p-0 mb-0">
                         <li class="breadcrumb-item"><a href=""><i class="bx bx-home-alt"></i></a>
                         </li>
-                        <li class="breadcrumb-item active"><a href="{{ route('admin.owner-verification') }}">Owner Verification</a>
+                        <li class="breadcrumb-item active"><a href="{{ route('admin.owner-verification') }}">Owner
+                                Verification</a>
                         </li>
                     </ol>
                 </div>
@@ -99,8 +100,9 @@
                                 <a href="{{ route('admin.owner-verification', ['status' => 'pending']) }}"
                                     class="btn {{ $status == 'pending' ? 'btn-warning' : 'btn-outline-warning' }} btn-sm">
                                     Pending
-                                    @if($pendingCount > 0 && $status != 'pending')
-                                        <span class="badge badge-pill badge-round badge-danger ml-1">{{ $pendingCount }}</span>
+                                    @if ($pendingCount > 0 && $status != 'pending')
+                                        <span
+                                            class="badge badge-pill badge-round badge-danger ml-1">{{ $pendingCount }}</span>
                                         {{-- <span class="badge badge-pill badge-danger badge-up badge-round">2</span> --}}
                                     @endif
                                 </a>
@@ -124,7 +126,7 @@
                                     <th>OWNER INFO</th>
                                     <th>BUSINESS</th>
                                     <th>SUBMITTED</th>
-                                    @if($status == 'approved')
+                                    @if ($status == 'approved')
                                         <th>APPROVED DATE</th>
                                     @elseif($status == 'rejected')
                                         <th>REJECTED DATE</th>
@@ -139,35 +141,33 @@
                                         <td>{{ $verifications->firstItem() + $index }}</td>
                                         <td>
                                             <span>{{ $verification->owner_name }}</span>
-                                            <small class="d-block" >{{ $verification->owner_email }}</small>
+                                            <small class="d-block">{{ $verification->owner_email }}</small>
                                         </td>
                                         <td>
                                             <span>{{ $verification->business_name }}</span>
-                                            <small class="d-block">{{ $verification->businessCategory->name ?? '-' }}</small>
+                                            <small
+                                                class="d-block">{{ $verification->businessCategory->name ?? '-' }}</small>
                                         </td>
                                         <td>
-                                            <span
-                                            >{{ $verification->created_at ? $verification->created_at->format('d M Y') : '-' }}</span>
+                                            <span>{{ $verification->created_at ? $verification->created_at->format('d M Y') : '-' }}</span>
                                             <small
                                                 class="d-block">{{ $verification->created_at ? $verification->created_at->format('H:i') : '' }}</small>
                                         </td>
-                                        @if($status == 'approved')
+                                        @if ($status == 'approved')
                                             <td>
-                                                <span
-                                                >{{ $verification->reviewed_at ? $verification->reviewed_at->format('d M Y') : '-' }}</span>
+                                                <span>{{ $verification->reviewed_at ? $verification->reviewed_at->format('d M Y') : '-' }}</span>
                                                 <small
                                                     class="d-block">{{ $verification->reviewed_at ? $verification->reviewed_at->format('H:i') : '' }}</small>
                                             </td>
                                         @elseif($status == 'rejected')
                                             <td>
-                                                <span
-                                                >{{ $verification->reviewed_at ? $verification->reviewed_at->format('d M Y') : '-' }}</span>
+                                                <span>{{ $verification->reviewed_at ? $verification->reviewed_at->format('d M Y') : '-' }}</span>
                                                 <small
                                                     class="d-block">{{ $verification->reviewed_at ? $verification->reviewed_at->format('H:i') : '' }}</small>
                                             </td>
                                         @endif
                                         <td>
-                                            @if($verification->status == 'pending')
+                                            @if ($verification->status == 'pending')
                                                 <span class="badge badge-pill badge-warning">Pending</span>
                                             @elseif($verification->status == 'approved')
                                                 <span class="badge badge-pill badge-success">Approved</span>
@@ -194,16 +194,75 @@
                     </div>
 
                     <!-- Pagination -->
-                    @if($verifications->hasPages())
+                    @if ($verifications->hasPages())
                         <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="text-muted">
-                                    Showing {{ $verifications->firstItem() }} to {{ $verifications->lastItem() }} of
-                                    {{ $verifications->total() }} entries
-                                </span>
-                                <nav>
-                                    {{ $verifications->links() }}
-                                </nav>
+                            <div id="paginationContainer">
+                                <div class="mt-2">
+                                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center">
+                                        <span class="text-muted mb-2 mb-sm-0">
+                                            Showing {{ $verifications->firstItem() }} to {{ $verifications->lastItem() }}
+                                            of
+                                            {{ $verifications->total() }} entries
+                                        </span>
+                                        <nav aria-label="Page navigation">
+                                            <ul class="pagination justify-content-center mb-0">
+                                                @if ($verifications->onFirstPage())
+                                                    <li class="page-item previous disabled"><a class="page-link"
+                                                            href="#"><i class="bx bx-chevron-left"></i></a></li>
+                                                @else
+                                                    <li class="page-item previous"><a class="page-link"
+                                                            href="{{ $verifications->previousPageUrl() }}"><i
+                                                                class="bx bx-chevron-left"></i></a></li>
+                                                @endif
+
+                                                @php
+                                                    $currentPage = $verifications->currentPage();
+                                                    $lastPage = $verifications->lastPage();
+                                                    $maxVisible = 5;
+
+                                                    if ($lastPage <= $maxVisible) {
+                                                        $start = 1;
+                                                        $end = $lastPage;
+                                                    } else {
+                                                        $start = max(1, $currentPage - 2);
+                                                        $end = min($lastPage, $currentPage + 2);
+
+                                                        if ($currentPage <= 3) {
+                                                            $start = 1;
+                                                            $end = $maxVisible;
+                                                        }
+
+                                                        if ($currentPage >= $lastPage - 2) {
+                                                            $start = $lastPage - $maxVisible + 1;
+                                                            $end = $lastPage;
+                                                        }
+                                                    }
+                                                @endphp
+
+                                                @for ($page = $start; $page <= $end; $page++)
+                                                    @if ($page == $currentPage)
+                                                        <li class="page-item active" aria-current="page"><a
+                                                                class="page-link" href="#">{{ $page }}</a>
+                                                        </li>
+                                                    @else
+                                                        <li class="page-item"><a class="page-link"
+                                                                href="{{ $verifications->url($page) }}">{{ $page }}</a>
+                                                        </li>
+                                                    @endif
+                                                @endfor
+
+                                                @if ($verifications->hasMorePages())
+                                                    <li class="page-item next"><a class="page-link"
+                                                            href="{{ $verifications->nextPageUrl() }}"><i
+                                                                class="bx bx-chevron-right"></i></a></li>
+                                                @else
+                                                    <li class="page-item next disabled"><a class="page-link"
+                                                            href="#"><i class="bx bx-chevron-right"></i></a></li>
+                                                @endif
+                                            </ul>
+                                        </nav>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     @endif

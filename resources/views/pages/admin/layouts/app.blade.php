@@ -63,6 +63,11 @@
 <!-- BEGIN: Footer-->
 @include('pages.admin.layouts.partials.footer')
 <!-- END: Footer-->
+{{-- <script src="https://cdn.tailwindcss.com"></script> --}}
+
+<!-- Scripts -->
+    @stack('scripts')
+
 </body>
 <!-- END: Body-->
 

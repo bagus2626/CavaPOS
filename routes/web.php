@@ -84,12 +84,12 @@ Route::middleware('setlocale')->group(function () {
     //admin
     Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
-        Route::prefix('owner-management')->name('owner-management.')->group(function () {
-                Route::get('/owner-list', [OwnerListController::class, 'index'])->name('owner-list.index');
-                Route::get('/owner-list/{ownerId}/outlets', [OwnerListController::class, 'showOutlets'])->name('owner-outlets');
-                Route::get('/owner-list/{ownerId}/outlets/{outletId}/data', [OwnerListController::class, 'showOutletData'])->name('outlet-data');
-            });
-        
+        Route::prefix('owner-list')->name('owner-list.')->group(function () {
+            Route::get('/', [OwnerListController::class, 'index'])->name('index');
+            Route::get('{ownerId}/outlets', [OwnerListController::class, 'showOutlets'])->name('outlets');
+            Route::get('{ownerId}/outlets/{outletId}/data', [OwnerListController::class, 'showOutletData'])->name('outlet-data');
+        });
+
         Route::get('/owner-verification', [OwnerVerificationController::class, 'index'])->name('owner-verification');
 
         Route::get('/owner-verification/{id}', [OwnerVerificationController::class, 'show'])->name('owner-verification.show');
