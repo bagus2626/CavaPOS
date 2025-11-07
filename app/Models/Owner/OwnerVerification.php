@@ -3,6 +3,7 @@
 namespace App\Models\Owner;
 
 use App\Models\Owner;
+use App\Models\Xendit\XenditSubAccount;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 

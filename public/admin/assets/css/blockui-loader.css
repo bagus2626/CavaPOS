@@ -1,0 +1,17 @@
+.blockui-wrapper .loading-logo {
+    width: 350px;
+    animation: pulse 1.5s infinite;
+}
+
+.blockui-wrapper .loader-text {
+    color: #fff;
+    font-family: 'Poppins', 'Roboto', sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.9; }
+}

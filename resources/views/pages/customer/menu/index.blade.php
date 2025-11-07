@@ -1341,6 +1341,14 @@ function recomputeLineTotal(key) {
                 catch { throw new Error('Respons not valid from server.'); }
                 }
 
+                if (paymentMethod === 'QRIS') {
+                    if (res.success) {
+                        return window.location.href = res.redirect_url;
+                    } else {
+                        return Swal.fire({icon: 'error', title: 'Gagal', text: res.message});
+                    }
+                }
+
                 if (!r.ok) {
                 throw new Error(res?.message || `Request failed: ${r.status}`);
                 }
