@@ -108,6 +108,11 @@
 @stack('after-scripts')
 
 <!-- END: Footer-->
+{{-- <script src="https://cdn.tailwindcss.com"></script> --}}
+
+<!-- Scripts -->
+    @stack('scripts')
+
 </body>
 <!-- END: Body-->
 

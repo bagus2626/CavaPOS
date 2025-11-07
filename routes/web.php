@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Broadcast;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Public\PriceController;
 use App\Http\Controllers\Admin\Dashboard\DashboardController;
+use App\Http\Controllers\Admin\OwnerManagement\OwnerListController;
 use App\Http\Controllers\Admin\OwnerVerification\OwnerVerificationController;
 use App\Http\Controllers\Admin\XenPlatform\PartnerAccountController;
 use App\Http\Controllers\Admin\XenPlatform\SplitPaymentController;
@@ -91,6 +92,12 @@ Route::middleware('setlocale')->group(function () {
     //admin
     Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+        Route::prefix('owner-list')->name('owner-list.')->group(function () {
+            Route::get('/', [OwnerListController::class, 'index'])->name('index');
+            Route::get('{ownerId}/outlets', [OwnerListController::class, 'showOutlets'])->name('outlets');
+            Route::get('{ownerId}/outlets/{outletId}/data', [OwnerListController::class, 'showOutletData'])->name('outlet-data');
+        });
+
         Route::get('/owner-verification', [OwnerVerificationController::class, 'index'])->name('owner-verification');
 
         Route::get('/owner-verification/{id}', [OwnerVerificationController::class, 'show'])->name('owner-verification.show');
