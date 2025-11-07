@@ -25,17 +25,27 @@
 <script src="{{asset('admin/app-assets/js/scripts/datatables/datatable.js')}}"></script>
 <script src="{{asset('admin/app-assets/vendors/js/forms/select/select2.full.min.js')}}"></script>
 <script src="{{asset('admin/app-assets/js/scripts/forms/select/form-select2.js')}}"></script>
-<script src="{{asset('script/admin/index.js')}}"></script>
+{{--<script src="{{asset('script/admin/index.js')}}"></script>--}}
 <script src="{{ asset('admin/app-assets/js/scripts/navs/navs.js') }}"></script>
 
 <script src="{{asset('admin/app-assets/vendors/js/pickers/pickadate/legacy.js')}}"></script>
 <script src="{{asset('admin/app-assets/vendors/js/pickers/daterange/moment.min.js')}}"></script>
 <script src="{{asset('admin/app-assets/vendors/js/pickers/daterange/daterangepicker.js')}}"></script>
 <script src="{{asset('admin/app-assets/vendors/js/pickers/pickadate/picker.js')}}"></script>
+<script src="{{asset('admin/app-assets/vendors/js/extensions/toastr.min.js')}}"></script>
+<script src="{{asset('admin/app-assets/js/scripts/extensions/toastr.js')}}"></script>
+<script src="{{asset('admin/app-assets/js/scripts/pages/app-invoice.js')}}"></script>
+<script src="{{asset('admin/app-assets/js/scripts/tooltip/tooltip.js')}}"></script>
+
+{{--Custom JS--}}
+<script src="{{asset('admin/assets/js/blockui-loader.js')}}"></script>
+{{--End Custom JS--}}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.15/jquery.mask.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js"></script>
 <!-- END: Page JS-->

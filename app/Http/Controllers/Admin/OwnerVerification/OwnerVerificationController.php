@@ -30,7 +30,8 @@ class OwnerVerificationController extends Controller
         $rejectedCount = OwnerVerification::where('status', 'rejected')->count();
         $totalCount = OwnerVerification::count();
 
-        $verifications = OwnerVerification::where('status', $status)
+        $verifications = OwnerVerification::with(['owner.xenditSubAccount', 'owner.latestSplitRule'])
+            ->where('status', $status)
             ->orderBy('created_at', 'asc')
             ->paginate(10)
             ->appends(['status' => $status]);

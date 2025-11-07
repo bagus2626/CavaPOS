@@ -18,16 +18,37 @@
     <div class="shadow-bottom"></div>
     <div class="main-menu-content">
         <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation" data-icon-style="">
+            <li class=" navigation-header"><span>Xendit</span></li>
 
-            <li class=" nav-item"><a href="index.html">
-                    <i class="bx bx-group"></i>
-                    <span class="menu-title" data-i18n="Dashboard">XenPlatform</span>
+            <li class=" nav-item"><a href="#">
+                    <i class="bx bx-grid-alt"></i>
+                    <span class="menu-title" data-i18n="XenPlatform">XenPlatform</span>
                 </a>
                 <ul class="menu-content">
-                    <li><a href="dashboard-ecommerce.html">
+                    <li @if (Request::segment(2) == 'xen_platform' && Request::segment(3) == 'partner-account') class="active" @endif>
+                        <a href="{{route('admin.xen_platform.partner-account.index')}}">
                             <i class="bx bx-right-arrow-alt"></i>
-                            <span class="menu-item" data-i18n="eCommerce">Partner Accounts</span></a>
+                            <span class="menu-item" data-i18n="partner-accounts">Partner Accounts</span></a>
                     </li>
+                    <li @if (Request::segment(2) == 'xen_platform' && Request::segment(3) == 'split-payments') class="active" @endif>
+                        <a href="{{route('admin.xen_platform.split-payments.index')}}">
+                            <i class="bx bx-right-arrow-alt"></i>
+                            <span class="menu-item" data-i18n="split-payments">Split Payments</span></a>
+                    </li>
+                </ul>
+            </li>
+
+            <li class=" nav-item"><a href="#">
+                    <i class="bx bx-up-arrow-circle"></i>
+                    <span class="menu-title" data-i18n="XenPlatform">Send Payments</span>
+                </a>
+                <ul class="menu-content">
+                    <li @if (Request::segment(2) == 'send-payment' && Request::segment(3) == 'payout') class="active" @endif>
+                        <a href="{{route('admin.send-payment.payout.index')}}">
+                            <i class="bx bx-right-arrow-alt"></i>
+                            <span class="menu-item" data-i18n="partner-accounts">Disbursements</span></a>
+                    </li>
+
                 </ul>
             </li>
             <li class=" nav-item"><a href="#">

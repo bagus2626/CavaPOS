@@ -83,6 +83,7 @@
     {{-- Table Section --}}
     <div class="row" id="verification-table">
         <div class="col-12">
+            @include('pages.admin.layouts.partials.alert')
             <div class="card">
                 <div class="card-header">
                     <h4 class="card-title">Verification Management</h4>
@@ -128,6 +129,8 @@
                                     <th>SUBMITTED</th>
                                     @if ($status == 'approved')
                                         <th>APPROVED DATE</th>
+                                        <th>XENDIT REGISTER</th>
+                                        <th>SPLIT RULES</th>
                                     @elseif($status == 'rejected')
                                         <th>REJECTED DATE</th>
                                     @endif
@@ -159,6 +162,40 @@
                                                 <small
                                                     class="d-block">{{ $verification->reviewed_at ? $verification->reviewed_at->format('H:i') : '' }}</small>
                                             </td>
+                                            <td>
+                                                @php
+                                                    $xenditStatus = $verification->owner->xenditSubAccount->status ?? null;
+                                                    $badgeColors = [
+                                                        'INVITED' => 'warning',
+                                                        'REGISTERED' => 'success',
+                                                        'AWAITING_DOCS' => 'primary',
+                                                        'LIVE' => 'info',
+                                                        'LIVE_TESTMODE' => 'info',
+                                                        'SUSPENDED' => 'danger',
+                                                    ];
+                                                @endphp
+
+                                                @if ($xenditStatus && isset($badgeColors[$xenditStatus]))
+                                                    <span class="badge badge-light-{{ $badgeColors[$xenditStatus] }} badge-pill">{{ $xenditStatus }}</span>
+                                                @else
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                            onclick="openXenditRegistrationModal('{{ $verification->owner_id }}', '{{ $verification->owner_email }}', '{{ $verification->business_name }}')">
+                                                        <i class="bx bx-id-card"></i> CREATE ACCOUNT
+                                                    </button>
+                                                @endif
+                                            </td>
+                                            <td class="text-center">
+                                                @php
+                                                    $hasSplitRule = $verification->owner && $verification->owner->latestSplitRule;
+                                                @endphp
+
+                                                @if($hasSplitRule)
+                                                    <i class="bx bx-check-circle text-success bx-md" title="Split Rule Created"></i>
+                                                @else
+                                                    <i class="bx bx-x-circle text-danger bx-md" title="No Split Rule"></i>
+                                                @endif
+                                            </td>
+
                                         @elseif($status == 'rejected')
                                             <td>
                                                 <span>{{ $verification->reviewed_at ? $verification->reviewed_at->format('d M Y') : '-' }}</span>
@@ -270,12 +307,33 @@
             </div>
         </div>
     </div>
+@endsection
 
+@section('modal')
+    @include('pages.admin.owner.modal')
+@endsection
+
+@push('page-scripts')
     <script>
         function viewDetails(id) {
             // Redirect ke halaman detail atau buka modal
             window.location.href = `/admin/owner-verification/${id}`;
         }
-    </script>
 
-@endsection
+        function openXenditRegistrationModal(partnerId, partnerEmail, businessName) {
+            $('#partner_id').val(partnerId);
+            $('#partner_email').val(partnerEmail);
+            $('#business_name').val(businessName);
+
+            const modal = new bootstrap.Modal($('#xenditRegistrationModal')[0]);
+            modal.show();
+        }
+
+        $(document).ready(function () {
+            $('#createAccountForm').on('submit', function () {
+                showPageLoader("Registering Xendit Account...");
+            });
+        });
+
+    </script>
+@endpush
