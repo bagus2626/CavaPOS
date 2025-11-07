@@ -52,7 +52,7 @@
             <input
                 id="menuSearch"
                 type="search"
-                placeholder="{{ __('messages.customer.menu.search-placeholder') }}"
+                placeholder="{{ __('messages.customer.menu.search_placeholder') }}"
                 class="w-full h-10 rounded-md border border-gray-300 bg-white px-3 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-choco/40"
                 autocomplete="off"
             />
@@ -165,7 +165,7 @@
                                             data-id="{{ $product->id }}">-</button>
                                     <span class="qty text-lg font-semibold text-gray-800 hidden" id="qty-{{ $product->id }}">0</span>
                                     @if ($product->quantity < 1 && $product->always_available_flag == false)
-                                        <p class="text-gray-700">Habis</p>
+                                        <p class="text-gray-700">{{ __('messages.customer.menu.sold') }}</p>
                                     @else
                                         <button class="plus-btn w-9 h-9 flex items-center justify-center border rounded-lg font-bold text-white bg-choco hover:bg-soft-choco"
                                                 data-id="{{ $product->id }}">+</button>
@@ -219,7 +219,7 @@
         background-color: #eff6ff; /* Tailwind blue-50 */
     }
     .filter-btn.active {
-        background-color: #9A3F3F; /* choco */
+        background-color: #CF1A02; /* choco */
         color: white;
     }
 
@@ -421,11 +421,11 @@ function recomputeLineTotal(key) {
     const val  = Number(value);
     const hasN = Number.isFinite(val);
     switch (prov) {
-      case 'EXACT':        return hasN ? `Pilih ${val}` : 'Pilih';
-      case 'MAX':          return hasN ? `Maksimal ${val}` : 'Maksimal';
-      case 'MIN':          return hasN ? `Minimal ${val}` : 'Minimal';
-      case 'OPTIONAL MAX': return hasN ? `Opsional, maksimal ${val}` : 'Opsional, maksimal';
-      case 'OPTIONAL':     return 'Opsional';
+      case 'EXACT':        return hasN ? `{{ __('messages.customer.menu.exact_provision') }} ${val}` : '{{ __('messages.customer.menu.exact_provision') }}';
+      case 'MAX':          return hasN ? `{{ __('messages.customer.menu.max_provision') }} ${val}` : '{{ __('messages.customer.menu.max_provision') }}';
+      case 'MIN':          return hasN ? `{{ __('messages.customer.menu.min_provision') }} ${val}` : '{{ __('messages.customer.menu.min_provision') }}';
+      case 'OPTIONAL MAX': return hasN ? `{{ __('messages.customer.menu.optional_max') }} ${val}` : '{{ __('messages.customer.menu.optional_max') }}';
+      case 'OPTIONAL':     return '{{ __('messages.customer.menu.optional') }}';
       default:             return '';
     }
   }
@@ -512,7 +512,7 @@ function recomputeLineTotal(key) {
 
   // ===== MODAL RENDERING =====
   function showModal(productData) {
-    console.log('productData:', productData);
+    // console.log('productData:', productData);
 
     // reset isi modal
     modalContent.innerHTML = '';
@@ -597,14 +597,14 @@ function recomputeLineTotal(key) {
         const priceNum = Number(opt.price) || 0;
 
         if (qty < 1 && !alwaysAvailable) {
-            priceSpan.textContent = 'Habis';
+            priceSpan.textContent = '{{ __('messages.customer.menu.sold') }}';
             priceSpan.classList.add('text-red-600');
             checkbox.disabled = true;
             label.classList.add('line-through','opacity-60','cursor-not-allowed');
             const val = parseInt(checkbox.value,10);
             selectedOptions = selectedOptions.filter(v => v !== val);
         } else {
-            priceSpan.textContent = (priceNum === 0) ? 'Free' : rupiahFmt.format(priceNum);
+            priceSpan.textContent = (priceNum === 0) ? '{{ __('messages.customer.menu.free') }}' : rupiahFmt.format(priceNum);
             const val = parseInt(checkbox.value,10);
             checkbox.checked = selectedOptions.includes(val);
             checkbox.addEventListener('change', function () {
@@ -636,18 +636,18 @@ function recomputeLineTotal(key) {
 
     const noteLabel = document.createElement('label');
     noteLabel.classList.add('block','text-sm','font-semibold','mb-1');
-    noteLabel.textContent = 'Catatan (opsional)';
+    noteLabel.textContent = '{{ __('messages.customer.menu.note') }} ({{ __('messages.customer.menu.optional') }})';
 
     const noteArea = document.createElement('textarea');
     noteArea.id = 'modalNote';                                        // for later query
     noteArea.classList.add('w-full','min-h-[72px]','p-2','rounded-md','border','border-gray-300','focus:outline-none','focus:ring-2','focus:ring-choco/40');
-    noteArea.placeholder = 'Contoh: “Pedas level 2, saus terpisah, tanpa bawang.”';
+    noteArea.placeholder = '{{ __('messages.customer.menu.note_example') }}';
     noteArea.maxLength = 200;                                         // batasi 200 karakter
     noteArea.addEventListener('input', (e) => { modalNote = e.target.value; });
 
     const noteHint = document.createElement('p');
     noteHint.classList.add('text-xs','text-gray-500','mt-1');
-    noteHint.textContent = 'Maks. 200 karakter.';
+    noteHint.textContent = '{{ __('messages.customer.menu.max_characters') }}';
 
     noteWrap.appendChild(noteLabel);
     noteWrap.appendChild(noteArea);
@@ -1021,7 +1021,7 @@ function recomputeLineTotal(key) {
 
     cartManagerBody.innerHTML = rows.map(r => {
         const optsText  = r.optNames.length ? `<p class="text-xs text-gray-500 line-clamp-1">${r.optNames.join(', ')}</p>` : '';
-        const noteText  = r.note ? `<p class="text-xs text-gray-600 mt-1 italic line-clamp-2">Catatan: ${r.note}</p>` : '';
+        const noteText  = r.note ? `<p class="text-xs text-gray-600 mt-1 italic line-clamp-2">{{ __('messages.customer.menu.note') }}: ${r.note}</p>` : '';
         const img = r.image ? `<img src="${r.image}" class="w-16 h-16 rounded-md object-cover flex-shrink-0" alt="">` : '';
         return `
             <div class="p-3 flex items-center gap-3" data-key="${r.key}" data-product-id="${r.productId}">
@@ -1147,7 +1147,7 @@ function recomputeLineTotal(key) {
             if (rows.length === 0) {
                 body.innerHTML = `
                 <div class="text-center text-gray-500 py-8">
-                    Keranjang masih kosong.
+                    {{ __('messages.customer.menu.empty_cart') }}
                 </div>`;
                 totalEl.textContent = rupiah(0);
                 return;
@@ -1167,7 +1167,7 @@ function recomputeLineTotal(key) {
                 }).join('');
 
                 const note = r.note
-                ? `<div class="mt-2 text-xs italic text-gray-700">Catatan: ${r.note}</div>`
+                ? `<div class="mt-2 text-xs italic text-gray-700">{{ __('messages.customer.menu.note') }}: ${r.note}</div>`
                 : '';
 
                 // === DI SINI tempatkan logika diskon base price ===
@@ -1179,7 +1179,7 @@ function recomputeLineTotal(key) {
                 const baseRow   = (baseDisc < rawBase)
                 ? `
                     <div class="w-full flex items-center justify-between text-xs text-gray-600">
-                    <span>Harga dasar</span>
+                    <span>{{ __('messages.customer.menu.base_price') }}</span>
                     <span class="shrink-0">
                         <span class="line-through mr-1">${rupiah(rawBase)}</span>
                         <span class="font-medium">${rupiah(baseDisc)}</span>
@@ -1188,7 +1188,7 @@ function recomputeLineTotal(key) {
                 `
                 : `
                     <div class="w-full flex items-center justify-between text-xs text-gray-600">
-                    <span>Harga dasar</span>
+                    <span>{{ __('messages.customer.menu.base_price') }}</span>
                     <span class="shrink-0">${rupiah(rawBase)}</span>
                     </div>
                 `;
@@ -1264,15 +1264,15 @@ function recomputeLineTotal(key) {
 
             // Validasi ringan
             if (!paymentMethod) {
-                await Swal.fire({ icon:'warning', title:'Metode pembayaran belum dipilih', text:'Silakan pilih Cash atau QRIS dahulu.' });
+                await Swal.fire({ icon:'warning', title:'{{ __('messages.customer.menu.payment_method_not_selected') }}', text:'{{ __('messages.customer.menu.select_payment_first') }}' });
                 return;
             }
             if (!orderName) {
-                await Swal.fire({ icon:'warning', title:'Nama Pemesan belum diisi', text:'Silakan isi nama pemesan terlebih dahulu.' });
+                await Swal.fire({ icon:'warning', title:'{{ __('messages.customer.menu.order_name_not_inputted') }}', text:'{{ __('messages.customer.menu.input_order_name_first') }}' });
                 return;
             }
             if (grandTotal <= 0) {
-                await Swal.fire({ icon:'info', title:'Keranjang kosong', text:'Tambahkan item sebelum checkout.' });
+                await Swal.fire({ icon:'info', title:'{{ __('messages.customer.menu.empty_cart') }}', text:'{{ __('messages.customer.menu.input_item_first') }}' });
                 return;
             }
 
@@ -1282,13 +1282,13 @@ function recomputeLineTotal(key) {
                 title:'Konfirmasi Checkout',
                 html: `
                 <div style="text-align:left">
-                    <div>Nama Pemesan: <b>${orderName}</b></div>
-                    <div>Metode: <b>${paymentMethod.toUpperCase()}</b></div>
+                    <div>{{ __('messages.customer.menu.nama_pemesan') }}: <b>${orderName}</b></div>
+                    <div>{{ __('messages.customer.menu.method') }}: <b>${paymentMethod.toUpperCase()}</b></div>
                     <div>Total: <b>${rupiahFmt.format(grandTotal)}</b></div>
                 </div>`,
                 showCancelButton:true,
-                confirmButtonText:'Ya, bayar',
-                cancelButtonText:'Batal'
+                confirmButtonText:'{{ __('messages.customer.menu.yes_pay') }}',
+                cancelButtonText:'{{ __('messages.customer.menu.batal') }}'
             });
             if (!confirm.isConfirmed) return;
 
@@ -1338,7 +1338,15 @@ function recomputeLineTotal(key) {
                 } else {
                 const text = await r.text();
                 try { res = JSON.parse(text); }
-                catch { throw new Error('Respons tidak valid dari server.'); }
+                catch { throw new Error('Respons not valid from server.'); }
+                }
+
+                if (paymentMethod === 'QRIS') {
+                    if (res.success) {
+                        return window.location.href = res.redirect_url;
+                    } else {
+                        return Swal.fire({icon: 'error', title: 'Gagal', text: res.message});
+                    }
                 }
 
                 if (!r.ok) {
@@ -1353,13 +1361,13 @@ function recomputeLineTotal(key) {
 
                 // Fallback (kalau tidak ada redirect di JSON)
                 Swal.close();
-                await Swal.fire({ icon:'success', title:'Berhasil', text:'Checkout berhasil diproses.', timer:1400, showConfirmButton:false });
+                await Swal.fire({ icon:'success', title:'{{ __('messages.customer.menu.success') }}', text:'{{ __('messages.customer.menu.checkout_success') }}', timer:1400, showConfirmButton:false });
             } catch (err) {
                 Swal.close();
                 const msg = (err?.message || '').toLowerCase().includes('csrf')
-                ? 'Sesi keamanan kedaluwarsa. Silakan muat ulang halaman dan coba lagi.'
-                : (err?.message || 'Checkout gagal.');
-                await Swal.fire({ icon:'error', title:'Gagal', text: msg });
+                ? '{{ __('messages.customer.menu.session_expired') }}'
+                : (err?.message || '{{ __('messages.customer.menu.checkout_failed') }}');
+                await Swal.fire({ icon:'error', title:'{{ __('messages.customer.menu.failed') }}', text: msg });
             } finally {
                 checkoutPayBtn.disabled = false;
             }
@@ -1460,7 +1468,7 @@ function recomputeLineTotal(key) {
       }
     }
     if (show) {
-      noResEl.innerHTML = `Tidak ada menu yang cocok untuk <b>"${nq}"</b>${activeCategory!=='all' ? ' pada kategori terpilih' : ''}.`;
+      noResEl.innerHTML = `{{ __('messages.customer.menu.no_match_menu') }} <b>"${nq}"</b>${activeCategory!=='all' ? ' {{ __('messages.customer.menu.in_selected_category') }}' : ''}.`;
       noResEl.style.display = 'block';
     } else {
       noResEl.style.display = 'none';

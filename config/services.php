@@ -40,5 +40,14 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
 
+    'xendit' => [
+        'base_url'   => env('XENDIT_BASE_URL', 'https://api.xendit.co'),
+        'secret_key' => env('XENDIT_SECRET_KEY'),
+        'callback_token' => env('XENDIT_CALLBACK_TOKEN'),
+        'account_master_id' => env('XENDIT_ACCOUNT_MASTER_ID'),
+        'iluma_api_key' => env('XENDIT_ILUMA_API_KEY'),
+        'iluma_base_url' => env('XENDIT_ILUMA_BASE_URL', 'https://api.iluma.ai'),
+    ],
+
 
 ];
