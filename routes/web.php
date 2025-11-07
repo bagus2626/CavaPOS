@@ -292,6 +292,7 @@ Route::middleware('setlocale')->group(function () {
             Route::get('orders/served', [KitchenDashboardController::class, 'getServedOrders'])->name('orders.served');
             Route::put('orders/{orderId}/pickup', [KitchenDashboardController::class, 'pickUpOrder'])->name('orders.pickup');
             Route::put('orders/{orderId}/serve', [KitchenDashboardController::class, 'markAsServed'])->name('orders.serve');
+            Route::put('orders/{orderId}/cancel', [KitchenDashboardController::class, 'cancelOrder'])->name('orders.cancel');
 
             // TAMBAH ROUTE BARU UNTUK KITCHEN_STATUS
             Route::get('orders/my-active', [KitchenDashboardController::class, 'getMyActiveOrders'])->name('orders.my-active');
