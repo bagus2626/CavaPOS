@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Customer\Menu;
 
+use App\Http\Controllers\PaymentGateway\Xendit\InvoiceController;
 use App\Http\Controllers\Controller;
 use App\Models\Product\Product;
 use App\Models\Partner\Products\PartnerProduct;
@@ -16,6 +17,9 @@ use App\Models\Product\Specification;
 use App\Models\Admin\Product\Category;
 use App\Models\User;
 use App\Models\Store\Table;
+use App\Models\Xendit\SplitRule;
+use App\Models\Xendit\XenditSubAccount;
+use App\Services\XenditService;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Http\Request;
@@ -31,6 +35,13 @@ use App\Jobs\SendReceiptEmailJob;
 
 class CustomerMenuController extends Controller
 {
+    protected $xenditInvoice;
+
+    public function __construct(XenditService $xendit)
+    {
+        $this->xenditInvoice = new InvoiceController($xendit);
+    }
+
     public function index($partner_slug, $table_code)
     {
         if (!Auth::guard('customer')->check() && !session()->has('guest_customer')) {
@@ -66,7 +77,6 @@ class CustomerMenuController extends Controller
 
     public function checkout(Request $request, $partner_slug, $table_code)
     {
-        // dd($request->all());
         DB::beginTransaction();
         try {
             // dd($request->all());
@@ -75,6 +85,25 @@ class CustomerMenuController extends Controller
             $partner = User::where('slug', $partner_slug)->first();
             $table = Table::where('table_code', $table_code)->first();
             $orders = $request->input('items', []);
+            $ownerId = $partner->owner_id ?? null;
+            $owner = Owner::findOrFail($ownerId);
+            $validRegistrationStatuses = ['LIVE', 'LIVE_TESTMODE'];
+
+            if ($request->payment_method === 'QRIS') {
+                if (!in_array($owner->xendit_registration_status, $validRegistrationStatuses)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Akun belum diaktifkan. Silakan hubungi pengelola untuk menyelesaikan proses aktivasi.',
+                    ]);
+                }
+
+                if ($owner->xendit_split_rule_status !== 'created') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Pengaturan pembayaran belum lengkap. Silakan hubungi pengelola.',
+                    ]);
+                }
+            }
 
             $booking_order_code = $this->generateBookingOrderCode($partner->partner_code);
 
@@ -99,8 +128,11 @@ class CustomerMenuController extends Controller
             ]);
 
 
+            $partnerProductIds = [];
+
             foreach ($orders as $order) {
                 // dd($order);
+                $partnerProductIds[] = data_get($order, 'product_id');
                 $productId   = data_get($order, 'product_id');
                 $optionIds   = data_get($order, 'option_ids', []);
                 $qty         = (int) data_get($order, 'qty', 1);
@@ -162,29 +194,73 @@ class CustomerMenuController extends Controller
                 $booking_order->payment_flag = true;
 
                 $payment = OrderPayment::create([
-                    'booking_order_id' => $booking_order->id,
-                    'customer_id' => $customer ? $customer->id : null,
-                    'customer_name' => $customer ? $customer->name : 'guest-' . $request->order_name,
-                    'payment_type' => 'QRIS',
-                    'paid_amount' => $request->total_amount,
-                    'change_amount' => 0,
-                    'payment_status' => 'PAID'
+                    'booking_order_id'  => $booking_order->id,
+                    'customer_id'       => $customer ? $customer->id : null,
+                    'customer_name'     => $customer ? $customer->name : 'guest-' . $request->order_name,
+                    'payment_type'      => 'QRIS',
+                    'paid_amount'       => $request->total_amount,
+                    'change_amount'     => 0,
+                    'payment_status'    => 'PENDING'
                 ]);
 
                 $booking_order->payment_id = $payment->id;
                 $booking_order->save();
 
-                DB::commit();
-                DB::afterCommit(function () use ($booking_order) {
-                    event(new OrderCreated($booking_order));
-                });
-                SendReceiptEmailJob::dispatch($booking_order->id, $request->input('email'))
-                    ->onQueue('email')
-                    ->afterCommit();
-                // return redirect()->route('customer.orders.receipt', $booking_order->id);
-                return redirect()->back()->with('success', 'Product updated successfully!');
-            }
+                $xenditSubAccount = XenditSubAccount::where('partner_id', $partner->owner_id)->first();
+                $xenditSplitRule = SplitRule::where('partner_id', $partner->owner_id)->latest()->first();
 
+                $products = OrderDetail::with('partnerProduct.category')
+                    ->where('booking_order_id', $booking_order->id)
+                    ->whereIn('partner_product_id', $partnerProductIds)
+                    ->get();
+
+                $items = $products->map(function ($product) {
+                    return [
+                        "name"      => $product->product_name,
+                        "quantity"  => $product->quantity,
+                        "price"     => $product->base_price ?? 0,
+                        "category"  => optional($product->partnerProduct->category)->category_name ?? "Uncategorized",
+                    ];
+                })->toArray();
+
+                $payload = [
+                    "external_id" => $booking_order->booking_order_code ?? "invoice-" . time(),
+                    "amount" => $payment->paid_amount ?? 0,
+                    "given_names" => $request->order_name ?? "unknow",
+                    "description" => "Invoice QRIS",
+                    "invoice_duration" => 3600,
+                    "customer" => [
+                        "given_names" => $customer ? $customer->name : $request->order_name,
+                        "email" => $customer ? $customer->email : "customer@example.com",
+                        "mobile_number" => $customer ? $customer->phone : "0",
+                    ],
+                    "customer_notification_preference" => [
+                        "invoice_created" => ["whatsapp", "email"],
+                        "invoice_reminder" => ["whatsapp", "email"],
+                        "invoice_paid" => ["whatsapp", "email"]
+                    ],
+                    "success_redirect_url" => url("customer/{$partner_slug}/menu/{$table_code}"),
+                    "failure_redirect_url" => url("customer/{$partner_slug}/menu/{$table_code}"),
+                    "currency" => "IDR",
+                    "items" => $items,
+//                    "payment_methods" => ["QRIS"],
+                    "metadata" => [
+                        "store_branch" => $partner->name
+                    ]
+                ];
+
+                $invoiceResponse = $this->xenditInvoice->createInvoice($booking_order->id, $xenditSubAccount->xendit_user_id, $xenditSplitRule->split_rule_id, $payload);
+                $invoice = $invoiceResponse->getData(true);
+                $invoiceData = $invoice['data'] ?? null;
+                DB::commit();
+
+                if($invoice['success']){
+                    return response()->json([
+                        'success' => true,
+                        'redirect_url' => $invoiceData['invoice_url']
+                    ]);
+                }
+            }
 
             DB::commit();
 

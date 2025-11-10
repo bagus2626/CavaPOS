@@ -75,6 +75,7 @@ return [
         'layout' => [
             'owner_panel' => 'Panel Pemilik',
             'dashboard' => 'Dashboard',
+            'verification' => "Verifikasi",
             'support' => 'Dukungan',
             'user_management' => 'Manajemen Pengguna',
             'employees' => 'Pegawai',
