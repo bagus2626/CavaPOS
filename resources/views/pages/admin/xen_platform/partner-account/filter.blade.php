@@ -8,31 +8,28 @@
         <label>Status (Multi-select)</label>
         <div class="form-group">
             <select id="filter-status" class="select2 form-control select-light-secondary"
-                    data-placeholder="Select status..." multiple="multiple">
-                <optgroup label="Status">
-                    <option value="INVITED">INVITED</option>
-                    <option value="REGISTERED">REGISTERED</option>
-                    <option value="AWAITING_DOCS">AWAITING_DOCS</option>
-                    <option value="LIVE">LIVE</option>
-                    <option value="SUSPENDED">SUSPENDED</option>
-                </optgroup>
+                    data-placeholder="Select status..." multiple>
+                <option value="INVITED">INVITED</option>
+                <option value="REGISTERED">REGISTERED</option>
+                <option value="AWAITING_DOCS">AWAITING_DOCS</option>
+                <option value="LIVE">LIVE</option>
+                <option value="SUSPENDED">SUSPENDED</option>
             </select>
         </div>
     </div>
 
     <div class="col-md-3 form-group">
-        <label for="filter-business-name">Nama Bisnis</label>
-        <input type="text" id="filter-business-name" class="form-control" placeholder="Nama Bisnis">
-    </div>
-
-    <div class="col-md-3 form-group">
         <label for="filter-type">Tipe Akun</label>
-        <select id="filter-type" class="form-control">
-            <option value="">Semua</option>
+        <select id="filter-type" class="select2 form-control select-light-secondary" data-placeholder="Select type..." multiple>
             <option value="MANAGED">MANAGED</option>
             <option value="OWNED">OWNED</option>
             <option value="CUSTOM">CUSTOM</option>
         </select>
+    </div>
+
+    <div class="col-md-3 form-group">
+        <label for="filter-business-name">Nama Bisnis</label>
+        <input type="text" id="filter-business-name" class="form-control" placeholder="Nama Bisnis">
     </div>
 
     <div class="col-md-3 form-group">

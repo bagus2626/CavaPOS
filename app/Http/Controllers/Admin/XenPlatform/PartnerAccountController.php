@@ -64,7 +64,7 @@ class PartnerAccountController extends Controller
             'after_id' => $request->get('after_id'),
             'email' => $request->get('email'),
             'status' => $request->get('status'),
-            'public_profile.business_name' => $request->get('business_name'),
+            'business_name' => $request->get('business_name'),
             'type' => $request->get('type'),
             'created[gte]' => $this->formatXenditDate($request->get('created_gte'), true),
             'created[lte]' => $this->formatXenditDate($request->get('created_lte'), false),

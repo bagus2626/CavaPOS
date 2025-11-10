@@ -14,29 +14,10 @@
                         <label>Split Rule Name : </label>
                         <input class="form-control" type="text" id="split_rule_name" name="split_rule_name" required>
                     </div>
-{{--                    <div class="row mt-1">--}}
-{{--                        <div class="col-12">--}}
-{{--                            <div class="form-group mb-1">--}}
-{{--                                <label>Source Account</label>--}}
-{{--                                <div class="d-flex justify-content-start">--}}
-{{--                                    <div class="radio">--}}
-{{--                                        <input type="radio" name="destination_account_option" value="MASTER"--}}
-{{--                                               id="master_account_radio" checked onchange="chooseAccountType()">--}}
-{{--                                        <label for="master_account_radio">Master Account</label>--}}
-{{--                                    </div>--}}
-{{--                                    <div class="radio ml-2">--}}
-{{--                                        <input type="radio" name="destination_account_option" value="SUB"--}}
-{{--                                               id="sub_account_radio" onchange="chooseAccountType()">--}}
-{{--                                        <label for="sub_account_radio">Sub Account</label>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
-{{--                    </div>--}}
 
                     <div class="form-group">
                         <label>Source Account</label>
-                        <select class="form-control" name="partner_account_id" id="partner_account_id">
+                        <select class="form-control select2" name="partner_account_id" id="partner_account_id">
                             <option value="" selected>Select Partner Account</option>
                             @foreach($accounts AS $account)
                                 <option value="{{ $account['xendit_user_id'] }}">{{ $account['business_name'] }}</option>
@@ -44,37 +25,10 @@
                         </select>
                     </div>
 
-{{--                    <div class="row mt-1">--}}
-{{--                        <div class="col-12">--}}
-{{--                            <div class="form-group mb-1">--}}
-{{--                                <label>Destination Account</label>--}}
-{{--                                <div class="d-flex justify-content-start">--}}
-{{--                                    <div class="radio">--}}
-{{--                                        <input type="radio" name="destination_account_option" value="MASTER" id="master_account_radio" checked onchange="chooseAccountType()">--}}
-{{--                                        <label for="master_account_radio">Master Account</label>--}}
-{{--                                    </div>--}}
-{{--                                    <div class="radio ml-2">--}}
-{{--                                        <input type="radio" name="destination_account_option" value="SUB" id="sub_account_radio" onchange="chooseAccountType()">--}}
-{{--                                        <label for="sub_account_radio">Sub Account</label>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
-{{--                    </div>--}}
-
                     <div class="form-group" id="master_account_form">
                         <label>Destination Account : </label>
                         <input class="form-control" type="text" value="PT VASTU CIPTA PERSADA" readonly required>
                     </div>
-
-{{--                    <div class="form-group" id="sub_account_form" style="display: none">--}}
-{{--                        <select class="form-control" name="partner_account_id" id="partner_account_id">--}}
-{{--                            <option value="" selected>Select Partner Account</option>--}}
-{{--                            @foreach($accounts AS $account)--}}
-{{--                                <option value="{{ $account['xendit_user_id'] }}">{{ $account['business_name'] }}</option>--}}
-{{--                            @endforeach--}}
-{{--                        </select>--}}
-{{--                    </div>--}}
 
                     <div class="form-group">
                         <label>Currency : </label>
@@ -135,10 +89,6 @@
 
 @push('page-scripts')
     <script>
-        $(document).ready(function() {
-            $("#partner_account_id").select2();
-        });
-
         const chooseSplit = () => {
             let selected = $("input[name='split_type_option']:checked").val();
 
@@ -154,21 +104,6 @@
                 $("#percent_amount_form").show();
             }
         };
-
-        // const chooseAccountType = () => {
-        //     let selected = $("input[name='destination_account_option']:checked").val();
-        //
-        //     if (selected === "MASTER") {
-        //         $("#partner_account_id").removeClass("required");
-        //         $("#partner_account_id").val('');
-        //         $("#master_account_form").show();
-        //         $("#sub_account_form").hide();
-        //     } else if (selected === "SUB") {
-        //         $("#partner_account_id").addClass("required");
-        //         $("#master_account_form").hide();
-        //         $("#sub_account_form").show();
-        //     }
-        // };
 
         $(document).on('input', '#percent_amount', function () {
             let val = $(this).val();
