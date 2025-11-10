@@ -18,7 +18,7 @@
 
 @section('content')
     <div class="content-body">
-        @include('pages.admin.xen_platform.partner-account.transaction-detail-row')
+        @include('pages.admin.xen_platform.partner-account.tab-panel.transaction.detail.content-body')
     </div>
 @endsection
 

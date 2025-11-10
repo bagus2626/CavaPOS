@@ -722,6 +722,6 @@ class PartnerAccountController extends Controller
         $transactionData = $transactionsResponse->getData(true);
         $transactions = $transactionData['data'] ?? [];
 
-        return view('pages.admin.xen_platform.partner-account.transaction-detail', ['transaction' => $transactions]);
+        return view('pages.admin.xen_platform.partner-account.tab-panel.transaction.detail.index', ['transaction' => $transactions]);
     }
 }
