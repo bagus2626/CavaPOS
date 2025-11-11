@@ -77,10 +77,10 @@
             {{-- 4. Tombol Terapkan SEMUA Filter (Aksi Final) --}}
             <div class="d-flex w-md-auto">
                 <button id="apply-balance-filter-btn" class="btn btn-primary mr-1 flex-grow-1" type="button">
-                    <i class="bx bx-filter"></i> Terapkan
+                    <i class="bx bx-filter-alt"></i> Apply Filter
                 </button>
-                <button id="reset-balance-filter-btn" class="btn btn-outline-secondary" type="button" title="Reset semua filter">
-                    <i class="bx bx-reset"></i>
+                <button id="reset-balance-filter-btn" class="btn btn-secondary" type="button" title="Reset semua filter">
+                    <i class="bx bx-reset"></i> Reset
                 </button>
             </div>
 

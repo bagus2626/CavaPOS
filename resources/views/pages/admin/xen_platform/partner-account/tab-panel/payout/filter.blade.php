@@ -33,15 +33,19 @@
         </div>
 
         {{-- Action Buttons --}}
-        <div class="col-md-1 mt-2 align-items-end">
-            <button type="submit" class="btn btn-info btn-block" title="Filter">
-                <i class="bx bx-filter-alt"></i>
-            </button>
-        </div>
-        <div class="col-md-1 mt-2 align-items-end">
-            <button type="button" class="btn btn-secondary btn-block" id="reset-filter-btn" title="Reset Filter">
-                <i class="bx bx-reset"></i>
-            </button>
+        <div class="col-3">
+            <div class="row">
+                <div class="d-flex w-md-auto mt-2 ml-1">
+                    <button type="submit" class="btn btn-primary btn-block" title="Filter">
+                        <i class="bx bx-filter-alt"></i> Apply Filter
+                    </button>
+                </div>
+                <div class="d-flex w-md-auto mt-2 ml-1">
+                    <button type="button" class="btn btn-secondary btn-block" id="reset-filter-btn" title="Reset Filter">
+                        <i class="bx bx-reset"></i> Reset
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </form>
