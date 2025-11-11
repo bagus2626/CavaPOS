@@ -1,4 +1,24 @@
 window.initPayoutTab = function (accountId) {
+    $(document).ready(function () {
+        $('#daterange-payout').daterangepicker({
+            autoUpdateInput: false,
+            ranges: {
+                'Today': [moment(), moment()],
+                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                'This Month': [moment().startOf('month'), moment().endOf('month')],
+                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+            },
+            locale: {cancelLabel: 'Clear', format: 'YYYY/MM/DD'}
+        }).on('cancel.daterangepicker', function (ev, picker) {
+            $(this).val('');
+        }).on('apply.daterangepicker', function (ev, picker) {
+            $(this).val(picker.startDate.format('YYYY/MM/DD') + ' - ' + picker.endDate.format('YYYY/MM/DD'));
+        });
+
+    });
+
     $.ajaxSetup({
         headers: {
             "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
@@ -26,8 +46,6 @@ window.initPayoutTab = function (accountId) {
             method: "GET",
             data: data_search,
             success: async function (response) {
-                console.log(response);
-                // await $(`#show-data-disbursement`).html(response);
                 $('#transactions-summary-div').html(response.summary);
                 $(`#show-data-payout`).html(response.payoutTable);
                 hidePageLoader();
@@ -43,14 +61,22 @@ window.initPayoutTab = function (accountId) {
         function getFilterData() {
             const search = $('#filter-search').val().trim();
             const status = $('#filter-status').val();
-            const dateFrom = $('#filter-date-from').val();
-            const dateTo = $('#filter-date-to').val();
+            const date_range = $('#daterange-payout').val();
+
+            let dateStart = '';
+            let dateEnd = '';
+
+            if (date_range) {
+                const dates = date_range.split(' - ');
+                dateStart = moment(dates[0], 'YYYY/MM/DD').format('YYYY-MM-DD');
+                dateEnd = moment(dates[1], 'YYYY/MM/DD').format('YYYY-MM-DD');
+            }
 
             let filters = {};
             if (search) filters.search = search;
             if (status) filters.status = status;
-            if (dateFrom) filters.date_from = dateFrom;
-            if (dateTo) filters.date_to = dateTo;
+            if (dateStart) filters.date_from = dateStart;
+            if (dateEnd) filters.date_to = dateEnd;
 
             return filters;
         }

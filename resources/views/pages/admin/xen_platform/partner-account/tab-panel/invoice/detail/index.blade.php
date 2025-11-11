@@ -8,7 +8,7 @@
                     <ol class="breadcrumb p-0 mb-0">
                         <li class="breadcrumb-item"><a href=""><i class="bx bx-home-alt"></i></a></li>
                         <li class="breadcrumb-item">Partner</li>
-                        <li class="breadcrumb-item active">Transaction Detail</li>
+                        <li class="breadcrumb-item active">Invoice Detail</li>
                     </ol>
                 </div>
             </div>
@@ -17,8 +17,12 @@
 @endsection
 
 @section('content')
-    <div class="content-body">
-        @include('pages.admin.xen_platform.partner-account.transaction-detail-row')
+    <div class="card  border-4 border">
+        <div class="card-content">
+            <div class="card-body card-dashboard">
+                @include('pages.admin.xen_platform.partner-account.tab-panel.invoice.detail.content-body')
+            </div>
+        </div>
     </div>
 @endsection
 

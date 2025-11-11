@@ -125,7 +125,7 @@ Route::middleware('setlocale')->group(function () {
                 Route::get('{accountId}/tab/{tab}', [PartnerAccountController::class, 'getTabData']);
                 Route::get('{accountId}/filter/{tab}', [PartnerAccountController::class, 'filter']);;
                 Route::get('{accountId}/transaction-detail/{transactionId}', [PartnerAccountController::class, 'getTransactionById']);
-
+                Route::get('{accountId}/invoice-detail/{invoiceId}', [PartnerAccountController::class, 'getInvoiceById']);
             });
 
             Route::resource('partner-account', PartnerAccountController::class);

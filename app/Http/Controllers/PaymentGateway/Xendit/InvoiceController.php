@@ -91,4 +91,31 @@ class InvoiceController extends Controller
             ], 500);
         }
     }
+
+    public function getInvoiceById(string $subAccountId = null, string $invoiceId = null)
+    {
+        try {
+            $response = $this->xendit->getInvoiceById($subAccountId, $invoiceId);
+
+            if (!$response->successful()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mengambil data invoice dari Xendit',
+                    'errors'  => $response->json(),
+                ], $response->status());
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data invoice berhasil diambil',
+                'data'    => $response->json(),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan internal server',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

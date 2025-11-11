@@ -16,8 +16,9 @@
         </thead>
         <tbody>
         @forelse($data['transactions'] as $item)
-            <tr class="clickable-row row-ov"
+            <tr class="transaction-clickable-row row-ov"
                 data-transaction-id="{{ $item['id'] ?? '' }}"
+                data-business-id="{{ $item['business_id'] ?? '' }}"
                 style="cursor: pointer;">
                 <td>
                     @php
@@ -82,6 +83,7 @@
                             <div class="dropdown-menu dropdown-menu-right">
                                 <a class="dropdown-item copy-btn" data-copy-value="{{ $item['id'] }}"><i class="bx bx-copy-alt mr-1"></i> Copy Transaction ID</a>
                                 <a class="dropdown-item copy-btn" data-copy-value="{{ $item['reference_id'] ?? '' }}"><i class="bx bx-copy-alt mr-1"></i> Copy Reference</a>
+                                <a class="dropdown-item copy-btn" data-copy-value="{{ $item['product_id'] ?? '' }}"><i class="bx bx-copy-alt mr-1"></i> Copy Product ID</a>
                             </div>
                         </div>
                     @else

@@ -62,9 +62,23 @@
             outline: none;
         }
 
-        .select2-container {
-            width: 100% !important;
+        .select2-container .select2-selection--multiple {
+            border: 1px solid #DFE3E7 !important;
+            background-color: white !important;
+            border-radius: .375rem !important;
+            min-height: 38px;
+            display: block;
+            align-items: center;
         }
+
+        /* Hover */
+        .select2-container .select2-selection--multiple:hover {
+            border-color: #bfc5ca !important;
+        }
+
+        /*.select2-container {*/
+        /*    width: 100% !important;*/
+        /*}*/
 
     </style>
 
