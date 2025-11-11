@@ -22,7 +22,7 @@
             <div class="card-body">
                 <section class="invoice-view-wrapper">
                     <div class="row">
-                        <div class="col-xl-5 col-md-8 col-12">
+                        <div class="col-xl-6 col-md-8 col-12">
                             <div class="card shadow border">
                                 <div class="card-content">
                                     <div class="card-body pb-0 mx-25 mb-3">

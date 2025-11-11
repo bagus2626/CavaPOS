@@ -1,18 +1,21 @@
-<div class="modal fade text-left" id="createAccountModal" role="dialog" aria-labelledby="myModalLabel140" aria-hidden="true">
+<div class="modal fade text-left" id="createAccountModal" role="dialog" aria-labelledby="myModalLabel140"
+     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-warning">
+            <div class="modal-header bg-secondary">
                 <h5 class="modal-title white" id="myModalLabel140">Create Split Rules</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <i class="bx bx-x"></i>
                 </button>
             </div>
-            <form id="createAccountForm" method="POST" action="{{ route('admin.xen_platform.split-payments.split-rules.create') }}">
+            <form id="createAccountForm" method="POST"
+                  action="{{ route('admin.xen_platform.split-payments.split-rules.create') }}">
                 @csrf
                 <div class="modal-body">
                     <div class="form-group">
                         <label>Split Rule Name : </label>
-                        <input class="form-control" type="text" id="split_rule_name" name="split_rule_name" required>
+                        <input class="form-control" type="text" id="split_rule_name" name="split_rule_name"
+                               placeholder="Enter split rule name" required>
                     </div>
 
                     <div class="form-group">
@@ -41,11 +44,13 @@
                                 <label>Split Type</label>
                                 <div class="d-flex justify-content-start">
                                     <div class="radio">
-                                        <input type="radio" name="split_type_option" value="FLAT" id="flat_amount_radio" checked onchange="chooseSplit()">
+                                        <input type="radio" name="split_type_option" value="FLAT" id="flat_amount_radio"
+                                               checked onchange="chooseSplit()">
                                         <label for="flat_amount_radio">Flat</label>
                                     </div>
                                     <div class="radio ml-2">
-                                        <input type="radio" name="split_type_option" value="PERCENT" id="percent_amount_radio" onchange="chooseSplit()">
+                                        <input type="radio" name="split_type_option" value="PERCENT"
+                                               id="percent_amount_radio" onchange="chooseSplit()">
                                         <label for="percent_amount_radio">Percent</label>
                                     </div>
                                 </div>
@@ -55,19 +60,23 @@
 
                     <div class="form-group" id="flat_amount_form">
                         <label>Amount : </label>
-                        <input class="form-control" type="number" id="flat_amount" name="flat_amount">
+                        <input class="form-control" type="number" id="flat_amount" name="flat_amount"
+                               placeholder="Enter amount">
                     </div>
 
                     <div class="form-group" id="percent_amount_form" style="display: none">
                         <label>Percent : </label>
-                        <input class="form-control" type="text" id="percent_amount" name="percent_amount" placeholder="Masukkan persen (0 - 100)">
-                        <small id="percent_error" class="text-danger d-none">Masukkan angka 0–100, maksimal 2 desimal</small>
+                        <input class="form-control" type="text" id="percent_amount" name="percent_amount"
+                               placeholder="Enter percent (0 - 100)">
+                        <small id="percent_error" class="text-danger d-none">Enter numbers 0-100, maximum 2
+                            decimals</small>
 
                     </div>
 
                     <div class="form-group">
                         <label>Description</label>
-                        <textarea name="description" id="description" cols="30" rows="3" class="form-control" placeholder="Keterangan optional"></textarea>
+                        <textarea name="description" id="description" cols="30" rows="3" class="form-control"
+                                  placeholder="Optional description"></textarea>
                     </div>
 
                 </div>
@@ -77,7 +86,7 @@
                         <span class="d-none d-sm-block">Close</span>
                     </button>
 
-                    <button type="submit" id="btn-submit-split-rule" class="btn btn-warning ml-1">
+                    <button type="submit" id="btn-submit-split-rule" class="btn btn-secondary ml-1">
                         <i class="bx bx-check d-block d-sm-none"></i>
                         <span class="d-none d-sm-block">Submit</span>
                     </button>

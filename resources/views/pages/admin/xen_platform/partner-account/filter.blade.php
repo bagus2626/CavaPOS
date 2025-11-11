@@ -47,7 +47,7 @@
     <input type="hidden" id="filter-limit" value="10">
 
     <div class="col-md-3 form-group d-flex align-items-end">
-        <button id="apply-filter-btn" class="btn btn-primary btn-block"><i class="bx bx-filter-alt"></i> Terapkan Filter</button>
+        <button id="apply-filter-btn" class="btn btn-primary btn-block"><i class="bx bx-filter-alt"></i> Apply Filter</button>
     </div>
 
     <div class="col-md-3 form-group d-flex align-items-end">
