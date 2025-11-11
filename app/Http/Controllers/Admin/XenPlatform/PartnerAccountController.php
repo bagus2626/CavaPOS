@@ -485,11 +485,9 @@ class PartnerAccountController extends Controller
 
         $apiParams = [
             'limit'                 => $request->input('limit', 10),
-            'statuses'              => $request->input('statuses'),
-            'client_types'          => $request->input('client_types'),
-            'payment_channels'      => $request->input('payment_channels'),
+            'types'               => $request->input('types'),
             'channel_categories'    => $request->input('channel_categories'),
-            'currency'              => $request->input('currency'),
+            'currency'              => $request->input('currency', 'IDR'),
         ];
 
         $searchKeys = ['reference_id', 'account_identifier', 'amount', 'product_id'];
@@ -717,11 +715,20 @@ class PartnerAccountController extends Controller
 
     public function getTransactionById($accountId, $transactionId)
     {
-
         $transactionsResponse = $this->xenditTransactions->getTransactionById($accountId, $transactionId);
         $transactionData = $transactionsResponse->getData(true);
         $transactions = $transactionData['data'] ?? [];
 
         return view('pages.admin.xen_platform.partner-account.tab-panel.transaction.detail.index', ['transaction' => $transactions]);
     }
+
+    public function getInvoiceById($accountId, $invoiceId)
+    {
+        $invoiceResponse = $this->xenditInvoices->getInvoiceById($accountId, $invoiceId);
+        $invoiceData = $invoiceResponse->getData(true);
+        $invoice = $invoiceData['data'] ?? [];
+
+        return view('pages.admin.xen_platform.partner-account.tab-panel.invoice.detail.index', ['invoice' => $invoice]);
+    }
+
 }
