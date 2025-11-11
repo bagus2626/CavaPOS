@@ -51,12 +51,15 @@
 
     <div class="col-lg-3">
         <div class="card border shadow-sm">
-            <div class="card-header">
-                <h6 class="mb-0">Detail Split Rule</h6>
+            <div class="card-header border-bottom">
+                <h6 class="mb-0 text-secondary text-bold-700">Detail Split Rule</h6>
             </div>
             <div class="card-content">
                 <div class="card-body" id="split-rule-detail">
-                    <p class="text-muted">Klik salah satu split rule untuk melihat detailnya.</p>
+                    <div class="text-center py-3">
+                        <i class="bx bx-info-circle text-muted" style="font-size: 2rem;"></i>
+                        <p class="text-muted mb-0">Klik salah satu split rule untuk melihat detailnya.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -83,10 +86,10 @@
             return new Intl.DateTimeFormat('id-ID', {
                 year: 'numeric',
                 month: 'long',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+                hour12: true,
                 timeZone: 'Asia/Jakarta'
             }).format(date);
         } catch (e) {
@@ -105,36 +108,66 @@
             const rule = JSON.parse(row.dataset.rule);
 
             let html = `
-                <h6 class="fw-bold">${rule.name ?? 'Nama Tidak Ada'}</h6>
-                <p class="text-muted small">${rule.description ?? '-'}</p>
-                <p><strong>Split Rule ID:</strong><br>${rule.split_rule_id ?? '-'}</p>
-                <p><strong>Tanggal Dibuat:</strong><br>${formatDate(rule.created_at)}</p>
-                <hr>
-                <h6 class="fw-bold">Route Detail</h6>
+                <div class="mt-2">
+                    <h6 class="text-primary text-bold-500">${rule.name ?? 'Nama Tidak Ada'}</h6>
+                    <p class="text-muted small">${rule.description ?? '-'}</p>
+
+                    <div class="mb-1">
+                        <label class="text-muted small">Split Rule ID</label>
+                        <p class="text-bold-500 mb-0">${rule.split_rule_id ?? '-'}</p>
+                    </div>
+
+                    <div class="mb-1">
+                        <label class="text-muted small">Tanggal Dibuat</label>
+                        <p class="text-bold-500 mb-0">${formatDate(rule.created_at)}</p>
+                    </div>
+                </div>
+
+                <div class="border-top">
+                    <h6 class="text-primary text-bold-500 mt-2 mb-1">Route Detail</h6>
             `;
 
             if (rule.routes && rule.routes.length > 0) {
                 rule.routes.forEach((r, i) => {
                     html += `
-                        <div class="mb-3">
-                            <strong>Route ${i + 1}</strong><br>
-                            Split Amount: <strong>${r.flet_amount != null ? formatRupiah(r.flet_amount) : `${r.percent_amount}%`}</strong> <br>
-                            Reference: ${r.reference ?? '-'} <br>
-                            Account ID: ${r.destination_account_id ?? '-'} <br>
-                            Destination Name: ${r.destination_account_name ?? '-'}
+                        <div class="rounded p-2 border-4 border mb-3">
+                            <h6 class="text-bold-500 mb-2">Route ${i + 1}</h6>
+                            <div class="mb-1">
+                                <label class="text-muted small">Split Amount</label>
+                                <p class="text-bold-500 mb-0">${r.flet_amount != null ? formatRupiah(r.flet_amount) : `${r.percent_amount}%`}</p>
+                            </div>
+                            <div class="mb-1">
+                                <label class="text-muted small">Reference</label>
+                                <p class="text-bold-500 mb-0">${r.reference ?? '-'}</p>
+                            </div>
+                            <div class="mb-1">
+                                <label class="text-muted small1">Account ID</label>
+                                <p class="text-bold-500 mb-0">${r.destination_account_id ?? '-'}</p>
+                            </div>
+                            <div>
+                                <label class="text-muted small">Destination Name</label>
+                                <p class="text-bold-500 mb-0">${r.destination_account_name ?? '-'}</p>
+                            </div>
                         </div>
-                        ${i < rule.routes.length - 1 ? '<hr class="my-2">' : ''}
                     `;
                 });
             } else {
-                html += `<p class="text-muted">Tidak ada route detail</p>`;
+                html += `<div class="text-center py-3">
+                    <i class="bx bx-info-circle text-muted" style="font-size: 1.5rem;"></i>
+                    <p class="text-muted mb-0">Tidak ada route detail</p>
+                </div>`;
             }
 
+            html += `</div>`;
             detailBox.innerHTML = html;
 
         } catch (e) {
             console.error("Error parsing JSON data:", e);
-            detailBox.innerHTML = `<p class="text-danger">Gagal memuat detail. Pastikan format data valid.</p>`;
+            detailBox.innerHTML = `
+                <div class="text-center py-3">
+                    <i class="bx bx-error-circle text-danger" style="font-size: 2rem;"></i>
+                    <p class="text-danger mb-0">Gagal memuat detail. Pastikan format data valid.</p>
+                </div>`;
         }
     }
 </script>
