@@ -1,15 +1,16 @@
 <form id="disbursement-filter-form">
     <div class="row">
         <div class="col-md-4">
-            <label for="filter-search">Cari</label>
-            <input type="text" class="form-control" id="filter-search" name="search" placeholder="Ref ID, Nama Partner, Jumlah, Status, dll...">
+            <label for="filter-search">Search</label>
+            <input type="text" class="form-control" id="filter-search" name="search" placeholder="Ref ID, Partner Name, Amount, Status, etc...">
+
         </div>
 
         {{-- Filter by Status --}}
         <div class="col-md-2">
             <label for="filter-status">Status</label>
             <select class="form-control" id="filter-status" name="status">
-                <option value="">Semua Status</option>
+                <option value="">All Status</option>
                 <option value="REQUESTED">REQUESTED</option>
                 <option value="REVERSED">REVERSED</option>
                 <option value="ACCEPTED">ACCEPTED</option>

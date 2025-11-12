@@ -10,7 +10,7 @@
 
                     <div class="d-flex justify-content-between mb-2">
                         <button class="btn btn-sm btn-outline-secondary" id="clear-all-filters" type="button">Clear All</button>
-                        <button class="btn btn-sm btn-primary" id="close-filter-dropdown-btn" type="button" data-toggle="dropdown">Tutup</button>
+                        <button class="btn btn-sm btn-primary" id="close-filter-dropdown-btn" type="button" data-toggle="dropdown">Close</button>
                     </div>
 
                     <div class="row" id="popup-filter-options">
@@ -78,7 +78,7 @@
                 <fieldset class="form-group position-relative has-icon-left m-0">
                     <input type="text" class="form-control daterange-transaction"
                            name="date_transaction" id="daterange-transaction"
-                           placeholder="Tanggal Transaksi">
+                           placeholder="Transaction Date">
                     <div class="form-control-position">
                         <i class="bx bx-calendar-check"></i>
                     </div>

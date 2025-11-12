@@ -22,7 +22,7 @@
                         <div class="row my-3">
                             <div class="col-6">
                                 <h6 class="invoice-from">Transaction Amount</h6>
-                                <h2 class="fw-bolder text-{{ ($transaction['cashflow'] ?? '') === 'MONEY_IN' ? 'success' : 'danger' }}">
+                                <h2 class="text-bold-700 text-{{ ($transaction['cashflow'] ?? '') === 'MONEY_IN' ? 'success' : 'danger' }}">
                                     <span class="text-light-secondary me-1">
                                         {{ $transaction['currency'] ?? 'IDR' }}
                                     </span>
@@ -184,9 +184,9 @@
         </div>
         <!-- invoice action  -->
         <div class="col-xl-4 col-md-4 col-12">
-            <div class="card invoice-action-wrapper border">
+            <div class="card border">
                 <div class="card-body">
-                    <h5 class="fw-bold mb-3">Event History</h5>
+                    <h5 class="text-bold-500 mb-1">Event History</h5>
 
                     @php
                         $history = [];

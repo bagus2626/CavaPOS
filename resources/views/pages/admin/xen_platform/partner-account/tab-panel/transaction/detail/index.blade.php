@@ -17,8 +17,12 @@
 @endsection
 
 @section('content')
-    <div class="content-body">
-        @include('pages.admin.xen_platform.partner-account.tab-panel.transaction.detail.content-body')
+    <div class="card">
+        <div class="card-content">
+            <div class="card-body">
+                @include('pages.admin.xen_platform.partner-account.tab-panel.transaction.detail.content-body')
+            </div>
+        </div>
     </div>
 @endsection
 
