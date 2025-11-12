@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Admin\OwnerVerification;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\PaymentGateway\Xendit\SubAccountController;
 use App\Jobs\SendEmailVerification;
 use App\Models\Owner;
 use App\Models\Owner\Businesses;
 use App\Models\Owner\OwnerProfile;
+use App\Models\Xendit\XenditSubAccount;
+use App\Services\XenditService;
 use Illuminate\Http\Request;
 use App\Models\Owner\OwnerVerification;
 use Illuminate\Support\Facades\Auth;
@@ -17,6 +20,15 @@ use Illuminate\Support\Facades\Storage;
 
 class OwnerVerificationController extends Controller
 {
+    protected $xendit;
+    protected $xenditSubAccount;
+
+    public function __construct(XenditService $xendit)
+    {
+        $this->xendit = $xendit;
+        $this->xenditSubAccount = new SubAccountController($xendit);
+    }
+
     public function index(Request $request)
     {
         $status = $request->query('status', 'pending');
@@ -178,5 +190,79 @@ public function approve($id)
         }
 
         return Storage::disk('local')->response($verification->ktp_photo_path);
+    }
+
+    public function registerXenditAccount(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'partner_id' => 'required|integer|exists:owners,id',
+                'partner_email' => 'required|email',
+                'business_name' => 'required|string|max:255',
+                'account_type' => 'required|in:OWNED,MANAGED'
+            ], [
+                'partner_id.required' => 'Partner ID is required',
+                'partner_id.integer' => 'Partner ID must be a valid integer',
+                'partner_id.exists' => 'Partner not found',
+                'partner_email.required' => 'Partner email is required',
+                'partner_email.email' => 'Partner email must be a valid email address',
+                'business_name.required' => 'Business name is required',
+                'business_name.string' => 'Business name must be a string',
+                'business_name.max' => 'Business name may not be greater than 255 characters',
+                'account_type.required' => 'Account type is required',
+                'account_type.in' => 'Account type must be either OWNED or MANAGED'
+            ]);
+
+            $existingAccount = XenditSubAccount::where('partner_id', $validated['partner_id'])->first();
+
+            if ($existingAccount) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Partner already has a registered Xendit account'
+                ], 422);
+            }
+
+            $partnerId = $validated['partner_id'];
+            $payload = [
+                'email' => $validated['partner_email'],
+                'type' => $validated['account_type'],
+                'public_profile' => [
+                    'business_name' => $validated['business_name'],
+                ],
+            ];
+
+            $subAccountResponse = $this->xenditSubAccount->createAccount($payload, $partnerId);
+            $subAccounts = $subAccountResponse->getData(true);
+
+            $success = $subAccounts['success'] ?? null;
+            if (!$success) {
+                $message = $subAccounts['errors']['message'] ?? 'Unknown error from Xendit API.';
+                return response()->json([
+                    'success' => false,
+                    'message' => $message
+                ], 422);
+
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Xendit account registration initiated successfully',
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+
+        } catch (\Exception $e) {
+            Log::error('Xendit account registration failed: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to register Xendit account: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
