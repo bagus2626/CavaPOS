@@ -13,7 +13,7 @@
     <tbody>
     @forelse($data as $item)
         <tr class="disbursement-clickable-row cursor-pointer"
-            data-business-id="{{ optional($item->subAccount)->xendit_user_id }}"
+            data-business-id="{{ optional($item->subAccount)->xendit_user_id ?? $item->business_id }}"
             data-payout-id="{{ $item->payout_id }}">
             <td>{{ $data->firstItem() + $loop->index }}</td>
             <td>
@@ -88,7 +88,7 @@
                     <td colspan="${colCount}" class="text-center">
                         <div class="d-flex justify-content-center align-items-center gap-2 overlay">
                             <div class="spinner-border" role="status" style="width:1.5rem; height:1.5rem;"></div>
-                            <span class="fw-medium ml-1">Memuat detail transaksi...</span>
+                            <span class="fw-medium ml-1">Memuat detail disbursement...</span>
                         </div>
                     </td>
                 `);
