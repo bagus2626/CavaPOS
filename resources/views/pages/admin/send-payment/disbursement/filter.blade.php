@@ -2,8 +2,8 @@
     <div class="row">
         <div class="col-md-4">
             <label for="filter-search">Search</label>
-            <input type="text" class="form-control" id="filter-search" name="search" placeholder="Ref ID, Partner Name, Amount, Status, etc...">
-
+            <input type="text" class="form-control" id="filter-search" name="search"
+                   placeholder="Ref ID, Partner Name, Amount, Status, etc...">
         </div>
 
         {{-- Filter by Status --}}
@@ -42,7 +42,8 @@
                     </button>
                 </div>
                 <div class="d-flex w-md-auto mt-2 ml-1">
-                    <button type="button" class="btn btn-secondary btn-block" id="reset-filter-btn" title="Reset Filter">
+                    <button type="button" class="btn btn-secondary btn-block" id="reset-filter-btn"
+                            title="Reset Filter">
                         <i class="bx bx-reset"></i> Reset
                     </button>
                 </div>

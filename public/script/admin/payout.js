@@ -126,7 +126,7 @@ window.initPayoutTab = function (accountId) {
                     <td colspan="${colCount}" class="text-center">
                         <div class="d-flex justify-content-center align-items-center gap-2 overlay">
                             <div class="spinner-border" role="status" style="width:1.5rem; height:1.5rem;"></div>
-                            <span class="fw-medium ml-1">Memuat detail transaksi...</span>
+                            <span class="fw-medium ml-1">Memuat detail payout...</span>
                         </div>
                     </td>
                 `);

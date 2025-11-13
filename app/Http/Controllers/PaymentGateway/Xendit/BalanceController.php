@@ -22,30 +22,30 @@ class BalanceController extends Controller
                 'account_type' => $request->query('account_type', 'CASH'),
                 'currency' => $request->query('currency', 'IDR'),
                 'at_timestamp' => $request->query('at_timestamp'),
-                ];
+            ];
 
             $response = $this->xendit->getBalance($subAccountId, $params);
 
             if (!$response->successful()) {
                 return response()->json([
                     'success' => false,
-                    'data'  => null,
-                    'message' => 'Gagal mengambil data balance',
-                    'errors'  => $response->json(),
+                    'data' => null,
+                    'message' => 'Failed to get balance data',
+                    'errors' => $response->json(),
                 ], $response->status());
             }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Data balance berhasil diambil',
-                'data'    => $response->json(),
+                'message' => 'Balance data retrieved successfully',
+                'data' => $response->json(),
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'data'   => null,
-                'message' => 'Terjadi kesalahan internal',
-                'error'   => $e->getMessage(),
+                'data' => null,
+                'message' => 'Internal server error',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

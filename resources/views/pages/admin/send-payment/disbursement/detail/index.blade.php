@@ -8,7 +8,7 @@
                     <ol class="breadcrumb p-0 mb-0">
                         <li class="breadcrumb-item"><a href=""><i class="bx bx-home-alt"></i></a></li>
                         <li class="breadcrumb-item">Partner</li>
-                        <li class="breadcrumb-item active">Transaction Detail</li>
+                        <li class="breadcrumb-item active">Payout Detail</li>
                     </ol>
                 </div>
             </div>
@@ -20,7 +20,7 @@
     <div class="card">
         <div class="card-content">
             <div class="card-body">
-                @include('pages.admin.xen_platform.partner-account.tab-panel.transaction.detail.content-body')
+                @include('pages.admin.send-payment.disbursement.detail.content-body')
             </div>
         </div>
     </div>

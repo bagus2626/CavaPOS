@@ -1,7 +1,7 @@
 <div class="modal fade text-left" id="createDisbursementModal" role="dialog" aria-labelledby="myModalLabel140" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-warning">
+            <div class="modal-header bg-secondary">
                 <h5 class="modal-title white" id="myModalLabel140">Single Disbursement</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <i class="bx bx-x"></i>
@@ -14,7 +14,7 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <label>Partner Account</label>
-                        <select class="form-control" name="for_user_id" id="for_user_id">
+                        <select class="form-control select2" name="for_user_id" id="for_user_id">
                             <option value="" selected>Select...</option>
                             @foreach($accounts AS $account)
                                 <option value="{{ $account['id'] }}"
@@ -27,7 +27,7 @@
 
                     <div class="form-group">
                         <label>Recipient bank name</label>
-                        <select class="form-control" name="channel_code" id="channel_code">
+                        <select class="form-control select2" name="channel_code" id="channel_code">
                             <option value="" selected>Select...</option>
                             @foreach($payoutChannels AS $channel)
                                 <option value="{{ $channel['channel_code'] }}"
@@ -89,7 +89,7 @@
                         <span class="d-none d-sm-block">Cancel</span>
                     </button>
 
-                    <button type="submit" class="btn btn-warning ml-1">
+                    <button type="submit" class="btn btn-secondary ml-1">
                         <i class="bx bx-check d-block d-sm-none"></i>
                         <span class="d-none d-sm-block">Create</span>
                     </button>
@@ -102,7 +102,7 @@
 <div class="modal fade text-left" id="confirmDisbursementModal" role="dialog" aria-labelledby="myModalLabelConfirm" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-warning">
+            <div class="modal-header bg-secondary">
                 <h5 class="modal-title white" id="myModalLabelConfirm">Confirm Disbursement</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <i class="bx bx-x"></i>
@@ -145,7 +145,7 @@
                     <span class="d-none d-sm-block">Back</span>
                 </button>
 
-                <button type="button" class="btn btn-warning ml-1" id="submitDisbursementBtn">
+                <button type="button" class="btn btn-secondary ml-1" id="submitDisbursementBtn">
                     <span class="d-none d-sm-block">Submit</span>
                 </button>
             </div>
@@ -158,8 +158,8 @@
         $(document).ready(function() {
             let isSubmitting = false;
 
-            $("#channel_code").select2({ dropdownParent: $('#createDisbursementModal') });
-            $("#for_user_id").select2({ dropdownParent: $('#createDisbursementModal') });
+            // $("#channel_code").select2({ dropdownParent: $('#createDisbursementModal') });
+            // $("#for_user_id").select2({ dropdownParent: $('#createDisbursementModal') });
 
             const $modal = $('#createDisbursementModal');
 

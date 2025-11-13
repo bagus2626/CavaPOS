@@ -9,7 +9,7 @@
                 <div class="dropdown-menu p-3" aria-labelledby="dropdownFilterInvoice" style="max-width: 95vw; width: 600px;">
                     <div class="d-flex justify-content-between mb-2">
                         <button class="btn btn-sm btn-outline-secondary" id="clear-all-invoice-filters" type="button">Clear All</button>
-                        <button class="btn btn-sm btn-primary" id="close-filter-invoice-dropdown-btn" type="button" data-toggle="dropdown">Tutup</button>
+                        <button class="btn btn-sm btn-primary" id="close-filter-invoice-dropdown-btn" type="button" data-toggle="dropdown">Close</button>
                     </div>
 
                     <div class="row" id="popup-invoice-filter-options">
@@ -65,7 +65,7 @@
                     </div>
                     <input type="text" class="form-control daterange-invoice"
                            name="date_invoice" id="daterange-invoice"
-                           placeholder="Pilih Rentang Tanggal">
+                           placeholder="Select Date Range">
                     <div class="form-control-position">
                         <i class="bx bx-calendar-check"></i>
                     </div>
