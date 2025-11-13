@@ -108,17 +108,18 @@ Route::middleware('setlocale')->group(function () {
                 Route::get('validate-bank', [PayoutController::class, 'validateBankAccount'])->name('validate-bank');
                 Route::post('create', [PayoutController::class, 'createPayout'])->name('create');
                 Route::get('{businessId}/detail/{payoutId}', [PayoutController::class, 'getPayout'])->name('detail');
-
             });
         });
 
         Route::prefix('xen_platform')->name('xen_platform.')->group(function () {
             Route::prefix('partner-account')->name('partner-account.')->group(function () {
-                Route::get('{accountId}/information', [PartnerAccountController::class, 'showAccountInfo'])->name('information');
-                Route::get('{accountId}/tab/{tab}', [PartnerAccountController::class, 'getTabData']);
-                Route::get('{accountId}/filter/{tab}', [PartnerAccountController::class, 'filter']);;
-                Route::get('{accountId}/transaction-detail/{transactionId}', [PartnerAccountController::class, 'getTransactionById']);
-                Route::get('{accountId}/invoice-detail/{invoiceId}', [PartnerAccountController::class, 'getInvoiceById']);
+                Route::prefix('{accountId}')->group(function () {
+                    Route::get('information', [PartnerAccountController::class, 'showAccountInfo'])->name('information');
+                    Route::get('tab/{tab}', [PartnerAccountController::class, 'getTabData']);
+                    Route::get('filter/{tab}', [PartnerAccountController::class, 'filter']);;
+                    Route::get('transaction-detail/{transactionId}', [PartnerAccountController::class, 'getTransactionById']);
+                    Route::get('invoice-detail/{invoiceId}', [PartnerAccountController::class, 'getInvoiceById']);
+                });
             });
 
             Route::resource('partner-account', PartnerAccountController::class);
@@ -135,7 +136,6 @@ Route::middleware('setlocale')->group(function () {
                 Route::get('list', [SubAccountController::class, 'getSubAccounts'])->name('list');
                 Route::get('profile/{id}', [SubAccountController::class, 'getSubAccountById'])->name('profile');
             });
-
         });
     });
 
