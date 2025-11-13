@@ -43,6 +43,8 @@ class SubAccountController extends Controller
                 'type' => $data['type'],
                 'status' => $data['status'],
                 'country' => $data['country'],
+                'created_xendit' => Carbon::parse($data['created']),
+                'updated_xendit' => Carbon::parse($data['updated']),
                 'raw_response' => json_encode($data),
             ]);
 
