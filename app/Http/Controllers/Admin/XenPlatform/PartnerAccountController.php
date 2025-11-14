@@ -548,7 +548,7 @@ class PartnerAccountController extends Controller
             }
 
             $rawTransactions = $transactionData['data']['data'];
-            $transactionsCollection = collect($rawTransactions)->whereNotIn('settlement_status', ['PENDING']);
+            $transactionsCollection = collect($rawTransactions);
 
             $hasMore = $transactionData['data']['has_more'] ?? false;
 
@@ -570,17 +570,13 @@ class PartnerAccountController extends Controller
             $tempResult = [];
 
             foreach ($transactionsCollection as $tx) {
-
-                $dateField = $tx['estimated_settlement_time'] ?? $tx['created'] ?? now()->toIso8601String();
-                $carbonDate = Carbon::parse($dateField)->setTimezone('Asia/Jakarta');
-                $isoTimestamp = $carbonDate->timestamp;
-                $formattedDate = $carbonDate->format('d M Y, H:i:s');
+                $dateCreatedField = $tx['estimated_settlement_time'] ?? $tx['created'] ?? now()->toIso8601String();
 
                 $amount = $tx['amount'] ?? 0;
                 $cashflow = $tx['cashflow'] ?? '';
 
                 try {
-                    $balanceTimestamp = Carbon::parse($dateField)->addSecond()->toIso8601String();
+                    $balanceTimestamp = Carbon::parse($dateCreatedField)->addSecond()->toIso8601String();
                     $balanceResponse = $this->xenditBalance->getBalance(
                         $accountId,
                         new Request(['at_timestamp' => $balanceTimestamp])
@@ -595,6 +591,7 @@ class PartnerAccountController extends Controller
                 $xenditFee = abs($tx['fee']['xendit_fee'] ?? 0);
                 $vatFee = abs($tx['fee']['value_added_tax'] ?? 0);
                 $totalFees = $xenditFee + $vatFee;
+                $statusFee = $tx['fee']['status'];
 
                 $isXenPlatform = ($tx['channel_category'] ?? '') === 'XENPLATFORM';
                 $isSplit = ($tx['channel_code'] ?? '') === 'SPLIT';
@@ -610,8 +607,7 @@ class PartnerAccountController extends Controller
                 }
 
                 $tempResult[] = [
-                    'created' => $formattedDate,
-                    'created_iso' => $isoTimestamp,
+                    'created' => $tx['created'],
                     'internal_sort' => $internalSort,
                     'transaction_type' => $isXenPlatform ? $tx['channel_category'] : $tx['type'],
                     'channel_code' => $tx['channel_code'] ?? '-',
@@ -619,10 +615,12 @@ class PartnerAccountController extends Controller
                     'amount' => $amount,
                     'balance' => $currentBalance,
                     'cashflow' => $cashflow ?? 'N/A',
+                    'settlement_status' => $tx['settlement_status'] ?? '-',
                     'fee_details' => [
                         'xendit_fee' => $xenditFee,
                         'vat_fee' => $vatFee,
                         'total_fees' => $totalFees,
+                        'status' => $statusFee,
                     ]
                 ];
             }
