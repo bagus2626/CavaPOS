@@ -3,6 +3,8 @@
 
 @section('page_title', 'Business Performance Dashboard')
 
+@vite(['resources/css/app.css'])
+
 @section('content')
     <section class="content">
         <div class="container-fluid">
@@ -363,8 +365,9 @@
         </div>
     </div>
 @endsection
-@vite(['resources/js/app.js'])
+
 @push('scripts')
+    @vite(['resources/js/app.js'])
     {{-- Melewatkan data dari PHP ke JavaScript untuk Chart --}}
     <script>
         const revenueChartData = @json($revenueChartData ?? ['labels' => [], 'data' => []]);
