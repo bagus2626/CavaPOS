@@ -8,7 +8,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Vite resources -->
-{{--    @vite(['resources/css/app.css', 'resources/js/app.js'])--}}
+    @vite(['resources/css/app.css'])
 
     <!-- AdminLTE CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
@@ -814,7 +814,7 @@
 
     <!-- Custom loader -->
     <script src="{{asset('admin/assets/js/blockui-loader.js')}}"></script>
-
+    @vite(['resources/js/app.js'])
 
     <script>
         $(function () {
