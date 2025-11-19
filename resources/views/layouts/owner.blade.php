@@ -39,9 +39,12 @@
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.6.4/dist/select2-bootstrap4.min.css">
 
+    <!-- Loader Custome CSS-->
+    <link rel="stylesheet" type="text/css" href="{{ asset('admin/assets/css/blockui-loader.css') }}">
 
-
-
+    <!-- Date Picker CSS-->
+    <link rel="stylesheet" type="text/css" href="{{asset('admin/app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('admin/app-assets/vendors/css/pickers/daterange/daterangepicker.css')}}">
 
     <style>
         :root {
@@ -514,6 +517,49 @@
                             </ul>
                         </li>
 
+
+                        <li class="nav-item @if (Request::segment(1) == 'owner' && Request::segment(3) == 'xen_platform') menu-open @endif">
+                            <a href="javascript:void(0)"
+                               class="nav-link {{ !$isVerified ? 'disabled-link' : '' }} {{ Route::is($employeeRoutes) ? 'active' : '' }}"
+                               onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
+                                <i class="nav-icon fas fa-credit-card"></i>
+                                <p>
+                                    XenPlatform
+                                    @if($isVerified)
+                                        <i class="fas fa-angle-left right"></i>
+                                    @endif
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview {{ !$isVerified ? 'disabled' : '' }}">
+                                <li class="nav-item">
+                                    <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.accounts.information') : 'javascript:void(0)' }}"
+                                       class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'accounts') active @endif">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Accounts</p>
+                                    </a>
+                                </li>
+                            </ul>
+                            <ul class="nav nav-treeview {{ !$isVerified ? 'disabled' : '' }}">
+                                <li class="nav-item">
+                                    <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.split-payment.index') : 'javascript:void(0)' }}"
+                                       class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'split-payment') active @endif">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Split Payments</p>
+                                    </a>
+                                </li>
+                            </ul>
+                            <ul class="nav nav-treeview {{ !$isVerified ? 'disabled' : '' }}">
+                                <li class="nav-item">
+                                    <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.payout.index') : 'javascript:void(0)' }}"
+                                       class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'payout') active @endif">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Payout</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+
                         {{-- Store (commented section) --}}
                         {{-- @php
                         $storeRoutes = ['partner.store.*'];
@@ -722,6 +768,7 @@
             @yield('content')
         </div>
 
+        @yield('modal')
         <!-- Footer -->
         <footer class="main-footer bg-white">
             <div class="float-right d-none d-sm-block">
@@ -735,6 +782,7 @@
     <!-- REQUIRED SCRIPTS -->
     <!-- jQuery -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+
     <!-- AdminLTE App -->
     <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
     <!-- DataTables -->
@@ -761,6 +809,16 @@
 
     <script src="{{ asset('js/owner/reports/sales.js') }}"></script>
 
+    {{--Custom JS Loader--}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js"></script>
+    <script src="{{asset('admin/assets/js/blockui-loader.js')}}"></script>
+
+    {{--Moment JS--}}
+    <script src="{{asset('admin/app-assets/vendors/js/pickers/daterange/moment.min.js')}}"></script>
+
+    {{--Date Picker JS--}}
+    <script src="{{asset('admin/app-assets/vendors/js/pickers/daterange/daterangepicker.js')}}"></script>
+    <script src="{{asset('admin/app-assets/vendors/js/pickers/pickadate/picker.js')}}"></script>
 
     <script>
         $(function () {
