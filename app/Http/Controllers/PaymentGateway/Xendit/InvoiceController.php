@@ -60,12 +60,6 @@ class InvoiceController extends Controller
         try {
             $response = $this->xendit->getAllInvoices($subAccountId, $params);
 
-            Log::info('DEBUG XENDIT INVOICES REQUEST', [
-                'account_id' => $subAccountId,
-                'params' => $params,
-                'response' => $response,
-            ]);
-
             if (!$response->successful()) {
                 return response()->json([
                     'success' => false,

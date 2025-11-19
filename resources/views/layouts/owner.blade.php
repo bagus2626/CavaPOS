@@ -783,42 +783,38 @@
     <!-- jQuery -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 
-    <!-- AdminLTE App -->
+    <!-- Bootstrap 4 (HARUS sebelum AdminLTE) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- AdminLTE -->
     <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
-    <!-- DataTables -->
+
+    <!-- Plugin lain -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
-    <!-- Select2 -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <!-- Toastr -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    <!-- Summernote -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs4.min.js"></script>
-    <!-- Chart.js -->
+
+    <!-- ChartJS (load once only) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-    <!-- Popper.js -->
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
 
-    <!-- Bootstrap 4 JS Bundle (includes Popper) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+    <!-- Popper.js (optional jika pakai bootstrap.bundle) -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script> -->
 
-    <!-- CDN SweetAlert2 -->
+    <!-- SweetAlert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Moment & DatePicker -->
+    <script src="{{asset('admin/app-assets/vendors/js/pickers/daterange/moment.min.js')}}"></script>
+    <script src="{{asset('admin/app-assets/vendors/js/pickers/daterange/daterangepicker.js')}}"></script>
 
-    <script src="{{ asset('js/owner/reports/sales.js') }}"></script>
-
-    {{--Custom JS Loader--}}
+    <!-- blockUI (HARUS sebelum pemanggilan showPageLoader) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js"></script>
+
+    <!-- Custom loader -->
     <script src="{{asset('admin/assets/js/blockui-loader.js')}}"></script>
 
-    {{--Moment JS--}}
-    <script src="{{asset('admin/app-assets/vendors/js/pickers/daterange/moment.min.js')}}"></script>
-
-    {{--Date Picker JS--}}
-    <script src="{{asset('admin/app-assets/vendors/js/pickers/daterange/daterangepicker.js')}}"></script>
-    <script src="{{asset('admin/app-assets/vendors/js/pickers/pickadate/picker.js')}}"></script>
 
     <script>
         $(function () {
