@@ -1,26 +1,29 @@
 <?php
 
-namespace App\Http\Controllers\Admin\XenPlatform;
+namespace App\Http\Controllers\Owner\XenPlatform;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\PaymentGateway\Xendit\BalanceController;
 use App\Http\Controllers\PaymentGateway\Xendit\InvoiceController;
 use App\Http\Controllers\PaymentGateway\Xendit\SubAccountController;
 use App\Http\Controllers\PaymentGateway\Xendit\TransactionsController;
+use App\Models\Owner;
 use App\Models\Xendit\XenditPayout;
 use App\Services\XenditService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
-class PartnerAccountController extends Controller
+class AccountsController extends Controller
 {
     protected $xendit;
     protected $xenditSubAccount;
     protected $xenditBalance;
     protected $xenditTransactions;
     protected $xenditInvoices;
+    protected $xenditAccountId;
+    protected $userAuth;
 
     public function __construct(XenditService $xendit)
     {
@@ -29,117 +32,22 @@ class PartnerAccountController extends Controller
         $this->xenditBalance = new BalanceController($xendit);
         $this->xenditTransactions = new TransactionsController($xendit);
         $this->xenditInvoices = new InvoiceController($xendit);
-    }
+        $this->userAuth = Auth::guard('owner')->user();
 
-    public function index()
-    {
-        return view('pages.admin.xen_platform.partner-account.index');
-    }
+        $this->xenditAccountId = Owner::with('xenditSubAccount')
+            ->where('id', $this->userAuth->id)
+            ->first()
+            ->xenditSubAccount->xendit_user_id ?? null;
 
-    private function formatXenditDate(?string $dateString, bool $isStart = true): ?string
-    {
-        if (empty($dateString)) {
-            return null;
-        }
-        try {
-            $carbon = Carbon::parse($dateString);
-            if ($isStart) {
-                $carbon->startOfDay();
-            } else {
-                $carbon->endOfDay();
-            }
-            return $carbon->toIso8601String();
-        } catch (\Exception $e) {
-            return null;
+        if (is_null($this->xenditAccountId)) {
+            abort(404, 'Xendit account not found.');
         }
     }
 
-    public function create(Request $request)
-    {
-        $page = (int) $request->input('page', 1);
-
-        $apiParams = [
-            'limit' => (int) $request->get('limit', 10),
-            'before_id' => $request->get('before_id'),
-            'after_id' => $request->get('after_id'),
-            'email' => $request->get('email'),
-            'status' => $request->get('status'),
-            'business_name' => $request->get('business_name'),
-            'type' => $request->get('type'),
-            'created[gte]' => $this->formatXenditDate($request->get('created_gte'), true),
-            'created[lte]' => $this->formatXenditDate($request->get('created_lte'), false),
-            'updated[gte]' => $this->formatXenditDate($request->get('updated_gte'), true),
-            'updated[lte]' => $this->formatXenditDate($request->get('updated_lte'), false),
-        ];
-
-        $apiParams = array_filter($apiParams, fn($value) => !is_null($value) && $value !== '');
-        $accounts = [];
-        $paginationMeta = [
-            'has_more' => false,
-            'before_id' => null,
-            'after_id' => null,
-            'limit' => $apiParams['limit'],
-        ];
-        $errorMessage = null;
-
-        try {
-            $subAccountResponse = $this->xenditSubAccount->getSubAccounts($apiParams);
-            $subAccountsData = $subAccountResponse->getData(true);
-
-            if (!($subAccountsData['success'] ?? false)) {
-                $apiMessage = $subAccountsData['message'] ?? 'Unknown error from Xendit API.';
-                throw new \Exception("Gagal mengambil data akun. Pesan API: " . $apiMessage);
-            }
-
-            $accounts = $subAccountsData['data']['data'] ?? [];
-            $hasMore = $subAccountsData['data']['has_more'] ?? false;
-
-            $firstAccount = reset($accounts);
-            $lastAccount = end($accounts);
-
-            $nextPageCursor = ($lastAccount) ? $lastAccount['id'] : null;
-            $prevPageCursor = ($firstAccount) ? $firstAccount['id'] : null;
-
-            $isFirstPage = $page <= 1;
-
-            $paginationMeta = [
-                'has_more' => $isFirstPage ? true : $hasMore,
-                'before_id' => $isFirstPage ? null : $prevPageCursor,
-                'after_id' => $nextPageCursor,
-                'limit' => $apiParams['limit'] ?? 10,
-            ];
-
-            foreach ($accounts as &$account) {
-                if (isset($account['id'])) {
-                    $balanceResponse = $this->xenditBalance->getBalance($account['id'], $request);
-                    $balanceData = $balanceResponse->getData(true);
-
-                    $account['balance'] = $balanceData['success'] && isset($balanceData['data']['balance'])
-                        ? $balanceData['data']['balance']
-                        : 0;
-                } else {
-                    $account['balance'] = 0;
-                }
-            }
-
-        } catch (\Exception $e) {
-            Log::error('Xendit Partner Account Error: ' . $e->getMessage(), [
-                'request_params' => $apiParams,
-            ]);
-            $errorMessage = 'Gagal mengambil data akun dari Xendit. Silakan coba lagi. (' . $e->getMessage() . ')';
-        }
-
-        return view('pages.admin.xen_platform.partner-account.display', [
-            'subAccounts' => $accounts,
-            'meta' => $paginationMeta,
-            'filters' => $apiParams,
-            'errorMessage' => $errorMessage,
-        ])->render();
-    }
-
-    public function showAccountInfo(Request $request, $accountId)
+    public function showAccountInfo(Request $request)
     {
         $tab = $request->query('tab', 'profile');
+        $accountId = $this->xenditAccountId;
         $account = $this->getProfile($accountId, $request);
 
         $data = [];
@@ -150,19 +58,16 @@ class PartnerAccountController extends Controller
             $data = $this->getAllInvoices($accountId, $request);
         } elseif ($tab === 'balance') {
             $data = $this->getTransactionsWithBalance($accountId, $request);
-        } elseif ($tab === 'payout') {
-            $data = $this->getPayout($accountId, $request);
         } elseif ($tab === 'profile') {
             $data = $account;
         }
-        return view('pages.admin.xen_platform.partner-account.tab-panel.information', [
+        return view('pages.owner.xen_platform.accounts.information', [
             'tab' => $tab,
             'data' => $data,
             'account' => $account,
             'accountId' => $accountId,
         ]);
     }
-
 
     public function getActivity($accountId, Request $request)
     {
@@ -407,72 +312,56 @@ class PartnerAccountController extends Controller
         ];
     }
 
-    public function getTabData(Request $request, $accountId, $tab)
+    public function getTabData(Request $request, $tab)
     {
+        $accountId = $this->xenditAccountId;
         $account = $this->getProfile($accountId, $request);
         if ($tab === 'activity') {
             $data = $this->getActivity($accountId, $request);
-            return view('pages.admin.xen_platform.partner-account.tab-panel.transaction.index', ['data' => $data, 'account' => $account]);
+            return view('pages.owner.xen_platform.accounts.tab-panel.transaction.index', ['data' => $data, 'account' => $account]);
         } elseif ($tab === 'invoices') {
             $data = $this->getAllInvoices($accountId, $request);
-            return view('pages.admin.xen_platform.partner-account.tab-panel.invoice.index', ['data' => $data, 'account' => $account]);
+            return view('pages.owner.xen_platform.accounts.tab-panel.invoice.index', ['data' => $data, 'account' => $account]);
         } elseif ($tab === 'balance') {
             $data = $this->getTransactionsWithBalance($accountId, $request);
-            return view('pages.admin.xen_platform.partner-account.tab-panel.balance.index', ['data' => $data, 'account' => $account]);
-        } elseif ($tab === 'payout') {
-            $data = $this->getPayout($accountId, $request);
-            return view('pages.admin.xen_platform.partner-account.tab-panel.payout.index', ['data' => $data, 'account' => $account]);
+            return view('pages.owner.xen_platform.accounts.tab-panel.balance.index', ['data' => $data, 'account' => $account]);
         } elseif ($tab === 'profile') {
             $data = $this->getProfile($accountId, $request);
-            return view('pages.admin.xen_platform.partner-account.tab-panel.profile.index', ['data' => $data]);
+            return view('pages.owner.xen_platform.accounts.tab-panel.profile.index', ['data' => $data]);
         }
 
         abort(404);
     }
 
-    public function filter(Request $request, $accountId, $tab)
+    public function filter(Request $request, $tab)
     {
+        $accountId = $this->xenditAccountId;
         $account = $this->getProfile($accountId, $request);
 
         switch ($tab) {
             case 'activity':
                 $data = $this->getActivity($accountId, $request);
-                $activityView = view('pages.admin.xen_platform.partner-account.tab-panel.transaction.table', ['data' => $data, 'account' => $account])->render();
-                $summaryView  = view('pages.admin.xen_platform.partner-account.tab-panel.summary', ['data' => $data, 'account' => $account])->render();
+                $activityView = view('pages.owner.xen_platform.accounts.tab-panel.transaction.table', ['data' => $data, 'account' => $account])->render();
 
                 return response()->json([
                     'activityTable' => $activityView,
-                    'summary' => $summaryView,
                 ]);
             case 'invoices':
                 $data = $this->getAllInvoices($accountId, $request);
 
-                $invoiceView = view('pages.admin.xen_platform.partner-account.tab-panel.invoice.table', ['data' => $data, 'account' => $account])->render();
-                $summaryView  = view('pages.admin.xen_platform.partner-account.tab-panel.summary', ['data' => $data, 'account' => $account])->render();
+                $invoiceView = view('pages.owner.xen_platform.accounts.tab-panel.invoice.table', ['data' => $data, 'account' => $account])->render();
                 $invoiceData = $data ?? [];
 
                 return response()->json([
                     'invoiceTable' => $invoiceView,
-                    'summary' => $summaryView,
                     'invoiceData' => $invoiceData,
                 ]);
             case 'balance':
                 $data = $this->getTransactionsWithBalance($accountId, $request);
-                $balanceView = view('pages.admin.xen_platform.partner-account.tab-panel.balance.table', ['data' => $data, 'account' => $account])->render();
-                $summaryView  = view('pages.admin.xen_platform.partner-account.tab-panel.summary', ['data' => $data, 'account' => $account])->render();
+                $balanceView = view('pages.owner.xen_platform.accounts.tab-panel.balance.table', ['data' => $data, 'account' => $account])->render();
 
                 return response()->json([
                     'balanceTable' => $balanceView,
-                    'summary' => $summaryView,
-                ]);
-            case 'payout':
-                $data = $this->getPayout($accountId, $request);
-                $payoutView = view('pages.admin.xen_platform.partner-account.tab-panel.payout.table', ['data' => $data, 'account' => $account])->render();
-                $summaryView  = view('pages.admin.xen_platform.partner-account.tab-panel.summary', ['data' => $data, 'account' => $account])->render();
-
-                return response()->json([
-                    'payoutTable' => $payoutView,
-                    'summary' => $summaryView,
                 ]);
             default:
                 abort(404);
@@ -656,77 +545,24 @@ class PartnerAccountController extends Controller
         ];
     }
 
-    public function getPayout($accountId, Request $request)
+    public function getTransactionById($transactionId)
     {
-        if (empty($accountId)) {
-            return collect([]);
-        }
-
-        $search = $request->input('search');
-        $status = $request->input('status');
-        $dateFrom = $request->input('date_from');
-        $dateTo = $request->input('date_to');
-
-        $query = XenditPayout::with('subAccount')
-            ->orderByDesc('id');
-
-        if ($accountId) {
-            $query->where('business_id', $accountId);
-        }
-
-        if ($status) {
-            $query->where('status', $status);
-        }
-
-        if ($dateFrom) {
-            $dateFromCarbon = \Carbon\Carbon::parse($dateFrom)->startOfDay();
-            $query->where('created_xendit', '>=', $dateFromCarbon);
-        }
-
-        if ($dateTo) {
-            $dateToCarbon = Carbon::parse($dateTo)->endOfDay();
-            $query->where('created_xendit', '<=', $dateToCarbon);
-        }
-
-        if ($search) {
-            $query->where(function ($q) use ($search, $accountId) {
-                $searchTerm = '%' . $search . '%';
-
-                $q->where('reference_id', 'like', $searchTerm)
-                    ->orWhere('amount', 'like', $searchTerm)
-                    ->orWhere('currency', 'like', $searchTerm)
-                    ->orWhere('channel_code', 'like', $searchTerm)
-                    ->orWhere('status', 'like', $searchTerm)
-                    ->orWhere('account_holder_name', 'like', $searchTerm)
-                    ->orWhere('account_number', 'like', $searchTerm);
-
-                $q->orWhereHas('subAccount', function ($sq) use ($searchTerm) {
-                    $sq->where('business_name', 'like', $searchTerm);
-                });
-            });
-        }
-
-        $data = $query->paginate(10);
-
-        return $data;
-    }
-
-    public function getTransactionById($accountId, $transactionId)
-    {
+        $accountId = $this->xenditAccountId;
         $transactionsResponse = $this->xenditTransactions->getTransactionById($accountId, $transactionId);
         $transactionData = $transactionsResponse->getData(true);
         $transactions = $transactionData['data'] ?? [];
 
-        return view('pages.admin.xen_platform.partner-account.tab-panel.transaction.detail.index', ['transaction' => $transactions]);
+        return view('pages.owner.xen_platform.accounts.tab-panel.transaction.detail.index', ['transaction' => $transactions]);
     }
 
-    public function getInvoiceById($accountId, $invoiceId)
+    public function getInvoiceById($invoiceId)
     {
+        $accountId = $this->xenditAccountId;
         $invoiceResponse = $this->xenditInvoices->getInvoiceById($accountId, $invoiceId);
         $invoiceData = $invoiceResponse->getData(true);
         $invoice = $invoiceData['data'] ?? [];
 
-        return view('pages.admin.xen_platform.partner-account.tab-panel.invoice.detail.index', ['invoice' => $invoice]);
+        return view('pages.owner.xen_platform.accounts.tab-panel.invoice.detail.index', ['invoice' => $invoice]);
     }
 
 }

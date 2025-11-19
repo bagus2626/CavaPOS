@@ -1,9 +1,6 @@
 <?php
 
-//use App\Http\Controllers\Owner\Product\OwnerProductController;
-//use App\Http\Controllers\Owner\Product\OwnerPromotionController;
-//use App\Http\Controllers\Owner\Report\SalesReportController;
-//use App\Http\Controllers\PaymentGateway\Xendit\WebhookController;
+
 use Pusher\Pusher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -22,6 +19,9 @@ use App\Http\Controllers\Owner\Auth\OwnerPasswordResetController;
 use App\Http\Controllers\Owner\OwnerDashboardController;
 use App\Http\Controllers\Owner\Outlet\OwnerOutletController;
 use App\Http\Controllers\Owner\Report\SalesReportController;
+use App\Http\Controllers\Owner\XenPlatform\AccountsController;
+use App\Http\Controllers\Owner\XenPlatform\OwnerPayoutController;
+use App\Http\Controllers\Owner\XenPlatform\OwnerSplitPaymentController;
 use App\Http\Controllers\Partner\PartnerDashboardController;
 use App\Http\Controllers\Auth\GoogleCallbackController;
 use App\Http\Controllers\Owner\Product\OwnerPromotionController;
@@ -215,6 +215,29 @@ Route::middleware('setlocale')->group(function () {
                 Route::resource('outlet-products', OwnerOutletProductController::class);
                 Route::resource('products', OwnerProductController::class);
                 Route::resource('categories', OwnerCategoryController::class);
+
+                Route::prefix('xen_platform')->name('xen_platform.')->group(function () {
+                    Route::prefix('accounts')->name('accounts.')->group(function () {
+                        Route::get('information', [AccountsController::class, 'showAccountInfo'])->name('information');
+                        Route::get('tab/{tab}', [AccountsController::class, 'getTabData']);
+                        Route::get('filter/{tab}', [AccountsController::class, 'filter']);;
+                        Route::get('transaction-detail/{transactionId}', [AccountsController::class, 'getTransactionById']);
+                        Route::get('invoice-detail/{invoiceId}', [AccountsController::class, 'getInvoiceById']);
+                    });
+
+                    Route::prefix('split-payment')->name('split-payment.')->group(function () {
+                        Route::get('/', [OwnerSplitPaymentController::class, 'index'])->name('index');
+                        Route::get('/get-data', [OwnerSplitPaymentController::class, 'getSplitPayments'])->name('data');
+                    });
+
+                    Route::prefix('payout')->name('payout.')->group(function () {
+                        Route::get('/', [OwnerPayoutController::class, 'index'])->name('index');
+                        Route::post('get-data', [OwnerPayoutController::class, 'getData'])->name('get-data');
+                        Route::get('validate-bank', [OwnerPayoutController::class, 'validateBankAccount'])->name('validate-bank');
+                        Route::post('create', [OwnerPayoutController::class, 'createPayout'])->name('create');
+                        Route::get('detail/{payoutId}', [OwnerPayoutController::class, 'getPayout'])->name('detail');
+                    });
+                });
 
                 Route::prefix('report')->name('report.')->group(function () {
                     Route::get('sales/export', [SalesReportController::class, 'export'])->name('sales.export');

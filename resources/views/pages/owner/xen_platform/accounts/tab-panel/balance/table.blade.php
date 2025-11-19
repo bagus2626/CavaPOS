@@ -52,9 +52,9 @@
                     <td>
                         @if (!empty($tx['settlement_status']))
                             <span class="badge
-                                    @if($tx['settlement_status'] === 'SETTLED') badge-light-success
-                                    @elseif($tx['settlement_status'] === 'PENDING') badge-light-warning
-                                    @else badge-light-secondary @endif
+                                    @if($tx['settlement_status'] === 'SETTLED') bg-success
+                                    @elseif($tx['settlement_status'] === 'PENDING') bg-warning
+                                    @else bg-secondary @endif
                                     badge-pill">
                                     {{ $tx['settlement_status'] }}
                                 </span><br>
@@ -112,11 +112,8 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="9" class="text-center py-4">
-                        <div class="d-flex flex-column align-items-center text-muted">
-                            <i class="bx bx-info-circle fs-1 mb-2"></i>
-                            <span>Tidak ada data transaksi yang ditemukan.</span>
-                        </div>
+                    <td colspan="9" class="text-center">
+                        <i class="fas fa-info-circle"></i> Tidak ada data balance yang ditemukan.
                     </td>
                 </tr>
             @endforelse
@@ -147,27 +144,27 @@
             </span>
             </div>
 
-            <nav aria-label="Navigasi halaman transaksi">
+            <nav aria-label="Navigasi halaman transaksi" class="py-2 px-2">
                 <ul class="pagination mb-0">
                     {{-- Tombol Previous --}}
                     <li class="page-item {{ empty($beforeId) ? 'disabled' : '' }} mr-1">
-                        <a class="page-link fw-medium px-1 rounded-pill"
+                        <a class="page-link fw-medium rounded-pill"
                            href="#"
                            data-direction="before"
                            data-before="{{ $beforeId }}"
                            data-after="">
-                            ← Previous
+                            &laquo; Previous
                         </a>
                     </li>
 
                     {{-- Tombol Next --}}
                     <li class="page-item {{ (!$hasMore || empty($afterId) || ($count < $limit)) ? 'disabled' : '' }}">
-                        <a class="page-link fw-medium px-1 rounded-pill ms-2"
+                        <a class="page-link fw-medium rounded-pill ms-2"
                            href="#"
                            data-direction="after"
                            data-after="{{ $afterId }}"
                            data-before="">
-                            Next →
+                            Next &raquo;
                         </a>
                     </li>
                 </ul>
