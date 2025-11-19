@@ -814,7 +814,7 @@
 
     <!-- Custom loader -->
     <script src="{{asset('admin/assets/js/blockui-loader.js')}}"></script>
-    @vite(['resources/js/app.js'])
+
 
     <script>
         $(function () {
