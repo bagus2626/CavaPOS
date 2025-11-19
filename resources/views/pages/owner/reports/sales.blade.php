@@ -363,7 +363,7 @@
         </div>
     </div>
 @endsection
-
+@vite(['resources/js/app.js'])
 @push('scripts')
     {{-- Melewatkan data dari PHP ke JavaScript untuk Chart --}}
     <script>
