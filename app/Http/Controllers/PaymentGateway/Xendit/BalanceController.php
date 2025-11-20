@@ -15,7 +15,7 @@ class BalanceController extends Controller
         $this->xendit = $xendit;
     }
 
-    public function getBalance(string $subAccountId, Request $request)
+    public function getBalance(string $subAccountId = null, Request $request)
     {
         try {
             $params = [

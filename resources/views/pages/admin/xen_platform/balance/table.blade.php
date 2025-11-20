@@ -16,7 +16,7 @@
             </tr>
             </thead>
             <tbody>
-            @forelse($data['transactions'] as $index => $tx)
+            @forelse($balances as $index => $tx)
                 @php
                     $amountSign = '';
                     $amountClass = '';
@@ -122,12 +122,11 @@
     </div>
 
 @php
-    $meta = $data['meta'] ?? [];
     $beforeId = $meta['before_id'] ?? null;
     $afterId = $meta['after_id'] ?? null;
     $hasMore = $meta['has_more'] ?? false;
     $limit = $meta['limit'] ?? 10;
-    $count = count($data['transactions'] ?? []);
+    $count = count($balances ?? []);
 
     if (empty($beforeId)) {
         $hasMore = true;
