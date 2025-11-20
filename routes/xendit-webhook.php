@@ -8,6 +8,9 @@ Route::prefix('xendit')->name('xendit.')->group(function () {
         Route::post('invoice', [WebhookController::class, 'invoice']);
         Route::post('split-payment-status', [WebhookController::class, 'splitPaymentStatus']);
         Route::post('payout', [WebhookController::class, 'payout']);
-        Route::post('sub-account/created', [WebhookController::class, 'subAccountCreated']);
+        Route::prefix('partner-account')->name('partner-account.')->group(function () {
+            Route::post('/owned/created', [WebhookController::class, 'ownedAccountCreated']);
+            Route::post('/managed/updated', [WebhookController::class, 'managedAccountUpdated']);
+        });
     });
 });

@@ -7,9 +7,9 @@
                     <i class="bx bx-x"></i>
                 </button>
             </div>
-            <form id="createAccountForm" method="POST" action="{{ route('admin.xendit.sub-account.create') }}">
-            @csrf
-            <input type="hidden" name="partner_id" id="partner_id">
+            <form id="createAccountForm" method="POST">
+                @csrf
+                <input type="hidden" name="partner_id" id="partner_id">
                 <div class="modal-body">
                     <div class="form-group">
                         <label>Partner Email : </label>
@@ -32,17 +32,17 @@
                     </div>
 
                 </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-light-secondary" data-dismiss="modal">
-                    <i class="bx bx-x d-block d-sm-none"></i>
-                    <span class="d-none d-sm-block">Close</span>
-                </button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-secondary" data-dismiss="modal">
+                        <i class="bx bx-x d-block d-sm-none"></i>
+                        <span class="d-none d-sm-block">Close</span>
+                    </button>
 
-                <button type="submit" class="btn btn-secondary ml-1">
-                    <i class="bx bx-check d-block d-sm-none"></i>
-                    <span class="d-none d-sm-block">Submit</span>
-                </button>
-            </div>
+                    <button type="submit" class="btn btn-secondary ml-1">
+                        <i class="bx bx-check d-block d-sm-none"></i>
+                        <span class="d-none d-sm-block">Submit</span>
+                    </button>
+                </div>
             </form>
         </div>
     </div>

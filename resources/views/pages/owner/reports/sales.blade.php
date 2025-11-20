@@ -4,7 +4,9 @@
 @section('page_title', 'Business Performance Dashboard')
 
 @section('content')
-    <section class="content">
+    @vite(['resources/css/app.css'])
+
+    <section class="content mb-4">
         <div class="container-fluid">
             <div class="bg-white rounded-xl shadow-md p-6 mb-6">
                 <form method="GET" action="{{ route('owner.user-owner.report.sales.index') }}" id="partner-filter-form">
@@ -365,6 +367,9 @@
 @endsection
 
 @push('scripts')
+    @vite(['resources/js/app.js'])
+    <script src="{{ asset('js/owner/reports/sales.js') }}"></script>
+
     {{-- Melewatkan data dari PHP ke JavaScript untuk Chart --}}
     <script>
         const revenueChartData = @json($revenueChartData ?? ['labels' => [], 'data' => []]);

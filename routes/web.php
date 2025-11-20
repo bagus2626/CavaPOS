@@ -1,9 +1,6 @@
 <?php
 
-//use App\Http\Controllers\Owner\Product\OwnerProductController;
-//use App\Http\Controllers\Owner\Product\OwnerPromotionController;
-//use App\Http\Controllers\Owner\Report\SalesReportController;
-//use App\Http\Controllers\PaymentGateway\Xendit\WebhookController;
+
 use Pusher\Pusher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -22,6 +19,9 @@ use App\Http\Controllers\Owner\Auth\OwnerPasswordResetController;
 use App\Http\Controllers\Owner\OwnerDashboardController;
 use App\Http\Controllers\Owner\Outlet\OwnerOutletController;
 use App\Http\Controllers\Owner\Report\SalesReportController;
+use App\Http\Controllers\Owner\XenPlatform\AccountsController;
+use App\Http\Controllers\Owner\XenPlatform\OwnerPayoutController;
+use App\Http\Controllers\Owner\XenPlatform\OwnerSplitPaymentController;
 use App\Http\Controllers\Partner\PartnerDashboardController;
 use App\Http\Controllers\Auth\GoogleCallbackController;
 use App\Http\Controllers\Owner\Product\OwnerPromotionController;
@@ -106,6 +106,7 @@ Route::middleware('setlocale')->group(function () {
         Route::post('/owner-verification/{id}/reject', [OwnerVerificationController::class, 'reject'])->name('owner-verification.reject');
 
         Route::get('/owner-verification/{id}/ktp-image', [OwnerVerificationController::class, 'showKtpImage'])->name('owner-verification.ktp-image');
+        Route::post('/owner-verification/register-xendit-account', [OwnerVerificationController::class, 'registerXenditAccount'])->name('owner-verification.register-xendit-account');;
 
         Route::prefix('send-payment')->name('send-payment.')->group(function () {
             Route::prefix('payout')->name('payout.')->group(function () {
@@ -114,24 +115,23 @@ Route::middleware('setlocale')->group(function () {
                 Route::get('validate-bank', [PayoutController::class, 'validateBankAccount'])->name('validate-bank');
                 Route::post('create', [PayoutController::class, 'createPayout'])->name('create');
                 Route::get('{businessId}/detail/{payoutId}', [PayoutController::class, 'getPayout'])->name('detail');
-
             });
         });
 
-
         Route::prefix('xen_platform')->name('xen_platform.')->group(function () {
             Route::prefix('partner-account')->name('partner-account.')->group(function () {
-                Route::get('{accountId}/information', [PartnerAccountController::class, 'showAccountInfo'])->name('information');
-                Route::get('{accountId}/tab/{tab}', [PartnerAccountController::class, 'getTabData']);
-                Route::get('{accountId}/filter/{tab}', [PartnerAccountController::class, 'filter']);;
-                Route::get('{accountId}/transaction-detail/{transactionId}', [PartnerAccountController::class, 'getTransactionById']);
-
+                Route::prefix('{accountId}')->group(function () {
+                    Route::get('information', [PartnerAccountController::class, 'showAccountInfo'])->name('information');
+                    Route::get('tab/{tab}', [PartnerAccountController::class, 'getTabData']);
+                    Route::get('filter/{tab}', [PartnerAccountController::class, 'filter']);;
+                    Route::get('transaction-detail/{transactionId}', [PartnerAccountController::class, 'getTransactionById']);
+                    Route::get('invoice-detail/{invoiceId}', [PartnerAccountController::class, 'getInvoiceById']);
+                });
             });
 
             Route::resource('partner-account', PartnerAccountController::class);
             Route::prefix('split-payments')->name('split-payments.')->group(function () {
                 Route::get('split-payments', [SplitPaymentController::class, 'getSplitPayments']);
-
                 Route::get('split-rules', [SplitPaymentController::class, 'getSplitRules']);
                 Route::post('split-rules/create', [SplitPaymentController::class, 'createSplitRule'])->name('split-rules.create');
             });
@@ -140,18 +140,10 @@ Route::middleware('setlocale')->group(function () {
 
         Route::prefix('xendit')->name('xendit.')->group(function () {
             Route::prefix('sub-account')->name('sub-account.')->group(function () {
-                Route::post('create', [SubAccountController::class, 'createAccount'])->name('create');
                 Route::get('list', [SubAccountController::class, 'getSubAccounts'])->name('list');
                 Route::get('profile/{id}', [SubAccountController::class, 'getSubAccountById'])->name('profile');
             });
-
-
-            Route::prefix('balance')->name('balance.')->group(function () {
-//                Route::post('create', [SubAccountController::class, 'createAccount'])->name('create');
-//                Route::get('list', [SubAccountController::class, 'getSubAccounts'])->name('list');
-            });
         });
-
     });
 
     // Owner
@@ -223,6 +215,29 @@ Route::middleware('setlocale')->group(function () {
                 Route::resource('outlet-products', OwnerOutletProductController::class);
                 Route::resource('products', OwnerProductController::class);
                 Route::resource('categories', OwnerCategoryController::class);
+
+                Route::prefix('xen_platform')->name('xen_platform.')->group(function () {
+                    Route::prefix('accounts')->name('accounts.')->group(function () {
+                        Route::get('information', [AccountsController::class, 'showAccountInfo'])->name('information');
+                        Route::get('tab/{tab}', [AccountsController::class, 'getTabData']);
+                        Route::get('filter/{tab}', [AccountsController::class, 'filter']);;
+                        Route::get('transaction-detail/{transactionId}', [AccountsController::class, 'getTransactionById']);
+                        Route::get('invoice-detail/{invoiceId}', [AccountsController::class, 'getInvoiceById']);
+                    });
+
+                    Route::prefix('split-payment')->name('split-payment.')->group(function () {
+                        Route::get('/', [OwnerSplitPaymentController::class, 'index'])->name('index');
+                        Route::get('/get-data', [OwnerSplitPaymentController::class, 'getSplitPayments'])->name('data');
+                    });
+
+                    Route::prefix('payout')->name('payout.')->group(function () {
+                        Route::get('/', [OwnerPayoutController::class, 'index'])->name('index');
+                        Route::post('get-data', [OwnerPayoutController::class, 'getData'])->name('get-data');
+                        Route::get('validate-bank', [OwnerPayoutController::class, 'validateBankAccount'])->name('validate-bank');
+                        Route::post('create', [OwnerPayoutController::class, 'createPayout'])->name('create');
+                        Route::get('detail/{payoutId}', [OwnerPayoutController::class, 'getPayout'])->name('detail');
+                    });
+                });
 
                 Route::prefix('report')->name('report.')->group(function () {
                     Route::get('sales/export', [SalesReportController::class, 'export'])->name('sales.export');

@@ -40,7 +40,7 @@ class PayoutController extends Controller
 
         $subAccountResponse = $this->xenditSubAccount->getSubAccounts();
         $subAccounts = $subAccountResponse->getData(true);
-        $accounts = $subAccounts['data']['data'];
+        $accounts = $subAccounts['data']['data'] ?? [];
         foreach ($accounts as &$account) {
             $balanceResponse = $this->xenditBalance->getBalance($account['id'], $request);
             $balanceData = $balanceResponse->getData(true);
@@ -207,6 +207,6 @@ class PayoutController extends Controller
         $connectorReference = XenditPayout::where('payout_id', $payoutId)->first();
         $payout['connector_reference'] = $connectorReference->connector_reference ?? null;
 
-        return view('pages.admin.send-payment.disbursement.detail', ['data' => $payout]);
+        return view('pages.admin.send-payment.disbursement.detail.index', ['data' => $payout]);
     }
 }

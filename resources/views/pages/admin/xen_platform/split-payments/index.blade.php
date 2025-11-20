@@ -309,7 +309,6 @@
                         },
                     });
                     break;
-
             }
         }
 
@@ -325,14 +324,5 @@
                     break;
             }
         }
-
-        document.addEventListener("DOMContentLoaded", function () {
-            const form = document.getElementById("createAccountForm");
-            if (form) {
-                form.addEventListener("submit", function () {
-                    showPageLoader("Creating Xendit Account...");
-                });
-            }
-        });
     </script>
 @endpush

@@ -7,57 +7,42 @@
                     Filter (<span id="balance-filter-count">0</span>)
                 </button>
 
-                <div class="dropdown-menu p-3" aria-labelledby="dropdownFilterBalance" style="width: 950px; white-space: normal;">
+                <div class="dropdown-menu p-3" aria-labelledby="dropdownFilterBalance" style="width: 500px; white-space: normal;">
 
                     <div class="d-flex justify-content-between mb-2">
                         <button class="btn btn-sm btn-outline-secondary" id="clear-all-balance-filters" type="button">Clear All</button>
-                        <button class="btn btn-sm btn-primary" id="close-filter-balance-dropdown-btn" type="button" data-toggle="dropdown">Tutup</button>
+                        <button class="btn btn-sm btn-primary" id="close-filter-balance-dropdown-btn" type="button" data-toggle="dropdown">Close</button>
                     </div>
 
                     <div class="row" id="popup-balance-filter-options">
-                        {{-- Kolom 1: STATUS --}}
-                        <div class="col-sm-2_5 px-2 px-2" style="flex-basis: 20%; max-width: 20%;">
-                            <h6 class="font-weight-bold border-bottom pb-1">STATUS</h6>
-                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-status-successful" data-filter-group="statuses" value="SUCCESSFUL"><label class="custom-control-label" for="bal-status-successful">Successful</label></div>
-                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-status-failed" data-filter-group="statuses" value="FAILED"><label class="custom-control-label" for="bal-status-failed">Failed</label></div>
-                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-status-refund-pending" data-filter-group="statuses" value="REFUND_PENDING"><label class="custom-control-label" for="bal-status-refund-pending">Refund Pending</label></div>
-                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-status-refunded" data-filter-group="statuses" value="REFUNDED"><label class="custom-control-label" for="bal-status-refunded">Refunded</label></div>
-                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-status-partially-refunded" data-filter-group="statuses" value="PARTIALLY_REFUNDED"><label class="custom-control-label" for="bal-status-partially-refunded">Partially Refunded</label></div>
-                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-status-voided" data-filter-group="statuses" value="VOIDED"><label class="custom-control-label" for="bal-status-voided">Voided</label></div>
-                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-status-reversed" data-filter-group="statuses" value="REVERSED"><label class="custom-control-label" for="bal-status-reversed">Reversed</label></div>
-                        </div>
-
-                        {{-- Kolom 2: CLIENT TYPE --}}
-                        <div class="col-sm-2_5 px-2" style="flex-basis: 20%; max-width: 20%;">
-                            <h6 class="font-weight-bold border-bottom pb-1">CLIENT TYPE</h6>
-                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-type-api" data-filter-group="client_types" value="API_GATEWAY"><label class="custom-control-label" for="bal-type-api">API Gateway</label></div>
-                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-type-dashboard" data-filter-group="client_types" value="DASHBOARD"><label class="custom-control-label" for="bal-type-dashboard">Dashboard</label></div>
-                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-type-integration" data-filter-group="client_types" value="INTEGRATION"><label class="custom-control-label" for="bal-type-integration">Integration</label></div>
-                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-type-recurring" data-filter-group="client_types" value="RECURRING"><label class="custom-control-label" for="bal-type-recurring">Recurring</label></div>
-                        </div>
-
-                        {{-- Kolom 3: PAYMENT CHANNELS --}}
-                        <div class="col-sm-2 px-2" style="flex-basis: 30%; max-width: 30%;">
-                            <h6 class="font-weight-bold border-bottom pb-1">PAYMENT CHANNELS</h6>
-                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-channel-va" data-filter-group="payment_channels" value="VIRTUAL_ACCOUNT"><label class="custom-control-label" for="bal-channel-va">Virtual Account</label></div>
-                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-channel-ewallet" data-filter-group="payment_channels" value="EWALLET"><label class="custom-control-label" for="bal-channel-ewallet">E-Wallet</label></div>
-                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-channel-retail" data-filter-group="payment_channels" value="RETAIL_OUTLET"><label class="custom-control-label" for="bal-channel-retail">Retail Outlet</label></div>
+                        {{-- Kolom 3: TYPE --}}
+                        <div class="col-sm-2 px-2" style="flex-basis: 40%; max-width: 40%;">
+                            <h6 class="font-weight-bold border-bottom pb-1">TYPE</h6>
+                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-type-disbursement" data-filter-group="types" value="DISBURSEMENT"><label class="custom-control-label" for="bal-type-disbursement">Disbursement</label></div>
+                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-type-payment" data-filter-group="types" value="PAYMENT"><label class="custom-control-label" for="bal-type-payment">Payment</label></div>
+                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-type-remittance-payout" data-filter-group="types" value="REMITTANCE_PAYOUT"><label class="custom-control-label" for="bal-type-remittance-payout">Remittance Payout</label></div>
+                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-type-transfer" data-filter-group="types" value="TRANSFER"><label class="custom-control-label" for="bal-type-transfer">Transfer</label></div>
+                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-type-refund" data-filter-group="types" value="REFUND"><label class="custom-control-label" for="bal-type-refund">Refund</label></div>
+                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-type-withdrawal" data-filter-group="types" value="WITHDRAWAL"><label class="custom-control-label" for="bal-type-withdrawal">Withdrawal</label></div>
+                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-type-topup" data-filter-group="types" value="TOPUP"><label class="custom-control-label" for="bal-type-topup">Top Up</label></div>
+                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-type-conversion" data-filter-group="types" value="CONVERSION"><label class="custom-control-label" for="bal-type-conversion">Conversion</label></div>
                         </div>
 
                         {{-- Kolom 4: PAYMENT METHOD --}}
-                        <div class="col-sm-3 px-2" style="flex-basis: 30%; max-width: 30%;">
-                            <h6 class="font-weight-bold border-bottom pb-1">PAYMENT METHOD (Lainnya)</h6>
-                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="pm-direct-debit-bal" data-filter-group="channel_categories" value="DIRECT_DEBIT"><label class="custom-control-label" for="pm-direct-debit-bal">Direct Debit</label></div>
-                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="pm-qr-bal" data-filter-group="channel_categories" value="QR_CODE"><label class="custom-control-label" for="pm-qr-bal">QR Code</label></div>
-                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="pm-paylater-bal" data-filter-group="channel_categories" value="PAYLATER"><label class="custom-control-label" for="pm-paylater-bal">PayLater</label></div>
-                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="pm-cards-bal" data-filter-group="channel_categories" value="CARDS"><label class="custom-control-label" for="pm-cards-bal">Cards</label></div>
-                        </div>
-
-                        {{-- Kolom 5: CURRENCY --}}
-                        <div class="col-sm-2 px-2" style="flex-basis: 15%; max-width: 15%;">
-                            <h6 class="font-weight-bold border-bottom pb-1">CURRENCY</h6>
-                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-currency-idr" data-filter-group="currency" value="IDR"><label class="custom-control-label" for="bal-currency-idr">IDR</label></div>
-                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-currency-other" data-filter-group="currency" value="NON_IDR"><label class="custom-control-label" for="bal-currency-other">Others (Non IDR)</label></div>
+                        <div class="col-sm-3 px-2" style="flex-basis: 50%; max-width: 50%;">
+                            <h6 class="font-weight-bold border-bottom pb-1">PAYMENT METHOD</h6>
+                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-pm-bank" data-filter-group="channel_categories" value="BANK"><label class="custom-control-label" for="bal-pm-bank">Bank</label></div>
+                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-pm-cards" data-filter-group="channel_categories" value="CARDS"><label class="custom-control-label" for="bal-pm-cards">Cards</label></div>
+                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-pm-cardless-credit" data-filter-group="channel_categories" value="CARDLESS_CREDIT"><label class="custom-control-label" for="bal-pm-cardless-credit">Cardless Credit</label></div>
+                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-pm-cash" data-filter-group="channel_categories" value="CASH"><label class="custom-control-label" for="bal-pm-cash">Cash</label></div>
+                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-pm-direct-debit" data-filter-group="channel_categories" value="DIRECT_DEBIT"><label class="custom-control-label" for="bal-pm-direct-debit">Direct Debit</label></div>
+                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-pm-e-wallet" data-filter-group="channel_categories" value="EWALLET"><label class="custom-control-label" for="bal-pm-e-wallet">E-Wallet</label></div>
+                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-pm-paylater" data-filter-group="channel_categories" value="PAYLATER"><label class="custom-control-label" for="bal-pm-paylater">PayLater</label></div>
+                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-pm-qr" data-filter-group="channel_categories" value="QR_CODE"><label class="custom-control-label" for="bal-pm-qr">QR Code</label></div>
+                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-pm-retail-outlet" data-filter-group="channel_categories" value="RETAIL_OUTLET"><label class="custom-control-label" for="bal-pm-retail-outlet">Retail Outlet</label></div>
+                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-pm-va" data-filter-group="channel_categories" value="VIRTUAL_ACCOUNT"><label class="custom-control-label" for="bal-pm-va">Virtual Account</label></div>
+                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-pm-xenplatform" data-filter-group="channel_categories" value="XENPLATFORM"><label class="custom-control-label" for="bal-pm-xenplatform">Xenplatform</label></div>
+                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input balance-filter-checkbox" id="bal-pm-other" data-filter-group="channel_categories" value="OTHER"><label class="custom-control-label" for="bal-pm-other">Other</label></div>
                         </div>
                     </div>
                 </div>
@@ -68,7 +53,7 @@
                 <fieldset class="form-group position-relative has-icon-left m-0">
                     <input type="text" class="form-control daterange-balance"
                            name="date_balance" id="daterange-balance"
-                           placeholder="Tanggal Mutasi">
+                           placeholder="Transaction Date">
                     <div class="form-control-position">
                         <i class="bx bx-calendar-check"></i>
                     </div>
@@ -92,10 +77,10 @@
             {{-- 4. Tombol Terapkan SEMUA Filter (Aksi Final) --}}
             <div class="d-flex w-md-auto">
                 <button id="apply-balance-filter-btn" class="btn btn-primary mr-1 flex-grow-1" type="button">
-                    <i class="bx bx-filter"></i> Terapkan
+                    <i class="bx bx-filter-alt"></i> Apply Filter
                 </button>
-                <button id="reset-balance-filter-btn" class="btn btn-outline-secondary" type="button" title="Reset semua filter">
-                    <i class="bx bx-reset"></i>
+                <button id="reset-balance-filter-btn" class="btn btn-secondary" type="button" title="Reset semua filter">
+                    <i class="bx bx-reset"></i> Reset
                 </button>
             </div>
 
