@@ -59,7 +59,7 @@
                                     <div class="col-12">
                                         <div class="card border-top border-4 border">
                                             <div class="card-header border-bottom">
-                                                @include('pages.admin.xen_platform.split-payments.payments.filter')
+                                                @include('pages.admin.xen_platform.split-payments.filter')
                                             </div>
                                             <div class="card-content">
                                                 <div class="card-body card-dashboard">
@@ -250,16 +250,18 @@
             },
         });
 
-
         function displayData(page = 1, type = "split-payments", pagination_params = {}) {
             showPageLoader("Mohon tunggu...");
             tabActive = type;
+
+            const baseUrl = '/admin/xen_platform/split-payments/';
+            let url = type === 'split-rules' ? baseUrl + 'rules/data' : baseUrl + 'data';
 
             let data_search = { ...currentFilters };
             data_search.page = page;
 
             $.ajax({
-                url: `/admin/xen_platform/split-payments/${type}`,
+                url: url,
                 method: "get",
                 data: data_search,
                 success: async function (response) {

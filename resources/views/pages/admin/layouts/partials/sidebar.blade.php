@@ -45,7 +45,7 @@
                             <i class="bx bx-right-arrow-alt"></i>
                             <span class="menu-item" data-i18n="split-payments">Split Payments</span></a>
                     </li>
-                    <li @if (Request::segment(2) == 'send-payment' && Request::segment(3) == 'disbursement') class="active" @endif>
+                    <li @if (Request::segment(2) == 'xen_platform' && Request::segment(3) == 'disbursement') class="active" @endif>
                         <a href="{{ route('admin.xen_platform.disbursement.index') }}">
                             <i class="bx bx-right-arrow-alt"></i>
                             <span class="menu-item" data-i18n="partner-accounts">Disbursements</span></a>
