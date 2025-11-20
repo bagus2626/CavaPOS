@@ -45,22 +45,14 @@
                             <i class="bx bx-right-arrow-alt"></i>
                             <span class="menu-item" data-i18n="split-payments">Split Payments</span></a>
                     </li>
-                </ul>
-            </li>
-
-            <li class=" nav-item"><a href="#">
-                    <i class="bx bx-up-arrow-circle"></i>
-                    <span class="menu-title" data-i18n="XenPlatform">Send Payments</span>
-                </a>
-                <ul class="menu-content">
-                    <li @if (Request::segment(2) == 'send-payment' && Request::segment(3) == 'payout') class="active" @endif>
-                        <a href="{{ route('admin.send-payment.payout.index') }}">
+                    <li @if (Request::segment(2) == 'send-payment' && Request::segment(3) == 'disbursement') class="active" @endif>
+                        <a href="{{ route('admin.xen_platform.disbursement.index') }}">
                             <i class="bx bx-right-arrow-alt"></i>
                             <span class="menu-item" data-i18n="partner-accounts">Disbursements</span></a>
                     </li>
-
                 </ul>
             </li>
+
             <li class="nav-item">
                 <a href="#">
                     <i class="bx bx-user-check"></i>

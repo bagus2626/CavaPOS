@@ -67,38 +67,3 @@
     </div>
 </div>
 
-<script>
-    $(document).on('click', '.disbursement-clickable-row', function (e) {
-        const $row = $(this);
-
-        if ($(e.target).closest('.dropdown, .dropdown-toggle, a').length > 0) {
-            return;
-        }
-
-        const businessId = $row.data('business-id');
-        console.log(businessId)
-        const payoutId = $row.data('payout-id');
-
-        if (businessId && payoutId) {
-            $row.addClass('loading');
-
-            const colCount = $row.find('td').length;
-
-            $row.html(`
-                    <td colspan="${colCount}" class="text-center">
-                        <div class="d-flex justify-content-center align-items-center gap-2 overlay">
-                            <div class="spinner-border" role="status" style="width:1.5rem; height:1.5rem;"></div>
-                            <span class="fw-medium ml-1">Memuat detail disbursement...</span>
-                        </div>
-                    </td>
-                `);
-
-            setTimeout(() => {
-                window.location.href = `/admin/send-payment/payout/${businessId}/detail/${payoutId}`;
-            }, 250);
-        } else {
-            alert('Missing business_id or payout_id for row click.')
-        }
-    });
-</script>
-
