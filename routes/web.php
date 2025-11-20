@@ -1,6 +1,8 @@
 <?php
 
 
+use App\Http\Controllers\Admin\XenPlatform\BalanceController;
+use App\Http\Controllers\Admin\XenPlatform\TransactionsController;
 use Pusher\Pusher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -119,6 +121,17 @@ Route::middleware('setlocale')->group(function () {
         });
 
         Route::prefix('xen_platform')->name('xen_platform.')->group(function () {
+            Route::prefix('transactions')->name('transactions.')->group(function () {
+                Route::get('/', [TransactionsController::class, 'index'])->name('index');
+                Route::post('data', [TransactionsController::class, 'getData'])->name('data');
+                Route::get('detail/{id}', [TransactionsController::class, 'getTransactionById'])->name('detail');
+            });
+
+            Route::prefix('balance')->name('balance.')->group(function () {
+                Route::get('/', [BalanceController::class, 'index'])->name('index');
+                Route::post('data', [BalanceController::class, 'getData'])->name('data');
+            });
+
             Route::prefix('partner-account')->name('partner-account.')->group(function () {
                 Route::prefix('{accountId}')->group(function () {
                     Route::get('information', [PartnerAccountController::class, 'showAccountInfo'])->name('information');

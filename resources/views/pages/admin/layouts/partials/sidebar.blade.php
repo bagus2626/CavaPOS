@@ -25,6 +25,16 @@
                     <span class="menu-title" data-i18n="XenPlatform">XenPlatform</span>
                 </a>
                 <ul class="menu-content">
+                    <li @if (Request::segment(2) == 'xen_platform' && Request::segment(3) == 'transactions') class="active" @endif>
+                        <a href="{{ route('admin.xen_platform.transactions.index') }}">
+                            <i class="bx bx-right-arrow-alt"></i>
+                            <span class="menu-item" data-i18n="partner-accounts">Transactions</span></a>
+                    </li>
+                    <li @if (Request::segment(2) == 'xen_platform' && Request::segment(3) == 'balance') class="active" @endif>
+                        <a href="{{ route('admin.xen_platform.balance.index') }}">
+                            <i class="bx bx-right-arrow-alt"></i>
+                            <span class="menu-item" data-i18n="partner-accounts">Balance</span></a>
+                    </li>
                     <li @if (Request::segment(2) == 'xen_platform' && Request::segment(3) == 'partner-account') class="active" @endif>
                         <a href="{{ route('admin.xen_platform.partner-account.index') }}">
                             <i class="bx bx-right-arrow-alt"></i>
