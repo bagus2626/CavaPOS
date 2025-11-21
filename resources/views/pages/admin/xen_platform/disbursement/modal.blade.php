@@ -7,7 +7,7 @@
                     <i class="bx bx-x"></i>
                 </button>
             </div>
-            <form id="createAccountForm" method="POST" action="{{ route('admin.send-payment.payout.create') }}">
+            <form id="createAccountForm" method="POST" action="{{ route('admin.xen_platform.disbursement.create') }}">
                 @csrf
                 <input type="hidden" id="validate_account_number" name="validate_account_number" value="">
                 <input type="hidden" id="validate_account_holder_name" name="validate_account_holder_name" value="">
@@ -349,7 +349,7 @@
                 $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...');
 
                 $.ajax({
-                    url: '{{ route("admin.send-payment.payout.validate-bank") }}',
+                    url: '{{ route("admin.xen_platform.disbursement.validate-bank") }}',
                     method: 'GET',
                     data: {
                         bank_code: bankCode,

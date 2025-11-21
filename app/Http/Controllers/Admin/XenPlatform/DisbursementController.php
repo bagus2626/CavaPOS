@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin\SendPayment;
+namespace App\Http\Controllers\Admin\XenPlatform;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\PaymentGateway\Xendit\BalanceController;
@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
-class PayoutController extends Controller
+class DisbursementController extends Controller
 {
     protected $xendit;
     protected $xenditPayout;
@@ -50,7 +50,7 @@ class PayoutController extends Controller
                 : null;
         }
 
-        return view('pages.admin.send-payment.disbursement.index',
+        return view('pages.admin.xen_platform.disbursement.index',
             [
                 'tab' => $tab,
                 'accounts' => $accounts,
@@ -191,7 +191,7 @@ class PayoutController extends Controller
 
         $data = $query->paginate(10);
 
-        return view('pages.admin.send-payment.disbursement.display', ['data' => $data])->render();
+        return view('pages.admin.xen_platform.disbursement.display', ['data' => $data])->render();
     }
 
     public function getPayout($businessId, $payoutId)
@@ -207,6 +207,6 @@ class PayoutController extends Controller
         $connectorReference = XenditPayout::where('payout_id', $payoutId)->first();
         $payout['connector_reference'] = $connectorReference->connector_reference ?? null;
 
-        return view('pages.admin.send-payment.disbursement.detail.index', ['data' => $payout]);
+        return view('pages.admin.xen_platform.disbursement.detail.index', ['data' => $payout]);
     }
 }
