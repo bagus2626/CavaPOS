@@ -112,7 +112,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="9" class="text-center">
+                    <td colspan="10" class="text-center">
                         <i class="bx bx-info-circle"></i> Tidak ada data balance yang ditemukan.
                     </td>
                 </tr>
