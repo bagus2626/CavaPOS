@@ -3,14 +3,14 @@
             {{-- 1. Dropdown Filter --}}
             <div class="dropdown mr-2">
                 <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownFilter" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Filter (<span id="filter-count">0</span>)
+                    {{ __('messages.owner.xen_platform.accounts.filter') }} (<span id="filter-count">0</span>)
                 </button>
 
                 <div class="dropdown-menu p-3" aria-labelledby="dropdownFilter" style="width: 800px; white-space: normal;">
 
                     <div class="d-flex justify-content-between mb-2">
-                        <button class="btn btn-sm btn-outline-secondary" id="clear-all-filters" type="button">Clear All</button>
-                        <button class="btn btn-sm btn-primary" id="close-filter-dropdown-btn" type="button" data-toggle="dropdown">Close</button>
+                        <button class="btn btn-sm btn-outline-secondary" id="clear-all-filters" type="button">{{ __('messages.owner.xen_platform.accounts.clear_all') }}</button>
+                        <button class="btn btn-sm btn-primary" id="close-filter-dropdown-btn" type="button" data-toggle="dropdown">{{ __('messages.owner.xen_platform.accounts.close') }}</button>
                     </div>
 
                     <div class="row" id="popup-filter-options">
@@ -26,7 +26,7 @@
 
                         {{-- Kolom 3: TYPE --}}
                         <div class="col-sm-2 px-2" style="flex-basis: 25%; max-width: 25%;">
-                            <h6 class="font-weight-bold border-bottom pb-1">TYPE</h6>
+                            <h6 class="font-weight-bold border-bottom pb-1">{{ __('messages.owner.xen_platform.accounts.type_b') }}</h6>
                             <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input filter-checkbox" id="type-disbursement" data-filter-group="types" value="DISBURSEMENT"><label class="custom-control-label" for="type-disbursement">Disbursement</label></div>
                             <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input filter-checkbox" id="type-payment" data-filter-group="types" value="PAYMENT"><label class="custom-control-label" for="type-payment">Payment</label></div>
                             <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input filter-checkbox" id="type-remittance-payout" data-filter-group="types" value="REMITTANCE_PAYOUT"><label class="custom-control-label" for="type-remittance-payout">Remittance Payout</label></div>
@@ -39,7 +39,7 @@
 
                         {{-- Kolom 4: PAYMENT METHOD --}}
                         <div class="col-sm-3 px-2" style="flex-basis: 30%; max-width: 30%;">
-                            <h6 class="font-weight-bold border-bottom pb-1">PAYMENT METHOD</h6>
+                            <h6 class="font-weight-bold border-bottom pb-1">{{ __('messages.owner.xen_platform.accounts.payment_method_b') }}</h6>
                             <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input filter-checkbox" id="pm-bank" data-filter-group="channel_categories" value="BANK"><label class="custom-control-label" for="pm-bank">Bank</label></div>
                             <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input filter-checkbox" id="pm-cards" data-filter-group="channel_categories" value="CARDS"><label class="custom-control-label" for="pm-cards">Cards</label></div>
                             <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input filter-checkbox" id="pm-cardless-credit" data-filter-group="channel_categories" value="CARDLESS_CREDIT"><label class="custom-control-label" for="pm-cardless-credit">Cardless Credit</label></div>
@@ -56,7 +56,7 @@
 
                         {{-- Kolom 5: CURRENCY --}}
                         <div class="col-sm-2 px-2" style="flex-basis: 25%; max-width: 25%;">
-                            <h6 class="font-weight-bold border-bottom pb-1">CURRENCY</h6>
+                            <h6 class="font-weight-bold border-bottom pb-1">{{ __('messages.owner.xen_platform.accounts.currency_b') }}</h6>
                             <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input filter-checkbox" id="currency-idr" data-filter-group="currency" value="IDR"><label class="custom-control-label" for="currency-idr">IDR</label></div>
                             <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input filter-checkbox" id="currency-php" data-filter-group="currency" value="PHP"><label class="custom-control-label" for="currency-php">PHP</label></div>
                             <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input filter-checkbox" id="currency-usd" data-filter-group="currency" value="USD"><label class="custom-control-label" for="currency-usd">USD</label></div>
@@ -88,12 +88,12 @@
             {{-- 3. Search Box --}}
             <div class="input-group mr-2 flex-grow-1" style="max-width: 500px;">
                 <div class="input-group-prepend">
-                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="search-type-toggle">Reference</button>
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="search-type-toggle">{{ __('messages.owner.xen_platform.accounts.reference') }}</button>
                     <div class="dropdown-menu">
-                        <a class="dropdown-item search-type-select" href="#" data-search-key="reference_id">Reference</a>
-                        <a class="dropdown-item search-type-select" href="#" data-search-key="account_identifier">Account</a>
-                        <a class="dropdown-item search-type-select" href="#" data-search-key="amount">Amount</a>
-                        <a class="dropdown-item search-type-select" href="#" data-search-key="product_id">Product ID</a>
+                        <a class="dropdown-item search-type-select" href="#" data-search-key="reference_id">{{ __('messages.owner.xen_platform.accounts.reference') }}</a>
+                        <a class="dropdown-item search-type-select" href="#" data-search-key="account_identifier">{{ __('messages.owner.xen_platform.accounts.account') }}</a>
+                        <a class="dropdown-item search-type-select" href="#" data-search-key="amount">{{ __('messages.owner.xen_platform.accounts.amount') }}</a>
+                        <a class="dropdown-item search-type-select" href="#" data-search-key="product_id">{{ __('messages.owner.xen_platform.accounts.product_id') }}</a>
                     </div>
                 </div>
                 <input type="text" class="form-control" placeholder="Search..." aria-label="Search" id="global-search-input">
@@ -102,10 +102,10 @@
             {{-- 4. Tombol Terapkan SEMUA Filter (Aksi Final) --}}
             <div class="d-flex w-md-auto">
                 <button id="apply-filter-btn" class="btn btn-primary mr-1 flex-grow-1" type="button">
-                    <i class="fas fa-filter"></i> Apply Filter
+                    <i class="fas fa-filter"></i> {{ __('messages.owner.xen_platform.accounts.apply_filter') }}
                 </button>
                 <button id="reset-filter-btn" class="btn btn-secondary" type="button" title="Reset semua filter">
-                    <i class="fas fa-sync-alt"></i> Reset
+                    <i class="fas fa-sync-alt"></i> {{ __('messages.owner.xen_platform.accounts.reset') }}
                 </button>
             </div>
 

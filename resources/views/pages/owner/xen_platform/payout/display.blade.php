@@ -2,11 +2,11 @@
     <thead class="thead-dark">
     <tr>
         <th class="w-2p">No</th>
-        <th class="w-8p">Date Created</th>
-        <th class="w-15p">Nama Partner</th>
-        <th class="w-10p">Reference</th>
-        <th class="w-5p">Channel</th>
-        <th class="w-15p">Amount</th>
+        <th class="w-8p">{{ __('messages.owner.xen_platform.payouts.date_created') }}</th>
+        <th class="w-15p">{{ __('messages.owner.xen_platform.payouts.business_name') }}</th>
+        <th class="w-10p">{{ __('messages.owner.xen_platform.payouts.reference') }}</th>
+        <th class="w-5p">{{ __('messages.owner.xen_platform.payouts.channel') }}</th>
+        <th class="w-15p">{{ __('messages.owner.xen_platform.payouts.amount') }}</th>
         <th class="w-10p">Status</th>
     </tr>
     </thead>
@@ -43,7 +43,7 @@
     @empty
         <tr>
             <td colspan="7" class="text-center">
-                <i class="bx bx-info-circle"></i> Tidak ada data disbursement yang ditemukan.
+                <i class="bx bx-info-circle"></i> {{ __('messages.owner.xen_platform.payouts.no_withdrawal_data_found') }}
             </td>
         </tr>
     @endforelse
@@ -52,11 +52,14 @@
 <div class="d-flex justify-content-between align-items-center mt-1">
     @if ($data->total() > 0)
         <div class="pagination-summary text-muted">
-            Showing {{ $data->firstItem() }} - {{ $data->lastItem() }} from {{ $data->total() }} disbursement
+            {{ __('messages.owner.xen_platform.payouts.showing') }} 
+            {{ $data->firstItem() }} - {{ $data->lastItem() }} 
+            {{ __('messages.owner.xen_platform.payouts.from') }} {{ $data->total() }} 
+            {{ __('messages.owner.xen_platform.payouts.withdrawal') }}
         </div>
     @else
         <div class="pagination-summary text-muted">
-            Tidak ada data yang ditemukan.
+            {{ __('messages.owner.xen_platform.payouts.no_data_found') }}
         </div>
     @endif
 

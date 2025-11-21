@@ -8,11 +8,11 @@
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="fas fa-money-bill-transfer mr-2"></i>
-                            Payout Details
+                            {{ __('messages.owner.xen_platform.payouts.withdrawal_detail') }}
                         </h3>
                         <div class="card-tools">
                             <a href="{{ url()->previous() }}" class="btn btn-sm btn-outline-secondary mr-2">
-                                <i class="fas fa-arrow-left mr-1"></i> Kembali
+                                <i class="fas fa-arrow-left mr-1"></i> {{ __('messages.owner.xen_platform.payouts.back') }}
                             </a>
                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
                                 <i class="fas fa-minus"></i>
@@ -23,7 +23,7 @@
                         <!-- Amount & Status -->
                         <div class="row mb-4">
                             <div class="col-md-6">
-                                <h6 class="text-muted">Transaction Amount</h6>
+                                <h6 class="text-muted">{{ __('messages.owner.xen_platform.payouts.transaction_amount') }}</h6>
                                 <h2 class="font-weight-bold text-primary">
                                     {{ $data['currency'] ?? 'IDR' }}
                                     {{ number_format($data['amount'] ?? 0, 0, ',', '.') }}
@@ -55,25 +55,25 @@
                             <div class="col-12">
                                 <h5 class="font-weight-bold mb-3 border-bottom pb-2">
                                     <i class="fas fa-info-circle mr-2"></i>
-                                    Basic Information
+                                    {{ __('messages.owner.xen_platform.payouts.basic_information') }}
                                 </h5>
                                 <div class="table-responsive">
                                     <table class="table table-sm table-borderless">
                                         <tr>
-                                            <td class="font-weight-bold" style="width: 150px;">Created Date</td>
+                                            <td class="font-weight-bold" style="width: 150px;">{{ __('messages.owner.xen_platform.payouts.created_date') }}</td>
                                             <td>: {{ \Carbon\Carbon::parse($data['created'])->setTimezone('Asia/Jakarta')->format('d M Y, H:i:s') }} (GMT +7)</td>
                                         </tr>
                                         <tr>
-                                            <td class="font-weight-bold">External ID</td>
+                                            <td class="font-weight-bold">{{ __('messages.owner.xen_platform.payouts.external_id') }}</td>
                                             <td>: {{ $data['reference_id'] ?? '-' }}</td>
                                         </tr>
                                         <tr>
-                                            <td class="font-weight-bold">Payout ID</td>
+                                            <td class="font-weight-bold">{{ __('messages.owner.xen_platform.payouts.withdrawal_id') }}</td>
                                             <td>: {{ $data['id'] ?? '-' }}</td>
                                         </tr>
                                         @if(!empty($data['estimated_arrival_time']))
                                             <tr>
-                                                <td class="font-weight-bold">Estimated Arrival</td>
+                                                <td class="font-weight-bold">{{ __('messages.owner.xen_platform.payouts.estimated_incoming_funds') }}</td>
                                                 <td>: {{ \Carbon\Carbon::parse($data['estimated_arrival_time'])->setTimezone('Asia/Jakarta')->format('d M Y, H:i:s') }} (GMT +7)</td>
                                             </tr>
                                         @endif
@@ -89,7 +89,7 @@
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="fas fa-credit-card mr-2"></i>
-                            Payment Details
+                            {{ __('messages.owner.xen_platform.payouts.payment_details') }}
                         </h3>
                         <div class="card-tools">
                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -102,17 +102,17 @@
                             <table class="table table-bordered table-striped">
                                 <thead class="thead-light">
                                 <tr>
-                                    <th style="width: 30%">Field</th>
-                                    <th>Value</th>
+                                    <th style="width: 30%">{{ __('messages.owner.xen_platform.payouts.fields') }}</th>
+                                    <th>{{ __('messages.owner.xen_platform.payouts.values') }}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 <tr>
-                                    <td class="font-weight-bold">Account Holder Name</td>
+                                    <td class="font-weight-bold">{{ __('messages.owner.xen_platform.payouts.account_holder_name') }}</td>
                                     <td>{{ $data['channel_properties']['account_holder_name'] ?? '-' }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="font-weight-bold">Bank Code</td>
+                                    <td class="font-weight-bold">{{ __('messages.owner.xen_platform.payouts.bank_code') }}</td>
                                     <td>
                                             <span class="badge badge-primary">
                                                 {{ $data['channel_code'] ?? '-' }}
@@ -120,7 +120,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="font-weight-bold">Bank Account Number</td>
+                                    <td class="font-weight-bold">{{ __('messages.owner.xen_platform.payouts.bank_account_number') }}</td>
                                     <td>
                                         <code class="font-weight-bold">
                                             {{ $data['channel_properties']['account_number'] ?? '-' }}
@@ -128,11 +128,11 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="font-weight-bold">Description</td>
+                                    <td class="font-weight-bold">{{ __('messages.owner.xen_platform.payouts.description') }}</td>
                                     <td>{{ $data['description'] ?? '-' }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="font-weight-bold">Bank Reference</td>
+                                    <td class="font-weight-bold">{{ __('messages.owner.xen_platform.payouts.bank_reference') }}</td>
                                     <td>
                                         @if(!empty($data['connector_reference']))
                                             <code>{{ $data['connector_reference'] }}</code>
@@ -142,7 +142,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="font-weight-bold">Email Notification</td>
+                                    <td class="font-weight-bold">{{ __('messages.owner.xen_platform.payouts.email_notification') }}</td>
                                     <td>
                                         @if(!empty($data['receipt_notification']['email_to'][0]))
                                             <i class="fas fa-envelope text-primary mr-1"></i>
@@ -154,7 +154,7 @@
                                 </tr>
                                 @if(!empty($data['failure_code']))
                                     <tr class="table-danger">
-                                        <td class="font-weight-bold">Failure Code</td>
+                                        <td class="font-weight-bold">{{ __('messages.owner.xen_platform.payouts.failure_code') }}</td>
                                         <td class="text-danger font-weight-bold">
                                             {{ $data['failure_code'] }}
                                         </td>
@@ -162,7 +162,7 @@
                                 @endif
                                 @if(!empty($data['failure_message']))
                                     <tr class="table-danger">
-                                        <td class="font-weight-bold">Failure Message</td>
+                                        <td class="font-weight-bold">{{ __('messages.owner.xen_platform.payouts.failure_message') }}</td>
                                         <td class="text-danger">
                                             {{ $data['failure_message'] }}
                                         </td>
@@ -182,7 +182,7 @@
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="fas fa-history mr-2"></i>
-                            Payout Status Timeline
+                            {{ __('messages.owner.xen_platform.payouts.withdrawal_status_timeline') }}
                         </h3>
                         <div class="card-tools">
                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -211,12 +211,12 @@
                             ];
 
                             $statusDescriptions = [
-                                'ACCEPTED' => 'The payout request has been accepted and has not yet been sent on to a channel.',
-                                'REQUESTED' => 'The payout has been sent to the channel. Funds have been sent to the channel for processing.',
-                                'SUCCEEDED' => 'Sender bank/channel has sent out the payout.',
-                                'FAILED' => 'Payout failed. Check the failure reason for details.',
-                                'CANCELLED' => 'Payout has been cancelled per your request.',
-                                'REVERSED' => 'Payout was rejected by the channel after the payout succeeded.',
+                                'ACCEPTED' => __('messages.owner.xen_platform.payouts.if_accepted'),
+                                'REQUESTED' => __('messages.owner.xen_platform.payouts.if_requested'),
+                                'SUCCEEDED' => __('messages.owner.xen_platform.payouts.if_succeeded'),
+                                'FAILED' => __('messages.owner.xen_platform.payouts.if_failed'),
+                                'CANCELLED' => __('messages.owner.xen_platform.payouts.if_cancelled'),
+                                'REVERSED' => __('messages.owner.xen_platform.payouts.if_reversed'),
                             ];
                         @endphp
 
@@ -232,8 +232,8 @@
                                             {{ \Carbon\Carbon::parse($data['created'])->setTimezone('Asia/Jakarta')->format('d M Y, H:i') }}
                                         </span>
                                             <h3 class="timeline-header mt-2">
-                                                <span class="badge bg-primary mr-2">CREATED</span>
-                                                Payout request was created
+                                                <span class="badge bg-primary mr-2">{{ __('messages.owner.xen_platform.payouts.created_b') }}</span>
+                                                {{ __('messages.owner.xen_platform.payouts.withdrawal_created') }}
                                             </h3>
                                         </div>
                                     </div>
@@ -275,7 +275,7 @@
                         @else
                             <div class="text-center py-4">
                                 <i class="fas fa-history fa-2x text-muted mb-3"></i>
-                                <p class="text-muted mb-0">No payout history available</p>
+                                <p class="text-muted mb-0">{{ __('messages.owner.xen_platform.payouts.no_withdrawal_history') }}</p>
                             </div>
                         @endif
                     </div>
@@ -283,7 +283,7 @@
                         <div class="card-footer">
                             <small class="text-muted">
                                 <i class="fas fa-info-circle mr-1"></i>
-                                All times in GMT +7
+                                {{ __('messages.owner.xen_platform.payouts.all_times') }} GMT +7
                             </small>
                         </div>
                     @endif
@@ -294,7 +294,7 @@
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="fas fa-bolt mr-2"></i>
-                            Quick Actions
+                            {{ __('messages.owner.xen_platform.payouts.quick_actions') }}
                         </h3>
                         <div class="card-tools">
                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -321,7 +321,7 @@
 {{--                            </button>--}}
 
                             <button class="btn btn-outline-secondary btn-sm" onclick="printPayoutReceipt()">
-                                <i class="fas fa-print mr-1"></i> Print Receipt
+                                <i class="fas fa-print mr-1"></i> {{ __('messages.owner.xen_platform.payouts.print_receipt') }}
                             </button>
 
 {{--                            @if($data['status'] === 'FAILED' && !empty($data['reference_id']))--}}
@@ -338,7 +338,7 @@
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="fas fa-info-circle mr-2"></i>
-                            Payout Information
+                            {{ __('messages.owner.xen_platform.payouts.withdrawal_information') }}
                         </h3>
                         <div class="card-tools">
                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -348,10 +348,10 @@
                     </div>
                     <div class="card-body">
                         <div class="small text-muted">
-                            <p><strong>Payout ID:</strong> {{ $data['id'] ?? 'N/A' }}</p>
-                            <p><strong>Channel:</strong> {{ $data['channel_code'] ?? 'N/A' }}</p>
-                            <p><strong>Currency:</strong> {{ $data['currency'] ?? 'IDR' }}</p>
-                            <p><strong>Amount:</strong> {{ number_format($data['amount'] ?? 0, 0, ',', '.') }}</p>
+                            <p><strong>{{ __('messages.owner.xen_platform.payouts.payout_id') }}:</strong> {{ $data['id'] ?? 'N/A' }}</p>
+                            <p><strong>{{ __('messages.owner.xen_platform.payouts.channel') }}:</strong> {{ $data['channel_code'] ?? 'N/A' }}</p>
+                            <p><strong>{{ __('messages.owner.xen_platform.payouts.currency') }}:</strong> {{ $data['currency'] ?? 'IDR' }}</p>
+                            <p><strong>{{ __('messages.owner.xen_platform.payouts.amount') }}:</strong> {{ number_format($data['amount'] ?? 0, 0, ',', '.') }}</p>
                             @if(!empty($data['estimated_arrival_time']))
                                 <p><strong>ETA:</strong> {{ \Carbon\Carbon::parse($data['estimated_arrival_time'])->setTimezone('Asia/Jakarta')->format('d M Y, H:i') }}</p>
                             @endif

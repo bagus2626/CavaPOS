@@ -1,7 +1,7 @@
 @extends('layouts.owner')
 
-@section('title', 'Transaction Detail')
-@section('page_title', 'Transaction Detail')
+@section('title', __('messages.owner.xen_platform.accounts.transaction_details'))
+@section('page_title', __('messages.owner.xen_platform.accounts.transaction_details'))
 
 @section('content')
     <section class="content">

@@ -532,7 +532,7 @@
                                     <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.accounts.information') : 'javascript:void(0)' }}"
                                        class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'accounts') active @endif">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>Accounts</p>
+                                        <p>{{ __('messages.owner.layout.accounts') }}</p>
                                     </a>
                                 </li>
                             </ul>
@@ -541,7 +541,7 @@
                                     <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.split-payment.index') : 'javascript:void(0)' }}"
                                        class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'split-payment') active @endif">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>Split Payments</p>
+                                        <p>{{ __('messages.owner.layout.split_payments') }}</p>
                                     </a>
                                 </li>
                             </ul>
@@ -550,7 +550,7 @@
                                     <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.payout.index') : 'javascript:void(0)' }}"
                                        class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'payout') active @endif">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>Payout</p>
+                                        <p>{{ __('messages.owner.layout.withdrawal') }}</p>
                                     </a>
                                 </li>
                             </ul>
@@ -780,6 +780,9 @@
     <!-- jQuery -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 
+    <!-- Popper.js (optional jika pakai bootstrap.bundle) -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+
     <!-- Bootstrap 4 (HARUS sebelum AdminLTE) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
 
@@ -795,9 +798,6 @@
 
     <!-- ChartJS (load once only) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-
-    <!-- Popper.js (optional jika pakai bootstrap.bundle) -->
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
 
     <!-- SweetAlert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

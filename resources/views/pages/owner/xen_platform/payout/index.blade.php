@@ -1,7 +1,7 @@
 @extends('layouts.owner')
 
-@section('title', 'Payout')
-@section('page_title', 'Payout')
+@section('title', __('messages.owner.xen_platform.payouts.withdrawal'))
+@section('page_title', __('messages.owner.xen_platform.payouts.withdrawal'))
 
 @section('content')
     <section class="content">
@@ -10,12 +10,12 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4 class="card-title">List Payout</h4>
+                            <h4 class="card-title">{{ __('messages.owner.xen_platform.payouts.withdrawal_list') }}</h4>
                             <div class="col ml-auto">
                                 <div class="dropdown float-right">
                                     <button type="button" class="btn btn-primary"
                                             onclick="showModal('create-split-rules','add')">
-                                        <i class="fas fa-paper-plane mr-1"></i> Create Disbursement
+                                        <i class="fas fa-paper-plane mr-1"></i> {{ __('messages.owner.xen_platform.payouts.create_withdrawal') }}
                                     </button>
                                 </div>
                             </div>
@@ -36,7 +36,7 @@
                                                         <div class="text-center">
                                                             <div class="d-flex flex-column align-items-center justify-content-center py-4 text-secondary">
                                                                 <i class="bx bx-loader bx-spin bx-lg"></i>
-                                                                <div class="fw-medium mt-1">Loading data...</div>
+                                                                <div class="fw-medium mt-1">{{ __('messages.owner.xen_platform.payouts.loading_data') }}</div>
                                                             </div>
                                                         </div>
                                                     </div>

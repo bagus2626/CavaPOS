@@ -10,7 +10,7 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4 class="card-title">Account Information</h4>
+                            <h4 class="card-title">{{ __('messages.owner.xen_platform.accounts.account_information') }}</h4>
                         </div>
                         <div class="card-content">
                             <div class="card-body">
@@ -18,25 +18,25 @@
                                     <li class="nav-item">
                                         <a class="nav-link {{ $tab === 'profile' ? 'active' : '' }}"
                                            data-tab="profile" data-toggle="tab" href="#profile" role="tab">
-                                            Profile
+                                            {{ __('messages.owner.xen_platform.accounts.profile') }}
                                         </a>
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link {{ $tab === 'activity' ? 'active' : '' }}"
                                            data-tab="activity" data-toggle="tab" href="#activity" role="tab">
-                                            Transactions
+                                            {{ __('messages.owner.xen_platform.accounts.transactions') }}
                                         </a>
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link {{ $tab === 'invoices' ? 'active' : '' }}"
                                            data-tab="invoices" data-toggle="tab" href="#invoices" role="tab">
-                                            Invoices
+                                            {{ __('messages.owner.xen_platform.accounts.invoices') }}
                                         </a>
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link {{ $tab === 'balance' ? 'active' : '' }}"
                                            data-tab="balance" data-toggle="tab" href="#balance" role="tab">
-                                            Balance
+                                            {{ __('messages.owner.xen_platform.accounts.balance') }}
                                         </a>
                                     </li>
                                 </ul>
@@ -52,7 +52,7 @@
                                             <div class="text-center">
                                                 <div class="d-flex flex-column align-items-center justify-content-center py-4 text-secondary">
                                                     <i class="fas fa-spinner fa-spin fa-lg"></i>
-                                                    <div class="text-bold-500 mt-3">Loading data...</div>
+                                                    <div class="text-bold-500 mt-3">{{ __('messages.owner.xen_platform.accounts.loading_data') }}</div>
                                                 </div>
                                             </div>
                                         @endif
@@ -68,7 +68,7 @@
                                             <div class="text-center">
                                                 <div class="d-flex flex-column align-items-center justify-content-center py-4 text-secondary">
                                                     <i class="fas fa-spinner fa-spin fa-lg"></i>
-                                                    <div class="text-bold-500 mt-3">Loading data...</div>
+                                                    <div class="text-bold-500 mt-3">{{ __('messages.owner.xen_platform.accounts.loading_data') }}</div>
                                                 </div>
                                             </div>
                                         @endif
@@ -84,7 +84,7 @@
                                             <div class="text-center">
                                                 <div class="d-flex flex-column align-items-center justify-content-center py-4 text-secondary">
                                                     <i class="fas fa-spinner fa-spin fa-lg"></i>
-                                                    <div class="text-bold-500 mt-3">Loading data...</div>
+                                                    <div class="text-bold-500 mt-3">{{ __('messages.owner.xen_platform.accounts.loading_data') }}</div>
                                                 </div>
                                             </div>
                                         @endif
@@ -100,7 +100,7 @@
                                             <div class="text-center">
                                                 <div class="d-flex flex-column align-items-center justify-content-center py-4 text-secondary">
                                                     <i class="fas fa-spinner fa-spin fa-lg"></i>
-                                                    <div class="text-bold-500 mt-3">Loading data...</div>
+                                                    <div class="text-bold-500 mt-3">{{ __('messages.owner.xen_platform.accounts.loading_data') }}</div>
                                                 </div>
                                             </div>
                                         @endif

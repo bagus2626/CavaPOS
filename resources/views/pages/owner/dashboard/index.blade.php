@@ -15,7 +15,7 @@
                     <span class="info-box-icon bg-info elevation-1"><i class="fas fa-users"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">{{ __('messages.owner.dashboard.total_users') }}</span>
-                        <span class="info-box-number">1,410</span>
+                        <span class="info-box-number">{{ $data['total_accounts'] }}</span>
                     </div>
                 </div>
             </div>
@@ -23,8 +23,8 @@
                 <div class="info-box">
                     <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-shopping-cart"></i></span>
                     <div class="info-box-content">
-                        <span class="info-box-text">Total Orders</span>
-                        <span class="info-box-number">3,921</span>
+                        <span class="info-box-text">{{ __('messages.owner.dashboard.total_orders') }} ({{ now()->year }})</span>
+                        <span class="info-box-number">{{ $data['total_orders'] }}</span>
                     </div>
                 </div>
             </div>
@@ -32,8 +32,8 @@
                 <div class="info-box">
                     <span class="info-box-icon bg-success elevation-1"><i class="fas fa-dollar-sign"></i></span>
                     <div class="info-box-content">
-                        <span class="info-box-text">Revenue</span>
-                        <span class="info-box-number">$92,450</span>
+                        <span class="info-box-text">{{ __('messages.owner.dashboard.total_sales') }} ({{ now()->year }})</span>
+                        <span class="info-box-number">Rp. {{ number_format($data['orders_gross_income']) }}</span>
                     </div>
                 </div>
             </div>
@@ -41,8 +41,8 @@
                 <div class="info-box">
                     <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-star"></i></span>
                     <div class="info-box-content">
-                        <span class="info-box-text">Products</span>
-                        <span class="info-box-number">1,243</span>
+                        <span class="info-box-text">{{ __('messages.owner.dashboard.products') }}</span>
+                        <span class="info-box-number">{{ $data['total_products'] }}</span>
                     </div>
                 </div>
             </div>
@@ -55,7 +55,7 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Recent Orders</h3>
+                        <h3 class="card-title">{{ __('messages.owner.dashboard.recent_orders') }}</h3>
                         <div class="card-tools">
                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
                                 <i class="fas fa-minus"></i>
@@ -67,37 +67,36 @@
                             <table class="table table-striped table-hover">
                                 <thead>
                                     <tr>
-                                        <th>Order ID</th>
-                                        <th>Customer</th>
+                                        <th>{{ __('messages.owner.dashboard.order_id') }}</th>
+                                        <th>Outlet</th>
+                                        <th>{{ __('messages.owner.dashboard.customer') }}</th>
                                         <th>Status</th>
-                                        <th>Amount</th>
+                                        <th>{{ __('messages.owner.dashboard.amount') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td><a href="#">OR9842</a></td>
-                                        <td>John Smith</td>
-                                        <td><span class="badge badge-success">Shipped</span></td>
-                                        <td>$120.00</td>
-                                    </tr>
-                                    <tr>
-                                        <td><a href="#">OR1848</a></td>
-                                        <td>Jane Doe</td>
-                                        <td><span class="badge badge-warning">Pending</span></td>
-                                        <td>$65.90</td>
-                                    </tr>
-                                    <tr>
-                                        <td><a href="#">OR7429</a></td>
-                                        <td>Robert Johnson</td>
-                                        <td><span class="badge badge-danger">Delivered</span></td>
-                                        <td>$320.00</td>
-                                    </tr>
-                                    <tr>
-                                        <td><a href="#">OR7429</a></td>
-                                        <td>Sarah Williams</td>
-                                        <td><span class="badge badge-info">Processing</span></td>
-                                        <td>$86.00</td>
-                                    </tr>
+                                    @foreach ($data['last_orders'] as $order)
+                                        <tr>
+                                            <td><a href="#">{{ $order->booking_order_code ?? '-' }}</a></td>
+                                            <td>{{ $order->partner_name ?? '-' }}</td>
+                                            <td>{{ $order->customer_name ?? '-' }}</td>
+                                            <td>
+                                                <span class="badge 
+                                                    @if ($order->order_status === 'PAID') badge-primary
+                                                    @elseif ($order->order_status === 'SERVED') badge-success
+                                                    @elseif ($order->order_status === 'PENDING') badge-warning
+                                                    @elseif ($order->order_status === 'UNPAID') badge-warning
+                                                    @elseif ($order->order_status === 'PROCESSED') badge-primary
+                                                    @elseif ($order->order_status === 'CANCELLED') badge-danger
+                                                    @else badge-secondary
+                                                    @endif
+                                                ">
+                                                    {{ $order->order_status }}
+                                                </span>
+                                            </td>
+                                            <td>Rp. {{ number_format($order->total_order_value ?? 0) }}</td>
+                                        </tr>
+                                    @endforeach
                                 </tbody>
                             </table>
                         </div>
@@ -108,7 +107,7 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Activity Timeline</h3>
+                        <h3 class="card-title">{{ __('messages.owner.dashboard.my_timeline') }}</h3>
                         <div class="card-tools">
                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
                                 <i class="fas fa-minus"></i>

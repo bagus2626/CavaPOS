@@ -4,14 +4,14 @@
         <tr>
             <th>No</th>
             <th>Status</th>
-            <th>Type</th>
-            <th>Channel</th>
-            <th>Account</th>
-            <th>Reference ID</th>
-            <th>Amount</th>
-            <th>Settlement <br> Status</th>
-            <th>Date Created (GMT +7)</th>
-            <th>Action</th>
+            <th>{{ __('messages.owner.xen_platform.accounts.type') }}</th>
+            <th>{{ __('messages.owner.xen_platform.accounts.channel') }}</th>
+            <th>{{ __('messages.owner.xen_platform.accounts.account') }}</th>
+            <th>{{ __('messages.owner.xen_platform.accounts.reference_id') }}</th>
+            <th>{{ __('messages.owner.xen_platform.accounts.amount') }}</th>
+            <th>{{ __('messages.owner.xen_platform.accounts.settlement') }} <br> Status</th>
+            <th>{{ __('messages.owner.xen_platform.accounts.date_created') }} (GMT +7)</th>
+            <th>{{ __('messages.owner.xen_platform.accounts.action') }}</th>
         </tr>
         </thead>
         <tbody>
@@ -83,9 +83,9 @@
                         <div class="dropdown">
                             <span class="fas fa-ellipsis-v fa-lg font-medium-3 nav-hide-arrow cursor-pointer" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="menu"></span>
                             <div class="dropdown-menu dropdown-menu-right">
-                                <a class="dropdown-item copy-btn" data-copy-value="{{ $item['id'] }}"><i class="bx bx-copy-alt mr-1"></i> Copy Transaction ID</a>
-                                <a class="dropdown-item copy-btn" data-copy-value="{{ $item['reference_id'] ?? '' }}"><i class="bx bx-copy-alt mr-1"></i> Copy Reference</a>
-                                <a class="dropdown-item copy-btn" data-copy-value="{{ $item['product_id'] ?? '' }}"><i class="bx bx-copy-alt mr-1"></i> Copy Product ID</a>
+                                <a class="dropdown-item copy-btn" data-copy-value="{{ $item['id'] }}"><i class="bx bx-copy-alt mr-1"></i> {{ __('messages.owner.xen_platform.accounts.copy_transaction_id') }}</a>
+                                <a class="dropdown-item copy-btn" data-copy-value="{{ $item['reference_id'] ?? '' }}"><i class="bx bx-copy-alt mr-1"></i> {{ __('messages.owner.xen_platform.accounts.copy_reference') }}</a>
+                                <a class="dropdown-item copy-btn" data-copy-value="{{ $item['product_id'] ?? '' }}"><i class="bx bx-copy-alt mr-1"></i> {{ __('messages.owner.xen_platform.accounts.copy_product_id') }}</a>
                             </div>
                         </div>
                     @else
@@ -96,7 +96,7 @@
         @empty
             <tr>
                 <td colspan="10" class="text-center">
-                    <i class="fas fa-info-circle"></i> Tidak ada data transaksi yang ditemukan.
+                    <i class="fas fa-info-circle"></i> {{ __('messages.owner.xen_platform.accounts.no_transaction_data_found') }}
                 </td>
             </tr>
         @endforelse
@@ -118,7 +118,7 @@
 
         <div class="d-flex align-items-center text-muted small">
             <i class="bx bx-info-circle me-1"></i>
-            <span>Showing <strong>{{ $count }}</strong> records (Limit: <strong>{{ $limit }}</strong>)</span>
+            <span>{{ __('messages.owner.xen_platform.accounts.showing') }} <strong>{{ $count }}</strong> {{ __('messages.owner.xen_platform.accounts.records') }} (Limit: <strong>{{ $limit }}</strong>)</span>
         </div>
 
         <nav aria-label="Navigasi halaman transaksi" class="py-2 px-2">
@@ -128,7 +128,7 @@
                        data-before="{{ $beforeId }}"
                        data-after=""
                        data-direction="before">
-                        &laquo; Previous
+                        &laquo; {{ __('messages.owner.xen_platform.accounts.previous') }}
                     </a>
                 </li>
 
@@ -137,7 +137,7 @@
                        data-after="{{ $afterId }}"
                        data-before=""
                        data-direction="after">
-                        Next &raquo;
+                        {{ __('messages.owner.xen_platform.accounts.next') }} &raquo;
                     </a>
                 </li>
             </ul>

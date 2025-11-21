@@ -7,11 +7,11 @@
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="fas fa-exchange-alt mr-2"></i>
-                            Transaction Details
+                            {{ __('messages.owner.xen_platform.accounts.transaction_details') }}
                         </h3>
                         <div class="card-tools">
                             <a href="{{ url()->previous() }}" class="btn btn-sm btn-outline-secondary mr-2">
-                                <i class="fas fa-arrow-left mr-1"></i> Kembali
+                                <i class="fas fa-arrow-left mr-1"></i> {{ __('messages.owner.xen_platform.accounts.back') }}
                             </a>
                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
                                 <i class="fas fa-minus"></i>
@@ -22,7 +22,7 @@
                         <!-- Header Info -->
                         <div class="row mb-4">
                             <div class="col-md-6">
-                                <h6 class="text-muted">Transaction ID</h6>
+                                <h6 class="text-muted">{{ __('messages.owner.xen_platform.accounts.transaction_id') }}</h6>
                                 <h4 class="text-primary font-weight-bold">{{ $transaction['id'] ?? 'N/A' }}</h4>
                             </div>
                             <div class="col-md-6 text-md-right">
@@ -48,7 +48,7 @@
                         <!-- Amount -->
                         <div class="row mb-4">
                             <div class="col-12">
-                                <h6 class="text-muted">Transaction Amount</h6>
+                                <h6 class="text-muted">{{ __('messages.owner.xen_platform.accounts.transaction_amount') }}</h6>
                                 <h2 class="font-weight-bold text-{{ ($transaction['cashflow'] ?? '') === 'MONEY_IN' ? 'success' : 'danger' }}">
                                     {{ $transaction['currency'] ?? 'IDR' }}
                                     {{ number_format($transaction['amount'] ?? 0, 0, ',', '.') }}
@@ -64,48 +64,48 @@
                             <div class="col-12">
                                 <h5 class="font-weight-bold mb-3 border-bottom pb-2">
                                     <i class="fas fa-info-circle mr-2"></i>
-                                    Transaction Details
+                                    {{ __('messages.owner.xen_platform.accounts.transaction_details') }}
                                 </h5>
                                 <div class="table-responsive">
                                     <table class="table table-sm table-borderless">
                                         <tr>
-                                            <td class="font-weight-bold" style="width: 200px;">Type</td>
+                                            <td class="font-weight-bold" style="width: 200px;">{{ __('messages.owner.xen_platform.accounts.type') }}</td>
                                             <td>: {{ $transaction['type'] ?? '-' }}</td>
                                         </tr>
                                         <tr>
-                                            <td class="font-weight-bold">Channel Category</td>
+                                            <td class="font-weight-bold">{{ __('messages.owner.xen_platform.accounts.channel_category') }}</td>
                                             <td>: {{ $transaction['channel_category'] ?? '-' }}</td>
                                         </tr>
                                         <tr>
-                                            <td class="font-weight-bold">Channel Name</td>
+                                            <td class="font-weight-bold">{{ __('messages.owner.xen_platform.accounts.channel_name') }}</td>
                                             <td>: {{ $transaction['channel_code'] ?? '-' }}</td>
                                         </tr>
                                         <tr>
-                                            <td class="font-weight-bold">Account Number</td>
+                                            <td class="font-weight-bold">{{ __('messages.owner.xen_platform.accounts.account_number') }}</td>
                                             <td>: {{ $transaction['account_identifier'] ?? '-' }}</td>
                                         </tr>
                                         <tr>
-                                            <td class="font-weight-bold">Reference</td>
+                                            <td class="font-weight-bold">{{ __('messages.owner.xen_platform.accounts.reference') }}</td>
                                             <td>: {{ $transaction['reference_id'] ?? '-' }}</td>
                                         </tr>
                                         <tr>
-                                            <td class="font-weight-bold">Payment Request ID</td>
+                                            <td class="font-weight-bold">{{ __('messages.owner.xen_platform.accounts.payment_request_id') }}</td>
                                             <td>: {{ $transaction['product_data']['payment_request_id'] ?? '-' }}</td>
                                         </tr>
                                         <tr>
-                                            <td class="font-weight-bold">Product ID</td>
+                                            <td class="font-weight-bold">{{ __('messages.owner.xen_platform.accounts.product_id') }}</td>
                                             <td>: {{ $transaction['product_id'] ?? '-' }}</td>
                                         </tr>
                                         <tr>
-                                            <td class="font-weight-bold">Capture ID</td>
+                                            <td class="font-weight-bold">{{ __('messages.owner.xen_platform.accounts.capture_id') }}</td>
                                             <td>: {{ $transaction['product_data']['capture_id'] ?? '-' }}</td>
                                         </tr>
                                         <tr>
-                                            <td class="font-weight-bold">Channel Reference</td>
+                                            <td class="font-weight-bold">{{ __('messages.owner.xen_platform.accounts.channel_reference') }}</td>
                                             <td>: -</td>
                                         </tr>
                                         <tr>
-                                            <td class="font-weight-bold">Settlement Status</td>
+                                            <td class="font-weight-bold">{{ __('messages.owner.xen_platform.accounts.settlement_status') }}</td>
                                             <td>:
                                                 <span class="badge
                                                     @if($transaction['settlement_status'] === 'SETTLED') badge-success
@@ -125,21 +125,21 @@
                             <div class="col-12">
                                 <h5 class="font-weight-bold mb-3 border-bottom pb-2">
                                     <i class="fas fa-receipt mr-2"></i>
-                                    Fee Details
+                                    {{ __('messages.owner.xen_platform.accounts.fee_details') }}
                                 </h5>
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-striped">
                                         <thead class="thead-light">
                                         <tr>
-                                            <th>Description</th>
-                                            <th class="text-right">Amount</th>
+                                            <th>{{ __('messages.owner.xen_platform.accounts.description') }}</th>
+                                            <th class="text-right">{{ __('messages.owner.xen_platform.accounts.amount') }}</th>
                                         </tr>
                                         </thead>
                                         <tbody>
                                         <tr>
                                             <td>
                                                 <div class="d-flex justify-content-between align-items-center">
-                                                    <span>Transaction Fee Status</span>
+                                                    <span>{{ __('messages.owner.xen_platform.accounts.transaction_fee_status') }}</span>
                                                     @php
                                                         $feeStatus = strtoupper($transaction['fee']['status'] ?? 'N/A');
                                                         $feeStatusClass = 'badge-info';
@@ -171,21 +171,21 @@
                                             <td class="text-right">-</td>
                                         </tr>
                                         <tr>
-                                            <td>Transaction Fee</td>
+                                            <td>{{ __('messages.owner.xen_platform.accounts.transaction_fee') }}</td>
                                             <td class="text-right">
                                                 {{ $transaction['currency'] ?? 'IDR' }}
                                                 {{ number_format($transaction['fee']['xendit_fee'] ?? 0, 0, ',', '.') }}
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td>Transaction VAT</td>
+                                            <td>{{ __('messages.owner.xen_platform.accounts.transaction_vat') }}</td>
                                             <td class="text-right">
                                                 {{ $transaction['currency'] ?? 'IDR' }}
                                                 {{ number_format($transaction['fee']['value_added_tax'] ?? 0, 0, ',', '.') }}
                                             </td>
                                         </tr>
                                         <tr class="table-secondary font-weight-bold">
-                                            <td>Net Amount</td>
+                                            <td>{{ __('messages.owner.xen_platform.accounts.net_amount') }}</td>
                                             <td class="text-right">
                                                 {{ $transaction['net_amount_currency'] ?? 'IDR' }}
                                                 {{ number_format($transaction['net_amount'] ?? 0, 0, ',', '.') }}
@@ -202,12 +202,12 @@
                             <div class="col-12">
                                 <h5 class="font-weight-bold mb-3 border-bottom pb-2">
                                     <i class="fas fa-calendar-alt mr-2"></i>
-                                    Timeline Information
+                                    {{ __('messages.owner.xen_platform.accounts.timeline_information') }}
                                 </h5>
                                 <div class="table-responsive">
                                     <table class="table table-sm table-borderless">
                                         <tr>
-                                            <td class="font-weight-bold" style="width: 250px;">Estimated Settlement Date</td>
+                                            <td class="font-weight-bold" style="width: 250px;">{{ __('messages.owner.xen_platform.accounts.estimated_settlement_date') }}</td>
                                             <td>:
                                                 @if ($transaction['estimated_settlement_time'] ?? null)
                                                     {{ \Carbon\Carbon::parse($transaction['estimated_settlement_time'])->setTimezone('Asia/Jakarta')->format('d M Y, H:i') }} (GMT +7)
@@ -217,7 +217,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td class="font-weight-bold">Date Settled</td>
+                                            <td class="font-weight-bold">{{ __('messages.owner.xen_platform.accounts.date_settled') }}</td>
                                             <td>:
                                                 @if ($transaction['updated'] ?? null)
                                                     {{ \Carbon\Carbon::parse($transaction['updated'])->setTimezone('Asia/Jakarta')->format('d M Y, H:i') }} (GMT +7)
@@ -241,7 +241,7 @@
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="fas fa-history mr-2"></i>
-                            Event History
+                            {{ __('messages.owner.xen_platform.accounts.event_history') }}
                         </h3>
                         <div class="card-tools">
                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -277,7 +277,7 @@
                                 $history[] = [
                                     'status' => 'CREATED',
                                     'timestamp' => \Carbon\Carbon::parse($transaction['created'])->setTimezone('Asia/Jakarta'),
-                                    'details' => 'Transaksi dibuat dan pembayaran dimulai.',
+                                    'details' => __('messages.owner.xen_platform.accounts.event_created'),
                                     'sort_key' => $transaction['created'],
                                 ];
                             }
@@ -287,7 +287,7 @@
                                 $history[] = [
                                     'status' => $transaction['status'],
                                     'timestamp' => \Carbon\Carbon::parse($transaction['updated'])->setTimezone('Asia/Jakarta'),
-                                    'details' => 'Status akhir transaksi.',
+                                    'details' => __('messages.owner.xen_platform.accounts.event_status'),
                                     'sort_key' => $transaction['updated'],
                                 ];
                             }
@@ -299,14 +299,14 @@
                                     $history[] = [
                                         'status' => 'SETTLED',
                                         'timestamp' => \Carbon\Carbon::parse($settledTime)->setTimezone('Asia/Jakarta'),
-                                        'details' => 'Dana telah diselesaikan ke akun Anda.',
+                                        'details' => __('messages.owner.xen_platform.accounts.event_settled'),
                                         'sort_key' => $settledTime,
                                     ];
                                 } else {
                                     $history[] = [
                                         'status' => 'EST. SETTLEMENT',
                                         'timestamp' => \Carbon\Carbon::parse($transaction['estimated_settlement_time'])->setTimezone('Asia/Jakarta'),
-                                        'details' => 'Estimasi waktu dana akan diselesaikan.',
+                                        'details' => __('messages.owner.xen_platform.accounts.event_est'),
                                         'sort_key' => $transaction['estimated_settlement_time'],
                                     ];
                                 }
@@ -347,7 +347,7 @@
                         @else
                             <div class="text-center py-4">
                                 <i class="fas fa-history fa-2x text-muted mb-3"></i>
-                                <p class="text-muted mb-0">Tidak ada riwayat event</p>
+                                <p class="text-muted mb-0">{{ __('messages.owner.xen_platform.accounts.no_history') }}</p>
                             </div>
                         @endif
                     </div>
@@ -355,7 +355,7 @@
                         <div class="card-footer">
                             <small class="text-muted">
                                 <i class="fas fa-info-circle mr-1"></i>
-                                Menampilkan {{ count($eventHistory) }} event terbaru
+                                {{ __('messages.owner.xen_platform.accounts.show') }} {{ count($eventHistory) }} {{ __('messages.owner.xen_platform.accounts.events') }}
                             </small>
                         </div>
                     @endif

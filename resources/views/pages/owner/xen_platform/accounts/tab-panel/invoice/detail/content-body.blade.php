@@ -7,11 +7,11 @@
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="fas fa-file-invoice mr-2"></i>
-                            Invoice Details
+                            {{ __('messages.owner.xen_platform.accounts.invoice_details') }}
                         </h3>
                         <div class="card-tools">
                             <a href="{{ url()->previous() }}" class="btn btn-sm btn-outline-secondary mr-2">
-                                <i class="fas fa-arrow-left mr-1"></i> Kembali
+                                <i class="fas fa-arrow-left mr-1"></i> {{ __('messages.owner.xen_platform.accounts.back') }}
                             </a>
                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
                                 <i class="fas fa-minus"></i>
@@ -22,7 +22,7 @@
                         <!-- Header Info -->
                         <div class="row mb-4">
                             <div class="col-md-6">
-                                <h6 class="text-muted">Invoice ID</h6>
+                                <h6 class="text-muted">{{ __('messages.owner.xen_platform.accounts.invoice_id') }}</h6>
                                 <h4 class="text-primary font-weight-bold">{{ $invoice['id'] ?? 'N/A' }}</h4>
                             </div>
                             <div class="col-md-6 text-md-right">
@@ -48,7 +48,7 @@
                         <!-- Amount -->
                         <div class="row mb-4">
                             <div class="col-12">
-                                <h6 class="text-muted">Invoice Amount</h6>
+                                <h6 class="text-muted">{{ __('messages.owner.xen_platform.accounts.invoice_amount') }}</h6>
                                 <h2 class="text-success font-weight-bold">
                                     {{ $invoice['currency'] ?? 'IDR' }}
                                     {{ number_format($invoice['amount'] ?? 0, 0, ',', '.') }}
@@ -61,21 +61,21 @@
                             <div class="col-12">
                                 <h5 class="font-weight-bold mb-3 border-bottom pb-2">
                                     <i class="fas fa-user mr-2"></i>
-                                    Customer Information
+                                    {{ __('messages.owner.xen_platform.accounts.customer_information') }}
                                 </h5>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <table class="table table-sm table-borderless">
                                             <tr>
-                                                <td class="font-weight-bold" style="width: 120px;">Name</td>
+                                                <td class="font-weight-bold" style="width: 120px;">{{ __('messages.owner.xen_platform.accounts.name') }}</td>
                                                 <td>: {{ $invoice['customer']['given_names'] ?? '-' }}</td>
                                             </tr>
                                             <tr>
-                                                <td class="font-weight-bold">Email</td>
+                                                <td class="font-weight-bold">{{ __('messages.owner.xen_platform.accounts.email') }}</td>
                                                 <td>: {{ $invoice['customer']['email'] ?? '-' }}</td>
                                             </tr>
                                             <tr>
-                                                <td class="font-weight-bold">Mobile</td>
+                                                <td class="font-weight-bold">{{ __('messages.owner.xen_platform.accounts.mobile_number') }}</td>
                                                 <td>: {{ $invoice['customer']['mobile_number'] ?? '-' }}</td>
                                             </tr>
                                         </table>
@@ -83,15 +83,15 @@
                                     <div class="col-md-6">
                                         <table class="table table-sm table-borderless">
                                             <tr>
-                                                <td class="font-weight-bold" style="width: 120px;">External ID</td>
+                                                <td class="font-weight-bold" style="width: 120px;">{{ __('messages.owner.xen_platform.accounts.external_id') }}</td>
                                                 <td>: {{ $invoice['external_id'] ?? '-' }}</td>
                                             </tr>
                                             <tr>
-                                                <td class="font-weight-bold">User ID</td>
+                                                <td class="font-weight-bold">{{ __('messages.owner.xen_platform.accounts.user_id') }}</td>
                                                 <td>: {{ $invoice['user_id'] ?? '-' }}</td>
                                             </tr>
                                             <tr>
-                                                <td class="font-weight-bold">Store Branch</td>
+                                                <td class="font-weight-bold">{{ __('messages.owner.xen_platform.accounts.store_branch') }}</td>
                                                 <td>: {{ $invoice['metadata']['store_branch'] ?? '-' }}</td>
                                             </tr>
                                         </table>
@@ -105,17 +105,17 @@
                             <div class="col-12">
                                 <h5 class="font-weight-bold mb-3 border-bottom pb-2">
                                     <i class="fas fa-shopping-cart mr-2"></i>
-                                    Items Details
+                                    {{ __('messages.owner.xen_platform.accounts.item_details') }}
                                 </h5>
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-striped">
                                         <thead class="thead-light">
                                         <tr>
-                                            <th>Item Name</th>
-                                            <th>Category</th>
-                                            <th class="text-center">Qty</th>
-                                            <th class="text-right">Price</th>
-                                            <th class="text-right">Subtotal</th>
+                                            <th>{{ __('messages.owner.xen_platform.accounts.item_name') }}</th>
+                                            <th>{{ __('messages.owner.xen_platform.accounts.category') }}</th>
+                                            <th class="text-center">{{ __('messages.owner.xen_platform.accounts.quantity') }}</th>
+                                            <th class="text-right">{{ __('messages.owner.xen_platform.accounts.price') }}</th>
+                                            <th class="text-right">{{ __('messages.owner.xen_platform.accounts.subtotal') }}</th>
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -129,7 +129,7 @@
                                             </tr>
                                         @endforeach
                                         <tr class="table-secondary font-weight-bold">
-                                            <td colspan="4" class="text-right">Total Amount</td>
+                                            <td colspan="4" class="text-right">{{ __('messages.owner.xen_platform.accounts.total_amount') }}</td>
                                             <td class="text-right">{{ number_format($invoice['amount'] ?? 0, 0, ',', '.') }}</td>
                                         </tr>
                                         </tbody>
@@ -143,20 +143,20 @@
                             <div class="col-12">
                                 <h5 class="font-weight-bold mb-3 border-bottom pb-2">
                                     <i class="fas fa-info-circle mr-2"></i>
-                                    Invoice Details
+                                    {{ __('messages.owner.xen_platform.accounts.invoice_details') }}
                                 </h5>
                                 <div class="table-responsive">
                                     <table class="table table-sm table-borderless">
                                         <tr>
-                                            <td class="font-weight-bold" style="width: 200px;">Description</td>
+                                            <td class="font-weight-bold" style="width: 200px;">{{ __('messages.owner.xen_platform.accounts.description') }}</td>
                                             <td>: {{ $invoice['description'] ?? '-' }}</td>
                                         </tr>
                                         <tr>
-                                            <td class="font-weight-bold">Merchant</td>
+                                            <td class="font-weight-bold">{{ __('messages.owner.xen_platform.accounts.business') }}</td>
                                             <td>: {{ $invoice['merchant_name'] ?? '-' }}</td>
                                         </tr>
                                         <tr>
-                                            <td class="font-weight-bold">Credit Card Excluded</td>
+                                            <td class="font-weight-bold">{{ __('messages.owner.xen_platform.accounts.credit_card_excluded') }}</td>
                                             <td>:
                                                 <span class="badge {{ $invoice['should_exclude_credit_card'] ? 'badge-warning' : 'badge-success' }}">
                                                     {{ $invoice['should_exclude_credit_card'] ? 'Yes' : 'No' }}
@@ -164,7 +164,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td class="font-weight-bold">Email Notification</td>
+                                            <td class="font-weight-bold">{{ __('messages.owner.xen_platform.accounts.email_notification') }}</td>
                                             <td>:
                                                 <span class="badge {{ $invoice['should_send_email'] ? 'badge-success' : 'badge-secondary' }}">
                                                     {{ $invoice['should_send_email'] ? 'Yes' : 'No' }}
@@ -172,7 +172,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td class="font-weight-bold">Customer Notification</td>
+                                            <td class="font-weight-bold">{{ __('messages.owner.xen_platform.accounts.customer_notification') }}</td>
                                             <td>:
                                                 @php
                                                     $preferences = $invoice['customer_notification_preference'] ?? [];
@@ -186,7 +186,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td class="font-weight-bold">Invoice URL</td>
+                                            <td class="font-weight-bold">{{ __('messages.owner.xen_platform.accounts.invoice_url') }}</td>
                                             <td>:
                                                 <a href="{{ $invoice['invoice_url'] ?? '#' }}" target="_blank" class="text-primary">
                                                     {{ Str::limit($invoice['invoice_url'] ?? '-', 50) }}
@@ -194,7 +194,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td class="font-weight-bold">Success Redirect URL</td>
+                                            <td class="font-weight-bold">{{ __('messages.owner.xen_platform.accounts.success_redirect_url') }}</td>
                                             <td>:
                                                 <a href="{{ $invoice['success_redirect_url'] ?? '#' }}" target="_blank" class="text-primary">
                                                     {{ Str::limit($invoice['success_redirect_url'] ?? '-', 50) }}
@@ -202,7 +202,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td class="font-weight-bold">Failure Redirect URL</td>
+                                            <td class="font-weight-bold">{{ __('messages.owner.xen_platform.accounts.failure_redirect_url') }}</td>
                                             <td>:
                                                 <a href="{{ $invoice['failure_redirect_url'] ?? '#' }}" target="_blank" class="text-primary">
                                                     {{ Str::limit($invoice['failure_redirect_url'] ?? '-', 50) }}
@@ -210,7 +210,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td class="font-weight-bold">Created Date</td>
+                                            <td class="font-weight-bold">{{ __('messages.owner.xen_platform.accounts.created_date') }}</td>
                                             <td>:
                                                 @if ($invoice['created'] ?? null)
                                                     {{ \Carbon\Carbon::parse($invoice['created'])->setTimezone('Asia/Jakarta')->format('d M Y, H:i') }} (GMT +7)
@@ -220,7 +220,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td class="font-weight-bold">Updated Date</td>
+                                            <td class="font-weight-bold">{{ __('messages.owner.xen_platform.accounts.updated_date') }}</td>
                                             <td>:
                                                 @if ($invoice['updated'] ?? null)
                                                     {{ \Carbon\Carbon::parse($invoice['updated'])->setTimezone('Asia/Jakarta')->format('d M Y, H:i') }} (GMT +7)
@@ -230,7 +230,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td class="font-weight-bold">Expiry Date</td>
+                                            <td class="font-weight-bold">{{ __('messages.owner.xen_platform.accounts.expiry_date') }}</td>
                                             <td>:
                                                 @if ($invoice['expiry_date'] ?? null)
                                                     {{ \Carbon\Carbon::parse($invoice['expiry_date'])->setTimezone('Asia/Jakarta')->format('d M Y, H:i') }} (GMT +7)
@@ -254,7 +254,7 @@
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="fas fa-credit-card mr-2"></i>
-                            Payment Methods
+                            {{ __('messages.owner.xen_platform.accounts.payment_methods') }}
                         </h3>
                         <div class="card-tools">
                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -268,14 +268,14 @@
                             <div class="p-3 border-bottom">
                                 <h6 class="font-weight-bold text-primary mb-2">
                                     <i class="fas fa-university mr-1"></i>
-                                    Virtual Account Banks
+                                    {{ __('messages.owner.xen_platform.accounts.virtual_account_banks') }}
                                 </h6>
                                 <div class="table-responsive">
                                     <table class="table table-sm table-borderless mb-0">
                                         <thead>
                                         <tr class="bg-light">
-                                            <th class="small font-weight-bold">Bank</th>
-                                            <th class="small font-weight-bold text-right">Amount</th>
+                                            <th class="small font-weight-bold">{{ __('messages.owner.xen_platform.accounts.bank') }}</th>
+                                            <th class="small font-weight-bold text-right">{{ __('messages.owner.xen_platform.accounts.amount') }}</th>
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -302,7 +302,7 @@
                             <div class="p-3 border-bottom">
                                 <h6 class="font-weight-bold text-primary mb-2">
                                     <i class="fas fa-mobile-alt mr-1"></i>
-                                    E-Wallets
+                                    {{ __('messages.owner.xen_platform.accounts.e_wallets') }}
                                 </h6>
                                 <div class="d-flex flex-wrap gap-1">
                                     @foreach($invoice['available_ewallets'] as $ewallet)
@@ -317,7 +317,7 @@
                             <div class="p-3 border-bottom">
                                 <h6 class="font-weight-bold text-primary mb-2">
                                     <i class="fas fa-qrcode mr-1"></i>
-                                    QR Codes
+                                    {{ __('messages.owner.xen_platform.accounts.qr_code') }}
                                 </h6>
                                 <div class="d-flex flex-wrap gap-1">
                                     @foreach($invoice['available_qr_codes'] as $qr)
@@ -332,7 +332,7 @@
                             <div class="p-3 border-bottom">
                                 <h6 class="font-weight-bold text-primary mb-2">
                                     <i class="fas fa-exchange-alt mr-1"></i>
-                                    Direct Debits
+                                    {{ __('messages.owner.xen_platform.accounts.direct_debit') }}
                                 </h6>
                                 <div class="d-flex flex-wrap gap-1">
                                     @foreach($invoice['available_direct_debits'] as $debit)
@@ -347,7 +347,7 @@
                             <div class="p-3">
                                 <h6 class="font-weight-bold text-primary mb-2">
                                     <i class="fas fa-hand-holding-usd mr-1"></i>
-                                    Paylater
+                                    {{ __('messages.owner.xen_platform.accounts.pay_later') }}
                                 </h6>
                                 <div class="d-flex flex-wrap gap-1">
                                     @foreach($invoice['available_paylaters'] as $paylater)
@@ -364,7 +364,7 @@
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="fas fa-history mr-2"></i>
-                            Event History & Actions
+                            {{ __('messages.owner.xen_platform.accounts.event_history_and_action') }}
                         </h3>
                         <div class="card-tools">
                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -375,7 +375,7 @@
                     <div class="card-body">
                         <!-- Event History -->
                         <div class="mb-4">
-                            <h6 class="font-weight-bold mb-3">Event History</h6>
+                            <h6 class="font-weight-bold mb-3">{{ __('messages.owner.xen_platform.accounts.event_history') }}</h6>
                             @php
                                 $history = [];
                                 $statusClasses = [
@@ -455,17 +455,17 @@
                             @else
                                 <div class="text-center py-3 text-muted">
                                     <i class="fas fa-history fa-2x mb-2"></i>
-                                    <p class="mb-0">Tidak ada riwayat event</p>
+                                    <p class="mb-0">{{ __('messages.owner.xen_platform.accounts.no_event_history') }}</p>
                                 </div>
                             @endif
                         </div>
 
                         <!-- Action Buttons -->
                         <div class="mb-4">
-                            <h6 class="font-weight-bold mb-3">Actions</h6>
+                            <h6 class="font-weight-bold mb-3">{{ __('messages.owner.xen_platform.accounts.actions') }}</h6>
                             <div class="d-grid gap-2">
                                 <a href="{{ $invoice['invoice_url'] ?? '#' }}" target="_blank" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-external-link-alt mr-1"></i> View Invoice
+                                    <i class="fas fa-external-link-alt mr-1"></i> {{ __('messages.owner.xen_platform.accounts.view_invoice') }}
                                 </a>
 {{--                                @if($invoice['status'] === 'PENDING')--}}
 {{--                                    <button class="btn btn-outline-warning btn-sm">--}}
@@ -484,7 +484,7 @@
 
                         <!-- Merchant Profile -->
                         <div>
-                            <h6 class="font-weight-bold mb-3">Merchant Profile</h6>
+                            <h6 class="font-weight-bold mb-3">{{ __('messages.owner.xen_platform.accounts.business_profile') }}</h6>
                             <div class="d-flex align-items-center p-3 bg-light rounded">
                                 @if($invoice['merchant_profile_picture_url'] ?? false)
                                     <img src="{{ $invoice['merchant_profile_picture_url'] }}"
@@ -499,7 +499,7 @@
                                 @endif
                                 <div>
                                     <h6 class="mb-0 font-weight-bold">{{ $invoice['merchant_name'] ?? 'Unknown Merchant' }}</h6>
-                                    <small class="text-muted">Merchant Account</small>
+                                    <small class="text-muted">{{ __('messages.owner.xen_platform.accounts.business_account') }}</small>
                                 </div>
                             </div>
                         </div>

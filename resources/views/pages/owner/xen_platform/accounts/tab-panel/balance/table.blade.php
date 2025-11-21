@@ -4,15 +4,15 @@
             <thead class="thead-dark">
             <tr>
                 <th>No</th>
-                <th>Created Date (GMT +7)</th>
-                <th>Settlement</th>
-                <th>Transaction Type</th>
-                <th>Channel</th>
-                <th>Reference</th>
-                <th>Fee/VAT</th>
-                <th>Cashflow</th>
-                <th class="text-end">Amount</th>
-                <th class="text-end">Balance</th>
+                <th>{{ __('messages.owner.xen_platform.accounts.created_date') }} (GMT +7)</th>
+                <th>{{ __('messages.owner.xen_platform.accounts.settlement') }}</th>
+                <th>{{ __('messages.owner.xen_platform.accounts.transaction_type') }}</th>
+                <th>{{ __('messages.owner.xen_platform.accounts.channel') }}</th>
+                <th>{{ __('messages.owner.xen_platform.accounts.reference') }}</th>
+                <th>{{ __('messages.owner.xen_platform.accounts.fee') }}/VAT</th>
+                <th>{{ __('messages.owner.xen_platform.accounts.cashflow') }}</th>
+                <th class="text-end">{{ __('messages.owner.xen_platform.accounts.amount') }}</th>
+                <th class="text-end">{{ __('messages.owner.xen_platform.accounts.balance') }}</th>
             </tr>
             </thead>
             <tbody>
@@ -67,11 +67,11 @@
                         <div class="d-flex flex-column">
                             <span class="font-weight-bold">{{ $tx['transaction_type'] }}</span>
                             @if($feePending)
-                                <small class="text-warning">(Fee Pending)</small>
+                                <small class="text-warning">{{ __('messages.owner.xen_platform.accounts.pending_fee') }}</small>
                             @endif
                             @if($hasFees)
                                 <small class="text-danger">
-                                    (Includes Fee/VAT)
+                                    {{ __('messages.owner.xen_platform.accounts.includes_fee_vat') }}
                                 </small>
                             @endif
                         </div>
@@ -82,7 +82,7 @@
 
                     <td>
                         @if(($tx['fee_details']['total_fees'] ?? 0) > 0)
-                            <small>Fee: - {{ number_format($tx['fee_details']['xendit_fee'], 0, ',', '.') }}</small><br>
+                            <small>{{ __('messages.owner.xen_platform.accounts.fee') }}: - {{ number_format($tx['fee_details']['xendit_fee'], 0, ',', '.') }}</small><br>
                             <small>VAT: - {{ number_format($tx['fee_details']['vat_fee'], 0, ',', '.') }}</small>
                         @else
                             -
@@ -113,7 +113,7 @@
             @empty
                 <tr>
                     <td colspan="9" class="text-center">
-                        <i class="fas fa-info-circle"></i> Tidak ada data balance yang ditemukan.
+                        <i class="fas fa-info-circle"></i> {{ __('messages.owner.xen_platform.accounts.no_balance_data_found') }}
                     </td>
                 </tr>
             @endforelse
@@ -140,7 +140,7 @@
             <div class="d-flex align-items-center text-muted small">
                 <i class="bx bx-info-circle me-1"></i>
                 <span>
-                Showing <strong>{{ $count }}</strong> records (Limit: <strong>{{ $limit }}</strong>)
+                {{ __('messages.owner.xen_platform.accounts.showing') }} <strong>{{ $count }}</strong> {{ __('messages.owner.xen_platform.accounts.records') }} (Limit: <strong>{{ $limit }}</strong>)
             </span>
             </div>
 
@@ -153,7 +153,7 @@
                            data-direction="before"
                            data-before="{{ $beforeId }}"
                            data-after="">
-                            &laquo; Previous
+                            &laquo; {{ __('messages.owner.xen_platform.accounts.previous') }}
                         </a>
                     </li>
 
@@ -164,7 +164,7 @@
                            data-direction="after"
                            data-after="{{ $afterId }}"
                            data-before="">
-                            Next &raquo;
+                            {{ __('messages.owner.xen_platform.accounts.next') }} &raquo;
                         </a>
                     </li>
                 </ul>

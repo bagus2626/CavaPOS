@@ -2,13 +2,13 @@
     <div class="col-lg-4">
         <div class="card border shadow-lg">
             <div class="card-header">
-                <h6 class="mb-0">Profile</h6>
+                <h6 class="mb-0">{{ __('messages.owner.xen_platform.accounts.profile') }}</h6>
             </div>
             <div class="card-content">
                 <div class="card-body">
                     <table class="table table-hover" id="table-split-rules">
                         <tr>
-                            <td class="w-20p">Name</td>
+                            <td class="w-20p">{{ __('messages.owner.xen_platform.accounts.name') }}</td>
                             <td class="w-15p text-right text-bold-500">{{$data['public_profile']['business_name']}}</td>
                         </tr>
                         <tr>
@@ -16,15 +16,15 @@
                             <td class="w-15p text-right text-bold-500">{{$data['email']}}</td>
                         </tr>
                         <tr>
-                            <td class="w-20p">Account ID</td>
+                            <td class="w-20p">{{ __('messages.owner.xen_platform.accounts.account_id') }}</td>
                             <td class="w-15p text-right text-bold-500">{{$data['id']}}</td>
                         </tr>
                         <tr>
-                            <td class="w-20p">Date Created</td>
+                            <td class="w-20p">{{ __('messages.owner.xen_platform.accounts.date_created') }}</td>
                             <td class="w-15p text-right text-bold-500">{{$data['created']}}</td>
                         </tr>
                         <tr>
-                            <td class="w-20p">Account Type</td>
+                            <td class="w-20p">{{ __('messages.owner.xen_platform.accounts.account_type') }}</td>
                             <td class="text-right">
                                 @switch($data['type'])
                                     @case('MANAGED')
@@ -87,7 +87,7 @@
     <div class="col-lg-5">
         <div class="card border shadow-lg">
             <div class="card-header">
-                <h6 class="mb-0">Balance</h6>
+                <h6 class="mb-0">{{ __('messages.owner.xen_platform.accounts.balance') }}</h6>
             </div>
             <div class="card-content">
                 <div class="card-body" id="split-rule-detail">
