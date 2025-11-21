@@ -1,8 +1,7 @@
 <?php
 
 
-use App\Http\Controllers\Admin\XenPlatform\BalanceController;
-use App\Http\Controllers\Admin\XenPlatform\TransactionsController;
+
 use Pusher\Pusher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -15,6 +14,9 @@ use App\Http\Controllers\Admin\OwnerManagement\OwnerListController;
 use App\Http\Controllers\Admin\OwnerVerification\OwnerVerificationController;
 use App\Http\Controllers\Admin\XenPlatform\PartnerAccountController;
 use App\Http\Controllers\Admin\XenPlatform\SplitPaymentController;
+use App\Http\Controllers\Admin\XenPlatform\BalanceController;
+use App\Http\Controllers\Admin\XenPlatform\DisbursementController;
+use App\Http\Controllers\Admin\XenPlatform\TransactionsController;
 use App\Http\Controllers\Admin\SendPayment\PayoutController;
 use App\Http\Controllers\Owner\Auth\OwnerAuthController;
 use App\Http\Controllers\Owner\Auth\OwnerPasswordResetController;
@@ -110,15 +112,6 @@ Route::middleware('setlocale')->group(function () {
         Route::get('/owner-verification/{id}/ktp-image', [OwnerVerificationController::class, 'showKtpImage'])->name('owner-verification.ktp-image');
         Route::post('/owner-verification/register-xendit-account', [OwnerVerificationController::class, 'registerXenditAccount'])->name('owner-verification.register-xendit-account');;
 
-        Route::prefix('send-payment')->name('send-payment.')->group(function () {
-            Route::prefix('payout')->name('payout.')->group(function () {
-                Route::get('/', [PayoutController::class, 'index'])->name('index');
-                Route::post('get-data', [PayoutController::class, 'getData'])->name('get-data');
-                Route::get('validate-bank', [PayoutController::class, 'validateBankAccount'])->name('validate-bank');
-                Route::post('create', [PayoutController::class, 'createPayout'])->name('create');
-                Route::get('{businessId}/detail/{payoutId}', [PayoutController::class, 'getPayout'])->name('detail');
-            });
-        });
 
         Route::prefix('xen_platform')->name('xen_platform.')->group(function () {
             Route::prefix('transactions')->name('transactions.')->group(function () {
@@ -141,14 +134,24 @@ Route::middleware('setlocale')->group(function () {
                     Route::get('invoice-detail/{invoiceId}', [PartnerAccountController::class, 'getInvoiceById']);
                 });
             });
-
             Route::resource('partner-account', PartnerAccountController::class);
+
             Route::prefix('split-payments')->name('split-payments.')->group(function () {
-                Route::get('split-payments', [SplitPaymentController::class, 'getSplitPayments']);
-                Route::get('split-rules', [SplitPaymentController::class, 'getSplitRules']);
-                Route::post('split-rules/create', [SplitPaymentController::class, 'createSplitRule'])->name('split-rules.create');
+                Route::get('/', [SplitPaymentController::class, 'index'])->name('index');
+                Route::get('/data', [SplitPaymentController::class, 'getSplitPayments']);;
+                Route::prefix('rules')->name('rules.')->group(function () {
+                    Route::get('/data', [SplitPaymentController::class, 'getSplitRules']);
+                    Route::post('/create', [SplitPaymentController::class, 'createSplitRule'])->name('create');
+                });
             });
-            Route::resource('split-payments', SplitPaymentController::class);
+
+            Route::prefix('disbursement')->name('disbursement.')->group(function () {
+                Route::get('/', [DisbursementController::class, 'index'])->name('index');
+                Route::post('get-data', [DisbursementController::class, 'getData'])->name('get-data');
+                Route::get('validate-bank', [DisbursementController::class, 'validateBankAccount'])->name('validate-bank');
+                Route::post('create', [DisbursementController::class, 'createPayout'])->name('create');
+                Route::get('{businessId}/detail/{disbursementId}', [DisbursementController::class, 'getPayout'])->name('detail');
+            });
         });
 
         Route::prefix('xendit')->name('xendit.')->group(function () {

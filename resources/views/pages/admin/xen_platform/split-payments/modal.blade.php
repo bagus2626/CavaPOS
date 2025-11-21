@@ -216,7 +216,7 @@
             const formData = new FormData(this);
 
             $.ajax({
-                url: "{{ route('admin.xen_platform.split-payments.split-rules.create') }}",
+                url: "{{ route('admin.xen_platform.split-payments.rules.create') }}",
                 type: "POST",
                 data: formData,
                 processData: false,

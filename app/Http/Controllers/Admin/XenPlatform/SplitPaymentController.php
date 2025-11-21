@@ -162,7 +162,7 @@ class SplitPaymentController extends Controller
             ];
         });
 
-        return view('pages.admin.xen_platform.split-payments.payments.table', [
+        return view('pages.admin.xen_platform.split-payments.table', [
             'splitTransactions' => $splitTransactionsPaginator,
             'oldRequest' => $request->all()
         ])->render();
@@ -239,7 +239,7 @@ class SplitPaymentController extends Controller
             if (!$splitRuleData['success'] || !isset($splitRuleData['data'])) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Failed to create split rule in Xendit: ' . ($splitRuleData['message'] ?? 'Unknown error')
+                    'message' => $splitRuleData['message'] ?? 'Unknown error'
                 ], 400);
             }
 
