@@ -2,14 +2,14 @@
     <thead class="thead-dark">
     <tr>
         <th class="w-2p">No</th>
-        <th class="w-20p">Split ID</th>
-        <th class="w-15p">Reference</th>
-        <th class="w-15p">Date Created <br> <span>(GMT +7)</span></th>
-        <th class="w-20p">Source Account ID</th>
-        <th class="w-10p">Transaction Amount</th>
-        <th class="w-20p">Destination Account ID</th>
-        <th class="w-10p">Total Split</th>
-        <th class="w-10p">Settled (GMT+7)</th>
+        <th class="w-20p">{{ __('messages.owner.xen_platform.split_payments.split_id') }}</th>
+        <th class="w-15p">{{ __('messages.owner.xen_platform.split_payments.reference') }}</th>
+        <th class="w-15p">{{ __('messages.owner.xen_platform.split_payments.date_created') }} <br> <span>(GMT +7)</span></th>
+        <th class="w-20p">{{ __('messages.owner.xen_platform.split_payments.source_account_id') }}</th>
+        <th class="w-10p">{{ __('messages.owner.xen_platform.split_payments.transaction_amount') }}</th>
+        <th class="w-20p">{{ __('messages.owner.xen_platform.split_payments.destination_account_id') }}</th>
+        <th class="w-10p">{{ __('messages.owner.xen_platform.split_payments.total_split') }}</th>
+        <th class="w-10p">{{ __('messages.owner.xen_platform.split_payments.settled') }} (GMT+7)</th>
         <th class="w-10p">Status</th>
     </tr>
     </thead>
@@ -54,7 +54,7 @@
         @empty
             <tr>
                 <td colspan="10" class="text-center">
-                    <i class="bx bx-info-circle"></i> Tidak ada data split payment yang ditemukan.
+                    <i class="bx bx-info-circle"></i> {{ __('messages.owner.xen_platform.split_payments.no_split_data_found') }}
                 </td>
             </tr>
         @endforelse
@@ -64,7 +64,10 @@
 <div class="d-flex justify-content-between align-items-center mt-1">
     @if ($splitTransactions->total() > 0)
         <div class="pagination-summary text-muted">
-            Showing {{ $splitTransactions->firstItem() }} - {{ $splitTransactions->lastItem() }} from {{ $splitTransactions->total() }} split payment
+            {{ __('messages.owner.xen_platform.split_payments.showing') }} 
+            {{ $splitTransactions->firstItem() }} - {{ $splitTransactions->lastItem() }} 
+            {{ __('messages.owner.xen_platform.split_payments.from') }} {{ $splitTransactions->total() }} 
+            {{ __('messages.owner.xen_platform.split_payments.split_payments_s') }}
         </div>
     @endif
 

@@ -1,7 +1,7 @@
 @extends('layouts.owner')
 
-@section('title', 'Split Payments')
-@section('page_title', 'Split Payments')
+@section('title', __('messages.owner.xen_platform.split_payments.split_payments'))
+@section('page_title', __('messages.owner.xen_platform.split_payments.split_payments'))
 
 @section('content')
     <section class="content">
@@ -12,7 +12,7 @@
                         <div class="card-header">
                             <div class="toolbar row">
                                 <div class="col-md-12 d-flex">
-                                    <h4 class="card-title">Split Payments</h4>
+                                    <h4 class="card-title">{{ __('messages.owner.xen_platform.split_payments.split_payments') }}</h4>
                                 </div>
                             </div>
                         </div>
@@ -32,7 +32,7 @@
                                                             <div class="text-center">
                                                                 <div class="d-flex flex-column align-items-center justify-content-center py-4 text-secondary">
                                                                     <i class="bx bx-loader bx-spin bx-lg"></i>
-                                                                    <div class="fw-medium mt-1">Loading data...</div>
+                                                                    <div class="fw-medium mt-1">{{ __('messages.owner.xen_platform.split_payments.loading_data') }}</div>
                                                                 </div>
                                                             </div>
                                                         </div>

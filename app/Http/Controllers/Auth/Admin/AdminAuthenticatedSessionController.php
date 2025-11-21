@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\Auth\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
@@ -9,14 +9,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
-class AuthenticatedSessionController extends Controller
+class AdminAuthenticatedSessionController extends Controller
 {
     /**
      * Display the login view.
      */
     public function create(): View
     {
-        return view('auth.login');
+        return view('auth.admin.login');
     }
 
     public function store(LoginRequest $request): RedirectResponse
@@ -26,9 +26,9 @@ class AuthenticatedSessionController extends Controller
 
         $user = $request->user();
 
-        if ($user->role !== 'partner') {
+        if ($user->role !== 'admin') {
             Auth::logout();
-            return redirect()->route('login')->withErrors([
+            return redirect()->route('admin.login')->withErrors([
                 'email' => 'Akses ditolak. Akun ini bukan akun partner.'
             ]);
         }
@@ -36,13 +36,12 @@ class AuthenticatedSessionController extends Controller
         // Lanjutkan login untuk role partner
         $intended = session()->get('url.intended');
 
-        if ($intended && str_starts_with($intended, url('/partner'))) {
+        if ($intended && str_starts_with($intended, url('/admin'))) {
             return redirect()->intended();
         }
 
-        return redirect('/partner');
+        return redirect('/admin/dashboard');
     }
-
 
 
     /**
@@ -50,12 +49,13 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        // dd('logout');
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
 
         $request->session()->regenerateToken();
 
-        return redirect('/partner/login');
+        return redirect('/admin/login');
     }
 }

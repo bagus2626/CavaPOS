@@ -3,13 +3,13 @@
         <thead class="thead-dark">
         <tr>
             <th>No</th>
-            <th>Date(GMT +7)</th>
-            <th>External ID</th>
-            <th>Payer email</th>
-            <th>Description</th>
-            <th>Amount</th>
+            <th>{{ __('messages.owner.xen_platform.accounts.date') }}(GMT +7)</th>
+            <th>{{ __('messages.owner.xen_platform.accounts.external_id') }}</th>
+            <th>{{ __('messages.owner.xen_platform.accounts.payer_email') }}</th>
+            <th>{{ __('messages.owner.xen_platform.accounts.description') }}</th>
+            <th>{{ __('messages.owner.xen_platform.accounts.amount') }}</th>
             <th>Status</th>
-            <th>Action</th>
+            <th>{{ __('messages.owner.xen_platform.accounts.action') }}</th>
         </tr>
         </thead>
         <tbody>
@@ -55,7 +55,7 @@
                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="menu"></span>
                         <div class="dropdown-menu dropdown-menu-right">
                             <a class="dropdown-item copy-btn" data-copy-value="{{ $item['external_id'] ?? '' }}">
-                                <i class="bx bx-copy-alt mr-1"></i> Copy Reference
+                                <i class="bx bx-copy-alt mr-1"></i> {{ __('messages.owner.xen_platform.accounts.copy_reference') }}
                             </a>
                         </div>
                     </div>
@@ -64,7 +64,7 @@
         @empty
             <tr>
                 <td colspan="9" class="text-center">
-                    <i class="fas fa-info-circle"></i> Tidak ada data invoice yang ditemukan.
+                    <i class="fas fa-info-circle"></i> {{ __('messages.owner.xen_platform.accounts.no_invoice_found') }}
                 </td>
             </tr>
         @endforelse
@@ -88,7 +88,7 @@
                     <a class="page-link fw-medium rounded-pill" href="#"
                        data-cursor="{{ $afterId }}"
                        data-direction="after">
-                        <i class="fas fa-arrow-down mr-1"></i> Load More
+                        <i class="fas fa-arrow-down mr-1"></i> {{ __('messages.owner.xen_platform.accounts.load_more') }}
                     </a>
                 </li>
             </ul>

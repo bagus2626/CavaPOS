@@ -6,7 +6,7 @@
             <div class="modal-header bg-choco">
                 <h5 class="modal-title text-white" id="createDisbursementModalLabel">
                     <i class="fas fa-money-bill-transfer mr-2"></i>
-                    Single Disbursement
+                    {{ __('messages.owner.xen_platform.payouts.single_withdrawal') }}
                 </h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -22,9 +22,9 @@
 
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="channel_code" class="font-weight-bold">Recipient Bank</label>
+                        <label for="channel_code" class="font-weight-bold">{{ __('messages.owner.xen_platform.payouts.recipient_bank') }}</label>
                         <select class="form-control select2" name="channel_code" id="channel_code" style="width: 100%;">
-                            <option value="" selected>Select Bank...</option>
+                            <option value="" selected>{{ __('messages.owner.xen_platform.payouts.select_bank') }}</option>
                             @foreach($payoutChannels AS $channel)
                                 <option value="{{ $channel['channel_code'] }}"
                                         data-min="{{ $channel['amount_limits']['minimum'] ?? 0 }}"
@@ -36,13 +36,13 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="account_number" class="font-weight-bold">Recipient Account Number</label>
+                        <label for="account_number" class="font-weight-bold">{{ __('messages.owner.xen_platform.payouts.recipient_account_number') }}</label>
                         <div class="input-group">
                             <input type="text" class="form-control" placeholder="527XXXXXXX"
                                    aria-label="Account Number" id="account_number" name="account_number">
                             <div class="input-group-append">
                                 <button class="btn btn-warning" type="button" id="validateBtn">
-                                    <i class="fas fa-check-circle mr-1"></i> Validate
+                                    <i class="fas fa-check-circle mr-1"></i> {{ __('messages.owner.xen_platform.payouts.validate') }}
                                 </button>
                             </div>
                         </div>
@@ -51,7 +51,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="amount" class="font-weight-bold">Amount to Send</label>
+                        <label for="amount" class="font-weight-bold">{{ __('messages.owner.xen_platform.payouts.amount_to_send') }}</label>
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">IDR</span>
@@ -60,29 +60,29 @@
                                    required>
                         </div>
                         <small class="form-text text-muted">
-                            Available balance: <span id="available-balance" class="font-weight-bold">0</span>
+                            {{ __('messages.owner.xen_platform.payouts.available_balance') }}: <span id="available-balance" class="font-weight-bold">0</span>
                         </small>
                     </div>
 
                     <div class="form-group">
-                        <label for="reference_id" class="font-weight-bold">Reference ID</label>
+                        <label for="reference_id" class="font-weight-bold">{{ __('messages.owner.xen_platform.payouts.reference_id') }}</label>
                         <input class="form-control" type="text" id="reference_id" name="reference_id"
                                placeholder="Unique reference ID" required>
                     </div>
 
 
                     <div class="form-group">
-                        <label for="description" class="font-weight-bold">Description</label>
+                        <label for="description" class="font-weight-bold">{{ __('messages.owner.xen_platform.payouts.description') }}</label>
                         <textarea class="form-control" id="description" name="description"
-                                  rows="2" placeholder="Transaction description" required>Withdraw</textarea>
+                                  rows="2" placeholder="Transaction description" required>{{ __('messages.owner.xen_platform.payouts.withdrawal') }}</textarea>
                     </div>
 
                     <div class="form-group">
-                        <label for="recipient_email" class="font-weight-bold">Recipient Email</label>
+                        <label for="recipient_email" class="font-weight-bold">{{ __('messages.owner.xen_platform.payouts.recipient_email') }}</label>
                         <input class="form-control" type="text" id="recipient_email" name="recipient_email"
                                placeholder="email1@example.com, email2@example.com">
                         <small class="form-text text-muted">
-                            Use comma to separate multiple email addresses
+                            {{ __('messages.owner.xen_platform.payouts.email_instruction') }}
                             <span id="email-validation-status" class="ml-2"></span>
                         </small>
                         <div id="email-validation-feedback" class="invalid-feedback" style="display: none;"></div>
@@ -90,16 +90,16 @@
 
                     <!-- Validation Summary -->
                     <div class="alert alert-info" id="validation-summary" style="display: none;">
-                        <h6 class="alert-heading"><i class="fas fa-info-circle mr-1"></i> Validation Summary</h6>
+                        <h6 class="alert-heading"><i class="fas fa-info-circle mr-1"></i> {{ __('messages.owner.xen_platform.payouts.validation_summary') }}</h6>
                         <div id="validation-details" class="small"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                        <i class="fas fa-times mr-1"></i> Cancel
+                        <i class="fas fa-times mr-1"></i> {{ __('messages.owner.xen_platform.payouts.cancel') }}
                     </button>
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-eye mr-1"></i> Preview
+                        <i class="fas fa-eye mr-1"></i> {{ __('messages.owner.xen_platform.payouts.preview') }}
                     </button>
                 </div>
             </form>
@@ -115,7 +115,7 @@
             <div class="modal-header bg-choco">
                 <h5 class="modal-title text-white" id="confirmDisbursementModalLabel">
                     <i class="fas fa-shield-alt mr-2"></i>
-                    Confirm Disbursement
+                    {{ __('messages.owner.xen_platform.payouts.confirm_withdrawal') }}
                 </h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -123,13 +123,13 @@
             </div>
             <div class="modal-body">
                 <div class="confirm-detail">
-                    <h5 class="text-dark">Amount to send</h5>
+                    <h5 class="text-dark">{{ __('messages.owner.xen_platform.payouts.amount_to_send') }}</h5>
                     <h4 id="confirm-amount" class="font-weight-bold text-danger"></h4>
-                    <small class="text-muted">From <span id="confirm-balance"></span> available</small>
+                    <small class="text-muted">{{ __('messages.owner.xen_platform.payouts.from') }} <span id="confirm-balance"></span> {{ __('messages.owner.xen_platform.payouts.available') }}</small>
                 </div>
                 <hr>
 
-                <h5 class="text-dark">Send to</h5>
+                <h5 class="text-dark">{{ __('messages.owner.xen_platform.payouts.send_to') }}</h5>
                 <p class="mb-1">
                     <span id="confirm-bank-name" class="font-weight-bold"></span>
                 </p>
@@ -143,28 +143,28 @@
                 <hr>
 
                 <p>
-                    <strong>Reference:</strong> <span id="confirm-reference"></span>
+                    <strong>{{ __('messages.owner.xen_platform.payouts.reference') }}:</strong> <span id="confirm-reference"></span>
                 </p>
                 <p>
-                    <strong>Description:</strong> <span id="confirm-description"></span>
+                    <strong>{{ __('messages.owner.xen_platform.payouts.description') }}:</strong> <span id="confirm-description"></span>
                 </p>
                 <p>
-                    <strong>Recipient email:</strong> <span id="confirm-email"></span>
+                    <strong>{{ __('messages.owner.xen_platform.payouts.recipient_email') }}:</strong> <span id="confirm-email"></span>
                 </p>
                 <!-- Warning Message -->
                 <div class="alert alert-danger py-2">
                     <small>
                         <i class="fas fa-exclamation-triangle mr-1"></i>
-                        Please review all details carefully. This action cannot be undone.
+                        {{ __('messages.owner.xen_platform.payouts.preview_instruction') }}
                     </small>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                    <i class="fas fa-arrow-left mr-1"></i> Back
+                    <i class="fas fa-arrow-left mr-1"></i> {{ __('messages.owner.xen_platform.payouts.back') }}
                 </button>
                 <button type="button" class="btn btn-success" id="submitDisbursementBtn">
-                    <i class="fas fa-paper-plane mr-1"></i> Confirm & Submit
+                    <i class="fas fa-paper-plane mr-1"></i> {{ __('messages.owner.xen_platform.payouts.confirm_and_submit') }}
                 </button>
             </div>
         </div>

@@ -10,15 +10,24 @@ class RedirectIfAuthenticatedWithRole
 {
     public function handle(Request $request, Closure $next)
     {
-        if (Auth::check()) {
-            $user = Auth::user();
-            if ($user->role === 'admin') {
-                return redirect('/admin/dashboard');
-            } elseif ($user->role === 'partner') {
-                return redirect('/partner');
-            } else {
-                return redirect('/');
-            }
+        // Jika sudah login sebagai admin
+        if (Auth::guard('web')->check() && Auth::user()->role === 'admin') {
+            return redirect('/admin/dashboard');
+        }
+
+        // Jika sudah login sebagai owner
+        if (Auth::guard('owner')->check()) {
+            return redirect()->route('owner.user-owner.dashboard');
+        }
+
+        // Jika sudah login sebagai partner
+        if (Auth::guard('partner')->check()) {
+            return redirect()->route('partner.dashboard');
+        }
+
+        // Jika sudah login sebagai employee
+        if (Auth::guard('employee')->check()) {
+            return redirect()->route('employee.cashier.dashboard');
         }
 
         return $next($request);
