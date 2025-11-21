@@ -132,7 +132,7 @@ window.initPayoutTab = function (accountId) {
                 `);
 
             setTimeout(() => {
-                window.location.href = `/admin/send-payment/payout/${businessId}/detail/${payoutId}`;
+                window.location.href = `/admin/xen_platform/disbursement/${businessId}/detail/${payoutId}`;
             }, 250);
         } else {
             alert('Missing business_id or payout_id for row click.')
