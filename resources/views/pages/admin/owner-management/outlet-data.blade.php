@@ -325,6 +325,7 @@
                                                     <th>EMAIL</th>
                                                     <th>ROLE</th>
                                                     <th>STATUS</th>
+                                                    <th>ACTION</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -332,13 +333,92 @@
                                                     @include('pages.admin.owner-management.partials.employee-row')
                                                 @empty
                                                     <tr>
-                                                        <td colspan="6" class="text-center text-muted">
+                                                        <td colspan="7" class="text-center text-muted">
                                                             No employees found for this outlet
                                                         </td>
                                                     </tr>
                                                 @endforelse
                                             </tbody>
                                         </table>
+                                    </div>
+
+                                    <!-- Deactivation Employee Modal -->
+                                    <div class="modal fade text-left" id="deactivationEmployeeModal" tabindex="-1"
+                                        role="dialog" aria-labelledby="deactivationEmployeeModalLabel"
+                                        aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-danger">
+                                                    <h4 class="modal-title text-white"
+                                                        id="deactivationEmployeeModalLabel">
+                                                        Deactivate Employee Account
+                                                    </h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="alert border-danger">
+                                                        <div class="alert-body d-flex align-items-center">
+                                                            <i class="bx bx-error"></i>
+                                                            You are about to deactivate: <strong
+                                                                id="employeeNameDisplay"></strong>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label for="deactivationEmployeeReason" class="font-weight-bold">
+                                                            Deactivation Reason <span class="text-danger">*</span>
+                                                        </label>
+                                                        <textarea class="form-control" id="deactivationEmployeeReason" rows="4"
+                                                            placeholder="Please explain why you are deactivating this employee account..." required></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-light-secondary"
+                                                        data-dismiss="modal">
+                                                        Cancel
+                                                    </button>
+                                                    <button type="button" class="btn btn-danger"
+                                                        id="confirmEmployeeDeactivation" disabled>
+                                                        Confirm Deactivation
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Activation Employee Modal -->
+                                    <div class="modal fade text-left" id="activationEmployeeModal" tabindex="-1"
+                                        role="dialog" aria-labelledby="activationEmployeeModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-success">
+                                                    <h4 class="modal-title text-white" id="activationEmployeeModalLabel">
+                                                        Activate Employee Account
+                                                    </h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="alert border-info">
+                                                        <div class="alert-body d-flex align-items-center">
+                                                            <i class="bx bx-info-circle"></i>
+                                                            You are about to activate: <strong
+                                                                id="employeeNameDisplayActivation"></strong>
+                                                        </div>
+                                                    </div>
+
+                                                    <p class="mb-0">Are you sure you want to activate this employee
+                                                        account?</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-light-secondary"
+                                                        data-dismiss="modal">
+                                                        Cancel
+                                                    </button>
+                                                    <button type="button" class="btn btn-success"
+                                                        id="confirmEmployeeActivation">
+                                                        Confirm Activation
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div id="employeesPaginationContainer">
@@ -477,6 +557,143 @@
             const outletId = {{ $outlet->id }};
             const baseUrl =
                 "{{ route('admin.owner-list.outlet-data', ['ownerId' => $outlet->owner_id, 'outletId' => $outlet->id]) }}";
+
+            // Employee status toggles
+            let currentEmployeeId = null;
+            let currentEmployeeToggle = null;
+            const deactivationEmployeeReasonTextarea = document.getElementById('deactivationEmployeeReason');
+            const confirmEmployeeDeactivationBtn = document.getElementById('confirmEmployeeDeactivation');
+
+            // Initialize tooltips for employees
+            if (typeof $('[data-toggle="tooltip"]').tooltip === 'function') {
+                $('[data-toggle="tooltip"]').tooltip();
+            }
+
+            // Enable/disable confirm button based on textarea input
+            if (deactivationEmployeeReasonTextarea && confirmEmployeeDeactivationBtn) {
+                deactivationEmployeeReasonTextarea.addEventListener('input', function() {
+                    confirmEmployeeDeactivationBtn.disabled = this.value.trim().length === 0;
+                });
+            }
+
+            // Handle all employee status toggles (using event delegation)
+            $(document).on('change', '.employee-status-toggle', function(e) {
+                const isActive = this.checked;
+                const employeeId = $(this).data('employee-id');
+                const employeeName = $(this).data('employee-name');
+
+                currentEmployeeId = employeeId;
+                currentEmployeeToggle = this;
+
+                if (!isActive) {
+                    e.preventDefault();
+                    this.checked = true;
+                    document.getElementById('employeeNameDisplay').textContent = employeeName;
+                    document.getElementById('deactivationEmployeeReason').value = '';
+                    confirmEmployeeDeactivationBtn.disabled = true;
+                    $('#deactivationEmployeeModal').modal('show');
+                } else {
+                    e.preventDefault();
+                    this.checked = false;
+                    document.getElementById('employeeNameDisplayActivation').textContent = employeeName;
+                    $('#activationEmployeeModal').modal('show');
+                }
+            });
+
+            // Handle deactivation confirmation
+            if (confirmEmployeeDeactivationBtn) {
+                confirmEmployeeDeactivationBtn.addEventListener('click', function() {
+                    const reason = deactivationEmployeeReasonTextarea.value.trim();
+                    if (reason.length === 0) return;
+
+                    if (currentEmployeeId && currentEmployeeToggle) {
+                        updateEmployeeStatus(currentEmployeeId, false, reason, currentEmployeeToggle);
+                        $('#deactivationEmployeeModal').modal('hide');
+                    }
+                });
+            }
+
+            // Handle activation confirmation
+            document.getElementById('confirmEmployeeActivation').addEventListener('click', function() {
+                if (currentEmployeeId && currentEmployeeToggle) {
+                    updateEmployeeStatus(currentEmployeeId, true, null, currentEmployeeToggle);
+                    $('#activationEmployeeModal').modal('hide');
+                }
+            });
+
+            // Reset on modal close
+            $('#deactivationEmployeeModal, #activationEmployeeModal').on('hidden.bs.modal', function() {
+                currentEmployeeId = null;
+                currentEmployeeToggle = null;
+            });
+
+            // Update employee status via AJAX
+            function updateEmployeeStatus(employeeId, isActive, reason, toggleElement) {
+                toggleElement.disabled = true;
+
+                fetch(`/admin/owner-list/${ownerId}/outlets/${outletId}/employees/${employeeId}/toggle-status`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            is_active_admin: isActive ? 1 : 0,
+                            deactivation_reason: reason
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            toggleElement.checked = isActive;
+                            toggleElement.disabled = false;
+
+                            const row = toggleElement.closest('tr');
+                            const statusCell = row.querySelector('td:nth-child(6)'); // STATUS column
+                            const badge = statusCell.querySelector('.badge');
+
+                            if (isActive) {
+                                badge.className = 'badge badge-success badge-pill';
+                                badge.textContent = 'Active';
+                                badge.removeAttribute('data-toggle');
+                                badge.removeAttribute('data-placement');
+                                badge.removeAttribute('title');
+                                badge.removeAttribute('data-original-title');
+
+                                if (typeof $(badge).tooltip === 'function') {
+                                    $(badge).tooltip('dispose');
+                                }
+                            } else {
+                                badge.className = 'badge badge-danger badge-pill';
+                                badge.textContent = 'Inactive';
+
+                                if (reason) {
+                                    badge.setAttribute('data-toggle', 'tooltip');
+                                    badge.setAttribute('data-placement', 'top');
+                                    badge.setAttribute('title', reason);
+
+                                    if (typeof $(badge).tooltip === 'function') {
+                                        $(badge).tooltip();
+                                    }
+                                }
+                            }
+
+                            // Show success message
+                            toastr.info(data.message || 'Status updated successfully');
+                        } else {
+                            toggleElement.checked = !isActive;
+                            toggleElement.disabled = false;
+                            alert(data.message || 'Failed to update status');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        toggleElement.checked = !isActive;
+                        toggleElement.disabled = false;
+                        alert('An error occurred while updating status');
+                    });
+            }
 
             // Function to toggle widgets based on active tab
             function toggleWidgets(tabName) {

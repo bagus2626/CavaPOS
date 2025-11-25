@@ -103,6 +103,76 @@
     </section>
     <!-- Widgets Statistics End -->
 
+    <!-- Deactivation Reason Modal -->
+    <div class="modal fade text-left" id="deactivationOutletModal" tabindex="-1" role="dialog"
+        aria-labelledby="deactivationOutletModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-danger">
+                    <h4 class="modal-title text-white" id="deactivationOutletModalLabel">
+                        Deactivate Outlet Account
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="alert border-danger">
+                        <div class="alert-body d-flex align-items-center">
+                            <i class="bx bx-error"></i>
+                            You are about to deactivate: <strong id="outletNameDisplay"></strong>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="deactivationOutletReason" class="font-weight-bold">
+                            Deactivation Reason <span class="text-danger">*</span>
+                        </label>
+                        <textarea class="form-control" id="deactivationOutletReason" rows="4"
+                            placeholder="Please explain why you are deactivating this outlet account..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-secondary" data-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button type="button" class="btn btn-danger" id="confirmOutletDeactivation" disabled>
+                        Confirm Deactivation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activation Confirmation Modal -->
+    <div class="modal fade text-left" id="activationOutletModal" tabindex="-1" role="dialog"
+        aria-labelledby="activationOutletModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-success">
+                    <h4 class="modal-title text-white" id="activationOutletModalLabel">
+                        Activate Outlet Account
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="alert border-info">
+                        <div class="alert-body d-flex align-items-center">
+                            <i class="bx bx-info-circle"></i>
+                            You are about to activate: <strong id="outletNameDisplayActivation"></strong>
+                        </div>
+                    </div>
+
+                    <p class="mb-0">Are you sure you want to activate this outlet account?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-secondary" data-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button type="button" class="btn btn-success" id="confirmOutletActivation">
+                        Confirm Activation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Outlets Table start -->
     <div class="row" id="outlets-table">
         <div class="col-12">
@@ -131,7 +201,7 @@
                                     <th>LOCATION</th>
                                     <th>ADDRESS</th>
                                     <th>STATUS</th>
-                                    <th>CREATED DATE</th>
+                                    <th>ACTION</th>
                                     <th>DETAIL</th>
                                 </tr>
                             </thead>
@@ -234,6 +304,147 @@
             let searchTimeout;
             let currentRequest = null;
             const ownerId = {{ $owner->id }};
+
+            // Outlet status toggles
+            let currentOutletId = null;
+            let currentOwnerId = null;
+            let currentToggle = null;
+            const deactivationOutletReasonTextarea = document.getElementById('deactivationOutletReason');
+            const confirmOutletDeactivationBtn = document.getElementById('confirmOutletDeactivation');
+
+            // Initialize tooltips
+            if (typeof $('[data-toggle="tooltip"]').tooltip === 'function') {
+                $('[data-toggle="tooltip"]').tooltip();
+            }
+
+            // Enable/disable confirm button based on textarea input
+            if (deactivationOutletReasonTextarea && confirmOutletDeactivationBtn) {
+                deactivationOutletReasonTextarea.addEventListener('input', function() {
+                    confirmOutletDeactivationBtn.disabled = this.value.trim().length === 0;
+                });
+            }
+
+            // Handle all outlet status toggles (using event delegation)
+            $(document).on('change', '.outlet-status-toggle', function(e) {
+                const isActive = this.checked;
+                const outletId = $(this).data('outlet-id');
+                const ownerId = $(this).data('owner-id');
+                const outletName = $(this).data('outlet-name');
+
+                currentOutletId = outletId;
+                currentOwnerId = ownerId;
+                currentToggle = this;
+
+                if (!isActive) {
+                    e.preventDefault();
+                    this.checked = true;
+                    document.getElementById('outletNameDisplay').textContent = outletName;
+                    document.getElementById('deactivationOutletReason').value = '';
+                    confirmOutletDeactivationBtn.disabled = true;
+                    $('#deactivationOutletModal').modal('show');
+                } else {
+                    e.preventDefault();
+                    this.checked = false;
+                    document.getElementById('outletNameDisplayActivation').textContent = outletName;
+                    $('#activationOutletModal').modal('show');
+                }
+            });
+
+            // Handle deactivation confirmation
+            if (confirmOutletDeactivationBtn) {
+                confirmOutletDeactivationBtn.addEventListener('click', function() {
+                    const reason = deactivationOutletReasonTextarea.value.trim();
+                    if (reason.length === 0) return;
+
+                    if (currentOutletId && currentOwnerId && currentToggle) {
+                        updateOutletStatus(currentOwnerId, currentOutletId, false, reason, currentToggle);
+                        $('#deactivationOutletModal').modal('hide');
+                    }
+                });
+            }
+
+            // Handle activation confirmation
+            document.getElementById('confirmOutletActivation').addEventListener('click', function() {
+                if (currentOutletId && currentOwnerId && currentToggle) {
+                    updateOutletStatus(currentOwnerId, currentOutletId, true, null, currentToggle);
+                    $('#activationOutletModal').modal('hide');
+                }
+            });
+
+            // Reset on modal close
+            $('#deactivationOutletModal, #activationOutletModal').on('hidden.bs.modal', function() {
+                currentOutletId = null;
+                currentOwnerId = null;
+                currentToggle = null;
+            });
+
+            // Update outlet status via AJAX
+            function updateOutletStatus(ownerId, outletId, isActive, reason, toggleElement) {
+                toggleElement.disabled = true;
+
+                fetch(`/admin/owner-list/${ownerId}/outlets/${outletId}/toggle-status`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            is_active_admin: isActive ? 1 : 0,
+                            deactivation_reason: reason
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            toggleElement.checked = isActive;
+                            toggleElement.disabled = false;
+
+                            const row = toggleElement.closest('tr');
+                            const statusCell = row.querySelector('td:nth-child(6)');
+                            const badge = statusCell.querySelector('.badge');
+
+                            if (isActive) {
+                                badge.className = 'badge badge-success badge-pill';
+                                badge.textContent = 'Active';
+                                badge.removeAttribute('data-toggle');
+                                badge.removeAttribute('data-placement');
+                                badge.removeAttribute('title');
+                                badge.removeAttribute('data-original-title');
+
+                                if (typeof $(badge).tooltip === 'function') {
+                                    $(badge).tooltip('dispose');
+                                }
+                            } else {
+                                badge.className = 'badge badge-danger badge-pill';
+                                badge.textContent = 'Inactive';
+
+                                if (reason) {
+                                    badge.setAttribute('data-toggle', 'tooltip');
+                                    badge.setAttribute('data-placement', 'top');
+                                    badge.setAttribute('title', reason);
+
+                                    if (typeof $(badge).tooltip === 'function') {
+                                        $(badge).tooltip();
+                                    }
+                                }
+                            }
+
+                            // Show success message
+                            toastr.info(data.message || 'Status updated successfully');
+                        } else {
+                            toggleElement.checked = !isActive;
+                            toggleElement.disabled = false;
+                            alert(data.message || 'Failed to update status');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        toggleElement.checked = !isActive;
+                        toggleElement.disabled = false;
+                        alert('An error occurred while updating status');
+                    });
+            }
 
             // Function to load outlets
             function loadOutlets(searchValue = '', page = 1) {

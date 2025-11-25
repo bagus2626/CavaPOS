@@ -188,6 +188,7 @@ class OwnerListController extends Controller
         $activeOutlets = User::where('role', 'partner')
             ->where('owner_id', $ownerId)
             ->where('is_active', 1)
+            ->where('is_active_admin', 1)
             ->count();
 
         return [
@@ -337,6 +338,7 @@ class OwnerListController extends Controller
         $totalEmployees = Employee::where('partner_id', $outletId)->count();
         $activeEmployees = Employee::where('partner_id', $outletId)
             ->where('is_active', 1)
+            ->where('is_active_admin', 1)
             ->count();
 
         return [
@@ -496,12 +498,13 @@ class OwnerListController extends Controller
     private function renderEmployeesTable($employees): string
     {
         if ($employees->count() === 0) {
-            return '<tr><td colspan="6" class="text-center text-muted">No employees found for this outlet</td></tr>';
+            return '<tr><td colspan="7" class="text-center text-muted">No employees found for this outlet</td></tr>';
         }
 
         $html = '';
         foreach ($employees as $index => $employee) {
-            $html .= view('pages.admin.owner-management.partials.employee-row',
+            $html .= view(
+                'pages.admin.owner-management.partials.employee-row',
                 compact('employee', 'index', 'employees')
             )->render();
         }
@@ -619,5 +622,155 @@ class OwnerListController extends Controller
             {$paginationView}
         </div>
         HTML;
+    }
+
+    /**
+     * Toggle owner active status
+     */
+    public function toggleStatus(Request $request, $ownerId)
+    {
+        try {
+            $request->validate([
+                'is_active' => 'required|boolean',
+                'deactivation_reason' => 'nullable|string|max:500'
+            ]);
+
+            $owner = Owner::findOrFail($ownerId); 
+
+            $owner->is_active = $request->is_active;
+
+            if ($request->is_active) {
+                // Activating - clear reason and timestamp
+                $owner->deactivation_reason = null;
+                $owner->deactivated_at = null;
+            } else {
+                // Deactivating - save reason and timestamp
+                $owner->deactivation_reason = $request->deactivation_reason;
+                $owner->deactivated_at = now();
+            }
+
+            $owner->save();
+
+            $status = $request->is_active ? 'activated' : 'deactivated';
+
+            return response()->json([
+                'success' => true,
+                'message' => "Owner account has been {$status} successfully"
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error: ' . $e->getMessage()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update owner status'
+            ], 500);
+        }
+    }
+
+    /**
+     * Toggle outlet active status
+     */
+    public function toggleOutletStatus(Request $request, $ownerId, $outletId)
+    {
+        try {
+            $request->validate([
+                'is_active_admin' => 'required|boolean',
+                'deactivation_reason' => 'nullable|string|max:500'
+            ]);
+
+            $outlet = User::where('id', $outletId)
+                ->where('owner_id', $ownerId)
+                ->where('role', 'partner')
+                ->firstOrFail();
+
+            $outlet->is_active_admin = $request->is_active_admin;
+
+            if ($request->is_active_admin) {
+                // Activating - clear reason and timestamp
+                $outlet->deactivation_reason = null;
+                $outlet->deactivated_at = null;
+            } else {
+                // Deactivating - save reason and timestamp
+                $outlet->deactivation_reason = $request->deactivation_reason;
+                $outlet->deactivated_at = now();
+            }
+
+            $outlet->save();
+
+            $status = $request->is_active_admin ? 'activated' : 'deactivated';
+
+            return response()->json([
+                'success' => true,
+                'message' => "Outlet account has been {$status} successfully"
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error: ' . $e->getMessage()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update outlet status'
+            ], 500);
+        }
+    }
+
+    /**
+     * Toggle employees active status
+     */
+    public function toggleEmployeeStatus(Request $request, $ownerId, $outletId, $employeeId)
+    {
+        try {
+            $request->validate([
+                'is_active_admin' => 'required|boolean',
+                'deactivation_reason' => 'nullable|string|max:500'
+            ]);
+
+            // Verify outlet belongs to owner
+            $outlet = User::where('id', $outletId)
+                ->where('owner_id', $ownerId)
+                ->where('role', 'partner')
+                ->firstOrFail();
+
+            // Get employee
+            $employee = Employee::where('id', $employeeId)
+                ->where('partner_id', $outletId)
+                ->firstOrFail();
+
+            $employee->is_active_admin = $request->is_active_admin;
+
+            if ($request->is_active_admin) {
+                // Activating - clear reason and timestamp
+                $employee->deactivation_reason = null;
+                $employee->deactivated_at = null;
+            } else {
+                // Deactivating - save reason and timestamp
+                $employee->deactivation_reason = $request->deactivation_reason;
+                $employee->deactivated_at = now();
+            }
+
+            $employee->save();
+
+            $status = $request->is_active_admin ? 'activated' : 'deactivated';
+
+            return response()->json([
+                'success' => true,
+                'message' => "Employee account has been {$status} successfully"
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error: ' . $e->getMessage()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update employee status'
+            ], 500);
+        }
     }
 }

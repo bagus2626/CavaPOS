@@ -518,7 +518,7 @@
 
                         <li class="nav-item @if (Request::segment(1) == 'owner' && Request::segment(3) == 'xen_platform') menu-open @endif">
                             <a href="javascript:void(0)"
-                               class="nav-link {{ !$isVerified ? 'disabled-link' : '' }} {{ Route::is($employeeRoutes) ? 'active' : '' }}"
+                               class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($employeeRoutes) ? 'active' : '' }}"
                                onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
                                 <i class="nav-icon fas fa-credit-card"></i>
                                 <p>
@@ -528,7 +528,7 @@
                                     @endif
                                 </p>
                             </a>
-                            <ul class="nav nav-treeview {{ !$isVerified ? 'disabled' : '' }}">
+                            <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
                                 <li class="nav-item">
                                     <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.accounts.information') : 'javascript:void(0)' }}"
                                        class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'accounts') active @endif">
@@ -537,7 +537,7 @@
                                     </a>
                                 </li>
                             </ul>
-                            <ul class="nav nav-treeview {{ !$isVerified ? 'disabled' : '' }}">
+                            <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
                                 <li class="nav-item">
                                     <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.split-payment.index') : 'javascript:void(0)' }}"
                                        class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'split-payment') active @endif">
@@ -546,7 +546,7 @@
                                     </a>
                                 </li>
                             </ul>
-                            <ul class="nav nav-treeview {{ !$isVerified ? 'disabled' : '' }}">
+                            <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
                                 <li class="nav-item">
                                     <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.payout.index') : 'javascript:void(0)' }}"
                                        class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'payout') active @endif">

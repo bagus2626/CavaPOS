@@ -32,10 +32,31 @@
         @endif
     </td>
     <td>
-        @if ($employee->is_active)
+        @if ($employee->is_active_admin)
             <span class="badge badge-success badge-pill">Active</span>
         @else
-            <span class="badge badge-danger badge-pill">Inactive</span>
+            <span class="badge badge-danger badge-pill"
+                @if ($employee->deactivation_reason) 
+                    data-toggle="tooltip" 
+                    data-placement="top"
+                    title="{{ $employee->deactivation_reason }}" 
+                @endif>
+                Inactive
+            </span>
         @endif
+    </td>
+    <td>
+        <div class="d-flex align-items-center">
+            <div class="custom-control custom-switch custom-switch-success">
+                <input type="checkbox"
+                    class="custom-control-input employee-status-toggle"
+                    id="employeeSwitch{{ $employee->id }}"
+                    data-employee-id="{{ $employee->id }}"
+                    data-employee-name="{{ $employee->name }}"
+                    {{ $employee->is_active_admin ? 'checked' : '' }}>
+                <label class="custom-control-label"
+                    for="employeeSwitch{{ $employee->id }}"></label>
+            </div>
+        </div>
     </td>
 </tr>
