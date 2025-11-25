@@ -74,6 +74,18 @@
                     <span class="menu-title" data-i18n="OwnerVerification">Owner Verification</span>
                 </a>
             </li>
+            <li class=" nav-item"><a href="#">
+                    <i class="bx bxs-conversation"></i>
+                    <span class="menu-title" data-i18n="XenPlatform">Messages & Notif</span>
+                </a>
+                <ul class="menu-content">
+                    <li @if (Request::segment(2) == 'message-notification' && Request::segment(3) == 'messages') class="active" @endif>
+                        <a href="{{ route('admin.message-notification.messages.index') }}">
+                            <i class="bx bx-right-arrow-alt"></i>
+                            <span class="menu-item" data-i18n="partner-accounts">Messages</span></a>
+                    </li>
+                </ul>
+            </li>
         </ul>
     </div>
 </div>

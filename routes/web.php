@@ -52,6 +52,7 @@ use App\Http\Controllers\Employee\Transaction\KitchenTransactionController;
 use App\Http\Controllers\Owner\Verification\VerificationController;
 use App\Http\Controllers\PaymentGateway\Xendit\SubAccountController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use \App\Http\Controllers\Admin\MessageNotification\MessageController;
 
 
 Route::get('/set-language', function () {
@@ -195,6 +196,11 @@ Route::middleware('setlocale')->group(function () {
                 //                Route::get('list', [SubAccountController::class, 'getSubAccounts'])->name('list');
             });
         });
+
+        Route::prefix('message-notification')->name('message-notification.')->group(function () {
+            Route::get('/get-recipients', [MessageController::class, 'getRecipients'])->name('get-recipients');
+            Route::resource('messages', MessageController::class);
+        });
     });
 
     // Owner
@@ -263,6 +269,7 @@ Route::middleware('setlocale')->group(function () {
 
             Route::middleware('owner.verification.access', 'owner.access')->group(function () {
                 Route::get('/', [OwnerDashboardController::class, 'index'])->name('dashboard');
+                Route::get('timeline/messages', [OwnerDashboardController::class, 'timelineMessages'])->name('timeline.messages');
                 Route::get('outlets/check-username', [OwnerOutletController::class, 'checkUsername'])->name('outlets.check-username')->middleware('throttle:30,1');
                 Route::get('outlets/check-slug', [OwnerOutletController::class, 'checkSlug'])->name('outlets.check-slug')->middleware('throttle:30,1');
                 Route::resource('outlets', OwnerOutletController::class);
