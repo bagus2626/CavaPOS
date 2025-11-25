@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Owner\Outlet;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\ProfileOutlet;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -24,7 +25,6 @@ class OwnerOutletController extends Controller
     public function index()
     {
         $owner = Auth::user();
-        // dd($owner);
         $outlets = User::where('owner_id', Auth::id())->get();
 
         return view('pages.owner.outlet.index', compact('owner', 'outlets'));
@@ -32,6 +32,7 @@ class OwnerOutletController extends Controller
 
     /**
      * Show the form for creating a new resource.
+     * 
      */
     public function create()
     {
@@ -44,7 +45,6 @@ class OwnerOutletController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
         try {
             DB::beginTransaction();
 
@@ -53,7 +53,7 @@ class OwnerOutletController extends Controller
 
             $imagePath = null;
             $imagePathLogo = null;
-            // dd($request->all());
+
             $request->validate([
                 'name' => ['required', 'string', 'max:255'],
                 'username' => ['required', 'string', 'max:255', 'unique:' . User::class],
@@ -66,15 +66,24 @@ class OwnerOutletController extends Controller
                 'village' => ['required', 'string', 'max:255'],
                 'address' => ['required', 'string'],
                 'partner_code' => ['required', 'size:4', 'alpha_num', Rule::unique('users', 'partner_code')],
+                'qr_mode' => ['nullable', 'string', 'in:disabled,barcode_only,cashier_only,both'],
+
+                // Validasi untuk field profile_outlet
+                'contact_person' => ['nullable', 'string', 'max:255'],
+                'contact_phone' => ['nullable', 'string', 'max:20'],
+                'gmaps_url' => ['nullable', 'url', 'max:500'],
+                'instagram' => ['nullable', 'string', 'max:255'],
+                'facebook' => ['nullable', 'string', 'max:255'],
+                'twitter' => ['nullable', 'string', 'max:255'],
+                'tiktok' => ['nullable', 'string', 'max:255'],
+                'whatsapp' => ['nullable', 'string', 'max:20'],
+                'website' => ['nullable', 'url', 'max:255'],
             ]);
 
             if ($request->hasFile('image')) {
                 $file = $request->file('image');
 
-                // Baca & perbaiki orientasi EXIF
                 $img = Image::make($file->getPathname())->orientate();
-
-                // Batasi dimensi supaya aman (maks 1600x1600, tetap proporsional)
                 $img->resize(1600, 1600, function ($c) {
                     $c->aspectRatio();
                     $c->upsize();
@@ -88,30 +97,22 @@ class OwnerOutletController extends Controller
                 $path     = null;
                 $binary   = null;
 
-                // Coba simpan sebagai WebP (ukuran kecil, modern)
                 try {
-                    $binary = (string) $img->encode('webp', 78); // kualitas 0-100
+                    $binary = (string) $img->encode('webp', 78);
                     $path   = "{$dir}/{$basename}.webp";
                 } catch (\Throwable $e) {
-                    // Fallback ke JPEG kalau WebP tidak didukung di server
                     $binary = (string) $img->encode('jpg', 80);
                     $path   = "{$dir}/{$basename}.jpg";
                 }
 
-                // Tulis ke disk public
                 $disk->put($path, $binary);
-
-                // Simpan path relatif untuk database
                 $imagePath = $path;
             }
 
             if ($request->hasFile('logo')) {
                 $fileLogo = $request->file('logo');
 
-                // Baca & perbaiki orientasi EXIF
                 $lg = Image::make($fileLogo->getPathname())->orientate();
-
-                // Batasi dimensi supaya aman (maks 1600x1600, tetap proporsional)
                 $lg->resize(1600, 1600, function ($c) {
                     $c->aspectRatio();
                     $c->upsize();
@@ -125,24 +126,26 @@ class OwnerOutletController extends Controller
                 $pathLogo     = null;
                 $binaryLogo   = null;
 
-                // Coba simpan sebagai WebP (ukuran kecil, modern)
                 try {
-                    $binaryLogo = (string) $lg->encode('webp', 78); // kualitas 0-100
+                    $binaryLogo = (string) $lg->encode('webp', 78);
                     $pathLogo   = "{$dirLogo}/{$basenameLogo}.webp";
                 } catch (\Throwable $e) {
-                    // Fallback ke JPEG kalau WebP tidak didukung di server
                     $binaryLogo = (string) $lg->encode('jpg', 80);
                     $pathLogo   = "{$dirLogo}/{$basenameLogo}.jpg";
                 }
 
-                // Tulis ke disk public
                 $diskLogo->put($pathLogo, $binaryLogo);
-
-                // Simpan path relatif untuk database
                 $imagePathLogo = $pathLogo;
             }
+
             $auth = Auth::user();
-            // dd($auth);
+
+            $auth = Auth::user();
+
+            // Tentukan is_qr_active dan is_cashier_active berdasarkan qr_mode
+            $qrMode = $request->input('qr_mode', 'disabled');
+            $isQrActive = in_array($qrMode, ['barcode_only', 'both']) ? 1 : 0;
+            $isCashierActive = in_array($qrMode, ['cashier_only', 'both']) ? 1 : 0;
 
             $user = User::create([
                 'name' => $request->name,
@@ -164,10 +167,24 @@ class OwnerOutletController extends Controller
                 'urban_village' => $request->village_name,
                 'urban_village_id' => $request->village,
                 'address' => $request->address,
+                'is_qr_active' => $isQrActive,
+                'is_cashier_active' => $isCashierActive,
+            ]);
+
+            // Create profile outlet
+            $user->profileOutlet()->create([
+                'contact_person' => $request->contact_person,
+                'contact_phone'  => $request->contact_phone,
+                'gmaps_url'      => $request->gmaps_url,
+                'instagram'      => $request->instagram,
+                'facebook'       => $request->facebook,
+                'twitter'        => $request->twitter,
+                'tiktok'         => $request->tiktok,
+                'whatsapp'       => $request->whatsapp,
+                'website'        => $request->website,
             ]);
 
             event(new Registered($user));
-            // Auth::login($user);
 
             DB::commit();
             return redirect()
@@ -182,12 +199,7 @@ class OwnerOutletController extends Controller
     protected function generateUniquePartnerCode(int $maxTries = 50): string
     {
         for ($i = 0; $i < $maxTries; $i++) {
-            // Str::random sudah alnum, kita uppercase agar A–Z
-            $code = strtoupper(Str::random(4)); // contoh: 7K3B
-
-            // (opsional) hilangkan karakter yang membingungkan:
-            // $code = strtr($code, ['O'=>'A','0'=>'1','I'=>'B','l'=>'C']);
-
+            $code = strtoupper(Str::random(4));
             $exists = User::where('partner_code', $code)->exists();
             if (!$exists) return $code;
         }
@@ -207,9 +219,20 @@ class OwnerOutletController extends Controller
      */
     public function edit(User $outlet)
     {
-        // Pastikan ini milik owner yang login & rolenya partner
         abort_if($outlet->role !== 'partner', 404);
         abort_if($outlet->owner_id !== Auth::id(), 403);
+
+        // Tentukan qr_mode berdasarkan kombinasi is_qr_active dan is_cashier_active
+        if ($outlet->is_qr_active && $outlet->is_cashier_active) {
+            $outlet->qr_mode = 'both';
+        } elseif ($outlet->is_qr_active) {
+            $outlet->qr_mode = 'barcode_only';
+        } elseif ($outlet->is_cashier_active) {
+            $outlet->qr_mode = 'cashier_only';
+        } else {
+            $outlet->qr_mode = 'disabled';
+        }
+        
 
         return view('pages.owner.outlet.edit', compact('outlet'));
     }
@@ -217,7 +240,6 @@ class OwnerOutletController extends Controller
     // Update data
     public function update(Request $request, User $outlet)
     {
-        // dd($request->all());
         abort_if($outlet->role !== 'partner', 404);
         abort_if($outlet->owner_id !== Auth::id(), 403);
 
@@ -237,20 +259,26 @@ class OwnerOutletController extends Controller
                 'max:255',
                 Rule::unique(User::class, 'email')->ignore($outlet->id),
             ],
-
-            // password opsional saat edit
             'password' => ['nullable', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
-
-            // alamat (ID yang dipost adalah kode dari API Emsifa)
             'province' => ['required', 'string', 'max:255'],
             'city'     => ['required', 'string', 'max:255'],
             'district' => ['required', 'string', 'max:255'],
             'village'  => ['required', 'string', 'max:255'],
             'address'  => ['required', 'string'],
             'is_active' => ['nullable', 'boolean'],
-            'is_qr_active' => ['nullable', 'boolean'],
-
+            'qr_mode' => ['nullable', 'string', 'in:disabled,barcode_only,cashier_only,both'],
             'image'    => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:2048'],
+
+            // Validasi untuk field profile_outlet
+            'contact_person' => ['nullable', 'string', 'max:255'],
+            'contact_phone' => ['nullable', 'string', 'max:20'],
+            'gmaps_url' => ['nullable', 'url', 'max:500'],
+            'instagram' => ['nullable', 'string', 'max:255'],
+            'facebook' => ['nullable', 'string', 'max:255'],
+            'twitter' => ['nullable', 'string', 'max:255'],
+            'tiktok' => ['nullable', 'string', 'max:255'],
+            'whatsapp' => ['nullable', 'string', 'max:20'],
+            'website' => ['nullable', 'url', 'max:255'],
         ]);
 
         try {
@@ -284,7 +312,6 @@ class OwnerOutletController extends Controller
 
                 $disk->put($path, $binary);
 
-                // Hapus lama bila ada
                 if ($outlet->background_picture && $disk->exists($outlet->background_picture)) {
                     $disk->delete($outlet->background_picture);
                 }
@@ -317,7 +344,6 @@ class OwnerOutletController extends Controller
 
                 $diskLogo->put($pathLogo, $binaryLogo);
 
-                // Hapus lama bila ada
                 if ($outlet->logo && $diskLogo->exists($outlet->logo)) {
                     $diskLogo->delete($outlet->logo);
                 }
@@ -325,15 +351,18 @@ class OwnerOutletController extends Controller
                 $newImagePathLogo = $pathLogo;
             }
 
-            // Data update
+            // Tentukan is_qr_active dan is_cashier_active berdasarkan qr_mode
+            $qrMode = $request->input('qr_mode', 'disabled');
+            $isQrActive = in_array($qrMode, ['barcode_only', 'both']) ? 1 : 0;
+            $isCashierActive = in_array($qrMode, ['cashier_only', 'both']) ? 1 : 0;
+
+            // Data update untuk user
             $updateData = [
                 'name'   => $request->name,
                 'email'  => $request->email,
                 'username' => $request->username,
                 'logo' => $newImagePathLogo,
                 'background_picture'   => $newImagePath,
-
-                // alamat simpan nama & id
                 'province'         => $request->province_name,
                 'province_id'      => $request->province,
                 'city'             => $request->city_name,
@@ -344,7 +373,8 @@ class OwnerOutletController extends Controller
                 'urban_village_id' => $request->village,
                 'address'          => $request->address,
                 'is_active'        => $request->is_active ?? 0,
-                'is_qr_active'     => $request->is_qr_active ?? 0,
+                'is_qr_active'     => $isQrActive,
+                'is_cashier_active' => $isCashierActive,
             ];
 
             if ($request->filled('password')) {
@@ -352,6 +382,25 @@ class OwnerOutletController extends Controller
             }
 
             $outlet->update($updateData);
+
+            // Update atau create profile outlet
+            $profileData = [
+                'contact_person' => $request->contact_person,
+                'contact_phone'  => $request->contact_phone,
+                'gmaps_url'      => $request->gmaps_url,
+                'instagram'      => $request->instagram,
+                'facebook'       => $request->facebook,
+                'twitter'        => $request->twitter,
+                'tiktok'         => $request->tiktok,
+                'whatsapp'       => $request->whatsapp,
+                'website'        => $request->website,
+            ];
+
+            if ($outlet->profileOutlet) {
+                $outlet->profileOutlet->update($profileData);
+            } else {
+                $outlet->profileOutlet()->create($profileData);
+            }
 
             DB::commit();
 
@@ -369,21 +418,18 @@ class OwnerOutletController extends Controller
      */
     public function destroy(User $outlet)
     {
-        // (opsional tapi bagus) pastikan employee milik partner yang login
         $ownerId = Auth::id();
         $partners = User::where('owner_id', $ownerId)->get();
         abort_if(!$partners->contains($outlet->id), 403);
 
         try {
-            // Hapus file gambar jika ada
             if (!empty($outlet->background_picture)) {
-                $disk = Storage::disk('public');       // path DB: "employees/xxxx.webp"
+                $disk = Storage::disk('public');
                 if ($disk->exists($outlet->background_picture)) {
                     $disk->delete($outlet->background_picture);
                 }
             }
 
-            // Hapus record
             $outlet->delete();
 
             return redirect()

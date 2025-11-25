@@ -878,14 +878,7 @@
                                 </ul>
                             </li>
 
-                        {{-- Settings --}}
-                        <li class="nav-item">
-                            <a href="javascript:void(0)" class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }}"
-                                onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                                <i class="nav-icon fas fa-cog"></i>
-                                <p>{{ __('messages.owner.layout.settings') }}</p>
-                            </a>
-                        </li>
+                        
 
                         {{-- Reports Header --}}
                         <li class="nav-header {{ !$isVerified || !$isActive ? 'disabled-header' : '' }}">
@@ -934,18 +927,6 @@
                     </div>
                 </div>
             </section>
-
-            <!-- Main Content -->
-            @yield('content')
-        </div>
-
-        @yield('modal')
-        <!-- Footer -->
-        <footer class="main-footer bg-white">
-            <div class="float-right d-none d-sm-block">
-                <b>Version</b> 3.2.0
-            </div>
-        </section>
 
         <!-- Main Content -->
         @yield('content')

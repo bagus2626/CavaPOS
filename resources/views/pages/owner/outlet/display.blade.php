@@ -14,6 +14,7 @@
         <th>{{ __('messages.owner.outlet.all_outlets.background_picture') }}</th>
         <th>{{ __('messages.owner.outlet.all_outlets.status') }}</th>
         <th>QRIS</th>
+        <th>Cashier</th>
         <th class="text-nowrap">{{ __('messages.owner.outlet.all_outlets.actions') }}</th>
       </tr>
     </thead>
@@ -80,6 +81,18 @@
 
           <td class="col-status">
             @if((int) $outlet->is_qr_active === 1)
+              <span class="badge badge-soft-success d-inline-flex align-items-center gap-1">
+                <i class="fas fa-check-circle"></i> {{ __('messages.owner.outlet.all_outlets.active') }}
+              </span>
+            @else
+              <span class="badge badge-soft-secondary d-inline-flex align-items-center gap-1">
+                <i class="fas fa-minus-circle"></i> {{ __('messages.owner.outlet.all_outlets.inactive') }}
+              </span>
+            @endif
+          </td>
+
+          <td class="col-status">
+            @if((int) $outlet->is_cashier_active === 1)
               <span class="badge badge-soft-success d-inline-flex align-items-center gap-1">
                 <i class="fas fa-check-circle"></i> {{ __('messages.owner.outlet.all_outlets.active') }}
               </span>
@@ -173,10 +186,6 @@
 }
 </style>
 
-
-
-
-
 @push('scripts')
 <script>
 function deleteOutlet(outletId) {
@@ -220,6 +229,5 @@ function generateBarcode(tableId) {
         console.error('Generate barcode failed:', error);
     });
 }
-
 </script>
 @endpush
