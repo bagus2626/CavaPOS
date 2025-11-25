@@ -88,12 +88,29 @@ Route::middleware('setlocale')->group(function () {
 
     Route::middleware('guest')->group(function () {});
 
+    Route::get('/partner/account-suspended', function () {
+        return view('pages.owner.owner-management.partner-account-suspended');
+    })->name('partner.account.suspended')->middleware('partner.access');
+
+    Route::get('/employee/account-suspended', function () {
+        return view('pages.owner.owner-management.employee-account-suspended');
+    })->name('employee.account.suspended')->middleware('employee.access');
+
+    Route::get('/customer/account-suspended', function () {
+        return view('pages.owner.owner-management.customer-account-suspended');
+    })->name('customer.account.suspended')->middleware('customer.access');
+
 
     //admin
     Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
         Route::prefix('owner-list')->name('owner-list.')->group(function () {
             Route::get('/', [OwnerListController::class, 'index'])->name('index');
+            // In your admin routes group
+            Route::post('{owner}/toggle-status', [OwnerListController::class, 'toggleStatus'])->name('toggle-status');
+            Route::post('{ownerId}/outlets/{outletId}/toggle-status', [OwnerListController::class, 'toggleOutletStatus'])->name('outlets.toggle-status');
+            Route::post('{ownerId}/outlets/{outletId}/employees/{employeeId}/toggle-status', [OwnerListController::class, 'toggleEmployeeStatus'])->name('employees.toggle-status');
+
             Route::get('{ownerId}/outlets', [OwnerListController::class, 'showOutlets'])->name('outlets');
             Route::get('{ownerId}/outlets/{outletId}/data', [OwnerListController::class, 'showOutletData'])->name('outlet-data');
         });
@@ -114,7 +131,6 @@ Route::middleware('setlocale')->group(function () {
                 Route::get('validate-bank', [PayoutController::class, 'validateBankAccount'])->name('validate-bank');
                 Route::post('create', [PayoutController::class, 'createPayout'])->name('create');
                 Route::get('{businessId}/detail/{payoutId}', [PayoutController::class, 'getPayout'])->name('detail');
-
             });
         });
 
@@ -125,7 +141,6 @@ Route::middleware('setlocale')->group(function () {
                 Route::get('{accountId}/tab/{tab}', [PartnerAccountController::class, 'getTabData']);
                 Route::get('{accountId}/filter/{tab}', [PartnerAccountController::class, 'filter']);;
                 Route::get('{accountId}/transaction-detail/{transactionId}', [PartnerAccountController::class, 'getTransactionById']);
-
             });
 
             Route::resource('partner-account', PartnerAccountController::class);
@@ -147,11 +162,10 @@ Route::middleware('setlocale')->group(function () {
 
 
             Route::prefix('balance')->name('balance.')->group(function () {
-//                Route::post('create', [SubAccountController::class, 'createAccount'])->name('create');
-//                Route::get('list', [SubAccountController::class, 'getSubAccounts'])->name('list');
+                //                Route::post('create', [SubAccountController::class, 'createAccount'])->name('create');
+                //                Route::get('list', [SubAccountController::class, 'getSubAccounts'])->name('list');
             });
         });
-
     });
 
     // Owner
@@ -203,6 +217,13 @@ Route::middleware('setlocale')->group(function () {
         Route::middleware(['auth:owner', 'is_owner:owner', 'verified'])->prefix('user-owner')->name('user-owner.')->group(function () {
 
 
+            Route::middleware('owner.access')->group(function () {
+                Route::get('/inactive-owners', function () {
+                    return view('pages.owner.owner-management.owner-account-inactive');
+                })->name('inactive-owners');
+            });
+
+
             Route::middleware('owner.verification.access')->prefix('verification')->name('verification.')->group(function () {
                 Route::get('/', [VerificationController::class, 'index'])->name('index');
                 Route::post('/', [VerificationController::class, 'store'])->name('store');
@@ -211,7 +232,7 @@ Route::middleware('setlocale')->group(function () {
             });
 
 
-            Route::middleware('owner.verification.access')->group(function () {
+            Route::middleware('owner.verification.access', 'owner.access')->group(function () {
                 Route::get('/', [OwnerDashboardController::class, 'index'])->name('dashboard');
                 Route::get('outlets/check-username', [OwnerOutletController::class, 'checkUsername'])->name('outlets.check-username')->middleware('throttle:30,1');
                 Route::get('outlets/check-slug', [OwnerOutletController::class, 'checkSlug'])->name('outlets.check-slug')->middleware('throttle:30,1');
@@ -246,7 +267,7 @@ Route::middleware('setlocale')->group(function () {
     });
 
     //Partner
-    Route::middleware(['auth', 'is_partner'])->prefix('partner')->name('partner.')->group(function () {
+    Route::middleware(['auth', 'is_partner', 'partner.access'])->prefix('partner')->name('partner.')->group(function () {
         Route::get('/', [PartnerDashboardController::class, 'index'])->name('dashboard');
         Route::resource('products', PartnerProductController::class);
         Route::prefix('store')->name('store.')->group(function () {
@@ -276,7 +297,7 @@ Route::middleware('setlocale')->group(function () {
         Route::post('logout', [EmployeeAuthController::class, 'logout'])->name('logout');
 
         // CASHIER area
-        Route::middleware(['auth:employee', 'is_employee:CASHIER'])->prefix('cashier')->name('cashier.')->group(function () {
+        Route::middleware(['auth:employee', 'employee.access', 'is_employee:CASHIER'])->prefix('cashier')->name('cashier.')->group(function () {
             Route::get('dashboard', [CashierDashboardController::class, 'index'])->name('dashboard');
             Route::get('tab/{tab}', [CashierDashboardController::class, 'show'])->name('tab');
             Route::post('cash-payment/{id}', [CashierTransactionController::class, 'cashPayment'])->name('cash-payment');
@@ -289,8 +310,7 @@ Route::middleware('setlocale')->group(function () {
 
 
         // KITCHEN area
-
-        Route::middleware(['auth:employee', 'is_employee:KITCHEN'])->prefix('kitchen')->name('kitchen.')->group(function () {
+        Route::middleware(['auth:employee', 'employee.access', 'is_employee:KITCHEN'])->prefix('kitchen')->name('kitchen.')->group(function () {
             Route::get('dashboard', [KitchenDashboardController::class, 'index'])->name('dashboard');
 
             // API Endpoints - UPDATE YANG SUDAH ADA
@@ -311,7 +331,7 @@ Route::middleware('setlocale')->group(function () {
     });
 
     //customer
-    Route::prefix('customer')->name('customer.')->group(function () {
+    Route::prefix('customer')->name('customer.')->middleware('customer.access')->group(function () {
         Route::get('{partner_slug}/menu/{table_code}', [CustomerMenuController::class, 'index'])->name('menu.index');
         Route::post('{partner_slug}/checkout/{table_code}', [CustomerMenuController::class, 'checkout'])->name('menu.checkout');
         Route::get('/orders/{id}/receipt', [CustomerMenuController::class, 'printReceipt'])->name('orders.receipt');
