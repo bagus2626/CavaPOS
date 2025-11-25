@@ -42,15 +42,33 @@
         </div>
     </td>
     <td>
-        @if ($outlet->is_active)
+        @if ($outlet->is_active_admin)
             <span class="badge badge-success badge-pill">Active</span>
         @else
-            <span class="badge badge-danger badge-pill">Inactive</span>
+            <span class="badge badge-danger badge-pill"
+                @if ($outlet->deactivation_reason) 
+                    data-toggle="tooltip" 
+                    data-placement="top"
+                    title="{{ $outlet->deactivation_reason }}" 
+                @endif>
+                Inactive
+            </span>
         @endif
     </td>
     <td>
-        <span class="text-muted d-block">{{ $outlet->created_at->format('d M Y') }}</span>
-        <span class="text-muted">{{ $outlet->created_at->format('H:i') }}</span>
+        <div class="d-flex align-items-center">
+            <div class="custom-control custom-switch custom-switch-success">
+                <input type="checkbox"
+                    class="custom-control-input outlet-status-toggle"
+                    id="outletSwitch{{ $outlet->id }}"
+                    data-outlet-id="{{ $outlet->id }}"
+                    data-owner-id="{{ $owner->id }}"
+                    data-outlet-name="{{ $outlet->name }}"
+                    {{ $outlet->is_active_admin ? 'checked' : '' }}>
+                <label class="custom-control-label"
+                    for="outletSwitch{{ $outlet->id }}"></label>
+            </div>
+        </div>
     </td>
     <td>
         <a href="{{ route('admin.owner-list.outlet-data', ['ownerId' => $owner->id, 'outletId' => $outlet->id]) }}"
