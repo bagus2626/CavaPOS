@@ -3,17 +3,23 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Partner\HumanResource\Employee;
 use App\Models\Transaction\BookingOrder;
 use App\Models\Product\MasterProduct;
+use App\Models\MessageNotification\Message;
+use App\Models\MessageNotification\MessageRecipient;
+use App\Models\MessageNotification\MessageAttachment;
+use Carbon\Carbon;
 
 class OwnerDashboardController extends Controller
 {
     public function index()
     {
         $owner = Auth::user();
+        $now = Carbon::now();
         // dd($owner);
 
         $outlets = User::where('owner_id', $owner->id)
@@ -32,7 +38,78 @@ class OwnerDashboardController extends Controller
         $total_orders = $orders->count();
 
         $last_orders = $orders->latest()->take(10)->get();
-        // dd($last_orders);
+
+        $popups = Message::with(['recipients', 'attachments'])
+            ->whereHas('recipients', function ($q) use ($owner) {
+                $q->where('message_type', 'popup')
+                    ->where(function ($qq) use ($owner) {
+                        $qq->where(function ($qx) use ($owner) {
+                            // Personal popup
+                            $qx->where('recipient_id', $owner->id)
+                                ->where('recipient_type', 'owner')
+                                ->where('recipient_target', 'single');
+                        })
+                        ->orWhere(function ($qx) {
+                            // Broadcast popup
+                            $qx->where('recipient_target', 'broadcast')
+                                ->whereIn('recipient_type', [
+                                    'owner',
+                                    'business-partner',
+                                    'all'
+                                ]);
+                        });
+                    });
+            })
+            ->where(function ($query) use ($now) {
+                $query->where(function ($q) use ($now) {
+                    $q->whereNull('scheduled_at')
+                        ->orWhere('scheduled_at', '<=', $now);
+                })
+                ->where(function ($q) use ($now) {
+                    $q->whereNull('expires_at')
+                        ->orWhere('expires_at', '>=', $now);
+                });
+            })
+            ->orderByRaw("COALESCE(scheduled_at, created_at) DESC")
+            ->get();
+
+        $messages = Message::with(['recipients', 'attachments'])
+            ->whereHas('recipients', function ($q) use ($owner) {
+                $q->where('message_type', 'message')
+                    ->where(function ($qq) use ($owner) {
+                        $qq->where(function ($qx) use ($owner) {
+                            // Personal message
+                            $qx->where('recipient_id', $owner->id)
+                                ->where('recipient_type', 'owner')
+                                ->where('recipient_target', 'single');
+                        })
+                        ->orWhere(function ($qx) {
+                            // Broadcast message
+                            $qx->where('recipient_target', 'broadcast')
+                                ->whereIn('recipient_type', [
+                                    'owner',
+                                    'business-partner',
+                                    'all'
+                                ]);
+                        });
+                    });
+            })
+            ->where(function ($query) use ($now) {
+                $query->where(function ($q) use ($now) {
+                    $q->whereNull('scheduled_at')
+                        ->orWhere('scheduled_at', '<=', $now);
+                })
+                ->where(function ($q) use ($now) {
+                    $q->whereNull('expires_at')
+                        ->orWhere('expires_at', '>=', $now);
+                });
+            })
+            ->orderByRaw("COALESCE(scheduled_at, created_at) DESC")
+            ->paginate(5);
+            // ->get();
+
+
+        // dd($messages);
 
         $data = [
             'total_outlets'      => $total_outlets,
@@ -42,10 +119,56 @@ class OwnerDashboardController extends Controller
             'total_orders'       => $total_orders,
             'total_products'     => $total_products,
             'last_orders'        => $last_orders,
+            'messages'           => $messages,
+            'popups'             => $popups,
         ];
 
         // dd($data);
 
         return view('pages.owner.dashboard.index', compact('data'));
     }
+
+    public function timelineMessages(Request $request)
+    {
+        $owner = Auth::user();
+        $now = Carbon::now();
+        $page = $request->get('page', 1);
+
+        $messages = Message::with(['recipients', 'attachments'])
+            ->whereHas('recipients', function ($q) use ($owner) {
+                $q->where('message_type', 'message')
+                    ->where(function ($qq) use ($owner) {
+                        $qq->where(function ($qx) use ($owner) {
+                            // Personal message
+                            $qx->where('recipient_id', $owner->id)
+                                ->where('recipient_type', 'owner')
+                                ->where('recipient_target', 'single');
+                        })
+                        ->orWhere(function ($qx) {
+                            // Broadcast message
+                            $qx->where('recipient_target', 'broadcast')
+                                ->whereIn('recipient_type', [
+                                    'owner',
+                                    'business-partner',
+                                    'all'
+                                ]);
+                        });
+                    });
+            })
+            ->where(function ($query) use ($now) {
+                $query->where(function ($q) use ($now) {
+                    $q->whereNull('scheduled_at')
+                        ->orWhere('scheduled_at', '<=', $now);
+                })
+                ->where(function ($q) use ($now) {
+                    $q->whereNull('expires_at')
+                        ->orWhere('expires_at', '>=', $now);
+                });
+            })
+            ->orderByRaw("COALESCE(scheduled_at, created_at) DESC")
+            ->paginate(5, ['*'], 'page', $page);
+
+        return view('pages.owner.dashboard.partials.timeline-items', compact('messages'));
+    }
+
 }

@@ -30,6 +30,7 @@
     <link rel="icon" href="{{ asset('images/logo-icon.png') }}" type="image/x-icon">
     <link rel="preload" as="image" href="{{ asset('images/cava-logo2.png') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('admin/app-assets/vendors/css/forms/select/select2.css') }}">
+    <link rel="stylesheet" href="{{ asset('admin/app-assets/vendors/css/editors/quill/quill.snow.css') }}">
 
     <link rel="stylesheet" type="text/css" href="{{asset('admin/app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('admin/app-assets/vendors/css/pickers/daterange/daterangepicker.css')}}">
@@ -126,6 +127,33 @@
 
 <!-- Scripts -->
     @stack('scripts')
+
+
+    @if(session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                toastr.success(@json(session('success')));
+            });
+        </script>
+    @endif
+
+    @if(session('error'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                toastr.error(@json(session('error')));
+            });
+        </script>
+    @endif
+
+    @if ($errors->any())
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                @foreach ($errors->all() as $err)
+                    toastr.error(@json($err));
+                @endforeach
+            });
+        </script>
+    @endif
 
 </body>
 <!-- END: Body-->
