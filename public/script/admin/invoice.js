@@ -12,9 +12,11 @@ window.initInvoiceTab = function(accountId) {
             autoUpdateInput: false,
             ranges: {
                 'Today': [moment(), moment()],
+                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
                 'Last 7 Days': [moment().subtract(6, 'days'), moment()],
                 'Last 30 Days': [moment().subtract(29, 'days'), moment()],
                 'This Month': [moment().startOf('month'), moment().endOf('month')],
+                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
             },
             locale: { cancelLabel: 'Clear', format: 'YYYY/MM/DD' }
         }).on('cancel.daterangepicker', function (ev, picker) {
@@ -52,6 +54,10 @@ window.initInvoiceTab = function(accountId) {
                 activeInvoiceFilters[group] = activeInvoiceFilters[group].filter(item => item !== value);
             }
             updateInvoiceFilterCount();
+        });
+
+        $('#popup-invoice-filter-options').on('click', function (e) {
+            e.stopPropagation();
         });
 
         $(document).on('click', '#xendit-invoice-pagination .page-link', function (e) {
@@ -318,7 +324,118 @@ window.initInvoiceTab = function(accountId) {
             </nav>
         </div>
     `;
-
         paginationContainer.html(paginationHtml);
     }
+
+    $(document).on('click', '.invoice-clickable-row', function (e) {
+        const $row = $(this);
+
+        if ($(e.target).closest('.dropdown, .dropdown-toggle, a').length > 0) {
+            return;
+        }
+
+        const businessId = $row.data('business-id');
+        const invoiceId = $row.data('invoice-id');
+
+        if (invoiceId && businessId) {
+            $row.addClass('loading');
+
+            const colCount = $row.find('td').length;
+
+            $row.html(`
+                    <td colspan="${colCount}" class="text-center">
+                        <div class="d-flex justify-content-center align-items-center gap-2 overlay">
+                            <div class="spinner-border" role="status" style="width:1.5rem; height:1.5rem;"></div>
+                            <span class="fw-medium ml-1">Memuat detail invoice...</span>
+                        </div>
+                    </td>
+                `);
+
+            setTimeout(() => {
+                window.location.href = `/admin/xen_platform/partner-account/${businessId}/invoice-detail/${invoiceId}`;
+            }, 250);
+        } else {
+            alert('Missing business_id or payout_id for row click.')
+        }
+    });
+
+    $(document).on('click', '.copy-btn', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const $btn = $(this);
+        const value = String($btn.data('copy-value') ?? '');
+        const originalHtml = $btn.html();
+
+        if (!value) {
+            flashTemp($btn, 'No value to copy', '#fff3cd', '#856404');
+            return;
+        }
+
+        const onCopied = () => {
+            $btn.html('<span class="text-success">Value copied to clipboard</span>');
+            $btn.css({
+                'background-color': '#e6f9ec',
+                'border-radius': '6px'
+            });
+
+            setTimeout(() => {
+                $btn.html(originalHtml);
+                $btn.css({'background-color': '', 'border-radius': ''});
+            }, 2500);
+        };
+
+        const onFail = (err) => {
+            console.error('Copy failed:', err);
+            flashTemp($btn, 'Copy failed', '#f8d7da', '#721c24');
+        };
+
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+            navigator.clipboard.writeText(value)
+                .then(onCopied)
+                .catch(() => {
+                    fallbackCopyTextToClipboard(value, (ok) => ok ? onCopied() : onFail('fallback failed'));
+                });
+        } else {
+            fallbackCopyTextToClipboard(value, (ok) => ok ? onCopied() : onFail('no clipboard API'));
+        }
+    });
+
+    function fallbackCopyTextToClipboard(text, cb) {
+        try {
+            const $txt = $('<textarea>');
+            $txt.css({
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '2em',
+                height: '2em',
+                padding: 0,
+                border: 'none',
+                outline: 'none',
+                boxShadow: 'none',
+                background: 'transparent'
+            });
+            $txt.val(text);
+            $('body').append($txt);
+            $txt[0].select();
+            $txt[0].setSelectionRange(0, $txt[0].value.length);
+            const success = document.execCommand('copy');
+            $txt.remove();
+            cb(Boolean(success));
+        } catch (err) {
+            cb(false);
+        }
+    }
+
+    function flashTemp($btn, message, bgColor = '#fff3cd', textColor = '#856404') {
+        const original = $btn.html();
+        $btn.html(`<span style="color:${textColor}">${message}</span>`);
+        $btn.css({'background-color': bgColor, 'border-radius': '6px'});
+        setTimeout(() => {
+            $btn.html(original);
+            $btn.css({'background-color': '', 'border-radius': ''});
+        }, 2500);
+    }
+
 }

@@ -11,6 +11,7 @@ use App\Models\Xendit\XenditSplitTransaction;
 use App\Models\Xendit\XenditSubAccount;
 use App\Services\XenditService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class SplitPaymentController extends Controller
@@ -101,7 +102,6 @@ class SplitPaymentController extends Controller
         return view('pages.admin.xen_platform.split-payments.rules.table', compact('splitRules'));
     }
 
-
     public function getSplitPayments(Request $request)
     {
         $query = XenditSplitTransaction::with([
@@ -162,7 +162,7 @@ class SplitPaymentController extends Controller
             ];
         });
 
-        return view('pages.admin.xen_platform.split-payments.payments.table', [
+        return view('pages.admin.xen_platform.split-payments.table', [
             'splitTransactions' => $splitTransactionsPaginator,
             'oldRequest' => $request->all()
         ])->render();
@@ -175,51 +175,125 @@ class SplitPaymentController extends Controller
 
     public function createSplitRule(Request $request)
     {
-        $splitTypeRequest = $request->input('split_type_option');
-
-        $splitType = $splitTypeRequest === 'FLAT'
-            ? ['flat_amount' => (int) $request->input('flat_amount')]
-            : ['percent_amount' => (float) $request->input('percent_amount')];
-
-        $xenditUserId = $request->input('partner_account_id');
-
-        $payload = [
-            "name" => $request->input('split_rule_name'),
-            "description" => $request->input('description'),
-            "routes" => [
-                array_merge($splitType, [
-                    'destination_account_id' => $this->accountMasterId,
-                    "currency" => "IDR",
-                    "reference_id" => $this->generateReferenceId('split')
-                ])
-            ]
-
-        ];
-
-        $splitRuleResponse = $this->xenditSpliRules->createSplitRule($payload);
-        $splitRuleData = $splitRuleResponse->getData(true);
-        $splitRule = $splitRuleData['data'] ?? null;
-
-        if ($splitRuleData['success']) {
-            $subAccount = XenditSubAccount::where('xendit_user_id', $xenditUserId)->first();
-            SplitRule::create([
-                'partner_id'       => $subAccount->partner_id,
-                'split_rule_id'    => $splitRule['id'],
-                'name'             => $splitRule['name'],
-                'description'      => $splitRule['description'],
-                'routes'           => json_encode($splitRule['routes']),
-                'raw_response'     => $splitRule,
+        try {
+            $validated = $request->validate([
+                'split_rule_name' => 'required|string|max:255',
+                'partner_account_id' => 'required|string',
+                'split_type_option' => 'required|in:FLAT,PERCENT',
+                'description' => 'nullable|string|max:500'
+            ], [
+                'split_rule_name.required' => 'Split rule name is required',
+                'split_rule_name.string' => 'Split rule name must be a string',
+                'split_rule_name.max' => 'Split rule name may not be greater than 255 characters',
+                'partner_account_id.required' => 'Partner account is required',
+                'split_type_option.required' => 'Split type is required',
+                'split_type_option.in' => 'Split type must be FLAT or PERCENT',
+                'description.string' => 'Description must be a string',
+                'description.max' => 'Description may not be greater than 500 characters'
             ]);
 
-            $owner = Owner::findOrFail($subAccount->partner_id);
+            $splitType = $validated['split_type_option'];
+
+            if ($splitType === 'FLAT') {
+                $flatValidation = $request->validate([
+                    'flat_amount' => 'required|numeric|min:1'
+                ], [
+                    'flat_amount.required' => 'Flat amount is required when split type is FLAT',
+                    'flat_amount.numeric' => 'Flat amount must be a number',
+                    'flat_amount.min' => 'Flat amount must be at least 1'
+                ]);
+                $validated['flat_amount'] = $flatValidation['flat_amount'];
+            } else {
+                $percentValidation = $request->validate([
+                    'percent_amount' => 'required|numeric|min:0.01|max:100'
+                ], [
+                    'percent_amount.required' => 'Percent amount is required when split type is PERCENT',
+                    'percent_amount.numeric' => 'Percent amount must be a number',
+                    'percent_amount.min' => 'Percent amount must be at least 0.01',
+                    'percent_amount.max' => 'Percent amount may not be greater than 100'
+                ]);
+                $validated['percent_amount'] = $percentValidation['percent_amount'];
+            }
+
+            $splitTypeData = $splitType === 'FLAT'
+                ? ['flat_amount' => (int)$validated['flat_amount']]
+                : ['percent_amount' => (float)$validated['percent_amount']];
+
+            $xenditUserId = $validated['partner_account_id'];
+
+            $payload = [
+                "name" => $validated['split_rule_name'],
+                "description" => $validated['description'] ?? null,
+                "routes" => [
+                    array_merge($splitTypeData, [
+                        'destination_account_id' => $this->accountMasterId,
+                        "currency" => "IDR",
+                        "reference_id" => $this->generateReferenceId('split')
+                    ])
+                ]
+            ];
+
+            $splitRuleResponse = $this->xenditSpliRules->createSplitRule($payload);
+            $splitRuleData = $splitRuleResponse->getData(true);
+
+            if (!$splitRuleData['success'] || !isset($splitRuleData['data'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $splitRuleData['message'] ?? 'Unknown error'
+                ], 400);
+            }
+
+            $splitRule = $splitRuleData['data'];
+
+            $subAccount = XenditSubAccount::where('xendit_user_id', $xenditUserId)->first();
+
+            if (!$subAccount) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Partner account not found'
+                ], 404);
+            }
+
+            SplitRule::create([
+                'partner_id' => $subAccount->partner_id,
+                'split_rule_id' => $splitRule['id'],
+                'name' => $splitRule['name'],
+                'description' => $splitRule['description'],
+                'routes' => json_encode($splitRule['routes']),
+                'raw_response' => json_encode($splitRule),
+            ]);
+
+            $owner = Owner::find($subAccount->partner_id);
             if ($owner) {
                 $owner->update([
                     'xendit_split_rule_status' => 'created',
                 ]);
             }
 
-            return redirect()->back()->with('success', 'Split Rule berhasil dibuat');
+            return response()->json([
+                'success' => true,
+                'message' => 'Split Rule berhasil dibuat',
+                'data' => [
+                    'split_rule_id' => $splitRule['id'],
+                    'name' => $splitRule['name'],
+                    'partner_id' => $subAccount->partner_id
+                ]
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+
+        } catch (\Exception $e) {
+            Log::error('Create split rule failed: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create split rule: ' . $e->getMessage()
+            ], 500);
         }
-        return redirect()->back()->with('error', 'Split Rule gagal dibuat. ' . ($splitRuleData['message'] ?? ''));
     }
 }

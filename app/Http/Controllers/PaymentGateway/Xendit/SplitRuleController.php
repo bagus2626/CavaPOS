@@ -23,8 +23,8 @@ class SplitRuleController extends Controller
             if (!$response->successful()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Gagal membuat split rule (Xendit)',
-                    'errors'  => $response->json(),
+                    'message' => 'Failed to create split rule (Xendit)',
+                    'errors' => $response->json(),
                 ], $response->status());
             }
 
@@ -32,14 +32,14 @@ class SplitRuleController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Split rule berhasil dibuat',
-                'data'    => $data,
+                'message' => 'Split rule created successfully',
+                'data' => $data,
             ], 200);
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kesalahan server saat membuat split rule',
-                'error'   => $e->getMessage(),
+                'message' => 'Server error while creating split rule',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

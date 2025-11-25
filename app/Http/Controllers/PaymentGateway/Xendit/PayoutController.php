@@ -31,23 +31,23 @@ class PayoutController extends Controller
             if (!$response->successful()) {
                 return response()->json([
                     'success' => false,
-                    'data'  => null,
-                    'message' => 'Gagal mengambil payout channels',
-                    'errors'  => $response->json(),
+                    'data' => null,
+                    'message' => 'Failed to get payout channels',
+                    'errors' => $response->json(),
                 ], $response->status());
             }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Data payout channels berhasil diambil',
-                'data'    => $response->json(),
+                'message' => 'Payout channels data retrieved successfully',
+                'data' => $response->json(),
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'data'   => null,
-                'message' => 'Terjadi kesalahan internal',
-                'error'   => $e->getMessage(),
+                'data' => null,
+                'message' => 'Internal server error occurred',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -155,8 +155,8 @@ class PayoutController extends Controller
             if (!$response->successful()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Payout gagal dibuat',
-                    'errors'  => $response->json(),
+                    'message' => 'Failed to create payout',
+                    'errors' => $response->json(),
                 ], $response->status());
             }
 
@@ -166,38 +166,38 @@ class PayoutController extends Controller
             $receiptNotification = $payoutData['receipt_notification'] ?? [];
 
             XenditPayout::create([
-                'payout_id'            => $payoutData['id'] ?? null,
-                'reference_id'         => $payoutData['reference_id'] ?? null,
-                'business_id'          => $payoutData['business_id'] ?? null,
-                'amount'               => $payoutData['amount'] ?? null,
-                'currency'             => $payoutData['currency'] ?? null,
-                'channel_code'         => $payoutData['channel_code'] ?? null,
-                'status'               => $payoutData['status'] ?? null,
-                'description'          => $payoutData['description'] ?? null,
-                'failure_code'         => $payoutData['failure_code'] ?? null,
-                'account_holder_name'  => $channelProperties['account_holder_name'] ?? null,
-                'account_number'       => $channelProperties['account_number'] ?? null,
-                'account_type'         => $channelProperties['account_type'] ?? null,
-                'email_to'             => $receiptNotification['email_to'] ?? null,
-                'email_cc'             => $receiptNotification['email_cc'] ?? null,
-                'email_bcc'            => $receiptNotification['email_bcc'] ?? null,
-                'metadata'             => $payoutData['metadata'] ?? null,
+                'payout_id' => $payoutData['id'] ?? null,
+                'reference_id' => $payoutData['reference_id'] ?? null,
+                'business_id' => $payoutData['business_id'] ?? null,
+                'amount' => $payoutData['amount'] ?? null,
+                'currency' => $payoutData['currency'] ?? null,
+                'channel_code' => $payoutData['channel_code'] ?? null,
+                'status' => $payoutData['status'] ?? null,
+                'description' => $payoutData['description'] ?? null,
+                'failure_code' => $payoutData['failure_code'] ?? null,
+                'account_holder_name' => $channelProperties['account_holder_name'] ?? null,
+                'account_number' => $channelProperties['account_number'] ?? null,
+                'account_type' => $channelProperties['account_type'] ?? null,
+                'email_to' => $receiptNotification['email_to'] ?? null,
+                'email_cc' => $receiptNotification['email_cc'] ?? null,
+                'email_bcc' => $receiptNotification['email_bcc'] ?? null,
+                'metadata' => $payoutData['metadata'] ?? null,
                 'estimated_arrival_time' => $payoutData['estimated_arrival_time'] ?? null,
-                'created_xendit'       => $payoutData['created'] ?? null,
-                'updated_xendit'       => $payoutData['updated'] ?? null,
-                'raw_response'         => $payoutData,
+                'created_xendit' => $payoutData['created'] ?? null,
+                'updated_xendit' => $payoutData['updated'] ?? null,
+                'raw_response' => $payoutData,
             ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Payout berhasil dibuat',
-                'data'    => $payoutData,
+                'message' => 'Payout created successfully',
+                'data' => $payoutData,
             ], 200);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'error'   => 'Gagal membuat payout',
+                'error' => 'Failed to create payout',
                 'message' => $e->getMessage(),
             ], 500);
         }
@@ -211,23 +211,23 @@ class PayoutController extends Controller
             if (!$response->successful()) {
                 return response()->json([
                     'success' => false,
-                    'data'  => null,
-                    'message' => 'Gagal mengambil data payout',
-                    'errors'  => $response->json(),
+                    'data' => null,
+                    'message' => 'Failed to get payout data',
+                    'errors' => $response->json(),
                 ], $response->status());
             }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Data payout berhasil diambil',
-                'data'    => $response->json(),
+                'message' => 'Payout data retrieved successfully',
+                'data' => $response->json(),
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'data'   => null,
-                'message' => 'Terjadi kesalahan internal',
-                'error'   => $e->getMessage(),
+                'data' => null,
+                'message' => 'Internal server error occurred',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

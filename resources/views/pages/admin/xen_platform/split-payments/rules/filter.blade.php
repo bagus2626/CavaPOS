@@ -25,14 +25,14 @@
             </div>
 
             <div class="col-md-3 d-flex">
-                <div class="col-md-6 form-group d-flex align-items-end">
-                    <button id="apply-rules-filter-btn" class="btn btn-primary btn-block"><i class="bx bx-filter"></i>
-                        Terapkan
+                <div class="col-md-6 form-group d-flex align-items-end px-0">
+                    <button id="apply-rules-filter-btn" class="btn btn-primary btn-block"><i class="bx bx-filter-alt"></i>
+                        Apply Filter
                     </button>
                 </div>
 
                 <div class="col-md-6 d-flex form-group align-items-end">
-                    <button id="reset-rules-filter-btn" type="button" class="btn btn-warning btn-block" title="Reset Filter">
+                    <button id="reset-rules-filter-btn" type="button" class="btn btn-secondary btn-block" title="Reset Filter">
                         <i class="bx bx-reset"></i> Reset
                     </button>
                 </div>

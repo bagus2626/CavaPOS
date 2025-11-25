@@ -7,9 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <!-- Vite resources -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-
     <!-- AdminLTE CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
 
@@ -39,9 +36,12 @@
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.6.4/dist/select2-bootstrap4.min.css">
 
+    <!-- Loader Custome CSS-->
+    <link rel="stylesheet" type="text/css" href="{{ asset('admin/assets/css/blockui-loader.css') }}">
 
-
-
+    <!-- Date Picker CSS-->
+    <link rel="stylesheet" type="text/css" href="{{asset('admin/app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('admin/app-assets/vendors/css/pickers/daterange/daterangepicker.css')}}">
 
     <style>
         :root {
@@ -426,7 +426,7 @@
             <!-- Brand Logo -->
             <a href="{{ route('owner.user-owner.dashboard') }}" class="brand-link bg-choco">
                 <img src="{{ asset('images/cava-logo2-gradient.png') }}" alt="Cavaa Logo"
-                    class="brand-image rounded-full" style="opacity: .8">
+                    class="brand-image rounded-2xl" style="opacity: .8">
                 <span class="brand-text font-weight-light">{{ __('messages.owner.layout.owner_panel') }}</span>
             </a>
 
@@ -514,6 +514,49 @@
                                 </li> --}}
                             </ul>
                         </li>
+
+
+                        <li class="nav-item @if (Request::segment(1) == 'owner' && Request::segment(3) == 'xen_platform') menu-open @endif">
+                            <a href="javascript:void(0)"
+                               class="nav-link {{ !$isVerified ? 'disabled-link' : '' }} {{ Route::is($employeeRoutes) ? 'active' : '' }}"
+                               onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
+                                <i class="nav-icon fas fa-credit-card"></i>
+                                <p>
+                                    XenPlatform
+                                    @if($isVerified)
+                                        <i class="fas fa-angle-left right"></i>
+                                    @endif
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview {{ !$isVerified ? 'disabled' : '' }}">
+                                <li class="nav-item">
+                                    <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.accounts.information') : 'javascript:void(0)' }}"
+                                       class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'accounts') active @endif">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>{{ __('messages.owner.layout.accounts') }}</p>
+                                    </a>
+                                </li>
+                            </ul>
+                            <ul class="nav nav-treeview {{ !$isVerified ? 'disabled' : '' }}">
+                                <li class="nav-item">
+                                    <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.split-payment.index') : 'javascript:void(0)' }}"
+                                       class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'split-payment') active @endif">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>{{ __('messages.owner.layout.split_payments') }}</p>
+                                    </a>
+                                </li>
+                            </ul>
+                            <ul class="nav nav-treeview {{ !$isVerified ? 'disabled' : '' }}">
+                                <li class="nav-item">
+                                    <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.payout.index') : 'javascript:void(0)' }}"
+                                       class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'payout') active @endif">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>{{ __('messages.owner.layout.withdrawal') }}</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
 
                         {{-- Store (commented section) --}}
                         {{-- @php
@@ -723,6 +766,7 @@
             @yield('content')
         </div>
 
+        @yield('modal')
         <!-- Footer -->
         <footer class="main-footer bg-white">
             <div class="float-right d-none d-sm-block">
@@ -736,31 +780,41 @@
     <!-- REQUIRED SCRIPTS -->
     <!-- jQuery -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-    <!-- AdminLTE App -->
-    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
-    <!-- DataTables -->
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
-    <!-- Select2 -->
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <!-- Toastr -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    <!-- Summernote -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs4.min.js"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-    <!-- Popper.js -->
+
+    <!-- Popper.js (optional jika pakai bootstrap.bundle) -->
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
 
-    <!-- Bootstrap 4 JS Bundle (includes Popper) -->
+    <!-- Bootstrap 4 (HARUS sebelum AdminLTE) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
 
-    <!-- CDN SweetAlert2 -->
+    <!-- AdminLTE -->
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+
+    <!-- Plugin lain -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs4.min.js"></script>
+
+    <!-- ChartJS (load once only) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+    <!-- SweetAlert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <script src="{{ asset('js/owner/reports/sales.js') }}"></script>
+    <!-- Moment & DatePicker -->
+    <script src="{{asset('admin/app-assets/vendors/js/pickers/daterange/moment.min.js')}}"></script>
+    <script src="{{asset('admin/app-assets/vendors/js/pickers/daterange/daterangepicker.js')}}"></script>
+    <script src="{{asset('admin/app-assets/vendors/js/pickers/pickadate/picker.js')}}"></script>
+
+    <!-- blockUI (HARUS sebelum pemanggilan showPageLoader) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js"></script>
+
+    <!-- Custom loader -->
+    <script src="{{asset('admin/assets/js/blockui-loader.js')}}"></script>
 
 
     <script>

@@ -385,9 +385,71 @@
             modal.show();
         }
 
-        $(document).ready(function() {
-            $('#createAccountForm').on('submit', function() {
+        $(document).ready(function () {
+            $('#createAccountForm').on('submit', function (e) {
+                e.preventDefault();
+                
                 showPageLoader("Registering Xendit Account...");
+
+                var formData = new FormData(this);
+
+                $.ajax({
+                    url: "{{ route('admin.owner-verification.register-xendit-account') }}",
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        hidePageLoader();
+
+                        if (response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: response.message || 'Xendit account registered successfully!',
+                                confirmButtonColor: '#3085d6',
+                                confirmButtonText: 'OK'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    $('#xenditRegistrationModal').modal('hide');
+                                    location.reload();
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: response.message || 'Failed to register Xendit account.',
+                                confirmButtonColor: '#d33',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        hidePageLoader();
+
+                        var errorMessage = 'An error occurred while processing your request.';
+
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        } else if (xhr.statusText) {
+                            errorMessage = xhr.statusText;
+                        }
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: errorMessage,
+                            confirmButtonColor: '#d33',
+                            confirmButtonText: 'OK'
+                        });
+
+                        console.error('AJAX Error:', error);
+                    }
+                });
             });
         });
     </script>

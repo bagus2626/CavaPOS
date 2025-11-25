@@ -22,21 +22,21 @@ class TransactionsController extends Controller
             if (!$response->successful()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Gagal mengambil data transaksi dari Xendit',
-                    'errors'  => $response->json(),
+                    'message' => 'Failed to get transaction data from Xendit',
+                    'errors' => $response->json(),
                 ], $response->status());
             }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Data transaksi berhasil diambil',
-                'data'    => $response->json(),
+                'message' => 'Transaction data successfully retrieved',
+                'data' => $response->json(),
             ]);
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan internal server',
-                'error'   => $e->getMessage(),
+                'message' => 'Internal server error occurred',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -49,21 +49,21 @@ class TransactionsController extends Controller
             if (!$response->successful()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Gagal mengambil data transaksi dari Xendit',
-                    'errors'  => $response->json(),
+                    'message' => 'Failed to get transaction data from Xendit',
+                    'errors' => $response->json(),
                 ], $response->status());
             }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Data transaksi berhasil diambil',
-                'data'    => $response->json(),
+                'message' => 'Transaction data successfully retrieved',
+                'data' => $response->json(),
             ]);
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan internal server',
-                'error'   => $e->getMessage(),
+                'message' => 'Internal server error occurred',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
