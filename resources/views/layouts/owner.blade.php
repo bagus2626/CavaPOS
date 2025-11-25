@@ -729,13 +729,13 @@
                         </li>
 
                         {{-- Traffic Report --}}
-                        <li class="nav-item">
+                        {{-- <li class="nav-item">
                             <a href="javascript:void(0)" class="nav-link {{ !$isVerified ? 'disabled-link' : '' }}"
                                 onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
                                 <i class="nav-icon fas fa-chart-pie"></i>
                                 <p>{{ __('messages.owner.layout.traffict_report') }}</p>
                             </a>
-                        </li>
+                        </li> --}}
                     </ul>
                 </nav>
             </div>
