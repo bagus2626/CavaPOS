@@ -2,7 +2,7 @@
 @section('page_title', 'Verifikasi Akun')
 
 @section('content')
-
+    @vite(['resources/css/app.css'])
     <section class="content pb-4">
         <div class="container-fluid">
 
@@ -411,6 +411,7 @@
     </section>
 
     @push('scripts')
+        @vite(['resources/js/app.js'])
         <script>
             // Fungsi untuk menghapus preview foto lama dari database
             function removeOldPreview(previewId, inputId) {

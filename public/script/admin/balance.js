@@ -1,11 +1,9 @@
 window.initBalanceTab = function (accountId) {
     let currentBalancePage = 1;
-    const pageBalanceLimit = $('#filter-limit').val() ?? 10;    let activeBalanceFilters = {
-        statuses: [],
-        client_types: [],
-        payment_channels: [],
+    const pageBalanceLimit = $('#filter-limit').val() ?? 10;
+    let activeBalanceFilters = {
+        types: [],
         channel_categories: [],
-        currency: []
     };
 
     $(document).ready(function () {
@@ -38,6 +36,10 @@ window.initBalanceTab = function (accountId) {
                 activeBalanceFilters[group] = activeBalanceFilters[group].filter(item => item !== value);
             }
             updateBalanceFilterCount();
+        });
+
+        $('#popup-balance-filter-options').on('click', function (e) {
+            e.stopPropagation();
         });
 
         $('#clear-all-balance-filters').on('click', function () {

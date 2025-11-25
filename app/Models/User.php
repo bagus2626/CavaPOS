@@ -76,4 +76,8 @@ class User extends Authenticatable
     {
         return $this->hasOne(ProfileOutlet::class);
     }
+    public function owner()
+    {
+        return $this->belongsTo(Owner::class, 'owner_id', 'id');
+    }
 }

@@ -16,12 +16,14 @@ function showPageLoader(message = "Please wait...") {
             top: "40%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: "auto"
+            width: "auto",
+            zIndex: 99999
         },
         overlayCSS: {
             backgroundColor: "#000",
             opacity: 0.6,
-            cursor: "wait"
+            cursor: "wait",
+            zIndex: 99998
         }
     });
 }

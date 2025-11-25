@@ -4,7 +4,7 @@
             <li class="nav-item mr-auto">
                 <a class="navbar-brand" href="#">
                     <div class="brand-logo">
-                        <img class="logo" src="{{asset('images/cava-logo2-black.png')}}"
+                        <img class="logo" src="{{ asset('images/cava-logo2-black.png') }}"
                             style="width:150px; height:auto; margin-top:-20px" />
                     </div>
                 </a>
@@ -25,36 +25,53 @@
                     <span class="menu-title" data-i18n="XenPlatform">XenPlatform</span>
                 </a>
                 <ul class="menu-content">
+                    <li @if (Request::segment(2) == 'xen_platform' && Request::segment(3) == 'transactions') class="active" @endif>
+                        <a href="{{ route('admin.xen_platform.transactions.index') }}">
+                            <i class="bx bx-right-arrow-alt"></i>
+                            <span class="menu-item" data-i18n="partner-accounts">Transactions</span></a>
+                    </li>
+                    <li @if (Request::segment(2) == 'xen_platform' && Request::segment(3) == 'balance') class="active" @endif>
+                        <a href="{{ route('admin.xen_platform.balance.index') }}">
+                            <i class="bx bx-right-arrow-alt"></i>
+                            <span class="menu-item" data-i18n="partner-accounts">Balance</span></a>
+                    </li>
                     <li @if (Request::segment(2) == 'xen_platform' && Request::segment(3) == 'partner-account') class="active" @endif>
-                        <a href="{{route('admin.xen_platform.partner-account.index')}}">
+                        <a href="{{ route('admin.xen_platform.partner-account.index') }}">
                             <i class="bx bx-right-arrow-alt"></i>
                             <span class="menu-item" data-i18n="partner-accounts">Partner Accounts</span></a>
                     </li>
                     <li @if (Request::segment(2) == 'xen_platform' && Request::segment(3) == 'split-payments') class="active" @endif>
-                        <a href="{{route('admin.xen_platform.split-payments.index')}}">
+                        <a href="{{ route('admin.xen_platform.split-payments.index') }}">
                             <i class="bx bx-right-arrow-alt"></i>
                             <span class="menu-item" data-i18n="split-payments">Split Payments</span></a>
                     </li>
-                </ul>
-            </li>
-
-            <li class=" nav-item"><a href="#">
-                    <i class="bx bx-up-arrow-circle"></i>
-                    <span class="menu-title" data-i18n="XenPlatform">Send Payments</span>
-                </a>
-                <ul class="menu-content">
-                    <li @if (Request::segment(2) == 'send-payment' && Request::segment(3) == 'payout') class="active" @endif>
-                        <a href="{{route('admin.send-payment.payout.index')}}">
+                    <li @if (Request::segment(2) == 'xen_platform' && Request::segment(3) == 'disbursement') class="active" @endif>
+                        <a href="{{ route('admin.xen_platform.disbursement.index') }}">
                             <i class="bx bx-right-arrow-alt"></i>
                             <span class="menu-item" data-i18n="partner-accounts">Disbursements</span></a>
                     </li>
-
                 </ul>
             </li>
+
             <li class="nav-item">
+                <a href="#">
+                    <i class="bx bx-user-check"></i>
+                    <span class="menu-title" data-i18n="OwnerManagement">Owner Management</span>
+                </a>
+                <ul class="menu-content">
+                    <li @if (Request::segment(2) == 'owner-list') class="active" @endif>
+                        <a href="{{ route('admin.owner-list.index') }}">
+                            <i class="bx bx-right-arrow-alt"></i>
+                            <span class="menu-item" data-i18n="OwnerList">Owner List</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="nav-item @if (Request::segment(2) == 'owner-verification') active @endif">
                 <a href="{{ route('admin.owner-verification') }}">
                     <i class="bx bx-user"></i>
-                    <span class="menu-title">Owner Verification</span>
+                    <span class="menu-title" data-i18n="OwnerVerification">Owner Verification</span>
                 </a>
             </li>
         </ul>

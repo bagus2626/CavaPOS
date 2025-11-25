@@ -22,14 +22,6 @@
             <div class="card">
                 <div class="card-header">
                     <h4 class="card-title">Partner Data</h4>
-                    <div class="col ml-auto">
-                        <div class="float-right">
-                            <button type="button" class="btn btn-primary"
-                                    onclick="showModal('create-partner-account', 'add')"><i
-                                        class="bx bx-plus"></i> Create Partner
-                            </button>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="card-content">
@@ -141,6 +133,7 @@
 
         function getFilterData() {
             const statusValues = $('#filter-status').val() || [];
+            const typeValues = $('#filter-type').val() || [];
             const dateRangeVal = $('#daterange-account-created').val();
 
             let createdGte = '';
@@ -156,7 +149,7 @@
                 email: $('#filter-email').val().trim(),
                 status: statusValues.join(','),
                 business_name: $('#filter-business-name').val().trim(),
-                type: $('#filter-type').val(),
+                type:typeValues.join(','),
                 created_gte: createdGte,
                 created_lte: createdLte,
                 limit: $('#filter-limit').val()
@@ -166,12 +159,13 @@
         function resetFilters() {
             $('#filter-email').val('');
             $('#filter-status').val([]);
+            $('#filter-type').val([]);
             $('#filter-business-name').val('');
-            $('#filter-type').val('');
             $('#daterange-account-created').val('');
             $('#filter-limit').val('10');
 
             $('#filter-status').val(null).trigger('change');
+            $('#filter-type').val(null).trigger('change');
 
             displayData();
         }
@@ -216,10 +210,6 @@
                     }
                 },
             });
-        }
-
-        function showModal(type, id) {
-            $(`#createPartnerAccountModal`).modal("show");
         }
     </script>
 @endpush

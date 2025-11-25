@@ -127,6 +127,7 @@
                         {{-- Aktif / Nonaktif --}}
                         <div class="col-md-6 mb-3">
                             <label class="form-label d-block">Status</label>
+                            <input type="hidden" name="is_active" value="0">
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="is_active" name="is_active"
                                     value="1" {{ old('is_active', $employee->is_active) ? 'checked' : '' }}>
