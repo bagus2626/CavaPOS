@@ -790,7 +790,6 @@
 
         updateCounters() {
             try {
-
                 let displayedQueueCount = this.queueTotal || 0;
                 let displayedServedCount = this.servedTotal || 0;
 
@@ -803,7 +802,6 @@
                         this.orderMatchesSearch(order, this.searchTerm)
                     ).length;
                 }
-
 
                 const waitingCount = document.getElementById('waitingCount');
                 if (waitingCount) waitingCount.textContent = displayedQueueCount;
@@ -962,6 +960,10 @@
                             active_queue_number: undefined
                         };
 
+                        // ✅ TAMBAHKAN: Increment queueTotal
+                        this.queueTotal++;
+
+                        // Tambah dan sort
                         this.queueOrders.push(restoredOrder);
                         this.queueOrders.sort((a, b) => {
                             const timeA = a.order_time ? a.order_time.split(':').map(Number) : [0, 0];
@@ -973,7 +975,10 @@
                             return a.id - b.id;
                         });
 
+                        // ✅ TAMBAHKAN: Update counter setelah queueTotal berubah
+                        this.updateCounters();
 
+                        // Smooth remove dari active
                         if (activeElement) {
                             activeElement.style.transition = 'all 0.3s ease-out';
                             activeElement.style.transform = 'scale(0.8)';
@@ -981,21 +986,19 @@
                             setTimeout(() => activeElement.remove(), 300);
                         }
 
+                        // Re-render queue
                         setTimeout(() => {
                             const container = document.getElementById('orderQueue');
                             if (container) {
                                 const scrollTop = container.scrollTop;
-
                                 this.renderOrderQueue();
-
                                 container.scrollTop = scrollTop;
 
                                 setTimeout(() => {
                                     const returnedCard = container.querySelector(
                                         `[data-order-id="${orderId}"]`);
                                     if (returnedCard) {
-                                        returnedCard.style.backgroundColor =
-                                            '#fef3c7';
+                                        returnedCard.style.backgroundColor = '#fef3c7';
                                         returnedCard.style.transition = 'background-color 2s ease';
 
                                         setTimeout(() => {
@@ -1104,14 +1107,12 @@
                 }
 
                 if (e.target.closest('.load-more-queue-btn')) {
-                    e.preventDefault();
                     e.stopPropagation();
                     this.loadMoreQueueOrders();
                     return;
                 }
 
                 if (e.target.closest('.load-more-served-btn')) {
-                    e.preventDefault();
                     e.stopPropagation();
                     this.loadMoreServedOrders();
                     return;
@@ -1238,7 +1239,6 @@
             if (mobileToggle && mobileSidebar) {
                 mobileToggle.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    e.preventDefault();
                     mobileSidebar.classList.remove('translate-x-full');
                     if (mobileOverlay) mobileOverlay.classList.remove('hidden');
                     document.body.style.overflow = 'hidden';
@@ -1250,7 +1250,6 @@
             if (closeSidebar) {
                 closeSidebar.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    e.preventDefault();
                     this.closeMobileSidebar();
                 });
             }
@@ -1258,7 +1257,6 @@
             if (mobileOverlay) {
                 mobileOverlay.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    e.preventDefault();
                     this.closeMobileSidebar();
                 });
             }
@@ -1913,7 +1911,7 @@
                     if (result && result.success) {
                         this.queueOrders = this.queueOrders.filter(o => o.id != orderId);
 
-                        
+
                         const now = new Date();
                         const currentTime =
                             `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
@@ -1923,7 +1921,7 @@
                             order_status: 'PROCESSED',
                             active_queue_number: this.activeOrders.length + 1,
                             picked_up_at: now.toISOString(),
-                            order_time: currentTime 
+                            order_time: currentTime
                         };
                         this.activeOrders.push(newActiveOrder);
 

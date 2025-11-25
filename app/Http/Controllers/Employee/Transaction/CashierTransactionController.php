@@ -276,6 +276,18 @@ class CashierTransactionController extends Controller
         }
         $partner = User::findOrFail($data->partner_id);
 
+        if (!empty($partner->logo)) {
+            $logoPath = public_path('storage/' . $partner->logo);
+
+            if (file_exists($logoPath)) {
+                $img = Image::make($logoPath);
+                $img->greyscale(); // Ubah ke hitam putih
+
+                // Encode ke base64 data URL
+                $partner->logo_grayscale = $img->encode('data-url');
+            }
+        }
+
         // Lebar thermal: 80mm (≈227pt), tinggi auto (0)
         $customPaper = [0, 0, 227, 600];
         // kalau mau lebih panjang lagi, naikkan angka terakhir (tinggi)

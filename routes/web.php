@@ -22,6 +22,7 @@ use App\Http\Controllers\Owner\Auth\OwnerAuthController;
 use App\Http\Controllers\Owner\Auth\OwnerPasswordResetController;
 use App\Http\Controllers\Owner\OwnerDashboardController;
 use App\Http\Controllers\Owner\Outlet\OwnerOutletController;
+use App\Http\Controllers\Owner\SettingsProfile\OwnerSettingsController;
 use App\Http\Controllers\Owner\Report\SalesReportController;
 use App\Http\Controllers\Owner\XenPlatform\AccountsController;
 use App\Http\Controllers\Owner\XenPlatform\OwnerPayoutController;
@@ -129,6 +130,15 @@ Route::middleware('setlocale')->group(function () {
 
         Route::get('/owner-verification/{id}/ktp-image', [OwnerVerificationController::class, 'showKtpImage'])->name('owner-verification.ktp-image');
 
+        Route::prefix('send-payment')->name('send-payment.')->group(function () {
+            Route::prefix('payout')->name('payout.')->group(function () {
+                Route::get('/', [PayoutController::class, 'index'])->name('index');
+                Route::post('get-data', [PayoutController::class, 'getData'])->name('get-data');
+                Route::get('validate-bank', [PayoutController::class, 'validateBankAccount'])->name('validate-bank');
+                Route::post('create', [PayoutController::class, 'createPayout'])->name('create');
+                Route::get('{businessId}/detail/{payoutId}', [PayoutController::class, 'getPayout'])->name('detail');
+            });
+        });
         Route::post('/owner-verification/register-xendit-account', [OwnerVerificationController::class, 'registerXenditAccount'])->name('owner-verification.register-xendit-account');;
 
 
@@ -289,13 +299,24 @@ Route::middleware('setlocale')->group(function () {
 
                 Route::prefix('report')->name('report.')->group(function () {
                     Route::get('sales/export', [SalesReportController::class, 'export'])->name('sales.export');
-                    Route::get('sales/products', [SalesReportController::class, 'getTopProductsAjax'])->name('sales.products'); // ROUTE BARU
+                    Route::get('sales/products', [SalesReportController::class, 'getTopProductsAjax'])->name('sales.products');
                     Route::get('order-details/{id}', [SalesReportController::class, 'getOrderDetails'])->name('order-details');
                     Route::resource('sales', SalesReportController::class)->only(['index']);
                 });
                 Route::resource('promotions', OwnerPromotionController::class);
                 Route::resource('stocks', OwnerStockController::class);
+
+                Route::prefix('settings')->name('settings.')->group(function () {
+                    Route::get('/', [OwnerSettingsController::class, 'index'])->name('index');
+                    Route::post('/personal-info', [OwnerSettingsController::class, 'updatePersonalInfo'])->name('update-personal-info');
+                    Route::post('/photo', [OwnerSettingsController::class, 'updatePhoto'])->name('update-photo');
+                    Route::post('/delete-photo', [OwnerSettingsController::class, 'deletePhoto'])->name('delete-photo');
+                    Route::post('/logo', [OwnerSettingsController::class, 'updateLogo'])->name('update-logo');
+                    Route::post('/change-password', [OwnerSettingsController::class, 'changePassword'])->name('change-password');
+                });
             });
+
+
 
 
             // Route::middleware('owner.not_approved')->prefix('verification')->name('verification.')->group(function () {

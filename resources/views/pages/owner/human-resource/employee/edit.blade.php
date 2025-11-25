@@ -231,6 +231,39 @@
                     </div>
 
                 </form>
+                <!-- Crop Photo Modal -->
+                <div class="modal fade" id="cropModal" tabindex="-1" role="dialog">
+                    <div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="max-width: 650px">
+                        <div class="modal-content border-0 shadow-lg">
+                            <div class="modal-header bg-choco text-white border-0">
+                                <h5 class="modal-title font-weight-bold">
+                                    <i class="fas fa-crop mr-2"></i>Crop Employee Photo
+                                </h5>
+                                <button type="button" class="close text-white" data-dismiss="modal">
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body p-4">
+                                <div class="alert alert-info border-0 mb-3">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    <small>Drag to move, scroll to zoom, or use the corners to resize the crop area.</small>
+                                </div>
+
+                                <div class="img-container-crop">
+                                    <img id="imageToCrop" style="max-width: 100%;">
+                                </div>
+                            </div>
+                            <div class="modal-footer border-0 bg-light">
+                                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
+                                    <i class="fas fa-times mr-2"></i>Cancel
+                                </button>
+                                <button type="button" id="cropBtn" class="btn btn-choco btn-md px-4">
+                                    <i class="fas fa-check mr-2"></i>Crop
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -421,14 +454,118 @@
         .owner-emp-edit .text-muted {
             color: #6b7280 !important;
         }
+
+        /* ===== CROP MODAL - EMPLOYEE PHOTO (Circular) ===== */
+.owner-emp-edit #cropModal .modal-dialog {
+    max-width: 650px;
+    width: 90%;
+    margin: 1.75rem auto;
+}
+
+.owner-emp-edit #cropModal .modal-content {
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.owner-emp-edit #cropModal .modal-header {
+    background-color: var(--choco);
+    border-radius: 20px 20px 0 0;
+}
+
+.owner-emp-edit #cropModal .modal-footer {
+    border-radius: 0 0 20px 20px;
+}
+
+.owner-emp-edit #cropModal .modal-body {
+    padding: 1.5rem;
+    background: #f8f9fa;
+}
+
+.owner-emp-edit #cropModal .alert-info {
+    border-radius: 10px;
+    background: #e0f2fe;
+    border: 1px solid #bae6fd;
+    color: #075985;
+}
+
+.owner-emp-edit .img-container-crop {
+    width: 100%;
+    height: 450px;
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.owner-emp-edit .img-container-crop img {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+}
+
+/* Cropper styling - CIRCULAR for employee photo */
+.owner-emp-edit #cropModal .cropper-view-box,
+.owner-emp-edit #cropModal .cropper-face {
+    border-radius: 50% !important;
+}
+
+.owner-emp-edit #cropModal .cropper-container {
+    background-color: #f8f9fa;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .owner-emp-edit #cropModal .modal-dialog {
+        max-width: 95%;
+        width: 95%;
+        margin: 1rem auto;
+    }
+
+    .owner-emp-edit .img-container-crop {
+        height: 350px;
+    }
+
+    .owner-emp-edit #cropModal .modal-body {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .owner-emp-edit #cropModal .modal-dialog {
+        margin: 0.5rem auto;
+        width: 98%;
+    }
+
+    .owner-emp-edit #cropModal .modal-content {
+        border-radius: 16px;
+    }
+
+    .owner-emp-edit .img-container-crop {
+        height: 280px;
+    }
+
+    .owner-emp-edit #cropModal .modal-body {
+        padding: 0.75rem;
+    }
+}
     </style>
 
     </style>
 @endsection
 
 @push('scripts')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            //Cropper JS
+            let cropper = null;
+            let currentFile = null;
             // ===== Switch label aktif/nonaktif =====
             const isActive = document.getElementById('is_active');
             if (isActive) {
@@ -451,6 +588,8 @@
             const MAX_SIZE = 2 * 1024 * 1024; // 2 MB
             const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'];
 
+
+
             function bytesToSize(bytes) {
                 const units = ['B', 'KB', 'MB', 'GB'];
                 let i = 0,
@@ -469,32 +608,111 @@
             }
 
             if (input) {
-                input.addEventListener('change', function() {
-                    const file = input.files && input.files[0];
-                    if (!file) {
-                        return;
-                    }
+                input.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (!file) return;
 
                     if (!ALLOWED.includes(file.type)) {
                         alert('File not supported. Use JPG, PNG, atau WEBP.');
-                        input.value = '';
+                        this.value = '';
                         return;
                     }
+
                     if (file.size > MAX_SIZE) {
-                        alert('FIle size more than 2 MB.');
-                        input.value = '';
+                        alert('File size more than 2 MB.');
+                        this.value = '';
                         return;
                     }
 
-                    const url = URL.createObjectURL(file);
-                    preview.src = url;
-                    info.textContent = `${file.name} • ${bytesToSize(file.size)}`;
-                    wrapper.classList.remove('d-none');
+                    // Simpan file untuk diproses
+                    currentFile = file;
 
-                    // User memilih gambar baru => batal hapus gambar lama
+                    // Baca file dan tampilkan modal crop
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        document.getElementById('imageToCrop').src = event.target.result;
+                        $('#cropModal').modal('show');
+                    };
+                    reader.readAsDataURL(file);
+
                     if (removeEl) removeEl.value = '0';
                 });
             }
+
+            // Initialize Cropper when modal shown
+            $('#cropModal').on('shown.bs.modal', function() {
+                if (cropper) cropper.destroy();
+                const imageElement = document.getElementById('imageToCrop');
+                setTimeout(function() {
+                    cropper = new Cropper(imageElement, {
+                        aspectRatio: 1, // Square untuk foto profil
+                        viewMode: 2,
+                        dragMode: 'move',
+                        autoCropArea: 0.9,
+                        restore: true,
+                        guides: true,
+                        center: true,
+                        cropBoxMovable: true,
+                        cropBoxResizable: true,
+                        responsive: true
+                    });
+                }, 300);
+            });
+
+            // Destroy cropper when modal hidden
+            $('#cropModal').on('hidden.bs.modal', function() {
+                if (cropper) {
+                    cropper.destroy();
+                    cropper = null;
+                }
+                currentFile = null;
+            });
+
+            // Crop button handler
+            document.getElementById('cropBtn')?.addEventListener('click', function() {
+                if (!cropper) {
+                    alert('Cropper not initialized. Please try again.');
+                    return;
+                }
+
+                const btn = this;
+                const originalText = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+
+                // Deteksi tipe file asli
+                const isTransparent = currentFile.type === 'image/png' || currentFile.type === 'image/webp';
+                const outputType = isTransparent ? currentFile.type : 'image/jpeg';
+                const quality = isTransparent ? 1 : 0.92;
+
+                const canvas = cropper.getCroppedCanvas({
+                    width: 800,
+                    height: 800,
+                    imageSmoothingEnabled: true,
+                    imageSmoothingQuality: 'high'
+                });
+
+                canvas.toBlob(function(blob) {
+                    const croppedFile = new File([blob], currentFile.name, {
+                        type: outputType,
+                        lastModified: Date.now()
+                    });
+
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(croppedFile);
+                    input.files = dataTransfer.files;
+
+                    const url = URL.createObjectURL(blob);
+                    wrapper.classList.remove('d-none');
+                    preview.src = url;
+                    info.textContent =
+                        `${croppedFile.name} • ${(croppedFile.size / 1024).toFixed(1)} KB (Cropped)`;
+
+                    $('#cropModal').modal('hide');
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }, outputType, quality);
+            });
 
             if (clearBtn) {
                 clearBtn.addEventListener('click', function() {

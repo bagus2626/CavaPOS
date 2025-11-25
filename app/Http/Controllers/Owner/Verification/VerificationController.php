@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class VerificationController extends Controller
@@ -64,8 +66,8 @@ class VerificationController extends Controller
 
         // KTP photo dan business logo optional jika resubmit dan ada foto lama
         $ktpPhotoRule = ($isResubmit && $latestVerification && $latestVerification->ktp_photo_path)
-            ? 'nullable|image|mimes:jpeg,jpg,png|max:1024'
-            : 'required|image|mimes:jpeg,jpg,png|max:1024';
+            ? 'nullable|image|mimes:jpeg,png,webp|max:1024'
+            : 'required|image|mimes:jpeg,png,webp|max:1024';
 
         $validatedData = $request->validate([
             'owner_name' => 'required|string|min:3|max:255',
@@ -77,7 +79,7 @@ class VerificationController extends Controller
             'business_address' => 'required|string|min:10',
             'business_phone' => ['required', 'string', 'min:10', 'max:15', 'regex:/^(08|62)\d{8,12}$/'],
             'business_email' => 'nullable|email|max:255',
-            'business_logo' => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
+            'business_logo' => 'nullable|image|mimes:jpeg,png,webp|max:2048',
             'terms' => 'accepted',
         ]);
 
@@ -89,19 +91,69 @@ class VerificationController extends Controller
                     ->with('warning', 'Anda tidak dapat mengirimkan ulang data verifikasi.');
             }
 
+            // Upload dan kompres KTP photo
             $ktpPhotoPath = null;
             if ($request->hasFile('ktp_photo')) {
-                // Upload foto baru
-                $ktpPhotoPath = $request->file('ktp_photo')->store('ktp_verifications', 'local');
+                $file = $request->file('ktp_photo');
+
+                $img = Image::make($file->getPathname())->orientate();
+                $img->resize(1600, 1600, function ($c) {
+                    $c->aspectRatio();
+                    $c->upsize();
+                });
+
+                $disk = Storage::disk('local');
+                $dir  = 'ktp_verifications';
+                $disk->makeDirectory($dir);
+
+                $basename = Str::uuid()->toString();
+                $path     = null;
+                $binary   = null;
+
+                try {
+                    $binary = (string) $img->encode('webp', 78);
+                    $path   = "{$dir}/{$basename}.webp";
+                } catch (\Throwable $e) {
+                    $binary = (string) $img->encode('jpg', 80);
+                    $path   = "{$dir}/{$basename}.jpg";
+                }
+
+                $disk->put($path, $binary);
+                $ktpPhotoPath = $path;
             } else if ($latestVerification && $latestVerification->ktp_photo_path) {
                 // Gunakan foto lama jika tidak upload baru
                 $ktpPhotoPath = $latestVerification->ktp_photo_path;
             }
 
+            // Upload dan kompres Business Logo
             $businessLogoPath = null;
             if ($request->hasFile('business_logo')) {
-                // Upload logo baru
-                $businessLogoPath = $request->file('business_logo')->store('business_logos', 'public');
+                $fileLogo = $request->file('business_logo');
+
+                $imgLogo = Image::make($fileLogo->getPathname())->orientate();
+                $imgLogo->resize(1600, 1600, function ($c) {
+                    $c->aspectRatio();
+                    $c->upsize();
+                });
+
+                $diskLogo = Storage::disk('public');
+                $dirLogo  = 'business_logos';
+                $diskLogo->makeDirectory($dirLogo);
+
+                $basenameLogo = Str::uuid()->toString();
+                $pathLogo     = null;
+                $binaryLogo   = null;
+
+                try {
+                    $binaryLogo = (string) $imgLogo->encode('webp', 78);
+                    $pathLogo   = "{$dirLogo}/{$basenameLogo}.webp";
+                } catch (\Throwable $e) {
+                    $binaryLogo = (string) $imgLogo->encode('jpg', 80);
+                    $pathLogo   = "{$dirLogo}/{$basenameLogo}.jpg";
+                }
+
+                $diskLogo->put($pathLogo, $binaryLogo);
+                $businessLogoPath = $pathLogo;
             } else if ($latestVerification && $latestVerification->business_logo_path) {
                 // Gunakan logo lama jika tidak upload baru
                 $businessLogoPath = $latestVerification->business_logo_path;
