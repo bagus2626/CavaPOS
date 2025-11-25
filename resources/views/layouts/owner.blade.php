@@ -450,6 +450,7 @@
                 <nav class="mt-2">
                     @php
                         $isVerified = auth('owner')->check() && auth('owner')->user()->verification_status === 'approved';
+                        $isActive = auth('owner')->check() && auth('owner')->user()->is_active;
                     @endphp
 
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
@@ -466,8 +467,8 @@
 
                         {{-- Dashboard --}}
                         <li class="nav-item">
-                            <a href="{{ $isVerified ? route('owner.user-owner.dashboard') : 'javascript:void(0)' }}"
-                                class="nav-link {{ !$isVerified ? 'disabled-link' : '' }} @if(Route::is('owner.user-owner.dashboard')) active @endif"
+                            <a href="{{ $isVerified && $isActive ? route('owner.user-owner.dashboard') : 'javascript:void(0)' }}"
+                                class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} @if(Route::is('owner.user-owner.dashboard')) active @endif"
                                 onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
                                 <i class="nav-icon fas fa-tachometer-alt"></i>
                                 <p>{{ __('messages.owner.layout.dashboard') }}</p>
@@ -481,7 +482,7 @@
 
                         <li class="nav-item {{ Route::is($employeeRoutes) ? 'menu-open' : '' }}">
                             <a href="javascript:void(0)"
-                                class="nav-link {{ !$isVerified ? 'disabled-link' : '' }} {{ Route::is($employeeRoutes) ? 'active' : '' }}"
+                                class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($employeeRoutes) ? 'active' : '' }}"
                                 onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
                                 <i class="nav-icon fas fa-users"></i>
                                 <p>
@@ -491,7 +492,7 @@
                                     @endif
                                 </p>
                             </a>
-                            <ul class="nav nav-treeview {{ !$isVerified ? 'disabled' : '' }}">
+                            <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
                                 <li class="nav-item">
                                     <a href="{{ route('owner.user-owner.employees.index') }}"
                                         class="nav-link {{ Route::is('owner.user-owner.employees.*') ? 'active' : '' }}">
@@ -517,7 +518,7 @@
 
                         <li class="nav-item @if (Request::segment(1) == 'owner' && Request::segment(3) == 'xen_platform') menu-open @endif">
                             <a href="javascript:void(0)"
-                               class="nav-link {{ !$isVerified ? 'disabled-link' : '' }} {{ Route::is($employeeRoutes) ? 'active' : '' }}"
+                               class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($employeeRoutes) ? 'active' : '' }}"
                                onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
                                 <i class="nav-icon fas fa-credit-card"></i>
                                 <p>
@@ -527,7 +528,7 @@
                                     @endif
                                 </p>
                             </a>
-                            <ul class="nav nav-treeview {{ !$isVerified ? 'disabled' : '' }}">
+                            <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
                                 <li class="nav-item">
                                     <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.accounts.information') : 'javascript:void(0)' }}"
                                        class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'accounts') active @endif">
@@ -536,7 +537,7 @@
                                     </a>
                                 </li>
                             </ul>
-                            <ul class="nav nav-treeview {{ !$isVerified ? 'disabled' : '' }}">
+                            <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
                                 <li class="nav-item">
                                     <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.split-payment.index') : 'javascript:void(0)' }}"
                                        class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'split-payment') active @endif">
@@ -545,7 +546,7 @@
                                     </a>
                                 </li>
                             </ul>
-                            <ul class="nav nav-treeview {{ !$isVerified ? 'disabled' : '' }}">
+                            <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
                                 <li class="nav-item">
                                     <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.payout.index') : 'javascript:void(0)' }}"
                                        class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'payout') active @endif">
@@ -613,7 +614,7 @@
 
                         <li class="nav-item {{ Route::is($outletRoutes) ? 'menu-open' : '' }}">
                             <a href="javascript:void(0)"
-                                class="nav-link {{ !$isVerified ? 'disabled-link' : '' }} {{ Route::is($outletRoutes) ? 'active' : '' }}"
+                                class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($outletRoutes) ? 'active' : '' }}"
                                 onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
                                 <i class="nav-icon fas fa-store"></i>
                                 <p>
@@ -623,7 +624,7 @@
                                     @endif
                                 </p>
                             </a>
-                            <ul class="nav nav-treeview {{ !$isVerified ? 'disabled' : '' }}">
+                            <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
                                 <li class="nav-item">
                                     <a href="{{ route('owner.user-owner.outlets.index') }}"
                                         class="nav-link {{ Route::is('owner.user-owner.outlets.*') ? 'active' : '' }}">
@@ -648,7 +649,7 @@
 
                         <li class="nav-item {{ Route::is($allProductRoutes) ? 'menu-open' : '' }}">
                             <a href="javascript:void(0)"
-                                class="nav-link {{ !$isVerified ? 'disabled-link' : '' }} {{ Route::is($allProductRoutes) ? 'active' : '' }}"
+                                class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($allProductRoutes) ? 'active' : '' }}"
                                 onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
                                 <i class="nav-icon fas fa-shopping-cart"></i>
                                 <p>
@@ -658,7 +659,7 @@
                                     @endif
                                 </p>
                             </a>
-                            <ul class="nav nav-treeview {{ !$isVerified ? 'disabled' : '' }}">
+                            <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
                                 <li class="nav-item">
                                     <a href="{{ route('owner.user-owner.master-products.index') }}"
                                         class="nav-link {{ Route::is('owner.user-owner.master-products.*') ? 'active' : '' }}">
@@ -706,7 +707,7 @@
 
                         {{-- Settings --}}
                         <li class="nav-item">
-                            <a href="javascript:void(0)" class="nav-link {{ !$isVerified ? 'disabled-link' : '' }}"
+                            <a href="javascript:void(0)" class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }}"
                                 onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
                                 <i class="nav-icon fas fa-cog"></i>
                                 <p>{{ __('messages.owner.layout.settings') }}</p>
@@ -714,14 +715,14 @@
                         </li>
 
                         {{-- Reports Header --}}
-                        <li class="nav-header {{ !$isVerified ? 'disabled-header' : '' }}">
+                        <li class="nav-header {{ !$isVerified || !$isActive ? 'disabled-header' : '' }}">
                             {{ __('messages.owner.layout.reports') }}
                         </li>
 
                         {{-- Sales Report --}}
                         <li class="nav-item">
-                            <a href="{{ $isVerified ? route('owner.user-owner.report.sales.index') : 'javascript:void(0)' }}"
-                                class="nav-link {{ !$isVerified ? 'disabled-link' : '' }} {{ Route::is('owner.user-owner.report.sales.*') ? 'active' : '' }}"
+                            <a href="{{ $isVerified && $isActive ? route('owner.user-owner.report.sales.index') : 'javascript:void(0)' }}"
+                                class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is('owner.user-owner.report.sales.*') ? 'active' : '' }}"
                                 onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
                                 <i class="nav-icon fas fa-chart-line"></i>
                                 <p>{{ __('messages.owner.layout.sales_report') }}</p>
@@ -730,7 +731,7 @@
 
                         {{-- Traffic Report --}}
                         <li class="nav-item">
-                            <a href="javascript:void(0)" class="nav-link {{ !$isVerified ? 'disabled-link' : '' }}"
+                            <a href="javascript:void(0)" class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }}"
                                 onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
                                 <i class="nav-icon fas fa-chart-pie"></i>
                                 <p>{{ __('messages.owner.layout.traffict_report') }}</p>

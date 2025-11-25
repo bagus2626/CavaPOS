@@ -108,6 +108,76 @@
         </div>
     </div>
 
+    <!-- Deactivation Reason Modal -->
+    <div class="modal fade text-left" id="deactivationModal" tabindex="-1" role="dialog"
+        aria-labelledby="deactivationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-danger">
+                    <h4 class="modal-title text-white" id="deactivationModalLabel">
+                        Deactivate Owner Account
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="alert border-danger">
+                        <div class="alert-body d-flex align-items-center">
+                            <i class="bx bx-error"></i>
+                            You are about to deactivate: <strong id="ownerNameDisplay"></strong>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="deactivationReason" class="font-weight-bold">
+                            Deactivation Reason <span class="text-danger">*</span>
+                        </label>
+                        <textarea class="form-control" id="deactivationReason" rows="4"
+                            placeholder="Please explain why you are deactivating this owner account..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-secondary" data-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button type="button" class="btn btn-danger" id="confirmDeactivation" disabled>
+                        Confirm Deactivation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activation Confirmation Modal -->
+    <div class="modal fade text-left" id="activationModal" tabindex="-1" role="dialog"
+        aria-labelledby="activationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-success">
+                    <h4 class="modal-title text-white" id="activationModalLabel">
+                        Activate Owner Account
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="alert border-info">
+                        <div class="alert-body d-flex align-items-center">
+                            <i class="bx bx-info-circle"></i>
+                            You are about to activate: <strong id="ownerNameDisplayActivation"></strong>
+                        </div>
+                    </div>
+
+                    <p class="mb-0">Are you sure you want to activate this owner account?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-secondary" data-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button type="button" class="btn btn-success" id="confirmActivation">
+                        Confirm Activation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Owner List Table start -->
     <div class="row" id="owners-table">
         <div class="col-12">
@@ -129,6 +199,7 @@
                                     <th>CONTACT INFORMATION</th>
                                     <th>TOTAL OUTLET</th>
                                     <th>STATUS</th>
+                                    <th>ACTION</th> {{-- KOLOM BARU --}}
                                     <th>JOINED DATE</th>
                                     <th>OUTLET</th>
                                 </tr>
@@ -162,10 +233,31 @@
                                         </td>
                                         <td>
                                             @if ($owner->is_active)
-                                                <span class="badge badge-success badge-pill">Active</span>
+                                                <span class="badge badge-success badge-pill">
+                                                    Active
+                                                </span>
                                             @else
-                                                <span class="badge badge-danger badge-pill">Inactive</span>
+                                                <span class="badge badge-danger badge-pill"
+                                                    @if ($owner->deactivation_reason) data-toggle="tooltip" 
+                                                        data-placement="top"
+                                                        title="{{ $owner->deactivation_reason }}" @endif>
+                                                    Inactive
+                                                </span>
                                             @endif
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="custom-control custom-switch custom-switch-success">
+                                                    <input type="checkbox"
+                                                        class="custom-control-input owner-status-toggle"
+                                                        id="ownerSwitch{{ $owner->id }}"
+                                                        data-owner-id="{{ $owner->id }}"
+                                                        data-owner-name="{{ $owner->name }}"
+                                                        {{ $owner->is_active ? 'checked' : '' }}>
+                                                    <label class="custom-control-label"
+                                                        for="ownerSwitch{{ $owner->id }}"></label>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td>
                                             <span
@@ -182,7 +274,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="text-center text-muted">
+                                        <td colspan="8" class="text-center text-muted">
                                             No owners found
                                         </td>
                                     </tr>
@@ -212,14 +304,33 @@
     <!-- Owner List Table end -->
 @endsection
 
+@push('styles')
+    <style>
+        /* Fix tooltip flickering */
+        .badge[data-toggle="tooltip"] {
+            cursor: pointer;
+        }
+
+        .tooltip {
+            pointer-events: none;
+        }
+
+        .tooltip-inner {
+            max-width: 300px;
+            text-align: left;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+@endpush
+
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Filter Code
             const statusFilter = document.getElementById('status-filter');
             const searchInput = document.getElementById('search-input');
             const filterBtn = document.getElementById('filter-btn');
-
-            // Set filter values from URL on page load
             const urlParams = new URLSearchParams(window.location.search);
 
             if (urlParams.has('status')) {
@@ -230,12 +341,10 @@
                 searchInput.value = urlParams.get('search');
             }
 
-            // Apply filter when button clicked
             filterBtn.addEventListener('click', function() {
                 applyFilters();
             });
 
-            // Search when Enter key is pressed
             searchInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -247,7 +356,6 @@
                 const url = new URL(window.location.href);
                 const params = new URLSearchParams(url.search);
 
-                // Set status parameter
                 const status = statusFilter.value;
                 if (status && status !== 'all') {
                     params.set('status', status);
@@ -255,7 +363,6 @@
                     params.delete('status');
                 }
 
-                // Set search parameter
                 const search = searchInput.value.trim();
                 if (search) {
                     params.set('search', search);
@@ -263,11 +370,154 @@
                     params.delete('search');
                 }
 
-                // Reset to first page
                 params.delete('page');
-
-                // Redirect with new parameters
                 window.location.href = url.pathname + '?' + params.toString();
+            }
+
+            // Owner Status Toggle
+            let currentOwnerId = null;
+            let currentToggle = null;
+            const deactivationReasonTextarea = document.getElementById('deactivationReason');
+            const confirmDeactivationBtn = document.getElementById('confirmDeactivation');
+
+            // Initialize tooltips
+            if (typeof $('[data-toggle="tooltip"]').tooltip === 'function') {
+                $('[data-toggle="tooltip"]').tooltip({
+                    trigger: 'hover',
+                    boundary: 'window',
+                    container: 'body'
+                });
+            }
+
+            // Enable/disable confirm button based on textarea input
+            if (deactivationReasonTextarea && confirmDeactivationBtn) {
+                deactivationReasonTextarea.addEventListener('input', function() {
+                    confirmDeactivationBtn.disabled = this.value.trim().length === 0;
+                });
+            }
+
+            // Handle all owner status toggles
+            document.querySelectorAll('.owner-status-toggle').forEach(function(toggle) {
+                toggle.addEventListener('change', function(e) {
+                    const isActive = this.checked;
+                    const ownerId = this.dataset.ownerId;
+                    const ownerName = this.dataset.ownerName;
+
+                    currentOwnerId = ownerId;
+                    currentToggle = this;
+
+                    if (!isActive) {
+                        e.preventDefault();
+                        this.checked = true;
+                        document.getElementById('ownerNameDisplay').textContent = ownerName;
+                        document.getElementById('deactivationReason').value = '';
+                        confirmDeactivationBtn.disabled = true;
+                        $('#deactivationModal').modal('show');
+                    } else {
+                        e.preventDefault();
+                        this.checked = false;
+                        document.getElementById('ownerNameDisplayActivation').textContent =
+                            ownerName;
+                        $('#activationModal').modal('show');
+                    }
+                });
+            });
+
+            // Handle deactivation confirmation
+            confirmDeactivationBtn.addEventListener('click', function() {
+                const reason = deactivationReasonTextarea.value.trim();
+                if (reason.length === 0) return;
+
+                if (currentOwnerId && currentToggle) {
+                    updateOwnerStatus(currentOwnerId, false, reason, currentToggle);
+                    $('#deactivationModal').modal('hide');
+                }
+            });
+
+            // Handle activation confirmation
+            document.getElementById('confirmActivation').addEventListener('click', function() {
+                if (currentOwnerId && currentToggle) {
+                    updateOwnerStatus(currentOwnerId, true, null, currentToggle);
+                    $('#activationModal').modal('hide');
+                }
+            });
+
+            // Reset on modal close
+            $('#deactivationModal, #activationModal').on('hidden.bs.modal', function() {
+                currentOwnerId = null;
+                currentToggle = null;
+            });
+
+            // Update owner status via AJAX
+            function updateOwnerStatus(ownerId, isActive, reason, toggleElement) {
+                toggleElement.disabled = true;
+
+                fetch(`/admin/owner-list/${ownerId}/toggle-status`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            is_active: isActive ? 1 : 0,
+                            deactivation_reason: reason
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            toggleElement.checked = isActive;
+                            toggleElement.disabled = false;
+
+                            const row = toggleElement.closest('tr');
+                            const statusCell = row.querySelector('td:nth-child(5)');
+                            const badge = statusCell.querySelector('.badge');
+
+                            if (isActive) {
+                                badge.className = 'badge badge-success badge-pill';
+                                badge.textContent = 'Active';
+                                badge.removeAttribute('data-toggle');
+                                badge.removeAttribute('data-placement');
+                                badge.removeAttribute('title');
+                                badge.removeAttribute('data-original-title');
+
+                                if (typeof $(badge).tooltip === 'function') {
+                                    $(badge).tooltip('dispose');
+                                }
+                            } else {
+                                badge.className = 'badge badge-danger badge-pill';
+                                badge.textContent = 'Inactive';
+
+                                if (reason) {
+                                    badge.setAttribute('data-toggle', 'tooltip');
+                                    badge.setAttribute('data-placement', 'top');
+                                    badge.setAttribute('title', reason);
+
+                                    if (typeof $(badge).tooltip === 'function') {
+                                        $(badge).tooltip({
+                                            trigger: 'hover',
+                                            boundary: 'window',
+                                            container: 'body'
+                                        });
+                                    }
+                                }
+                            }
+
+                            // Show success message
+                            toastr.info(data.message || 'Status updated successfully');
+                        } else {
+                            toggleElement.checked = !isActive;
+                            toggleElement.disabled = false;
+                            alert(data.message || 'Failed to update status');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        toggleElement.checked = !isActive;
+                        toggleElement.disabled = false;
+                        alert('An error occurred while updating status');
+                    });
             }
         });
     </script>

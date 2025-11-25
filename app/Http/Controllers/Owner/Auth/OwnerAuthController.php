@@ -70,7 +70,7 @@ class OwnerAuthController extends Controller
 
         // Tambahkan constraint is_active=1 agar sekalian tervalidasi di query
         $ok = Auth::guard('owner')->attempt(
-            ['email' => $credentials['email'], 'password' => $credentials['password'], 'is_active' => 1],
+            ['email' => $credentials['email'], 'password' => $credentials['password']],
             $request->boolean('remember')
         );
 
