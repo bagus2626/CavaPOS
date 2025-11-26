@@ -349,18 +349,15 @@ function initCategoryChart() {
  * Inisialisasi semua chart setelah DOM ready
  */
 document.addEventListener("DOMContentLoaded", function () {
-  console.log("Menginisialisasi charts...");
 
   try {
     initRevenueTrendChart();
-    console.log("✓ Revenue Trend Chart berhasil diinisialisasi");
   } catch (error) {
     console.error("✗ Error pada Revenue Trend Chart:", error);
   }
 
   try {
     initCategoryChart();
-    console.log("✓ Category Chart berhasil diinisialisasi");
   } catch (error) {
     console.error("✗ Error pada Category Chart:", error);
   }
