@@ -90,101 +90,96 @@
 
                             {{-- List produk --}}
                             @foreach ($products as $product)
-                                {{-- hitung promo dulu sebelum menampilkan --}}
-                                @php
-                                    $firstImage = $product->pictures[0]['path'] ?? null;
-                                    $promo = $product->promotion; // null kalau tidak ada/ tidak aktif hari ini
-                                    $basePrice = (float) $product->price;
+                                    {{-- hitung promo dulu sebelum menampilkan --}}
+                                    @php
+                                        $firstImage = $product->pictures[0]['path'] ?? null;
+                                        $promo = $product->promotion; // null kalau tidak ada/ tidak aktif hari ini
+                                        $basePrice = (float) $product->price;
 
-                                    $hasPromo = false;
-                                    $discountedBase = $basePrice;
+                                        $hasPromo = false;
+                                        $discountedBase = $basePrice;
 
-                                    if ($promo) {
-                                        if ($promo->promotion_type === 'percentage') {
-                                            $discountedBase = max(0, $basePrice * (1 - $promo->promotion_value / 100));
-                                        } else {
-                                            // amount
-                                            $discountedBase = max(0, $basePrice - (float) $promo->promotion_value);
+                                        if ($promo) {
+                                            if ($promo->promotion_type === 'percentage') {
+                                                $discountedBase = max(0, $basePrice * (1 - $promo->promotion_value / 100));
+                                            } else {
+                                                // amount
+                                                $discountedBase = max(0, $basePrice - (float) $promo->promotion_value);
+                                            }
+                                            $hasPromo = $discountedBase < $basePrice;
                                         }
-                                        $hasPromo = $discountedBase < $basePrice;
-                                    }
 
-                                    // Badge text
-                                    $promoBadge = null;
-                                    if ($promo) {
-                                        $promoBadge =
-                                            $promo->promotion_type === 'percentage'
+                                        // Badge text
+                                        $promoBadge = null;
+                                        if ($promo) {
+                                            $promoBadge =
+                                                $promo->promotion_type === 'percentage'
                                                 ? '-' .
-                                                    rtrim(
-                                                        rtrim(number_format($promo->promotion_value, 2, ',', '.'), '0'),
-                                                        ',',
-                                                    ) .
-                                                    '%'
+                                                rtrim(
+                                                    rtrim(number_format($promo->promotion_value, 2, ',', '.'), '0'),
+                                                    ',',
+                                                ) .
+                                                '%'
                                                 : '-Rp ' . number_format($promo->promotion_value, 0, ',', '.');
-                                    }
-                                @endphp
-                                <div @class([
+                                        }
+                                    @endphp
+                                    <div
+                                @class([
                                     'menu-item bg-white flex flex-row transition hover:shadow-lg px-4 border-b border-gray-200',
                                     // tailwind grayscale
-                                    'grayscale' =>
-                                        $product->quantity < 1 && $product->always_available_flag == false,
-                                ]) data-category="{{ $product->category_id }}">
+                                    'grayscale' => $product->quantity_available < 1 && $product->always_available_flag == false,
+                                ])
+                                data-category="{{ $product->category_id }}"
+                                >
 
-                                    {{-- Gambar Produk --}}
-                                    @if ($firstImage)
-                                        <div
-                                            class="w-28 h-28 flex-shrink-0 rounded-lg m-2 rounded-bl-lg overflow-hidden relative">
-                                            <img src="{{ asset($firstImage) }}" alt="{{ $product->name }}"
-                                                class="w-full h-full object-cover">
-                                            @if ($hasPromo && $promoBadge)
-                                                <span
-                                                    class="absolute top-1 left-1 bg-red-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded">
-                                                    {{ $promoBadge }}
-                                                </span>
-                                            @endif
-                                        </div>
-                                    @endif
+                                {{-- Gambar Produk --}}
+                                @if($firstImage)
+                                    <div class="w-28 h-28 flex-shrink-0 rounded-lg m-2 rounded-bl-lg overflow-hidden relative">
+                                        <img src="{{ asset($firstImage) }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
+                                        @if($hasPromo && $promoBadge)
+                                            <span class="absolute top-1 left-1 bg-red-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded">
+                                                {{ $promoBadge }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                @endif
 
-                                    {{-- Info Produk --}}
-                                    <div class="ml-4 flex-1 flex flex-col justify-between">
-                                        <div>
-                                            <h5 class="text-lg font-semibold text-gray-800">{{ $product->name }}</h5>
-                                            <p class="text-gray-500 text-sm mb-1 line-clamp-1">{{ $product->description }}
-                                            </p>
-                                            @if ($hasPromo)
-                                                <div class="flex items-baseline gap-2">
-                                                    <span class="text-sm text-gray-500 line-through">
-                                                        Rp {{ number_format($basePrice, 0, ',', '.') }}
-                                                    </span>
-                                                    <span class="text-lg font-bold text-gray-900">
-                                                        Rp {{ number_format($discountedBase, 0, ',', '.') }}
-                                                    </span>
-                                                </div>
-                                            @else
-                                                <p class="text-lg font-bold text-gray-900">
+                                {{-- Info Produk --}}
+                                <div class="ml-4 flex-1 flex flex-col justify-between">
+                                    <div>
+                                        <h5 class="text-lg font-semibold text-gray-800">{{ $product->name }}</h5>
+                                        <p class="text-gray-500 text-sm mb-1 line-clamp-1">{{ $product->description }}</p>
+                                        @if($hasPromo)
+                                            <div class="flex items-baseline gap-2">
+                                                <span class="text-sm text-gray-500 line-through">
                                                     Rp {{ number_format($basePrice, 0, ',', '.') }}
-                                                </p>
-                                            @endif
+                                                </span>
+                                                <span class="text-lg font-bold text-gray-900">
+                                                    Rp {{ number_format($discountedBase, 0, ',', '.') }}
+                                                </span>
+                                                    </div>
+                                        @else
+                                                    <p class="text-lg font-bold text-gray-900">
+                                                        Rp {{ number_format($basePrice, 0, ',', '.') }}
+                                                    </p>
+                                                @endif
 
-                                        </div>
+                                            </div>
 
-                                        {{-- Tombol Qty --}}
-                                        <div class="mb-2 flex items-center ml-auto space-x-4">
-                                            <button
-                                                class="minus-btn w-9 h-9 flex items-center justify-center border border-choco rounded-lg font-bold text-choco hover:bg-gray-100 hidden"
-                                                data-id="{{ $product->id }}">-</button>
-                                            <span class="qty text-lg font-semibold text-gray-800 hidden"
-                                                id="qty-{{ $product->id }}">0</span>
-                                            @if ($product->quantity < 1 && $product->always_available_flag == false)
+                                            {{-- Tombol Qty --}}
+                                            <div class="mb-2 flex items-center ml-auto space-x-4">
+                                            <button class="minus-btn w-9 h-9 flex items-center justify-center border border-choco rounded-lg font-bold text-choco hover:bg-gray-100 hidden"
+                                                    data-id="{{ $product->id }}">-</button>
+                                            <span class="qty text-lg font-semibold text-gray-800 hidden" id="qty-{{ $product->id }}">0</span>
+                                            @if ($product->quantity_available < 1 && $product->always_available_flag == false)
                                                 <p class="text-gray-700">{{ __('messages.customer.menu.sold') }}</p>
                                             @else
-                                                <button
-                                                    class="plus-btn w-9 h-9 flex items-center justify-center border rounded-lg font-bold text-white bg-choco hover:bg-soft-choco"
-                                                    data-id="{{ $product->id }}">+</button>
+                                                <button class="plus-btn w-9 h-9 flex items-center justify-center border rounded-lg font-bold text-white bg-choco hover:bg-soft-choco"
+                                                        data-id="{{ $product->id }}">+</button>
                                             @endif
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
                             @endforeach
                         </div>
                     @endif
@@ -195,7 +190,7 @@
         </div>
         @include('pages.customer.menu.modal')
 
-    @endsection
+@endsection
 
     <style>
         /* sheet bisa di-scroll sendiri */
@@ -288,41 +283,57 @@
 
     @push('scripts')
         @php
-            $productsData = $partner_products
-                ->map(function ($p) {
-                    $firstImage = $p->pictures[0]['path'] ?? null;
-                    $promo = $p->promotion;
-                    $base = (float) $p->price;
-                    $discBase = $base;
+            $productsData = $partner_products->map(function ($p) {
+            $firstImage = $p->pictures[0]['path'] ?? null;
+            $promo = $p->promotion;
+            $base = (float) $p->price;
+            $discBase = $base;
 
-                    if ($promo) {
-                        if ($promo->promotion_type === 'percentage') {
-                            $discBase = max(0, $base * (1 - $promo->promotion_value / 100));
-                        } else {
-                            $discBase = max(0, $base - (float) $promo->promotion_value);
-                        }
-                    }
+            if ($promo) {
+                if ($promo->promotion_type === 'percentage') {
+                $discBase = max(0, $base * (1 - ($promo->promotion_value / 100)));
+                } else {
+                $discBase = max(0, $base - (float) $promo->promotion_value);
+                }
+            }
+
+            // Transform parent_options dengan accessor quantity_available
+            $parentOptions = ($p->parent_options ?? collect())->map(function ($po) {
+                return [
+                'id' => $po->id,
+                'name' => $po->name,
+                'description' => $po->description,
+                'provision' => $po->provision,
+                'provision_value' => $po->provision_value,
+                'options' => ($po->options ?? collect())->map(function ($opt) {
                     return [
-                        'id' => $p->id,
-                        'name' => $p->name,
-                        'description' => strip_tags((string) $p->description),
-                        'price' => $base,
-                        'discounted_base' => $discBase, // <<—
-                        'promotion' => $promo
-                            ? [
-                                // <<—
-                                'id' => $promo->id,
-                                'type' => $promo->promotion_type,
-                                'value' => (float) $promo->promotion_value,
-                            ]
-                            : null,
-                        'image' => $firstImage ? asset($firstImage) : null,
-                        'parent_options' => $p->parent_options ?? [],
+                    'id' => $opt->id,
+                    'name' => $opt->name,
+                    'price' => (float) $opt->price,
+                    'quantity_available' => $opt->quantity_available, // ← ACCESSOR dipanggil di sini
+                    'always_available_flag' => (bool) $opt->always_available_flag,
+                    'description' => $opt->description,
                     ];
-                })
-                ->values()
-                ->toArray();
-        @endphp
+                })->values()->all(),
+                ];
+            })->values()->all();
+
+            return [
+                'id' => $p->id,
+                'name' => $p->name,
+                'description' => strip_tags((string) $p->description),
+                'price' => $base,
+                'discounted_base' => $discBase,
+                'promotion' => $promo ? [
+                'id' => $promo->id,
+                'type' => $promo->promotion_type,
+                'value' => (float) $promo->promotion_value,
+                ] : null,
+                'image' => $firstImage ? asset($firstImage) : null,
+                'parent_options' => $parentOptions, // ← Gunakan transformed data
+            ];
+            })->values()->toArray();
+            @endphp
 
         <script src="{{ asset('js/customer/menu/index.js') }}"></script>
         <script>
@@ -661,7 +672,7 @@
                             const priceSpan = document.createElement('span');
                             priceSpan.classList.add('ml-auto', 'text-sm', 'font-medium');
 
-                            const qty = Number(opt.quantity) || 0;
+                            const qty = Number(opt.quantity_available) || 0;
                             const alwaysAvailable = opt.always_available_flag === 1;
                             const priceNum = Number(opt.price) || 0;
 

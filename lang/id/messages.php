@@ -619,7 +619,7 @@ return [
                 'old_stock' => 'Stok Sebelumnya',
                 'update_stock_status' => 'Perbarui Stok & Status',
                 'if_active_stock_hidden' => 'Jika aktif, kolom Stok akan disembunyikan',
-                'stock_product' => 'Stok (Produk)',
+                'stock_product' => 'Stok',
                 'max' => 'Maks',
                 'promotion' => 'Promosi',
                 'no_promotion_dropdown' => '-- Tidak Ada Promosi --',

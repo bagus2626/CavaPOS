@@ -92,7 +92,7 @@
             {{-- Total orders (gradient card) --}}
             <div class="rounded-2xl border border-choco/10 p-4 shadow-sm bg-gradient-to-br from-soft-choco to-choco">
                 <p class="metric-label text-xs text-white/90">Total Order</p>
-                <p class="mt-2 text-3xl font-extrabold text-white drop-shadow">
+                <p class="mt-2 text-3xl font-extrabold text-white drop-shadow" id="metric-total-order">
                     {{ number_format($ordersToday->count() ?? 0) }}
                 </p>
             </div>
@@ -100,7 +100,7 @@
             {{-- Unpaid cash --}}
             <div class="rounded-2xl border border-choco/10 p-4 bg-white shadow-sm">
                 <p class="metric-label text-xs text-gray-500">Belum Bayar (Cash)</p>
-                <p class="mt-2 text-3xl font-extrabold text-soft-choco">
+                <p class="mt-2 text-3xl font-extrabold text-soft-choco" id="metric-unpaid-cash">
                     {{ number_format($ordersToday->where('payment_method', 'CASH')->where('payment_flag', 0)->count() ?? 0) }}
                 </p>
             </div>
@@ -108,7 +108,7 @@
             {{-- paid cash --}}
             <div class="rounded-2xl border border-choco/10 p-4 bg-white shadow-sm">
                 <p class="metric-label text-xs text-gray-500">Sudah Bayar (Cash)</p>
-                <p class="mt-2 text-3xl font-extrabold text-soft-choco">
+                <p class="mt-2 text-3xl font-extrabold text-soft-choco" id="metric-paid-cash">
                     {{ number_format($ordersToday->where('payment_method', 'CASH')->where('payment_flag', 1)->count() ?? 0) }}
                 </p>
             </div>
@@ -116,7 +116,7 @@
             {{-- QRIS paid --}}
             <div class="rounded-2xl border border-choco/10 p-4 bg-white shadow-sm">
                 <p class="metric-label text-xs text-gray-500">QRIS Berhasil</p>
-                <p class="mt-2 text-3xl font-extrabold text-teal-700">
+                <p class="mt-2 text-3xl font-extrabold text-teal-700" id="metric-qris-paid">
                     {{ number_format($ordersToday->where('payment_method', 'QRIS')->where('payment_flag', 1)->count() ?? 0) }}
                 </p>
             </div>
@@ -124,7 +124,7 @@
             {{-- On Process Order --}}
             <div class="rounded-2xl border border-choco/10 p-4 bg-white shadow-sm">
                 <p class="metric-label text-xs text-gray-500">Order Diproses</p>
-                <p class="mt-2 text-3xl font-extrabold text-cyan-700">
+                <p class="mt-2 text-3xl font-extrabold text-cyan-700" id="metric-on-process">
                     {{ number_format($ordersToday->whereIn('order_status', ['PROCESSED', 'PAID'])->count() ?? 0) }}
                 </p>
             </div>
@@ -132,8 +132,8 @@
             {{-- Revenue --}}
             <div class="rounded-2xl border border-choco/10 p-4 bg-white shadow-sm">
                 <p class="metric-label text-xs text-gray-500">Pendapatan</p>
-                <p class="mt-2 text-2xl font-extrabold text-choco">Rp
-                    {{ number_format($ordersToday->where('payment_flag', 1)->sum('total_order_value') ?? 0, 0, ',', '.') }}
+                <p class="mt-2 text-2xl font-extrabold text-choco" id="metric-revenue">
+                    Rp {{ number_format($ordersToday->where('payment_flag', 1)->sum('total_order_value') ?? 0, 0, ',', '.') }}
                 </p>
             </div>
         </div>
@@ -176,7 +176,9 @@
                         <span class="inline-flex items-center gap-2">
                             <span>{{ $label }}</span>
                             @if(isset($tabCounts[$key]))
-                                <span class="ml-1 inline-flex items-center justify-center rounded-full
+                                <span 
+                                    id="tab-badge-{{ $key }}"
+                                    class="ml-1 inline-flex items-center justify-center rounded-full
                                                                 bg-choco/10 text-choco text-[11px] font-bold px-2 py-0.5">
                                     {{ $tabCounts[$key] }}
                                 </span>
@@ -203,7 +205,7 @@
                 <div
                     class="px-4 py-3 border-b border-choco/10 flex items-center justify-between sticky top-0 bg-white z-10">
                     <h2 class="font-semibold text-choco">Butuh Proses Cash</h2>
-                    <span class="text-xs text-gray-500">{{ $pendingCashOrders->count() }} order</span>
+                    <span class="text-xs text-gray-500" id="pending-cash-count">{{ $pendingCashOrders->count() }} order</span>
                 </div>
                 <div class="p-4 overflow-y-auto flex-1">
                     @if ($pendingCashOrders->isEmpty())
@@ -346,83 +348,89 @@
 @endsection
 
 @push('scripts')
-    <script>
-        (function () {
-            const tabBtns = document.querySelectorAll('.tab-btn');
-            const tabContent = document.getElementById('tabContent');
-            const tabLoading = document.getElementById('tabLoading');
+<script>
+  window.CASHIER_PARTNER_ID   = "{{ $partner->id }}";
+  window.CASHIER_METRICS_URL  = "{{ route('employee.cashier.metrics') }}";
+</script>
+<script>
+    (function () {
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContent = document.getElementById('tabContent');
+        const tabLoading = document.getElementById('tabLoading');
 
-            function setActive(btn) {
-                tabBtns.forEach(b => b.classList.remove('bg-soft-choco/10', 'text-choco'));
-                btn.classList.add('bg-soft-choco/10', 'text-choco');
+        function setActive(btn) {
+            tabBtns.forEach(b => b.classList.remove('bg-soft-choco/10', 'text-choco'));
+            btn.classList.add('bg-soft-choco/10', 'text-choco');
+        }
+        function setActiveByKey(key) {
+            const btn = document.querySelector(`.tab-btn[data-tab="${key}"]`);
+            if (btn) setActive(btn);
+        }
+
+        async function loadTab(tab, afterLoaded) {
+            tabLoading.classList.remove('hidden');
+            [...tabContent.children].forEach(el => { if (el.id !== 'tabLoading') el.remove(); });
+
+            try {
+                const qs = new URLSearchParams(window.location.search);
+                qs.set('_', Date.now());
+                const url = "{{ route('employee.cashier.tab', '__TAB__') }}".replace('__TAB__', tab) + '?' + qs.toString();
+
+                const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                const html = await res.text();
+                const frag = document.createRange().createContextualFragment(html);
+                tabContent.appendChild(frag);
+
+                // panggil callback setelah DOM tab terpasang
+                if (typeof afterLoaded === 'function') afterLoaded();
+            } catch (e) {
+                tabContent.appendChild(Object.assign(document.createElement('div'), {
+                    className: 'p-6 text-rose-600',
+                    textContent: 'Gagal memuat data. Coba lagi.'
+                }));
+            } finally {
+                tabLoading.classList.add('hidden');
             }
-            function setActiveByKey(key) {
-                const btn = document.querySelector(`.tab-btn[data-tab="${key}"]`);
-                if (btn) setActive(btn);
+        }
+
+        // initial load
+        if (tabBtns.length) {
+            const savedTab = localStorage.getItem("activeTab");
+            let initialBtn = tabBtns[0];
+            if (savedTab) {
+                const foundBtn = document.querySelector(`.tab-btn[data-tab="${savedTab}"]`);
+                if (foundBtn) initialBtn = foundBtn;
             }
-
-            async function loadTab(tab, afterLoaded) {
-                tabLoading.classList.remove('hidden');
-                [...tabContent.children].forEach(el => { if (el.id !== 'tabLoading') el.remove(); });
-
-                try {
-                    const qs = new URLSearchParams(window.location.search);
-                    qs.set('_', Date.now());
-                    const url = "{{ route('employee.cashier.tab', '__TAB__') }}".replace('__TAB__', tab) + '?' + qs.toString();
-
-                    const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-                    const html = await res.text();
-                    const frag = document.createRange().createContextualFragment(html);
-                    tabContent.appendChild(frag);
-
-                    // panggil callback setelah DOM tab terpasang
-                    if (typeof afterLoaded === 'function') afterLoaded();
-                } catch (e) {
-                    tabContent.appendChild(Object.assign(document.createElement('div'), {
-                        className: 'p-6 text-rose-600',
-                        textContent: 'Gagal memuat data. Coba lagi.'
-                    }));
-                } finally {
-                    tabLoading.classList.add('hidden');
+            setActive(initialBtn);
+            loadTab(initialBtn.dataset.tab, () => {
+                if (initialBtn.dataset.tab === 'pembelian' && typeof window.initPembelianTab === 'function') {
+                    window.initPembelianTab();
                 }
-            }
+            });
+        }
 
-            // initial load
-            if (tabBtns.length) {
-                const savedTab = localStorage.getItem("activeTab");
-                let initialBtn = tabBtns[0];
-                if (savedTab) {
-                    const foundBtn = document.querySelector(`.tab-btn[data-tab="${savedTab}"]`);
-                    if (foundBtn) initialBtn = foundBtn;
-                }
-                setActive(initialBtn);
-                loadTab(initialBtn.dataset.tab, () => {
-                    if (initialBtn.dataset.tab === 'pembelian' && typeof window.initPembelianTab === 'function') {
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                setActive(btn);
+                loadTab(btn.dataset.tab, () => {
+                    if (btn.dataset.tab === 'pembelian' && typeof window.initPembelianTab === 'function') {
                         window.initPembelianTab();
                     }
                 });
-            }
-
-            tabBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    setActive(btn);
-                    loadTab(btn.dataset.tab, () => {
-                        if (btn.dataset.tab === 'pembelian' && typeof window.initPembelianTab === 'function') {
-                            window.initPembelianTab();
-                        }
-                    });
-                    localStorage.setItem("activeTab", btn.dataset.tab);
-                });
+                localStorage.setItem("activeTab", btn.dataset.tab);
             });
+        });
 
 
-            // 🔸 Ekspor ke window biar file JS eksternal bisa panggil
-            window.CASHIER = {
-                setActiveTab: (key) => setActiveByKey(key),
-                loadTab: (key, afterLoaded) => loadTab(key, afterLoaded)
-            };
-        })();
+        // 🔸 Ekspor ke window biar file JS eksternal bisa panggil
+        window.CASHIER = {
+            setActiveTab: (key) => setActiveByKey(key),
+            loadTab: (key, afterLoaded) => loadTab(key, afterLoaded)
+        };
+    })();
 
-    </script>
+</script>
+
+
 
 @endpush
