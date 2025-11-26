@@ -1,7 +1,8 @@
 <?php
 
-
-
+use App\Http\Controllers\Owner\Product\OwnerStockMovementController;
+use App\Jobs\SendAdminEmailVerification;
+use App\Jobs\SendEmailVerification;
 use Pusher\Pusher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -68,6 +69,21 @@ Route::post('/set-language', function () {
     return back();
 })->name('language.set');
 
+Route::get('send-email', function () {
+    $owner = (object) [
+        'name' => 'adin abimanyu',
+        'email' => 'adin123@gmail.com',
+        'verification_status' => 'pending'
+    ];
+
+    $verification = (object)[
+        'id' => 1,
+    ];
+
+    SendEmailVerification::dispatch($owner, $verification)->onQueue('send-email-verification');
+    SendAdminEmailVerification::dispatch($owner, $verification)->onQueue('send-email-verification');
+});
+
 Route::middleware('setlocale')->group(function () {
 
     Route::get('/', function () {
@@ -125,10 +141,8 @@ Route::middleware('setlocale')->group(function () {
         Route::get('/owner-verification', [OwnerVerificationController::class, 'index'])->name('owner-verification');
 
         Route::get('/owner-verification/{id}', [OwnerVerificationController::class, 'show'])->name('owner-verification.show');
-
         Route::post('/owner-verification/{id}/approve', [OwnerVerificationController::class, 'approve'])->name('owner-verification.approve');
         Route::post('/owner-verification/{id}/reject', [OwnerVerificationController::class, 'reject'])->name('owner-verification.reject');
-
         Route::get('/owner-verification/{id}/ktp-image', [OwnerVerificationController::class, 'showKtpImage'])->name('owner-verification.ktp-image');
 
         Route::prefix('send-payment')->name('send-payment.')->group(function () {
@@ -313,6 +327,19 @@ Route::middleware('setlocale')->group(function () {
                 Route::resource('promotions', OwnerPromotionController::class);
                 Route::resource('stocks', OwnerStockController::class);
 
+                Route::prefix('stock-movements')->name('stock-movements.')->group(function () {
+                    Route::get('/', [OwnerStockMovementController::class, 'index'])->name('index');
+                    // Route::get('/stock-in/create', [OwnerStockMovementController::class, 'create'])->name('create');
+
+                    Route::get('/stock-in/create', [OwnerStockMovementController::class, 'createStockIn'])->name('create-stock-in');
+                    Route::get('/adjustment/create', [OwnerStockMovementController::class, 'createAdjustment'])->name('create-adjustment');
+                    Route::get('/transfer/create', [OwnerStockMovementController::class, 'createTransfer'])->name('create-transfer');
+
+                    // Aksi untuk menyimpan form (DISIAPKAN UNTUK NANTI)
+                    Route::post('/', [OwnerStockMovementController::class, 'store'])->name('store');
+                    // Route::get('/{movement}', [OwnerStockMovementController::class, 'show'])->name('show');
+                    Route::get('/{id}/items', [OwnerStockMovementController::class, 'getMovementItemsJson'])->name('items.json');
+                });
                 Route::prefix('settings')->name('settings.')->group(function () {
                     Route::get('/', [OwnerSettingsController::class, 'index'])->name('index');
                     Route::post('/personal-info', [OwnerSettingsController::class, 'updatePersonalInfo'])->name('update-personal-info');
@@ -339,6 +366,16 @@ Route::middleware('setlocale')->group(function () {
     //Partner
     Route::middleware(['auth', 'is_partner', 'partner.access'])->prefix('partner')->name('partner.')->group(function () {
         Route::get('/', [PartnerDashboardController::class, 'index'])->name('dashboard');
+
+        Route::get('products/recipe/ingredients', [PartnerProductController::class, 'getRecipeIngredients'])
+            ->name('products.recipe.ingredients');
+
+        Route::get('products/recipe/load', [PartnerProductController::class, 'loadRecipe'])
+            ->name('products.recipe.load');
+
+        Route::post('products/recipe/save', [PartnerProductController::class, 'saveRecipe'])
+            ->name('products.recipe.save');
+
         Route::resource('products', PartnerProductController::class);
         Route::prefix('store')->name('store.')->group(function () {
             Route::get('tables/generate-barcode/{tableId}', [PartnerTableController::class, 'generateBarcode'])->name('tables.generate-barcode');

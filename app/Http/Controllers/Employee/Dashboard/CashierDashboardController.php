@@ -148,14 +148,16 @@ class CashierDashboardController extends Controller
                 $partner = User::findOrFail($partnerId);
                 $partner_products = PartnerProduct::with([
                     'category',
-                    'parent_options.options',
                     'promotion' => function ($q) {
                         $q->activeToday();
-                    }
+                    },
+                    'stock',
+                    'parent_options.options.stock',
                 ])
                     ->where('partner_id', $partner->id)
                     ->where('is_active', 1)
                     ->get();
+
                 $categories = Category::whereIn('id', $partner_products->pluck('category_id'))->get();
                 $tables = Table::where('partner_id', $partner->id)->orderBy('table_no', 'ASC')->get();
 
