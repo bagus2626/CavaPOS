@@ -379,6 +379,7 @@ Route::middleware('setlocale')->group(function () {
         Route::resource('products', PartnerProductController::class);
         Route::prefix('store')->name('store.')->group(function () {
             Route::get('tables/generate-barcode/{tableId}', [PartnerTableController::class, 'generateBarcode'])->name('tables.generate-barcode');
+            Route::get('tables/generate-all-barcode', [PartnerTableController::class, 'generateAllBarcode'])->name('tables.generate-all-barcode');
             Route::resource('tables', PartnerTableController::class);
         });
         Route::prefix('user-management')->name('user-management.')->group(function () {

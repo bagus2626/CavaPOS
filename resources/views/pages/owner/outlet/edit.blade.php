@@ -399,6 +399,7 @@
                                     class="form-label">{{ __('messages.owner.outlet.all_outlets.upload_picture_optional') }}</label>
                                 <input type="file" name="image" id="image"
                                     class="form-control @error('image') is-invalid @enderror" accept="image/*">
+                                <input type="hidden" name="remove_background_picture" id="remove_background_picture" value="0">
                                 <small
                                     class="text-muted">{{ __('messages.owner.outlet.all_outlets.muted_text_2') }}</small>
                                 @error('image')
@@ -426,6 +427,7 @@
                                     class="form-label">{{ __('messages.owner.outlet.all_outlets.upload_logo_optional') }}</label>
                                 <input type="file" name="logo" id="logo"
                                     class="form-control @error('logo') is-invalid @enderror" accept="image/*">
+                                <input type="hidden" name="remove_logo" id="remove_logo" value="0">
                                 <small
                                     class="text-muted">{{ __('messages.owner.outlet.all_outlets.muted_text_2') }}</small>
                                 @error('logo')
@@ -957,6 +959,9 @@
             const info2 = document.getElementById('imageInfo2');
             const clearBtn2 = document.getElementById('clearImageBtn2');
 
+            const removeBgInput = document.getElementById('remove_background_picture');
+            const removeLogoInput = document.getElementById('remove_logo');
+
             const MAX_SIZE = 2 * 1024 * 1024;
             const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'];
 
@@ -982,6 +987,8 @@
                 input.addEventListener('change', function(e) {
                     const file = e.target.files[0];
                     if (!file) return;
+
+                    if (removeBgInput) removeBgInput.value = '0';
 
                     if (!ALLOWED.includes(file.type)) {
                         alert('File type not supported. Use JPG, PNG, atau WEBP.');
@@ -1011,6 +1018,8 @@
                     const file = e.target.files[0];
                     if (!file) return;
 
+                    if (removeLogoInput) removeLogoInput.value = '0';
+
                     if (!ALLOWED.includes(file.type)) {
                         alert('File type not supported. Use JPG, PNG, atau WEBP.');
                         this.value = '';
@@ -1038,6 +1047,7 @@
                 clearBtn.addEventListener('click', () => {
                     input.value = '';
                     resetPreview(wrapper, preview, info);
+                    if (removeBgInput) removeBgInput.value = '1';
                 });
             }
 
@@ -1045,6 +1055,7 @@
                 clearBtn2.addEventListener('click', () => {
                     input2.value = '';
                     resetPreview(wrapper2, preview2, info2);
+                    if (removeLogoInput) removeLogoInput.value = '1';
                 });
             }
 
