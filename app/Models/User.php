@@ -45,6 +45,8 @@ class User extends Authenticatable
         'pic_role',
         'is_active',
         'is_qr_active',
+        'is_cashier_active',
+
     ];
 
     /**
@@ -68,5 +70,14 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function profileOutlet()
+    {
+        return $this->hasOne(ProfileOutlet::class);
+    }
+    public function owner()
+    {
+        return $this->belongsTo(Owner::class, 'owner_id', 'id');
     }
 }

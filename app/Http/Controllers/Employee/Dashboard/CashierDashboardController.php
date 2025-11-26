@@ -31,6 +31,8 @@ class CashierDashboardController extends Controller
     {
         $employee = Employee::findOrFail(Auth::id());
         $partner  = $employee->partner;
+        
+        
 
         // Ambil filter dari query string
         $payment = $request->string('payment')->toString(); // 'CASH' | 'QRIS' | ''
@@ -104,6 +106,7 @@ class CashierDashboardController extends Controller
     public function show(Request $request, string $tab)
     {
         $partnerId = auth('employee')->user()->partner_id;
+        $employeeId = auth('employee')->id();
 
         $payment = $request->string('payment')->toString();
         $status  = $request->string('order_status')->toString();
@@ -160,16 +163,24 @@ class CashierDashboardController extends Controller
 
                 return view('pages.employee.cashier.dashboard.tabs.pembelian', compact('partner', 'partner_products', 'categories', 'tables'));
             case 'pembayaran':
-                $items = (clone $base)->where('payment_method', 'CASH')->where('order_status', 'UNPAID')->latest()->limit(20)->get();
+                $items = (clone $base)->where('payment_method', 'CASH')->where('order_status', 'UNPAID')->latest()->get();
                 return view('pages.employee.cashier.dashboard.tabs.pembayaran', compact('items'));
             case 'proses':
-                $items = (clone $base)->whereIn('order_status', ['PROCESSED', 'PAID'])->latest()->limit(20)->get();
-                return view('pages.employee.cashier.dashboard.tabs.proses', compact('items'));
+                $items = (clone $base)
+                ->whereIn('order_status', ['PROCESSED', 'PAID'])
+                ->where(function($query) use ($employeeId) {
+                    $query->where('cashier_process_id', $employeeId)
+                          ->orWhereNull('cashier_process_id'); 
+                })
+                ->latest()
+                ->get();
+                return view('pages.employee.cashier.dashboard.tabs.proses', compact('items', 'employeeId'));
             case 'selesai':
-                $items = (clone $base)->where('order_status', 'SERVED')->latest()->limit(20)->get();
+                $items = (clone $base)->where('order_status', 'SERVED')->latest()->get();
                 return view('pages.employee.cashier.dashboard.tabs.selesai', compact('items'));
             default:
                 abort(404);
         }
     }
+
 }

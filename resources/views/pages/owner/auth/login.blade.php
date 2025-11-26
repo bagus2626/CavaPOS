@@ -159,7 +159,9 @@
                                 <label for="remember" class="inline-flex items-center select-none cursor-pointer">
                                     <input id="remember" type="checkbox"
                                         class="rounded border-red-200 text-[#dc2626] shadow-sm focus:ring-[#dc2626] transition-all cursor-pointer w-4 h-4"
-                                        name="remember">
+                                        name="remember"
+                                        "
+                                        >
                                     <span class="ms-2 text-xs sm:text-sm text-gray-700 font-medium">Ingat saya</span>
                                 </label>
                             </div>

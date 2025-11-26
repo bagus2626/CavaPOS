@@ -30,7 +30,6 @@ class EmployeeAuthController extends Controller
         $attempt = Auth::guard('employee')->attempt([
             'user_name'     => $cred['user_name'],
             'password'  => $cred['password'],
-            'is_active' => 1,
         ], $request->boolean('remember'));
 
         if (!$attempt) {
