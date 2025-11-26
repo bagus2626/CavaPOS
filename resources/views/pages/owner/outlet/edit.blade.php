@@ -486,16 +486,16 @@
                                     style="padding-left: 6px; padding-right: 30px; padding-top: 4px; padding-bottom: 4px; font-size: 14px;">>
                                     <option value="disabled"
                                         {{ old('qr_mode', $outlet->qr_mode ?? 'disabled') == 'disabled' ? 'selected' : '' }}>
-                                        Nonaktif</option>
+                                        {{ __('messages.owner.outlet.all_outlets.inactive') }}</option>
                                     <option value="barcode_only"
                                         {{ old('qr_mode', $outlet->qr_mode ?? 'disabled') == 'barcode_only' ? 'selected' : '' }}>
-                                        Barcode Saja</option>
+                                        {{ __('messages.owner.outlet.all_outlets.qr_only') }}</option>
                                     <option value="cashier_only"
                                         {{ old('qr_mode', $outlet->qr_mode ?? 'disabled') == 'cashier_only' ? 'selected' : '' }}>
-                                        Kasir Saja</option>
+                                        {{ __('messages.owner.outlet.all_outlets.cashier_only') }}</option>
                                     <option value="both"
                                         {{ old('qr_mode', $outlet->qr_mode ?? 'disabled') == 'both' ? 'selected' : '' }}>
-                                        Aktif Keduanya</option>
+                                        {{ __('messages.owner.outlet.all_outlets.all_methods') }}</option>
                                 </select>
                                 @error('qr_mode')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
