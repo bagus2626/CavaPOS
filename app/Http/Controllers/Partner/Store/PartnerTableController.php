@@ -239,7 +239,10 @@ class PartnerTableController extends Controller
         $outlet = Auth::user();
 
         // ambil semua table milik outlet ini
-        $tables = Table::where('partner_id', $outlet->id)->orderBy('table_no')->get();
+        $tables = Table::where('partner_id', $outlet->id)
+            ->orderBy('table_class')
+            ->orderBy('table_no')
+            ->get();
 
         if ($tables->isEmpty()) {
             return back()->with('error', 'Tidak ada meja yang tersedia untuk dibuat barcode.');
