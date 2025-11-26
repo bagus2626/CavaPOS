@@ -406,6 +406,7 @@ Route::middleware('setlocale')->group(function () {
         // CASHIER area
         Route::middleware(['auth:employee', 'employee.access', 'is_employee:CASHIER'])->prefix('cashier')->name('cashier.')->group(function () {
             Route::get('dashboard', [CashierDashboardController::class, 'index'])->name('dashboard');
+            Route::get('metrics', [CashierDashboardController::class, 'metrics'])->name('metrics');
             Route::get('tab/{tab}', [CashierDashboardController::class, 'show'])->name('tab');
             Route::post('cash-payment/{id}', [CashierTransactionController::class, 'cashPayment'])->name('cash-payment');
             Route::get('order-detail/{id}', [CashierTransactionController::class, 'orderDetail'])->name('order-detail');
