@@ -5,79 +5,172 @@ namespace App\Http\Controllers\Owner\Product;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
-use App\Models\Partner\Products\PartnerProduct;
-use App\Models\Partner\Products\PartnerProductParentOption;
-use App\Models\Partner\Products\PartnerProductOption;
 use App\Models\Product\MasterProduct;
-use App\Models\Product\MasterProductParentOption;
-use App\Models\Product\MasterProductOption;
-use App\Models\Admin\Product\Category;
 use App\Models\Store\Stock;
 use App\Models\Product\Promotion;
+use App\Models\Store\MasterUnit;
+use App\Models\User;
+use App\Services\UnitConversionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Intervention\Image\Facades\Image;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class OwnerStockController extends Controller
 {
-    public function index()
+    protected $unitConversionService;
+
+    public function __construct(UnitConversionService $unitConversionService)
+    {
+        $this->unitConversionService = $unitConversionService;
+    }
+
+    public function index(Request $request)
     {
         $owner = Auth::user();
-        $stocks = Stock::where('owner_id', $owner->id)->get();
-        return view('pages.owner.products.stock.index', compact('stocks'));
+
+        // Ambil daftar Partner/Outlet untuk dropdown
+        $partners = User::where('owner_id', $owner->id)
+            ->where('role', 'partner')
+            ->orderBy('name')
+            ->get();
+
+        // Menentukan lokasi filter default (Gudang Owner)
+        $filterLocation = $request->input('filter_location', 'owner');
+
+        $query = Stock::with('displayUnit')->where('owner_id', $owner->id);
+
+        if ($filterLocation === 'owner') {
+            $query->whereNull('partner_id');
+        } else {
+            $query->where('partner_id', $filterLocation);
+        }
+
+        $stocks = $query->get();
+
+        // Konversi quantity untuk tampilan
+        $stocks->transform(function ($stock) {
+            if ($stock->displayUnit) {
+                $stock->display_quantity = $this->unitConversionService->convertToDisplayUnit(
+                    $stock->quantity,
+                    $stock->display_unit_id
+                );
+            } else {
+                $stock->display_quantity = $stock->quantity;
+            }
+            return $stock;
+        });
+
+        return view('pages.owner.products.stock.index', compact('stocks', 'partners', 'filterLocation'));
     }
 
     public function create()
     {
         $owner = Auth::user();
-        $existing_master_product_ids = Stock::where('owner_id', $owner->id)->pluck('owner_master_product_id');
+
+        $existing_master_product_ids = Stock::where('owner_id', $owner->id)
+            ->whereNotNull('owner_master_product_id')
+            ->pluck('owner_master_product_id');
+
         $master_products = MasterProduct::where('owner_id', $owner->id)
             ->whereNotIn('id', $existing_master_product_ids)
+            ->orderBy('name')
             ->get();
-        // dd($master_products);
-        return view('pages.owner.products.stock.create', compact('master_products'));
+
+        $master_units = MasterUnit::where('owner_id', $owner->id)
+            ->orWhereNull('owner_id')
+            ->orderBy('group_label')
+            ->orderBy('unit_name')
+            ->get();
+
+        return view('pages.owner.products.stock.create', compact(
+            'master_products',
+            'master_units'
+        ));
     }
 
     public function store(Request $request)
     {
-        // dd($request->all());
         $owner = Auth::user();
 
         DB::beginTransaction();
         try {
-            $request->validate([
-                'stock_name'          => ['required','string','max:150'],
-                'unit'                => ['required','string','max:30'],
-                'custom_unit'         => ['nullable','string','max:30'],
-                'description'         => ['nullable','string','max:1000'],
+            $validated = $request->validate([
+                'stock_name'         => ['required', 'string', 'max:150'],
+                'description'        => ['nullable', 'string', 'max:1000'],
+                'product_id'         => ['nullable', 'integer', 'exists:master_products,id'],
+                'unit_id'            => [
+                    'required',
+                    'integer',
+                    Rule::exists('master_units', 'id')->where(function ($query) use ($owner) {
+                        $query->where('owner_id', $owner->id)
+                            ->orWhereNull('owner_id');
+                    }),
+                ],
             ]);
 
-            $unit = $request->unit === 'other' ? ($request->custom_unit ?: 'unit') : $request->unit;
-            $code = $this->generateUniqueStockCode();
+            // Ambil semua ID Partner (Outlet) yang dimiliki oleh Owner
+            $partnerIds = User::where('owner_id', $owner->id)
+                ->where('role', 'partner')
+                ->pluck('id');
 
-            Stock::create([
-                'stock_code' => $code,
-                'owner_id' => $owner->id,
-                'owner_master_product_id' => $request->product_id ?? null,
-                'type' => 'master',
-                'unit' => $unit,
-                'stock_name' => $request->stock_name,
-                'description' => $request->description
+            // Tambahkan ID Owner sebagai "gudang utama" (master stock)
+            $recipients = collect([
+                ['id' => $owner->id, 'partner_id' => null, 'type' => 'master']
             ]);
+
+            // Tambahkan semua ID Partner
+            $partnerRecipients = $partnerIds->map(function ($id) {
+                return ['id' => $id, 'partner_id' => $id, 'type' => 'partner'];
+            });
+
+            // Gabungkan list penerima
+            $recipients = $recipients->concat($partnerRecipients);
+
+
+            // Looping untuk membuat Stock di Owner dan setiap Partner
+            foreach ($recipients as $recipient) {
+                $partnerId = $recipient['partner_id'];
+                $stockType = $recipient['type'];
+
+                $ownerIdForStock = ($stockType === 'master') ? $owner->id : $owner->id;
+
+                $stockName = $validated['stock_name'];
+
+                $code = $this->generateUniqueStockCode();
+
+                $newStock = Stock::create([
+                    'stock_code'              => $code,
+                    'stock_type'              => 'linked',
+                    'owner_id'                => $ownerIdForStock,
+                    'partner_id'              => $partnerId,
+                    'owner_master_product_id' => $validated['product_id'] ?? null,
+                    'type'                    => $stockType,
+                    'stock_name'              => ($stockType === 'partner') ? $stockName  : $stockName,
+                    'quantity'                => 0,
+                    'last_price_per_unit'     => 0,
+                    'description'             => $validated['description'],
+                    'display_unit_id'         => $validated['unit_id'],
+                ]);
+            }
 
             DB::commit();
 
             return redirect()
                 ->route('owner.user-owner.stocks.index')
-                ->with('success', 'Product added successfully!');
+                ->with('success', 'Stock item and ' . count($partnerIds) . ' partner stocks added successfully!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors($e->errors());
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()
                 ->back()
                 ->withInput()
-                ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+                ->withErrors(['error' => 'An error occurred: ' . $e->getMessage()]);
         }
     }
 
@@ -85,9 +178,8 @@ class OwnerStockController extends Controller
     {
         $date = Carbon::now()->format('ymd');
 
-        for ($i = 0; $i < 10; $i++) { // batasi percobaan collision
-            // 6 char alfanumerik uppercase
-            $suffix = strtoupper(Str::random(6)); // [A-Za-z0-9], nanti di-upper
+        for ($i = 0; $i < 10; $i++) {
+            $suffix = strtoupper(Str::random(6));
             $code = "STK-{$date}-{$suffix}";
 
             if (!Stock::where('stock_code', $code)->exists()) {
@@ -95,10 +187,8 @@ class OwnerStockController extends Controller
             }
         }
 
-        // fallback super kuat kalau (sangat jarang) masih tabrakan
-        return 'STK-'.Str::ulid()->toBase32(); // ~26 char, sangat unik
+        return 'STK-' . Str::ulid()->toBase32();
     }
-
 
     public function show(Promotion $promotion)
     {
@@ -109,7 +199,6 @@ class OwnerStockController extends Controller
     public function edit(Promotion $promotion)
     {
         $owner = Auth::user();
-        // dd($owner);
         $data = Promotion::where('owner_id', $owner->id)
             ->where('id', $promotion->id)
             ->first();
@@ -149,7 +238,6 @@ class OwnerStockController extends Controller
 
             $uses_expiry = $request->has('uses_expiry') ? (bool)$request->uses_expiry : false;
 
-            // Opsional: guard kepemilikan
             if ((int)$promotion->owner_id !== (int)$owner->id) {
                 abort(403);
             }
@@ -161,7 +249,7 @@ class OwnerStockController extends Controller
                 'uses_expiry'     => $uses_expiry,
                 'start_date'      => $request->uses_expiry ? $request->start_date : null,
                 'end_date'        => $request->uses_expiry ? $request->end_date : null,
-                'active_days'     => $request->active_days ?: null, // model cast ke array
+                'active_days'     => $request->active_days ?: null,
                 'is_active'       => $request->has('is_active') ? (bool)$request->is_active : false,
                 'description'     => $request->description,
             ]);
@@ -179,12 +267,8 @@ class OwnerStockController extends Controller
         }
     }
 
-
-
     public function destroy(Stock $stock)
     {
-        // Hapus semua paket dan spesifikasi terkait
-
         $stock->delete();
 
         return redirect()->route('owner.user-owner.stocks.index')->with('success', 'Stock deleted successfully!');

@@ -620,7 +620,7 @@ return [
                 'old_stock' => 'Previous Stock',
                 'update_stock_status' => 'Update Stock & Status',
                 'if_active_stock_hidden' => 'If enabled, the Stock field will be hidden',
-                'stock_product' => 'Stock (Product)',
+                'stock_product' => 'Stock',
                 'max' => 'Max',
                 'promotion' => 'Promotion',
                 'no_promotion_dropdown' => '-- No Promotion --',
