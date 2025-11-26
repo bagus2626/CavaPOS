@@ -533,379 +533,375 @@
                         </li>
                     </ul>
                 </li>
+            </ul>
+        </nav>
 
-                <!-- Sidebar -->
-                <aside class="main-sidebar sidebar-dark-primary elevation-4">
-                    <!-- Brand Logo -->
-                    <a href="{{ route('owner.user-owner.dashboard') }}" class="brand-link bg-choco">
-                        <img src="{{ asset('images/cava-logo2-gradient.png') }}" alt="Cavaa Logo"
-                            class="brand-image rounded-full" style="opacity: .8">
-                        <span
-                            class="brand-text font-weight-light">{{ __('messages.owner.layout.owner_panel') }}</span>
+        <!-- Sidebar -->
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <!-- Brand Logo -->
+            <a href="{{ route('owner.user-owner.dashboard') }}" class="brand-link bg-choco">
+                <img src="{{ asset('images/cava-logo2-gradient.png') }}" alt="Cavaa Logo"
+                    class="brand-image rounded-2xl" style="opacity: .8">
+                <span
+                    class="brand-text font-weight-light">{{ __('messages.owner.layout.owner_panel') }}</span>
+            </a>
+
+            <!-- Sidebar -->
+            <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                <div class="image">
+                    @if (auth('owner')->check() && auth('owner')->user()->image)
+                        <img src="{{ asset('storage/' . auth('owner')->user()->image) }}"
+                            class="img-circle elevation-2"
+                            style="width:40px; height:40px; object-fit:cover; border-radius:50%;"
+                            alt="User Image">
+                    @else
+                        <div class="img-circle elevation-2 d-inline-flex align-items-center justify-content-center"
+                            style="width:40px; height:40px; background-color: #9ca3af;">
+                            <svg style="width: 22px; height: 22px; color: #ffffff;" fill="currentColor"
+                                viewBox="0 0 24 24">
+                                <path
+                                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                            </svg>
+                        </div>
+                    @endif
+                </div>
+                <div class="info" style="margin-top:3px;">
+                    <a href="{{ route('owner.user-owner.settings.index') }}" class="d-block text-choco">
+                        @auth('owner')
+                            {{ auth('owner')->user()->name }}
+                        @else
+                            User Owner
+                        @endauth
                     </a>
-
-                    <!-- Sidebar -->
-                    <!-- Sidebar -->
-                    <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-                        <div class="image">
-                            @if (auth('owner')->check() && auth('owner')->user()->image)
-                                <img src="{{ asset('storage/' . auth('owner')->user()->image) }}"
-                                    class="img-circle elevation-2"
-                                    style="width:40px; height:40px; object-fit:cover; border-radius:50%;"
-                                    alt="User Image">
-                            @else
-                                <div class="img-circle elevation-2 d-inline-flex align-items-center justify-content-center"
-                                    style="width:40px; height:40px; background-color: #9ca3af;">
-                                    <svg style="width: 22px; height: 22px; color: #ffffff;" fill="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path
-                                            d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                                    </svg>
-                                </div>
-                            @endif
-                        </div>
-                        <div class="info" style="margin-top:3px;">
-                            <a href="{{ route('owner.user-owner.settings.index') }}" class="d-block text-choco">
-                                @auth('owner')
-                                    {{ auth('owner')->user()->name }}
-                                @else
-                                    User Owner
-                                @endauth
-                            </a>
-                        </div>
-                    </div>
-
+                </div>
+            </div>
                 <!-- Sidebar Menu -->
-                <!-- Sidebar Menu -->
-                <nav class="mt-2">
-                    @php
-                        $isVerified = auth('owner')->check() && auth('owner')->user()->verification_status === 'approved';
-                        $isActive = auth('owner')->check() && auth('owner')->user()->is_active;
-                    @endphp
+            <nav class="mt-2">
+                @php
+                    $isVerified = auth('owner')->check() && auth('owner')->user()->verification_status === 'approved';
+                    $isActive = auth('owner')->check() && auth('owner')->user()->is_active;
+                @endphp
 
-                        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
-                            data-accordion="false">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                    data-accordion="false">
 
-                            {{-- Verification Menu (commented) --}}
-                            {{-- <li class="nav-item">
-                            <a href="{{ route('owner.user-owner.verification') }}"
-                                class="nav-link @if (Route::is('owner.user-owner.verification')) active @endif">
-                                <i class="nav-icon fas fa-tachometer-alt"></i>
-                                <p>{{ __('messages.owner.layout.verification') }}</p>
-                            </a>
-                        </li> --}}
+                        {{-- Verification Menu (commented) --}}
+                        {{-- <li class="nav-item">
+                        <a href="{{ route('owner.user-owner.verification') }}"
+                            class="nav-link @if (Route::is('owner.user-owner.verification')) active @endif">
+                            <i class="nav-icon fas fa-tachometer-alt"></i>
+                            <p>{{ __('messages.owner.layout.verification') }}</p>
+                        </a>
+                    </li> --}}
 
-                        {{-- Dashboard --}}
-                        <li class="nav-item">
-                            <a href="{{ $isVerified && $isActive ? route('owner.user-owner.dashboard') : 'javascript:void(0)' }}"
-                                class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} @if(Route::is('owner.user-owner.dashboard')) active @endif"
-                                onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                                <i class="nav-icon fas fa-tachometer-alt"></i>
-                                <p>{{ __('messages.owner.layout.dashboard') }}</p>
-                            </a>
-                        </li>
+                    {{-- Dashboard --}}
+                    <li class="nav-item">
+                        <a href="{{ $isVerified && $isActive ? route('owner.user-owner.dashboard') : 'javascript:void(0)' }}"
+                            class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} @if(Route::is('owner.user-owner.dashboard')) active @endif"
+                            onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
+                            <i class="nav-icon fas fa-tachometer-alt"></i>
+                            <p>{{ __('messages.owner.layout.dashboard') }}</p>
+                        </a>
+                    </li>
 
-                            {{-- User Management --}}
-                            @php
-                                $employeeRoutes = ['owner.user-owner.employees.*'];
-                            @endphp
-
-                            <li class="nav-item {{ Route::is($employeeRoutes) ? 'menu-open' : '' }}">
-                                <a href="javascript:void(0)"
-                                    class="nav-link {{ !$isVerified ? 'disabled-link' : '' }} {{ Route::is($employeeRoutes) ? 'active' : '' }}"
-                                    onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                                    <i class="nav-icon fas fa-users"></i>
-                                    <p>
-                                        {{ __('messages.owner.layout.user_management') }}
-                                        @if ($isVerified)
-                                            <i class="fas fa-angle-left right"></i>
-                                        @endif
-                                    </p>
-                                </a>
-                                <ul class="nav nav-treeview {{ !$isVerified ? 'disabled' : '' }}">
-                                    <li class="nav-item">
-                                        <a href="{{ route('owner.user-owner.employees.index') }}"
-                                            class="nav-link {{ Route::is('owner.user-owner.employees.*') ? 'active' : '' }}">
-                                            <i class="far fa-circle nav-icon"></i>
-                                            <p>{{ __('messages.owner.layout.employees') }}</p>
-                                        </a>
-                                    </li>
-                                    {{-- <li class="nav-item">
-                                    <a href="#" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Roles</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Permissions</p>
-                                    </a>
-                                </li> --}}
-                                </ul>
-                            </li>
-
-
-                        <li class="nav-item @if (Request::segment(1) == 'owner' && Request::segment(3) == 'xen_platform') menu-open @endif">
-                            <a href="javascript:void(0)"
-                               class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($employeeRoutes) ? 'active' : '' }}"
-                               onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                                <i class="nav-icon fas fa-credit-card"></i>
-                                <p>
-                                    XenPlatform
-                                    @if($isVerified)
-                                        <i class="fas fa-angle-left right"></i>
-                                    @endif
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
-                                <li class="nav-item">
-                                    <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.accounts.information') : 'javascript:void(0)' }}"
-                                       class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'accounts') active @endif">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>{{ __('messages.owner.layout.accounts') }}</p>
-                                    </a>
-                                </li>
-                            </ul>
-                            <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
-                                <li class="nav-item">
-                                    <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.split-payment.index') : 'javascript:void(0)' }}"
-                                       class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'split-payment') active @endif">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>{{ __('messages.owner.layout.split_payments') }}</p>
-                                    </a>
-                                </li>
-                            </ul>
-                            <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
-                                <li class="nav-item">
-                                    <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.payout.index') : 'javascript:void(0)' }}"
-                                       class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'payout') active @endif">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>{{ __('messages.owner.layout.withdrawal') }}</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-
-
-                        {{-- Store (commented section) --}}
-                        {{-- @php
-                        $storeRoutes = ['partner.store.*'];
+                        {{-- User Management --}}
+                        @php
+                            $employeeRoutes = ['owner.user-owner.employees.*'];
                         @endphp
 
-                        <li class="nav-item {{ Route::is($storeRoutes) ? 'menu-open' : '' }}">
-                            <a href="#" class="nav-link {{ Route::is($storeRoutes) ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-shopping-cart"></i>
-                                <p>
-                                    Outlet
-                                    <i class="fas fa-angle-left right"></i>
-                                </p>
-                            </a>
-
-                            <ul class="nav nav-treeview">
-
-                                <li
-                                    class="nav-item {{ Route::is('partner.store.tables.*') || Route::is('partner.store.seat-layouts.*') ? 'menu-open' : '' }}">
-                                    <a href="#"
-                                        class="nav-link {{ Route::is('partner.store.tables.*') || Route::is('partner.store.seat-layouts.*') ? 'active' : '' }}">
-                                        <i class="fas fa-table nav-icon"></i>
-                                        <p>
-                                            Outlet Management
-                                            <i class="fas fa-angle-left right"></i>
-                                        </p>
-                                    </a>
-
-                                    <ul class="nav nav-treeview">
-                                        <li class="nav-item">
-                                            <a href="{{ route('partner.store.tables.index') }}"
-                                                class="nav-link {{ Route::is('partner.store.tables.*') ? 'active' : '' }}">
-                                                <i class="far fa-dot-circle nav-icon"></i>
-                                                <p>Tables</p>
-                                            </a>
-                                        </li>
-
-                                        <li class="nav-item">
-                                            <a href="{{ route('partner.products.index') }}"
-                                                class="nav-link {{ Route::is('partner.products.*') ? 'active' : '' }}">
-                                                <i class="far fa-dot-circle nav-icon"></i>
-                                                <p>Seat Layout</p>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </li>
-
-                            </ul>
-                        </li> --}}
-
-                            {{-- Outlets --}}
-                            @php
-                                $outletRoutes = ['owner.user-owner.outlets.*'];
-                            @endphp
-
-                        <li class="nav-item {{ Route::is($outletRoutes) ? 'menu-open' : '' }}">
+                        <li class="nav-item {{ Route::is($employeeRoutes) ? 'menu-open' : '' }}">
                             <a href="javascript:void(0)"
-                                class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($outletRoutes) ? 'active' : '' }}"
+                                class="nav-link {{ !$isVerified ? 'disabled-link' : '' }} {{ Route::is($employeeRoutes) ? 'active' : '' }}"
                                 onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                                <i class="nav-icon fas fa-store"></i>
+                                <i class="nav-icon fas fa-users"></i>
                                 <p>
-                                    {{ __('messages.owner.layout.outlets') }}
-                                    @if($isVerified)
+                                    {{ __('messages.owner.layout.user_management') }}
+                                    @if ($isVerified)
                                         <i class="fas fa-angle-left right"></i>
                                     @endif
                                 </p>
                             </a>
-                            <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
+                            <ul class="nav nav-treeview {{ !$isVerified ? 'disabled' : '' }}">
                                 <li class="nav-item">
-                                    <a href="{{ route('owner.user-owner.outlets.index') }}"
-                                        class="nav-link {{ Route::is('owner.user-owner.outlets.*') ? 'active' : '' }}">
+                                    <a href="{{ route('owner.user-owner.employees.index') }}"
+                                        class="nav-link {{ Route::is('owner.user-owner.employees.*') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>{{ __('messages.owner.layout.all_outlets') }}</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-
-                            {{-- Products --}}
-                            @php
-                                $productRoutes = ['owner.user-owner.products.*'];
-                                $categoryRoutes = ['owner.user-owner.categories.*'];
-                                $promotionRoutes = ['owner.user-owner.promotions.*'];
-                                $stockRoutes = ['owner.user-owner.stocks.*'];
-                                $masterProductRoutes = ['owner.user-owner.master-products.*'];
-                                $outletProductRoutes = ['owner.user-owner.outlet-products.*'];
-
-                                $allProductRoutes = array_merge(
-                                    $productRoutes,
-                                    $categoryRoutes,
-                                    $promotionRoutes,
-                                    $masterProductRoutes,
-                                    $outletProductRoutes,
-                                    $stockRoutes,
-                                );
-                            @endphp
-
-                        <li class="nav-item {{ Route::is($allProductRoutes) ? 'menu-open' : '' }}">
-                            <a href="javascript:void(0)"
-                                class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($allProductRoutes) ? 'active' : '' }}"
-                                onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                                <i class="nav-icon fas fa-shopping-cart"></i>
-                                <p>
-                                    {{ __('messages.owner.layout.products') }}
-                                    @if($isVerified)
-                                        <i class="fas fa-angle-left right"></i>
-                                    @endif
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
-                                <li class="nav-item">
-                                    <a href="{{ route('owner.user-owner.master-products.index') }}"
-                                        class="nav-link {{ Route::is('owner.user-owner.master-products.*') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>{{ __('messages.owner.layout.master_products') }}</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="{{ route('owner.user-owner.outlet-products.index') }}"
-                                        class="nav-link {{ Route::is('owner.user-owner.outlet-products.*') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>{{ __('messages.owner.layout.outlet_products') }}</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="{{ route('owner.user-owner.stocks.index') }}"
-                                        class="nav-link {{ Route::is('owner.user-owner.stocks.*') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>{{ __('messages.owner.layout.stocks') }}</p>
+                                        <p>{{ __('messages.owner.layout.employees') }}</p>
                                     </a>
                                 </li>
                                 {{-- <li class="nav-item">
-                                    <a href="{{ route('owner.user-owner.products.index') }}"
-                                        class="nav-link {{ Route::is('owner.user-owner.products.*') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>All Products</p>
-                                    </a>
-                                </li> --}}
-                                    <li class="nav-item">
-                                        <a href="{{ route('owner.user-owner.categories.index') }}"
-                                            class="nav-link {{ Route::is('owner.user-owner.categories.*') ? 'active' : '' }}">
-                                            <i class="far fa-circle nav-icon"></i>
-                                            <p>{{ __('messages.owner.layout.categories') }}</p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="{{ route('owner.user-owner.promotions.index') }}"
-                                            class="nav-link {{ Route::is('owner.user-owner.promotions.*') ? 'active' : '' }}">
-                                            <i class="far fa-circle nav-icon"></i>
-                                            <p>{{ __('messages.owner.layout.promotions') }}</p>
-                                        </a>
-                                    </li>
-                                </ul>
+                                <a href="#" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Roles</p>
+                                </a>
                             </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Permissions</p>
+                                </a>
+                            </li> --}}
+                            </ul>
+                        </li>
 
-                            {{-- Settings --}}
-                            {{-- Settings --}}
-                            @php
-                                $settingRoutes = ['owner.user-owner.settings.*'];
-                            @endphp
-                            <li class="nav-item {{ Route::is($settingRoutes) ? 'menu-open' : '' }}">
-                                <a href="javascript:void(0)"
-                                    class="nav-link {{ !$isVerified ? 'disabled-link' : '' }} {{ Route::is($settingRoutes) ? 'active' : '' }}"
-                                    onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                                    <i class="nav-icon fas fa-cog"></i>
+
+                    <li class="nav-item @if (Request::segment(1) == 'owner' && Request::segment(3) == 'xen_platform') menu-open @endif">
+                        <a href="javascript:void(0)"
+                        class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($employeeRoutes) ? 'active' : '' }}"
+                        onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
+                            <i class="nav-icon fas fa-credit-card"></i>
+                            <p>
+                                XenPlatform
+                                @if($isVerified)
+                                    <i class="fas fa-angle-left right"></i>
+                                @endif
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
+                            <li class="nav-item">
+                                <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.accounts.information') : 'javascript:void(0)' }}"
+                                class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'accounts') active @endif">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>{{ __('messages.owner.layout.accounts') }}</p>
+                                </a>
+                            </li>
+                        </ul>
+                        <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
+                            <li class="nav-item">
+                                <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.split-payment.index') : 'javascript:void(0)' }}"
+                                class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'split-payment') active @endif">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>{{ __('messages.owner.layout.split_payments') }}</p>
+                                </a>
+                            </li>
+                        </ul>
+                        <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
+                            <li class="nav-item">
+                                <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.payout.index') : 'javascript:void(0)' }}"
+                                class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'payout') active @endif">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>{{ __('messages.owner.layout.withdrawal') }}</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+
+                    {{-- Store (commented section) --}}
+                    {{-- @php
+                    $storeRoutes = ['partner.store.*'];
+                    @endphp
+
+                    <li class="nav-item {{ Route::is($storeRoutes) ? 'menu-open' : '' }}">
+                        <a href="#" class="nav-link {{ Route::is($storeRoutes) ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-shopping-cart"></i>
+                            <p>
+                                Outlet
+                                <i class="fas fa-angle-left right"></i>
+                            </p>
+                        </a>
+
+                        <ul class="nav nav-treeview">
+
+                            <li
+                                class="nav-item {{ Route::is('partner.store.tables.*') || Route::is('partner.store.seat-layouts.*') ? 'menu-open' : '' }}">
+                                <a href="#"
+                                    class="nav-link {{ Route::is('partner.store.tables.*') || Route::is('partner.store.seat-layouts.*') ? 'active' : '' }}">
+                                    <i class="fas fa-table nav-icon"></i>
                                     <p>
-                                        {{ __('messages.owner.layout.settings') }}
-                                        @if ($isVerified)
-                                            <i class="fas fa-angle-left right"></i>
-                                        @endif
+                                        Outlet Management
+                                        <i class="fas fa-angle-left right"></i>
                                     </p>
                                 </a>
-                                <ul class="nav nav-treeview {{ !$isVerified ? 'disabled' : '' }}">
-                                    {{-- Submenu: Settings (ini adalah link ke halaman settings sebenarnya) --}}
+
+                                <ul class="nav nav-treeview">
                                     <li class="nav-item">
-                                        <a href="{{ route('owner.user-owner.settings.index') }}"
-                                            class="nav-link {{ Route::is('owner.user-owner.settings.index') ? 'active' : '' }}">
-                                            <i class="far fa-circle nav-icon"></i>
-                                            <p>{{ __('messages.owner.layout.settings') }}</p>
+                                        <a href="{{ route('partner.store.tables.index') }}"
+                                            class="nav-link {{ Route::is('partner.store.tables.*') ? 'active' : '' }}">
+                                            <i class="far fa-dot-circle nav-icon"></i>
+                                            <p>Tables</p>
                                         </a>
                                     </li>
-                                    {{-- Anda bisa menambahkan menu settings lain di sini jika ada, misal 'Payment Gateway' --}}
-                                    {{-- <li class="nav-item">
-                                    <a href="#" class="nav-link">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Payment Gateway</p>
-                                    </a>
-                                </li> --}}
+
+                                    <li class="nav-item">
+                                        <a href="{{ route('partner.products.index') }}"
+                                            class="nav-link {{ Route::is('partner.products.*') ? 'active' : '' }}">
+                                            <i class="far fa-dot-circle nav-icon"></i>
+                                            <p>Seat Layout</p>
+                                        </a>
+                                    </li>
                                 </ul>
                             </li>
 
-                        
+                        </ul>
+                    </li> --}}
 
-                        {{-- Reports Header --}}
-                        <li class="nav-header {{ !$isVerified || !$isActive ? 'disabled-header' : '' }}">
-                            {{ __('messages.owner.layout.reports') }}
-                        </li>
+                    {{-- Outlets --}}
+                    @php
+                        $outletRoutes = ['owner.user-owner.outlets.*'];
+                    @endphp
 
-                        {{-- Sales Report --}}
-                        <li class="nav-item">
-                            <a href="{{ $isVerified && $isActive ? route('owner.user-owner.report.sales.index') : 'javascript:void(0)' }}"
-                                class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is('owner.user-owner.report.sales.*') ? 'active' : '' }}"
-                                onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                                <i class="nav-icon fas fa-chart-line"></i>
-                                <p>{{ __('messages.owner.layout.sales_report') }}</p>
-                            </a>
-                        </li>
+                    <li class="nav-item {{ Route::is($outletRoutes) ? 'menu-open' : '' }}">
+                        <a href="javascript:void(0)"
+                            class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($outletRoutes) ? 'active' : '' }}"
+                            onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
+                            <i class="nav-icon fas fa-store"></i>
+                            <p>
+                                {{ __('messages.owner.layout.outlets') }}
+                                @if($isVerified)
+                                    <i class="fas fa-angle-left right"></i>
+                                @endif
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
+                            <li class="nav-item">
+                                <a href="{{ route('owner.user-owner.outlets.index') }}"
+                                    class="nav-link {{ Route::is('owner.user-owner.outlets.*') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>{{ __('messages.owner.layout.all_outlets') }}</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
 
-                        {{-- Traffic Report --}}
-                        {{-- <li class="nav-item">
-                            <a href="javascript:void(0)" class="nav-link {{ !$isVerified ? 'disabled-link' : '' }}"
-                                onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                                <i class="nav-icon fas fa-chart-pie"></i>
-                                <p>{{ __('messages.owner.layout.traffict_report') }}</p>
+                    {{-- Products --}}
+                    @php
+                        $productRoutes = ['owner.user-owner.products.*'];
+                        $categoryRoutes = ['owner.user-owner.categories.*'];
+                        $promotionRoutes = ['owner.user-owner.promotions.*'];
+                        $stockRoutes = ['owner.user-owner.stocks.*'];
+                        $masterProductRoutes = ['owner.user-owner.master-products.*'];
+                        $outletProductRoutes = ['owner.user-owner.outlet-products.*'];
+
+                        $allProductRoutes = array_merge(
+                            $productRoutes,
+                            $categoryRoutes,
+                            $promotionRoutes,
+                            $masterProductRoutes,
+                            $outletProductRoutes,
+                            $stockRoutes,
+                        );
+                    @endphp
+
+                    <li class="nav-item {{ Route::is($allProductRoutes) ? 'menu-open' : '' }}">
+                        <a href="javascript:void(0)"
+                            class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($allProductRoutes) ? 'active' : '' }}"
+                            onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
+                            <i class="nav-icon fas fa-shopping-cart"></i>
+                            <p>
+                                {{ __('messages.owner.layout.products') }}
+                                @if($isVerified)
+                                    <i class="fas fa-angle-left right"></i>
+                                @endif
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
+                            <li class="nav-item">
+                                <a href="{{ route('owner.user-owner.master-products.index') }}"
+                                    class="nav-link {{ Route::is('owner.user-owner.master-products.*') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>{{ __('messages.owner.layout.master_products') }}</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('owner.user-owner.outlet-products.index') }}"
+                                    class="nav-link {{ Route::is('owner.user-owner.outlet-products.*') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>{{ __('messages.owner.layout.outlet_products') }}</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('owner.user-owner.stocks.index') }}"
+                                    class="nav-link {{ Route::is('owner.user-owner.stocks.*') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>{{ __('messages.owner.layout.stocks') }}</p>
+                                </a>
+                            </li>
+                            {{-- <li class="nav-item">
+                                <a href="{{ route('owner.user-owner.products.index') }}"
+                                    class="nav-link {{ Route::is('owner.user-owner.products.*') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>All Products</p>
+                                </a>
+                            </li> --}}
+                            <li class="nav-item">
+                                <a href="{{ route('owner.user-owner.categories.index') }}"
+                                    class="nav-link {{ Route::is('owner.user-owner.categories.*') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>{{ __('messages.owner.layout.categories') }}</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('owner.user-owner.promotions.index') }}"
+                                    class="nav-link {{ Route::is('owner.user-owner.promotions.*') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>{{ __('messages.owner.layout.promotions') }}</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    {{-- Settings --}}
+                    @php
+                        $settingRoutes = ['owner.user-owner.settings.*'];
+                    @endphp
+                    <li class="nav-item {{ Route::is($settingRoutes) ? 'menu-open' : '' }}">
+                        <a href="javascript:void(0)"
+                            class="nav-link {{ !$isVerified ? 'disabled-link' : '' }} {{ Route::is($settingRoutes) ? 'active' : '' }}"
+                            onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
+                            <i class="nav-icon fas fa-cog"></i>
+                            <p>
+                                {{ __('messages.owner.layout.settings') }}
+                                @if ($isVerified)
+                                    <i class="fas fa-angle-left right"></i>
+                                @endif
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview {{ !$isVerified ? 'disabled' : '' }}">
+                            {{-- Submenu: Settings (ini adalah link ke halaman settings sebenarnya) --}}
+                            <li class="nav-item">
+                                <a href="{{ route('owner.user-owner.settings.index') }}"
+                                    class="nav-link {{ Route::is('owner.user-owner.settings.index') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>{{ __('messages.owner.layout.settings') }}</p>
+                                </a>
+                            </li>
+                            {{-- Anda bisa menambahkan menu settings lain di sini jika ada, misal 'Payment Gateway' --}}
+                            {{-- <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Payment Gateway</p>
                             </a>
                         </li> --}}
-                    </ul>
-                </nav>
-            </div>
+                        </ul>
+                    </li>
+
+                    
+
+                    {{-- Reports Header --}}
+                    <li class="nav-header {{ !$isVerified || !$isActive ? 'disabled-header' : '' }}">
+                        {{ __('messages.owner.layout.reports') }}
+                    </li>
+
+                    {{-- Sales Report --}}
+                    <li class="nav-item">
+                        <a href="{{ $isVerified && $isActive ? route('owner.user-owner.report.sales.index') : 'javascript:void(0)' }}"
+                            class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is('owner.user-owner.report.sales.*') ? 'active' : '' }}"
+                            onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
+                            <i class="nav-icon fas fa-chart-line"></i>
+                            <p>{{ __('messages.owner.layout.sales_report') }}</p>
+                        </a>
+                    </li>
+
+                    {{-- Traffic Report --}}
+                    {{-- <li class="nav-item">
+                        <a href="javascript:void(0)" class="nav-link {{ !$isVerified ? 'disabled-link' : '' }}"
+                            onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
+                            <i class="nav-icon fas fa-chart-pie"></i>
+                            <p>{{ __('messages.owner.layout.traffict_report') }}</p>
+                        </a>
+                    </li> --}}
+                </ul>
+            </nav>
         </aside>
 
         <!-- Content Wrapper -->
@@ -928,18 +924,18 @@
                 </div>
             </section>
 
-        <!-- Main Content -->
-        @yield('content')
-    </div>
-
-    <!-- Footer -->
-    <footer class="main-footer bg-white">
-        <div class="float-right d-none d-sm-block">
-            <b>Version</b> 3.2.0
+            <!-- Main Content -->
+            @yield('content')
         </div>
-        <strong>Copyright &copy; 2024-{{ date('Y') }} <a href="https://vastech.co.id">Vastech.co.id</a>.</strong>
-        All rights reserved.
-    </footer>
+
+        <!-- Footer -->
+        <footer class="main-footer bg-white">
+            <div class="float-right d-none d-sm-block">
+                <b>Version</b> 3.2.0
+            </div>
+            <strong>Copyright &copy; 2024-{{ date('Y') }} <a href="https://vastech.co.id">Vastech.co.id</a>.</strong>
+            All rights reserved.
+        </footer>
     </div>
 
     <!-- REQUIRED SCRIPTS -->

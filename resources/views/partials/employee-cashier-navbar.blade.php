@@ -185,31 +185,6 @@
         });
     });
 </script>
-{{-- <script>
-document.addEventListener('DOMContentLoaded', function () {
-  const enableBtn = document.getElementById('enable-sound');
-  if (!enableBtn) return;
-
-  const testAudio = new Audio('/sounds/bell-notification-337658.mp3');
-
-  // Coba autoplay saat load. Jika ditolak, tampilkan tombol.
-  testAudio.play()
-    .then(() => {
-      // Autoplay diizinkan → tombol tetap hidden (memang sengaja)
-    })
-    .catch(() => {
-      // Autoplay ditolak → munculkan tombol agar user memberi izin
-      enableBtn.classList.remove('hidden');
-    });
-
-  // Klik tombol = minta izin sekali, lalu sembunyikan
-  enableBtn.addEventListener('click', () => {
-    (new Audio('/sounds/bell-notification-337658.mp3')).play()
-      .then(() => enableBtn.classList.add('hidden'))
-      .catch(() => {/* tetap tampil kalau masih gagal */});
-  });
-});
-</script> --}}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   // util
