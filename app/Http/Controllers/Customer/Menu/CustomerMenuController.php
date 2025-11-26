@@ -28,6 +28,9 @@ use App\Models\Transaction\OrderPayment;
 use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Jobs\SendReceiptEmailJob;
+use App\Models\Partner\Products\PartnerProductOptionsRecipe;
+use App\Models\Partner\Products\PartnerProductRecipe;
+use App\Models\Store\Stock;
 
 class CustomerMenuController extends Controller
 {
@@ -52,7 +55,9 @@ class CustomerMenuController extends Controller
             'parent_options.options',
             'promotion' => function ($q) {
                 $q->activeToday();
-            }
+            },
+            'stock',
+            'parent_options.options.stock',
         ])
             ->where('partner_id', $partner->id)
             ->where('is_active', 1)
@@ -107,7 +112,7 @@ class CustomerMenuController extends Controller
                 $note        = data_get($order, 'note', '');
                 $promoId    = data_get($order, 'promo_id', null);
 
-                $product = PartnerProduct::findOrFail($productId);
+                $product = PartnerProduct::with('stock')->findOrFail($productId);
                 $options = PartnerProductOption::with('parent')->whereIn('id', (array)$optionIds)->get();
                 $optionsPrice = $options->sum('price');
 
@@ -137,8 +142,13 @@ class CustomerMenuController extends Controller
                     'quantity'          => $qty,
                     'customer_note'       => $note,
                 ]);
-                if ($product->always_available_flag === 0) {
-                    $product->decrement('quantity', $qty);
+                if ($product->stock_type === 'direct' && $product->always_available_flag === 0 && $product->stock) {
+                    $product->stock->decrement('quantity', $qty);
+                }
+
+                if ($product->stock_type === 'linked') {
+                    $recipes = PartnerProductRecipe::where('partner_product_id', $productId)->get();
+                    $this->processRecipeDeduction($recipes, $qty);
                 }
 
                 foreach ($options as $opt) {
@@ -149,8 +159,12 @@ class CustomerMenuController extends Controller
                         'option_id' => $opt->id,
                         'price' => $opt->price
                     ]);
-                    if ($opt->always_available_flag === 0) {
-                        $opt->decrement('quantity', 1); // kurangi stock option
+                    if ($opt->stock_type === 'direct' && $opt->always_available_flag === 0 && $opt->stock) {
+                        $opt->stock->decrement('quantity', $qty);
+                    }
+                    if ($opt->stock_type === 'linked') {
+                        $recipes = PartnerProductOptionsRecipe::where('partner_product_option_id', $opt->id)->get();
+                        $this->processRecipeDeduction($recipes, $qty);
                     }
                 }
             }
@@ -266,5 +280,26 @@ class CustomerMenuController extends Controller
 
         // download file hasil simpan
         return Storage::download("receipts/debug-{$data->booking_order_code}.pdf");
+    }
+
+    private function processRecipeDeduction($recipes, int $orderedQuantity): void
+    {
+        foreach ($recipes as $recipe) {
+
+            $ingredientStock = Stock::find($recipe->stock_id);
+
+            // Jika stok bahan mentah tidak ditemukan (misal dihapus), lewati atau log warning.
+            if (!$ingredientStock) {
+                continue;
+            }
+
+            $quantityPerUnit = $recipe->quantity_used;
+
+            // Hitung Total Konsumsi
+            $totalQuantityToConsume = $quantityPerUnit * $orderedQuantity;
+
+            // Pengurangan Stok Bahan Mentah
+            $ingredientStock->decrement('quantity', $totalQuantityToConsume);
+        }
     }
 }

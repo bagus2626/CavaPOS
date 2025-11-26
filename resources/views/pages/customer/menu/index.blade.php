@@ -120,7 +120,7 @@
                             @class([
                                 'menu-item bg-white flex flex-row transition hover:shadow-lg px-4 border-b border-gray-200',
                                 // tailwind grayscale
-                                'grayscale' => $product->quantity < 1 && $product->always_available_flag == false,
+                                'grayscale' => $product->quantity_available < 1 && $product->always_available_flag == false,
                             ])
                             data-category="{{ $product->category_id }}"
                             >
@@ -164,7 +164,7 @@
                                     <button class="minus-btn w-9 h-9 flex items-center justify-center border border-choco rounded-lg font-bold text-choco hover:bg-gray-100 hidden"
                                             data-id="{{ $product->id }}">-</button>
                                     <span class="qty text-lg font-semibold text-gray-800 hidden" id="qty-{{ $product->id }}">0</span>
-                                    @if ($product->quantity < 1 && $product->always_available_flag == false)
+                                    @if ($product->quantity_available < 1 && $product->always_available_flag == false)
                                         <p class="text-gray-700">{{ __('messages.customer.menu.sold') }}</p>
                                     @else
                                         <button class="plus-btn w-9 h-9 flex items-center justify-center border rounded-lg font-bold text-white bg-choco hover:bg-soft-choco"
@@ -272,21 +272,39 @@
                 $discBase = max(0, $base - (float)$promo->promotion_value);
             }
         }
-        return [
-            'id'             => $p->id,
-            'name'           => $p->name,
-            'description'    => strip_tags((string)$p->description),
-            'price'          => $base,
-            'discounted_base'=> $discBase,                 // <<—
-            'promotion'      => $promo ? [                 // <<—
-                'id'    => $promo->id,
-                'type'  => $promo->promotion_type,
-                'value' => (float)$promo->promotion_value,
-            ] : null,
-            'image'          => $firstImage ? asset($firstImage) : null,
-            'parent_options' => $p->parent_options ?? [],
-        ];
+    $parentOptions = ($p->parent_options ?? [])->map(function ($po) {
+      return [
+        'id' => $po->id,
+        'name' => $po->name,
+        'provision' => $po->provision,
+        'provision_value' => $po->provision_value,
+        'options' => ($po->options ?? [])->map(function ($opt) {
+          return [
+            'id' => $opt->id,
+            'name' => $opt->name,
+            'price' => (float) $opt->price,
+            'quantity_available' => $opt->quantity_available,
+            'always_available_flag' => (int) $opt->always_available_flag,
+          ];
+        })->values()->toArray(),
+      ];
     })->values()->toArray();
+
+    return [
+      'id' => $p->id,
+      'name' => $p->name,
+      'description' => strip_tags((string) $p->description),
+      'price' => $base,
+      'discounted_base' => $discBase,
+      'promotion' => $promo ? [
+        'id' => $promo->id,
+        'type' => $promo->promotion_type,
+        'value' => (float) $promo->promotion_value,
+      ] : null,
+      'image' => $firstImage ? asset($firstImage) : null,
+      'parent_options' => $parentOptions,
+    ];
+  })->values()->toArray();
 @endphp
 
 <script src="{{ asset('js/customer/menu/index.js') }}"></script>
@@ -592,7 +610,7 @@ function recomputeLineTotal(key) {
         const priceSpan = document.createElement('span');
         priceSpan.classList.add('ml-auto','text-sm','font-medium');
 
-        const qty = Number(opt.quantity) || 0;
+        const qty = Number(opt.quantity_available) || 0;
         const alwaysAvailable = opt.always_available_flag === 1;
         const priceNum = Number(opt.price) || 0;
 

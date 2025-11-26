@@ -29,9 +29,20 @@ use App\Events\OrderCreated;
 use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Jobs\SendReceiptEmailJob;
+use App\Models\Partner\Products\PartnerProductOptionsRecipe;
+use App\Models\Partner\Products\PartnerProductRecipe;
+use App\Models\Store\Stock;
+use App\Services\UnitConversionService;
 
 class CashierTransactionController extends Controller
 {
+
+    protected $unitConversionService;
+
+    public function __construct(UnitConversionService $unitConversionService)
+    {
+        $this->unitConversionService = $unitConversionService;
+    }
 
     public function orderDetail($id)
     {
@@ -139,16 +150,18 @@ class CashierTransactionController extends Controller
     {
         DB::beginTransaction();
         try {
-            // dd($request->all());
             $employee = Auth::guard('employee')->user();
             $partner = User::findOrFail($employee->partner_id);
             $table = Table::findOrFail($request->order_table);
             $orders = $request->input('items', []);
 
+            // Jika stok tidak cukup, exception akan dilempar dan transaksi akan Rollback.
+            $this->checkStockAvailability($orders, $partner);
+
             $booking_order_code = $this->generateBookingOrderCode($partner->partner_code);
 
             do {
-                $suffix = strtoupper(substr((string) Str::ulid(), -8));   // contoh: 01HZ3A9Q -> ambil 8 char terakhir
+                $suffix = strtoupper(substr((string) Str::ulid(), -8));
                 $booking_order_code = "{$partner->partner_code}-{$suffix}";
             } while (
                 BookingOrder::where('booking_order_code', $booking_order_code)->exists()
@@ -176,8 +189,8 @@ class CashierTransactionController extends Controller
                 $note        = data_get($order, 'note', '');
                 $promoId    = data_get($order, 'promo_id', null);
 
-                $product = PartnerProduct::findOrFail($productId);
-                $options = PartnerProductOption::with('parent')->whereIn('id', (array)$optionIds)->get();
+                $product = PartnerProduct::with('stock')->findOrFail($productId);
+                $options = PartnerProductOption::with('parent', 'stock')->whereIn('id', (array)$optionIds)->get();
                 $optionsPrice = $options->sum('price');
 
                 $promoAmount = 0;
@@ -202,12 +215,17 @@ class CashierTransactionController extends Controller
                     'promo_id'      => $promoId,
                     'promo_amount'  => $promoAmount,
                     'promo_type'    => $promoType,
-                    'options_price' => $optionsPrice ?? 0,   // isi jika ingin simpan
+                    'options_price' => $optionsPrice ?? 0,
                     'quantity'  => $qty,
                     'customer_note' => $note,
                 ]);
-                if ($product->always_available_flag === 0) {
-                    $product->decrement('quantity', $qty);
+
+
+                if ($product->stock_type === 'direct' && $product->always_available_flag === 0 && $product->stock) {
+                    $product->stock->decrement('quantity', $qty);
+                } elseif ($product->stock_type === 'linked') {
+                    $recipes = PartnerProductRecipe::where('partner_product_id', $productId)->get();
+                    $this->processRecipeDeduction($recipes, $qty);
                 }
 
                 foreach ($options as $opt) {
@@ -218,8 +236,13 @@ class CashierTransactionController extends Controller
                         'option_id' => $opt->id,
                         'price' => $opt->price
                     ]);
-                    if ($opt->always_available_flag === 0) {
-                        $opt->decrement('quantity', 1); // kurangi stock option
+
+                    // B. Opsi Produk
+                    if ($opt->stock_type === 'direct' && $opt->always_available_flag === 0 && $opt->stock) {
+                        $opt->stock->decrement('quantity', $qty);
+                    } elseif ($opt->stock_type === 'linked') {
+                        $recipes = PartnerProductOptionsRecipe::where('partner_product_option_id', $opt->id)->get();
+                        $this->processRecipeDeduction($recipes, $qty);
                     }
                 }
             }
@@ -245,7 +268,9 @@ class CashierTransactionController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->withInput()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+            // Menampilkan pesan error dari checkStockAvailability
+            $errorMessage = $e->getMessage();
+            return redirect()->back()->withInput()->withErrors(['error' => 'Gagal membuat pesanan. ' . $errorMessage]);
         }
     }
 
@@ -317,6 +342,99 @@ class CashierTransactionController extends Controller
         } catch (\Exception $e) {
             // general error lainnya
             return response()->json(['status' => 'error', 'message' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+        }
+    }
+
+    private function checkStockAvailability(array $orders, $partner): void
+    {
+        // Menggunakan array untuk mengakumulasi total kebutuhan bahan baku (linked)
+        $requiredStock = [];
+
+        foreach ($orders as $order) {
+            $productId = data_get($order, 'product_id');
+            $optionIds = data_get($order, 'option_ids', []);
+            $qty = (int) data_get($order, 'qty', 1);
+
+            // Cek Ketersediaan Produk Utama (Direct/Linked)
+            $product = PartnerProduct::with('stock')->find($productId);
+
+            if ($product->always_available_flag === 0) {
+                if ($product->stock_type === 'direct') {
+                    $productStock = $product->stock;
+
+                    // Cek Direct Stock: Stok harus lebih besar atau sama dengan jumlah yang dipesan
+                    if (!$productStock || $productStock->quantity < $qty) {
+                        throw new \Exception("Stok {$product->name} (Produk) tidak mencukupi.");
+                    }
+                } elseif ($product->stock_type === 'linked') {
+                    $recipes = PartnerProductRecipe::where('partner_product_id', $productId)->get();
+                    $this->accumulateLinkedRequirements($recipes, $qty, $requiredStock, $product->name);
+                }
+            }
+
+            // Cek Ketersediaan Opsi (Direct/Linked) 
+            $options = PartnerProductOption::with('stock')->whereIn('id', (array)$optionIds)->get();
+            foreach ($options as $opt) {
+                if ($opt->always_available_flag === 0) {
+                    if ($opt->stock_type === 'direct') {
+                        $optStock = $opt->stock;
+
+                        // Opsi direct stock dikurangi sebesar $qty produk
+                        if (!$optStock || $optStock->quantity < $qty) {
+                            throw new \Exception("Stok {$opt->name} (Opsi) tidak mencukupi.");
+                        }
+                    } elseif ($opt->stock_type === 'linked') {
+                        $recipes = PartnerProductOptionsRecipe::where('partner_product_option_id', $opt->id)->get();
+                        $this->accumulateLinkedRequirements($recipes, $qty, $requiredStock, $opt->name);
+                    }
+                }
+            }
+        }
+
+        // Final Check untuk Linked Stock (Cek Akumulasi Total)
+        foreach ($requiredStock as $stockId => $totalRequired) {
+            $ingredient = Stock::find($stockId);
+
+            if (!$ingredient || $ingredient->quantity < $totalRequired) {
+                $name = $ingredient ? $ingredient->stock_name : 'Bahan Baku Tidak Ditemukan';
+                throw new \Exception("Bahan Baku '{$name}' tidak mencukupi untuk memenuhi total pesanan.");
+            }
+        }
+    }
+
+    /**
+     * Akumulasi total kebutuhan bahan baku untuk semua item linked.
+     */
+    private function accumulateLinkedRequirements($recipes, $orderedQuantity, array &$requiredStock, $itemName)
+    {
+        foreach ($recipes as $recipe) {
+            $stockId = $recipe->stock_id;
+            $quantityPerUnit = $recipe->quantity_used;
+            $totalNeeded = $quantityPerUnit * $orderedQuantity;
+
+            // Akumulasi total kebutuhan untuk stock_id ini
+            $requiredStock[$stockId] = ($requiredStock[$stockId] ?? 0) + $totalNeeded;
+        }
+    }
+
+    private function processRecipeDeduction($recipes, int $orderedQuantity): void
+    {
+        foreach ($recipes as $recipe) {
+
+            $ingredientStock = Stock::find($recipe->stock_id);
+
+            // Jika stok bahan mentah tidak ditemukan (misal dihapus), lewati atau log warning.
+            if (!$ingredientStock) {
+                continue;
+            }
+
+            $quantityPerUnit = $recipe->quantity_used;
+
+            // Hitung Total Konsumsi
+            $totalQuantityToConsume = $quantityPerUnit * $orderedQuantity;
+
+            // Pengurangan Stok Bahan Mentah
+            $ingredientStock->decrement('quantity', $totalQuantityToConsume);
         }
     }
 }
