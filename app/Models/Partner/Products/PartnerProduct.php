@@ -97,19 +97,23 @@ class PartnerProduct extends Model
         $converter = app(UnitConversionService::class);
         $recipeCalc = app(LinkedStockCalculatorService::class);
 
-        // 1. Logika untuk Linked Stock (Perhitungan Faktor Pembatas)
+        $availablePhysicalQuantity = ($this->stock)
+            ? ($this->stock->quantity - ($this->stock->quantity_reserved ?? 0))
+            : 0.00;
+
+        // Logika untuk Linked Stock (Perhitungan Faktor Pembatas)
         if ($this->stock_type === 'linked') {
             // Panggil service untuk menghitung ketersediaan (dalam porsi)
             return $recipeCalc->calculateLinkedQuantity($this);
         }
 
-        // 2. Logika untuk Direct Stock (Konversi dari Base Unit)
+        // Logika untuk Direct Stock (Konversi dari Base Unit)
         elseif ($this->stock_type === 'direct') {
             if ($this->stock) {
-                // Konversi quantity (base unit) ke display unit-nya (misal Pcs)
+                // Gunakan kuantitas fisik yang sudah dikurangi reservasi
                 return $converter->convertToDisplayUnit(
-                    $this->stock->quantity,
-                    $this->stock->display_unit_id // ID unit display yang tersimpan di tabel stocks
+                    $availablePhysicalQuantity,
+                    $this->stock->display_unit_id
                 );
             }
             return 0.00;

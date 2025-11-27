@@ -17,46 +17,35 @@ class LinkedStockCalculatorService
         $this->converter = $converter;
     }
 
-    /**
-     * Menghitung kuantitas maksimum produk linked berdasarkan faktor pembatas resep.
-     * Logika ini menjalankan Analisis Faktor Pembatas (Limiting Factor Analysis).
-     *
-     * @param PartnerProduct $product Model produk utama atau opsi produk.
-     * @return float Kuantitas maksimum porsi yang tersedia (dibulatkan ke bawah).
-     */
-    // App/Services/LinkedStockCalculatorService.php
-
-    // ... (di dalam class LinkedStockCalculatorService) ...
-
-    /**
-     * Menghitung kuantitas maksimum produk linked berdasarkan faktor pembatas resep.
-     *
-     * @param object $item Model produk utama atau opsi produk (PartnerProduct/PartnerProductOption).
-     * @return float Kuantitas maksimum porsi yang tersedia (dibulatkan ke bawah).
-     */
-    public function calculateLinkedQuantity(object $item): float // UBAH TIPE HINT
+    public function calculateLinkedQuantity(object $item): float
     {
         // Cek runtime apakah item yang dimasukkan adalah opsi atau produk utama
         $isOption = $item instanceof PartnerProductOption;
-        $recipes = $this->getRecipes($item->id, $isOption); // Gunakan $item->id
+        $recipes = $this->getRecipes($item->id, $isOption);
 
         if ($recipes->isEmpty()) {
             return 0.00;
         }
 
-        $minPortions = INF; // Mulai dengan nilai tak terhingga (Faktor Pembatas)
+        $minPortions = INF;
+
 
         foreach ($recipes as $recipeItem) {
 
             // Ambil stok bahan mentah
             $ingredientStock = Stock::find($recipeItem->stock_id);
 
-            if (!$ingredientStock || $ingredientStock->quantity <= 0) {
+            // Tentukan Stok Fisik Tersedia (Sudah Dikurangi Reservasi)
+            $quantityReserved = $ingredientStock->quantity_reserved ?? 0;
+            $availablePhysicalQty = $ingredientStock->quantity - $quantityReserved;
+
+            // Periksa: Jika stok fisik yang tersedia <= 0
+            if (!$ingredientStock || $availablePhysicalQty <= 0) {
                 return 0.00;
             }
 
             $requiredBaseQty = $recipeItem->quantity_used;
-            $availableBaseQty = $ingredientStock->quantity;
+            $availableBaseQty = $availablePhysicalQty;
 
             if ($requiredBaseQty <= 0) {
                 continue;
