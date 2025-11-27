@@ -469,6 +469,8 @@
                 ] : null,
                 'image' => $firstImage ? asset($firstImage) : null,
                 'parent_options' => $parentOptions, // ← Gunakan transformed data
+                'quantity_available' => $p->quantity_available, 
+                'always_available_flag' => (int) $p->always_available_flag,
             ];
             })->values()->toArray();
             @endphp
@@ -728,16 +730,13 @@
                 }
 
 
-                // ===== MODAL RENDERING =====
                 function showModal(productData) {
-                    // console.log('productData:', productData);
-
                     // reset isi modal
                     modalContent.innerHTML = '';
                     modalHeader.innerHTML = '';
                     modalQty = 1; // reset qty ke 1 setiap kali modal dibuka
                     modalNote = '';
-                    updateModalQtyDisplay();
+                    selectedOptions = []; // ← TAMBAHAN: reset selectedOptions
 
                     // === header produk ===
                     const headerWrapper = document.createElement('div');
@@ -764,6 +763,24 @@
                     descEl.classList.add('text-sm', 'text-gray-500', 'line-clamp-2');
                     descEl.textContent = productData.description || '';
                     infoDiv.appendChild(descEl);
+
+                    // ===== TAMBAHAN: Info Stok =====
+                    const stockEl = document.createElement('p');
+                    stockEl.className = 'text-xs mt-1 font-medium';
+                    stockEl.id = 'productStockInfo';
+                    const stockQty = Number(productData.quantity_available) || 0;
+                    const alwaysAvailable = Boolean(productData.always_available_flag);
+
+                    if (alwaysAvailable) {
+                        stockEl.innerHTML = '<span class="text-green-600">✓ {{ __("messages.customer.menu.always_available") }}</span>';
+                    } else if (stockQty > 10) {
+                        stockEl.innerHTML = `<span class="text-green-600">{{ __("messages.customer.menu.stock") }}: ${stockQty}</span>`;
+                    } else if (stockQty > 0) {
+                        stockEl.innerHTML = `<span class="text-orange-600">⚠ {{ __("messages.customer.menu.limited_stock") }}: ${stockQty}</span>`;
+                    } else {
+                        stockEl.innerHTML = '<span class="text-red-600">✕ {{ __("messages.customer.menu.sold") }}</span>';
+                    }
+                    infoDiv.appendChild(stockEl); // ← TAMBAHAN
 
                     headerWrapper.appendChild(infoDiv);
                     modalHeader.appendChild(headerWrapper);
@@ -830,11 +847,13 @@
                                 checkbox.addEventListener('change', function() {
                                     const v = parseInt(this.value, 10);
                                     if (this.checked) {
-                                        if (!selectedOptions.includes(v)) selectedOptions.push(
-                                            v);
+                                        if (!selectedOptions.includes(v)) selectedOptions.push(v);
                                     } else {
                                         selectedOptions = selectedOptions.filter(x => x !== v);
                                     }
+                                    // ← TAMBAHAN: Hitung ulang total saat opsi berubah
+                                    const pd = productsData.find(p => p.id === currentProductId);
+                                    if (pd) calcModalTotal(pd);
                                 });
                             }
 
@@ -879,11 +898,13 @@
                     noteWrap.appendChild(noteHint);
                     modalContent.appendChild(noteWrap);
 
-
                     // tampilkan modal
                     modal.classList.add('show');
                     lockBodyScroll();
                     modal.classList.remove('hidden');
+                    
+                    // ← TAMBAHAN: Panggil updateModalQtyDisplay() di akhir agar validasi stok berjalan
+                    updateModalQtyDisplay();
                 }
 
                 // ===== UI qty di modal =====
@@ -894,6 +915,25 @@
                 function updateModalQtyDisplay() {
                     modalQtyValue.innerText = modalQty;
                     modalQtyMinus.disabled = modalQty <= 1;
+                    
+                    if (currentProductId) {
+                        const pd = getProductDataById(currentProductId);
+                        const stockInfo = document.getElementById('productStockInfo');
+                        const stockQty = Number(pd.quantity_available) || 0;
+                        const alwaysAvailable = Boolean(pd.always_available_flag);
+                        
+                        if (stockInfo && !alwaysAvailable) {
+                        if (modalQty >= stockQty) {
+                            stockInfo.innerHTML = `<span class="text-red-600">⚠ Maksimal: ${stockQty}</span>`;
+                            modalQtyPlus.disabled = true;
+                        } else {
+                            stockInfo.innerHTML = `<span class="text-green-600">Stok: ${stockQty}</span>`;
+                            modalQtyPlus.disabled = false;
+                        }
+                        } else if (alwaysAvailable) {
+                        modalQtyPlus.disabled = false;
+                        }
+                    }
                 }
 
                 modalQtyMinus.addEventListener('click', () => {
@@ -908,12 +948,21 @@
                 });
 
                 modalQtyPlus.addEventListener('click', () => {
-                    modalQty++;
-                    updateModalQtyDisplay();
-                    if (currentProductId) {
-                        const pd = productsData.find(p => p.id === currentProductId);
-                        calcModalTotal(pd);
+                    const pd = getProductDataById(currentProductId);
+                    if (!pd) return;
+
+                    const productStock = Number(pd.quantity_available) || 0;
+                    const alwaysAvailable = Boolean(pd.always_available_flag);
+                    
+                    // ===== TAMBAHAN: Validasi Stok =====
+                    if (!alwaysAvailable && modalQty >= productStock) {
+                        // Jangan tambah qty jika sudah mencapai stok maksimal
+                        return;
                     }
+
+                    modalQty++; 
+                    updateModalQtyDisplay();
+                    calcModalTotal(pd);
                 });
 
 
@@ -1321,13 +1370,6 @@
                         addToCart(row.productId, row.options); // tambah 1
                     } else if (minusBtn) {
                         minusFromCart(row.productId, row.options); // kurang 1
-
-                        const remainingRows = cartRows();
-                        if (remainingRows.length === 0) {
-                            // Langsung tutup modal
-                            closeCartManagerModal();
-                            return; // stop di sini, jangan re-render
-                        }
                     }
 
                     // sinkron UI lain
