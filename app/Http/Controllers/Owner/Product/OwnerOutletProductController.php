@@ -336,6 +336,7 @@ class OwnerOutletProductController extends Controller
                 'always_available' => ['nullable', 'in:0,1'],
                 'quantity'         => ['nullable', 'integer', 'min:0'],
                 'is_active'        => ['required', 'in:0,1'],
+                'is_hot_product'   => ['required', 'in:0,1'],
                 'promotion_id'     => ['nullable', 'integer', 'exists:promotions,id'],
                 'options'                     => [$hasOptions ? 'required' : 'sometimes', 'array'],
                 'options.*.stock_type'        => ['required', 'in:direct,linked'],
@@ -377,6 +378,7 @@ class OwnerOutletProductController extends Controller
 
             $productAlways = (int)($request->input('always_available', 0)) === 1;
             $newIsActive   = (int) ($validated['is_active'] ?? 0);
+            $newIsHotProduct   = (int) ($validated['is_hot_product'] ?? 0);
             $promotionId   = $request->filled('promotion_id') ? (int) $validated['promotion_id'] : null;
             $newQuantity   = $productAlways ? 0 : (int) ($validated['quantity'] ?? 0);
 
@@ -397,6 +399,7 @@ class OwnerOutletProductController extends Controller
 
             // ===== Update kolom di 'partner_products' =====
             $product->is_active = $newIsActive;
+            $product->is_hot_product = $newIsHotProduct;
             $product->promo_id  = $promotionId;
             $product->always_available_flag = $productAlways ? 1 : 0;
             $product->save();

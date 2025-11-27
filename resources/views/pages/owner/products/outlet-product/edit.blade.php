@@ -38,14 +38,55 @@
                   <div class="card-body">
                     <div class="d-flex align-items-start">
                       {{-- Thumbnail utama --}}
-                      <div class="mr-3">
-                        @php
-                          $firstPic = is_array($data->pictures ?? null) && count($data->pictures) ? $data->pictures[0]['path'] : null;
-                        @endphp
-                        <img
-                          src="{{ $firstPic ? asset($firstPic) : 'https://via.placeholder.com/120x120?text=No+Image' }}"
-                          alt="{{ $data->name }}" class="rounded" style="width:120px;height:120px;object-fit:cover;">
+                      <div class="mr-3 position-relative" style="width:120px; height:120px;">
+                          @php
+                              $firstPic = is_array($data->pictures ?? null) && count($data->pictures)
+                                  ? $data->pictures[0]['path']
+                                  : null;
+                          @endphp
+
+                          {{-- Tampilkan gambar jika ada --}}
+                          @if($firstPic)
+                              <img src="{{ asset($firstPic) }}"
+                                  alt="{{ $data->name }}"
+                                  class="rounded"
+                                  style="width:120px;height:120px;object-fit:cover;">
+                          @else
+                              {{-- Placeholder --}}
+                              <div style="
+                                  width:120px;height:120px;
+                                  background:#f3f4f6;
+                                  border-radius:6px;
+                                  display:flex;
+                                  align-items:center;
+                                  justify-content:center;
+                                  font-size:18px;
+                                  color:#9ca3af;
+                              ">
+                                  <i class="fas fa-image"></i>
+                              </div>
+                          @endif
+
+                          {{-- HOT BADGE --}}
+                          @if($data->is_hot_product)
+                              <span style="
+                                  position:absolute;
+                                  top:-8px;
+                                  right:-8px;
+                                  background:#ff5722;
+                                  color:white;
+                                  padding:4px 8px;
+                                  border-radius:10px;
+                                  font-size:12px;
+                                  font-weight:600;
+                                  box-shadow:0 2px 6px rgba(0,0,0,0.2);
+                              ">
+                                  HOT
+                              </span>
+                          @endif
+
                       </div>
+
                       <div class="flex-fill">
                         <h4 class="mb-1">{{ $data->name }}</h4>
                         <div class="mb-2">
@@ -335,6 +376,26 @@
                       @enderror
                     </div>
 
+                    {{-- Hot Product (is_hot_product) --}}
+                    <div class="form-group">
+                      <label class="mb-1">{{ __('messages.owner.products.outlet_products.hot_product') }}</label>
+                      <div class="custom-control custom-switch">
+                        <input
+                          type="checkbox"
+                          class="custom-control-input"
+                          id="is_hot_product_switch"
+                          {{ old('is_hot_product', $data->is_hot_product ?? 0) ? 'checked' : '' }}
+                        >
+                        <label class="custom-control-label" for="is_hot_product_switch">
+                          <span id="is_hot_product_label">{{ old('is_hot_product', $data->is_hot_product ?? 0) ? __('messages.owner.products.outlet_products.active') : __('messages.owner.products.outlet_products.inactive') }}</span>
+                        </label>
+                      </div>
+                      <input type="hidden" name="is_hot_product" id="is_hot_product" value="{{ old('is_hot_product', $data->is_hot_product ?? 0) }}">
+                      @error('is_hot_product')
+                        <small class="text-danger d-block mt-1">{{ $message }}</small>
+                      @enderror
+                    </div>
+
                     {{-- Promotion --}}
                     <div class="form-group">
                       <label class="mb-1" for="promotion_id">{{ __('messages.owner.products.outlet_products.promotion') }}</label>
@@ -484,6 +545,17 @@
       const sw = document.getElementById('is_active_switch');
       const hid = document.getElementById('is_active');
       const lab = document.getElementById('is_active_label');
+      function sync(){
+        hid.value = sw.checked ? 1 : 0;
+        if (lab) lab.textContent = sw.checked ? 'Active' : 'Inactive';
+      }
+      sw?.addEventListener('change', sync);
+    })();
+
+    (function () {
+      const sw = document.getElementById('is_hot_product_switch');
+      const hid = document.getElementById('is_hot_product');
+      const lab = document.getElementById('is_hot_product_label');
       function sync(){
         hid.value = sw.checked ? 1 : 0;
         if (lab) lab.textContent = sw.checked ? 'Active' : 'Inactive';

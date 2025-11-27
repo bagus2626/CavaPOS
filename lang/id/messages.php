@@ -60,7 +60,8 @@ return [
             'pay_at_cashier' => 'Bayar di Kasir',
             'payment' => 'Pembayaran',
             'customer_name_example' => 'Contoh: Budi Setiawan',
-            'cancel' => 'Batal'
+            'cancel' => 'Batal',
+            'hot_products' => 'Produk Unggulan',
         ],
         'payment' => [
             'show_order_code' => 'Tunjukkan Kode Pemesanan',
@@ -630,7 +631,8 @@ return [
                 'save_changes' => 'Simpan Perubahan',
                 'created' => 'Dibuat',
                 'last_updated' => 'Terakhir Diperbarui',
-                'owner' => 'Pemilik'
+                'owner' => 'Pemilik',
+                'hot_product' => 'Produk Unggulan',
             ],
             'categories' => [
                 'categories' => 'Kategori',
@@ -650,7 +652,12 @@ return [
                 'save' => 'Simpan',
                 'back' => 'Kembali',
                 'edit_category' => 'Ubah Kategori',
-                'update' => 'Perbarui'
+                'update' => 'Perbarui',
+                'category_order' => 'Urutan Kategori',
+                'reorder_categories' => 'Atur ulang Kategori',
+                'drag_drop_instruction' => 'Seret dan lepas untuk mengatur ulang urutan kategori.',
+                'close' => 'Tutup',
+                'save_order' => 'Simpan Urutan',
             ],
             'promotions' => [
                 'promotion_list' => 'Daftar Promosi',

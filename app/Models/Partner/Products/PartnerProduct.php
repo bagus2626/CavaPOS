@@ -19,6 +19,7 @@ class PartnerProduct extends Model
     protected $fillable = [
         'product_code',
         'is_active',
+        'is_hot_product',
         'master_product_id',
         'owner_id',
         'partner_id',
