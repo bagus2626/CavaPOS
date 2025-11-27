@@ -82,7 +82,7 @@
                 @if($hotProducts->count())
                     <div class="hot-products-group bg-amber-50 border-b border-amber-200 pb-2">
                         <p class="px-4 pt-3 mb-2 text-sm font-semibold text-amber-800 flex items-center gap-2">
-                            🔥 <span>Hot Products</span>
+                            🔥 <span>{{ __('messages.customer.menu.hot_products') }}</span>
                         </p>
 
                         <div class="flex flex-col">
@@ -120,7 +120,7 @@
 
                                 <div
                                     @class([
-                                        'menu-item menu-item-hot bg-white flex flex-row transition hover:shadow-lg px-4 border-b border-amber-100',
+                                        'menu-item menu-item-hot bg-white flex flex-row transition hover:shadow-lg border border-amber-100 rounded-xl px-3',
                                         'grayscale' => $product->quantity_available < 1 && $product->always_available_flag == false,
                                     ])
                                     data-category="{{ $product->category_id }}"
@@ -151,8 +151,11 @@
                                     {{-- Info produk --}}
                                     <div class="ml-4 flex-1 flex flex-col justify-between py-2">
                                         <div>
-                                            <h5 class="text-base font-semibold text-gray-900">
+                                            <h5 class="text-base font-semibold text-gray-900 flex items-center gap-2">
                                                 {{ $product->name }}
+                                                <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">
+                                                    {{ $product->category->category_name ?? '' }}
+                                                </span>
                                             </h5>
                                             <p class="text-gray-500 text-xs mb-1 line-clamp-2">
                                                 {{ $product->description }}
@@ -178,7 +181,7 @@
                                         <div class="mt-1 mb-2 flex items-center ml-auto space-x-4">
                                             <button class="minus-btn w-8 h-8 flex items-center justify-center border border-choco rounded-lg font-bold text-choco hover:bg-gray-100 hidden"
                                                     data-id="{{ $product->id }}">-</button>
-                                            <span class="qty text-base font-semibold text-gray-800 hidden" id="qty-{{ $product->id }}">0</span>
+                                            <span class="qty text-base font-semibold text-gray-800 hidden" data-id="{{ $product->id }}">0</span>
                                             @if ($product->quantity_available < 1 && $product->always_available_flag == false)
                                                 <p class="text-gray-700 text-xs">{{ __('messages.customer.menu.sold') }}</p>
                                             @else
@@ -307,7 +310,7 @@
                                         <div class="mb-2 flex items-center ml-auto space-x-4">
                                             <button class="minus-btn w-9 h-9 flex items-center justify-center border border-choco rounded-lg font-bold text-choco hover:bg-gray-100 hidden"
                                                     data-id="{{ $product->id }}">-</button>
-                                            <span class="qty text-lg font-semibold text-gray-800 hidden" id="qty-{{ $product->id }}">0</span>
+                                            <span class="qty text-lg font-semibold text-gray-800 hidden" data-id="{{ $product->id }}">0</span>
                                             @if ($product->quantity_available < 1 && $product->always_available_flag == false)
                                                 <p class="text-gray-700">{{ __('messages.customer.menu.sold') }}</p>
                                             @else
@@ -700,18 +703,26 @@
 
                 // Update badge qty + visibility tombol minus di kartu produk
                 function updateProductBadge(productId) {
-                    const qtySpan = document.getElementById('qty-' + productId);
-                    const minusBtn = document.querySelector('.minus-btn[data-id="' + productId + '"]');
-                    const total = sumQtyByProduct(productId);
+                    const qtySpans  = document.querySelectorAll('.qty[data-id="' + productId + '"]');
+                    const minusBtns = document.querySelectorAll('.minus-btn[data-id="' + productId + '"]');
+                    const total     = sumQtyByProduct(productId);
 
-                    qtySpan.innerText = total;
-                    if (total > 0) {
-                        qtySpan.classList.remove('hidden');
-                        if (minusBtn) minusBtn.classList.remove('hidden');
-                    } else {
-                        qtySpan.classList.add('hidden');
-                        if (minusBtn) minusBtn.classList.add('hidden');
-                    }
+                    qtySpans.forEach(qtySpan => {
+                        qtySpan.innerText = total;
+                        if (total > 0) {
+                            qtySpan.classList.remove('hidden');
+                        } else {
+                            qtySpan.classList.add('hidden');
+                        }
+                    });
+
+                    minusBtns.forEach(minusBtn => {
+                        if (total > 0) {
+                            minusBtn.classList.remove('hidden');
+                        } else {
+                            minusBtn.classList.add('hidden');
+                        }
+                    });
                 }
 
                 // Debug print

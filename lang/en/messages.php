@@ -60,7 +60,8 @@ return [
             'pay_at_cashier' => 'Pay at Cashier',
             'payment' => 'Payment',
             'customer_name_example' => 'e.g Michael',
-            'cancel' => 'Cancel'
+            'cancel' => 'Cancel',
+            'hot_products' => 'Hot Products',
         ],
         'payment' => [
             'show_order_code' => 'Show Order Code',
@@ -632,6 +633,7 @@ return [
                 'created' => 'Created',
                 'last_updated' => 'Last Updated',
                 'owner' => 'Owner',
+                'hot_product' => 'Hot Product',
             ],
             'categories' => [
                 'categories' => 'Categories',
@@ -652,6 +654,12 @@ return [
                 'back' => 'Back',
                 'edit_category' => 'Edit Category',
                 'update' => 'Update',
+
+                'category_order' => 'Category Order',
+                'reorder_categories' => 'Reorder Categories',
+                'drag_drop_instruction' => 'Drag and drop to reorder categories.',
+                'close' => 'Close',
+                'save_order' => 'Save Order',
             ],
             'promotions' => [
                 'promotion_list' => 'Promotion List',

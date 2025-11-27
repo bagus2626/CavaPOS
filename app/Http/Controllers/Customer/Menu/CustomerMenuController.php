@@ -75,7 +75,9 @@ class CustomerMenuController extends Controller
             ->get();
 
         $owner = Owner::where('id', $partner->owner_id)->first();
-        $categories = Category::whereIn('id', $partner_products->pluck('category_id'))->get();
+        $categories = Category::whereIn('id', $partner_products->pluck('category_id'))
+            ->orderBy('category_order')
+            ->get();
 
         return view('pages.customer.menu.index', compact('table', 'customer', 'partner', 'partner_products', 'categories'));
     }

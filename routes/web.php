@@ -293,6 +293,7 @@ Route::middleware('setlocale')->group(function () {
                 Route::get('outlet-products/get-master-products', [OwnerOutletProductController::class, 'getMasterProducts'])->name('outlet-products.get-master-products');
                 Route::resource('outlet-products', OwnerOutletProductController::class);
                 Route::resource('products', OwnerProductController::class);
+                Route::post('/categories/reorder', [OwnerCategoryController::class, 'reorder'])->name('categories.reorder');
                 Route::resource('categories', OwnerCategoryController::class);
 
                 Route::prefix('xen_platform')->name('xen_platform.')->group(function () {
