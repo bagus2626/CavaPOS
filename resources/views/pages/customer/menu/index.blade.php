@@ -67,11 +67,136 @@
 
             {{-- menu list --}}
             @php
-                // Kelompokkan produk berdasarkan category_id
-                $productsByCategory = $partner_products->groupBy('category_id');
+                $productsByCategory = $partner_products
+                    ->sortBy(function ($product) {
+                        return $product->category->category_order ?? 99999;
+                    })
+                    ->groupBy('category_id');
+                $hotProducts = $partner_products->filter(function ($p) {
+                    return $p->is_hot_product;
+                });
             @endphp
 
             <div class="flex flex-col" id="menu-container">
+                {{-- Segmen Hot Products --}}
+                @if($hotProducts->count())
+                    <div class="hot-products-group bg-amber-50 border-b border-amber-200 pb-2">
+                        <p class="px-4 pt-3 mb-2 text-sm font-semibold text-amber-800 flex items-center gap-2">
+                            🔥 <span>{{ __('messages.customer.menu.hot_products') }}</span>
+                        </p>
+
+                        <div class="flex flex-col">
+                            @foreach($hotProducts as $product)
+                                @php
+                                    $firstImage = $product->pictures[0]['path'] ?? null;
+                                    $promo = $product->promotion;
+                                    $basePrice = (float) $product->price;
+                                    $discountedBase = $basePrice;
+                                    $hasPromo = false;
+
+                                    if ($promo) {
+                                        if ($promo->promotion_type === 'percentage') {
+                                            $discountedBase = max(0, $basePrice * (1 - $promo->promotion_value / 100));
+                                        } else {
+                                            $discountedBase = max(0, $basePrice - (float) $promo->promotion_value);
+                                        }
+                                        $hasPromo = $discountedBase < $basePrice;
+                                    }
+
+                                    // Badge text promo
+                                    $promoBadge = null;
+                                    if ($promo) {
+                                        $promoBadge =
+                                            $promo->promotion_type === 'percentage'
+                                                ? '-' .
+                                                    rtrim(
+                                                        rtrim(number_format($promo->promotion_value, 2, ',', '.'), '0'),
+                                                        ',',
+                                                    ) .
+                                                    '%'
+                                                : '-Rp ' . number_format($promo->promotion_value, 0, ',', '.');
+                                    }
+                                @endphp
+
+                                <div
+                                    @class([
+                                        'menu-item menu-item-hot bg-white flex flex-row transition hover:shadow-lg border border-amber-100 rounded-xl px-3',
+                                        'grayscale' => $product->quantity_available < 1 && $product->always_available_flag == false,
+                                    ])
+                                    data-category="{{ $product->category_id }}"
+                                >
+                                    {{-- Gambar + badge PROMO + badge HOT --}}
+                                    <div class="w-28 h-28 flex-shrink-0 rounded-lg m-2 overflow-hidden relative">
+                                        @if($firstImage)
+                                            <img src="{{ asset($firstImage) }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
+                                        @else
+                                            <div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400 text-sm">
+                                                <i class="fas fa-image"></i>
+                                            </div>
+                                        @endif
+
+                                        {{-- Badge PROMO (kiri atas) --}}
+                                        @if($hasPromo && $promoBadge)
+                                            <span class="absolute top-1 left-1 bg-red-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded">
+                                                {{ $promoBadge }}
+                                            </span>
+                                        @endif
+
+                                        {{-- Badge HOT khusus segmen ini (kanan atas) --}}
+                                        <span class="absolute top-1 right-1 bg-orange-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow">
+                                            HOT
+                                        </span>
+                                    </div>
+
+                                    {{-- Info produk --}}
+                                    <div class="ml-4 flex-1 flex flex-col justify-between py-2">
+                                        <div>
+                                            <h5 class="text-base font-semibold text-gray-900 flex items-center gap-2">
+                                                {{ $product->name }}
+                                                <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">
+                                                    {{ $product->category->category_name ?? '' }}
+                                                </span>
+                                            </h5>
+                                            <p class="text-gray-500 text-xs mb-1 line-clamp-2">
+                                                {{ $product->description }}
+                                            </p>
+
+                                            @if($hasPromo)
+                                                <div class="flex items-baseline gap-2">
+                                                    <span class="text-xs text-gray-500 line-through">
+                                                        Rp {{ number_format($basePrice, 0, ',', '.') }}
+                                                    </span>
+                                                    <span class="text-sm font-bold text-gray-900">
+                                                        Rp {{ number_format($discountedBase, 0, ',', '.') }}
+                                                    </span>
+                                                </div>
+                                            @else
+                                                <p class="text-sm font-bold text-gray-900">
+                                                    Rp {{ number_format($basePrice, 0, ',', '.') }}
+                                                </p>
+                                            @endif
+                                        </div>
+
+                                        {{-- Tombol Qty --}}
+                                        <div class="mt-1 mb-2 flex items-center ml-auto space-x-4">
+                                            <button class="minus-btn w-8 h-8 flex items-center justify-center border border-choco rounded-lg font-bold text-choco hover:bg-gray-100 hidden"
+                                                    data-id="{{ $product->id }}">-</button>
+                                            <span class="qty text-base font-semibold text-gray-800 hidden" data-id="{{ $product->id }}">0</span>
+                                            @if ($product->quantity_available < 1 && $product->always_available_flag == false)
+                                                <p class="text-gray-700 text-xs">{{ __('messages.customer.menu.sold') }}</p>
+                                            @else
+                                                <button class="plus-btn w-8 h-8 flex items-center justify-center border rounded-lg font-bold text-white bg-choco hover:bg-soft-choco"
+                                                        data-id="{{ $product->id }}">+</button>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                {{-- Segmen Kategori Produk --}}
                 @foreach ($productsByCategory as $categoryId => $products)
                     @if ($products->count() > 0)
                         @php
@@ -90,97 +215,113 @@
 
                             {{-- List produk --}}
                             @foreach ($products as $product)
-                                    {{-- hitung promo dulu sebelum menampilkan --}}
-                                    @php
-                                        $firstImage = $product->pictures[0]['path'] ?? null;
-                                        $promo = $product->promotion; // null kalau tidak ada/ tidak aktif hari ini
-                                        $basePrice = (float) $product->price;
+                                {{-- hitung promo dulu sebelum menampilkan --}}
+                                @php
+                                    $firstImage = $product->pictures[0]['path'] ?? null;
+                                    $promo = $product->promotion; // null kalau tidak ada/ tidak aktif hari ini
+                                    $basePrice = (float) $product->price;
 
-                                        $hasPromo = false;
-                                        $discountedBase = $basePrice;
+                                    $hasPromo = false;
+                                    $discountedBase = $basePrice;
 
-                                        if ($promo) {
-                                            if ($promo->promotion_type === 'percentage') {
-                                                $discountedBase = max(0, $basePrice * (1 - $promo->promotion_value / 100));
-                                            } else {
-                                                // amount
-                                                $discountedBase = max(0, $basePrice - (float) $promo->promotion_value);
-                                            }
-                                            $hasPromo = $discountedBase < $basePrice;
+                                    if ($promo) {
+                                        if ($promo->promotion_type === 'percentage') {
+                                            $discountedBase = max(0, $basePrice * (1 - $promo->promotion_value / 100));
+                                        } else {
+                                            // amount
+                                            $discountedBase = max(0, $basePrice - (float) $promo->promotion_value);
                                         }
+                                        $hasPromo = $discountedBase < $basePrice;
+                                    }
 
-                                        // Badge text
-                                        $promoBadge = null;
-                                        if ($promo) {
-                                            $promoBadge =
-                                                $promo->promotion_type === 'percentage'
+                                    // Badge text
+                                    $promoBadge = null;
+                                    if ($promo) {
+                                        $promoBadge =
+                                            $promo->promotion_type === 'percentage'
                                                 ? '-' .
-                                                rtrim(
-                                                    rtrim(number_format($promo->promotion_value, 2, ',', '.'), '0'),
-                                                    ',',
-                                                ) .
-                                                '%'
+                                                    rtrim(
+                                                        rtrim(number_format($promo->promotion_value, 2, ',', '.'), '0'),
+                                                        ',',
+                                                    ) .
+                                                    '%'
                                                 : '-Rp ' . number_format($promo->promotion_value, 0, ',', '.');
-                                        }
-                                    @endphp
-                                    <div
-                                @class([
-                                    'menu-item bg-white flex flex-row transition hover:shadow-lg px-4 border-b border-gray-200',
-                                    // tailwind grayscale
-                                    'grayscale' => $product->quantity_available < 1 && $product->always_available_flag == false,
-                                ])
-                                data-category="{{ $product->category_id }}"
+                                    }
+                                @endphp
+
+                                <div
+                                    @class([
+                                        'menu-item bg-white flex flex-row transition hover:shadow-lg px-4 border-b border-gray-200',
+                                        'grayscale' => $product->quantity_available < 1 && $product->always_available_flag == false,
+                                    ])
+                                    data-category="{{ $product->category_id }}"
                                 >
 
-                                {{-- Gambar Produk --}}
-                                @if($firstImage)
+                                    {{-- Gambar Produk / Placeholder + BADGE --}}
                                     <div class="w-28 h-28 flex-shrink-0 rounded-lg m-2 rounded-bl-lg overflow-hidden relative">
-                                        <img src="{{ asset($firstImage) }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
+                                        @if($firstImage)
+                                            <img src="{{ asset($firstImage) }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
+                                        @else
+                                            <div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400 text-sm">
+                                                <i class="fas fa-image"></i>
+                                            </div>
+                                        @endif
+
+                                        {{-- Badge PROMO (kiri atas) --}}
                                         @if($hasPromo && $promoBadge)
                                             <span class="absolute top-1 left-1 bg-red-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded">
                                                 {{ $promoBadge }}
                                             </span>
                                         @endif
+
+                                        {{-- Badge HOT PRODUCT (kanan atas) --}}
+                                        @if($product->is_hot_product)
+                                            <span class="absolute top-1 right-1 bg-orange-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow">
+                                                HOT
+                                            </span>
+                                        @endif
                                     </div>
-                                @endif
 
-                                {{-- Info Produk --}}
-                                <div class="ml-4 flex-1 flex flex-col justify-between">
-                                    <div>
-                                        <h5 class="text-lg font-semibold text-gray-800">{{ $product->name }}</h5>
-                                        <p class="text-gray-500 text-sm mb-1 line-clamp-1">{{ $product->description }}</p>
-                                        @if($hasPromo)
-                                            <div class="flex items-baseline gap-2">
-                                                <span class="text-sm text-gray-500 line-through">
-                                                    Rp {{ number_format($basePrice, 0, ',', '.') }}
-                                                </span>
-                                                <span class="text-lg font-bold text-gray-900">
-                                                    Rp {{ number_format($discountedBase, 0, ',', '.') }}
-                                                </span>
-                                                    </div>
-                                        @else
-                                                    <p class="text-lg font-bold text-gray-900">
+                                    {{-- Info Produk --}}
+                                    <div class="ml-4 flex-1 flex flex-col justify-between">
+                                        <div>
+                                            <h5 class="text-lg font-semibold text-gray-800 flex items-center gap-1">
+                                                {{ $product->name }}
+                                            </h5>
+                                            <p class="text-gray-500 text-sm mb-1 line-clamp-1">{{ $product->description }}</p>
+
+                                            @if($hasPromo)
+                                                <div class="flex items-baseline gap-2">
+                                                    <span class="text-sm text-gray-500 line-through">
                                                         Rp {{ number_format($basePrice, 0, ',', '.') }}
-                                                    </p>
-                                                @endif
+                                                    </span>
+                                                    <span class="text-lg font-bold text-gray-900">
+                                                        Rp {{ number_format($discountedBase, 0, ',', '.') }}
+                                                    </span>
+                                                </div>
+                                            @else
+                                                <p class="text-lg font-bold text-gray-900">
+                                                    Rp {{ number_format($basePrice, 0, ',', '.') }}
+                                                </p>
+                                            @endif
+                                        </div>
 
-                                            </div>
-
-                                            {{-- Tombol Qty --}}
-                                           <div class="mb-2 flex items-center ml-auto space-x-4"> 
+                                        {{-- Tombol Qty --}}
+                                        <div class="mb-2 flex items-center ml-auto space-x-4">
                                             <button class="minus-btn w-9 h-9 flex items-center justify-center border border-choco rounded-lg font-bold text-choco hover:bg-gray-100 hidden"
                                                     data-id="{{ $product->id }}">-</button>
-                                            <span class="qty text-lg font-semibold text-gray-800 hidden" id="qty-{{ $product->id }}">0</span>
+                                            <span class="qty text-lg font-semibold text-gray-800 hidden" data-id="{{ $product->id }}">0</span>
                                             @if ($product->quantity_available < 1 && $product->always_available_flag == false)
                                                 <p class="text-gray-700">{{ __('messages.customer.menu.sold') }}</p>
                                             @else
                                                 <button class="plus-btn w-9 h-9 flex items-center justify-center border rounded-lg font-bold text-white bg-choco hover:bg-soft-choco"
                                                         data-id="{{ $product->id }}">+</button>
                                             @endif
-                                            </div>
                                         </div>
                                     </div>
+                                </div>
                             @endforeach
+
                         </div>
                     @endif
                 @endforeach
@@ -562,18 +703,26 @@
 
                 // Update badge qty + visibility tombol minus di kartu produk
                 function updateProductBadge(productId) {
-                    const qtySpan = document.getElementById('qty-' + productId);
-                    const minusBtn = document.querySelector('.minus-btn[data-id="' + productId + '"]');
-                    const total = sumQtyByProduct(productId);
+                    const qtySpans  = document.querySelectorAll('.qty[data-id="' + productId + '"]');
+                    const minusBtns = document.querySelectorAll('.minus-btn[data-id="' + productId + '"]');
+                    const total     = sumQtyByProduct(productId);
 
-                    qtySpan.innerText = total;
-                    if (total > 0) {
-                        qtySpan.classList.remove('hidden');
-                        if (minusBtn) minusBtn.classList.remove('hidden');
-                    } else {
-                        qtySpan.classList.add('hidden');
-                        if (minusBtn) minusBtn.classList.add('hidden');
-                    }
+                    qtySpans.forEach(qtySpan => {
+                        qtySpan.innerText = total;
+                        if (total > 0) {
+                            qtySpan.classList.remove('hidden');
+                        } else {
+                            qtySpan.classList.add('hidden');
+                        }
+                    });
+
+                    minusBtns.forEach(minusBtn => {
+                        if (total > 0) {
+                            minusBtn.classList.remove('hidden');
+                        } else {
+                            minusBtn.classList.add('hidden');
+                        }
+                    });
                 }
 
                 // Debug print

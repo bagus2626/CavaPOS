@@ -62,8 +62,8 @@
                                     {{ __('messages.owner.user_management.employees.cashier') }}</option>
                                 <option value="KITCHEN" {{ old('role', $employee->role) === 'KITCHEN' ? 'selected' : '' }}>
                                     {{ __('messages.owner.user_management.employees.kitchen') }}</option>
-                                <option value="WAITER" {{ old('role', $employee->role) === 'WAITER' ? 'selected' : '' }}>
-                                    {{ __('messages.owner.user_management.employees.waiter') }}</option>
+                                {{-- <option value="WAITER" {{ old('role', $employee->role) === 'WAITER' ? 'selected' : '' }}>
+                                    {{ __('messages.owner.user_management.employees.waiter') }}</option> --}}
                             </select>
                             @error('role')
                                 <div class="invalid-feedback">{{ $message }}</div>

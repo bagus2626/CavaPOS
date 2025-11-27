@@ -14,7 +14,9 @@ class OwnerCategoryController extends Controller
     public function index()
     {
         $owner_id = Auth::id();
-        $categories = Category::where('owner_id', $owner_id)->paginate(5);
+        $categories = Category::where('owner_id', $owner_id)
+            ->orderBy('category_order')
+            ->paginate(5);
         // dd($categories);
         return view('pages.owner.products.categories.index', compact('categories'));
     }
@@ -123,6 +125,25 @@ class OwnerCategoryController extends Controller
         return redirect()->route('owner.user-owner.categories.index')
             ->with('success', 'Category updated successfully.');
     }
+
+    public function reorder(Request $request)
+    {
+        $owner_id = Auth::id();
+
+        foreach ($request->orders as $item) {
+            Category::where('id', $item['id'])
+                ->where('owner_id', $owner_id)
+                ->update([
+                    'category_order' => $item['order']
+                ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Category order updated'
+        ]);
+    }
+
 
     public function destroy(Category $category)
     {
