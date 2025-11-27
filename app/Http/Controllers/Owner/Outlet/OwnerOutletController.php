@@ -237,9 +237,9 @@ class OwnerOutletController extends Controller
         return view('pages.owner.outlet.edit', compact('outlet'));
     }
 
-    // Update data
     public function update(Request $request, User $outlet)
     {
+        // dd($request->all());
         abort_if($outlet->role !== 'partner', 404);
         abort_if($outlet->owner_id !== Auth::id(), 403);
 
@@ -268,25 +268,41 @@ class OwnerOutletController extends Controller
             'is_active' => ['nullable', 'boolean'],
             'qr_mode' => ['nullable', 'string', 'in:disabled,barcode_only,cashier_only,both'],
             'image'    => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:2048'],
+            'logo'     => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:2048'],
+
+            // flag hapus
+            'remove_background_picture' => ['nullable', 'boolean'],
+            'remove_logo'              => ['nullable', 'boolean'],
 
             // Validasi untuk field profile_outlet
             'contact_person' => ['nullable', 'string', 'max:255'],
-            'contact_phone' => ['nullable', 'string', 'max:20'],
-            'gmaps_url' => ['nullable', 'url', 'max:500'],
-            'instagram' => ['nullable', 'string', 'max:255'],
-            'facebook' => ['nullable', 'string', 'max:255'],
-            'twitter' => ['nullable', 'string', 'max:255'],
-            'tiktok' => ['nullable', 'string', 'max:255'],
-            'whatsapp' => ['nullable', 'string', 'max:20'],
-            'website' => ['nullable', 'url', 'max:255'],
+            'contact_phone'  => ['nullable', 'string', 'max:20'],
+            'gmaps_url'      => ['nullable', 'url', 'max:500'],
+            'instagram'      => ['nullable', 'string', 'max:255'],
+            'facebook'       => ['nullable', 'string', 'max:255'],
+            'twitter'        => ['nullable', 'string', 'max:255'],
+            'tiktok'         => ['nullable', 'string', 'max:255'],
+            'whatsapp'       => ['nullable', 'string', 'max:20'],
+            'website'        => ['nullable', 'url', 'max:255'],
         ]);
 
         try {
             DB::beginTransaction();
 
-            // Upload gambar baru bila ada
+            $disk = Storage::disk('public');
+
+            // ====== HANDLE BACKGROUND PICTURE ======
             $newImagePath = $outlet->background_picture;
-            $newImagePathLogo = $outlet->logo;
+
+            // Jika user klik X (hapus background)
+            if ($request->boolean('remove_background_picture')) {
+                if ($outlet->background_picture && $disk->exists($outlet->background_picture)) {
+                    $disk->delete($outlet->background_picture);
+                }
+                $newImagePath = null;
+            }
+
+            // Jika upload background baru
             if ($request->hasFile('image')) {
                 $file = $request->file('image');
 
@@ -296,7 +312,6 @@ class OwnerOutletController extends Controller
                     $c->upsize();
                 });
 
-                $disk = Storage::disk('public');
                 $dir  = 'outlets';
                 $disk->makeDirectory($dir);
 
@@ -312,6 +327,7 @@ class OwnerOutletController extends Controller
 
                 $disk->put($path, $binary);
 
+                // Hapus file lama kalau masih ada & belum dihapus
                 if ($outlet->background_picture && $disk->exists($outlet->background_picture)) {
                     $disk->delete($outlet->background_picture);
                 }
@@ -319,6 +335,18 @@ class OwnerOutletController extends Controller
                 $newImagePath = $path;
             }
 
+            // ====== HANDLE LOGO ======
+            $newImagePathLogo = $outlet->logo;
+
+            // Jika user klik X (hapus logo)
+            if ($request->boolean('remove_logo')) {
+                if ($outlet->logo && $disk->exists($outlet->logo)) {
+                    $disk->delete($outlet->logo);
+                }
+                $newImagePathLogo = null;
+            }
+
+            // Jika upload logo baru
             if ($request->hasFile('logo')) {
                 $fileLogo = $request->file('logo');
 
@@ -328,9 +356,8 @@ class OwnerOutletController extends Controller
                     $cLogo->upsize();
                 });
 
-                $diskLogo = Storage::disk('public');
                 $dirLogo  = 'outlets';
-                $diskLogo->makeDirectory($dirLogo);
+                $disk->makeDirectory($dirLogo);
 
                 $basenameLogo = Str::uuid()->toString();
 
@@ -342,18 +369,18 @@ class OwnerOutletController extends Controller
                     $pathLogo   = "{$dirLogo}/{$basenameLogo}.jpg";
                 }
 
-                $diskLogo->put($pathLogo, $binaryLogo);
+                $disk->put($pathLogo, $binaryLogo);
 
-                if ($outlet->logo && $diskLogo->exists($outlet->logo)) {
-                    $diskLogo->delete($outlet->logo);
+                if ($outlet->logo && $disk->exists($outlet->logo)) {
+                    $disk->delete($outlet->logo);
                 }
 
                 $newImagePathLogo = $pathLogo;
             }
 
-            // Tentukan is_qr_active dan is_cashier_active berdasarkan qr_mode
-            $qrMode = $request->input('qr_mode', 'disabled');
-            $isQrActive = in_array($qrMode, ['barcode_only', 'both']) ? 1 : 0;
+            // ====== QR MODE ======
+            $qrMode         = $request->input('qr_mode', 'disabled');
+            $isQrActive     = in_array($qrMode, ['barcode_only', 'both']) ? 1 : 0;
             $isCashierActive = in_array($qrMode, ['cashier_only', 'both']) ? 1 : 0;
 
             // Data update untuk user
@@ -361,8 +388,8 @@ class OwnerOutletController extends Controller
                 'name'   => $request->name,
                 'email'  => $request->email,
                 'username' => $request->username,
-                'logo' => $newImagePathLogo,
-                'background_picture'   => $newImagePath,
+                'logo'   => $newImagePathLogo,
+                'background_picture' => $newImagePath,
                 'province'         => $request->province_name,
                 'province_id'      => $request->province,
                 'city'             => $request->city_name,
@@ -412,6 +439,7 @@ class OwnerOutletController extends Controller
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
         }
     }
+
 
     /**
      * Remove the specified resource from storage.

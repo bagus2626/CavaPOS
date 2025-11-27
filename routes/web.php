@@ -379,6 +379,7 @@ Route::middleware('setlocale')->group(function () {
         Route::resource('products', PartnerProductController::class);
         Route::prefix('store')->name('store.')->group(function () {
             Route::get('tables/generate-barcode/{tableId}', [PartnerTableController::class, 'generateBarcode'])->name('tables.generate-barcode');
+            Route::get('tables/generate-all-barcode', [PartnerTableController::class, 'generateAllBarcode'])->name('tables.generate-all-barcode');
             Route::resource('tables', PartnerTableController::class);
         });
         Route::prefix('user-management')->name('user-management.')->group(function () {
@@ -406,6 +407,7 @@ Route::middleware('setlocale')->group(function () {
         // CASHIER area
         Route::middleware(['auth:employee', 'employee.access', 'is_employee:CASHIER'])->prefix('cashier')->name('cashier.')->group(function () {
             Route::get('dashboard', [CashierDashboardController::class, 'index'])->name('dashboard');
+            Route::get('metrics', [CashierDashboardController::class, 'metrics'])->name('metrics');
             Route::get('tab/{tab}', [CashierDashboardController::class, 'show'])->name('tab');
             Route::post('cash-payment/{id}', [CashierTransactionController::class, 'cashPayment'])->name('cash-payment');
             Route::get('order-detail/{id}', [CashierTransactionController::class, 'orderDetail'])->name('order-detail');
