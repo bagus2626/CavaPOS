@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use App\Events\OrderCreated;
+use App\Models\Transaction\BookingOrder;
 
 class WebhookController extends Controller
 {
@@ -47,6 +48,14 @@ class WebhookController extends Controller
 
             OrderPayment::where('booking_order_id', $xenditInvoice->order_id)
                 ->update(['payment_status' => data_get($payload, 'status')]);
+
+            if (data_get($payload, 'status') === 'PAID') {
+                BookingOrder::where('id', $xenditInvoice->order_id)
+                ->update([
+                    'order_status' => data_get($payload, 'status'),
+                    'payment_flag'  => true,
+                ]);
+            }
 
             $bookingOrder = $xenditInvoice->order;
 

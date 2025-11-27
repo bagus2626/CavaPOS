@@ -205,9 +205,8 @@ class CustomerMenuController extends Controller
 
             // test by qris (hapus kemudian)
             if ($request->payment_method === 'QRIS') {
-                $booking_order->order_status = 'PAID';
+                $booking_order->order_status = 'UNPAID';
                 $booking_order->payment_method = 'QRIS';
-                $booking_order->payment_flag = true;
 
                 $payment = OrderPayment::create([
                     'booking_order_id'  => $booking_order->id,
