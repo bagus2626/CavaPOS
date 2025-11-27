@@ -152,7 +152,8 @@
                     <!-- Description -->
                     <div class="form-group">
                         <label>{{ __('messages.owner.products.master_products.description') }}</label>
-                        <textarea name="description" class="form-control summernote" rows="3">{{ $data->description }}</textarea>
+                        {{-- class summernote untuk html text editor --}}
+                        <textarea name="description" class="form-control" rows="3">{{ $data->description }}</textarea>
                     </div>
 
                     <hr>

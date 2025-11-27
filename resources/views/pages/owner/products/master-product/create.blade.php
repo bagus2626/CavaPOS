@@ -91,7 +91,8 @@
 
                             <div class="form-group">
                                 <label>{{ __('messages.owner.products.master_products.description') }}</label>
-                                <textarea name="description" class="form-control summernote" rows="3" placeholder="{{ __('messages.owner.products.master_products.product_description_placeholder') }}"></textarea>
+                                {{-- class summernote untuk html text editor --}}
+                                <textarea name="description" class="form-control" rows="3" placeholder="{{ __('messages.owner.products.master_products.product_description_placeholder') }}"></textarea>
                             </div>
 
                             <hr>
