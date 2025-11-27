@@ -225,26 +225,15 @@ class OwnerStockMovementController extends Controller
                 $inputUnitId
             );
 
-            // Konversi harga per unit ke harga per unit dasar
-            // Harga per base unit = harga per display unit / conversion factor
-            $selectedUnit = MasterUnit::find($inputUnitId);
-            $conversionFactor = $selectedUnit ? $selectedUnit->base_unit_conversion_value : 1;
-            $pricePerBaseUnit = ($conversionFactor > 0) ? ($inputUnitPrice / $conversionFactor) : 0;
-
             // Simpan data yang sudah terkonversi
             $movement->items()->create([
                 'stock_id' => $stock->id,
                 'quantity' => $quantityInBaseUnit,
-                'unit_price' => $pricePerBaseUnit,
+                'unit_price' => $inputUnitPrice,
             ]);
 
             // Update stok dengan kuantitas unit dasar
             $stock->increment('quantity', $quantityInBaseUnit);
-
-            if (isset($item['unit_price'])) {
-                // Simpan harga unit dasar sebagai harga beli terakhir
-                $stock->update(['last_price_per_unit' => $pricePerBaseUnit]);
-            }
         }
     }
 
@@ -396,7 +385,7 @@ class OwnerStockMovementController extends Controller
             }
 
             $unitPriceFormatted = $item->unit_price !== null
-                ? 'Rp ' . number_format($item->unit_price, 2, ',', '.') . ' / base'
+                ? 'Rp ' . number_format($item->unit_price, 2, ',', '.') . ''
                 : '-';
 
             return [

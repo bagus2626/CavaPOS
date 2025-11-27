@@ -257,6 +257,8 @@ $productsByCategory = $partner_products->groupBy('category_id');
       ] : null,
       'image' => $firstImage ? asset($firstImage) : null,
       'parent_options' => $parentOptions,
+      'quantity_available' => $p->quantity_available, 
+      'always_available_flag' => (int) $p->always_available_flag,
     ];
   })->values()->toArray();
 @endphp
@@ -507,22 +509,54 @@ window.initPembelianTab = function initPembelianTab() {
 
   function showModal(productData) {
     // reset
-    modalContent.innerHTML = ''; modalHeader.innerHTML = '';
-    modalQty = 1; modalNote = ''; selectedOptions = [];
+    modalContent.innerHTML = '';
+    modalHeader.innerHTML = '';
+    modalQty = 1;
+    modalNote = '';
+    selectedOptions = [];
 
     // header
     const headerWrapper = document.createElement('div');
     headerWrapper.className = 'flex gap-4 items-start mb-4';
+    
     if (productData.image) {
       const img = document.createElement('img');
-      img.src = productData.image; img.alt = productData.name || 'Product Image';
+      img.src = productData.image;
+      img.alt = productData.name || 'Product Image';
       img.className = 'w-20 h-20 rounded-md object-cover flex-shrink-0';
       headerWrapper.appendChild(img);
     }
+    
     const infoDiv = document.createElement('div');
-    const nameEl = document.createElement('h3'); nameEl.className = 'text-lg font-semibold'; nameEl.textContent = productData.name || '';
-    const descEl = document.createElement('p');  descEl.className  = 'text-sm text-gray-500 line-clamp-2'; descEl.textContent = productData.description || '';
-    infoDiv.appendChild(nameEl); infoDiv.appendChild(descEl);
+    
+    const nameEl = document.createElement('h3');
+    nameEl.className = 'text-lg font-semibold';
+    nameEl.textContent = productData.name || '';
+    
+    const descEl = document.createElement('p');
+    descEl.className = 'text-sm text-gray-500 line-clamp-2';
+    descEl.textContent = productData.description || '';
+    
+    // ===== TAMBAHAN: Info Stok =====
+    const stockEl = document.createElement('p');
+    stockEl.className = 'text-xs mt-1 font-medium';
+    stockEl.id = 'productStockInfo';
+    const stockQty = Number(productData.quantity_available) || 0;
+    const alwaysAvailable = Boolean(productData.always_available_flag);
+
+    if (alwaysAvailable) {
+      stockEl.innerHTML = '<span class="text-green-600">✓ Selalu Tersedia</span>';
+    } else if (stockQty > 10) {
+      stockEl.innerHTML = `<span class="text-green-600">Stok: ${stockQty}</span>`;
+    } else if (stockQty > 0) {
+      stockEl.innerHTML = `<span class="text-orange-600">⚠ Stok Terbatas: ${stockQty}</span>`;
+    } else {
+      stockEl.innerHTML = '<span class="text-red-600">✕ Stok Habis</span>';
+    }
+    
+    infoDiv.appendChild(nameEl);
+    infoDiv.appendChild(descEl);
+    infoDiv.appendChild(stockEl);
     headerWrapper.appendChild(infoDiv);
     modalHeader.appendChild(headerWrapper);
 
@@ -530,15 +564,19 @@ window.initPembelianTab = function initPembelianTab() {
     const parentOptions = productData.parent_options || [];
     parentOptions.forEach(po => {
       const poDiv = document.createElement('div');
-      poDiv.className = 'mb-2'; poDiv.dataset.provision = po.provision; poDiv.dataset.value = po.provision_value;
-      poDiv.setAttribute('data-provision-group','');
+      poDiv.className = 'mb-2';
+      poDiv.dataset.provision = po.provision;
+      poDiv.dataset.value = po.provision_value;
+      poDiv.setAttribute('data-provision-group', '');
 
       const title = document.createElement('p');
-      title.className = 'font-semibold mb-2 bg-gray-100 py-1'; title.innerText = po.name;
+      title.className = 'font-semibold mb-2 bg-gray-100 py-1';
+      title.innerText = po.name;
       const info = provisionInfoText(po.provision, po.provision_value);
       if (info) {
         const infoSpan = document.createElement('span');
-        infoSpan.className = 'ml-2 text-gray-500 font-normal'; infoSpan.textContent = '(' + info + ')';
+        infoSpan.className = 'ml-2 text-gray-500 font-normal';
+        infoSpan.textContent = '(' + info + ')';
         title.appendChild(infoSpan);
       }
       poDiv.appendChild(title);
@@ -553,7 +591,8 @@ window.initPembelianTab = function initPembelianTab() {
         checkbox.className = 'h-5 w-5 rounded-md border border-gray-500 transition focus:outline-none focus:ring-2 disabled:opacity-60 disabled:cursor-not-allowed';
 
         const nameSpan = document.createElement('span');
-        nameSpan.className = 'flex-1'; nameSpan.textContent = opt.name;
+        nameSpan.className = 'flex-1';
+        nameSpan.textContent = opt.name;
 
         const priceSpan = document.createElement('span');
         priceSpan.className = 'ml-auto text-sm font-medium';
@@ -563,25 +602,32 @@ window.initPembelianTab = function initPembelianTab() {
         const priceNum = Number(opt.price) || 0;
 
         if (qty < 1 && !alwaysAvailable) {
-          priceSpan.textContent = 'Habis'; priceSpan.classList.add('text-red-600');
-          checkbox.disabled = true; label.classList.add('line-through','opacity-60','cursor-not-allowed');
-          const val = parseInt(checkbox.value,10);
+          priceSpan.textContent = 'Habis';
+          priceSpan.classList.add('text-red-600');
+          checkbox.disabled = true;
+          label.classList.add('line-through', 'opacity-60', 'cursor-not-allowed');
+          const val = parseInt(checkbox.value, 10);
           selectedOptions = selectedOptions.filter(v => v !== val);
         } else {
           priceSpan.textContent = (priceNum === 0) ? 'Free' : rupiahFmt.format(priceNum);
-          const val = parseInt(checkbox.value,10);
+          const val = parseInt(checkbox.value, 10);
           checkbox.checked = selectedOptions.includes(val);
-          checkbox.addEventListener('change', function () {
-            const v = parseInt(this.value,10);
-            if (this.checked) { if (!selectedOptions.includes(v)) selectedOptions.push(v); }
-            else { selectedOptions = selectedOptions.filter(x => x !== v); }
+          checkbox.addEventListener('change', function() {
+            const v = parseInt(this.value, 10);
+            if (this.checked) {
+              if (!selectedOptions.includes(v)) selectedOptions.push(v);
+            } else {
+              selectedOptions = selectedOptions.filter(x => x !== v);
+            }
             const pd = getProductDataById(currentProductId);
             calcModalTotal(pd);
             validateAllProvisions();
           });
         }
 
-        label.appendChild(checkbox); label.appendChild(nameSpan); label.appendChild(priceSpan);
+        label.appendChild(checkbox);
+        label.appendChild(nameSpan);
+        label.appendChild(priceSpan);
         poDiv.appendChild(label);
       });
 
@@ -591,27 +637,61 @@ window.initPembelianTab = function initPembelianTab() {
     });
 
     // Catatan
-    const noteWrap = document.createElement('div'); noteWrap.className = 'mt-4';
-    const noteLabel = document.createElement('label'); noteLabel.className = 'block text-sm font-semibold mb-1'; noteLabel.textContent = 'Catatan (opsional)';
-    const noteArea = document.createElement('textarea'); noteArea.id = 'modalNote';
+    const noteWrap = document.createElement('div');
+    noteWrap.className = 'mt-4';
+    const noteLabel = document.createElement('label');
+    noteLabel.className = 'block text-sm font-semibold mb-1';
+    noteLabel.textContent = 'Catatan (opsional)';
+    const noteArea = document.createElement('textarea');
+    noteArea.id = 'modalNote';
     noteArea.className = 'w-full min-h-[72px] p-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-choco/40';
-    noteArea.placeholder = 'Contoh: “Pedas level 2, saus terpisah, tanpa bawang.”';
-    noteArea.maxLength = 200; noteArea.addEventListener('input', (e) => { modalNote = e.target.value; });
-    const noteHint = document.createElement('p'); noteHint.className = 'text-xs text-gray-500 mt-1'; noteHint.textContent = 'Maks. 200 karakter.';
+    noteArea.placeholder = 'Contoh: "Pedas level 2, saus terpisah, tanpa bawang."';
+    noteArea.maxLength = 200;
+    noteArea.addEventListener('input', (e) => {
+      modalNote = e.target.value;
+    });
+    const noteHint = document.createElement('p');
+    noteHint.className = 'text-xs text-gray-500 mt-1';
+    noteHint.textContent = 'Maks. 200 karakter.';
 
-    noteWrap.appendChild(noteLabel); noteWrap.appendChild(noteArea); noteWrap.appendChild(noteHint);
+    noteWrap.appendChild(noteLabel);
+    noteWrap.appendChild(noteArea);
+    noteWrap.appendChild(noteHint);
     modalContent.appendChild(noteWrap);
 
     // tampilkan
-    modal.classList.add('show'); lockBodyScroll(); modal.classList.remove('hidden');
+    modal.classList.add('show');
+    lockBodyScroll();
+    modal.classList.remove('hidden');
+    
     // init qty & total
-    modalQty = 1; updateModalQtyDisplay();
+    modalQty = 1;
     calcModalTotal(productData);
+    updateModalQtyDisplay(); // ← Dipanggil terakhir agar validasi stok berjalan
   }
 
-  function updateModalQtyDisplay() {
-    modalQtyValue.innerText = modalQty;
-    modalQtyMinus.disabled = modalQty <= 1;
+ function updateModalQtyDisplay() {
+      modalQtyValue.innerText = modalQty;
+      modalQtyMinus.disabled = modalQty <= 1;
+      
+      if (currentProductId) {
+        const pd = getProductDataById(currentProductId);
+        const stockInfo = document.getElementById('productStockInfo');
+        const stockQty = Number(pd.quantity_available) || 0;
+        const alwaysAvailable = Boolean(pd.always_available_flag);
+        
+        if (stockInfo && !alwaysAvailable) {
+          if (modalQty >= stockQty) {
+            stockInfo.innerHTML = `<span class="text-red-600">⚠ Maksimal: ${stockQty}</span>`;
+            modalQtyPlus.disabled = true;
+          } else {
+            stockInfo.innerHTML = `<span class="text-green-600">Stok: ${stockQty}</span>`;
+            modalQtyPlus.disabled = false;
+          }
+        } else if (alwaysAvailable) {
+          modalQtyPlus.disabled = false;
+        }
+      }
   }
 
   modalQtyMinus.addEventListener('click', () => {
@@ -621,8 +701,21 @@ window.initPembelianTab = function initPembelianTab() {
     }
   });
   modalQtyPlus.addEventListener('click', () => {
-    modalQty++; updateModalQtyDisplay();
-    if (currentProductId) calcModalTotal(getProductDataById(currentProductId));
+      const pd = getProductDataById(currentProductId);
+      if (!pd) return;
+
+      const productStock = Number(pd.quantity_available) || 0;
+      const alwaysAvailable = Boolean(pd.always_available_flag);
+      
+      // ===== TAMBAHAN: Validasi Stok =====
+      if (!alwaysAvailable && modalQty >= productStock) {
+        // Jangan tambah qty jika sudah mencapai stok maksimal
+        return;
+      }
+
+      modalQty++; 
+      updateModalQtyDisplay();
+      calcModalTotal(pd);
   });
 
   // CLOSE modal

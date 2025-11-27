@@ -32,7 +32,9 @@ use App\Jobs\SendReceiptEmailJob;
 use App\Models\Partner\Products\PartnerProductOptionsRecipe;
 use App\Models\Partner\Products\PartnerProductRecipe;
 use App\Models\Store\Stock;
+use App\Models\Store\StockMovement;
 use App\Services\UnitConversionService;
+use Illuminate\Support\Facades\Schema;
 
 class CashierTransactionController extends Controller
 {
@@ -115,11 +117,18 @@ class CashierTransactionController extends Controller
 
     public function finishOrder(Request $request, $id)
     {
-        // dd($request->all());
+        $cashier = Auth::user();
+        $partner = User::findOrFail($cashier->partner_id);
+
         DB::beginTransaction();
         try {
-            $cashier = Auth::user();
-            $booking_order = BookingOrder::findOrFail($id);
+
+            $booking_order = BookingOrder::with([
+                'order_details.partnerProduct.stock',
+                'order_details.partnerProduct.recipes',
+                'order_details.order_detail_options.option.stock',
+                'order_details.order_detail_options.option.recipes',
+            ])->findOrFail($id);
 
             if (!$booking_order) {
                 return redirect()->back()->with('error', 'Order tidak ditemukan');
@@ -127,6 +136,40 @@ class CashierTransactionController extends Controller
 
             if ($cashier->partner_id !== $booking_order->partner_id) {
                 return redirect()->back()->with('error', 'Anda tidak bisa menyelesaikan order outlet lain');
+            }
+
+            $masterMovement = StockMovement::create([
+                'owner_id'   => $partner->owner_id,
+                'partner_id' => $partner->id,
+                'type'       => 'out',
+                'category'   => 'sale_consumption', // Ubah kategori untuk mencerminkan konsumsi final
+            ]);
+
+            // 2. PENGURANGAN FISIK & PENCATATAN MOVEMENT ITEM
+            foreach ($booking_order->order_details as $detail) {
+                $qty = $detail->quantity;
+                $product = $detail->partnerProduct;
+
+                // A. Pengurangan Produk Utama
+                if ($product->stock_type === 'direct' && $product->always_available_flag === 0 && $product->stock) {
+                    // Kurangi fisik (quantity) dan hapus reservasi (quantity_reserved)
+                    $this->processStockConsumption($product->stock, $qty, $masterMovement);
+                } elseif ($product->stock_type === 'linked') {
+                    // Kurangi bahan baku (ingredients)
+                    $this->processRecipeConsumption($product->recipes, $qty, $masterMovement);
+                }
+
+                // B. Pengurangan Opsi Produk
+                foreach ($detail->order_detail_options as $detailOption) {
+                    $opt = $detailOption->option;
+                    if (!$opt) continue;
+
+                    if ($opt->stock_type === 'direct' && $opt->always_available_flag === 0 && $opt->stock) {
+                        $this->processStockConsumption($opt->stock, $qty, $masterMovement);
+                    } elseif ($opt->stock_type === 'linked') {
+                        $this->processRecipeConsumption($opt->recipes, $qty, $masterMovement);
+                    }
+                }
             }
 
             $booking_order->order_status = 'SERVED';
@@ -222,10 +265,14 @@ class CashierTransactionController extends Controller
 
 
                 if ($product->stock_type === 'direct' && $product->always_available_flag === 0 && $product->stock) {
-                    $product->stock->decrement('quantity', $qty);
+                    if (Schema::hasColumn('stocks', 'quantity_reserved')) {
+                        $product->stock->increment('quantity_reserved', $qty);
+                    } else {
+                        $product->stock->decrement('quantity', $qty);
+                    }
                 } elseif ($product->stock_type === 'linked') {
                     $recipes = PartnerProductRecipe::where('partner_product_id', $productId)->get();
-                    $this->processRecipeDeduction($recipes, $qty);
+                    $this->processRecipeReservation($recipes, $qty);
                 }
 
                 foreach ($options as $opt) {
@@ -237,12 +284,16 @@ class CashierTransactionController extends Controller
                         'price' => $opt->price
                     ]);
 
-                    // B. Opsi Produk
+                    // Opsi Produk
                     if ($opt->stock_type === 'direct' && $opt->always_available_flag === 0 && $opt->stock) {
-                        $opt->stock->decrement('quantity', $qty);
+                        if (Schema::hasColumn('stocks', 'quantity_reserved')) {
+                            $opt->stock->increment('quantity_reserved', $qty);
+                        } else {
+                            $opt->stock->decrement('quantity', $qty);
+                        }
                     } elseif ($opt->stock_type === 'linked') {
                         $recipes = PartnerProductOptionsRecipe::where('partner_product_option_id', $opt->id)->get();
-                        $this->processRecipeDeduction($recipes, $qty);
+                        $this->processRecipeReservation($recipes, $qty);
                     }
                 }
             }
@@ -429,24 +480,79 @@ class CashierTransactionController extends Controller
         }
     }
 
-    private function processRecipeDeduction($recipes, int $orderedQuantity): void
+    /**
+     * Mengubah Logic Deduction untuk reservasi stok linked (hanya menambah quantity_reserved).
+     */
+    private function processRecipeReservation($recipes, int $orderedQuantity): void
     {
         foreach ($recipes as $recipe) {
-
             $ingredientStock = Stock::find($recipe->stock_id);
 
-            // Jika stok bahan mentah tidak ditemukan (misal dihapus), lewati atau log warning.
+            if (!$ingredientStock || !Schema::hasColumn('stocks', 'quantity_reserved')) {
+                continue;
+            }
+
+            $quantityPerUnit = $recipe->quantity_used;
+            $totalQuantityToReserve = $quantityPerUnit * $orderedQuantity;
+
+            // Reservasi Stok Bahan Mentah
+            $ingredientStock->increment('quantity_reserved', $totalQuantityToReserve);
+        }
+    }
+
+    /**
+     * Melakukan pengurangan fisik dan menghapus reservasi untuk Direct Stock.
+     */
+    private function processStockConsumption(Stock $stock, int $qty, StockMovement $masterMovement): void
+    {
+        // Pastikan kolom quantity_reserved ada
+        $reservedColumnExists = Schema::hasColumn('stocks', 'quantity_reserved');
+        $decrementArray = ['quantity' => $qty];
+
+        if ($reservedColumnExists) {
+            $decrementArray['quantity_reserved'] = $qty; // Hapus reservasi
+        }
+
+        // Pengurangan fisik (quantity) dan reservasi (quantity_reserved)
+        $stock->decrement($decrementArray);
+
+        // CATATAN MOVEMENT: Produk Direct
+        $masterMovement->items()->create([
+            'stock_id' => $stock->id,
+            'quantity' => $qty,
+            'unit_price' => $stock->last_price_per_unit ?? 0,
+        ]);
+    }
+
+    /**
+     * Mengurangi fisik dan mencatat konsumsi untuk Linked Stock (saat served).
+     */
+    private function processRecipeConsumption($recipes, int $orderedQuantity, StockMovement $masterMovement): void
+    {
+        foreach ($recipes as $recipe) {
+            $ingredientStock = Stock::find($recipe->stock_id);
+
             if (!$ingredientStock) {
                 continue;
             }
 
             $quantityPerUnit = $recipe->quantity_used;
-
-            // Hitung Total Konsumsi
             $totalQuantityToConsume = $quantityPerUnit * $orderedQuantity;
 
-            // Pengurangan Stok Bahan Mentah
+            // 1. Pengurangan Stok Fisik (quantity)
             $ingredientStock->decrement('quantity', $totalQuantityToConsume);
+
+            // 2. Pengurangan Reservasi (quantity_reserved)
+            if (Schema::hasColumn('stocks', 'quantity_reserved')) {
+                $ingredientStock->decrement('quantity_reserved', $totalQuantityToConsume);
+            }
+
+            // 3. Pencatatan Movement Item
+            $masterMovement->items()->create([
+                'stock_id' => $ingredientStock->id,
+                'quantity' => $totalQuantityToConsume,
+                'unit_price' => $ingredientStock->last_price_per_unit ?? 0,
+            ]);
         }
     }
 }
