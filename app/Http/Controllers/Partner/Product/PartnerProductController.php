@@ -13,6 +13,7 @@ use App\Models\Partner\Products\PartnerProductOptionsRecipe;
 use App\Models\Partner\Products\PartnerProductRecipe;
 use App\Models\Store\MasterUnit;
 use App\Models\Store\Stock;
+use App\Services\StockRecalculationService;
 use App\Services\UnitConversionService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -24,6 +25,14 @@ use Illuminate\Support\Str;
 
 class PartnerProductController extends Controller
 {
+
+    protected $recalculationService;
+
+    public function __construct(StockRecalculationService $recalculationService)
+    {
+        $this->recalculationService = $recalculationService;
+    }
+
     public function index()
     {
         $categories = Category::where('owner_id', Auth::user()->owner_id)->get();
@@ -295,7 +304,7 @@ class PartnerProductController extends Controller
         }
     }
 
-    public function saveRecipe(Request $request, UnitConversionService $converter)
+    public function saveRecipe(Request $request, UnitConversionService $converter, StockRecalculationService $recalculator)
     {
         try {
             $request->validate([
@@ -342,6 +351,8 @@ class PartnerProductController extends Controller
                 if ($product->stock_type !== 'linked') {
                     $product->update(['stock_type' => 'linked']);
                 }
+                $recalculator->recalculateSingleTarget($product);
+
             } elseif ($itemType === 'option') {
                 // Verify option exists
                 $option = PartnerProductOption::findOrFail($itemId);
@@ -373,6 +384,8 @@ class PartnerProductController extends Controller
                 if ($option->stock_type !== 'linked') {
                     $option->update(['stock_type' => 'linked']);
                 }
+
+                $recalculator->recalculateSingleTarget($option);
             }
 
             DB::commit();
@@ -528,18 +541,17 @@ class PartnerProductController extends Controller
             // Jika ada stok direct yang lama, HAPUS
             if ($product->stock) {
                 $product->stock->delete();
-                // PENTING: Unset relasi agar tidak mengingat objek yang sudah dihapus
                 unset($product->stock);
-                $product->load('stock'); // Reload relasi (akan menjadi null)
+                $product->load('stock');
             }
+            $this->recalculationService->recalculateSingleTarget($product);
         }
 
         // DIRECT (Termasuk switch dari LINKED ke DIRECT)
         elseif ($newStockType === 'direct') {
 
-            // PENTING: Query fresh stock dari database untuk memastikan data terkini
             $existingStock = Stock::where('partner_product_id', $product->id)
-                ->whereNull('partner_product_option_id') // Pastikan ini stok produk, bukan opsi
+                ->whereNull('partner_product_option_id')
                 ->first();
 
             // Cek apakah entri stok direct sudah ada di DB
@@ -547,8 +559,7 @@ class PartnerProductController extends Controller
                 // UPDATE STOK YANG ADA
                 $existingStock->quantity = $productAlways ? 0 : $newQuantity;
                 $existingStock->save();
-            }
-            else {
+            } else {
                 // Buat stok baru (baik Always Available maupun tidak)
                 Stock::create([
                     'stock_code'              => $this->generateUniqueStockCode(),
@@ -596,8 +607,6 @@ class PartnerProductController extends Controller
             $optModel->always_available_flag = $optAlways;
             $optModel->save();
 
-            // Handle Stock berdasarkan stock_type
-
             // Berubah dari DIRECT ke LINKED atau tetap LINKED
             if ($optStockType === 'linked') {
                 // Hapus stok direct yang ada
@@ -606,6 +615,8 @@ class PartnerProductController extends Controller
                     unset($optModel->stock);
                     $optModel->load('stock');
                 }
+
+                $this->recalculationService->recalculateSingleTarget($optModel);
             }
 
             // DIRECT

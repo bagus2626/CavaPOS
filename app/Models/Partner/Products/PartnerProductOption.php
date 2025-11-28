@@ -3,6 +3,8 @@
 namespace App\Models\Partner\Products;
 
 use App\Models\Store\Stock;
+use App\Services\LinkedStockCalculatorService;
+use App\Services\UnitConversionService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -16,8 +18,8 @@ class PartnerProductOption extends Model
         'master_product_option_id',
         'partner_product_parent_option_id',
         'name',
-        'quantity',
         'stock_type',
+        'available_linked_quantity',
         'always_available_flag',
         'price',
         'pictures',
@@ -65,25 +67,20 @@ class PartnerProductOption extends Model
         }
 
         // Ambil service yang diperlukan
-        $converter = app(\App\Services\UnitConversionService::class);
-        $recipeCalc = app(\App\Services\LinkedStockCalculatorService::class);
+        $converter = app(UnitConversionService::class);
+        $recipeCalc = app(LinkedStockCalculatorService::class);
 
-        $availablePhysicalQuantity = ($this->stock)
-            ? ($this->stock->quantity - ($this->stock->quantity_reserved ?? 0))
-            : 0.00;
-
-        // 1. Logika untuk Linked Stock (Perhitungan Faktor Pembatas)
+        // 1. Logika untuk Linked Stock (Membaca Kolom Cache)
         if ($this->stock_type === 'linked') {
-            // Panggil service, mengirimkan instance $this (Model Option)
-            return $recipeCalc->calculateLinkedQuantity($this);
+            // Ambil nilai dari kolom yang sudah dihitung dan disimpan
+            return (float) $this->available_linked_quantity;
         }
 
-        // 2. Logika untuk Direct Stock (Konversi dari Base Unit)
+        // 2. Logika untuk Direct Stock (Tetap Konversi Langsung)
         elseif ($this->stock_type === 'direct') {
             if ($this->stock) {
-                // Gunakan kuantitas fisik yang sudah dikurangi reservasi
                 return $converter->convertToDisplayUnit(
-                    $availablePhysicalQuantity,
+                    $this->stock->quantity - ($this->stock->quantity_reserved ?? 0),
                     $this->stock->display_unit_id
                 );
             }
