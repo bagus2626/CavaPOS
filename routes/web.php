@@ -418,6 +418,7 @@ Route::middleware('setlocale')->group(function () {
             Route::post('process-order/{id}', [CashierTransactionController::class, 'processOrder'])->name('process-order');
             Route::post('finish-order/{id}', [CashierTransactionController::class, 'finishOrder'])->name('finish-order');
             Route::post('checkout-order', [CashierTransactionController::class, 'checkout'])->name('checkout');
+            Route::post('check-stock', [CashierTransactionController::class, 'checkStockRealtime'])->name('check-stock');
         });
 
 
@@ -445,6 +446,7 @@ Route::middleware('setlocale')->group(function () {
     //customer
     Route::prefix('customer')->name('customer.')->middleware('customer.access')->group(function () {
         Route::get('{partner_slug}/menu/{table_code}', [CustomerMenuController::class, 'index'])->name('menu.index');
+        Route::post('{partner_slug}/menu/{table_code}/check-stock', [CustomerMenuController::class, 'checkStockRealtime'])->name('menu.check-stock');
         Route::post('{partner_slug}/checkout/{table_code}', [CustomerMenuController::class, 'checkout'])->name('menu.checkout');
         Route::get('{partner_slug}/order-detail/{table_code}/{order_id}', [CustomerMenuController::class, 'orderDetail'])->name('orders.order-detail');
         Route::get('/orders/{id}/receipt', [CustomerMenuController::class, 'printReceipt'])->name('orders.receipt');

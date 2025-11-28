@@ -886,7 +886,7 @@ window.initPembelianTab = function initPembelianTab() {
         
         if (stockInfo && !alwaysAvailable) {
           if (modalQty >= stockQty) {
-            stockInfo.innerHTML = `<span class="text-red-600">⚠ Maksimal: ${stockQty}</span>`;
+            stockInfo.innerHTML = `<span class="text-red-600">Stok: ${stockQty}</span>`;
             modalQtyPlus.disabled = true;
           } else {
             stockInfo.innerHTML = `<span class="text-green-600">Stok: ${stockQty}</span>`;
@@ -1238,6 +1238,85 @@ window.initPembelianTab = function initPembelianTab() {
     if (!orderName)     { Swal && Swal.fire({ icon:'warning', title:'Nama belum diisi' }); return; }
     if (grandTotal <= 0){ Swal && Swal.fire({ icon:'info', title:'Keranjang kosong' }); return; }
 
+    // ===== VALIDASI STOK REAL-TIME =====
+                    checkoutPayBtn.disabled = true;
+                    Swal.fire({ 
+                        title:'Memeriksa ketersediaan stok…', 
+                        allowOutsideClick:false, 
+                        didOpen:() => Swal.showLoading() 
+                    });
+
+                    try {
+                        const tokenEl = document.querySelector('meta[name="csrf-token"]');
+                        const csrf = tokenEl ? tokenEl.content : null;
+                        
+                        const checkStockUrl = `/employee/cashier/check-stock`;                        
+                        const stockCheckResponse = await fetch(checkStockUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                ...(csrf ? { 'X-CSRF-TOKEN': csrf } : {})
+                            },
+                            credentials: 'same-origin',
+                            body: JSON.stringify({ items: payload })
+                        });
+                        
+                        if (!stockCheckResponse.ok) {
+                            throw new Error(`HTTP ${stockCheckResponse.status}`);
+                        }
+                        
+                        const stockResult = await stockCheckResponse.json();
+                        
+                        if (!stockResult.success) {
+                            Swal.close();
+                            
+                            const result = await Swal.fire({
+                                icon: 'error',
+                                title: 'Stok Tidak Mencukupi',
+                                html: `
+                                    <div class="text-center">
+                                        <p class="mt-3 text-sm text-gray-600">Silakan refresh halaman untuk melihat stok terbaru.</p>
+                                    </div>
+                                `,
+                                showCancelButton: true,
+                                confirmButtonText: 'Refresh Halaman',
+                                cancelButtonText: 'Batal',
+                                confirmButtonColor: '#3085d6',
+                            });
+                            
+                            if (result.isConfirmed) {
+                                window.location.reload();
+                            }
+                            
+                            checkoutPayBtn.disabled = false;
+                            return;
+                        }
+                        
+                        Swal.close();
+                        
+                    } catch (stockCheckError) {
+        console.error('Stock check error:', stockCheckError);
+        Swal.close();
+        
+        // ✅ PERBAIKAN: Tampilkan toast + return (hentikan)
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2500,
+            timerProgressBar: true,
+        });
+        
+        await Toast.fire({
+            icon: 'warning',
+            title: 'Gagal memverifikasi stok'
+        });
+        
+        checkoutPayBtn.disabled = false;
+        return; // ✅ PENTING: Hentikan eksekusi, jangan lanjut checkout
+    }
+    
     const confirm = await Swal.fire({
       icon:'question',
       title:'Konfirmasi Checkout',

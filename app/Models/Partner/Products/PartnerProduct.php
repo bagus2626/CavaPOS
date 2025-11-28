@@ -26,7 +26,7 @@ class PartnerProduct extends Model
         'category_id',
         'name',
         'stock_type',
-        'quantity',
+        'available_linked_quantity',
         'always_available_flag',
         'price',
         'pictures',
@@ -98,22 +98,25 @@ class PartnerProduct extends Model
         $converter = app(UnitConversionService::class);
         $recipeCalc = app(LinkedStockCalculatorService::class);
 
-        $availablePhysicalQuantity = ($this->stock)
-            ? ($this->stock->quantity - ($this->stock->quantity_reserved ?? 0))
-            : 0.00;
-
-        // Logika untuk Linked Stock (Perhitungan Faktor Pembatas)
+        // 1. Logika untuk Linked Stock (Membaca Kolom Cache)
         if ($this->stock_type === 'linked') {
-            // Panggil service untuk menghitung ketersediaan (dalam porsi)
-            return $recipeCalc->calculateLinkedQuantity($this);
+
+            // // hapus kode ini jika sudah menkadlankan StockRecalculationService
+            // $cachedQty = (float) $this->available_linked_quantity;
+            // if ($cachedQty > 0) {
+            //     return $cachedQty;
+            // }
+            // return $recipeCalc->calculateLinkedQuantity($this);
+
+            // Ambil nilai dari kolom yang sudah dihitung dan disimpan
+            return (float) $this->available_linked_quantity;
         }
 
-        // Logika untuk Direct Stock (Konversi dari Base Unit)
+        // 2. Logika untuk Direct Stock (Tetap Konversi Langsung)
         elseif ($this->stock_type === 'direct') {
             if ($this->stock) {
-                // Gunakan kuantitas fisik yang sudah dikurangi reservasi
                 return $converter->convertToDisplayUnit(
-                    $availablePhysicalQuantity,
+                    $this->stock->quantity - ($this->stock->quantity_reserved ?? 0),
                     $this->stock->display_unit_id
                 );
             }

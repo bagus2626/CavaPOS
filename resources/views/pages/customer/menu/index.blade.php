@@ -935,7 +935,7 @@
                         
                         if (stockInfo && !alwaysAvailable) {
                         if (modalQty >= stockQty) {
-                            stockInfo.innerHTML = `<span class="text-red-600">⚠ Maksimal: ${stockQty}</span>`;
+                            stockInfo.innerHTML = `<span class="text-red-600">Stok: ${stockQty}</span>`;
                             modalQtyPlus.disabled = true;
                         } else {
                             stockInfo.innerHTML = `<span class="text-green-600">Stok: ${stockQty}</span>`;
@@ -1615,6 +1615,68 @@
                             text: '{{ __('messages.customer.menu.input_item_first') }}'
                         });
                         return;
+                    }
+
+                    // ===== VALIDASI STOK REAL-TIME =====
+                    checkoutPayBtn.disabled = true;
+                    Swal.fire({ 
+                        title:'Memeriksa ketersediaan stok…', 
+                        allowOutsideClick:false, 
+                        didOpen:() => Swal.showLoading() 
+                    });
+
+                    try {
+                        const tokenEl = document.querySelector('meta[name="csrf-token"]');
+                        const csrf = tokenEl ? tokenEl.content : null;
+                        
+                        const checkStockUrl = "{{ route('customer.menu.check-stock', ['partner_slug' => $partner_slug, 'table_code' => $table_code]) }}";
+                        
+                        const stockCheckResponse = await fetch(checkStockUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                ...(csrf ? { 'X-CSRF-TOKEN': csrf } : {})
+                            },
+                            credentials: 'same-origin',
+                            body: JSON.stringify({ items: payload })
+                        });
+                        
+                        if (!stockCheckResponse.ok) {
+                            throw new Error(`HTTP ${stockCheckResponse.status}`);
+                        }
+                        
+                        const stockResult = await stockCheckResponse.json();
+                        
+                        if (!stockResult.success) {
+                            Swal.close();
+                            
+                            const result = await Swal.fire({
+                                icon: 'error',
+                                title: 'Stok Tidak Mencukupi',
+                                html: `
+                                    <div class="text-center">
+                                        <p class="mt-3 text-sm text-gray-600">Silakan refresh halaman untuk melihat stok terbaru.</p>
+                                    </div>
+                                `,
+                                showCancelButton: true,
+                                confirmButtonText: 'Refresh Halaman',
+                                cancelButtonText: 'Batal',
+                                confirmButtonColor: '#3085d6',
+                            });
+                            
+                            if (result.isConfirmed) {
+                                window.location.reload();
+                            }
+                            
+                            checkoutPayBtn.disabled = false;
+                            return;
+                        }
+                        
+                        Swal.close();
+                        
+                    } catch (stockCheckError) {
+                        Swal.close();
                     }
 
                     // Konfirmasi ringkas
