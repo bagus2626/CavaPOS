@@ -153,9 +153,9 @@
                                         <div>
                                             <h5 class="text-base font-semibold text-gray-900 flex items-center gap-2">
                                                 {{ $product->name }}
-                                                <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">
+                                                {{-- <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">
                                                     {{ $product->category->category_name ?? '' }}
-                                                </span>
+                                                </span> --}}
                                             </h5>
                                             <p class="text-gray-500 text-xs mb-1 line-clamp-2">
                                                 {{ $product->description }}

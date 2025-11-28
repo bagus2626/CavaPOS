@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Employee\Transaction;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\PaymentGateway\Xendit\InvoiceController;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Transaction\OrderPayment;
@@ -12,6 +14,12 @@ use App\Models\Partner\Products\PartnerProductOption;
 use App\Models\Transaction\BookingOrder;
 use App\Models\Transaction\OrderDetail;
 use App\Models\Transaction\OrderDetailOption;
+use App\Models\Xendit\SplitRule;
+use App\Models\Xendit\XenditSubAccount;
+use App\Services\XenditService;
+use App\Models\Product\Specification;
+use App\Models\Admin\Product\Category;
+use App\Models\Owner;
 use App\Models\User;
 use App\Models\Store\Table;
 use Illuminate\Support\Facades\DB;
@@ -33,11 +41,13 @@ class CashierTransactionController extends Controller
 {
 
     protected $unitConversionService;
+    protected $xenditInvoice;
     protected $recalculationService;
 
-    public function __construct(UnitConversionService $unitConversionService, StockRecalculationService $recalculationService) // INJECT BARU
+    public function __construct(UnitConversionService $unitConversionService, XenditService $xendit, StockRecalculationService $recalculationService)
     {
         $this->unitConversionService = $unitConversionService;
+        $this->xenditInvoice = new InvoiceController($xendit);
         $this->recalculationService = $recalculationService;
     }
 
@@ -186,15 +196,34 @@ class CashierTransactionController extends Controller
 
     public function checkout(Request $request)
     {
+        // dd($request->all());
         DB::beginTransaction();
         try {
             $employee = Auth::guard('employee')->user();
             $partner = User::findOrFail($employee->partner_id);
             $table = Table::findOrFail($request->order_table);
             $orders = $request->input('items', []);
+            $owner = Owner::findOrFail($partner->owner_id);
+            $validRegistrationStatuses = ['LIVE', 'LIVE_TESTMODE'];
 
             // Jika stok tidak cukup, exception akan dilempar dan transaksi akan Rollback.
             $this->checkStockAvailability($orders, $partner);
+
+            if ($request->payment_method === 'QRIS') {
+                if (!in_array($owner->xendit_registration_status, $validRegistrationStatuses)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Akun belum diaktifkan. Silakan hubungi pengelola untuk menyelesaikan proses aktivasi.',
+                    ]);
+                }
+
+                if ($owner->xendit_split_rule_status !== 'created') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Pengaturan pembayaran belum lengkap. Silakan hubungi pengelola.',
+                    ]);
+                }
+            }
 
             $booking_order_code = $this->generateBookingOrderCode($partner->partner_code);
 
@@ -219,8 +248,9 @@ class CashierTransactionController extends Controller
                 'total_order_value' => $request->total_amount,
             ]);
 
-
+            $partnerProductIds = [];
             foreach ($orders as $order) {
+                $partnerProductIds[] = data_get($order, 'product_id');
                 $productId   = data_get($order, 'product_id');
                 $optionIds   = data_get($order, 'option_ids', []);
                 $qty         = (int) data_get($order, 'qty', 1);
@@ -293,12 +323,76 @@ class CashierTransactionController extends Controller
                 }
             }
 
-            // test by qris (hapus kemudian)
             if ($request->payment_method === 'QRIS') {
-                $booking_order->order_status = 'PAID';
+                $booking_order->order_status = 'UNPAID';
                 $booking_order->payment_method = 'QRIS';
-                $booking_order->payment_flag = true;
+
+                $payment = OrderPayment::create([
+                    'booking_order_id'  => $booking_order->id,
+                    'customer_id'       => null,
+                    'customer_name'     => 'guest-' . $request->order_name,
+                    'payment_type'      => 'QRIS',
+                    'paid_amount'       => $request->total_amount,
+                    'change_amount'     => 0,
+                    'payment_status'    => 'PENDING'
+                ]);
+
+                $booking_order->payment_id = $payment->id;
                 $booking_order->save();
+
+                $xenditSubAccount = XenditSubAccount::where('partner_id', $partner->owner_id)->first();
+                $xenditSplitRule = SplitRule::where('partner_id', $partner->owner_id)->latest()->first();
+
+                $products = OrderDetail::with('partnerProduct.category')
+                    ->where('booking_order_id', $booking_order->id)
+                    ->whereIn('partner_product_id', $partnerProductIds)
+                    ->get();
+
+                $items = $products->map(function ($product) {
+                    return [
+                        "name"      => $product->product_name,
+                        "quantity"  => $product->quantity,
+                        "price"     => $product->base_price ?? 0,
+                        "category"  => optional($product->partnerProduct->category)->category_name ?? "Uncategorized",
+                    ];
+                })->toArray();
+
+                $payload = [
+                    "external_id" => $booking_order->booking_order_code ?? "invoice-" . time(),
+                    "amount" => $payment->paid_amount ?? 0,
+                    "given_names" => $request->order_name ?? "unknow",
+                    "description" => "Invoice QRIS",
+                    "invoice_duration" => 3600,
+                    "customer" => [
+                        "given_names" => $request->order_name ?? "unknow",
+                        "email" => "example@example.com",
+                        "mobile_number" => "0",
+                    ],
+                    "customer_notification_preference" => [
+                        "invoice_created" => ["whatsapp", "email"],
+                        "invoice_reminder" => ["whatsapp", "email"],
+                        "invoice_paid" => ["whatsapp", "email"]
+                    ],
+                    "success_redirect_url" => url("employee/cashier/dashboard"),
+                    "failure_redirect_url" => url("employee/cashier/dashboard"),
+                    "currency" => "IDR",
+                    "items" => $items,
+//                    "payment_methods" => ["QRIS"],
+                    "metadata" => [
+                        "store_branch" => $partner->name
+                    ]
+                ];
+
+                $invoiceResponse = $this->xenditInvoice->createInvoice($booking_order->id, $xenditSubAccount->xendit_user_id, $xenditSplitRule->split_rule_id, $payload);
+                $invoice = $invoiceResponse->getData(true);
+                $invoiceData = $invoice['data'] ?? null;
+                DB::commit();
+
+                if($invoice['success']){
+                    return response()->json([
+                        'redirect' => $invoiceData['invoice_url']
+                    ]);
+                }
             }
 
             DB::commit();

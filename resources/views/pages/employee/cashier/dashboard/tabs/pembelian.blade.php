@@ -15,7 +15,7 @@
                     data-category="all">
               All
             </button>
-            @foreach($categories as $category)
+            @foreach($categories->sortBy('category_order') as $category)
               <button type="button"
                       class="filter-btn px-4 py-2 text-sm rounded-md cursor-pointer shrink-0"
                       data-category="{{ $category->id }}">
@@ -54,19 +54,139 @@
     </div>
   </div>
 
-
-
-
   @php
-$productsByCategory = $partner_products->groupBy('category_id');
+      $productsByCategory = $partner_products
+          ->sortBy(function ($product) {
+              return $product->category->category_order ?? 99999;
+          })
+          ->groupBy('category_id');
+
+      $hotProducts = $partner_products->filter(function ($p) {
+          return $p->is_hot_product;
+      });
   @endphp
 
   <div class="flex flex-col" id="menu-container">
+    {{-- Segmen Hot Products --}}
+    @if($hotProducts->count())
+        <div class="hot-products-group bg-amber-50 border-b border-amber-200 pb-2">
+            <p class="px-4 pt-3 mb-2 text-sm font-semibold text-amber-800 flex items-center gap-2">
+                🔥 <span>Hot Products</span>
+            </p>
+
+            <div class="flex flex-col">
+                @foreach($hotProducts as $product)
+                    @php
+                        $firstImage = $product->pictures[0]['path'] ?? null;
+
+                        $promo = $product->promotion;
+                        $basePrice = (float) $product->price;
+                        $discountedBase = $basePrice;
+                        $hasPromo = false;
+
+                        if ($promo) {
+                            if ($promo->promotion_type === 'percentage') {
+                                $discountedBase = max(0, $basePrice * (1 - $promo->promotion_value / 100));
+                            } else {
+                                $discountedBase = max(0, $basePrice - (float) $promo->promotion_value);
+                            }
+                            $hasPromo = $discountedBase < $basePrice;
+                        }
+
+                        $promoBadge = null;
+                        if ($promo) {
+                            $promoBadge = $promo->promotion_type === 'percentage'
+                                ? '-' . rtrim(rtrim(number_format($promo->promotion_value, 2, ',', '.'), '0'), ',') . '%'
+                                : '-Rp ' . number_format($promo->promotion_value, 0, ',', '.');
+                        }
+                    @endphp
+
+                    <div
+                        @class([
+                            'menu-item menu-item-hot bg-white flex flex-row transition hover:shadow-lg border border-amber-100 rounded-xl px-3',
+                            'grayscale' => $product->quantity_available < 1 && $product->always_available_flag === 0,
+                        ])
+                        data-category="{{ $product->category_id }}"
+                    >
+                        {{-- Gambar + badge PROMO + badge HOT --}}
+                        <div class="w-24 h-24 flex-shrink-0 rounded-lg m-2 overflow-hidden relative">
+                            @if($firstImage)
+                                <img src="{{ asset($firstImage) }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400 text-sm">
+                                    <i class="fas fa-image"></i>
+                                </div>
+                            @endif
+
+                            @if($hasPromo && $promoBadge)
+                                <span class="absolute top-1 left-1 bg-red-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded">
+                                    {{ $promoBadge }}
+                                </span>
+                            @endif
+
+                            <span class="absolute top-1 right-1 bg-orange-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow">
+                                HOT
+                            </span>
+                        </div>
+
+                        {{-- Info produk --}}
+                        <div class="ml-4 flex-1 flex flex-col justify-between py-2">
+                            <div>
+                                <h5 class="text-base font-semibold text-gray-900 flex items-center gap-2">
+                                    {{ $product->name }}
+                                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">
+                                        {{ $product->category->category_name ?? '' }}
+                                    </span>
+                                </h5>
+                                <p class="text-gray-500 text-xs mb-1 line-clamp-2">
+                                    {{ $product->description }}
+                                </p>
+
+                                @if($hasPromo)
+                                    <div class="flex items-baseline gap-2">
+                                        <span class="text-xs text-gray-500 line-through">
+                                            Rp {{ number_format($basePrice, 0, ',', '.') }}
+                                        </span>
+                                        <span class="text-sm font-bold text-gray-900">
+                                            Rp {{ number_format($discountedBase, 0, ',', '.') }}
+                                        </span>
+                                    </div>
+                                @else
+                                    <p class="text-sm font-bold text-gray-900">
+                                        Rp {{ number_format($basePrice, 0, ',', '.') }}
+                                    </p>
+                                @endif
+                            </div>
+
+                            {{-- Tombol Qty (LINKED ke list biasa lewat data-id) --}}
+                            <div class="mt-1 mb-2 flex items-center ml-auto space-x-4">
+                                <button
+                                    class="minus-btn w-8 h-8 flex items-center justify-center border border-choco rounded-lg font-bold text-choco hover:bg-gray-100 hidden"
+                                    data-id="{{ $product->id }}"
+                                >-</button>
+                                <span class="qty text-base font-semibold text-gray-800 hidden" data-id="{{ $product->id }}">0</span>
+                                @if ($product->quantity_available < 1 && $product->always_available_flag === 0)
+                                    <p class="text-gray-700 text-xs">Habis</p>
+                                @else
+                                    <button
+                                        class="plus-btn w-8 h-8 flex items-center justify-center border rounded-lg font-bold text-white bg-choco hover:bg-soft-choco"
+                                        data-id="{{ $product->id }}"
+                                    >+</button>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
+    {{-- Daftar produk per kategori --}}
     @foreach($productsByCategory as $categoryId => $products)
       @if($products->count() > 0)
             @php
-    $categoryName = $categories->firstWhere('id', $categoryId)->category_name ?? 'Uncategorized';
-    $productsOnCategory = App\Models\Partner\Products\PartnerProduct::where('category_id', $categoryId)->count();
+              $categoryName = $categories->firstWhere('id', $categoryId)->category_name ?? 'Uncategorized';
+              $productsOnCategory = App\Models\Partner\Products\PartnerProduct::where('category_id', $categoryId)->count();
             @endphp
 
             <div class="category-group" data-category="{{ $categoryId }}">
@@ -76,37 +196,37 @@ $productsByCategory = $partner_products->groupBy('category_id');
 
               @foreach($products as $product)
                       @php
-      $firstImage = $product->pictures[0]['path'] ?? null;
+                        $firstImage = $product->pictures[0]['path'] ?? null;
 
-      // --- PROMO (sama seperti Customer) ---
-      $promo = $product->promotion; // null kalau tidak ada/ tidak aktif hari ini
-      $basePrice = (float) $product->price;
+                        // --- PROMO (sama seperti Customer) ---
+                        $promo = $product->promotion; // null kalau tidak ada/ tidak aktif hari ini
+                        $basePrice = (float) $product->price;
 
-      $hasPromo = false;
-      $discountedBase = $basePrice;
+                        $hasPromo = false;
+                        $discountedBase = $basePrice;
 
-      if ($promo) {
-        if ($promo->promotion_type === 'percentage') {
-          $discountedBase = max(0, $basePrice * (1 - ($promo->promotion_value / 100)));
-        } else { // amount
-          $discountedBase = max(0, $basePrice - (float) $promo->promotion_value);
-        }
-        $hasPromo = $discountedBase < $basePrice;
-      }
+                        if ($promo) {
+                          if ($promo->promotion_type === 'percentage') {
+                            $discountedBase = max(0, $basePrice * (1 - ($promo->promotion_value / 100)));
+                          } else { // amount
+                            $discountedBase = max(0, $basePrice - (float) $promo->promotion_value);
+                          }
+                          $hasPromo = $discountedBase < $basePrice;
+                        }
 
-      $promoBadge = null;
-      if ($promo) {
-        $promoBadge = $promo->promotion_type === 'percentage'
-          ? '-' . rtrim(rtrim(number_format($promo->promotion_value, 2, ',', '.'), '0'), ',') . '%'
-          : '-Rp ' . number_format($promo->promotion_value, 0, ',', '.');
-      }
+                        $promoBadge = null;
+                        if ($promo) {
+                          $promoBadge = $promo->promotion_type === 'percentage'
+                            ? '-' . rtrim(rtrim(number_format($promo->promotion_value, 2, ',', '.'), '0'), ',') . '%'
+                            : '-Rp ' . number_format($promo->promotion_value, 0, ',', '.');
+                        }
                       @endphp
                       <div
                         @class([
-        'menu-item bg-white flex flex-row transition hover:shadow-lg px-4 border-b border-gray-200',
-        'grayscale' => $product->quantity_available < 1 && $product->always_available_flag === 0, // <-- Diubah
-      ])
-                        data-category="{{ $product->category_id }}"
+                          'menu-item bg-white flex flex-row transition hover:shadow-lg px-4 border-b border-gray-200',
+                          'grayscale' => $product->quantity_available < 1 && $product->always_available_flag === 0, // <-- Diubah
+                        ])
+                                          data-category="{{ $product->category_id }}"
                       >
                         @if($firstImage)
                           <div class="w-28 h-28 flex-shrink-0 rounded-lg m-2 rounded-bl-lg overflow-hidden relative">
@@ -136,7 +256,7 @@ $productsByCategory = $partner_products->groupBy('category_id');
                             <button
                               class="minus-btn w-9 h-9 flex items-center justify-center border border-choco rounded-lg font-bold text-choco hover:bg-gray-100 hidden"
                               data-id="{{ $product->id }}">-</button>
-                            <span class="qty text-lg font-semibold text-gray-800 hidden" id="qty-{{ $product->id }}">0</span>
+                            <span class="qty text-lg font-semibold text-gray-800 hidden" data-id="{{ $product->id }}">0</span>
 
                             @if ($product->quantity_available < 1 && $product->always_available_flag === 0)
                               <p class="text-gray-700">Habis</p>
@@ -405,16 +525,28 @@ window.initPembelianTab = function initPembelianTab() {
     return total;
   }
   function updateProductBadge(productId) {
-    const qtySpan = document.getElementById('qty-' + productId);
-    const minusBtn = document.querySelector('.minus-btn[data-id="' + productId + '"]');
-    const total = sumQtyByProduct(productId);
-    qtySpan.innerText = total;
-    if (total > 0) {
-      qtySpan.classList.remove('hidden'); minusBtn && minusBtn.classList.remove('hidden');
-    } else {
-      qtySpan.classList.add('hidden'); minusBtn && minusBtn.classList.add('hidden');
-    }
+      const qtySpans  = document.querySelectorAll('.qty[data-id="' + productId + '"]');
+      const minusBtns = document.querySelectorAll('.minus-btn[data-id="' + productId + '"]');
+      const total     = sumQtyByProduct(productId);
+
+      qtySpans.forEach(qtySpan => {
+          qtySpan.innerText = total;
+          if (total > 0) {
+              qtySpan.classList.remove('hidden');
+          } else {
+              qtySpan.classList.add('hidden');
+          }
+      });
+
+      minusBtns.forEach(minusBtn => {
+          if (total > 0) {
+              minusBtn.classList.remove('hidden');
+          } else {
+              minusBtn.classList.add('hidden');
+          }
+      });
   }
+
   function printCart(label='Cart') {
     const rows = Object.entries(cart).map(([key, v]) => ({
       key, productId: v.productId, options: (v.options || []).join(','), qty: v.qty,
@@ -1163,8 +1295,13 @@ window.initPembelianTab = function initPembelianTab() {
         lastKeyPerProduct = {};
         updateFloatingCartBar();
         // reset badge qty di daftar produk
-        document.querySelectorAll('[id^="qty-"]').forEach(el => el.classList.add('hidden'));
+        // reset badge qty di semua tampilan (Hot & kategori)
+        document.querySelectorAll('.qty').forEach(el => {
+            el.textContent = '0';
+            el.classList.add('hidden');
+        });
         document.querySelectorAll('.minus-btn').forEach(btn => btn.classList.add('hidden'));
+
 
         // Notifikasi
         Swal.close();
