@@ -163,7 +163,7 @@ class CashierDashboardController extends Controller
 
                 return view('pages.employee.cashier.dashboard.tabs.pembelian', compact('partner', 'partner_products', 'categories', 'tables'));
             case 'pembayaran':
-                $items = (clone $base)->where('payment_method', 'CASH')->where('order_status', 'UNPAID')->latest()->get();
+                $items = (clone $base)->whereIn('payment_method', ['CASH', 'QRIS'])->where('order_status', 'UNPAID')->latest()->get();
                 return view('pages.employee.cashier.dashboard.tabs.pembayaran', compact('items'));
             case 'proses':
                 $items = (clone $base)
@@ -255,6 +255,26 @@ class CashierDashboardController extends Controller
         return $base->latest()->get();
     }
 
+    public function openOrder($id)
+    {
+        $booking_order = BookingOrder::findOrFail($id);
+        $tab = 'proses';
+
+        // if (!in_array($booking_order->order_status, ['PROCESSED', 'PAID'])) {
+        //     abort(404);
+        // }
+
+        if ($booking_order->order_status === 'PAID') {
+            $tab = 'proses';
+        } else {
+            $tab = 'pembayaran';
+        }
+
+        return redirect()->route('employee.cashier.dashboard', [
+            'open_order' => $id,
+            'tab' => $tab
+        ]);
+    }
 
 
 }
