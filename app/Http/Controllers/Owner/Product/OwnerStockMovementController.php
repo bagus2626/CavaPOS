@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Models\Store\Stock;
+use App\Services\StockRecalculationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -18,10 +19,12 @@ use Illuminate\Validation\Rule;
 class OwnerStockMovementController extends Controller
 {
     protected $unitConversionService;
+    protected $recalculationService;
 
-    public function __construct(UnitConversionService $unitConversionService)
+    public function __construct(UnitConversionService $unitConversionService, StockRecalculationService $recalculationService) // TAMBAHAN: Injection
     {
         $this->unitConversionService = $unitConversionService;
+        $this->recalculationService = $recalculationService;
     }
 
     public function index(Request $request)
@@ -234,6 +237,8 @@ class OwnerStockMovementController extends Controller
 
             // Update stok dengan kuantitas unit dasar
             $stock->increment('quantity', $quantityInBaseUnit);
+
+            $this->recalculationService->recalculateLinkedProducts($stock);
         }
     }
 
@@ -306,6 +311,8 @@ class OwnerStockMovementController extends Controller
             ]);
             // Kurangi stok ASAL
             $stockFrom->decrement('quantity', $quantityInBaseUnit);
+            
+            $this->recalculationService->recalculateLinkedProducts($stockFrom);
 
 
             // --- Validasi & Update Stok TUJUAN (Stock In) ---
@@ -353,6 +360,8 @@ class OwnerStockMovementController extends Controller
             ]);
             // Tambah stok TUJUAN
             $stockTo->increment('quantity', $quantityInBaseUnit);
+
+            $this->recalculationService->recalculateLinkedProducts($stockTo);
         }
     }
 

@@ -25,6 +25,7 @@ class Stock extends Model
         'type',
         'stock_name',
         'quantity',
+        'quantity_reserved',
         'last_price_per_unit',
         'description',
     ];
