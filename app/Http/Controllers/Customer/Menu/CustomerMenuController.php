@@ -35,6 +35,7 @@ use App\Jobs\SendReceiptEmailJob;
 use App\Models\Partner\Products\PartnerProductOptionsRecipe;
 use App\Models\Partner\Products\PartnerProductRecipe;
 use App\Models\Store\Stock;
+use Milon\Barcode\Facades\DNS2DFacade as DNS2D;
 use App\Services\StockRecalculationService;
 use Illuminate\Support\Facades\Schema;
 
@@ -251,7 +252,7 @@ class CustomerMenuController extends Controller
                     "amount" => $payment->paid_amount ?? 0,
                     "given_names" => $request->order_name ?? "unknow",
                     "description" => "Invoice QRIS",
-                    "invoice_duration" => 3600,
+                    "invoice_duration" => 10,
                     "customer" => [
                         "given_names" => $customer ? $customer->name : $request->order_name,
                         "email" => $customer ? $customer->email : "customer@example.com",
@@ -262,8 +263,9 @@ class CustomerMenuController extends Controller
                         "invoice_reminder" => ["whatsapp", "email"],
                         "invoice_paid" => ["whatsapp", "email"]
                     ],
-                    "success_redirect_url" => url("customer/{$partner_slug}/menu/{$table_code}"),
-                    "failure_redirect_url" => url("customer/{$partner_slug}/menu/{$table_code}"),
+                    "success_redirect_url" => url("customer/{$partner_slug}/order-detail/{$table_code}/{$booking_order->id}"),
+                    "failure_redirect_url" => url("customer/{$partner_slug}/order-detail/{$table_code}/{$booking_order->id}"),
+                    // "failure_redirect_url" => url("customer/{$partner_slug}/menu/{$table_code}"),
                     "currency" => "IDR",
                     "items" => $items,
                     //                    "payment_methods" => ["QRIS"],
@@ -546,5 +548,87 @@ class CustomerMenuController extends Controller
                 'message' => 'Gagal memeriksa stok: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function orderDetail(Request $request, $partner_slug, $table_code, $order_id)
+    {
+        // Customer login / guest
+        $customer = Auth::guard('customer')->user() ?? session('guest_customer');
+
+        // Partner & Table
+        $partner = User::where('slug', $partner_slug)->firstOrFail();
+        $table = Table::where('table_code', $table_code)
+            ->where('partner_id', $partner->id)
+            ->firstOrFail();
+
+        // Order + relasi yang dibutuhkan
+        $order = BookingOrder::with([
+            'order_details.order_detail_options.option',
+            'order_details.partnerProduct',
+            'payment',
+            'table',
+        ])->findOrFail($order_id);
+
+        // Validasi kepemilikan
+        if ($order->customer_id) {
+            if (!$customer || ($customer->id ?? null) !== $order->customer_id) {
+                abort(403, 'Kamu tidak bisa melihat pesanan pelanggan lain.');
+            }
+        }
+
+        // mapping indeks status untuk timeline
+        $statusOrder = $order->order_status;
+        $statusIndexMap = [
+            'UNPAID'    => 0,
+            'PAID'      => 1,
+            'PROCESSED' => 2,
+            'SERVED'    => 3,
+        ];
+        $currentIndex = $statusIndexMap[$statusOrder] ?? 0;
+
+        // Label/status utama di atas timeline
+        $headline = '';
+        $subtitle = '';
+
+        switch ($statusOrder) {
+            case 'UNPAID':
+                $headline = 'Status pembayaran';
+                $subtitle = 'Pesanan kamu sudah tercatat, silakan selesaikan pembayaran di kasir atau melalui QRIS.';
+                break;
+            case 'PAID':
+                $headline = 'Menunggu diproses';
+                $subtitle = 'Pembayaran kamu sudah kami terima. Pesanan sedang menunggu diproses oleh kasir/kitchen.';
+                break;
+            case 'PROCESSED':
+                $headline = 'Sedang diproses';
+                $subtitle = 'Pesanan kamu sedang disiapkan. Mohon menunggu, pesanan akan segera disajikan.';
+                break;
+            case 'SERVED':
+                $headline = 'Selesai';
+                $subtitle = 'Pesanan kamu sudah selesai dan telah disajikan. Selamat menikmati!';
+                break;
+            default:
+                $headline = 'Status pesanan';
+                $subtitle = 'Status pesanan tidak dikenal.';
+        }
+
+        // ====== QR CODE 2D UNTUK KASIR ======
+        // Data yang mau di-encode ke QR (bisa kamu sesuaikan formatnya)
+        $qrPayload = $order->booking_order_code;
+
+        // Generate PNG QR, lalu jadikan base64 supaya gampang ditaruh di <img>
+        $qrPngBase64 = DNS2D::getBarcodePNG($qrPayload, 'QRCODE', 6, 6);
+        // =====================================
+
+        return view('pages.customer.orders.detail', [
+            'order'        => $order,
+            'partner'      => $partner,
+            'table'        => $table,
+            'customer'     => $customer,
+            'currentIndex' => $currentIndex,
+            'headline'     => $headline,
+            'subtitle'     => $subtitle,
+            'qrPngBase64'  => $qrPngBase64, // <- kirim ke Blade
+        ]);
     }
 }
