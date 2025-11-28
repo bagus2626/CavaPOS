@@ -575,9 +575,12 @@ window.initPembelianTab = function initPembelianTab() {
 
     function updateState() {
       const checked = checkboxes.filter(c => c.checked);
-      if (prov === 'EXACT') {
-        if (checked.length >= val) checkboxes.forEach(c => { if (!c.checked) c.disabled = true; });
-        else checkboxes.forEach(c => c.disabled = false);
+      if (prov === 'EXACT' && val > 1) {
+          if (checked.length >= val) {
+              checkboxes.forEach(c => { if (!c.checked) c.disabled = true; });
+          } else {
+              checkboxes.forEach(c => c.disabled = false);
+          }
       }
       if (prov === 'MAX' || prov === 'OPTIONAL MAX') {
         if (checked.length >= val) checkboxes.forEach(c => { if (!c.checked) c.disabled = true; });
@@ -611,21 +614,68 @@ window.initPembelianTab = function initPembelianTab() {
     updateState();
   }
   function validateAllProvisions() {
-    const groups = Array.from(modalContent.querySelectorAll('[data-provision-group]'));
-    let allValid = true;
-    groups.forEach(group => {
-      const prov = String(group.dataset.provision || '').toUpperCase();
-      const val  = Number(group.dataset.value);
-      const checked = group.querySelectorAll('input[type="checkbox"]:checked').length;
-      if (prov === 'EXACT' && checked !== val) allValid = false;
-      if (prov === 'MAX' && (checked < 1 || checked > val)) allValid = false;
-      if (prov === 'MIN' && checked < val) allValid = false;
-      if (prov === 'OPTIONAL MAX' && checked > val) allValid = false;
-    });
-    saveModalBtn.disabled = !allValid;
-    saveModalBtn.classList.toggle('opacity-50', !allValid);
-    saveModalBtn.classList.toggle('cursor-not-allowed', !allValid);
+      const groups = Array.from(modalContent.querySelectorAll('[data-provision-group]'));
+      let allValid = true;
+
+      groups.forEach(group => {
+          const prov    = String(group.dataset.provision || '').toUpperCase();
+          const val     = Number(group.dataset.value);
+          const checked = group.querySelectorAll('input[type="checkbox"]:checked').length;
+
+          let groupValid = true;
+          let msg        = '';
+
+          if (prov === 'EXACT' && val > 0) {
+              if (checked !== val) {
+                  groupValid = false;
+                  msg = `Harus memilih tepat ${val} opsi.`;
+              }
+          } else if (prov === 'MAX') {
+              if (checked < 1) {
+                  groupValid = false;
+                  msg = 'Minimal pilih 1 opsi.';
+              } else if (checked > val) {
+                  groupValid = false;
+                  msg = `Maksimal memilih ${val} opsi.`;
+              }
+          } else if (prov === 'MIN') {
+              if (checked < val) {
+                  groupValid = false;
+                  msg = `Minimal memilih ${val} opsi.`;
+              }
+          } else if (prov === 'OPTIONAL MAX') {
+              if (checked > val) {
+                  groupValid = false;
+                  msg = `Maksimal memilih ${val} opsi (opsional).`;
+              }
+          }
+
+          if (!groupValid) {
+              allValid = false;
+          }
+
+          // Kelola error text kecil di bawah group
+          let errEl = group.querySelector('.provision-error');
+          if (!errEl && !groupValid) {
+              errEl = document.createElement('p');
+              errEl.className = 'provision-error text-xs text-red-500 mt-1';
+              group.appendChild(errEl);
+          }
+
+          if (errEl) {
+              if (groupValid) {
+                  errEl.remove();
+              } else {
+                  errEl.textContent = msg;
+              }
+          }
+      });
+
+      saveModalBtn.disabled = !allValid;
+      saveModalBtn.classList.toggle('opacity-50', !allValid);
+      saveModalBtn.classList.toggle('cursor-not-allowed', !allValid);
   }
+
   function calcModalTotal(productData) {
     const baseDisc = Number(productData.discounted_base ?? productData.price) || 0; // <— PAKAI DISCOUNTED
     const optSum = (productData.parent_options || []).reduce((sum, po) => {
@@ -702,7 +752,7 @@ window.initPembelianTab = function initPembelianTab() {
       poDiv.setAttribute('data-provision-group', '');
 
       const title = document.createElement('p');
-      title.className = 'font-semibold mb-2 bg-gray-100 py-1';
+      title.className = 'font-semibold mb-2 bg-gray-100 py-1 px-1';
       title.innerText = po.name;
       const info = provisionInfoText(po.provision, po.provision_value);
       if (info) {
@@ -715,7 +765,7 @@ window.initPembelianTab = function initPembelianTab() {
 
       (po.options || []).forEach(opt => {
         const label = document.createElement('label');
-        label.className = 'flex items-center gap-2 w-full py-1';
+        label.className = 'flex items-center gap-2 w-full py-1 pl-1';
 
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
@@ -744,17 +794,39 @@ window.initPembelianTab = function initPembelianTab() {
           priceSpan.textContent = (priceNum === 0) ? 'Free' : rupiahFmt.format(priceNum);
           const val = parseInt(checkbox.value, 10);
           checkbox.checked = selectedOptions.includes(val);
-          checkbox.addEventListener('change', function() {
-            const v = parseInt(this.value, 10);
-            if (this.checked) {
-              if (!selectedOptions.includes(v)) selectedOptions.push(v);
-            } else {
-              selectedOptions = selectedOptions.filter(x => x !== v);
-            }
-            const pd = getProductDataById(currentProductId);
-            calcModalTotal(pd);
-            validateAllProvisions();
+          // checkbox.addEventListener('change', function() {
+          //   const v = parseInt(this.value, 10);
+          //   if (this.checked) {
+          //     if (!selectedOptions.includes(v)) selectedOptions.push(v);
+          //   } else {
+          //     selectedOptions = selectedOptions.filter(x => x !== v);
+          //   }
+          //   const pd = getProductDataById(currentProductId);
+          //   calcModalTotal(pd);
+          //   validateAllProvisions();
+          // });
+          checkbox.addEventListener('change', function () {
+              const group = poDiv; // grup ini
+              const prov  = String(group.dataset.provision || '').toUpperCase();
+              const val   = Number(group.dataset.value);
+
+              // Khusus EXACT 1: perilaku seperti radio (pindah pilihan)
+              if (prov === 'EXACT' && val === 1 && this.checked) {
+                  group.querySelectorAll('input[type="checkbox"]').forEach(cb2 => {
+                      if (cb2 !== this) cb2.checked = false;
+                  });
+              }
+
+              // Sync selectedOptions dari semua checkbox yang tercentang
+              selectedOptions = Array.from(
+                  modalContent.querySelectorAll('input[type="checkbox"]:checked')
+              ).map(c => parseInt(c.value, 10));
+
+              const pd = getProductDataById(currentProductId);
+              calcModalTotal(pd);
+              validateAllProvisions();
           });
+
         }
 
         label.appendChild(checkbox);
