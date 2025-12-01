@@ -1,15 +1,25 @@
-<div class="filter-tabs-container mb-2">
-  <ul class="nav nav-tabs" id="stockFilterTabs">
-    <li class="nav-item">
-      <a class="nav-link active" href="#" data-filter-type="all">Semua Stok</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="#" data-filter-type="master">Bahan Baku</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="#" data-filter-type="partner">Produk</a>
-    </li>
-  </ul>
+<div class="d-flex flex-wrap align-items-center justify-content-between mb-2">
+
+  <div class="filter-tabs-container">
+    <ul class="nav nav-tabs" id="stockFilterTabs">
+      <li class="nav-item">
+        <a class="nav-link active" href="#" data-filter-type="all">Semua Stok</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#" data-filter-type="master">Bahan Baku</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#" data-filter-type="partner">Produk</a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="ms-auto pt-2 pt-md-0">
+    <a href="{{ route('owner.user-owner.stocks.movements.index') }}" class="btn btn-outline-primary btn-movements">
+      <i class="fas fa-history me-1"></i>
+      Riwayat Pergerakan
+    </a>
+  </div>
 </div>
 
 <div class="sub-filter-container mb-3 ms-3" id="stockPartnerFilterContainer" style="display: none;">

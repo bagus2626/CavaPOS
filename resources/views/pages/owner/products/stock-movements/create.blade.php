@@ -6,7 +6,7 @@
 @section('content')
     <section class="content">
         <div class="container-fluid owner-stocks">
-            <form action="{{ route('owner.user-owner.stock-movements.store') }}" method="POST" id="stockMovementForm">
+            <form action="{{ route('owner.user-owner.movements.store') }}" method="POST" id="stockMovementForm">
                 @csrf
                 {{-- Hidden input untuk Tipe Transaksi --}}
                 <input type="hidden" name="movement_type" id="movement_type" value="{{ $type }}">

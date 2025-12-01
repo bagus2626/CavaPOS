@@ -14,13 +14,13 @@
         </a>
 
         <div class="btn-group">
-          <a href="{{ route('owner.user-owner.stock-movements.create-stock-in') }}" class="btn btn-outline-success">
+          <a href="{{ route('owner.user-owner.stocks.movements.create-stock-in') }}" class="btn btn-outline-success">
             <i class="fas fa-arrow-down fa-fw me-1"></i> Stock In
           </a>
-          <a href="{{ route('owner.user-owner.stock-movements.create-transfer') }}" class="btn btn-outline-info">
+          <a href="{{ route('owner.user-owner.stocks.movements.create-transfer') }}" class="btn btn-outline-info">
             <i class="fas fa-exchange-alt fa-fw me-1"></i> Transfer
           </a>
-          <a href="{{ route('owner.user-owner.stock-movements.create-adjustment') }}" class="btn btn-outline-danger">
+          <a href="{{ route('owner.user-owner.stocks.movements.create-adjustment') }}" class="btn btn-outline-danger">
             <i class="fas fa-arrow-up fa-fw me-1"></i> Adjustment
           </a>
         </div>
