@@ -806,7 +806,7 @@
                         poDiv.setAttribute('data-provision-group', '');
 
                         const title = document.createElement('p');
-                        title.classList.add('font-semibold', 'mb-2', 'bg-gray-100', 'py-1');
+                        title.classList.add('font-semibold', 'mb-2', 'bg-gray-100', 'py-1', 'pl-1');
                         title.innerText = po.name;
 
                         const info = provisionInfoText(po.provision, po.provision_value);
@@ -828,7 +828,7 @@
                             checkbox.classList.add(
                                 'h-5', 'w-5', 'rounded-md', 'border-1', 'border-gray-500',
                                 'transition', 'focus:outline-none', 'focus:ring-2',
-                                'disabled:opacity-60', 'disabled:cursor-not-allowed'
+                                'disabled:opacity-60', 'disabled:cursor-not-allowed', 'ml-1'
                             );
 
                             const nameSpan = document.createElement('span');
@@ -1072,10 +1072,44 @@
                     const prov = String(provision || '').toUpperCase();
                     const val = Number(value);
 
+                    // === KHUSUS EXACT 1 → perilaku seperti radio button ===
+                    if (prov === 'EXACT' && val === 1) {
+                        function updateStateExact1(changedCb = null) {
+                            if (changedCb && changedCb.checked) {
+                                checkboxes.forEach(cb => {
+                                    if (cb !== changedCb) cb.checked = false;
+                                });
+                            }
+
+                            checkboxes.forEach(cb => cb.disabled = false);
+
+                            selectedOptions = Array.from(
+                                modalContent.querySelectorAll('input[type="checkbox"]:checked')
+                            ).map(c => parseInt(c.value, 10));
+
+                            if (currentProductId) {
+                                const pd = productsData.find(p => p.id === currentProductId);
+                                if (pd) calcModalTotal(pd);
+                            }
+
+                            validateAllProvisions();
+                        }
+
+                        checkboxes.forEach(cb => {
+                            cb.disabled = false; // jangan pernah di-disable di mode EXACT 1
+                            cb.addEventListener('change', function () {
+                                updateStateExact1(this);
+                            });
+                        });
+
+                        // init awal
+                        updateStateExact1();
+                        return; 
+                    }
+
                     function updateState() {
                         const checked = checkboxes.filter(c => c.checked);
 
-                        // === aturan provision ===
                         if (prov === 'EXACT') {
                             if (checked.length >= val) {
                                 checkboxes.forEach(c => {
@@ -1111,24 +1145,22 @@
                             }
                         }
 
-                        // === sinkronkan selectedOptions global ===
                         selectedOptions = Array.from(
                             modalContent.querySelectorAll('input[type="checkbox"]:checked')
                         ).map(c => parseInt(c.value, 10));
 
-                        console.log('selectedOptions:', selectedOptions);
-
                         if (currentProductId) {
                             const pd = productsData.find(p => p.id === currentProductId);
-                            calcModalTotal(pd);
+                            if (pd) calcModalTotal(pd);
                         }
 
                         validateAllProvisions();
                     }
 
                     checkboxes.forEach(cb => cb.addEventListener('change', updateState));
-                    updateState(); // initial check
+                    updateState();
                 }
+
 
 
                 function validateAllProvisions() {
