@@ -642,11 +642,8 @@ class CustomerMenuController extends Controller
                 $subtitle = 'Status pesanan tidak dikenal.';
         }
 
-        // ====== QR CODE 2D UNTUK KASIR ======
-        // Data yang mau di-encode ke QR (bisa kamu sesuaikan formatnya)
         $qrPayload = $order->booking_order_code;
 
-        // Generate PNG QR, lalu jadikan base64 supaya gampang ditaruh di <img>
         $qrPngBase64 = DNS2D::getBarcodePNG($qrPayload, 'QRCODE', 6, 6);
         // =====================================
 
@@ -666,22 +663,18 @@ class CustomerMenuController extends Controller
     {
         $customer = Auth::guard('customer')->user();
 
-        // Hanya customer login yang boleh akses
         if (!$customer || !$customer->id) {
             abort(403, 'Maaf, anda tidak bisa mengakses halaman ini.');
         }
 
-        // Ambil outlet/partner
         $partner = User::where('slug', $partner_slug)
             ->where('role', 'partner')
             ->firstOrFail();
 
-        // Ambil meja (opsional: validasi memang milik partner ini)
         $table = Table::where('table_code', $table_code)
             ->where('partner_id', $partner->id)
             ->firstOrFail();
 
-        // Ambil riwayat order milik customer ini di outlet ini
         $order_history = BookingOrder::with([
                 'order_details.order_detail_options.option',
                 'order_details.partnerProduct',
@@ -693,6 +686,21 @@ class CustomerMenuController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
+        if ($request->ajax()) {
+            $view = view('pages.customer.orders.partials._order-cards', [
+                'orderHistory' => $order_history,
+                'partner'      => $partner,
+                'table'        => $table,
+                'partner_slug' => $partner_slug,
+                'table_code'   => $table_code,
+            ])->render();
+
+            return response()->json([
+                'html'          => $view,
+                'next_page_url' => $order_history->nextPageUrl(),
+            ]);
+        }
+
         return view('pages.customer.orders.histories', [
             'partner'       => $partner,
             'table'         => $table,
@@ -702,5 +710,6 @@ class CustomerMenuController extends Controller
             'table_code'    => $table_code,
         ]);
     }
+
 
 }

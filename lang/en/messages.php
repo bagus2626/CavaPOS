@@ -63,6 +63,7 @@ return [
             'customer_name_example' => 'e.g Michael',
             'cancel' => 'Cancel',
             'hot_products' => 'Hot Products',
+            'always_available' => 'Available'
         ],
         'payment' => [
             'show_order_code' => 'Show Order Code',
@@ -87,7 +88,9 @@ return [
                 'paid' => 'Paid',
                 'receipt' => 'Receipt',
                 'you_dont_have_histories' => 'You don’t have any order history in this outlet.',
-                'back_to_menu' => 'Back to Menu'
+                'back_to_menu' => 'Back to Menu',
+                'load_more' => 'Load More',
+                'loading' => 'Loading...'
             ],
             'detail' => [
                 'order_detail' => 'Order Detail',
