@@ -12,7 +12,8 @@ return [
             'language' => 'Language',
             'logout' => 'Logout',
             'logout_guest' => 'Logout (Guest)',
-            'guest' => 'Guest'
+            'guest' => 'Guest',
+            'order_history' => 'Order History'
         ],
         'menu' => [
             'table' => 'Table',
@@ -60,7 +61,8 @@ return [
             'pay_at_cashier' => 'Pay at Cashier',
             'payment' => 'Payment',
             'customer_name_example' => 'e.g Michael',
-            'cancel' => 'Cancel'
+            'cancel' => 'Cancel',
+            'hot_products' => 'Hot Products',
         ],
         'payment' => [
             'show_order_code' => 'Show Order Code',
@@ -68,7 +70,58 @@ return [
             'orderers_name' => 'Orderer’s Name',
             'table_no' => 'Table Number',
             'print' => 'Print',
-            'back_to_menu' => 'Back to Menu'
+            'back_to_menu' => 'Back to Menu',
+            'order_detail' => 'Order Detail'
+        ],
+        'orders' => [
+            'histories' => [
+                'order_history' => 'Order History',
+                'order_list_that_youve_made_in' => 'List of orders you’ve made in',
+                'recent_table' => 'Recent Table',
+                'order_code' => 'Order Code',
+                'date' => 'Date',
+                'table' => 'Table',
+                'method' => 'Method',
+                'payment_not_found' => 'Payment: Not recorded yet',
+                'created' => 'Created',
+                'paid' => 'Paid',
+                'receipt' => 'Receipt',
+                'you_dont_have_histories' => 'You don’t have any order history in this outlet.',
+                'back_to_menu' => 'Back to Menu'
+            ],
+            'detail' => [
+                'order_detail' => 'Order Detail',
+                'order_code' => 'Order Code',
+                'order_name' => 'Order Name',
+                'table_no' => 'Table Number',
+                'your_payment_is_not_paid_yet' => 'Your payment has not been marked as paid.',
+                'please_come_to_the_cashier' => 'Please come to the cashier and complete the payment by showing the following code.',
+                'name' => 'Name',
+                'show_this_qr' => 'Show this QR / code to the cashier to complete your payment.',
+                'no_payment_found' => 'No payment has been recorded for this order.',
+                'waiting_for_payment' => 'Waiting for Payment',
+                'waiting_for_payment_desc' => 'The order has been recorded. Please proceed with the payment.',
+                'waiting_to_be_processed' => 'Waiting to be Processed',
+                'waiting_to_be_processed_desc' => 'Payment received. The order is waiting in queue to be processed by staff.',
+                'being_processed' => 'Being Processed',
+                'being_processed_desc' => 'Your order is currently being prepared.',
+                'served' => 'Completed',
+                'served_desc' => 'Your order is complete and has been handed over to you.',
+                'order_status' => 'Order Status',
+                'qty' => 'Qty',
+                'note' => 'Note',
+                'item_not_found' => 'No items found in this order.',
+                'order_total' => 'Order Total',
+                'payment_detail' => 'Payment Detail',
+                'payment_method' => 'Payment Method',
+                'payment_status' => 'Payment Status',
+                'total_paid' => 'Total Paid',
+                'change' => 'Change',
+                'paid_at' => 'Paid At',
+                'no_payment_found_please_confirm_to_cashier' => 'No payment data recorded yet. If you have already paid, please confirm to the cashier.',
+                'back_to_menu' => 'Back to Menu',
+                'download_receipt' => 'Download Receipt'
+            ],
         ],
     ],
     'owner' => [
@@ -632,6 +685,7 @@ return [
                 'created' => 'Created',
                 'last_updated' => 'Last Updated',
                 'owner' => 'Owner',
+                'hot_product' => 'Hot Product',
             ],
             'categories' => [
                 'categories' => 'Categories',
@@ -652,6 +706,12 @@ return [
                 'back' => 'Back',
                 'edit_category' => 'Edit Category',
                 'update' => 'Update',
+
+                'category_order' => 'Category Order',
+                'reorder_categories' => 'Reorder Categories',
+                'drag_drop_instruction' => 'Drag and drop to reorder categories.',
+                'close' => 'Close',
+                'save_order' => 'Save Order',
             ],
             'promotions' => [
                 'promotion_list' => 'Promotion List',

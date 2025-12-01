@@ -13,6 +13,7 @@ return [
             'logout' => 'Keluar',
             'logout_guest' => 'Keluar (Tamu)',
             'guest' => 'Tamu',
+            'order_history' => 'Riwayat Pesanan'
         ],
         'menu' => [
             'table' => 'Meja',
@@ -60,7 +61,8 @@ return [
             'pay_at_cashier' => 'Bayar di Kasir',
             'payment' => 'Pembayaran',
             'customer_name_example' => 'Contoh: Budi Setiawan',
-            'cancel' => 'Batal'
+            'cancel' => 'Batal',
+            'hot_products' => 'Produk Unggulan',
         ],
         'payment' => [
             'show_order_code' => 'Tunjukkan Kode Pemesanan',
@@ -68,7 +70,58 @@ return [
             'orderers_name' => 'Nama Pemesan',
             'table_no' => 'Nomor Meja',
             'print' => 'Cetak',
-            'back_to_menu' => 'Kembali ke Menu'
+            'back_to_menu' => 'Kembali ke Menu',
+            'order_detail' => 'Detail Order'
+        ],
+        'orders' => [
+            'histories' => [
+                'order_history' => 'Riwayat Pesanan',
+                'order_list_that_youve_made_in' => 'Daftar pesanan yang pernah kamu buat di',
+                'recent_table' => 'Meja terakhir',
+                'order_code' => 'Kode Pesanan',
+                'date' => 'Tanggal',
+                'table' => 'Meja',
+                'method' => 'Metode',
+                'payment_not_found' => 'Pembayaran: Belum tercatat',
+                'created' => 'Dibuat',
+                'paid' => 'Dibayar',
+                'receipt' => 'Struk',
+                'you_dont_have_histories' => 'Kamu belum memiliki riwayat pesanan di outlet ini.',
+                'back_to_menu' => 'Kembali ke menu'
+            ],
+            'detail' => [
+                'order_detail' => 'Detail Pesanan',
+                'order_code' => 'Kode Pesanan',
+                'order_name' => 'Nama Pemesan',
+                'table_no' => 'Nomor Meja',
+                'your_payment_is_not_paid_yet' => 'Pembayaran kamu belum dinyatakan lunas.',
+                'please_come_to_the_cashier' => 'Silakan datang ke kasir dan selesaikan pembayaran dengan menunjukkan kode berikut.',
+                'name' => 'Nama',
+                'show_this_qr' => 'Tunjukkan QR / kode ini ke kasir untuk menyelesaikan pembayaran.',
+                'no_payment_found' => 'Pembayaran untuk pesanan ini belum tercatat.',
+                'waiting_for_payment' => 'Menunggu pembayaran',
+                'waiting_for_payment_desc' => 'Pesanan sudah tercatat. Silakan lakukan pembayaran.',
+                'waiting_to_be_processed' => 'Menunggu diproses',
+                'waiting_to_be_processed_desc' => 'Pembayaran diterima. Pesanan menunggu antrian untuk diproses oleh pegawai.',
+                'being_processed' => 'Sedang diproses',
+                'being_processed_desc' => 'Pesanan sedang disiapkan.',
+                'served' => 'Selesai',
+                'served_desc' => 'Pesanan sudah selesai dan diserahkan ke pelanggan',
+                'order_status' => 'Status Pesanan',
+                'qty' => 'Jml',
+                'note' => 'Catatan',
+                'item_not_found' => 'Tidak ada item pada pesanan ini.',
+                'order_total' => 'Total Pesanan',
+                'payment_detail' => 'Detail Pembayaran',
+                'payment_method' => 'Metode Pembayaran',
+                'payment_status' => 'Status Pembayaran',
+                'total_paid' => 'Total dibayar',
+                'change' => 'Kembalian',
+                'paid_at' => 'Dibayar pada',
+                'no_payment_found_please_confirm_to_cashier' => 'Belum ada data pembayaran tercatat. Jika kamu sudah membayar, silakan konfirmasi ke kasir.',
+                'back_to_menu' => 'Kembali ke menu',
+                'download_receipt' => 'Download Struk'
+            ],
         ],
     ],
     'owner' => [
@@ -630,7 +683,8 @@ return [
                 'save_changes' => 'Simpan Perubahan',
                 'created' => 'Dibuat',
                 'last_updated' => 'Terakhir Diperbarui',
-                'owner' => 'Pemilik'
+                'owner' => 'Pemilik',
+                'hot_product' => 'Produk Unggulan',
             ],
             'categories' => [
                 'categories' => 'Kategori',
@@ -650,7 +704,12 @@ return [
                 'save' => 'Simpan',
                 'back' => 'Kembali',
                 'edit_category' => 'Ubah Kategori',
-                'update' => 'Perbarui'
+                'update' => 'Perbarui',
+                'category_order' => 'Urutan Kategori',
+                'reorder_categories' => 'Atur ulang Kategori',
+                'drag_drop_instruction' => 'Seret dan lepas untuk mengatur ulang urutan kategori.',
+                'close' => 'Tutup',
+                'save_order' => 'Simpan Urutan',
             ],
             'promotions' => [
                 'promotion_list' => 'Daftar Promosi',

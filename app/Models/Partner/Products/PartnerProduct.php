@@ -19,13 +19,14 @@ class PartnerProduct extends Model
     protected $fillable = [
         'product_code',
         'is_active',
+        'is_hot_product',
         'master_product_id',
         'owner_id',
         'partner_id',
         'category_id',
         'name',
         'stock_type',
-        'quantity',
+        'available_linked_quantity',
         'always_available_flag',
         'price',
         'pictures',
@@ -97,19 +98,26 @@ class PartnerProduct extends Model
         $converter = app(UnitConversionService::class);
         $recipeCalc = app(LinkedStockCalculatorService::class);
 
-        // 1. Logika untuk Linked Stock (Perhitungan Faktor Pembatas)
+        // 1. Logika untuk Linked Stock (Membaca Kolom Cache)
         if ($this->stock_type === 'linked') {
-            // Panggil service untuk menghitung ketersediaan (dalam porsi)
-            return $recipeCalc->calculateLinkedQuantity($this);
+
+            // // hapus kode ini jika sudah menkadlankan StockRecalculationService
+            // $cachedQty = (float) $this->available_linked_quantity;
+            // if ($cachedQty > 0) {
+            //     return $cachedQty;
+            // }
+            // return $recipeCalc->calculateLinkedQuantity($this);
+
+            // Ambil nilai dari kolom yang sudah dihitung dan disimpan
+            return (float) $this->available_linked_quantity;
         }
 
-        // 2. Logika untuk Direct Stock (Konversi dari Base Unit)
+        // 2. Logika untuk Direct Stock (Tetap Konversi Langsung)
         elseif ($this->stock_type === 'direct') {
             if ($this->stock) {
-                // Konversi quantity (base unit) ke display unit-nya (misal Pcs)
                 return $converter->convertToDisplayUnit(
-                    $this->stock->quantity,
-                    $this->stock->display_unit_id // ID unit display yang tersimpan di tabel stocks
+                    $this->stock->quantity - ($this->stock->quantity_reserved ?? 0),
+                    $this->stock->display_unit_id
                 );
             }
             return 0.00;

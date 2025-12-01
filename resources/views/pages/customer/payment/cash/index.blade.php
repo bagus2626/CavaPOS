@@ -48,10 +48,10 @@
 
     {{-- Aksi --}}
     <div class="mt-6 flex items-center justify-center gap-3">
-      <button onclick="window.print()"
+      <a href="{{ route('customer.orders.order-detail', [$partner?->slug ?? '', $table->table_code, $order->id]) }}"
               class="px-4 py-2 rounded-lg border hover:bg-gray-50">
-        {{__('messages.customer.payment.print')}}
-      </button>
+        {{__('messages.customer.payment.order_detail')}}
+      </a>
       <a href="{{ route('customer.menu.index', [$partner?->slug ?? '', $table->table_code]) }}"
          class="px-4 py-2 rounded-lg bg-choco text-white hover:bg-soft-choco">
         {{__('messages.customer.payment.back_to_menu')}}

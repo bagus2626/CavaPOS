@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Models\Store\Stock;
+use App\Services\StockRecalculationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -18,10 +19,12 @@ use Illuminate\Validation\Rule;
 class OwnerStockMovementController extends Controller
 {
     protected $unitConversionService;
+    protected $recalculationService;
 
-    public function __construct(UnitConversionService $unitConversionService)
+    public function __construct(UnitConversionService $unitConversionService, StockRecalculationService $recalculationService) // TAMBAHAN: Injection
     {
         $this->unitConversionService = $unitConversionService;
+        $this->recalculationService = $recalculationService;
     }
 
     public function index(Request $request)
@@ -225,26 +228,17 @@ class OwnerStockMovementController extends Controller
                 $inputUnitId
             );
 
-            // Konversi harga per unit ke harga per unit dasar
-            // Harga per base unit = harga per display unit / conversion factor
-            $selectedUnit = MasterUnit::find($inputUnitId);
-            $conversionFactor = $selectedUnit ? $selectedUnit->base_unit_conversion_value : 1;
-            $pricePerBaseUnit = ($conversionFactor > 0) ? ($inputUnitPrice / $conversionFactor) : 0;
-
             // Simpan data yang sudah terkonversi
             $movement->items()->create([
                 'stock_id' => $stock->id,
                 'quantity' => $quantityInBaseUnit,
-                'unit_price' => $pricePerBaseUnit,
+                'unit_price' => $inputUnitPrice,
             ]);
 
             // Update stok dengan kuantitas unit dasar
             $stock->increment('quantity', $quantityInBaseUnit);
 
-            if (isset($item['unit_price'])) {
-                // Simpan harga unit dasar sebagai harga beli terakhir
-                $stock->update(['last_price_per_unit' => $pricePerBaseUnit]);
-            }
+            $this->recalculationService->recalculateLinkedProducts($stock);
         }
     }
 
@@ -317,6 +311,8 @@ class OwnerStockMovementController extends Controller
             ]);
             // Kurangi stok ASAL
             $stockFrom->decrement('quantity', $quantityInBaseUnit);
+            
+            $this->recalculationService->recalculateLinkedProducts($stockFrom);
 
 
             // --- Validasi & Update Stok TUJUAN (Stock In) ---
@@ -364,6 +360,8 @@ class OwnerStockMovementController extends Controller
             ]);
             // Tambah stok TUJUAN
             $stockTo->increment('quantity', $quantityInBaseUnit);
+
+            $this->recalculationService->recalculateLinkedProducts($stockTo);
         }
     }
 
@@ -396,7 +394,7 @@ class OwnerStockMovementController extends Controller
             }
 
             $unitPriceFormatted = $item->unit_price !== null
-                ? 'Rp ' . number_format($item->unit_price, 2, ',', '.') . ' / base'
+                ? 'Rp ' . number_format($item->unit_price, 2, ',', '.') . ''
                 : '-';
 
             return [

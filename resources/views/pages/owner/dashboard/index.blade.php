@@ -76,8 +76,8 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($data['last_orders'] as $order)
-                                        <tr>
-                                            <td><a href="#">{{ $order->booking_order_code ?? '-' }}</a></td>
+                                        <tr style="cursor: pointer;" data-toggle="modal" data-target="#orderDetailModal{{ $order->id }}">
+                                            <td><a href="#" class="order-link">{{ $order->booking_order_code ?? '-' }}</a></td>
                                             <td>{{ $order->partner_name ?? '-' }}</td>
                                             <td>{{ $order->customer_name ?? '-' }}</td>
                                             <td>
@@ -101,6 +101,8 @@
                             </table>
                         </div>
                     </div>
+                    <!-- Modal untuk setiap order -->
+                    @include('pages.owner.dashboard.partials.recent-order-modal')
                 </div>
             </div>
 

@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Store\MasterUnit;
-use Illuminate\Support\Facades\Cache; // Opsional: Untuk caching unit
 
 class UnitConversionService
 {
@@ -47,11 +46,6 @@ class UnitConversionService
      */
     private function getUnit(int $unitId): ?MasterUnit
     {
-        // Jika Anda ingin mengaktifkan caching, Anda dapat menggunakan Cache::remember
-        // return Cache::remember("master_unit_{$unitId}", now()->addHours(1), function () use ($unitId) {
-        //     return MasterUnit::find($unitId);
-        // });
-
         return MasterUnit::find($unitId);
     }
 }

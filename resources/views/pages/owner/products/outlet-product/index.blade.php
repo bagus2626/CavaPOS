@@ -84,7 +84,53 @@
                   @forelse($rows as $p)
                     <tr data-outlet="{{ $o->id }}" data-category="{{ $p->category_id }}">
                       <td>{{ $no++ }}</td>
-                      <td>{{ $p->name ?? $p->product_name }}</td>
+                      <td class="d-flex align-items-center gap-2">
+                          {{-- Wrapper agar bisa tempel badge di atas gambar --}}
+                          <div class="position-relative" style="width:40px; height:40px;">
+                              {{-- Tampilkan gambar jika ada --}}
+                              @if(!empty($p->pictures) && isset($p->pictures[0]['path']))
+                                  <img src="{{ asset($p->pictures[0]['path']) }}"
+                                      alt="{{ $p->name ?? $p->product_name }}"
+                                      style="width:40px; height:40px; object-fit:cover; border-radius:6px;">
+                              @else
+                                  {{-- Placeholder tanpa gambar --}}
+                                  <div style="
+                                      width:40px; height:40px;
+                                      background:#f3f4f6;
+                                      border-radius:6px;
+                                      display:flex;
+                                      align-items:center;
+                                      justify-content:center;
+                                      font-size:12px;
+                                      color:#9ca3af;
+                                  ">
+                                      <i class="fas fa-image"></i>
+                                  </div>
+                              @endif
+
+                              {{-- HOT BADGE jika produk hot --}}
+                              @if($p->is_hot_product)
+                                  <span style="
+                                      position:absolute;
+                                      top:-6px;
+                                      right:-6px;
+                                      background:#ff5722;
+                                      color:white;
+                                      padding:2px 6px;
+                                      border-radius:8px;
+                                      font-size:10px;
+                                      font-weight:600;
+                                      box-shadow:0 2px 6px rgba(0,0,0,0.2);
+                                  ">
+                                      HOT
+                                  </span>
+                              @endif
+
+                          </div>
+                          {{-- Nama produk --}}
+                          <span class="ml-1">{{ $p->name ?? $p->product_name }}</span>
+
+                      </td>
                       <td>{{ $p->category->category_name ?? '-' }}</td>
                       {{-- <td>
                         @if($p->always_available_flag === 1)

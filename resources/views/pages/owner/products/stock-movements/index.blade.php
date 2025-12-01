@@ -179,7 +179,7 @@
                   <th>Nama Barang</th>
                   <th class="text-right">Kuantitas</th>
                   <th>Unit</th>
-                  <th class="text-right">Harga Beli (per Base Unit)</th>
+                  <th class="text-right">Harga Beli</th>
                 </tr>
               </thead>
               <tbody id="movementDetailTableBody">
@@ -244,26 +244,23 @@
             // Ambil tipe pergerakan dari response (in / out / transfer)
             var movementType = response.movement.type;
 
-            // Isi tabel
             tableBody.empty();
 
             if (response.items && response.items.length > 0) {
               $.each(response.items, function (index, item) {
 
-                // --- PERUBAHAN LOGIKA DI SINI ---
                 var qtyClass = '';
                 var qtySign = '';
 
                 // Cek tipe pergerakan dari parent (movement) atau item itu sendiri
                 // Jika movement 'out', atau item spesifik ini tipenya 'out'
                 if (movementType === 'out' || item.type === 'out') {
-                  qtyClass = 'text-danger'; // Merah
+                  qtyClass = 'text-danger';
                   qtySign = '-';
                 } else {
-                  qtyClass = 'text-success'; // Hijau (default untuk 'in')
+                  qtyClass = 'text-success';
                   qtySign = '+';
                 }
-                // -------------------------------
 
                 var row = `
                         <tr>

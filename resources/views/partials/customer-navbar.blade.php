@@ -35,16 +35,30 @@
                 // Nama yang akan ditampilkan
                 $displayName = $authCustomer?->name ?? ($guest->name ?? null);
             @endphp
+            @php
+                // Ambil context dari variabel view, query, atau session
+                $ps = $partner_slug ?? null ?: request('partner_slug') ?: session('customer.partner_slug');
+                $tc = $table_code ?? null ?: request('table_code') ?: session('customer.table_code');
+
+                // Tentukan action logout yang aman di semua halaman
+                $logoutAction =
+                    $ps && $tc
+                        ? route('customer.logout', ['partner_slug' => $ps, 'table_code' => $tc])
+                        : route('customer.logout.simple'); // <-- fallback tanpa parameter
+            @endphp
 
             {{-- Brand dengan Logo --}}
             <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
                 @if ($currentOutlet && $currentOutlet->logo && (auth('customer')->check() || session('guest_customer')))
+                <a href="{{ route('customer.menu.index', ['partner_slug' => $ps, 'table_code' => $tc]) }}">
                     <img src="{{ asset('storage/' . $currentOutlet->logo) }}"
                         class="h-14 w-14 object-contain rounded-md">
+                </a>
+                    
                 @else
-                    {{-- <a href="{{ url('/') }}" class="text-xl font-bold text-choco">
-                        {{ config('app.name', 'FoodBee') }}
-                    </a> --}}
+                    <a href="{{ route('customer.menu.index', ['partner_slug' => $ps, 'table_code' => $tc]) }}" class="text-xl font-bold text-choco">
+                        {{ $currentOutlet->name ?? '' }}
+                    </a>
                 @endif
             </div>
 
@@ -115,17 +129,21 @@
                         </button>
                     </div>
                 </div>
-                @php
-                    // Ambil context dari variabel view, query, atau session
-                    $ps = $partner_slug ?? null ?: request('partner_slug') ?: session('customer.partner_slug');
-                    $tc = $table_code ?? null ?: request('table_code') ?: session('customer.table_code');
-
-                    // Tentukan action logout yang aman di semua halaman
-                    $logoutAction =
-                        $ps && $tc
-                            ? route('customer.logout', ['partner_slug' => $ps, 'table_code' => $tc])
-                            : route('customer.logout.simple'); // <-- fallback tanpa parameter
-                @endphp
+                {{-- Tombol Order History (Desktop, ikon saja) --}}
+                @if ($ps && $tc && auth('customer')->check())
+                    <a href="{{ route('customer.orders.histories', ['partner_slug' => $ps, 'table_code' => $tc]) }}"
+                    class="inline-flex items-center justify-center w-9 h-9 rounded-full
+                            text-choco bg-white hover:bg-soft-choco hover:text-white transition-colors duration-150"
+                    title="{{ __('messages.customer.navbar.order_history') }}">
+                        {{-- Icon History --}}
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            fill="none" viewBox="0 0 24 24" stroke-width="2.1" stroke="currentColor"
+                            class="w-7 h-7">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 6v6l4 2m4-2a8 8 0 11-16 0 8 8 0 0116 0z" />
+                        </svg>
+                    </a>
+                @endif
 
                 @auth('customer')
                     <form class="my-auto" method="POST" action="{{ $logoutAction }}">
@@ -222,6 +240,27 @@
                 </div>
             </div>
         </div>
+
+        <a href="{{ route('customer.menu.index', ['partner_slug' => $ps, 'table_code' => $tc]) }}"
+            class="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium 
+                    text-choco bg-white hover:bg-soft-choco transition-colors hover:text-white duration-150 w-full">
+                    Menu
+        </a>
+
+        {{-- Tombol Order History (Desktop) --}}
+        @if ($ps && $tc && auth('customer')->check())
+            <a href="{{ route('customer.orders.histories', ['partner_slug' => $ps, 'table_code' => $tc]) }}"
+            class="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium 
+                    text-choco bg-white hover:bg-soft-choco transition-colors hover:text-white duration-150 w-full">
+                <span>{{ __('messages.customer.navbar.order_history') }}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" 
+                    fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor" 
+                    class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" 
+                        d="M12 6v6l4 2m4-2a8 8 0 11-16 0 8 8 0 0116 0z" />
+                </svg>
+            </a>
+        @endif
 
         @auth('customer')
             <form method="POST" action="{{ $logoutAction }}">
