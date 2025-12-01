@@ -1,6 +1,6 @@
 @extends('layouts.customer')
 
-@section('title', 'Detail Pesanan')
+@section('title', __('messages.customer.orders.detail.order_detail'))
 
 @section('content')
 @php
@@ -12,7 +12,7 @@
         <div class="flex items-start justify-between gap-4">
             <div>
                 <h1 class="text-xl md:text-2xl font-semibold text-gray-900">
-                    Detail Pesanan
+                    {{ __('messages.customer.orders.detail.order_detail') }}
                 </h1>
                 <p class="text-sm text-gray-600 mt-1">
                     {{ $headline }}
@@ -23,7 +23,7 @@
             </div>
             <div class="text-right text-sm">
                 <div class="font-mono text-xs uppercase text-gray-500">
-                    Kode Pesanan
+                    {{ __('messages.customer.orders.detail.order_code') }}
                 </div>
                 <div class="font-semibold tracking-widest">
                     {{ $order->booking_order_code }}
@@ -37,13 +37,13 @@
         {{-- Info pemesan & meja --}}
         <div class="mt-6 grid grid-cols-2 gap-4 text-sm">
             <div>
-                <div class="text-gray-500">Nama pemesan</div>
+                <div class="text-gray-500">{{ __('messages.customer.orders.detail.order_name') }}</div>
                 <div class="font-semibold">
                     {{ $order->customer_name }}
                 </div>
             </div>
             <div>
-                <div class="text-gray-500">Nomor meja</div>
+                <div class="text-gray-500">{{ __('messages.customer.orders.detail.table_no') }}</div>
                 <div class="font-semibold">
                     {{ $table->table_no ?? '-' }}
                 </div>
@@ -57,7 +57,7 @@
                     <div class="flex-1 space-y-2">
                         <div class="flex flex-wrap items-center gap-2">
                             <p class="font-semibold text-amber-900">
-                                Pembayaran kamu belum dinyatakan lunas.
+                                {{ __('messages.customer.orders.detail.your_payment_is_not_paid_yet') }}
                             </p>
                             <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-white text-[11px] font-semibold border border-amber-300 text-amber-800">
                                 Status: {{ $payment->payment_status }}
@@ -65,7 +65,7 @@
                         </div>
 
                         <p class="text-xs md:text-sm text-amber-800">
-                            Silakan datang ke kasir dan selesaikan pembayaran dengan menunjukkan kode berikut.
+                            {{ __('messages.customer.orders.detail.please_come_to_the_cashier') }}
                         </p>
 
                         {{-- Kartu QR + Detail --}}
@@ -86,7 +86,7 @@
                                 <div class="flex-1 text-center md:text-left space-y-2">
                                     <div>
                                         <div class="text-[10px] uppercase text-gray-500 tracking-wide">
-                                            Booking Code
+                                            {{ __('messages.customer.orders.detail.order_code') }}
                                         </div>
                                         <div class="font-mono text-base font-semibold tracking-[0.35em]">
                                             {{ $order->booking_order_code }}
@@ -95,7 +95,7 @@
 
                                     <div>
                                         <div class="text-[10px] uppercase text-gray-500 tracking-wide mt-1">
-                                            Nama
+                                            {{ __('messages.customer.orders.detail.name') }}
                                         </div>
                                         <div class="text-xs font-medium text-gray-800">
                                             {{ $order->customer_name }}
@@ -103,7 +103,7 @@
                                     </div>
 
                                     <p class="mt-1 text-[11px] text-gray-500">
-                                        Tunjukkan QR / kode ini ke kasir untuk menyelesaikan pembayaran.
+                                        {{ __('messages.customer.orders.detail.show_this_qr') }}
                                     </p>
                                 </div>
                             </div>
@@ -121,10 +121,10 @@
 
                     <div class="flex-1 space-y-2">
                         <p class="font-semibold text-amber-900">
-                            Pembayaran untuk pesanan ini belum tercatat.
+                            {{ __('messages.customer.orders.detail.no_payment_found') }}
                         </p>
                         <p class="text-xs md:text-sm text-amber-800">
-                            Silakan datang ke kasir dan selesaikan pembayaran dengan menunjukkan kode berikut.
+                            {{ __('messages.customer.orders.detail.please_come_to_the_cashier') }}
                         </p>
 
                         {{-- Kartu QR + Detail --}}
@@ -145,7 +145,7 @@
                                 <div class="flex-1 text-center md:text-left space-y-2">
                                     <div>
                                         <div class="text-[10px] uppercase text-gray-500 tracking-wide">
-                                            Booking Code
+                                            {{ __('messages.customer.orders.detail.order_code') }}
                                         </div>
                                         <div class="font-mono text-base font-semibold tracking-[0.35em]">
                                             {{ $order->booking_order_code }}
@@ -154,7 +154,7 @@
 
                                     <div>
                                         <div class="text-[10px] uppercase text-gray-500 tracking-wide mt-1">
-                                            Nama
+                                            {{ __('messages.customer.orders.detail.name') }}
                                         </div>
                                         <div class="text-xs font-medium text-gray-800">
                                             {{ $order->customer_name }}
@@ -162,7 +162,7 @@
                                     </div>
 
                                     <p class="mt-1 text-[11px] text-gray-500">
-                                        Tunjukkan QR / kode ini ke kasir untuk menyelesaikan pembayaran.
+                                        {{ __('messages.customer.orders.detail.show_this_qr') }}
                                     </p>
                                 </div>
                             </div>
@@ -180,26 +180,26 @@
             $steps = [
                 [
                     'key'   => 'UNPAID',
-                    'title' => 'Menunggu pembayaran',
-                    'desc'  => 'Pesanan sudah tercatat. Silakan lakukan pembayaran.',
+                    'title' => __('messages.customer.orders.detail.waiting_for_payment'),
+                    'desc'  => __('messages.customer.orders.detail.waiting_for_payment_desc'),
                     'icon'  => asset('icons/icon-payment-90.png'),
                 ],
                 [
                     'key'   => 'PAID',
-                    'title' => 'Menunggu diproses',
-                    'desc'  => 'Pembayaran diterima. Pesanan menunggu diproses oleh pegawai.',
+                    'title' => __('messages.customer.orders.detail.waiting_to_be_processed'),
+                    'desc'  => __('messages.customer.orders.detail.waiting_to_be_processed_desc'),
                     'icon'  => asset('icons/icon-time-90.png'),
                 ],
                 [
                     'key'   => 'PROCESSED',
-                    'title' => 'Sedang diproses',
-                    'desc'  => 'Pesanan sedang disiapkan.',
+                    'title' => __('messages.customer.orders.detail.being_processed'),
+                    'desc'  => __('messages.customer.orders.detail.being_processed_desc'),
                     'icon'  => asset('icons/icon-process-100.png'),
                 ],
                 [
                     'key'   => 'SERVED',
-                    'title' => 'Selesai',
-                    'desc'  => 'Pesanan sudah selesai dan disajikan.',
+                    'title' => __('messages.customer.orders.detail.served'),
+                    'desc'  => __('messages.customer.orders.detail.served_desc'),
                     'icon'  => asset('icons/icon-done-128.png'),
                 ],
             ];
@@ -223,55 +223,61 @@
         @endphp
 
         <div class="mt-8">
-            <h2 class="text-sm font-semibold text-gray-800 mb-3">Status Pesanan</h2>
+            <h2 class="text-sm font-semibold text-gray-800 mb-3">{{ __('messages.customer.orders.detail.order_status') }}</h2>
 
             <div class="mt-4 px-4">
-                {{-- BARIS 1: BULLET + GARIS --}}
-                <div class="relative flex items-center justify-between">
-                    <div class="absolute left-0 right-0 h-1 bg-gray-200 rounded-full z-0"></div>
+                <div class="relative">
+                    <div class="absolute left-0 right-0 top-4 h-1 bg-gray-200 rounded-full z-0"></div>
 
-                    <div class="absolute left-0 h-1 bg-choco rounded-full z-0"
-                         style="width: {{ $progressPercent }}%;"></div>
+                    <div class="absolute left-0 top-4 h-1 bg-choco rounded-full z-0"
+                        style="width: {{ $progressPercent }}%;"></div>
+                    <div class="relative flex justify-between z-10">
+                        @foreach ($steps as $index => $step)
+                            @php
+                                $isDone   = $index < $currentIndex;
+                                $isActive = $index === $currentIndex;
+                            @endphp
 
-                    @foreach ($steps as $index => $step)
-                        @php
-                            $isDone   = $index < $currentIndex;
-                            $isActive = $index === $currentIndex;
-                        @endphp
-
-                        <div class="flex items-center justify-center w-1/4 relative z-10">
-                            <div class="w-8 h-8 rounded-full border-2 flex items-center justify-center overflow-hidden
-                                @if($isDone || $isActive)
-                                    bg-choco border-choco
-                                @else
-                                    bg-white border-gray-300
+                            <div class="flex flex-col items-center w-1/4 text-center">
+                                {{-- BULLET --}}
+                                <div class="w-8 h-8 rounded-full border-2 flex items-center justify-center overflow-hidden
+                                    @if($isDone || $isActive)
+                                        bg-choco border-choco
+                                    @else
+                                        bg-white border-gray-300
+                                    @endif
+                                ">
+                                    <img src="{{ $step['icon'] }}"
+                                        class="w-5 h-5 object-contain"
+                                        alt="icon">
+                                </div>
+                                <p class="mt-2 text-[11px] font-semibold
+                                    @if($isActive)
+                                        text-choco
+                                    @elseif($isDone)
+                                        text-gray-700
+                                    @else
+                                        text-gray-400
+                                    @endif
+                                ">
+                                    {{ $step['title'] }}
+                                </p>
+                                {{-- DESKRIPSI (hanya untuk status aktif) --}}
+                                @if($isActive)
+                                    <p class="mt-1 text-[10px] text-gray-600">
+                                        {{ $step['desc'] }}
+                                    </p>
                                 @endif
-                            ">
-                                <img src="{{ $step['icon'] }}"
-                                     class="w-5 h-5 object-contain"
-                                     alt="icon">
                             </div>
-                        </div>
-                    @endforeach
-                </div>
-
-                {{-- INFO STATUS SAAT INI --}}
-                <div class="mt-4 rounded-xl bg-slate-50 px-4 py-3">
-                    <div class="flex items-center gap-2">
-                        <p class="text-sm font-semibold text-choco">
-                            {{ $currentStep['title'] }}
-                        </p>
+                        @endforeach
                     </div>
-                    <p class="mt-1 text-xs text-gray-600">
-                        {{ $currentStep['desc'] }}
-                    </p>
                 </div>
             </div>
         </div>
 
         {{-- Detail Item Pesanan --}}
         <div class="mt-8">
-            <h2 class="text-sm font-semibold text-gray-800 mb-3">Rincian Pesanan</h2>
+            <h2 class="text-sm font-semibold text-gray-800 mb-3">{{ __('messages.customer.orders.detail.order_detail') }}</h2>
             <div class="space-y-3">
                 @forelse ($order->order_details as $detail)
                     @php
@@ -286,7 +292,7 @@
                                     {{ $detail->product_name }}
                                 </p>
                                 <p class="text-xs text-gray-500">
-                                    Qty: {{ $detail->quantity }} ×
+                                    {{ __('messages.customer.orders.detail.qty') }}: {{ $detail->quantity }} ×
                                     Rp {{ number_format($detail->base_price, 0, ',', '.') }}
                                 </p>
                             </div>
@@ -316,19 +322,19 @@
 
                         @if($detail->customer_note)
                             <p class="mt-1 text-xs text-gray-700 italic">
-                                Catatan: {{ $detail->customer_note }}
+                                {{ __('messages.customer.orders.detail.note') }}: {{ $detail->customer_note }}
                             </p>
                         @endif
                     </div>
                 @empty
                     <p class="text-sm text-gray-500">
-                        Tidak ada item pada pesanan ini.
+                        {{ __('messages.customer.orders.detail.item_not_found') }}
                     </p>
                 @endforelse
             </div>
 
             <div class="mt-4 border-t pt-3 flex items-center justify-between text-sm">
-                <span class="text-gray-600">Total pesanan</span>
+                <span class="text-gray-600">{{ __('messages.customer.orders.detail.order_total') }}</span>
                 <span class="font-semibold text-gray-900">
                     Rp {{ number_format($order->total_order_value, 0, ',', '.') }}
                 </span>
@@ -337,20 +343,28 @@
 
         {{-- Detail Pembayaran --}}
         <div class="mt-8">
-            <h2 class="text-sm font-semibold text-gray-800 mb-3">Detail Pembayaran</h2>
+            <h2 class="text-sm font-semibold text-gray-800 mb-3">{{ __('messages.customer.orders.detail.payment_detail') }}</h2>
 
             @if($payment)
                 <div class="border rounded-xl p-4 bg-slate-50 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                     <div>
                         <p class="text-xs text-gray-500 uppercase tracking-wide">
-                            Metode Pembayaran
+                            {{ __('messages.customer.orders.detail.payment_method') }}
                         </p>
                         <p class="text-sm font-semibold text-gray-900">
-                            {{ $payment->payment_type ?? $order->payment_method }}
+                            <span class="inline-flex items-center gap-1 px-1 py-1 rounded-md text-[11px] font-medium border border-gray-200 bg-white text-gray-700">
+                                @if ($payment->payment_type == 'QRIS')
+                                <img src="{{ asset('icons/qris_svg.svg') }}" 
+                                            alt="QRIS" 
+                                            class="h-3 w-auto">
+                                @else
+                                    {{ $payment->payment_type ?? '' }}
+                                @endif
+                            </span>
                         </p>
 
                         <p class="mt-2 text-xs text-gray-500 uppercase tracking-wide">
-                            Status Pembayaran
+                            {{ __('messages.customer.orders.detail.payment_status') }}
                         </p>
                         <p class="text-sm font-semibold
                             @if($payment->payment_status === 'PAID') text-emerald-700
@@ -362,7 +376,7 @@
 
                     <div class="text-right">
                         <p class="text-xs text-gray-500 uppercase tracking-wide">
-                            Total dibayar
+                            {{ __('messages.customer.orders.detail.total_paid') }}
                         </p>
                         <p class="text-lg font-semibold text-gray-900">
                             Rp {{ number_format($payment->paid_amount, 0, ',', '.') }}
@@ -370,7 +384,7 @@
 
                         @if($payment->change_amount ?? 0)
                             <p class="mt-1 text-xs text-gray-500">
-                                Kembalian:
+                                {{ __('messages.customer.orders.detail.change') }}:
                                 <span class="font-semibold">
                                     Rp {{ number_format($payment->change_amount, 0, ',', '.') }}
                                 </span>
@@ -379,14 +393,14 @@
 
                         @if($payment->created_at)
                             <p class="mt-1 text-xs text-gray-400">
-                                Dibayar pada {{ $payment->created_at->format('d M Y H:i') }}
+                                {{ __('messages.customer.orders.detail.paid_at') }} {{ $payment->created_at->format('d M Y H:i') }}
                             </p>
                         @endif
                     </div>
                 </div>
             @else
                 <div class="border rounded-xl p-4 bg-amber-50 text-sm text-amber-800">
-                    Belum ada data pembayaran tercatat. Jika kamu sudah membayar, silakan konfirmasi ke kasir.
+                    {{ __('messages.customer.orders.detail.no_payment_found_please_confirm_to_cashier') }}
                 </div>
             @endif
         </div>
@@ -395,14 +409,16 @@
         <div class="mt-8 flex flex-wrap items-center justify-between gap-3">
             <a href="{{ route('customer.menu.index', [$partner->slug, $table->table_code]) }}"
                 class="inline-flex items-center px-4 py-2 rounded-lg border border-choco text-sm text-choco hover:bg-[#fee2e2]">
-                    Kembali ke menu
+                    {{ __('messages.customer.orders.detail.back_to_menu') }}
             </a>
 
             <div class="flex items-center gap-2">
-                <button onclick="window.print()"
-                        class="px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">
-                    Cetak halaman
-                </button>
+                @if ($order->payment_flag === 1)
+                    <a href="{{ route('customer.orders.receipt', $order->id) }}"
+                    class="px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50">
+                        {{ __('messages.customer.orders.detail.download_receipt') }}
+                    </a>
+                @endif
             </div>
         </div>
 
