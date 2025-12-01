@@ -819,7 +819,7 @@ return [
     ],
     'partner' => [
         'layout' => [
-            'partner_panel' => 'Panel Partner',
+            'outlet_panel' => 'Panel Toko',
             'dashboard' => 'Dashboard',
             'support' => 'Dukungan',
             'user_management' => 'Manajemen Pengguna',

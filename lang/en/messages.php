@@ -820,7 +820,7 @@ return [
     ],
     'partner' => [
         'layout' => [
-            'partner_panel' => 'Partner Panel',
+            'outlet_panel' => 'Outlet Panel',
             'dashboard' => 'Dashboard',
             'support' => 'Support',
             'user_management' => 'User Management',
