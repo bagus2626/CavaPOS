@@ -320,27 +320,32 @@ Route::middleware('setlocale')->group(function () {
                 });
 
                 Route::prefix('report')->name('report.')->group(function () {
+                    // Existing Sales Report Routes
                     Route::get('sales/export', [SalesReportController::class, 'export'])->name('sales.export');
                     Route::get('sales/products', [SalesReportController::class, 'getTopProductsAjax'])->name('sales.products');
                     Route::get('order-details/{id}', [SalesReportController::class, 'getOrderDetails'])->name('order-details');
                     Route::resource('sales', SalesReportController::class)->only(['index']);
+
+
                 });
                 Route::resource('promotions', OwnerPromotionController::class);
-                Route::resource('stocks', OwnerStockController::class);
 
-                Route::prefix('stock-movements')->name('stock-movements.')->group(function () {
-                    Route::get('/', [OwnerStockMovementController::class, 'index'])->name('index');
-                    // Route::get('/stock-in/create', [OwnerStockMovementController::class, 'create'])->name('create');
+                Route::prefix('stocks')->name('stocks.')->group(function () {
+                    Route::resource('/', OwnerStockController::class);
 
-                    Route::get('/stock-in/create', [OwnerStockMovementController::class, 'createStockIn'])->name('create-stock-in');
-                    Route::get('/adjustment/create', [OwnerStockMovementController::class, 'createAdjustment'])->name('create-adjustment');
-                    Route::get('/transfer/create', [OwnerStockMovementController::class, 'createTransfer'])->name('create-transfer');
+                    Route::prefix('movements')->name('movements.')->group(function () {
+                        Route::get('/', [OwnerStockMovementController::class, 'index'])->name('index');
 
-                    // Aksi untuk menyimpan form (DISIAPKAN UNTUK NANTI)
-                    Route::post('/', [OwnerStockMovementController::class, 'store'])->name('store');
-                    // Route::get('/{movement}', [OwnerStockMovementController::class, 'show'])->name('show');
-                    Route::get('/{id}/items', [OwnerStockMovementController::class, 'getMovementItemsJson'])->name('items.json');
+                        Route::get('/stock-in/create', [OwnerStockMovementController::class, 'createStockIn'])->name('create-stock-in');
+                        Route::get('/adjustment/create', [OwnerStockMovementController::class, 'createAdjustment'])->name('create-adjustment');
+                        Route::get('/transfer/create', [OwnerStockMovementController::class, 'createTransfer'])->name('create-transfer');
+
+                        Route::post('/', [OwnerStockMovementController::class, 'store'])->name('store');
+                        Route::get('/{id}/items', [OwnerStockMovementController::class, 'getMovementItemsJson'])->name('items.json');
+                    });
                 });
+
+
                 Route::prefix('settings')->name('settings.')->group(function () {
                     Route::get('/', [OwnerSettingsController::class, 'index'])->name('index');
                     Route::post('/personal-info', [OwnerSettingsController::class, 'updatePersonalInfo'])->name('update-personal-info');
