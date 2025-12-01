@@ -449,6 +449,7 @@ Route::middleware('setlocale')->group(function () {
         Route::post('{partner_slug}/menu/{table_code}/check-stock', [CustomerMenuController::class, 'checkStockRealtime'])->name('menu.check-stock');
         Route::post('{partner_slug}/checkout/{table_code}', [CustomerMenuController::class, 'checkout'])->name('menu.checkout');
         Route::get('{partner_slug}/order-detail/{table_code}/{order_id}', [CustomerMenuController::class, 'orderDetail'])->name('orders.order-detail');
+        Route::get('{partner_slug}/order-histories/{table_code}', [CustomerMenuController::class, 'getOrderHistory'])->name('orders.histories');
         Route::get('/orders/{id}/receipt', [CustomerMenuController::class, 'printReceipt'])->name('orders.receipt');
 
         Route::prefix('payment')->name('payment.')->group(function () {

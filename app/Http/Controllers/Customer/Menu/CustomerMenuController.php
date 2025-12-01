@@ -247,6 +247,13 @@ class CustomerMenuController extends Controller
                     ];
                 })->toArray();
 
+                if (!$customer) {
+                    $guestOrders = collect(session('guest_orders', []));
+                    $guestOrders->push($booking_order->id);
+
+                    session(['guest_orders' => $guestOrders->unique()->values()->all()]);
+                }
+
                 $payload = [
                     "external_id" => $booking_order->booking_order_code ?? "invoice-" . time(),
                     "amount" => $payment->paid_amount ?? 0,
@@ -256,7 +263,7 @@ class CustomerMenuController extends Controller
                     "customer" => [
                         "given_names" => $customer ? $customer->name : $request->order_name,
                         "email" => $customer ? $customer->email : "customer@example.com",
-                        "mobile_number" => $customer ? $customer->phone : "0",
+                        "mobile_number" => $customer ? $customer->phone ?? "0" : "0",
                     ],
                     "customer_notification_preference" => [
                         "invoice_created" => ["whatsapp", "email"],
@@ -274,10 +281,13 @@ class CustomerMenuController extends Controller
                     ]
                 ];
 
+                // dd($payload);
+
                 $invoiceResponse = $this->xenditInvoice->createInvoice($booking_order->id, $xenditSubAccount->xendit_user_id, $xenditSplitRule->split_rule_id, $payload);
                 $invoice = $invoiceResponse->getData(true);
                 $invoiceData = $invoice['data'] ?? null;
                 DB::commit();
+                // dd($invoiceResponse, $invoice, $invoiceData);
 
                 if ($invoice['success']) {
                     return response()->json([
@@ -339,6 +349,10 @@ class CustomerMenuController extends Controller
             'table', // kamu pakai $data->table di view => eager load
         ])->findOrFail($id);
 
+        if ($data->payment_flag === 0) {
+            abort(403, 'Pembayaran belum terdeteksi');
+        }
+
         // Validasi kepemilikan hanya jika order memang punya customer_id
         if ($data->customer_id) {
             if (!$customer || ($customer->id ?? null) !== $data->customer_id) {
@@ -363,10 +377,10 @@ class CustomerMenuController extends Controller
             ob_end_clean();
         }
 
-        Storage::put("receipts/debug-{$data->booking_order_code}.pdf", $pdf->output());
+        Storage::put("receipts/receipt-{$data->booking_order_code}.pdf", $pdf->output());
 
         // download file hasil simpan
-        return Storage::download("receipts/debug-{$data->booking_order_code}.pdf");
+        return Storage::download("receipts/receipt-{$data->booking_order_code}.pdf");
     }
 
     private function checkStockAvailability(array $orders, $partner): void
@@ -553,7 +567,8 @@ class CustomerMenuController extends Controller
     public function orderDetail(Request $request, $partner_slug, $table_code, $order_id)
     {
         // Customer login / guest
-        $customer = Auth::guard('customer')->user() ?? session('guest_customer');
+        $customer = Auth::guard('customer')->user();
+        $guestOrders = collect(session('guest_orders', []));
 
         // Partner & Table
         $partner = User::where('slug', $partner_slug)->firstOrFail();
@@ -574,6 +589,21 @@ class CustomerMenuController extends Controller
             if (!$customer || ($customer->id ?? null) !== $order->customer_id) {
                 abort(403, 'Kamu tidak bisa melihat pesanan pelanggan lain.');
             }
+        } else {
+            if ($customer) {
+                abort(403, 'Pesanan ini dibuat tanpa login. Silakan akses dari perangkat yang sama saat memesan.');
+            }
+
+            if (!$guestOrders->contains($order->id)) {
+                abort(403, 'Sesi kamu untuk melihat pesanan ini sudah tidak berlaku.');
+            }
+
+            // untuk Blade, kita bisa set $customer sebagai object sederhana
+            $customer = (object)[
+                'id'   => null,
+                'name' => $order->customer_name,
+                'email' => null,
+            ];
         }
 
         // mapping indeks status untuk timeline
@@ -631,4 +661,46 @@ class CustomerMenuController extends Controller
             'qrPngBase64'  => $qrPngBase64, // <- kirim ke Blade
         ]);
     }
+
+    public function getOrderHistory(Request $request, $partner_slug, $table_code)
+    {
+        $customer = Auth::guard('customer')->user();
+
+        // Hanya customer login yang boleh akses
+        if (!$customer || !$customer->id) {
+            abort(403, 'Maaf, anda tidak bisa mengakses halaman ini.');
+        }
+
+        // Ambil outlet/partner
+        $partner = User::where('slug', $partner_slug)
+            ->where('role', 'partner')
+            ->firstOrFail();
+
+        // Ambil meja (opsional: validasi memang milik partner ini)
+        $table = Table::where('table_code', $table_code)
+            ->where('partner_id', $partner->id)
+            ->firstOrFail();
+
+        // Ambil riwayat order milik customer ini di outlet ini
+        $order_history = BookingOrder::with([
+                'order_details.order_detail_options.option',
+                'order_details.partnerProduct',
+                'payment',
+                'table',
+            ])
+            ->where('partner_id', $partner->id)
+            ->where('customer_id', $customer->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        return view('pages.customer.orders.histories', [
+            'partner'       => $partner,
+            'table'         => $table,
+            'customer'      => $customer,
+            'orderHistory'  => $order_history,
+            'partner_slug'  => $partner_slug,
+            'table_code'    => $table_code,
+        ]);
+    }
+
 }

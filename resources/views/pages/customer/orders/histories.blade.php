@@ -1,0 +1,204 @@
+@extends('layouts.customer')
+
+@section('title', __('messages.customer.orders.histories.order_history'))
+
+@section('content')
+<div class="max-w-3xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-2xl shadow p-6 md:p-8 border-t-4 border-choco">
+        {{-- Header --}}
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <h1 class="text-xl md:text-2xl font-semibold text-gray-900">
+                    {{ __('messages.customer.orders.histories.order_history') }}
+                </h1>
+                <p class="text-sm text-gray-600 mt-1">
+                    {{ __('messages.customer.orders.histories.order_list_that_youve_made_in') }} <strong>{{ $partner->name }}</strong>.
+                </p>
+                <p class="text-xs text-gray-500 mt-1">
+                    {{ __('messages.customer.orders.histories.recent_table') }}: {{ $table->table_no ?? '-' }} ({{ $table->table_code }})
+                </p>
+            </div>
+        </div>
+
+        {{-- List Riwayat --}}
+        <div class="mt-6 space-y-4">
+            @forelse($orderHistory as $order)
+                @php
+                    $payment = $order->payment;
+                    // Badge warna untuk status pesanan
+                    $orderStatusColor = match($order->order_status) {
+                        'UNPAID'    => 'bg-red-100 text-red-700 border-red-200',
+                        'PAID'      => 'bg-amber-100 text-amber-800 border-amber-200',
+                        'PROCESSED' => 'bg-blue-100 text-blue-800 border-blue-200',
+                        'SERVED'    => 'bg-emerald-100 text-emerald-800 border-emerald-200',
+                        default     => 'bg-gray-100 text-gray-700 border-gray-200',
+                    };
+
+                    // Badge warna untuk status pembayaran
+                    $paymentStatus = $payment->payment_status ?? 'UNRECORDED';
+                    $paymentStatusLabel = $payment->payment_status ?? 'Belum tercatat';
+
+                    $paymentStatusColor = match($paymentStatus) {
+                        'PAID'      => 'bg-emerald-100 text-emerald-800 border-emerald-200',
+                        'PENDING'   => 'bg-amber-100 text-amber-800 border-amber-200',
+                        'FAILED'    => 'bg-red-100 text-red-700 border-red-200',
+                        default     => 'bg-gray-100 text-gray-700 border-gray-200',
+                    };
+                @endphp
+
+                <div class="border rounded-xl p-4 bg-gray-50 flex flex-col gap-3">
+                    {{-- Baris atas: Kode, tanggal, total --}}
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="space-y-1">
+                            <div class="text-xs text-gray-500 uppercase tracking-wide">
+                                {{ __('messages.customer.orders.histories.order_code') }}
+                            </div>
+                            <div class="font-mono text-sm font-semibold">
+                                {{ $order->booking_order_code }}
+                            </div>
+
+                            <div class="text-xs text-gray-500 mt-1">
+                                {{ __('messages.customer.orders.histories.date') }}:
+                                <span class="font-medium text-gray-800">
+                                    {{ $order->created_at?->format('d M Y H:i') }}
+                                </span>
+                            </div>
+
+                            <div class="text-xs text-gray-500">
+                                {{ __('messages.customer.orders.histories.table') }}:
+                                <span class="font-medium text-gray-800">
+                                    {{ $order->table->table_no ?? '-' }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="text-right">
+                            <div class="text-xs text-gray-500 uppercase tracking-wide">
+                                Total
+                            </div>
+                            <div class="text-lg font-semibold text-gray-900">
+                                Rp {{ number_format($order->total_order_value, 0, ',', '.') }}
+                            </div>
+
+                            @if($order->payment_method)
+                                <div class="mt-1 text-xs text-gray-500">
+                                    {{ __('messages.customer.orders.histories.method') }}:
+                                    <span class="font-medium text-gray-800">
+                                        {{ $order->payment_method }}
+                                    </span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- Baris status --}}
+                    <div class="flex flex-wrap items-center gap-2 mt-1">
+                        {{-- Status pesanan --}}
+                        <span class="inline-flex items-center px-1 py-1 rounded-md text-[11px] font-semibold border {{ $orderStatusColor }}">
+                            {{ $order->order_status }}
+                        </span>
+
+                        {{-- Status pembayaran --}}
+                        <span class="inline-flex items-center px-1 py-1 rounded-md text-[11px] font-semibold border {{ $paymentStatusColor }}">
+                            @if($payment)
+                                {{ $payment->payment_status }}
+                            @else
+                                {{ __('messages.customer.orders.histories.payment_not_found') }}
+                            @endif
+                        </span>
+
+                        {{-- Metode bayar badge --}}
+                        @if($payment && $payment->payment_type)
+                            <span class="inline-flex items-center gap-1 px-1 py-1 rounded-md text-[11px] font-medium border border-gray-200 bg-white text-gray-700">
+                                
+                                @if(strtoupper($payment->payment_type) === 'QRIS')
+                                    <img src="{{ asset('icons/qris_svg.svg') }}" 
+                                        alt="QRIS" 
+                                        class="h-3 w-auto">
+                                @else
+                                    {{ $payment->payment_type }}
+                                @endif
+                            </span>
+                        @endif
+                    </div>
+
+                    {{-- List item singkat --}}
+                    <div class="mt-2 text-xs text-gray-600">
+                        @php
+                            $names = $order->order_details->pluck('product_name')->toArray();
+                            $preview = implode(', ', array_slice($names, 0, 3));
+                            $extra   = count($names) > 3 ? ' +' . (count($names) - 3) . ' item' : '';
+                        @endphp
+                        <span class="font-medium">Item:</span>
+                        <span>{{ $preview }}{{ $extra }}</span>
+                    </div>
+
+                    {{-- Aksi --}}
+                    <div class="flex flex-wrap items-center justify-between gap-2 mt-2 pt-2 border-t border-dashed border-gray-200">
+                        {{-- Status kecil --}}
+                        <div class="text-[11px] text-gray-500">
+                            @if($payment && $payment->payment_status === 'PAID' && $payment->created_at)
+                                {{ __('messages.customer.orders.histories.created') }}: {{ $order->created_at?->format('d M Y H:i') }} •
+                                {{ __('messages.customer.orders.histories.paid') }}: {{ $payment->created_at->format('d M Y H:i') }}
+                            @else
+                                {{ __('messages.customer.orders.histories.created') }}: {{ $order->created_at?->format('d M Y H:i') }}
+                            @endif
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            {{-- Lihat detail --}}
+                            <a href="{{ route('customer.orders.order-detail', [
+                                    'partner_slug' => $partner_slug,
+                                    'table_code'   => $table_code,
+                                    'order_id'     => $order->id,
+                                ]) }}"
+                               class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-300 text-xs md:text-sm text-gray-700 hover:bg-gray-50">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor"
+                                     class="w-4 h-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v9A2.25 2.25 0 007.5 16.5H9m6.75-7.5H18a2.25 2.25 0 012.25 2.25v7.5A2.25 2.25 0 018 21H9m6.75-12V18A2.25 2.25 0 0113.5 20.25H9" />
+                                </svg>
+                                <span>Detail</span>
+                            </a>
+
+                            {{-- Download Struk: hanya jika payment_flag == 1 --}}
+                            @if($order->payment_flag == 1)
+                                <a href="{{ route('customer.orders.receipt', $order->id) }}"
+                                   class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-choco text-xs md:text-sm text-choco hover:bg-soft-choco hover:text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                         fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor"
+                                         class="w-4 h-4">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M9 8.25h6m-6 3h3.75M4.5 9.75v8.25a2.25 2.25 0 002.25 2.25h10.5A2.25 2.25 0 0019.5 18V9.75M16.5 6h-9A1.5 1.5 0 006 7.5v.75h12V7.5A1.5 1.5 0 0016.5 6z" />
+                                    </svg>
+                                    <span>{{ __('messages.customer.orders.histories.receipt') }}</span>
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="border rounded-xl p-4 bg-gray-50 text-sm text-gray-600">
+                    {{ __('messages.customer.orders.histories.you_dont_have_histories') }}
+                </div>
+            @endforelse
+        </div>
+
+        {{-- Pagination --}}
+        @if($orderHistory->hasPages())
+            <div class="mt-6">
+                {{ $orderHistory->links() }}
+            </div>
+        @endif
+
+        {{-- Tombol kembali ke menu --}}
+        <div class="mt-8">
+            <a href="{{ route('customer.menu.index', [$partner_slug, $table_code]) }}"
+               class="inline-flex items-center px-4 py-2 rounded-lg border border-choco text-sm text-choco hover:bg-[#fee2e2]">
+                {{ __('messages.customer.orders.histories.back_to_menu') }}
+            </a>
+        </div>
+    </div>
+</div>
+@endsection

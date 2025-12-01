@@ -161,8 +161,9 @@ class CustomerAuthController extends Controller
     public function guestLogout($partner_slug, $table_code)
     {
         session()->forget('guest_customer');
+        session()->forget('guest_orders');
         return redirect()->route('customer.menu.index', compact('partner_slug', 'table_code'))
-            ->with('success', 'Registrasi berhasil, selamat datang!');
+            ->with('success', 'Logout berhasil, selamat datang!');
     }
 
 
