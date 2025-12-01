@@ -846,6 +846,9 @@
                                 priceSpan.textContent = '{{ __('messages.customer.menu.sold') }}';
                                 priceSpan.classList.add('text-red-600');
                                 checkbox.disabled = true;
+                                checkbox.disabled = true;
+                                checkbox.checked = false;
+                                checkbox.dataset.sold = '1'; 
                                 label.classList.add('line-through', 'opacity-60', 'cursor-not-allowed');
                                 const val = parseInt(checkbox.value, 10);
                                 selectedOptions = selectedOptions.filter(v => v !== val);
@@ -1068,7 +1071,9 @@
                 });
 
                 function enforceProvision(poDiv, provision, value) {
-                    const checkboxes = Array.from(poDiv.querySelectorAll('input[type="checkbox"]'));
+                    const checkboxes = Array.from(
+                        poDiv.querySelectorAll('input[type="checkbox"]:not([data-sold="1"])')
+                    );
                     const prov = String(provision || '').toUpperCase();
                     const val = Number(value);
 

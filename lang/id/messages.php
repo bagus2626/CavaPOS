@@ -63,6 +63,7 @@ return [
             'customer_name_example' => 'Contoh: Budi Setiawan',
             'cancel' => 'Batal',
             'hot_products' => 'Produk Unggulan',
+            'always_available' => 'Tersedia'
         ],
         'payment' => [
             'show_order_code' => 'Tunjukkan Kode Pemesanan',
@@ -87,7 +88,9 @@ return [
                 'paid' => 'Dibayar',
                 'receipt' => 'Struk',
                 'you_dont_have_histories' => 'Kamu belum memiliki riwayat pesanan di outlet ini.',
-                'back_to_menu' => 'Kembali ke menu'
+                'back_to_menu' => 'Kembali ke menu',
+                'load_more' => 'Muat Lebih',
+                'loading' => 'Memuat...'
             ],
             'detail' => [
                 'order_detail' => 'Detail Pesanan',
