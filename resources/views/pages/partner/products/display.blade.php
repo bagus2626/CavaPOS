@@ -81,9 +81,10 @@
                     <a href="{{ route('partner.products.edit', $product->id) }}" class="btn btn-outline-choco btn-pill">
                       <i class="fas fa-pen"></i> <span>{{ __('messages.partner.product.all_product.edit') }}</span>
                     </a>
-                    <button onclick="deleteProduct({{ $product->id }})" class="btn btn-soft-danger btn-pill">
+                    {{-- rafi --}}
+                    {{-- <button onclick="deleteProduct({{ $product->id }})" class="btn btn-soft-danger btn-pill">
                       <i class="fas fa-trash-alt"></i> <span>{{ __('messages.partner.product.all_product.delete') }}</span>
-                    </button>
+                    </button> --}}
                   </div>
                 </td>
 

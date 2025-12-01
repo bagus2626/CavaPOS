@@ -25,13 +25,14 @@
     </a>
 
     <div class="btn-group">
-      <a href="{{ route('partner.user-management.employees.edit', $data->id) }}" class="btn btn-choco">
+      {{-- rafi --}}
+      {{-- <a href="{{ route('partner.user-management.employees.edit', $data->id) }}" class="btn btn-choco">
         <i class="fas fa-pen mr-1"></i> Edit
       </a>
       <button class="btn btn-soft-danger"
               onclick="confirmDeletion(`{{ route('partner.user-management.employees.destroy', $data->id) }}`)">
         <i class="fas fa-trash-alt mr-1"></i> Delete
-      </button>
+      </button> --}}
     </div>
   </div>
 
