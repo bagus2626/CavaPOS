@@ -154,7 +154,7 @@ class CashierTransactionController extends Controller
                 'owner_id'   => $partner->owner_id,
                 'partner_id' => $partner->id,
                 'type'       => 'out',
-                'category'   => 'sale_consumption',
+                'category'   => 'sale',
             ]);
 
             // 2. PENGURANGAN FISIK & PENCATATAN MOVEMENT ITEM

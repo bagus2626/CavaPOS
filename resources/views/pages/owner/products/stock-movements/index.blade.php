@@ -6,11 +6,13 @@
 @section('content')
   <section class="content">
     <div class="container-fluid owner-stock-movements">
-
+      <a href="{{ route('owner.user-owner.stocks.index') }}" class="btn btn-primary mb-3">
+        <i class="fas fa-arrow-left mr-2"></i>Back to Stock List
+      </a>
       {{-- FILTER --}}
       <div class="card mb-4">
         <div class="card-body">
-          <form action="{{ route('owner.user-owner.stock-movements.index')}}" method="GET">
+          <form action="{{ route('owner.user-owner.stocks.movements.index')}}" method="GET">
             <div class="row">
               <div class="col-md-4">
                 <div class="form-group">
@@ -53,7 +55,7 @@
                   <button type="submit" class="btn btn-primary w-100">
                     Filter
                   </button>
-                  <a href="{{ route('owner.user-owner.stock-movements.index')}}" class="btn btn-secondary w-100 mt-2">
+                  <a href="{{ route('owner.user-owner.stocks.movements.index')}}" class="btn btn-secondary w-100 mt-2">
                     Reset
                   </a>
                 </div>
@@ -116,7 +118,7 @@
                     <td class="text-nowrap">
                       <button type="button" class="btn btn-sm btn-primary btn-show-detail roundedlg" style=""
                         data-toggle="modal" data-target="#detailMovementModal"
-                        data-url="{{ route('owner.user-owner.stock-movements.items.json', $movement->id) }}">
+                        data-url="{{ route('owner.user-owner.stocks.movements.items.json', $movement->id) }}">
                         <i class="fas fa-eye"></i>
                       </button>
                     </td>
@@ -215,15 +217,15 @@
 
         // Reset modal ke status loading
         tableBody.html(`
-                <tr>
-                  <td colspan="4" class="text-center py-4">
-                    <div class="spinner-border spinner-border-sm" role="status">
-                      <span class="sr-only">Loading...</span>
-                    </div>
-                    <span class="ml-2">Memuat data item...</span>
-                  </td>
-                </tr>
-              `);
+                  <tr>
+                    <td colspan="4" class="text-center py-4">
+                      <div class="spinner-border spinner-border-sm" role="status">
+                        <span class="sr-only">Loading...</span>
+                      </div>
+                      <span class="ml-2">Memuat data item...</span>
+                    </td>
+                  </tr>
+                `);
         modal.find('#modal_notes').text('-');
         modal.find('#modal_category').text('-');
         modal.find('#modal_location').text('-');
@@ -263,36 +265,36 @@
                 }
 
                 var row = `
-                        <tr>
-                          <td>${item.stock_name}</td>
-                          <td class="text-right fw-600 ${qtyClass}">
-                            ${qtySign}${item.display_quantity}
-                          </td>
-                          <td>${item.display_unit_name}</td>
-                          <td class="text-right">${item.unit_price_formatted}</td>
-                        </tr>
-                      `;
+                          <tr>
+                            <td>${item.stock_name}</td>
+                            <td class="text-right fw-600 ${qtyClass}">
+                              ${qtySign}${item.display_quantity}
+                            </td>
+                            <td>${item.display_unit_name}</td>
+                            <td class="text-right">${item.unit_price_formatted}</td>
+                          </tr>
+                        `;
                 tableBody.append(row);
               });
             } else {
               tableBody.html(`
-                      <tr>
-                        <td colspan="4" class="text-center py-4 text-muted">
-                          Tidak ada item dalam transaksi ini.
-                        </td>
-                      </tr>
-                    `);
+                        <tr>
+                          <td colspan="4" class="text-center py-4 text-muted">
+                            Tidak ada item dalam transaksi ini.
+                          </td>
+                        </tr>
+                      `);
             }
           },
           error: function (xhr) {
             tableBody.html(`
-                    <tr>
-                      <td colspan="4" class="text-center py-4 text-danger">
-                        Gagal memuat data. Silakan coba lagi.
-                        <div class="text-muted small">${xhr.statusText || 'Error'}</div>
-                      </td>
-                    </tr>
-                  `);
+                      <tr>
+                        <td colspan="4" class="text-center py-4 text-danger">
+                          Gagal memuat data. Silakan coba lagi.
+                          <div class="text-muted small">${xhr.statusText || 'Error'}</div>
+                        </td>
+                      </tr>
+                    `);
           }
         });
       });

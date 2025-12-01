@@ -6,7 +6,7 @@
 @section('content')
     <section class="content">
         <div class="container-fluid owner-stocks">
-            <form action="{{ route('owner.user-owner.stock-movements.store') }}" method="POST" id="stockMovementForm">
+            <form action="{{ route('owner.user-owner.stocks.movements.store') }}" method="POST" id="stockMovementForm">
                 @csrf
                 <input type="hidden" name="movement_type" value="transfer" id="movement_type">
 
@@ -116,7 +116,6 @@
 
                 {{-- Tombol Aksi --}}
                 <div class="mt-4">
-                    <a href="{{ route('owner.user-owner.stock-movements.index') }}" class="btn btn-secondary">Batal</a>
                     <button type="submit" class="btn btn-info">
                         <i class="fas fa-save"></i> Simpan Transfer
                     </button>

@@ -6,7 +6,7 @@
 @section('content')
     <section class="content">
         <div class="container-fluid owner-stocks">
-            <form action="{{ route('owner.user-owner.stock-movements.store') }}" method="POST" id="stockMovementForm">
+            <form action="{{ route('owner.user-owner.stocks.movements.store') }}" method="POST" id="stockMovementForm">
                 @csrf
                 <input type="hidden" name="movement_type" value="in">
 
@@ -88,7 +88,7 @@
                                     </select>
                                 </div>
                                 <div class="col-md-3">
-                                    <label>Harga Beli / Unit</label>
+                                    <label>Harga Beli</label>
                                     <input type="number" name="items[0][unit_price]" class="form-control" step="0.01"
                                         placeholder="0.00">
                                 </div>
@@ -106,7 +106,6 @@
 
                 {{-- Tombol Aksi --}}
                 <div class="mt-4">
-                    <a href="{{ route('owner.user-owner.stock-movements.index') }}" class="btn btn-secondary">Batal</a>
                     <button type="submit" class="btn btn-success">
                         <i class="fas fa-save"></i> Simpan Stock In
                     </button>
