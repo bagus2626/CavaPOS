@@ -13,7 +13,7 @@
             <div class="mr-3">
                 <h1 class="text-2xl font-extrabold text-soft-choco">Dashboard Kasir <span
                         class="text-choco">{{ $partner->name }}</span></h1>
-                <p class="text-sm text-gray-500">Pantau pesanan, proses pembayaran cash, dan cek transaksi QRIS.</p>
+                <p class="text-sm text-gray-500">Pantau pesanan, proses pembayaran manual, dan cek transaksi QRIS.</p>
             </div>
             <div class="flex items-center gap-2">
                 <a href="{{ route('employee.cashier.dashboard') }}"
@@ -154,7 +154,10 @@
                     $tabCounts = [
                         // Pembayaran: Cash & belum bayar
                         'pembayaran' => number_format(
-                            $ordersToday->where('payment_method', 'CASH')->where('payment_flag', 0)->count() ?? 0
+                            $ordersToday->whereIn('payment_method', ['CASH', 'QRIS'])
+                                ->where('order_status', 'UNPAID')
+                                ->where('payment_flag', 0)
+                                ->count() ?? 0
                         ),
                         // Proses: status PROCESSED
                         'proses' => number_format(
@@ -215,7 +218,7 @@
                     @else
                         <ul class="space-y-3">
                             @foreach ($pendingCashOrders as $o)
-                                <li class="rounded-xl border border-choco/10 p-3 hover:bg-soft-choco/5">
+                                <li class="rounded-xl border border-choco/10 p-3 hover:bg-soft-choco/5" data-order-id="{{ $o->id }}">
                                     <div class="flex items-center justify-between">
                                         <div>
                                             <p class="text-sm font-semibold text-gray-900">
@@ -273,7 +276,7 @@
                         </thead>
                         <tbody class="divide-y divide-choco/10">
                             @forelse ($ordersToday as $o)
-                                <tr class="hover:bg-soft-choco/5">
+                                <tr class="hover:bg-soft-choco/5" data-order-id="{{ $o->id }}">
                                     <td class="px-4 py-3">{{ $o->created_at?->format('H:i') }}</td>
                                     <td class="px-4 py-3">
                                         <div class="font-medium text-gray-900">{{ $o->booking_order_code }}</div>
@@ -358,6 +361,10 @@
         const tabContent = document.getElementById('tabContent');
         const tabLoading = document.getElementById('tabLoading');
 
+        const url          = new URL(window.location.href);
+        const urlTabParam  = url.searchParams.get('tab'); //"pembayaran" / "proses"
+        const urlOpenOrder = url.searchParams.get('open_order');
+
         function setActive(btn) {
             tabBtns.forEach(b => b.classList.remove('bg-soft-choco/10', 'text-choco'));
             btn.classList.add('bg-soft-choco/10', 'text-choco');
@@ -395,17 +402,38 @@
 
         // initial load
         if (tabBtns.length) {
-            const savedTab = localStorage.getItem("activeTab");
-            let initialBtn = tabBtns[0];
-            if (savedTab) {
-                const foundBtn = document.querySelector(`.tab-btn[data-tab="${savedTab}"]`);
-                if (foundBtn) initialBtn = foundBtn;
-            }
+            const savedTabKey   = localStorage.getItem("activeTab");
+            const defaultKey    = tabBtns[0].dataset.tab;
+            const initialKey    = urlTabParam || savedTabKey || defaultKey;
+
+            const initialBtn = document.querySelector(`.tab-btn[data-tab="${initialKey}"]`) || tabBtns[0];
+
             setActive(initialBtn);
+
             loadTab(initialBtn.dataset.tab, () => {
+                // khusus tab pembelian: init script menu
                 if (initialBtn.dataset.tab === 'pembelian' && typeof window.initPembelianTab === 'function') {
                     window.initPembelianTab();
                 }
+
+                // kalau URL punya open_order, fokus ke card-nya
+                if (urlOpenOrder) {
+                    highlightOrderCard(urlOpenOrder);
+                }
+
+                // otomatis buka struk saat redirect dari xendit
+                // if (urlTabParam === 'proses' && urlOpenOrder) {
+                //     // cari tombol di dalam konten tab yang baru saja dimuat
+                //     const btn = tabContent.querySelector(
+                //         `[data-print-receipt-process][data-order-id="${urlOpenOrder}"]`
+                //     );
+
+                //     if (btn) {
+                //         btn.click(); // trigger handler di blade "proses" (script delegasi yg sudah kamu buat)
+                //     } else {
+                //         console.warn('Tombol Struk tidak ditemukan untuk order', urlOpenOrder);
+                //     }
+                // }
             });
         }
 
@@ -429,6 +457,40 @@
         };
     })();
 
+    function highlightOrderCard(orderId) {
+        if (!orderId) return;
+
+        const tabContentEl = document.getElementById('tabContent');
+        if (!tabContentEl) return;
+
+        // Cari elemen di dalam tab (pakai id dan data-order-id, biar fleksibel)
+        const selector = `#order-item-${orderId}, [data-order-id="${orderId}"]`;
+        const el = tabContentEl.querySelector(selector);
+
+        if (!el) {
+            console.warn('Order card tidak ditemukan untuk ID', orderId);
+            return;
+        }
+
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add(
+            'ring-4',
+            'ring-amber-400',
+            'ring-offset-2',
+            'ring-offset-white',
+            'shadow-lg'
+        );
+
+        setTimeout(() => {
+            el.classList.remove(
+                'ring-4',
+                'ring-amber-400',
+                'ring-offset-2',
+                'ring-offset-white',
+                'shadow-lg'
+            );
+        }, 2000);
+    }
 </script>
 
 

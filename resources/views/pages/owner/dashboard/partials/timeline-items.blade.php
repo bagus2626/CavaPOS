@@ -11,6 +11,10 @@
             ? Carbon\Carbon::parse($message->scheduled_at)
             : Carbon\Carbon::parse($message->created_at);
 
+        $isScheduled = $message->scheduled_at && Carbon\Carbon::parse($message->scheduled_at)->isFuture();
+        $expiresAt = $message->expires_at ? Carbon\Carbon::parse($message->expires_at) : null;
+        $isExpiringSoon = $expiresAt && $expiresAt->diffInHours(now()) < 24;
+
         if ($displayDate->isToday()) {
             $dateLabel = 'Today';
         } elseif ($displayDate->isYesterday()) {
@@ -72,7 +76,7 @@
                                      alt="{{ $attachment->file_name }}">
                             </a>
                         @else
-                            <a href="{{ $url }}" target="_blank" class="attachment-badge">
+                            <a href="{{ $url }}" target="_blank" class="attachment-badge text-dark">
                                 @if (Str::contains($mime, 'pdf'))
                                     <i class="fas fa-file-pdf text-danger"></i>
                                 @elseif(Str::contains($mime, 'excel') || Str::contains($mime, 'spreadsheet'))

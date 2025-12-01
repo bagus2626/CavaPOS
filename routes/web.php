@@ -415,6 +415,8 @@ Route::middleware('setlocale')->group(function () {
             Route::get('dashboard', [CashierDashboardController::class, 'index'])->name('dashboard');
             Route::get('metrics', [CashierDashboardController::class, 'metrics'])->name('metrics');
             Route::get('tab/{tab}', [CashierDashboardController::class, 'show'])->name('tab');
+            Route::get('/open-order/{id}', [CashierDashboardController::class, 'openOrder'])->name('open-order');
+
             Route::post('cash-payment/{id}', [CashierTransactionController::class, 'cashPayment'])->name('cash-payment');
             Route::get('order-detail/{id}', [CashierTransactionController::class, 'orderDetail'])->name('order-detail');
             Route::get('print-receipt/{id}', [CashierTransactionController::class, 'printReceipt'])->name('print-receipt');
@@ -451,6 +453,8 @@ Route::middleware('setlocale')->group(function () {
         Route::get('{partner_slug}/menu/{table_code}', [CustomerMenuController::class, 'index'])->name('menu.index');
         Route::post('{partner_slug}/menu/{table_code}/check-stock', [CustomerMenuController::class, 'checkStockRealtime'])->name('menu.check-stock');
         Route::post('{partner_slug}/checkout/{table_code}', [CustomerMenuController::class, 'checkout'])->name('menu.checkout');
+        Route::get('{partner_slug}/order-detail/{table_code}/{order_id}', [CustomerMenuController::class, 'orderDetail'])->name('orders.order-detail');
+        Route::get('{partner_slug}/order-histories/{table_code}', [CustomerMenuController::class, 'getOrderHistory'])->name('orders.histories');
         Route::get('/orders/{id}/receipt', [CustomerMenuController::class, 'printReceipt'])->name('orders.receipt');
 
         Route::prefix('payment')->name('payment.')->group(function () {

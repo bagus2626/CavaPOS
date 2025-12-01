@@ -44,31 +44,31 @@ class OwnerDashboardController extends Controller
                 $q->where('message_type', 'popup')
                     ->where(function ($qq) use ($owner) {
                         $qq->where(function ($qx) use ($owner) {
-                            // Personal popup
                             $qx->where('recipient_id', $owner->id)
                                 ->where('recipient_type', 'owner')
                                 ->where('recipient_target', 'single');
                         })
-                        ->orWhere(function ($qx) {
-                            // Broadcast popup
-                            $qx->where('recipient_target', 'broadcast')
-                                ->whereIn('recipient_type', [
-                                    'owner',
-                                    'business-partner',
-                                    'all'
-                                ]);
-                        });
+                            ->orWhere(function ($qx) {
+                                $qx->where('recipient_target', 'broadcast')
+                                    ->whereIn('recipient_type', [
+                                        'owner',
+                                        'business-partner',
+                                        'all'
+                                    ]);
+                            });
                     });
             })
             ->where(function ($query) use ($now) {
+                // Pesan sudah waktunya ditampilkan
                 $query->where(function ($q) use ($now) {
                     $q->whereNull('scheduled_at')
                         ->orWhere('scheduled_at', '<=', $now);
                 })
-                ->where(function ($q) use ($now) {
-                    $q->whereNull('expires_at')
-                        ->orWhere('expires_at', '>=', $now);
-                });
+                    // Pesan belum expired
+                    ->where(function ($q) use ($now) {
+                        $q->whereNull('expires_at')
+                            ->orWhere('expires_at', '>=', $now);
+                    });
             })
             ->orderByRaw("COALESCE(scheduled_at, created_at) DESC")
             ->get();
@@ -78,35 +78,36 @@ class OwnerDashboardController extends Controller
                 $q->where('message_type', 'message')
                     ->where(function ($qq) use ($owner) {
                         $qq->where(function ($qx) use ($owner) {
-                            // Personal message
                             $qx->where('recipient_id', $owner->id)
                                 ->where('recipient_type', 'owner')
                                 ->where('recipient_target', 'single');
                         })
-                        ->orWhere(function ($qx) {
-                            // Broadcast message
-                            $qx->where('recipient_target', 'broadcast')
-                                ->whereIn('recipient_type', [
-                                    'owner',
-                                    'business-partner',
-                                    'all'
-                                ]);
-                        });
+                            ->orWhere(function ($qx) {
+                                $qx->where('recipient_target', 'broadcast')
+                                    ->whereIn('recipient_type', [
+                                        'owner',
+                                        'business-partner',
+                                        'all'
+                                    ]);
+                            });
                     });
             })
             ->where(function ($query) use ($now) {
+                // Pesan sudah waktunya ditampilkan
                 $query->where(function ($q) use ($now) {
                     $q->whereNull('scheduled_at')
                         ->orWhere('scheduled_at', '<=', $now);
                 })
-                ->where(function ($q) use ($now) {
-                    $q->whereNull('expires_at')
-                        ->orWhere('expires_at', '>=', $now);
-                });
+                    // Pesan belum expired
+                    ->where(function ($q) use ($now) {
+                        $q->whereNull('expires_at')
+                            ->orWhere('expires_at', '>=', $now);
+                    });
             })
             ->orderByRaw("COALESCE(scheduled_at, created_at) DESC")
             ->paginate(5);
-            // ->get();
+
+        // ->get();
 
 
         // dd($messages);
@@ -139,31 +140,31 @@ class OwnerDashboardController extends Controller
                 $q->where('message_type', 'message')
                     ->where(function ($qq) use ($owner) {
                         $qq->where(function ($qx) use ($owner) {
-                            // Personal message
                             $qx->where('recipient_id', $owner->id)
                                 ->where('recipient_type', 'owner')
                                 ->where('recipient_target', 'single');
                         })
-                        ->orWhere(function ($qx) {
-                            // Broadcast message
-                            $qx->where('recipient_target', 'broadcast')
-                                ->whereIn('recipient_type', [
-                                    'owner',
-                                    'business-partner',
-                                    'all'
-                                ]);
-                        });
+                            ->orWhere(function ($qx) {
+                                $qx->where('recipient_target', 'broadcast')
+                                    ->whereIn('recipient_type', [
+                                        'owner',
+                                        'business-partner',
+                                        'all'
+                                    ]);
+                            });
                     });
             })
             ->where(function ($query) use ($now) {
+                // Pesan sudah waktunya ditampilkan
                 $query->where(function ($q) use ($now) {
                     $q->whereNull('scheduled_at')
                         ->orWhere('scheduled_at', '<=', $now);
                 })
-                ->where(function ($q) use ($now) {
-                    $q->whereNull('expires_at')
-                        ->orWhere('expires_at', '>=', $now);
-                });
+                    // Pesan belum expired
+                    ->where(function ($q) use ($now) {
+                        $q->whereNull('expires_at')
+                            ->orWhere('expires_at', '>=', $now);
+                    });
             })
             ->orderByRaw("COALESCE(scheduled_at, created_at) DESC")
             ->paginate(5, ['*'], 'page', $page);

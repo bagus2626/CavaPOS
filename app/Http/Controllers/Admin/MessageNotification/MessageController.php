@@ -21,13 +21,15 @@ class MessageController extends Controller
      */
     public function index(Request $request)
     {
-        $folder = $request->get('folder', 'inbox'); // inbox | sent | broadcast | trash
+        $folder = $request->get('folder', 'inbox');
+        $search = $request->get('search');
         $user   = Auth::user();
 
         $query = Message::query()
             ->withCount('recipients')
             ->orderByDesc('created_at');
 
+        // Filter berdasarkan folder
         switch ($folder) {
             case 'sent':
                 $query->where('sender_id', $user->id)
@@ -44,7 +46,6 @@ class MessageController extends Controller
                 $query->where('sender_id', $user->id)
                     ->whereHas('recipients', function ($q) use ($user) {
                         $q->where('message_type', 'popup');
-                        
                     });
                 break;
 
@@ -52,10 +53,19 @@ class MessageController extends Controller
             default:
                 $query->whereHas('recipients', function ($q) use ($user) {
                     $q->where('recipient_id', $user->id)
-                      ->where('recipient_type', 'admin')
-                      ->where('recipient_target', 'single');
+                        ->where('recipient_type', 'admin')
+                        ->where('recipient_target', 'single');
                 });
                 break;
+        }
+
+        // Filter berdasarkan search query
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('body', 'like', "%{$search}%")
+                    ->orWhere('type', 'like', "%{$search}%");
+            });
         }
 
         $messages = $query->with([
@@ -63,15 +73,58 @@ class MessageController extends Controller
             'recipients.outlets',
             'recipients.owners',
             'recipients.employees'
-            ])->paginate(10)->withQueryString();
+        ])->paginate(10)->withQueryString();
 
+        // Jika request AJAX, return JSON
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'messages' => $messages->map(function ($msg) {
+                    // Format data untuk response JSON
+                    $broadcastRecipient = $msg->recipients()
+                        ->where('recipient_target', 'broadcast')
+                        ->first();
+
+                    $recipients = $msg->recipients()
+                        ->where('recipient_target', 'single')
+                        ->get()
+                        ->map(function ($recip) {
+                            return [
+                                'name' => $recip->recipient_type === 'owner'
+                                    ? ($recip->owners->name ?? '-')
+                                    : ($recip->recipient_type === 'outlet'
+                                        ? ($recip->outlets->name ?? '-')
+                                        : ($recip->employees->name ?? '-')),
+                                'recipient_type' => $recip->recipient_type
+                            ];
+                        });
+
+                    return [
+                        'id' => $msg->id,
+                        'title' => $msg->title,
+                        'body' => $msg->body,
+                        'type' => $msg->type,
+                        'created_at_human' => optional($msg->created_at)->diffForHumans(),
+                        'broadcast_recipient_type' => $broadcastRecipient->recipient_type ?? null,
+                        'recipients' => $recipients
+                    ];
+                }),
+                'pagination' => [
+                    'current_page' => $messages->currentPage(),
+                    'last_page' => $messages->lastPage(),
+                    'per_page' => $messages->perPage(),
+                    'total' => $messages->total(),
+                    'from' => $messages->firstItem(),
+                    'to' => $messages->lastItem()
+                ]
+            ]);
+        }
+
+        // Return view normal untuk non-AJAX request
         $currentMessage = null;
         if ($request->filled('message_id')) {
             $currentMessage = Message::with(['attachments', 'recipients'])
                 ->find($request->get('message_id'));
         }
-
-        // dd($currentMessage);
 
         return view('pages.admin.messages-notification.messages.index', [
             'messages'       => $messages,

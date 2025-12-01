@@ -60,7 +60,6 @@ class CashierTransactionController extends Controller
             'order_details.partnerProduct',
             'order_details.order_detail_options.option.parent'
         ])->findOrFail($id);
-        // dd($order);
         return response()->json($order);
     }
     public function cashPayment(Request $request, $id)
@@ -69,9 +68,16 @@ class CashierTransactionController extends Controller
         $cashier = Auth::user();
         $booking_order = BookingOrder::with('order_details.order_detail_options.option', 'order_details.partnerProduct')
             ->findOrFail($id);
-        $payment = OrderPayment::where('booking_order_id', $id)->first();
+        $payment = OrderPayment::where('booking_order_id', $id)
+            ->where('payment_status', 'PAID')
+            ->first();
         if ($payment) {
-            // dd('payemtn', $payment);
+
+            $booking_order->order_status = 'PAID';
+            $booking_order->payment_flag = true;
+            $booking_order->save();
+
+            DB::commit();
             return redirect()->back()->with('error', 'Order ini sudah dibayar! Coba Refresh halaman.');
         }
 
@@ -100,6 +106,7 @@ class CashierTransactionController extends Controller
             ]);
 
             $booking_order->order_status = 'PAID';
+            $booking_order->payment_method = 'CASH';
             $booking_order->payment_id = $order_payment->id;
             $booking_order->payment_flag = true;
             $booking_order->save();
@@ -362,7 +369,7 @@ class CashierTransactionController extends Controller
                     "amount" => $payment->paid_amount ?? 0,
                     "given_names" => $request->order_name ?? "unknow",
                     "description" => "Invoice QRIS",
-                    "invoice_duration" => 3600,
+                    "invoice_duration" => 60,
                     "customer" => [
                         "given_names" => $request->order_name ?? "unknow",
                         "email" => "example@example.com",
@@ -373,8 +380,8 @@ class CashierTransactionController extends Controller
                         "invoice_reminder" => ["whatsapp", "email"],
                         "invoice_paid" => ["whatsapp", "email"]
                     ],
-                    "success_redirect_url" => url("employee/cashier/dashboard"),
-                    "failure_redirect_url" => url("employee/cashier/dashboard"),
+                    "success_redirect_url" => url("employee/cashier/open-order/" . $booking_order->id),
+                    "failure_redirect_url" => url("employee/cashier/open-order/" . $booking_order->id),
                     "currency" => "IDR",
                     "items" => $items,
 //                    "payment_methods" => ["QRIS"],
