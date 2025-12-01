@@ -1,8 +1,8 @@
 @extends('layouts.owner')
 
-@section('title', 'Profile Settings')
+@section('title', __('messages.owner.settings.settings.profile_settings'))
 
-@section('page_title', 'Profile Settings')
+@section('page_title', __('messages.owner.settings.settings.profile_settings'))
 
 @section('content')
     <div class="content">
@@ -46,14 +46,16 @@
 
                             @if ($owner->image)
                                 <button type="button" id="btnDeletePhoto" class="btn btn-outline-danger btn-sm mb-3">
-                                    <i class="fas fa-trash mr-1"></i>Remove Photo
+                                    <i
+                                        class="fas fa-trash mr-1"></i>{{ __('messages.owner.settings.settings.remove_photo') }}
                                 </button>
                             @endif
 
                             <div class="border-top pt-3">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <small class="text-muted">
-                                        <i class="fas fa-calendar-alt mr-1"></i>Member Since
+                                        <i
+                                            class="fas fa-calendar-alt mr-1"></i>{{ __('messages.owner.settings.settings.member_since') }}
                                     </small>
                                     <small class="font-weight-bold">
                                         {{ \Carbon\Carbon::parse($owner->created_at)->format('d M Y') }}
@@ -61,7 +63,8 @@
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <small class="text-muted">
-                                        <i class="fas fa-clock mr-1"></i>Last Update
+                                        <i
+                                            class="fas fa-clock mr-1"></i>{{ __('messages.owner.settings.settings.last_update') }}
                                     </small>
                                     <small class="font-weight-bold">
                                         {{ \Carbon\Carbon::parse($owner->updated_at)->diffForHumans() }}
@@ -75,17 +78,19 @@
                     <div class="card shadow-sm border-0 mb-4">
                         <div class="card-header bg-white border-bottom">
                             <h6 class="mb-0 font-weight-bold">
-                                <i class="fas fa-shield-alt text-choco mr-2"></i>Security
+                                <i
+                                    class="fas fa-shield-alt text-choco mr-2"></i>{{ __('messages.owner.settings.settings.security') }}
                             </h6>
                         </div>
 
                         <div class="card-body">
                             <button type="button" class="btn btn-outline-primary btn-block" data-toggle="modal"
                                 data-target="#changePasswordModal">
-                                <i class="fas fa-key mr-2"></i>Change Password
+                                <i class="fas fa-key mr-2"></i>{{ __('messages.owner.settings.settings.change_password') }}
                             </button>
                             <small class="text-muted d-block mt-2 text-center">
-                                <i class="fas fa-info-circle mr-1"></i>Keep your account secure
+                                <i
+                                    class="fas fa-info-circle mr-1"></i>{{ __('messages.owner.settings.settings.keep_account_secure') }}
                             </small>
                         </div>
                     </div>
@@ -96,7 +101,8 @@
                     <div class="card shadow-sm border-0">
                         <div class="card-header text-black">
                             <h5 class="mb-0 font-weight-bold">
-                                <i class="fas fa-user-edit mr-2 text-choco"></i>Personal Information
+                                <i
+                                    class="fas fa-user-edit mr-2 text-choco"></i>{{ __('messages.owner.settings.settings.personal_information') }}
                             </h5>
                         </div>
                         <div class="card-body p-4">
@@ -109,13 +115,15 @@
                                         <div class="form-group">
                                             <label class="form-label font-weight-semibold">
                                                 <i class="fas fa-user text-choco mr-1"></i>
-                                                Full Name <span class="text-danger">*</span>
+                                                {{ __('messages.owner.settings.settings.full_name') }} <span
+                                                    class="text-danger">*</span>
                                             </label>
                                             <input type="text" class="form-control form-control-md" id="name"
                                                 name="name" value="{{ old('name', $owner->name ?? '') }}"
-                                                placeholder="Enter your full name" required>
-                                            <small class="form-text text-muted">This name will be displayed on your
-                                                profile</small>
+                                                placeholder="{{ __('messages.owner.settings.settings.full_name_placeholder') }}"
+                                                required>
+                                            <small
+                                                class="form-text text-muted">{{ __('messages.owner.settings.settings.this_name_displayed') }}</small>
                                         </div>
                                     </div>
 
@@ -124,13 +132,15 @@
                                         <div class="form-group">
                                             <label class="form-label font-weight-semibold">
                                                 <i class="fas fa-envelope text-choco mr-1"></i>
-                                                Email Address <span class="text-danger">*</span>
+                                                {{ __('messages.owner.settings.settings.email_address') }}<span
+                                                    class="text-danger">*</span>
                                             </label>
                                             <input type="email" class="form-control form-control-md" id="email"
                                                 name="email" value="{{ old('email', $owner->email ?? '') }}"
-                                                placeholder="example@email.com" required>
-                                            <small class="form-text text-muted">We'll never share your email with
-                                                anyone</small>
+                                                placeholder="{{ __('messages.owner.settings.settings.email_placeholder') }}"
+                                                required>
+                                            <small
+                                                class="form-text text-muted">{{ __('messages.owner.settings.settings.never_share_email') }}</small>
                                         </div>
                                     </div>
 
@@ -139,15 +149,17 @@
                                         <div class="form-group">
                                             <label class="form-label font-weight-semibold">
                                                 <i class="fas fa-phone text-choco mr-1"></i>
-                                                Phone Number <span class="text-danger">*</span>
+                                                {{ __('messages.owner.settings.settings.phone_number') }}<span
+                                                    class="text-danger">*</span>
                                             </label>
                                             <input type="text" class="form-control form-control-md" id="phone_number"
                                                 name="phone_number"
                                                 value="{{ old('phone_number', $owner->phone_number ?? '') }}"
-                                                placeholder="e.g. 081234567890" required>
+                                                placeholder="{{ __('messages.owner.settings.settings.phone_placeholder') }}"
+                                                required>
                                             <small class="form-text text-muted">
                                                 <i class="fas fa-shield-alt mr-1"></i>
-                                                Use an active phone number for security notifications
+                                                {{ __('messages.owner.settings.settings.use_active_phone') }}
                                             </small>
                                         </div>
                                     </div>
@@ -157,7 +169,7 @@
                                 <div class="border-top pt-4 mt-3">
                                     <h6 class="font-weight-bold mb-3">
                                         <i class="fas fa-info-circle text-choco mr-2"></i>
-                                        Another Information
+                                        {{ __('messages.owner.settings.settings.another_information') }}
                                     </h6>
 
                                     <div class="row">
@@ -174,7 +186,7 @@
                                                             <small class="text-muted d-block">Status</small>
                                                             <span
                                                                 class="font-weight-bold text-{{ $owner->is_active ? 'success' : 'danger' }}">
-                                                                {{ $owner->is_active ? 'Active' : 'Inactive' }}
+                                                                {{ $owner->is_active ? __('messages.owner.settings.settings.active') : __('messages.owner.settings.settings.inactive') }}
                                                             </span>
 
                                                         </div>
@@ -191,8 +203,10 @@
                                                             <i class="fas fa-user-shield text-choco"></i>
                                                         </div>
                                                         <div>
-                                                            <small class="text-muted d-block">Account Type</small>
-                                                            <span class="font-weight-bold">Owner Account</span>
+                                                            <small
+                                                                class="text-muted d-block">{{ __('messages.owner.settings.settings.account_type') }}</small>
+                                                            <span
+                                                                class="font-weight-bold">{{ __('messages.owner.settings.settings.owner_account') }}</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -206,10 +220,11 @@
                                 <!-- Action Buttons -->
                                 <div class="d-flex justify-content-between align-items-center pt-3 border-top">
                                     <button type="button" id="btnCancel" class="btn btn-outline-secondary px-4">
-                                        <i class="fas fa-undo mr-2"></i>Reset
+                                        <i class="fas fa-undo mr-2"></i>{{ __('messages.owner.settings.settings.reset') }}
                                     </button>
                                     <button type="submit" class="btn btn-primary btn-md px-5">
-                                        <i class="fas fa-save mr-2"></i>Save Changes
+                                        <i
+                                            class="fas fa-save mr-2"></i>{{ __('messages.owner.settings.settings.save_changes') }}
                                     </button>
                                 </div>
                             </form>
@@ -227,7 +242,7 @@
             <div class="modal-content border-0 shadow-lg">
                 <div class="modal-header bg-choco text-white border-0">
                     <h5 class="modal-title font-weight-bold">
-                        <i class="fas fa-lock mr-2"></i>Change Password
+                        <i class="fas fa-lock mr-2"></i>{{ __('messages.owner.settings.settings.change_password') }}
                     </h5>
                     <button type="button" class="close text-white" data-dismiss="modal">
                         <span>&times;</span>
@@ -240,9 +255,8 @@
                             <div class="d-flex align-items-start">
                                 <i class="fas fa-exclamation-triangle fa-2x mr-3 text-warning"></i>
                                 <div>
-                                    <strong>Security Notice:</strong><br>
-                                    <small>After changing your password, you'll need to login again with your new password.
-                                        Make sure to remember it!</small>
+                                    <strong>{{ __('messages.owner.settings.settings.security_notice') }}:</strong><br>
+                                    <small>{{ __('messages.owner.settings.settings.security_notice_text') }}</small>
                                 </div>
                             </div>
                         </div>
@@ -250,11 +264,13 @@
                         <div class="form-group">
                             <label class="form-label font-weight-semibold">
                                 <i class="fas fa-lock text-choco mr-1"></i>
-                                Current Password <span class="text-danger">*</span>
+                                {{ __('messages.owner.settings.settings.current_password') }}<span
+                                    class="text-danger">*</span>
                             </label>
                             <div class="input-group input-group-md">
                                 <input type="password" class="form-control" name="current_password" id="currentPassword"
-                                    required placeholder="Enter current password">
+                                    required
+                                    placeholder="{{ __('messages.owner.settings.settings.current_password_placeholder') }}">
                                 <div class="input-group-append">
                                     <button class="btn btn-outline-secondary" type="button" id="toggleCurrentPassword">
                                         <i class="fas fa-eye"></i>
@@ -266,11 +282,13 @@
                         <div class="form-group">
                             <label class="form-label font-weight-semibold">
                                 <i class="fas fa-key text-choco mr-1"></i>
-                                New Password <span class="text-danger">*</span>
+                                {{ __('messages.owner.settings.settings.new_password') }}<span
+                                    class="text-danger">*</span>
                             </label>
                             <div class="input-group input-group-md">
                                 <input type="password" class="form-control" name="new_password" id="newPassword"
-                                    required placeholder="Enter new password">
+                                    required
+                                    placeholder="{{ __('messages.owner.settings.settings.new_password_placeholder') }}">
                                 <div class="input-group-append">
                                     <button class="btn btn-outline-secondary" type="button" id="toggleNewPassword">
                                         <i class="fas fa-eye"></i>
@@ -278,19 +296,21 @@
                                 </div>
                             </div>
                             <small class="text-muted">
-                                <i class="fas fa-info-circle mr-1"></i>Minimum 8 characters (letters, numbers & symbols
-                                recommended)
+                                <i
+                                    class="fas fa-info-circle mr-1"></i>{{ __('messages.owner.settings.settings.password_hint') }}
                             </small>
                         </div>
 
                         <div class="form-group mb-0">
                             <label class="form-label font-weight-semibold">
                                 <i class="fas fa-check-circle text-choco mr-1"></i>
-                                Confirm New Password <span class="text-danger">*</span>
+                                {{ __('messages.owner.settings.settings.confirm_new_password') }} <span
+                                    class="text-danger">*</span>
                             </label>
                             <div class="input-group input-group-md">
                                 <input type="password" class="form-control" name="new_password_confirmation"
-                                    id="confirmPassword" required placeholder="Confirm new password">
+                                    id="confirmPassword" required
+                                    placeholder="{{ __('messages.owner.settings.settings.confirm_password_placeholder') }}">
                                 <div class="input-group-append">
                                     <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
                                         <i class="fas fa-eye"></i>
@@ -301,10 +321,10 @@
                     </div>
                     <div class="modal-footer border-0 bg-light">
                         <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
-                            <i class="fas fa-times mr-2"></i>Cancel
+                            <i class="fas fa-times mr-2"></i>{{ __('messages.owner.settings.settings.cancel') }}
                         </button>
                         <button type="submit" class="btn btn-primary btn-md px-4">
-                            <i class="fas fa-check mr-2"></i>Change Password
+                            <i class="fas fa-check mr-2"></i>{{ __('messages.owner.settings.settings.change_password') }}
                         </button>
                     </div>
                 </form>
@@ -318,7 +338,7 @@
             <div class="modal-content border-0 shadow-lg">
                 <div class="modal-header bg-choco text-white border-0">
                     <h5 class="modal-title font-weight-bold">
-                        <i class="fas fa-crop mr-2"></i>Crop Profile Photo
+                        <i class="fas fa-crop mr-2"></i>{{ __('messages.owner.settings.settings.crop_profile_photo') }}
                     </h5>
                     <button type="button" class="close text-white" data-dismiss="modal">
                         <span>&times;</span>
@@ -327,7 +347,7 @@
                 <div class="modal-body p-4">
                     <div class="alert alert-info border-0 mb-3">
                         <i class="fas fa-info-circle mr-2"></i>
-                        <small>Drag to move, scroll to zoom, or use the corners to resize the crop area.</small>
+                        <small>{{ __('messages.owner.settings.settings.crop_instruction') }}</small>
                     </div>
 
                     <div class="img-container">
@@ -336,10 +356,10 @@
                 </div>
                 <div class="modal-footer border-0 bg-light">
                     <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
-                        <i class="fas fa-times mr-2"></i>Cancel
+                        <i class="fas fa-times mr-2"></i>{{ __('messages.owner.settings.settings.cancel') }}
                     </button>
                     <button type="button" id="cropAndUploadBtn" class="btn btn-primary btn-md px-4">
-                        <i class="fas fa-check mr-2"></i>Crop
+                        <i class="fas fa-check mr-2"></i>{{ __('messages.owner.settings.settings.crop') }}
                     </button>
                 </div>
             </div>

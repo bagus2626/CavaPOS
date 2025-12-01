@@ -477,17 +477,17 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label for="qr_mode" class="form-label d-block">Payment Scheme</label>
+                                <label for="qr_mode" class="form-label d-block">{{ __('messages.owner.outlet.all_outlets.activate_qr') }}</label>
                                 <select id="qr_mode" name="qr_mode"
                                     class="form-select @error('qr_mode') is-invalid @enderror"
                                     style="padding-left: 8px; padding-right: 30px; padding-top: 1px; padding-bottom: 1px; font-size: 14px;">
                                     <option value="disabled"
-                                        {{ old('qr_mode', 'disabled') == 'disabled' ? 'selected' : '' }}>Nonaktif</option>
+                                        {{ old('qr_mode', 'disabled') == 'disabled' ? 'selected' : '' }}>{{ __('messages.owner.outlet.all_outlets.inactive') }}</option>
                                     <option value="barcode_only" {{ old('qr_mode') == 'barcode_only' ? 'selected' : '' }}>
-                                        QR Only</option>
+                                        {{ __('messages.owner.outlet.all_outlets.qr_only') }}</option>
                                     <option value="cashier_only" {{ old('qr_mode') == 'cashier_only' ? 'selected' : '' }}>
-                                        Cashier Only</option>
-                                    <option value="both" {{ old('qr_mode') == 'both' ? 'selected' : '' }}>All</option>
+                                        {{ __('messages.owner.outlet.all_outlets.cashier_only') }}</option>
+                                    <option value="both" {{ old('qr_mode') == 'both' ? 'selected' : '' }}>{{ __('messages.owner.outlet.all_outlets.all_methods') }}</option>
                                 </select>
                                 @error('qr_mode')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>

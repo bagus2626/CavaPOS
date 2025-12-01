@@ -51,8 +51,8 @@ class AccountVerificationStatusMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.owner-verification-status', // Versi HTML
-            text: 'emails.owner-verification-status2', // <-- TAMBAHKAN INI
+            view: 'emails.owner-verification-status',
+            text: 'emails.owner-verification-status2',
             with: [
                 'owner' => $this->owner,
                 'verification' => $this->verification,

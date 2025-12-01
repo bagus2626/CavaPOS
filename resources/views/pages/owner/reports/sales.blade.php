@@ -263,7 +263,7 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 <div class="bg-white rounded-xl shadow-md p-6">
-                    <p class="text-sm font-medium text-gray-500 uppercase">{{ __('messages.owner.sales_report.total-sales') }}</p>
+                    <p class="text-sm font-medium text-gray-500 uppercase">{{ __('messages.owner.sales_report.total_sales') }}</p>
                     <p class="text-2xl font-bold text-gray-900 mt-1">Rp {{ number_format($totalRevenue ?? 0, 0, ',', '.') }}
                     </p>
                 </div>

@@ -148,20 +148,22 @@ class CashierDashboardController extends Controller
                 $partner = User::findOrFail($partnerId);
                 $partner_products = PartnerProduct::with([
                     'category',
-                    'parent_options.options',
                     'promotion' => function ($q) {
                         $q->activeToday();
-                    }
+                    },
+                    'stock',
+                    'parent_options.options.stock',
                 ])
                     ->where('partner_id', $partner->id)
                     ->where('is_active', 1)
                     ->get();
+
                 $categories = Category::whereIn('id', $partner_products->pluck('category_id'))->get();
                 $tables = Table::where('partner_id', $partner->id)->orderBy('table_no', 'ASC')->get();
 
                 return view('pages.employee.cashier.dashboard.tabs.pembelian', compact('partner', 'partner_products', 'categories', 'tables'));
             case 'pembayaran':
-                $items = (clone $base)->where('payment_method', 'CASH')->where('order_status', 'UNPAID')->latest()->get();
+                $items = (clone $base)->whereIn('payment_method', ['CASH', 'QRIS'])->where('order_status', 'UNPAID')->latest()->get();
                 return view('pages.employee.cashier.dashboard.tabs.pembayaran', compact('items'));
             case 'proses':
                 $items = (clone $base)
@@ -180,5 +182,99 @@ class CashierDashboardController extends Controller
                 abort(404);
         }
     }
+
+    public function metrics(Request $request)
+    {
+        $ordersToday = $this->getOrdersTodayWithFilters($request);
+
+        $unpaidCash = $ordersToday->where('payment_method', 'CASH')->where('payment_flag', 0)->count();
+        $onProcess  = $ordersToday->whereIn('order_status', ['PROCESSED', 'PAID'])->count();
+        $served     = $ordersToday->where('order_status', 'SERVED')->count();
+
+        return response()->json([
+            'total_order'       => $ordersToday->count(),
+            'unpaid_cash'       => $unpaidCash,
+            'paid_cash'         => $ordersToday->where('payment_method', 'CASH')->where('payment_flag', 1)->count(),
+            'qris_paid'         => $ordersToday->where('payment_method', 'QRIS')->where('payment_flag', 1)->count(),
+            'on_process'        => $onProcess,
+            'revenue'           => $ordersToday->where('payment_flag', 1)->sum('total_order_value'),
+
+            // 🔹 tambahan untuk badge & panel
+            'badge_pembayaran'  => $unpaidCash,
+            'badge_proses'      => $onProcess,
+            'badge_selesai'     => $served,
+            'pending_cash_count'=> $unpaidCash, // atau logika lain kalau perlu beda
+        ]);
+    }
+
+
+    protected function getOrdersTodayWithFilters(Request $request)
+    {
+        // ambil partner dari employee yang login
+        $employee = Employee::findOrFail(Auth::id());
+        $partner  = $employee->partner;
+
+        // Ambil filter dari query string
+        $payment = $request->string('payment')->toString(); // 'CASH' | 'QRIS' | ''
+        $status  = $request->string('status')->toString();  // 'PAID' | 'UNPAID' | '' (bundle dengan index())
+        $q       = $request->string('q')->toString();
+
+        // Ambil tanggal dari request
+        $from = $request->date('from');
+        $to   = $request->date('to');
+
+        // Atur default tanggal (sama seperti index)
+        if (!$from && !$to) {
+            $from = $to = Carbon::today();
+        } elseif ($from && !$to) {
+            $to = Carbon::today();
+        } elseif (!$from && $to) {
+            $from = Carbon::parse($to)->startOfMonth();
+        }
+
+        // Base query: partner + rentang tanggal (inklusif)
+        $base = BookingOrder::query()
+            ->with('table')
+            ->where('partner_id', $partner->id)
+            ->whereBetween('created_at', [
+                Carbon::parse($from)->startOfDay(),
+                Carbon::parse($to)->endOfDay(),
+            ])
+            ->when($payment, fn($q2) => $q2->where('payment_method', $payment))
+            ->when($status,  fn($q2) => $q2->where('order_status', $status))
+            ->when($q, function ($q2) use ($q) {
+                $q2->where(function ($qq) use ($q) {
+                    $qq->where('booking_order_code', 'like', "%{$q}%")
+                        ->orWhere('customer_name', 'like', "%{$q}%")
+                        ->orWhereHas('table', fn($t) => $t->where('table_no', 'like', "%{$q}%"));
+                });
+            })
+            ->orderBy('created_at', 'ASC');
+
+        // kembalikan collection order yang sudah difilter
+        return $base->latest()->get();
+    }
+
+    public function openOrder($id)
+    {
+        $booking_order = BookingOrder::findOrFail($id);
+        $tab = 'proses';
+
+        // if (!in_array($booking_order->order_status, ['PROCESSED', 'PAID'])) {
+        //     abort(404);
+        // }
+
+        if ($booking_order->order_status === 'PAID') {
+            $tab = 'proses';
+        } else {
+            $tab = 'pembayaran';
+        }
+
+        return redirect()->route('employee.cashier.dashboard', [
+            'open_order' => $id,
+            'tab' => $tab
+        ]);
+    }
+
 
 }

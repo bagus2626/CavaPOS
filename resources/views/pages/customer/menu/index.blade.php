@@ -67,11 +67,136 @@
 
             {{-- menu list --}}
             @php
-                // Kelompokkan produk berdasarkan category_id
-                $productsByCategory = $partner_products->groupBy('category_id');
+                $productsByCategory = $partner_products
+                    ->sortBy(function ($product) {
+                        return $product->category->category_order ?? 99999;
+                    })
+                    ->groupBy('category_id');
+                $hotProducts = $partner_products->filter(function ($p) {
+                    return $p->is_hot_product;
+                });
             @endphp
 
             <div class="flex flex-col" id="menu-container">
+                {{-- Segmen Hot Products --}}
+                @if($hotProducts->count())
+                    <div class="hot-products-group bg-amber-50 border-b border-amber-200 pb-2">
+                        <p class="px-4 pt-3 mb-2 text-sm font-semibold text-amber-800 flex items-center gap-2">
+                            🔥 <span>{{ __('messages.customer.menu.hot_products') }}</span>
+                        </p>
+
+                        <div class="flex flex-col">
+                            @foreach($hotProducts as $product)
+                                @php
+                                    $firstImage = $product->pictures[0]['path'] ?? null;
+                                    $promo = $product->promotion;
+                                    $basePrice = (float) $product->price;
+                                    $discountedBase = $basePrice;
+                                    $hasPromo = false;
+
+                                    if ($promo) {
+                                        if ($promo->promotion_type === 'percentage') {
+                                            $discountedBase = max(0, $basePrice * (1 - $promo->promotion_value / 100));
+                                        } else {
+                                            $discountedBase = max(0, $basePrice - (float) $promo->promotion_value);
+                                        }
+                                        $hasPromo = $discountedBase < $basePrice;
+                                    }
+
+                                    // Badge text promo
+                                    $promoBadge = null;
+                                    if ($promo) {
+                                        $promoBadge =
+                                            $promo->promotion_type === 'percentage'
+                                                ? '-' .
+                                                    rtrim(
+                                                        rtrim(number_format($promo->promotion_value, 2, ',', '.'), '0'),
+                                                        ',',
+                                                    ) .
+                                                    '%'
+                                                : '-Rp ' . number_format($promo->promotion_value, 0, ',', '.');
+                                    }
+                                @endphp
+
+                                <div
+                                    @class([
+                                        'menu-item menu-item-hot bg-white flex flex-row transition hover:shadow-lg border border-amber-100 rounded-xl px-3',
+                                        'grayscale' => $product->quantity_available < 1 && $product->always_available_flag == false,
+                                    ])
+                                    data-category="{{ $product->category_id }}"
+                                >
+                                    {{-- Gambar + badge PROMO + badge HOT --}}
+                                    <div class="w-28 h-28 flex-shrink-0 rounded-lg m-2 overflow-hidden relative">
+                                        @if($firstImage)
+                                            <img src="{{ asset($firstImage) }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
+                                        @else
+                                            <div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400 text-sm">
+                                                <i class="fas fa-image"></i>
+                                            </div>
+                                        @endif
+
+                                        {{-- Badge PROMO (kiri atas) --}}
+                                        @if($hasPromo && $promoBadge)
+                                            <span class="absolute top-1 left-1 bg-red-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded">
+                                                {{ $promoBadge }}
+                                            </span>
+                                        @endif
+
+                                        {{-- Badge HOT khusus segmen ini (kanan atas) --}}
+                                        <span class="absolute top-1 right-1 bg-orange-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow">
+                                            HOT
+                                        </span>
+                                    </div>
+
+                                    {{-- Info produk --}}
+                                    <div class="ml-4 flex-1 flex flex-col justify-between py-2">
+                                        <div>
+                                            <h5 class="text-base font-semibold text-gray-900 flex items-center gap-2">
+                                                {{ $product->name }}
+                                                {{-- <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">
+                                                    {{ $product->category->category_name ?? '' }}
+                                                </span> --}}
+                                            </h5>
+                                            <p class="text-gray-500 text-xs mb-1 line-clamp-2">
+                                                {{ $product->description }}
+                                            </p>
+
+                                            @if($hasPromo)
+                                                <div class="flex items-baseline gap-2">
+                                                    <span class="text-xs text-gray-500 line-through">
+                                                        Rp {{ number_format($basePrice, 0, ',', '.') }}
+                                                    </span>
+                                                    <span class="text-sm font-bold text-gray-900">
+                                                        Rp {{ number_format($discountedBase, 0, ',', '.') }}
+                                                    </span>
+                                                </div>
+                                            @else
+                                                <p class="text-sm font-bold text-gray-900">
+                                                    Rp {{ number_format($basePrice, 0, ',', '.') }}
+                                                </p>
+                                            @endif
+                                        </div>
+
+                                        {{-- Tombol Qty --}}
+                                        <div class="mt-1 mb-2 flex items-center ml-auto space-x-4">
+                                            <button class="minus-btn w-8 h-8 flex items-center justify-center border border-choco rounded-lg font-bold text-choco hover:bg-gray-100 hidden"
+                                                    data-id="{{ $product->id }}">-</button>
+                                            <span class="qty text-base font-semibold text-gray-800 hidden" data-id="{{ $product->id }}">0</span>
+                                            @if ($product->quantity_available < 1 && $product->always_available_flag == false)
+                                                <p class="text-gray-700 text-xs">{{ __('messages.customer.menu.sold') }}</p>
+                                            @else
+                                                <button class="plus-btn w-8 h-8 flex items-center justify-center border rounded-lg font-bold text-white bg-choco hover:bg-soft-choco"
+                                                        data-id="{{ $product->id }}">+</button>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                {{-- Segmen Kategori Produk --}}
                 @foreach ($productsByCategory as $categoryId => $products)
                     @if ($products->count() > 0)
                         @php
@@ -123,35 +248,49 @@
                                                 : '-Rp ' . number_format($promo->promotion_value, 0, ',', '.');
                                     }
                                 @endphp
-                                <div @class([
-                                    'menu-item bg-white flex flex-row transition hover:shadow-lg px-4 border-b border-gray-200',
-                                    // tailwind grayscale
-                                    'grayscale' =>
-                                        $product->quantity < 1 && $product->always_available_flag == false,
-                                ]) data-category="{{ $product->category_id }}">
 
-                                    {{-- Gambar Produk --}}
-                                    @if ($firstImage)
-                                        <div
-                                            class="w-28 h-28 flex-shrink-0 rounded-lg m-2 rounded-bl-lg overflow-hidden relative">
-                                            <img src="{{ asset($firstImage) }}" alt="{{ $product->name }}"
-                                                class="w-full h-full object-cover">
-                                            @if ($hasPromo && $promoBadge)
-                                                <span
-                                                    class="absolute top-1 left-1 bg-red-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded">
-                                                    {{ $promoBadge }}
-                                                </span>
-                                            @endif
-                                        </div>
-                                    @endif
+                                <div
+                                    @class([
+                                        'menu-item bg-white flex flex-row transition hover:shadow-lg px-4 border-b border-gray-200',
+                                        'grayscale' => $product->quantity_available < 1 && $product->always_available_flag == false,
+                                    ])
+                                    data-category="{{ $product->category_id }}"
+                                >
+
+                                    {{-- Gambar Produk / Placeholder + BADGE --}}
+                                    <div class="w-28 h-28 flex-shrink-0 rounded-lg m-2 rounded-bl-lg overflow-hidden relative">
+                                        @if($firstImage)
+                                            <img src="{{ asset($firstImage) }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
+                                        @else
+                                            <div class="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400 text-sm">
+                                                <i class="fas fa-image"></i>
+                                            </div>
+                                        @endif
+
+                                        {{-- Badge PROMO (kiri atas) --}}
+                                        @if($hasPromo && $promoBadge)
+                                            <span class="absolute top-1 left-1 bg-red-600 text-white text-[11px] font-semibold px-2 py-0.5 rounded">
+                                                {{ $promoBadge }}
+                                            </span>
+                                        @endif
+
+                                        {{-- Badge HOT PRODUCT (kanan atas) --}}
+                                        @if($product->is_hot_product)
+                                            <span class="absolute top-1 right-1 bg-orange-600 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow">
+                                                HOT
+                                            </span>
+                                        @endif
+                                    </div>
 
                                     {{-- Info Produk --}}
                                     <div class="ml-4 flex-1 flex flex-col justify-between">
                                         <div>
-                                            <h5 class="text-lg font-semibold text-gray-800">{{ $product->name }}</h5>
-                                            <p class="text-gray-500 text-sm mb-1 line-clamp-1">{{ $product->description }}
-                                            </p>
-                                            @if ($hasPromo)
+                                            <h5 class="text-lg font-semibold text-gray-800 flex items-center gap-1">
+                                                {{ $product->name }}
+                                            </h5>
+                                            <p class="text-gray-500 text-sm mb-1 line-clamp-1">{{ $product->description }}</p>
+
+                                            @if($hasPromo)
                                                 <div class="flex items-baseline gap-2">
                                                     <span class="text-sm text-gray-500 line-through">
                                                         Rp {{ number_format($basePrice, 0, ',', '.') }}
@@ -165,27 +304,24 @@
                                                     Rp {{ number_format($basePrice, 0, ',', '.') }}
                                                 </p>
                                             @endif
-
                                         </div>
 
                                         {{-- Tombol Qty --}}
                                         <div class="mb-2 flex items-center ml-auto space-x-4">
-                                            <button
-                                                class="minus-btn w-9 h-9 flex items-center justify-center border border-choco rounded-lg font-bold text-choco hover:bg-gray-100 hidden"
-                                                data-id="{{ $product->id }}">-</button>
-                                            <span class="qty text-lg font-semibold text-gray-800 hidden"
-                                                id="qty-{{ $product->id }}">0</span>
-                                            @if ($product->quantity < 1 && $product->always_available_flag == false)
+                                            <button class="minus-btn w-9 h-9 flex items-center justify-center border border-choco rounded-lg font-bold text-choco hover:bg-gray-100 hidden"
+                                                    data-id="{{ $product->id }}">-</button>
+                                            <span class="qty text-lg font-semibold text-gray-800 hidden" data-id="{{ $product->id }}">0</span>
+                                            @if ($product->quantity_available < 1 && $product->always_available_flag == false)
                                                 <p class="text-gray-700">{{ __('messages.customer.menu.sold') }}</p>
                                             @else
-                                                <button
-                                                    class="plus-btn w-9 h-9 flex items-center justify-center border rounded-lg font-bold text-white bg-choco hover:bg-soft-choco"
-                                                    data-id="{{ $product->id }}">+</button>
+                                                <button class="plus-btn w-9 h-9 flex items-center justify-center border rounded-lg font-bold text-white bg-choco hover:bg-soft-choco"
+                                                        data-id="{{ $product->id }}">+</button>
                                             @endif
                                         </div>
                                     </div>
                                 </div>
                             @endforeach
+
                         </div>
                     @endif
                 @endforeach
@@ -195,7 +331,7 @@
         </div>
         @include('pages.customer.menu.modal')
 
-    @endsection
+@endsection
 
     <style>
         /* sheet bisa di-scroll sendiri */
@@ -288,41 +424,59 @@
 
     @push('scripts')
         @php
-            $productsData = $partner_products
-                ->map(function ($p) {
-                    $firstImage = $p->pictures[0]['path'] ?? null;
-                    $promo = $p->promotion;
-                    $base = (float) $p->price;
-                    $discBase = $base;
+            $productsData = $partner_products->map(function ($p) {
+            $firstImage = $p->pictures[0]['path'] ?? null;
+            $promo = $p->promotion;
+            $base = (float) $p->price;
+            $discBase = $base;
 
-                    if ($promo) {
-                        if ($promo->promotion_type === 'percentage') {
-                            $discBase = max(0, $base * (1 - $promo->promotion_value / 100));
-                        } else {
-                            $discBase = max(0, $base - (float) $promo->promotion_value);
-                        }
-                    }
+            if ($promo) {
+                if ($promo->promotion_type === 'percentage') {
+                $discBase = max(0, $base * (1 - ($promo->promotion_value / 100)));
+                } else {
+                $discBase = max(0, $base - (float) $promo->promotion_value);
+                }
+            }
+
+            // Transform parent_options dengan accessor quantity_available
+            $parentOptions = ($p->parent_options ?? collect())->map(function ($po) {
+                return [
+                'id' => $po->id,
+                'name' => $po->name,
+                'description' => $po->description,
+                'provision' => $po->provision,
+                'provision_value' => $po->provision_value,
+                'options' => ($po->options ?? collect())->map(function ($opt) {
                     return [
-                        'id' => $p->id,
-                        'name' => $p->name,
-                        'description' => strip_tags((string) $p->description),
-                        'price' => $base,
-                        'discounted_base' => $discBase, // <<—
-                        'promotion' => $promo
-                            ? [
-                                // <<—
-                                'id' => $promo->id,
-                                'type' => $promo->promotion_type,
-                                'value' => (float) $promo->promotion_value,
-                            ]
-                            : null,
-                        'image' => $firstImage ? asset($firstImage) : null,
-                        'parent_options' => $p->parent_options ?? [],
+                    'id' => $opt->id,
+                    'name' => $opt->name,
+                    'price' => (float) $opt->price,
+                    'quantity_available' => $opt->quantity_available, // ← ACCESSOR dipanggil di sini
+                    'always_available_flag' => (bool) $opt->always_available_flag,
+                    'description' => $opt->description,
                     ];
-                })
-                ->values()
-                ->toArray();
-        @endphp
+                })->values()->all(),
+                ];
+            })->values()->all();
+
+            return [
+                'id' => $p->id,
+                'name' => $p->name,
+                'description' => strip_tags((string) $p->description),
+                'price' => $base,
+                'discounted_base' => $discBase,
+                'promotion' => $promo ? [
+                'id' => $promo->id,
+                'type' => $promo->promotion_type,
+                'value' => (float) $promo->promotion_value,
+                ] : null,
+                'image' => $firstImage ? asset($firstImage) : null,
+                'parent_options' => $parentOptions, // ← Gunakan transformed data
+                'quantity_available' => $p->quantity_available, 
+                'always_available_flag' => (int) $p->always_available_flag,
+            ];
+            })->values()->toArray();
+            @endphp
 
         <script src="{{ asset('js/customer/menu/index.js') }}"></script>
         <script>
@@ -549,18 +703,26 @@
 
                 // Update badge qty + visibility tombol minus di kartu produk
                 function updateProductBadge(productId) {
-                    const qtySpan = document.getElementById('qty-' + productId);
-                    const minusBtn = document.querySelector('.minus-btn[data-id="' + productId + '"]');
-                    const total = sumQtyByProduct(productId);
+                    const qtySpans  = document.querySelectorAll('.qty[data-id="' + productId + '"]');
+                    const minusBtns = document.querySelectorAll('.minus-btn[data-id="' + productId + '"]');
+                    const total     = sumQtyByProduct(productId);
 
-                    qtySpan.innerText = total;
-                    if (total > 0) {
-                        qtySpan.classList.remove('hidden');
-                        if (minusBtn) minusBtn.classList.remove('hidden');
-                    } else {
-                        qtySpan.classList.add('hidden');
-                        if (minusBtn) minusBtn.classList.add('hidden');
-                    }
+                    qtySpans.forEach(qtySpan => {
+                        qtySpan.innerText = total;
+                        if (total > 0) {
+                            qtySpan.classList.remove('hidden');
+                        } else {
+                            qtySpan.classList.add('hidden');
+                        }
+                    });
+
+                    minusBtns.forEach(minusBtn => {
+                        if (total > 0) {
+                            minusBtn.classList.remove('hidden');
+                        } else {
+                            minusBtn.classList.add('hidden');
+                        }
+                    });
                 }
 
                 // Debug print
@@ -579,16 +741,13 @@
                 }
 
 
-                // ===== MODAL RENDERING =====
                 function showModal(productData) {
-                    // console.log('productData:', productData);
-
                     // reset isi modal
                     modalContent.innerHTML = '';
                     modalHeader.innerHTML = '';
                     modalQty = 1; // reset qty ke 1 setiap kali modal dibuka
                     modalNote = '';
-                    updateModalQtyDisplay();
+                    selectedOptions = []; // ← TAMBAHAN: reset selectedOptions
 
                     // === header produk ===
                     const headerWrapper = document.createElement('div');
@@ -615,6 +774,24 @@
                     descEl.classList.add('text-sm', 'text-gray-500', 'line-clamp-2');
                     descEl.textContent = productData.description || '';
                     infoDiv.appendChild(descEl);
+
+                    // ===== TAMBAHAN: Info Stok =====
+                    const stockEl = document.createElement('p');
+                    stockEl.className = 'text-xs mt-1 font-medium';
+                    stockEl.id = 'productStockInfo';
+                    const stockQty = Number(productData.quantity_available) || 0;
+                    const alwaysAvailable = Boolean(productData.always_available_flag);
+
+                    if (alwaysAvailable) {
+                        stockEl.innerHTML = '<span class="text-green-600">✓ {{ __("messages.customer.menu.always_available") }}</span>';
+                    } else if (stockQty > 10) {
+                        stockEl.innerHTML = `<span class="text-green-600">{{ __("messages.customer.menu.stock") }}: ${stockQty}</span>`;
+                    } else if (stockQty > 0) {
+                        stockEl.innerHTML = `<span class="text-orange-600">⚠ {{ __("messages.customer.menu.limited_stock") }}: ${stockQty}</span>`;
+                    } else {
+                        stockEl.innerHTML = '<span class="text-red-600">✕ {{ __("messages.customer.menu.sold") }}</span>';
+                    }
+                    infoDiv.appendChild(stockEl); // ← TAMBAHAN
 
                     headerWrapper.appendChild(infoDiv);
                     modalHeader.appendChild(headerWrapper);
@@ -661,7 +838,7 @@
                             const priceSpan = document.createElement('span');
                             priceSpan.classList.add('ml-auto', 'text-sm', 'font-medium');
 
-                            const qty = Number(opt.quantity) || 0;
+                            const qty = Number(opt.quantity_available) || 0;
                             const alwaysAvailable = opt.always_available_flag === 1;
                             const priceNum = Number(opt.price) || 0;
 
@@ -681,11 +858,13 @@
                                 checkbox.addEventListener('change', function() {
                                     const v = parseInt(this.value, 10);
                                     if (this.checked) {
-                                        if (!selectedOptions.includes(v)) selectedOptions.push(
-                                            v);
+                                        if (!selectedOptions.includes(v)) selectedOptions.push(v);
                                     } else {
                                         selectedOptions = selectedOptions.filter(x => x !== v);
                                     }
+                                    // ← TAMBAHAN: Hitung ulang total saat opsi berubah
+                                    const pd = productsData.find(p => p.id === currentProductId);
+                                    if (pd) calcModalTotal(pd);
                                 });
                             }
 
@@ -730,11 +909,13 @@
                     noteWrap.appendChild(noteHint);
                     modalContent.appendChild(noteWrap);
 
-
                     // tampilkan modal
                     modal.classList.add('show');
                     lockBodyScroll();
                     modal.classList.remove('hidden');
+                    
+                    // ← TAMBAHAN: Panggil updateModalQtyDisplay() di akhir agar validasi stok berjalan
+                    updateModalQtyDisplay();
                 }
 
                 // ===== UI qty di modal =====
@@ -745,6 +926,25 @@
                 function updateModalQtyDisplay() {
                     modalQtyValue.innerText = modalQty;
                     modalQtyMinus.disabled = modalQty <= 1;
+                    
+                    if (currentProductId) {
+                        const pd = getProductDataById(currentProductId);
+                        const stockInfo = document.getElementById('productStockInfo');
+                        const stockQty = Number(pd.quantity_available) || 0;
+                        const alwaysAvailable = Boolean(pd.always_available_flag);
+                        
+                        if (stockInfo && !alwaysAvailable) {
+                        if (modalQty >= stockQty) {
+                            stockInfo.innerHTML = `<span class="text-red-600">Stok: ${stockQty}</span>`;
+                            modalQtyPlus.disabled = true;
+                        } else {
+                            stockInfo.innerHTML = `<span class="text-green-600">Stok: ${stockQty}</span>`;
+                            modalQtyPlus.disabled = false;
+                        }
+                        } else if (alwaysAvailable) {
+                        modalQtyPlus.disabled = false;
+                        }
+                    }
                 }
 
                 modalQtyMinus.addEventListener('click', () => {
@@ -759,12 +959,21 @@
                 });
 
                 modalQtyPlus.addEventListener('click', () => {
-                    modalQty++;
-                    updateModalQtyDisplay();
-                    if (currentProductId) {
-                        const pd = productsData.find(p => p.id === currentProductId);
-                        calcModalTotal(pd);
+                    const pd = getProductDataById(currentProductId);
+                    if (!pd) return;
+
+                    const productStock = Number(pd.quantity_available) || 0;
+                    const alwaysAvailable = Boolean(pd.always_available_flag);
+                    
+                    // ===== TAMBAHAN: Validasi Stok =====
+                    if (!alwaysAvailable && modalQty >= productStock) {
+                        // Jangan tambah qty jika sudah mencapai stok maksimal
+                        return;
                     }
+
+                    modalQty++; 
+                    updateModalQtyDisplay();
+                    calcModalTotal(pd);
                 });
 
 
@@ -1172,13 +1381,6 @@
                         addToCart(row.productId, row.options); // tambah 1
                     } else if (minusBtn) {
                         minusFromCart(row.productId, row.options); // kurang 1
-
-                        const remainingRows = cartRows();
-                        if (remainingRows.length === 0) {
-                            // Langsung tutup modal
-                            closeCartManagerModal();
-                            return; // stop di sini, jangan re-render
-                        }
                     }
 
                     // sinkron UI lain
@@ -1413,6 +1615,68 @@
                             text: '{{ __('messages.customer.menu.input_item_first') }}'
                         });
                         return;
+                    }
+
+                    // ===== VALIDASI STOK REAL-TIME =====
+                    checkoutPayBtn.disabled = true;
+                    Swal.fire({ 
+                        title:'Memeriksa ketersediaan stok…', 
+                        allowOutsideClick:false, 
+                        didOpen:() => Swal.showLoading() 
+                    });
+
+                    try {
+                        const tokenEl = document.querySelector('meta[name="csrf-token"]');
+                        const csrf = tokenEl ? tokenEl.content : null;
+                        
+                        const checkStockUrl = "{{ route('customer.menu.check-stock', ['partner_slug' => $partner_slug, 'table_code' => $table_code]) }}";
+                        
+                        const stockCheckResponse = await fetch(checkStockUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                ...(csrf ? { 'X-CSRF-TOKEN': csrf } : {})
+                            },
+                            credentials: 'same-origin',
+                            body: JSON.stringify({ items: payload })
+                        });
+                        
+                        if (!stockCheckResponse.ok) {
+                            throw new Error(`HTTP ${stockCheckResponse.status}`);
+                        }
+                        
+                        const stockResult = await stockCheckResponse.json();
+                        
+                        if (!stockResult.success) {
+                            Swal.close();
+                            
+                            const result = await Swal.fire({
+                                icon: 'error',
+                                title: 'Stok Tidak Mencukupi',
+                                html: `
+                                    <div class="text-center">
+                                        <p class="mt-3 text-sm text-gray-600">Silakan refresh halaman untuk melihat stok terbaru.</p>
+                                    </div>
+                                `,
+                                showCancelButton: true,
+                                confirmButtonText: 'Refresh Halaman',
+                                cancelButtonText: 'Batal',
+                                confirmButtonColor: '#3085d6',
+                            });
+                            
+                            if (result.isConfirmed) {
+                                window.location.reload();
+                            }
+                            
+                            checkoutPayBtn.disabled = false;
+                            return;
+                        }
+                        
+                        Swal.close();
+                        
+                    } catch (stockCheckError) {
+                        Swal.close();
                     }
 
                     // Konfirmasi ringkas

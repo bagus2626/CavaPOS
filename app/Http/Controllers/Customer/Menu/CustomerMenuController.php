@@ -32,14 +32,22 @@ use App\Models\Transaction\OrderPayment;
 use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Jobs\SendReceiptEmailJob;
+use App\Models\Partner\Products\PartnerProductOptionsRecipe;
+use App\Models\Partner\Products\PartnerProductRecipe;
+use App\Models\Store\Stock;
+use Milon\Barcode\Facades\DNS2DFacade as DNS2D;
+use App\Services\StockRecalculationService;
+use Illuminate\Support\Facades\Schema;
 
 class CustomerMenuController extends Controller
 {
     protected $xenditInvoice;
+    protected $recalculationService;
 
-    public function __construct(XenditService $xendit)
+    public function __construct(XenditService $xendit, StockRecalculationService $recalculationService)
     {
         $this->xenditInvoice = new InvoiceController($xendit);
+        $this->recalculationService = $recalculationService;
     }
 
     public function index($partner_slug, $table_code)
@@ -63,14 +71,18 @@ class CustomerMenuController extends Controller
             'parent_options.options',
             'promotion' => function ($q) {
                 $q->activeToday();
-            }
+            },
+            'stock',
+            'parent_options.options.stock',
         ])
             ->where('partner_id', $partner->id)
             ->where('is_active', 1)
             ->get();
 
         $owner = Owner::where('id', $partner->owner_id)->first();
-        $categories = Category::whereIn('id', $partner_products->pluck('category_id'))->get();
+        $categories = Category::whereIn('id', $partner_products->pluck('category_id'))
+            ->orderBy('category_order')
+            ->get();
 
         return view('pages.customer.menu.index', compact('table', 'customer', 'partner', 'partner_products', 'categories'));
     }
@@ -88,6 +100,8 @@ class CustomerMenuController extends Controller
             $ownerId = $partner->owner_id ?? null;
             $owner = Owner::findOrFail($ownerId);
             $validRegistrationStatuses = ['LIVE', 'LIVE_TESTMODE'];
+
+            $this->checkStockAvailability($orders, $partner);
 
             if ($request->payment_method === 'QRIS') {
                 if (!in_array($owner->xendit_registration_status, $validRegistrationStatuses)) {
@@ -139,7 +153,7 @@ class CustomerMenuController extends Controller
                 $note        = data_get($order, 'note', '');
                 $promoId    = data_get($order, 'promo_id', null);
 
-                $product = PartnerProduct::findOrFail($productId);
+                $product = PartnerProduct::with('stock')->findOrFail($productId);
                 $options = PartnerProductOption::with('parent')->whereIn('id', (array)$optionIds)->get();
                 $optionsPrice = $options->sum('price');
 
@@ -169,8 +183,14 @@ class CustomerMenuController extends Controller
                     'quantity'          => $qty,
                     'customer_note'       => $note,
                 ]);
-                if ($product->always_available_flag === 0) {
-                    $product->decrement('quantity', $qty);
+
+                if ($product->stock_type === 'direct' && $product->always_available_flag === 0 && $product->stock) {
+                    // Reservasi Direct Stock
+                    $product->stock->increment('quantity_reserved', $qty);
+                } elseif ($product->stock_type === 'linked') {
+                    // Reservasi Linked Stock (Bahan Baku)
+                    $recipes = PartnerProductRecipe::where('partner_product_id', $productId)->get();
+                    $this->processRecipeReservation($recipes, $qty);
                 }
 
                 foreach ($options as $opt) {
@@ -181,17 +201,21 @@ class CustomerMenuController extends Controller
                         'option_id' => $opt->id,
                         'price' => $opt->price
                     ]);
-                    if ($opt->always_available_flag === 0) {
-                        $opt->decrement('quantity', 1); // kurangi stock option
+
+                    // Opsi Produk
+                    if ($opt->stock_type === 'direct' && $opt->always_available_flag === 0 && $opt->stock) {
+                        $opt->stock->increment('quantity_reserved', $qty);
+                    } elseif ($opt->stock_type === 'linked') {
+                        $recipes = PartnerProductOptionsRecipe::where('partner_product_option_id', $opt->id)->get();
+                        $this->processRecipeReservation($recipes, $qty);
                     }
                 }
             }
 
             // test by qris (hapus kemudian)
             if ($request->payment_method === 'QRIS') {
-                $booking_order->order_status = 'PAID';
+                $booking_order->order_status = 'UNPAID';
                 $booking_order->payment_method = 'QRIS';
-                $booking_order->payment_flag = true;
 
                 $payment = OrderPayment::create([
                     'booking_order_id'  => $booking_order->id,
@@ -228,7 +252,7 @@ class CustomerMenuController extends Controller
                     "amount" => $payment->paid_amount ?? 0,
                     "given_names" => $request->order_name ?? "unknow",
                     "description" => "Invoice QRIS",
-                    "invoice_duration" => 3600,
+                    "invoice_duration" => 10,
                     "customer" => [
                         "given_names" => $customer ? $customer->name : $request->order_name,
                         "email" => $customer ? $customer->email : "customer@example.com",
@@ -239,11 +263,12 @@ class CustomerMenuController extends Controller
                         "invoice_reminder" => ["whatsapp", "email"],
                         "invoice_paid" => ["whatsapp", "email"]
                     ],
-                    "success_redirect_url" => url("customer/{$partner_slug}/menu/{$table_code}"),
-                    "failure_redirect_url" => url("customer/{$partner_slug}/menu/{$table_code}"),
+                    "success_redirect_url" => url("customer/{$partner_slug}/order-detail/{$table_code}/{$booking_order->id}"),
+                    "failure_redirect_url" => url("customer/{$partner_slug}/order-detail/{$table_code}/{$booking_order->id}"),
+                    // "failure_redirect_url" => url("customer/{$partner_slug}/menu/{$table_code}"),
                     "currency" => "IDR",
                     "items" => $items,
-//                    "payment_methods" => ["QRIS"],
+                    //                    "payment_methods" => ["QRIS"],
                     "metadata" => [
                         "store_branch" => $partner->name
                     ]
@@ -254,7 +279,7 @@ class CustomerMenuController extends Controller
                 $invoiceData = $invoice['data'] ?? null;
                 DB::commit();
 
-                if($invoice['success']){
+                if ($invoice['success']) {
                     return response()->json([
                         'success' => true,
                         'redirect_url' => $invoiceData['invoice_url']
@@ -342,5 +367,268 @@ class CustomerMenuController extends Controller
 
         // download file hasil simpan
         return Storage::download("receipts/debug-{$data->booking_order_code}.pdf");
+    }
+
+    private function checkStockAvailability(array $orders, $partner): void
+    {
+        $requiredStock = [];
+
+        foreach ($orders as $order) {
+            $productId = data_get($order, 'product_id');
+            $optionIds = data_get($order, 'option_ids', []);
+            $qty = (int) data_get($order, 'qty', 1);
+
+            $product = PartnerProduct::with('stock')->find($productId);
+
+            // 1. Cek Produk Utama
+            if ($product->always_available_flag === 0) {
+                if ($product->stock_type === 'direct') {
+                    $productStock = $product->stock;
+                    // Cek Direct Stock: Stok Total - Stok Reserved harus >= qty
+                    $available = ($productStock->quantity ?? 0) - ($productStock->quantity_reserved ?? 0);
+
+                    if (!$productStock || $available < $qty) {
+                        throw new \Exception("Stok {$product->name} (Produk) tidak mencukupi.");
+                    }
+                } elseif ($product->stock_type === 'linked') {
+                    $recipes = PartnerProductRecipe::where('partner_product_id', $productId)->get();
+                    $this->accumulateLinkedRequirements($recipes, $qty, $requiredStock, $product->name);
+                }
+            }
+
+            // 2. Cek Opsi
+            $options = PartnerProductOption::with('stock')->whereIn('id', (array)$optionIds)->get();
+            foreach ($options as $opt) {
+                if ($opt->always_available_flag === 0) {
+                    if ($opt->stock_type === 'direct') {
+                        $optStock = $opt->stock;
+                        $available = ($optStock->quantity ?? 0) - ($optStock->quantity_reserved ?? 0);
+
+                        if (!$optStock || $available < $qty) {
+                            throw new \Exception("Stok {$opt->name} (Opsi) tidak mencukupi.");
+                        }
+                    } elseif ($opt->stock_type === 'linked') {
+                        $recipes = PartnerProductOptionsRecipe::where('partner_product_option_id', $opt->id)->get();
+                        $this->accumulateLinkedRequirements($recipes, $qty, $requiredStock, $opt->name);
+                    }
+                }
+            }
+        }
+
+        // 3. Final Check untuk Linked Stock (Cek Akumulasi Total)
+        foreach ($requiredStock as $stockId => $totalRequired) {
+            $ingredient = Stock::find($stockId);
+            $available = ($ingredient->quantity ?? 0) - ($ingredient->quantity_reserved ?? 0);
+
+            if (!$ingredient || $available < $totalRequired) {
+                $name = $ingredient ? $ingredient->stock_name : 'Bahan Baku Tidak Ditemukan';
+                throw new \Exception("Bahan Baku '{$name}' tidak mencukupi untuk memenuhi total pesanan.");
+            }
+        }
+    }
+
+    private function accumulateLinkedRequirements($recipes, $orderedQuantity, array &$requiredStock, $itemName)
+    {
+        foreach ($recipes as $recipe) {
+            $stockId = $recipe->stock_id;
+            $quantityPerUnit = $recipe->quantity_used;
+            $totalNeeded = $quantityPerUnit * $orderedQuantity;
+            $requiredStock[$stockId] = ($requiredStock[$stockId] ?? 0) + $totalNeeded;
+        }
+    }
+
+    /**
+     * Mengubah Logic Deduction untuk reservasi stok linked (hanya menambah quantity_reserved).
+     */
+    private function processRecipeReservation($recipes, int $orderedQuantity): void
+    {
+        foreach ($recipes as $recipe) {
+            $ingredientStock = Stock::find($recipe->stock_id);
+
+            $quantityPerUnit = $recipe->quantity_used;
+            $totalQuantityToReserve = $quantityPerUnit * $orderedQuantity;
+
+            // Reservasi Stok Bahan Mentah
+            $ingredientStock->increment('quantity_reserved', $totalQuantityToReserve);
+
+            $this->recalculationService->recalculateLinkedProducts($ingredientStock);
+        }
+    }
+
+    /**
+     * Check stock availability in real-time sebelum checkout
+     */
+    public function checkStockRealtime(Request $request, $partner_slug, $table_code)
+    {
+        try {
+            $items = $request->input('items', []);
+            $unavailable = [];
+
+            foreach ($items as $item) {
+                $productId = data_get($item, 'product_id');
+                $optionIds = data_get($item, 'option_ids', []);
+                $qty = (int) data_get($item, 'qty', 1);
+
+                // Cek Produk Utama
+                $product = PartnerProduct::with('stock')->find($productId);
+
+                if (!$product) continue;
+
+                if ($product->always_available_flag === 0) {
+                    if ($product->stock_type === 'direct' && $product->stock) {
+                        $available = ($product->stock->quantity ?? 0) - ($product->stock->quantity_reserved ?? 0);
+
+                        if ($available < $qty) {
+                            $unavailable[] = [
+                                'name' => $product->name,
+                                'type' => 'Produk',
+                                'requested' => $qty,
+                                'available' => max(0, $available)
+                            ];
+                        }
+                    } elseif ($product->stock_type === 'linked') {
+                        // Untuk linked stock, gunakan quantity_available dari accessor
+                        $available = $product->quantity_available;
+
+                        if ($available < $qty) {
+                            $unavailable[] = [
+                                'name' => $product->name,
+                                'type' => 'Produk',
+                                'requested' => $qty,
+                                'available' => max(0, $available)
+                            ];
+                        }
+                    }
+                }
+
+                // Cek Opsi Produk
+                if (!empty($optionIds)) {
+                    $options = PartnerProductOption::with('stock')->whereIn('id', (array)$optionIds)->get();
+
+                    foreach ($options as $opt) {
+                        if ($opt->always_available_flag === 0) {
+                            if ($opt->stock_type === 'direct' && $opt->stock) {
+                                $available = ($opt->stock->quantity ?? 0) - ($opt->stock->quantity_reserved ?? 0);
+
+                                if ($available < $qty) {
+                                    $unavailable[] = [
+                                        'name' => $opt->name,
+                                        'type' => 'Opsi',
+                                        'requested' => $qty,
+                                        'available' => max(0, $available)
+                                    ];
+                                }
+                            } elseif ($opt->stock_type === 'linked') {
+                                $available = $opt->quantity_available;
+
+                                if ($available < $qty) {
+                                    $unavailable[] = [
+                                        'name' => $opt->name,
+                                        'type' => 'Opsi',
+                                        'requested' => $qty,
+                                        'available' => max(0, $available)
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return response()->json([
+                'success' => empty($unavailable),
+                'unavailable_items' => $unavailable,
+                'message' => empty($unavailable)
+                    ? 'Stok tersedia'
+                    : 'Beberapa item tidak tersedia'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memeriksa stok: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function orderDetail(Request $request, $partner_slug, $table_code, $order_id)
+    {
+        // Customer login / guest
+        $customer = Auth::guard('customer')->user() ?? session('guest_customer');
+
+        // Partner & Table
+        $partner = User::where('slug', $partner_slug)->firstOrFail();
+        $table = Table::where('table_code', $table_code)
+            ->where('partner_id', $partner->id)
+            ->firstOrFail();
+
+        // Order + relasi yang dibutuhkan
+        $order = BookingOrder::with([
+            'order_details.order_detail_options.option',
+            'order_details.partnerProduct',
+            'payment',
+            'table',
+        ])->findOrFail($order_id);
+
+        // Validasi kepemilikan
+        if ($order->customer_id) {
+            if (!$customer || ($customer->id ?? null) !== $order->customer_id) {
+                abort(403, 'Kamu tidak bisa melihat pesanan pelanggan lain.');
+            }
+        }
+
+        // mapping indeks status untuk timeline
+        $statusOrder = $order->order_status;
+        $statusIndexMap = [
+            'UNPAID'    => 0,
+            'PAID'      => 1,
+            'PROCESSED' => 2,
+            'SERVED'    => 3,
+        ];
+        $currentIndex = $statusIndexMap[$statusOrder] ?? 0;
+
+        // Label/status utama di atas timeline
+        $headline = '';
+        $subtitle = '';
+
+        switch ($statusOrder) {
+            case 'UNPAID':
+                $headline = 'Status pembayaran';
+                $subtitle = 'Pesanan kamu sudah tercatat, silakan selesaikan pembayaran di kasir atau melalui QRIS.';
+                break;
+            case 'PAID':
+                $headline = 'Menunggu diproses';
+                $subtitle = 'Pembayaran kamu sudah kami terima. Pesanan sedang menunggu diproses oleh kasir/kitchen.';
+                break;
+            case 'PROCESSED':
+                $headline = 'Sedang diproses';
+                $subtitle = 'Pesanan kamu sedang disiapkan. Mohon menunggu, pesanan akan segera disajikan.';
+                break;
+            case 'SERVED':
+                $headline = 'Selesai';
+                $subtitle = 'Pesanan kamu sudah selesai dan telah disajikan. Selamat menikmati!';
+                break;
+            default:
+                $headline = 'Status pesanan';
+                $subtitle = 'Status pesanan tidak dikenal.';
+        }
+
+        // ====== QR CODE 2D UNTUK KASIR ======
+        // Data yang mau di-encode ke QR (bisa kamu sesuaikan formatnya)
+        $qrPayload = $order->booking_order_code;
+
+        // Generate PNG QR, lalu jadikan base64 supaya gampang ditaruh di <img>
+        $qrPngBase64 = DNS2D::getBarcodePNG($qrPayload, 'QRCODE', 6, 6);
+        // =====================================
+
+        return view('pages.customer.orders.detail', [
+            'order'        => $order,
+            'partner'      => $partner,
+            'table'        => $table,
+            'customer'     => $customer,
+            'currentIndex' => $currentIndex,
+            'headline'     => $headline,
+            'subtitle'     => $subtitle,
+            'qrPngBase64'  => $qrPngBase64, // <- kirim ke Blade
+        ]);
     }
 }

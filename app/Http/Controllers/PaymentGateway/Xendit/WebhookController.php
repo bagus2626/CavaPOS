@@ -14,11 +14,15 @@ use App\Models\Xendit\XenditWebhookLog;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use App\Events\OrderCreated;
+use App\Models\Transaction\BookingOrder;
 
 class WebhookController extends Controller
 {
     public function invoice(Request $request)
     {
+        DB::beginTransaction();
         try {
             $payload = $request->all();
 
@@ -36,7 +40,7 @@ class WebhookController extends Controller
                 'payload'   => $payload,
             ]);
 
-            $xenditInvoice = XenditInvoice::where('xendit_invoice_id', data_get($payload, 'id'))->first();
+            $xenditInvoice = XenditInvoice::with('order')->where('xendit_invoice_id', data_get($payload, 'id'))->first();
             $xenditInvoice->update([
                 'status'         => data_get($payload, 'status'),
                 'payment_method' => data_get($payload, 'payment_method'),
@@ -45,11 +49,27 @@ class WebhookController extends Controller
             OrderPayment::where('booking_order_id', $xenditInvoice->order_id)
                 ->update(['payment_status' => data_get($payload, 'status')]);
 
+            if (data_get($payload, 'status') === 'PAID') {
+                BookingOrder::where('id', $xenditInvoice->order_id)
+                ->update([
+                    'order_status' => data_get($payload, 'status'),
+                    'payment_flag'  => true,
+                ]);
+            }
+
+            $bookingOrder = $xenditInvoice->order;
+
+            DB::commit();
+            DB::afterCommit(function () use ($bookingOrder) {
+                event(new OrderCreated($bookingOrder));
+            });
+
             return response()->json([
                 'success' => true,
                 'message' => "Webhook invoice processed",
             ]);
         } catch (\Throwable $e) {
+            DB::rollBack();
             Log::error('Xendit Webhook error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
