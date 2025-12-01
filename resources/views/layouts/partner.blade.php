@@ -90,12 +90,84 @@
   .navbar .nav-link{ color: var(--ink); }
   .navbar .nav-link:hover{ color: var(--choco); }
 
-  /* ===== Brand / Sidebar ===== */
-  .brand-link{
-    background: linear-gradient(135deg,var(--choco),var(--soft-choco)) !important;
+  /* ===== Brand ===== asd*/
+  .brand-link {
+    background: linear-gradient(135deg, var(--choco), var(--soft-choco)) !important;
     border-bottom: 0;
-  }
-  .brand-link .brand-image{ background:#fff; }
+    transition: all 0.3s ease-in-out;
+    overflow: hidden !important;
+    white-space: nowrap;
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-start !important;
+    padding-left: 0.5rem !important;
+    min-height: 57px;
+    
+}
+
+.brand-link .brand-image {
+    background: #fff;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+    padding: 2px;
+}
+
+/* Logo horizontal (sidebar terbuka) */
+.brand-image-full {
+    max-height: 40px;
+    width: auto;
+    max-width: 180px;
+    opacity: 0;
+    transform: scale(0.8);
+    display: none; 
+}
+
+/* Logo circular (sidebar collapse) */
+.brand-image-collapsed {
+    max-height: 30px;
+    width: 40px;
+    height: 40px;
+    opacity: 1;
+    transform: scale(1);
+    object-fit: contain;
+    display: block; 
+    transition: opacity 0.6s ease-in-out; 
+}
+
+.brand-text {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    max-width: 0;
+    overflow: hidden;
+    margin-left: 0;
+    white-space: nowrap;
+    display: none; 
+}
+
+/* ====== STATE: Sidebar Normal  ====== asd */
+body:not(.sidebar-collapse) .brand-link {
+    justify-content: flex-start !important;
+    padding-left: 0.5rem !important;
+}
+
+body:not(.sidebar-collapse) .brand-image-full {
+    max-width: 200px;
+    width: auto;
+    opacity: 1;
+    transform: scale(1);
+    display: block; 
+}
+
+body:not(.sidebar-collapse) .brand-image-collapsed {
+    display: none; 
+}
+
+body:not(.sidebar-collapse) .brand-text {
+    opacity: 1;
+    max-width: 200px;
+    margin-left: 0.5rem;
+    display: inline-block; 
+}
 
   .main-sidebar{
     background: #f3f3f3; /* gelap netral agar choco menonjol */
@@ -107,7 +179,7 @@
   /* item level 1 */
   .nav-sidebar .nav-item > .nav-link{
     border-radius: 10px;
-    margin: 4px 8px;
+    margin: 4px 4px;
     color: #ac0000;
     transition: .2s ease;
   }
@@ -185,10 +257,83 @@
   .text-choco{ color: var(--choco) !important; }
   .soft-shadow{ box-shadow: var(--shadow); }
   .rounded-2xl{ border-radius: 1rem; }
+
+  /* Ensure profile images stay circular asd */
+.user-panel .image img,
+.user-image {
+    min-width: 40px;
+    min-height: 40px;
+    object-fit: cover;
+}
+
+/* Fix navbar user image */
+.navbar .user-image {
+    width: 35px !important;
+    height: 35px !important;
+    min-width: 35px !important;
+    min-height: 35px !important;
+}
+/* ====== STATE: Sidebar Collapse (Default) ====== */
+.sidebar-collapse .brand-link {
+    justify-content: center;
+    padding: 0.8125rem 0.5rem;
+}
+
+.sidebar-collapse .brand-image-full {
+    display: none !important; /* sembunyikan total */
+}
+
+.sidebar-collapse .brand-image-collapsed {
+    display: block !important; /* tampilkan */
+    opacity: 1;
+    transform: scale(1);
+}
+
+.sidebar-collapse .brand-text {
+    display: none; /* sembunyikan total */
+}
+
+/* ====== STATE: Sidebar Collapse + Hover ====== */
+.sidebar-collapse .main-sidebar:hover .brand-link {
+    justify-content: flex-start;
+    padding-left: 1rem;
+    overflow: hidden !important; 
+}
+
+.sidebar-collapse .main-sidebar:hover .brand-image-full {
+    display: block !important;
+    max-width: 200px;
+    width: auto;
+    opacity: 1 !important;
+    transform: scale(1) !important;
+    transition: all 0.3s ease-in-out; 
+    background: #e8cfcc; 
+}
+
+.sidebar-collapse .main-sidebar:hover .brand-image-collapsed {
+    display: none !important; 
+}
+
+.sidebar-collapse .main-sidebar:hover .brand-text {
+    display: inline-block !important; 
+    opacity: 1 !important;
+    max-width: 200px;
+    margin-left: 0.5rem;
+    left: 5px;
+}
+
+
+.main-sidebar {
+    transition: width 0.3s ease-in-out, margin-left 0.3s ease-in-out;
+}
+
+.sidebar-collapse .main-sidebar:hover {
+    width: 250px !important;
+}
 </style>
 </head>
 
-<body class="hold-transition sidebar-mini layout-fixed">
+<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed">
   <div class="wrapper">
 
     <!-- Navbar -->
@@ -289,52 +434,65 @@
           </a>
         </li>
 
-        <!-- User Dropdown Menu -->
+        <!-- User Dropdown Menu asd-->
         <li class="nav-item dropdown user-menu">
-          <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-            <img src="{{ auth()->user()->logo 
-              ? asset('storage/' . auth()->user()->logo) 
-              : asset('icons/icons-person-96.png') }}"
-              class="user-image img-circle elevation-2" alt="User Image"
-              style="width: 35px; height: 35px; object-fit: cover; border-radius: 50%;">
-            <span class="d-none d-md-inline">
-              @auth {{ auth()->user()->name }} @else User Partner @endauth
-            </span>
-          </a>
-          <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-            <!-- User image -->
-            <li class="user-header bg-choco text-white">
-              <img src="https://adminlte.io/themes/v3/dist/img/user2-160x160.jpg" class="img-circle elevation-2"
-                alt="User Image">
-              <p>
-                @auth {{ auth()->user()->name }} @else User Partner @endauth
-                <small>{{ __('messages.partner.layout.member_since') }} @auth {{ auth()->user()->created_at->format('M. Y') }} @else User Partner @endauth</small>
-              </p>
-            </li>
-            <!-- Menu Footer-->
-            <li class="user-footer">
-              <a href="#" class="btn btn-default btn-flat">{{ __('messages.partner.layout.profile') }}</a>
-              <form method="POST" action="{{ route('logout') }}" class="d-inline">
-                @csrf
-                <button type="submit" class="btn btn-default btn-flat float-right">
-                  {{ __('messages.partner.layout.sign_out') }}
-                </button>
-              </form>
+  <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
+    <img src="{{ auth()->user()->logo 
+      ? asset('storage/' . auth()->user()->logo) 
+      : asset('icons/icons-person-96.png') }}"
+      class="user-image img-circle elevation-2" alt="User Image"
+      style="width: 35px; height: 35px; object-fit: cover; border-radius: 50%;">
+    <span class="d-none d-md-inline">
+      @auth {{ auth()->user()->name }} @else User Partner @endauth
+    </span>
+  </a>
+  <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right rounded-2xl soft-shadow">
+            <!-- User image asd-->
+            <li class="user-header bg-choco text-white text center">
+      <img src="{{ auth()->user()->logo 
+        ? asset('storage/' . auth()->user()->logo) 
+        : asset('icons/icons-person-96.png') }}"
+        class="img-circle elevation-2" alt="User Image"
+        style="width: 80px; height: 80px; object-fit: cover; margin: 0 auto; border-radius: 50%;">
+      <p>
+        @auth {{ auth()->user()->name }} @else User Partner @endauth
+        <small>{{ __('messages.partner.layout.member_since') }} @auth {{ auth()->user()->created_at->format('M. Y') }} @else - @endauth</small>
+      </p>
+    </li>
 
-            </li>
-          </ul>
-        </li>
+            <!-- Menu Footer asd-->
+           <li class="user-footer">
+      <a href="#" class="btn btn-default btn-flat">{{ __('messages.partner.layout.profile') }}</a>
+      <form method="POST" action="{{ route('logout') }}" class="d-inline">
+        @csrf
+        <button type="submit" class="btn btn-default btn-flat float-right">
+          {{ __('messages.partner.layout.sign_out') }}
+        </button>
+      </form>
+    </li>
+  </ul>
+</li>
       </ul>
     </nav>
 
     <!-- Sidebar -->
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
-      <!-- Brand Logo -->
-      <a href="{{ route('partner.dashboard') }}" class="brand-link bg-choco">
-        <img src="{{ asset('images/cava-logo2-gradient.png') }}" alt="Cavaa Logo"
-                    class="brand-image rounded-full" style="opacity: .8">
-        <span class="brand-text font-weight-light">{{ __('messages.partner.layout.partner_panel') }}</span>
-      </a>
+      <!-- Brand Logo - Perbaikan -->
+<a href="{{ route('partner.dashboard') }}" class="brand-link bg-choco">
+  <!-- Logo untuk sidebar terbuka (horizontal) -->
+  <img src="{{ asset('images/cava-logo2-gradient.png') }}" 
+       alt="Cavaa Logo"
+       class="brand-image rounded-full brand-image-full" 
+       style="opacity: .8">
+  
+  <!-- Logo circular untuk sidebar collapse -->
+  <img src="{{ asset('icons/cava-logo-red-gradient.png') }}" 
+       alt="Cavaa Logo"
+       class="brand-image rounded-full brand-image-collapsed" 
+       style="opacity: .8">
+  
+  <span class="brand-text font-weight-light">{{ __('messages.partner.layout.outlet_panel') }}</span>
+</a>
 
       <!-- Sidebar -->
       <div class="sidebar">
@@ -346,7 +504,7 @@
               : asset('icons/icons-person-96.png') }}"
               class="img-circle elevation-2"
               alt="User Image"
-              style="width: 35px; height: 35px; object-fit: cover; border-radius: 50%;">
+              style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; "> <!-- Perbaikan asd -->
           </div>
           <div class="info">
             <a href="#" class="d-block text-choco">
@@ -408,7 +566,7 @@
 
             <li class="nav-item {{ Route::is($storeRoutes) ? 'menu-open' : '' }}">
               <a href="#" class="nav-link {{ Route::is($storeRoutes) ? 'active' : '' }}">
-                <i class="nav-icon fas fa-shopping-cart"></i>
+                <i class="nav-icon fas fa-store"></i> <!-- Perbaikan asd -->
                 <p>
                   {{ __('messages.partner.layout.outlet') }}
                   <i class="fas fa-angle-left right"></i>
@@ -486,14 +644,16 @@
               </ul>
             </li>
 
-            <li class="nav-item">
+            {{-- asd --}}
+            {{-- <li class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-cog"></i>
                 <p>{{ __('messages.partner.layout.settings') }}</p>
               </a>
-            </li>
+            </li> --}}
 
-            <li class="nav-header">{{ __('messages.partner.layout.reports') }}</li>
+            {{-- asd --}}
+            {{-- <li class="nav-header">{{ __('messages.partner.layout.reports') }}</li>
             <li class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-chart-line"></i>
@@ -505,7 +665,7 @@
                 <i class="nav-icon fas fa-chart-pie"></i>
                 <p>{{ __('messages.partner.layout.traffict_report') }}</p>
               </a>
-            </li>
+            </li> --}}
           </ul>
         </nav>
       </div>
@@ -572,6 +732,7 @@
 
   <script>
     $(function () {
+      
       // Initialize DataTable
       $('.datatable').DataTable({
         "paging": true,
@@ -646,6 +807,7 @@
         }
       });
     });
+    
   </script>
   <style>
         .sidebar-dark-primary .nav-sidebar > .nav-header {
