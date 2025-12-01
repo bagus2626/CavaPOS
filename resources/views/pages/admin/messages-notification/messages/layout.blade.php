@@ -31,12 +31,17 @@
 
 @push('page-styling')
 <style>
+    .email-application {
+        margin-top: -5rem;
+        margin-left: -2rem; 
+        margin-right: -2rem;
+    }
     /* ===== Shell utama email app ===== */
     .email-application .content-area-wrapper.email-shell {
         display: flex;
         flex-direction: row; 
-        min-height: 68vh;
-        max-height: 82vh;
+        min-height: 100vh;
+        max-height: 100vh;
         background: #f9fafb;
         border-radius: 16px;
         overflow: hidden;

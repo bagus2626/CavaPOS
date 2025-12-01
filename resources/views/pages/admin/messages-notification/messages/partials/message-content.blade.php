@@ -16,13 +16,24 @@
                         {{-- Tombol Back ke list --}}
                         <a href="{{ route('admin.message-notification.messages.index', ['folder' => $folder ?? request('folder','inbox')]) }}"
                         class="btn btn-sm btn-light btn-back-list">
-                            <i class="bx bx-chevron-left mr-50"></i> Back to list
+                            <i class="bx bx-chevron-left mr-20"></i> Back to list
                         </a>
 
                     </div>
 
                     <div class="card-body">
-                        {!! $message->body !!}
+                        @php
+                            $processedBody = $message->body;
+                            
+                            $processedBody = preg_replace_callback(
+                                '/href=["\'](?!https?:\/\/|\/|#|\?)([^"\']+)["\']/i',
+                                function($matches) {
+                                    return 'href="https://' . $matches[1] . '"';
+                                },
+                                $processedBody
+                            );
+                        @endphp
+                        {!! $processedBody !!}
 
                         @if($message->attachments->count())
                             <hr>
