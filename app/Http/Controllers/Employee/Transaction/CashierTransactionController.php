@@ -369,7 +369,7 @@ class CashierTransactionController extends Controller
                     "amount" => $payment->paid_amount ?? 0,
                     "given_names" => $request->order_name ?? "unknow",
                     "description" => "Invoice QRIS",
-                    "invoice_duration" => 10,
+                    "invoice_duration" => 60,
                     "customer" => [
                         "given_names" => $request->order_name ?? "unknow",
                         "email" => "example@example.com",

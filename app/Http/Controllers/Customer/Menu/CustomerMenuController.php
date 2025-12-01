@@ -259,7 +259,7 @@ class CustomerMenuController extends Controller
                     "amount" => $payment->paid_amount ?? 0,
                     "given_names" => $request->order_name ?? "unknow",
                     "description" => "Invoice QRIS",
-                    "invoice_duration" => 10,
+                    "invoice_duration" => 60,
                     "customer" => [
                         "given_names" => $customer ? $customer->name : $request->order_name,
                         "email" => $customer ? $customer->email : "customer@example.com",
