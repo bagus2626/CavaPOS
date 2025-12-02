@@ -424,6 +424,7 @@ Route::middleware('setlocale')->group(function () {
             Route::post('finish-order/{id}', [CashierTransactionController::class, 'finishOrder'])->name('finish-order');
             Route::post('checkout-order', [CashierTransactionController::class, 'checkout'])->name('checkout');
             Route::post('check-stock', [CashierTransactionController::class, 'checkStockRealtime'])->name('check-stock');
+            Route::delete('order/{id}/soft-delete', [CashierTransactionController::class, 'softDeleteUnpaidOrder'])->name('order.soft-delete');
         });
 
 
