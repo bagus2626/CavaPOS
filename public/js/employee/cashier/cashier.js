@@ -29,6 +29,7 @@ console.log("cashier.js loaded");
     // tentukan tab tujuan berdasarkan status
     const statusToTab = {
       UNPAID: "pembayaran",
+      EXPIRED: "pembayaran",
       PROCESSED: "proses",
       PAID: "proses", // optional kalau mau
     };

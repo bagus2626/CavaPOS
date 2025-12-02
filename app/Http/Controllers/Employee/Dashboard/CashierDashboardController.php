@@ -163,7 +163,7 @@ class CashierDashboardController extends Controller
 
                 return view('pages.employee.cashier.dashboard.tabs.pembelian', compact('partner', 'partner_products', 'categories', 'tables'));
             case 'pembayaran':
-                $items = (clone $base)->whereIn('payment_method', ['CASH', 'QRIS'])->where('order_status', 'UNPAID')->latest()->get();
+                $items = (clone $base)->whereIn('payment_method', ['CASH', 'QRIS'])->whereIn('order_status', ['UNPAID', 'EXPIRED'])->latest()->get();
                 return view('pages.employee.cashier.dashboard.tabs.pembayaran', compact('items'));
             case 'proses':
                 $items = (clone $base)

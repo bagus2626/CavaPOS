@@ -422,6 +422,12 @@
     </style>
 
     @push('scripts')
+        <script>
+            window.__REORDER_ITEMS__    = @json($reorderItems ?? []);
+            window.__REORDER_MESSAGES__ = @json($reorderMessages ?? []);
+            window.__PARTNER_SLUG__     = @json($partner_slug ?? null);
+            window.__TABLE_CODE__       = @json($table_code ?? null);
+        </script>
         @php
             $productsData = $partner_products->map(function ($p) {
             $firstImage = $p->pictures[0]['path'] ?? null;
@@ -1372,9 +1378,9 @@
 
                     if (rows.length === 0) {
                         cartManagerBody.innerHTML = `
-        <div class="p-6 text-center text-gray-500">
-            Keranjang masih kosong.
-        </div>`;
+                    <div class="p-6 text-center text-gray-500">
+                        Keranjang masih kosong.
+                    </div>`;
                         cartManagerTotal.textContent = rupiahFmt.format(0);
                         return;
                     }
@@ -1389,24 +1395,24 @@
                             `<img src="${r.image}" class="w-16 h-16 rounded-md object-cover flex-shrink-0" alt="">` :
                             '';
                         return `
-            <div class="p-3 flex items-center gap-3" data-key="${r.key}" data-product-id="${r.productId}">
-            ${img}
-            <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold text-gray-800 line-clamp-1">${r.productName}</p>
-                ${optsText}
-                ${noteText} <!-- <<< NEW -->
-                <p class="text-xs text-gray-400 mt-0.5">Harga: ${rupiahFmt.format(r.unit)}</p>
-            </div>
-            <div class="flex items-center gap-2">
-                <button class="cm-minus w-8 h-8 flex items-center justify-center border rounded-lg">-</button>
-                <span class="cm-qty w-6 text-center font-semibold">${r.qty}</span>
-                <button class="cm-plus w-8 h-8 flex items-center justify-center border rounded-lg bg-choco text-white">+</button>
-            </div>
-            <div class="ml-3 text-right">
-                <p class="text-sm font-bold">${rupiahFmt.format(r.line)}</p>
-            </div>
-            </div>
-        `;
+                            <div class="p-3 flex items-center gap-3" data-key="${r.key}" data-product-id="${r.productId}">
+                            ${img}
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-semibold text-gray-800 line-clamp-1">${r.productName}</p>
+                                ${optsText}
+                                ${noteText} <!-- <<< NEW -->
+                                <p class="text-xs text-gray-400 mt-0.5">Harga: ${rupiahFmt.format(r.unit)}</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="cm-minus w-8 h-8 flex items-center justify-center border rounded-lg">-</button>
+                                <span class="cm-qty w-6 text-center font-semibold">${r.qty}</span>
+                                <button class="cm-plus w-8 h-8 flex items-center justify-center border rounded-lg bg-choco text-white">+</button>
+                            </div>
+                            <div class="ml-3 text-right">
+                                <p class="text-sm font-bold">${rupiahFmt.format(r.line)}</p>
+                            </div>
+                            </div>
+                        `;
                     }).join('');
 
 
@@ -1910,6 +1916,52 @@
                 checkoutModal.addEventListener('click', (e) => {
                     if (e.target === checkoutModal) closeCheckoutModal();
                 });
+
+                //reorder
+                (function applyReorderOnLoad() {
+                    const items = window.__REORDER_ITEMS__ || [];
+
+                    if (Array.isArray(items) && items.length > 0) {
+                        console.log('Reorder items:', items);
+
+                        items.forEach(item => {
+                            const productId = parseInt(item.product_id, 10);
+                            const optionIds = Array.isArray(item.option_ids) ? item.option_ids : [];
+                            const qty       = item.qty ? parseInt(item.qty, 10) : 1;
+                            const note      = item.note || '';
+
+                            if (!productId || qty <= 0) return;
+
+                            for (let i = 0; i < qty; i++) {
+                                const key = addToCart(productId, optionIds);
+                                // kalau ada catatan, simpan di line item terakhir
+                                if (note && key && cart[key]) {
+                                    cart[key].note = note;
+                                }
+                            }
+
+                            updateProductBadge(productId);
+                        });
+
+                        updateFloatingCartBar();
+
+                        // tampilkan pesan info kalau ada item/opsi yang tidak bisa dimuat
+                        const msgs = window.__REORDER_MESSAGES__ || [];
+                        if (Array.isArray(msgs) && msgs.length > 0 && window.Swal) {
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'Pesan lagi dimuat',
+                                html: `<div style="text-align:left;font-size:13px;">
+                                    <p class="mb-1">Sebagian pesanan dari order sebelumnya sudah dimuat ke keranjang.</p>
+                                    <ul class="mt-2 list-disc pl-5 space-y-1">
+                                        ${msgs.map(m => `<li>${m}</li>`).join('')}
+                                    </ul>
+                                </div>`,
+                                confirmButtonText: 'Mengerti',
+                            });
+                        }
+                    }
+                })();
 
 
             });

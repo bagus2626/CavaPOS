@@ -90,7 +90,8 @@ return [
                 'you_dont_have_histories' => 'You don’t have any order history in this outlet.',
                 'back_to_menu' => 'Back to Menu',
                 'load_more' => 'Load More',
-                'loading' => 'Loading...'
+                'loading' => 'Loading...',
+                'order_again' => 'Order Again'
             ],
             'detail' => [
                 'order_detail' => 'Order Detail',
@@ -123,7 +124,8 @@ return [
                 'paid_at' => 'Paid At',
                 'no_payment_found_please_confirm_to_cashier' => 'No payment data recorded yet. If you have already paid, please confirm to the cashier.',
                 'back_to_menu' => 'Back to Menu',
-                'download_receipt' => 'Download Receipt'
+                'download_receipt' => 'Download Receipt',
+                'order_again' => 'Order Again'
             ],
         ],
     ],

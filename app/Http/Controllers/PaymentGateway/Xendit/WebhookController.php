@@ -55,6 +55,11 @@ class WebhookController extends Controller
                     'order_status' => data_get($payload, 'status'),
                     'payment_flag'  => true,
                 ]);
+            } else {
+                BookingOrder::where('id', $xenditInvoice->order_id)
+                ->update([
+                    'order_status' => data_get($payload, 'status'),
+                ]);
             }
 
             $bookingOrder = $xenditInvoice->order;

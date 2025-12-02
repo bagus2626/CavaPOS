@@ -20,9 +20,9 @@
                                 <div>
                                     <p class="text-sm font-semibold text-gray-900">
                                         {{ $i->booking_order_code }} &middot; Meja {{ $i->table->table_no }}
-                                        @if ($i->payment_method === 'QRIS' && $i->order_status === 'UNPAID')
+                                        @if ($i->payment_method === 'QRIS' && $i->order_status === 'EXPIRED')
                                             <span class="inline-block px-2 py-0.5 text-xs font-medium text-white bg-red-500 rounded-md">
-                                                Expired/Gagal QRIS
+                                                Expired QRIS
                                             </span>
                                         @endif
                                     </p>

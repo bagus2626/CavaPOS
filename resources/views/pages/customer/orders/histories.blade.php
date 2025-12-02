@@ -70,71 +70,97 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // === EXISTING: LOAD MORE ===
     const loadMoreBtn = document.getElementById('load-more-orders');
-    const listEl = document.getElementById('order-history-list');
+    const listEl      = document.getElementById('order-history-list');
 
-    if (!loadMoreBtn || !listEl) return;
+    if (loadMoreBtn && listEl) {
+        const textSpan = loadMoreBtn.querySelector('.load-more-text');
+        const spinner  = loadMoreBtn.querySelector('.load-more-spinner');
 
-    const textSpan = loadMoreBtn.querySelector('.load-more-text');
-    const spinner  = loadMoreBtn.querySelector('.load-more-spinner');
+        loadMoreBtn.addEventListener('click', function () {
+            let nextUrl = loadMoreBtn.getAttribute('data-next-page');
+            if (!nextUrl) return;
 
-    loadMoreBtn.addEventListener('click', function () {
-        let nextUrl = loadMoreBtn.getAttribute('data-next-page');
-        if (!nextUrl) return;
+            loadMoreBtn.disabled = true;
+            if (spinner) spinner.classList.remove('hidden');
+            if (textSpan) textSpan.textContent = '{{ __('messages.customer.orders.histories.loading') ?? 'Loading…' }}';
 
-        loadMoreBtn.disabled = true;
-        if (spinner) spinner.classList.remove('hidden');
-        if (textSpan) textSpan.textContent = '{{ __('messages.customer.orders.histories.loading') ?? 'Loading…' }}';
+            fetch(nextUrl, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                credentials: 'same-origin'
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('HTTP ' + res.status);
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data.html) {
+                    const temp = document.createElement('div');
+                    temp.innerHTML = data.html;
+                    Array.from(temp.children).forEach(child => listEl.appendChild(child));
+                }
 
-        // Tambah flag AJAX biar controller bisa bedain
-        fetch(nextUrl, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
-            },
-            credentials: 'same-origin'
-        })
-        .then(res => {
-            if (!res.ok) {
-                throw new Error('HTTP ' + res.status);
-            }
-            return res.json();
-        })
-        .then(data => {
-            if (data.html) {
-                // Append card baru ke dalam list
-                const temp = document.createElement('div');
-                temp.innerHTML = data.html;
-
-                // Pindahkan anak-anaknya ke list
-                Array.from(temp.children).forEach(child => {
-                    listEl.appendChild(child);
-                });
-            }
-
-            // Update next_page_url
-            if (data.next_page_url) {
-                loadMoreBtn.setAttribute('data-next-page', data.next_page_url);
+                if (data.next_page_url) {
+                    loadMoreBtn.setAttribute('data-next-page', data.next_page_url);
+                    loadMoreBtn.disabled = false;
+                    if (spinner) spinner.classList.add('hidden');
+                    if (textSpan) textSpan.textContent = '{{ __('messages.customer.orders.histories.load_more') ?? 'Load more' }}';
+                } else {
+                    loadMoreBtn.classList.add('hidden');
+                }
+            })
+            .catch(err => {
+                console.error(err);
                 loadMoreBtn.disabled = false;
                 if (spinner) spinner.classList.add('hidden');
                 if (textSpan) textSpan.textContent = '{{ __('messages.customer.orders.histories.load_more') ?? 'Load more' }}';
-            } else {
-                // Tidak ada halaman berikut → sembunyikan tombol
-                loadMoreBtn.classList.add('hidden');
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            loadMoreBtn.disabled = false;
-            if (spinner) spinner.classList.add('hidden');
-            if (textSpan) textSpan.textContent = '{{ __('messages.customer.orders.histories.load_more') ?? 'Load more' }}';
 
-            // Optional: kasih alert sederhana
-            @if(app()->environment('local'))
-                alert('Gagal memuat data riwayat pesanan. Coba lagi.');
-            @endif
+                @if(app()->environment('local'))
+                    alert('Gagal memuat data riwayat pesanan. Coba lagi.');
+                @endif
+            });
         });
+    }
+
+    // === BARU: klik card -> pergi ke detail ===
+    const historyList = document.getElementById('order-history-list');
+    if (!historyList) return;
+
+    // Klik dengan mouse/tap
+    historyList.addEventListener('click', function (e) {
+        // Kalau klik di <a> (Struk / Pesan Lagi), biarkan default behavior
+        const anchor = e.target.closest('a');
+        if (anchor) return;
+
+        const card = e.target.closest('.order-card');
+        if (!card) return;
+
+        const url = card.getAttribute('data-detail-url');
+        if (url) {
+            window.location.href = url;
+        }
+    });
+
+    // Aksesibilitas: Enter / Space pada card
+    historyList.addEventListener('keydown', function (e) {
+        const card = e.target.closest('.order-card');
+        if (!card) return;
+
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            const url = card.getAttribute('data-detail-url');
+            if (url) {
+                window.location.href = url;
+            }
+        }
     });
 });
 </script>
 @endpush
+

@@ -50,42 +50,146 @@ class CustomerMenuController extends Controller
         $this->recalculationService = $recalculationService;
     }
 
-    public function index($partner_slug, $table_code)
+    public function index(Request $request, $partner_slug, $table_code)
     {
         if (!Auth::guard('customer')->check() && !session()->has('guest_customer')) {
-            // Belum login, tampilkan pilihan login
             return view('pages.customer.auth.login_choice', compact('partner_slug', 'table_code'));
         }
 
-        // Sudah login / guest
         $customer = Auth::guard('customer')->user() ?? session('guest_customer');
 
-        // Ambil menu dari partner/table
         $table = Table::where('table_code', $table_code)
             ->whereHas('partner', fn($q) => $q->where('slug', $partner_slug))
             ->firstOrFail();
-        $partner = User::where('slug', $partner_slug)->first();
+
+        $partner = User::where('slug', $partner_slug)
+            ->where('role', 'partner')
+            ->firstOrFail();
 
         $partner_products = PartnerProduct::with([
-            'category',
-            'parent_options.options',
-            'promotion' => function ($q) {
-                $q->activeToday();
-            },
-            'stock',
-            'parent_options.options.stock',
-        ])
+                'category',
+                'parent_options.options',
+                'promotion' => function ($q) {
+                    $q->activeToday();
+                },
+                'stock',
+                'parent_options.options.stock',
+            ])
             ->where('partner_id', $partner->id)
             ->where('is_active', 1)
             ->get();
 
         $owner = Owner::where('id', $partner->owner_id)->first();
+
         $categories = Category::whereIn('id', $partner_products->pluck('category_id'))
             ->orderBy('category_order')
             ->get();
 
-        return view('pages.customer.menu.index', compact('table', 'customer', 'partner', 'partner_products', 'categories'));
+        // 🔹 REORDER dari order lama
+        $reorderItems    = [];
+        $reorderMessages = [];
+
+        if ($request->filled('reorder_order_id') && Auth::guard('customer')->check()) {
+            $reorderOrderId = $request->query('reorder_order_id');
+
+            $bookingOrder = BookingOrder::with([
+                    'order_details.order_detail_options.option',
+                ])
+                ->where('id', $reorderOrderId)
+                ->where('partner_id', $partner->id)
+                ->where('customer_id', $customer->id) // pastikan milik customer ini
+                ->first();
+
+            if ($bookingOrder) {
+                foreach ($bookingOrder->order_details as $detail) {
+                    // cari produk sekarang
+                    $product = $partner_products->firstWhere('id', $detail->partner_product_id);
+                    if (!$product) {
+                        $reorderMessages[] = "Produk \"{$detail->product_name}\" sudah tidak tersedia di menu.";
+                        continue;
+                    }
+
+                    // stok produk habis & bukan always_available → skip
+                    if ($product->quantity_available < 1 && !$product->always_available_flag) {
+                        $reorderMessages[] = "Stok \"{$product->name}\" sudah habis. Produk ini tidak dimasukkan ke pesanan ulang.";
+                        continue;
+                    }
+
+                    // opsi-opsi
+                    $requestedOptionIds = $detail->order_detail_options
+                        ->pluck('option_id')
+                        ->filter()
+                        ->values();
+
+                    $validOptionIds      = [];
+                    $unavailableOptNames = [];
+
+                    // flat map semua options produk
+                    $allOptions = $product->parent_options
+                        ->flatMap(function ($po) {
+                            return $po->options;
+                        });
+
+                    foreach ($requestedOptionIds as $optId) {
+                        $opt = $allOptions->firstWhere('id', $optId);
+
+                        if (!$opt) {
+                            $unavailableOptNames[] = $detail->order_detail_options
+                                    ->firstWhere('option_id', $optId)
+                                    ->option->name ?? 'Opsi lama';
+                            continue;
+                        }
+
+                        if ($opt->quantity_available < 1 && !$opt->always_available_flag) {
+                            $unavailableOptNames[] = $opt->name;
+                            continue;
+                        }
+
+                        $validOptionIds[] = $optId;
+                    }
+
+                    if ($requestedOptionIds->count() > 0 && count($validOptionIds) === 0) {
+                        $reorderMessages[] =
+                            "Produk \"{$product->name}\" tidak dimuat ulang karena semua opsi yang dipilih pada pesanan sebelumnya sudah tidak tersedia.";
+                        continue; // skip ke detail berikutnya
+                    }
+
+                    if (count($unavailableOptNames) > 0 && count($validOptionIds) > 0) {
+                        $reorderMessages[] =
+                            "Beberapa opsi pada \"{$product->name}\" tidak tersedia lagi: " .
+                            implode(', ', $unavailableOptNames) .
+                            ". Pesanan dimuat tanpa produk tersebut.";
+                        continue;
+                    }
+
+                    $qty = $detail->quantity ?? $detail->qty ?? 1;
+
+                    $reorderItems[] = [
+                        'product_id' => $product->id,
+                        'option_ids' => $validOptionIds,
+                        'qty'        => max(1, (int) $qty),
+                        'note'       => $detail->note ?? '',
+                    ];
+                }
+            } else {
+                // kalau order tidak ditemukan / bukan milik user ini
+                $reorderMessages[] = 'Pesanan yang dipilih tidak dapat dimuat ulang.';
+            }
+        }
+
+        return view('pages.customer.menu.index', [
+            'table'           => $table,
+            'customer'        => $customer,
+            'partner'         => $partner,
+            'partner_products'=> $partner_products,
+            'categories'      => $categories,
+            'partner_slug'    => $partner_slug,
+            'table_code'      => $table_code,
+            'reorderItems'    => $reorderItems,
+            'reorderMessages' => $reorderMessages,
+        ]);
     }
+
 
     public function checkout(Request $request, $partner_slug, $table_code)
     {
@@ -214,7 +318,7 @@ class CustomerMenuController extends Controller
 
             // test by qris (hapus kemudian)
             if ($request->payment_method === 'QRIS') {
-                $booking_order->order_status = 'UNPAID';
+                $booking_order->order_status = 'PAYMENT';
                 $booking_order->payment_method = 'QRIS';
 
                 $payment = OrderPayment::create([
@@ -259,7 +363,7 @@ class CustomerMenuController extends Controller
                     "amount" => $payment->paid_amount ?? 0,
                     "given_names" => $request->order_name ?? "unknow",
                     "description" => "Invoice QRIS",
-                    "invoice_duration" => 60,
+                    "invoice_duration" => 10,
                     "customer" => [
                         "given_names" => $customer ? $customer->name : $request->order_name,
                         "email" => $customer ? $customer->email : "customer@example.com",
