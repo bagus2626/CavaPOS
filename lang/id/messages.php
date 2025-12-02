@@ -90,7 +90,8 @@ return [
                 'you_dont_have_histories' => 'Kamu belum memiliki riwayat pesanan di outlet ini.',
                 'back_to_menu' => 'Kembali ke menu',
                 'load_more' => 'Muat Lebih',
-                'loading' => 'Memuat...'
+                'loading' => 'Memuat...',
+                'order_again' => 'Pesan Lagi'
             ],
             'detail' => [
                 'order_detail' => 'Detail Pesanan',
@@ -123,7 +124,8 @@ return [
                 'paid_at' => 'Dibayar pada',
                 'no_payment_found_please_confirm_to_cashier' => 'Belum ada data pembayaran tercatat. Jika kamu sudah membayar, silakan konfirmasi ke kasir.',
                 'back_to_menu' => 'Kembali ke menu',
-                'download_receipt' => 'Download Struk'
+                'download_receipt' => 'Download Struk',
+                'order_again' => 'Pesan Lagi'
             ],
         ],
     ],

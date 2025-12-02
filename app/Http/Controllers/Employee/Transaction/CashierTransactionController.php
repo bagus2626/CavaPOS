@@ -876,7 +876,7 @@ class CashierTransactionController extends Controller
         $order = BookingOrder::findOrFail($id);
 
         // Kalau mau dibatasi hanya order UNPAID, bisa aktifkan ini:
-        if ($order->order_status !== 'UNPAID') {
+        if (!in_array($order->order_status, ['UNPAID', 'EXPIRED'])) {
             return back()->with('error', 'Order ini tidak dapat dihapus.');
         }
 
@@ -887,34 +887,39 @@ class CashierTransactionController extends Controller
         $order_details = OrderDetail::where('booking_order_id', $order->id)->get();
         foreach ($order_details as $detail) {
             $partner_product = PartnerProduct::findOrFail($detail->partner_product_id);
-            if ($partner_product->stock_type === 'direct') {
-                $stock = Stock::where('partner_product_id', $partner_product->id)
-                    ->whereNull('partner_product_option_id')
-                    ->first();
-                $stock->quantity_reserved -= ($detail->quantity);
-                $stock->save();
-            } else {
-                $partner_recipes = PartnerProductRecipe::where('partner_product_id', $partner_product->id)->get();
-                foreach ($partner_recipes as $pr) {
-                    $stock = Stock::findOrFail($pr->stock_id);
-                    $stock->quantity_reserved -= ($detail->quantity * $pr->quantity_used);
+            if ($partner_product && $partner_product->always_available_flag === 0) {
+                if ($partner_product->stock_type === 'direct') {
+                    $stock = Stock::where('partner_product_id', $partner_product->id)
+                        ->whereNull('partner_product_option_id')
+                        ->first();
+                    $stock->quantity_reserved -= ($detail->quantity);
                     $stock->save();
+                } else {
+                    $partner_recipes = PartnerProductRecipe::where('partner_product_id', $partner_product->id)->get();
+                    foreach ($partner_recipes as $pr) {
+                        $stock = Stock::findOrFail($pr->stock_id);
+                        $stock->quantity_reserved -= ($detail->quantity * $pr->quantity_used);
+                        $stock->save();
+                    }
                 }
             }
+            
             $order_detail_options = OrderDetailOption::where('order_detail_id', $detail->id)->get();
             if ($order_detail_options) {
                 foreach ($order_detail_options as $option) {
                     $partner_option = PartnerProductOption::findOrFail($option->option_id);
-                    if ($partner_option->stock_type === 'direct') {
-                        $stockOption = Stock::where('partner_product_option_id', $partner_option->id)->first();
-                        $stockOption->quantity_reserved -= 1;
-                        $stockOption->save();
-                    } else {
-                        $partner_option_recipes = PartnerProductOptionsRecipe::where('partner_product_option_id', $partner_option->id)->get();
-                        foreach ($partner_option_recipes as $por) {
-                            $stockOption = Stock::findOrFail($por->stock_id);
-                            $stockOption->quantity_reserved -= ($detail->quantity * $por->quantity_used);
+                    if ($partner_option && $partner_option->always_available_flag === 0) {
+                        if ($partner_option->stock_type === 'direct') {
+                            $stockOption = Stock::where('partner_product_option_id', $partner_option->id)->first();
+                            $stockOption->quantity_reserved -= $detail->quantity;
                             $stockOption->save();
+                        } else {
+                            $partner_option_recipes = PartnerProductOptionsRecipe::where('partner_product_option_id', $partner_option->id)->get();
+                            foreach ($partner_option_recipes as $por) {
+                                $stockOption = Stock::findOrFail($por->stock_id);
+                                $stockOption->quantity_reserved -= ($detail->quantity * $por->quantity_used);
+                                $stockOption->save();
+                            }
                         }
                     }
                 }
