@@ -326,9 +326,8 @@
                     @endif
                 @endforeach
             </div>
-
-
         </div>
+    </div>
         @include('pages.customer.menu.modal')
 
 @endsection
@@ -928,7 +927,7 @@
 
                 function updateModalQtyDisplay() {
                     modalQtyValue.innerText = modalQty;
-                    modalQtyMinus.disabled = modalQty <= 1;
+                    // modalQtyMinus.disabled = modalQty <= 1;
                     
                     if (currentProductId) {
                         const pd = getProductDataById(currentProductId);
@@ -958,8 +957,12 @@
                             const pd = productsData.find(p => p.id === currentProductId);
                             calcModalTotal(pd);
                         }
+                    } else {
+                        // qty = 1 dan user klik "-", anggap batal → tutup modal
+                        closeOptionsModal();
                     }
                 });
+
 
                 modalQtyPlus.addEventListener('click', () => {
                     const pd = getProductDataById(currentProductId);
@@ -1063,12 +1066,23 @@
                 });
 
                 closeModalBtn.addEventListener('click', function() {
+                    closeOptionsModal();
+                });
+
+                function closeOptionsModal() {
                     modal.classList.remove('show');
                     setTimeout(() => {
                         modal.classList.add('hidden');
-                        unlockBodyScroll(); // <<< penting
+                        unlockBodyScroll(); // kembalikan scroll body
+
+                        // reset state modal
+                        currentProductId = null;
+                        selectedOptions = [];
+                        modalQty = 1;
+                        modalNote = '';
+                        updateModalQtyDisplay();
                     }, 300);
-                });
+                }
 
                 function enforceProvision(poDiv, provision, value) {
                     const checkboxes = Array.from(
