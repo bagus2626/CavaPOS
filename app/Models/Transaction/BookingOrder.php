@@ -6,9 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Store\Table;
 use App\Models\Customer;
 use App\Models\Transaction\OrderPayment;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class BookingOrder extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'booking_order_code',
         'partner_id',
@@ -29,6 +32,8 @@ class BookingOrder extends Model
         'payment_id',
         'payment_flag',
     ];
+
+    protected $dates = ['deleted_at'];
 
     public function table()
     {
