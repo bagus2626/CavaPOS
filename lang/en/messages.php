@@ -63,7 +63,16 @@ return [
             'customer_name_example' => 'e.g Michael',
             'cancel' => 'Cancel',
             'hot_products' => 'Hot Products',
-            'always_available' => 'Available'
+            'always_available' => 'Available',
+            'reorder_information' => 'Some orders from previous orders have been loaded into the cart.',
+            'product_not_in_menu' => 'The product ":name" is no longer available on the menu.',
+            'product_out_of_stock' => 'Stock for ":name" has run out. This product is not included in the reorder.',
+            'options_all_unavailable' => 'The product ":name" was not reloaded because all previously selected options are no longer available.',
+            'options_partial_unavailable' => 'Some options for ":name" are no longer available: :options. The order has been loaded with the remaining available options.',
+            'options_insufficient_stock' => 'The product ":name" was not reloaded because the remaining stock is insufficient for the selected options.',
+            'qty_reduced' => 'The quantity of ":name" was reduced from :from to :to based on the remaining stock of the product and selected options.',
+            'order_not_found' => 'The selected order cannot be reloaded.',
+            'understand' => 'I Understand',
         ],
         'payment' => [
             'show_order_code' => 'Show Order Code',

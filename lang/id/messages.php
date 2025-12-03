@@ -63,7 +63,16 @@ return [
             'customer_name_example' => 'Contoh: Budi Setiawan',
             'cancel' => 'Batal',
             'hot_products' => 'Produk Unggulan',
-            'always_available' => 'Tersedia'
+            'always_available' => 'Tersedia',
+            'reorder_information' => 'Sebagian pesanan dari order sebelumnya sudah dimuat ke keranjang.',
+            'product_not_in_menu' => 'Produk ":name" sudah tidak tersedia di menu.',
+            'product_out_of_stock' => 'Stok ":name" sudah habis. Produk ini tidak dimasukkan ke pesanan ulang.',
+            'options_all_unavailable' => 'Produk ":name" tidak dimuat ulang karena semua opsi yang dipilih pada pesanan sebelumnya sudah tidak tersedia.',
+            'options_partial_unavailable' => 'Beberapa opsi pada ":name" tidak tersedia lagi: :options. Pesanan dimuat dengan opsi yang masih tersedia.',
+            'options_insufficient_stock' => 'Produk ":name" tidak dimuat ulang karena stok tersisa tidak mencukupi untuk opsi yang dipilih.',
+            'qty_reduced' => 'Jumlah pesanan ":name" dikurangi dari :from menjadi :to berdasarkan stok tersisa produk dan opsi yang dipilih.',
+            'order_not_found' => 'Pesanan yang dipilih tidak dapat dimuat ulang.',
+            'understand' => 'Mengerti',
         ],
         'payment' => [
             'show_order_code' => 'Tunjukkan Kode Pemesanan',

@@ -407,7 +407,7 @@ class OwnerOutletProductController extends Controller
             // ===== Update tabel 'stocks' untuk Product (Hanya jika 'direct') =====
             if ($product->stock_type === 'direct') {
                 if ($product->stock) {
-                    $product->stock->quantity = $newQuantity;
+                    $product->stock->quantity = $newQuantity + ($product->stock->quantity_reserved ?? 0);
                     $product->stock->save();
                 } else if (!$productAlways) {
                     $product->stock()->create([
@@ -457,7 +457,7 @@ class OwnerOutletProductController extends Controller
                         // Jika direct, kelola stock
                         if ($optModel->stock) {
                             // Update existing stock
-                            $optModel->stock->quantity = $optQty;
+                            $optModel->stock->quantity = $optQty + ($optModel->stock->quantity_reserved ?? 0);
                             $optModel->stock->save();
                         } else if (!$optAlways) {
                             // Create new stock jika belum ada dan bukan always available
