@@ -557,7 +557,7 @@ class PartnerProductController extends Controller
             // Cek apakah entri stok direct sudah ada di DB
             if ($existingStock) {
                 // UPDATE STOK YANG ADA
-                $existingStock->quantity = $productAlways ? 0 : $newQuantity;
+                $existingStock->quantity = $productAlways ? 0 : $newQuantity + ($product->stock->quantity_reserved ?? 0);
                 $existingStock->save();
             } else {
                 // Buat stok baru (baik Always Available maupun tidak)
@@ -628,7 +628,7 @@ class PartnerProductController extends Controller
 
                 if ($existingStock) {
                     // Update stok yang sudah ada
-                    $existingStock->quantity = $optQty;
+                    $existingStock->quantity = $optQty + ($optModel->stock->quantity_reserved ?? 0);
                     $existingStock->save();
                 } else {
                     // Buat stok baru

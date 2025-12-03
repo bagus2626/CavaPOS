@@ -155,7 +155,7 @@
                         // Pembayaran: Cash & belum bayar
                         'pembayaran' => number_format(
                             $ordersToday->whereIn('payment_method', ['CASH', 'QRIS'])
-                                ->where('order_status', 'UNPAID')
+                                ->whereIn('order_status', ['UNPAID', 'EXPIRED'])
                                 ->where('payment_flag', 0)
                                 ->count() ?? 0
                         ),
@@ -296,7 +296,7 @@
                                         @if ($o->order_status === 'PAID')
                                             <span
                                                 class="inline-flex items-center rounded-full bg-emerald-100 text-emerald-700 px-2 py-0.5 text-xs">PAID</span>
-                                        @elseif ($o->order_status === 'UNPAID')
+                                        @elseif ($o->order_status === 'UNPAID' || $o->order_status === 'EXPIRED')
                                             <span
                                                 class="inline-flex items-center rounded-full bg-rose-100 text-rose-700 px-2 py-0.5 text-xs">UNPAID</span>
                                         @else
@@ -492,7 +492,5 @@
         }, 2000);
     }
 </script>
-
-
 
 @endpush

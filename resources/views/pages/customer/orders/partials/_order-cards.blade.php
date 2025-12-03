@@ -19,7 +19,15 @@
         };
     @endphp
 
-    <div class="border rounded-xl p-4 bg-gray-50 flex flex-col gap-3 order-card">
+    {{-- 🔹 seluruh card bisa di-klik --}}
+    <div class="border rounded-xl p-4 bg-gray-50 flex flex-col gap-3 order-card cursor-pointer hover:bg-gray-100 transition"
+         data-detail-url="{{ route('customer.orders.order-detail', [
+                'partner_slug' => $partner_slug,
+                'table_code'   => $table_code,
+                'order_id'     => $order->id,
+          ]) }}"
+         tabindex="0"
+         role="button">
         {{-- Baris atas: Kode, tanggal, total --}}
         <div class="flex items-start justify-between gap-3">
             <div class="space-y-1">
@@ -117,20 +125,7 @@
             </div>
 
             <div class="flex items-center gap-2">
-                <a href="{{ route('customer.orders.order-detail', [
-                        'partner_slug' => $partner_slug,
-                        'table_code'   => $table_code,
-                        'order_id'     => $order->id,
-                    ]) }}"
-                   class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-300 text-xs md:text-sm text-gray-700 hover:bg-gray-50">
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                         fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor"
-                         class="w-4 h-4">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v9A2.25 2.25 0 007.5 16.5H9m6.75-7.5H18a2.25 2.25 0 012.25 2.25v7.5A2.25 2.25 0 018 21H9m6.75-12V18A2.25 2.25 0 0113.5 20.25H9" />
-                    </svg>
-                    <span>Detail</span>
-                </a>
+                {{-- 🔻 TOMBOL DETAIL DIHAPUS --}}
 
                 @if($order->payment_flag == 1)
                     <a href="{{ route('customer.orders.receipt', $order->id) }}"
@@ -143,11 +138,26 @@
                         </svg>
                         <span>{{ __('messages.customer.orders.histories.receipt') }}</span>
                     </a>
+
+                    {{-- PESAN LAGI --}}
+                    <a href="{{ route('customer.menu.index', [
+                            'partner_slug'       => $partner_slug,
+                            'table_code'         => $table_code,
+                            'reorder_order_id'   => $order->id,
+                        ]) }}"
+                       class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-emerald-500 text-xs md:text-sm text-emerald-700 hover:bg-emerald-50">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor"
+                             class="w-4 h-4">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M4.5 4.5h10.125M4.5 9h6.75M4.5 13.5h10.125M4.5 18h6.75M16.5 7.5l3 3-3 3" />
+                        </svg>
+                        <span>{{ __('messages.customer.orders.histories.order_again') }}</span>
+                    </a>
                 @endif
             </div>
         </div>
     </div>
 @empty
-    {{-- Untuk request AJAX, biasanya orderHistory tidak kosong (karena tombol disembunyikan kalau habis).
-         Tapi kalau kosong, bisa kirim kosong saja. --}}
+    {{-- ... --}}
 @endforelse

@@ -1,7 +1,7 @@
 @extends('layouts.owner')
 
-@section('title', 'Stock List')
-@section('page_title', 'All Stocks')
+@section('title', __('messages.owner.products.stocks.stock_list'))
+@section('page_title', __('messages.owner.products.stocks.all_stock'))
 
 @section('content')
   <section class="content">
@@ -10,18 +10,18 @@
       <div class="d-flex flex-wrap gap-2 mb-3 align-items-center justify-content-between">
         <a href="{{ route('owner.user-owner.stocks.create') }}" class="btn btn-primary">
           <i class="fas fa-plus me-1"></i>
-          Add Stock Item
+          {{ __('messages.owner.products.stocks.add_stock_item') }}
         </a>
 
         <div class="btn-group">
           <a href="{{ route('owner.user-owner.stocks.movements.create-stock-in') }}" class="btn btn-outline-success">
-            <i class="fas fa-arrow-down fa-fw me-1"></i> Stock In
+            <i class="fas fa-arrow-down fa-fw me-1"></i> {{ __('messages.owner.products.stocks.stock_in') }}
           </a>
           <a href="{{ route('owner.user-owner.stocks.movements.create-transfer') }}" class="btn btn-outline-info">
-            <i class="fas fa-exchange-alt fa-fw me-1"></i> Transfer
+            <i class="fas fa-exchange-alt fa-fw me-1"></i> {{ __('messages.owner.products.stocks.transfer') }}
           </a>
           <a href="{{ route('owner.user-owner.stocks.movements.create-adjustment') }}" class="btn btn-outline-danger">
-            <i class="fas fa-arrow-up fa-fw me-1"></i> Adjustment
+            <i class="fas fa-arrow-up fa-fw me-1"></i> {{ __('messages.owner.products.stocks.adjustment') }}
           </a>
         </div>
 
@@ -35,12 +35,12 @@
 
             <div class="col-md-4">
               <div class="form-group mb-0">
-                <label for="filter_location" class="fw-600">Lihat Stok Berdasarkan Lokasi:</label>
+                <label for="filter_location" class="fw-600">{{ __('messages.owner.products.stocks.view_stock_by_location') }}:</label>
                 <select class="form-control" id="filter_location" name="filter_location" onchange="this.form.submit()">
 
                   {{-- Opsi Default: Gudang Owner --}}
                   <option value="owner" {{ $filterLocation == 'owner' ? 'selected' : '' }}>
-                    Gudang Owner
+                    {{ __('messages.owner.products.stocks.owner_warehouse') }}
                   </option>
 
                   {{-- Looping Partner/Outlet --}}
@@ -203,37 +203,37 @@
   {{-- Delete confirm + filter logic --}}
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
-    function deletePromo(productId) {
-      Swal.fire({
-        title: '{{ __('messages.owner.products.stocks.delete_confirmation_1') }}',
-        text: "{{ __('messages.owner.products.stocks.delete_confirmation_2') }}",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#8c1000', // brand choco
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: '{{ __('messages.owner.products.stocks.delete_confirmation_3') }}',
-        cancelButtonText: '{{ __('messages.owner.products.stocks.cancel') }}',
-        reverseButtons: true
-      }).then((result) => {
-        if (result.isConfirmed) {
-          const form = document.createElement('form');
-          form.method = 'POST';
-          form.action = `/owner/user-owner/stocks/${productId}`;
-          form.style.display = 'none';
+    // function deletePromo(productId) {
+    //   Swal.fire({
+    //     title: '{{ __('messages.owner.products.stocks.delete_confirmation_1') }}',
+    //     text: "{{ __('messages.owner.products.stocks.delete_confirmation_2') }}",
+    //     icon: 'warning',
+    //     showCancelButton: true,
+    //     confirmButtonColor: '#8c1000', // brand choco
+    //     cancelButtonColor: '#6b7280',
+    //     confirmButtonText: '{{ __('messages.owner.products.stocks.delete_confirmation_3') }}',
+    //     cancelButtonText: '{{ __('messages.owner.products.stocks.cancel') }}',
+    //     reverseButtons: true
+    //   }).then((result) => {
+    //     if (result.isConfirmed) {
+    //       const form = document.createElement('form');
+    //       form.method = 'POST';
+    //       form.action = `/owner/user-owner/stocks/${productId}`;
+    //       form.style.display = 'none';
 
-          const csrf = document.createElement('input');
-          csrf.type = 'hidden'; csrf.name = '_token'; csrf.value = '{{ csrf_token() }}';
-          form.appendChild(csrf);
+    //       const csrf = document.createElement('input');
+    //       csrf.type = 'hidden'; csrf.name = '_token'; csrf.value = '{{ csrf_token() }}';
+    //       form.appendChild(csrf);
 
-          const method = document.createElement('input');
-          method.type = 'hidden'; method.name = '_method'; method.value = 'DELETE';
-          form.appendChild(method);
+    //       const method = document.createElement('input');
+    //       method.type = 'hidden'; method.name = '_method'; method.value = 'DELETE';
+    //       form.appendChild(method);
 
-          document.body.appendChild(form);
-          form.submit();
-        }
-      });
-    }
+    //       document.body.appendChild(form);
+    //       form.submit();
+    //     }
+    //   });
+    // }
 
     document.addEventListener('DOMContentLoaded', function () {
       const filterButtons = document.querySelectorAll('.owner-stocks .filter-btn');

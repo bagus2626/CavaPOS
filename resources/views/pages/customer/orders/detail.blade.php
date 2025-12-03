@@ -407,10 +407,16 @@
 
         {{-- Aksi --}}
         <div class="mt-8 flex flex-wrap items-center justify-between gap-3">
-            <a href="{{ route('customer.menu.index', [$partner->slug, $table->table_code]) }}"
+            @if($order->payment_flag == 1)
+            <a href="{{ route('customer.menu.index', [
+                            'partner_slug'       => $partner_slug,
+                            'table_code'         => $table_code,
+                            'reorder_order_id'   => $order->id,
+                        ]) }}"
                 class="inline-flex items-center px-4 py-2 rounded-lg border border-choco text-sm text-choco hover:bg-[#fee2e2]">
-                    {{ __('messages.customer.orders.detail.back_to_menu') }}
+                    {{ __('messages.customer.orders.detail.order_again') }}
             </a>
+            @endif
 
             <div class="flex items-center gap-2">
                 @if ($order->payment_flag === 1)

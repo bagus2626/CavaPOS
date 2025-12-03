@@ -145,15 +145,15 @@ Route::middleware('setlocale')->group(function () {
         Route::post('/owner-verification/{id}/reject', [OwnerVerificationController::class, 'reject'])->name('owner-verification.reject');
         Route::get('/owner-verification/{id}/ktp-image', [OwnerVerificationController::class, 'showKtpImage'])->name('owner-verification.ktp-image');
 
-        Route::prefix('send-payment')->name('send-payment.')->group(function () {
-            Route::prefix('payout')->name('payout.')->group(function () {
-                Route::get('/', [PayoutController::class, 'index'])->name('index');
-                Route::post('get-data', [PayoutController::class, 'getData'])->name('get-data');
-                Route::get('validate-bank', [PayoutController::class, 'validateBankAccount'])->name('validate-bank');
-                Route::post('create', [PayoutController::class, 'createPayout'])->name('create');
-                Route::get('{businessId}/detail/{payoutId}', [PayoutController::class, 'getPayout'])->name('detail');
-            });
-        });
+        // Route::prefix('send-payment')->name('send-payment.')->group(function () {
+        //     Route::prefix('payout')->name('payout.')->group(function () {
+        //         Route::get('/', [PayoutController::class, 'index'])->name('index');
+        //         Route::post('get-data', [PayoutController::class, 'getData'])->name('get-data');
+        //         Route::get('validate-bank', [PayoutController::class, 'validateBankAccount'])->name('validate-bank');
+        //         Route::post('create', [PayoutController::class, 'createPayout'])->name('create');
+        //         Route::get('{businessId}/detail/{payoutId}', [PayoutController::class, 'getPayout'])->name('detail');
+        //     });
+        // });
         Route::post('/owner-verification/register-xendit-account', [OwnerVerificationController::class, 'registerXenditAccount'])->name('owner-verification.register-xendit-account');;
 
 
@@ -331,6 +331,7 @@ Route::middleware('setlocale')->group(function () {
                 Route::resource('promotions', OwnerPromotionController::class);
 
                 Route::prefix('stocks')->name('stocks.')->group(function () {
+                    Route::delete('/delete-stock/{id}', [OwnerStockController::class, 'deleteStock'])->name('delete-stock');
                     Route::resource('/', OwnerStockController::class);
 
                     Route::prefix('movements')->name('movements.')->group(function () {
@@ -427,6 +428,7 @@ Route::middleware('setlocale')->group(function () {
             Route::post('finish-order/{id}', [CashierTransactionController::class, 'finishOrder'])->name('finish-order');
             Route::post('checkout-order', [CashierTransactionController::class, 'checkout'])->name('checkout');
             Route::post('check-stock', [CashierTransactionController::class, 'checkStockRealtime'])->name('check-stock');
+            Route::delete('order/{id}/soft-delete', [CashierTransactionController::class, 'softDeleteUnpaidOrder'])->name('order.soft-delete');
         });
 
 
@@ -453,9 +455,9 @@ Route::middleware('setlocale')->group(function () {
 
     //customer
     Route::prefix('customer')->name('customer.')->middleware('customer.access')->group(function () {
-        Route::get('{partner_slug}/menu/{table_code}', [CustomerMenuController::class, 'index'])->name('menu.index');
+        Route::get('{partner_slug}/menu/{table_code}', [CustomerMenuController::class, 'index'])->name('menu.index')->middleware('throttle:10,1');
         Route::post('{partner_slug}/menu/{table_code}/check-stock', [CustomerMenuController::class, 'checkStockRealtime'])->name('menu.check-stock');
-        Route::post('{partner_slug}/checkout/{table_code}', [CustomerMenuController::class, 'checkout'])->name('menu.checkout');
+        Route::post('{partner_slug}/checkout/{table_code}', [CustomerMenuController::class, 'checkout'])->name('menu.checkout')->middleware('throttle:3,1');
         Route::get('{partner_slug}/order-detail/{table_code}/{order_id}', [CustomerMenuController::class, 'orderDetail'])->name('orders.order-detail');
         Route::get('{partner_slug}/order-histories/{table_code}', [CustomerMenuController::class, 'getOrderHistory'])->name('orders.histories');
         Route::get('/orders/{id}/receipt', [CustomerMenuController::class, 'printReceipt'])->name('orders.receipt');
