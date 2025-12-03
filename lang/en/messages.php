@@ -1051,6 +1051,20 @@ return [
             'profile' => 'Profile',
             'sign_out' => 'Sign Out'
         ],
+        'dashboard' => [
+            'total_employees' => 'Total Employees',
+            'total_orders' => 'Total Orders',
+            'total_sales' => 'Total Sales',
+            'revenue' => 'Revenue',
+            'products' => 'Products',
+            'recent_orders' => 'Recent Orders',
+            'order_id' => 'Order ID',
+            'customer' => 'Customer',
+            'status' => 'Status',
+            'amount' => 'Amount',
+            'my_timeline' => 'My Timeline',
+            'no_orders_yet' => 'No orders yet',
+        ],
         'user_management' => [
             'employees' => [
                 'employee_list' => 'Employee List',

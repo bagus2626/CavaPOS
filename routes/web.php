@@ -374,6 +374,9 @@ Route::middleware('setlocale')->group(function () {
     Route::middleware(['auth', 'is_partner', 'partner.access'])->prefix('partner')->name('partner.')->group(function () {
         Route::get('/', [PartnerDashboardController::class, 'index'])->name('dashboard');
 
+        Route::get('timeline/messages', [PartnerDashboardController::class, 'timelineMessages'])
+            ->name('timeline.messages');
+
         Route::get('products/recipe/ingredients', [PartnerProductController::class, 'getRecipeIngredients'])
             ->name('products.recipe.ingredients');
 

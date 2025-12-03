@@ -50,15 +50,34 @@
             </span>
         @else
             @php
+                $stockQuantity = 0;
+                $stockType = $product->stock_type ?? 'direct';
+                
+                // Calculate stock based on stock_type
+                if ($stockType === 'linked') {
+                    // For linked stock, use available_linked_quantity
+                    $stockQuantity = (float) ($product->available_linked_quantity ?? 0);
+                } else {
+                    // For direct stock, get from stocks relation
+                    if ($product->stock) {
+                        $stockQuantity = (float) ($product->stock->quantity ?? 0);
+                    }
+                }
+                
+                // Determine CSS class based on stock level
                 $stockClass = '';
-                if ($product->quantity <= 0) {
+                if ($stockQuantity <= 0) {
                     $stockClass = 'text-danger font-weight-bold';
-                } elseif ($product->quantity < 10) {
+                } elseif ($stockQuantity < 10) {
                     $stockClass = 'text-warning font-weight-bold';
                 }
             @endphp
             <span class="{{ $stockClass }}">
-                {{ number_format($product->quantity) }}
+                @if ($stockQuantity == floor($stockQuantity))
+                    {{ number_format($stockQuantity, 0) }}
+                @else
+                    {{ number_format($stockQuantity, 2) }}
+                @endif
             </span>
         @endif
     </td>
