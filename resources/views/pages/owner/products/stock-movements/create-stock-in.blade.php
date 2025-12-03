@@ -1,7 +1,7 @@
 @extends('layouts.owner')
 
-@section('title', 'Stock In')
-@section('page_title', 'Mencatat Stok Masuk (Stock In)')
+@section('title', __('messages.owner.products.stocks.movements_create_in.title'))
+@section('page_title', __('messages.owner.products.stocks.movements_create_in.page_title'))
 
 @section('content')
     <section class="content">
@@ -13,39 +13,61 @@
                 {{-- CARD 1: DETAIL TRANSAKSI --}}
                 <div class="card shadow-sm mb-4">
                     <div class="card-header">
-                        <h3 class="card-title">Detail Transaksi Stock In</h3>
+                        <h3 class="card-title">
+                            {{ __('messages.owner.products.stocks.movements_create_in.card_transaction_title') }}
+                        </h3>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             {{-- Lokasi Tujuan (TO) --}}
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="location_to">Lokasi Tujuan (Masuk Ke) <span
-                                            class="text-danger">*</span></label>
+                                    <label for="location_to">
+                                        {{ __('messages.owner.products.stocks.movements_create_in.location_to_label') }}
+                                        <span class="text-danger">*</span>
+                                    </label>
                                     <select name="location_to" id="location_to" class="form-control" required>
-                                        <option value="_owner">Gudang Owner</option>
+                                        <option value="_owner">
+                                            {{ __('messages.owner.products.stocks.movements_create_in.location_owner_option') }}
+                                        </option>
                                         @foreach ($partners as $partner)
                                             <option value="{{ $partner->id }}">{{ $partner->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                             </div>
+
                             {{-- Kategori Transaksi --}}
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="category">Kategori Transaksi <span class="text-danger">*</span></label>
+                                    <label for="category">
+                                        {{ __('messages.owner.products.stocks.movements_create_in.category_label') }}
+                                        <span class="text-danger">*</span>
+                                    </label>
                                     <select name="category" id="category" class="form-control" required>
-                                        <option value="purchase">Pembelian dari Supplier</option>
-                                        <option value="transfer_in">Transfer Masuk</option>
+                                        <option value="purchase">
+                                            {{ __('messages.owner.products.stocks.movements_create_in.category_purchase') }}
+                                        </option>
+                                        <option value="transfer_in">
+                                            {{ __('messages.owner.products.stocks.movements_create_in.category_transfer_in') }}
+                                        </option>
                                     </select>
                                 </div>
                             </div>
+
                             {{-- Catatan --}}
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label for="notes">Catatan (Opsional)</label>
-                                    <input type="text" name="notes" id="notes" class="form-control"
-                                        placeholder="Misal: Invoice #12345 atau Purchase Order #PO-001">
+                                    <label for="notes">
+                                        {{ __('messages.owner.products.stocks.movements_create_in.notes_label') }}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="notes"
+                                        id="notes"
+                                        class="form-control"
+                                        placeholder="{{ __('messages.owner.products.stocks.movements_create_in.notes_placeholder') }}"
+                                    >
                                 </div>
                             </div>
                         </div>
@@ -55,51 +77,80 @@
                 {{-- CARD 2: ITEM TRANSAKSI --}}
                 <div class="card shadow-sm">
                     <div class="card-header">
-                        <h3 class="card-title">Daftar Item yang Masuk</h3>
+                        <h3 class="card-title">
+                            {{ __('messages.owner.products.stocks.movements_create_in.card_items_title') }}
+                        </h3>
                     </div>
                     <div class="card-body">
                         <div id="item-repeater-container">
                             {{-- Item pertama --}}
                             <div class="row repeater-item align-items-end mb-3">
                                 <div class="col-md-4">
-                                    <label>Item Stok <span class="text-danger">*</span></label>
+                                    <label>
+                                        {{ __('messages.owner.products.stocks.movements_create_in.item_stock_label') }}
+                                        <span class="text-danger">*</span>
+                                    </label>
                                     <select name="items[0][stock_id]" class="form-control stock-select" required>
-                                        <option value="">Pilih item stok...</option>
+                                        <option value="">
+                                            {{ __('messages.owner.products.stocks.movements_create_in.item_stock_placeholder') }}
+                                        </option>
                                         @foreach ($stocks as $stock)
                                             <option value="{{ $stock->id }}"
                                                 data-location-id="{{ $stock->partner_id ?? '_owner' }}"
                                                 data-unit-group="{{ $stock->displayUnit->group_label ?? 'pcs' }}"
                                                 data-display-unit-id="{{ $stock->displayUnit->id ?? '' }}">
                                                 {{ $stock->stock_name }}
-                                                ({{ $stock->partner->name ?? 'Gudang Owner' }})
+                                                ({{ $stock->partner->name ?? __('messages.owner.products.stocks.movements_create_in.location_owner_option') }})
                                             </option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <div class="col-md-2">
-                                    <label>Jumlah <span class="text-danger">*</span></label>
-                                    <input type="number" name="items[0][quantity]" class="form-control quantity-input"
-                                        step="0.01" placeholder="0.00" required>
+                                    <label>
+                                        {{ __('messages.owner.products.stocks.movements_create_in.quantity_label') }}
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <input
+                                        type="number"
+                                        name="items[0][quantity]"
+                                        class="form-control quantity-input"
+                                        step="0.01"
+                                        placeholder="{{ __('messages.owner.products.stocks.movements_create_in.quantity_placeholder') }}"
+                                        required
+                                    >
                                 </div>
                                 <div class="col-md-2">
-                                    <label>Unit <span class="text-danger">*</span></label>
+                                    <label>
+                                        {{ __('messages.owner.products.stocks.movements_create_in.unit_label') }}
+                                        <span class="text-danger">*</span>
+                                    </label>
                                     <select name="items[0][unit_id]" class="form-control unit-select" required>
-                                        <option value="">Pilih item dulu</option>
+                                        <option value="">
+                                            {{ __('messages.owner.products.stocks.movements_create_in.unit_placeholder_no_stock') }}
+                                        </option>
                                     </select>
                                 </div>
                                 <div class="col-md-3">
-                                    <label>Harga Beli</label>
-                                    <input type="number" name="items[0][unit_price]" class="form-control" step="0.01"
-                                        placeholder="0.00">
+                                    <label>
+                                        {{ __('messages.owner.products.stocks.movements_create_in.unit_price_label') }}
+                                    </label>
+                                    <input
+                                        type="number"
+                                        name="items[0][unit_price]"
+                                        class="form-control"
+                                        step="0.01"
+                                        placeholder="{{ __('messages.owner.products.stocks.movements_create_in.unit_price_placeholder') }}"
+                                    >
                                 </div>
                                 <div class="col-md-1">
-                                    {{-- Tombol Hapus tidak ada --}}
+                                    {{-- Baris pertama tidak punya tombol hapus --}}
                                 </div>
                             </div>
                         </div>
 
                         <button type="button" id="btn-add-item" class="btn btn-sm btn-outline-primary mt-2">
-                            <i class="fas fa-plus"></i> Tambah Item
+                            <i class="fas fa-plus"></i>
+                            {{ __('messages.owner.products.stocks.movements_create_in.add_item_button') }}
                         </button>
                     </div>
                 </div>
@@ -107,7 +158,8 @@
                 {{-- Tombol Aksi --}}
                 <div class="mt-4">
                     <button type="submit" class="btn btn-success">
-                        <i class="fas fa-save"></i> Simpan Stock In
+                        <i class="fas fa-save"></i>
+                        {{ __('messages.owner.products.stocks.movements_create_in.submit_button') }}
                     </button>
                 </div>
             </form>
@@ -117,34 +169,63 @@
     <template id="item-repeater-template">
         <div class="row repeater-item align-items-end mb-3">
             <div class="col-md-4">
-                <label>Item Stok <span class="text-danger">*</span></label>
+                <label>
+                    {{ __('messages.owner.products.stocks.movements_create_in.item_stock_label') }}
+                    <span class="text-danger">*</span>
+                </label>
                 <select name="items[__INDEX__][stock_id]" class="form-control stock-select" required>
-                    <option value="">Pilih item stok...</option>
+                    <option value="">
+                        {{ __('messages.owner.products.stocks.movements_create_in.item_stock_placeholder') }}
+                    </option>
                     @foreach ($stocks as $stock)
-                        <option value="{{ $stock->id }}" data-location-id="{{ $stock->partner_id ?? '_owner' }}"
+                        <option
+                            value="{{ $stock->id }}"
+                            data-location-id="{{ $stock->partner_id ?? '_owner' }}"
                             data-unit-group="{{ $stock->displayUnit->group_label ?? 'pcs' }}"
-                            data-display-unit-id="{{ $stock->displayUnit->id ?? '' }}">
+                            data-display-unit-id="{{ $stock->displayUnit->id ?? '' }}"
+                        >
                             {{ $stock->stock_name }}
-                            ({{ $stock->partner->name ?? 'Gudang Owner' }})
+                            ({{ $stock->partner->name ?? __('messages.owner.products.stocks.movements_create_in.location_owner_option') }})
                         </option>
                     @endforeach
                 </select>
             </div>
             <div class="col-md-2">
-                <label>Jumlah <span class="text-danger">*</span></label>
-                <input type="number" name="items[__INDEX__][quantity]" class="form-control quantity-input" step="0.01"
-                    placeholder="0.00" required>
+                <label>
+                    {{ __('messages.owner.products.stocks.movements_create_in.quantity_label') }}
+                    <span class="text-danger">*</span>
+                </label>
+                <input
+                    type="number"
+                    name="items[__INDEX__][quantity]"
+                    class="form-control quantity-input"
+                    step="0.01"
+                    placeholder="{{ __('messages.owner.products.stocks.movements_create_in.quantity_placeholder') }}"
+                    required
+                >
             </div>
             <div class="col-md-2">
-                <label>Unit <span class="text-danger">*</span></label>
+                <label>
+                    {{ __('messages.owner.products.stocks.movements_create_in.unit_label') }}
+                    <span class="text-danger">*</span>
+                </label>
                 <select name="items[__INDEX__][unit_id]" class="form-control unit-select" required>
-                    <option value="">Pilih item dulu</option>
+                    <option value="">
+                        {{ __('messages.owner.products.stocks.movements_create_in.unit_placeholder_no_stock') }}
+                    </option>
                 </select>
             </div>
             <div class="col-md-3">
-                <label>Harga Beli / Unit</label>
-                <input type="number" name="items[__INDEX__][unit_price]" class="form-control" step="0.01"
-                    placeholder="0.00">
+                <label>
+                    {{ __('messages.owner.products.stocks.movements_create_in.unit_price_label_with_unit') }}
+                </label>
+                <input
+                    type="number"
+                    name="items[__INDEX__][unit_price]"
+                    class="form-control"
+                    step="0.01"
+                    placeholder="{{ __('messages.owner.products.stocks.movements_create_in.unit_price_placeholder') }}"
+                >
             </div>
             <div class="col-md-1">
                 <button type="button" class="btn btn-sm btn-danger btn-remove-item">
@@ -201,20 +282,20 @@
             function updateUnitDropdown(stockSelectElement) {
                 const selectedOption = stockSelectElement.options[stockSelectElement.selectedIndex];
 
+                const row = stockSelectElement.closest('.repeater-item');
+                const unitSelect = row.querySelector('.unit-select');
+
                 if (!selectedOption || !selectedOption.value) {
-                    const row = stockSelectElement.closest('.repeater-item');
-                    const unitSelect = row.querySelector('.unit-select');
-                    unitSelect.innerHTML = '<option value="">Pilih item dulu</option>';
+                    unitSelect.innerHTML =
+                        `<option value="">{{ __('messages.owner.products.stocks.movements_create_in.unit_placeholder_no_stock') }}</option>`;
                     return;
                 }
 
                 const unitGroup = selectedOption.getAttribute('data-unit-group');
                 const displayUnitId = selectedOption.getAttribute('data-display-unit-id');
 
-                const row = stockSelectElement.closest('.repeater-item');
-                const unitSelect = row.querySelector('.unit-select');
-
-                unitSelect.innerHTML = '<option value="">Pilih unit...</option>';
+                unitSelect.innerHTML =
+                    `<option value="">{{ __('messages.owner.products.stocks.movements_create_in.unit_placeholder') }}</option>`;
 
                 if (unitGroup) {
                     const filteredUnits = allUnits.filter(unit => unit.group_label === unitGroup);
@@ -276,13 +357,13 @@
                 form.addEventListener('submit', function (e) {
                     e.preventDefault();
                     Swal.fire({
-                        title: 'Konfirmasi Stock In',
-                        text: "Pastikan data lokasi dan item sudah benar.",
+                        title: '{{ __('messages.owner.products.stocks.movements_create_in.confirm_title') }}',
+                        text: '{{ __('messages.owner.products.stocks.movements_create_in.confirm_text') }}',
                         icon: 'question',
                         showCancelButton: true,
                         confirmButtonColor: '#8c1000',
                         cancelButtonColor: '#6b7280',
-                        confirmButtonText: 'Simpan!',
+                        confirmButtonText: '{{ __('messages.owner.products.stocks.movements_create_in.confirm_button') }}',
                         reverseButtons: true
                     }).then((result) => {
                         if (result.isConfirmed) form.submit();
