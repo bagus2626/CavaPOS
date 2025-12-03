@@ -1922,8 +1922,6 @@
                     const items = window.__REORDER_ITEMS__ || [];
 
                     if (Array.isArray(items) && items.length > 0) {
-                        console.log('Reorder items:', items);
-
                         items.forEach(item => {
                             const productId = parseInt(item.product_id, 10);
                             const optionIds = Array.isArray(item.option_ids) ? item.option_ids : [];
@@ -1945,25 +1943,24 @@
 
                         updateFloatingCartBar();
 
-                        // tampilkan pesan info kalau ada item/opsi yang tidak bisa dimuat
-                        const msgs = window.__REORDER_MESSAGES__ || [];
-                        if (Array.isArray(msgs) && msgs.length > 0 && window.Swal) {
-                            Swal.fire({
-                                icon: 'info',
-                                title: 'Pesan lagi dimuat',
-                                html: `<div style="text-align:left;font-size:13px;">
-                                    <p class="mb-1">Sebagian pesanan dari order sebelumnya sudah dimuat ke keranjang.</p>
-                                    <ul class="mt-2 list-disc pl-5 space-y-1">
-                                        ${msgs.map(m => `<li>${m}</li>`).join('')}
-                                    </ul>
-                                </div>`,
-                                confirmButtonText: 'Mengerti',
-                            });
-                        }
+                        
+                    }
+                    // tampilkan pesan info kalau ada item/opsi yang tidak bisa dimuat
+                    const msgs = window.__REORDER_MESSAGES__ || [];
+                    if (Array.isArray(msgs) && msgs.length > 0 && window.Swal) {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Pesan lagi dimuat',
+                            html: `<div style="text-align:left;font-size:13px;">
+                                <p class="mb-1">{{ __('messages.customer.menu.reorder_information') }}</p>
+                                <ul class="mt-2 list-disc pl-5 space-y-1">
+                                    ${msgs.map(m => `<li>${m}</li>`).join('')}
+                                </ul>
+                            </div>`,
+                            confirmButtonText: "{{ __('messages.customer.menu.understand') }}",
+                        });
                     }
                 })();
-
-
             });
         </script>
 
