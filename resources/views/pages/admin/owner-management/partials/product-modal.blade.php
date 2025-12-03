@@ -38,17 +38,37 @@
                             </span>
                         @else
                             @php
+                                $stockQuantity = 0;
+                                $stockType = $product->stock_type ?? 'direct';
+                                
+                                // Calculate stock based on stock_type
+                                if ($stockType === 'linked') {
+                                    // For linked stock, use available_linked_quantity
+                                    $stockQuantity = (float) ($product->available_linked_quantity ?? 0);
+                                } else {
+                                    // For direct stock, get from stocks relation
+                                    if ($product->stock) {
+                                        $stockQuantity = (float) ($product->stock->quantity ?? 0);
+                                    }
+                                }
+                                
+                                // Determine badge class based on stock level
                                 $stockClass = '';
-                                if ($product->quantity <= 0) {
+                                if ($stockQuantity <= 0) {
                                     $stockClass = 'badge-danger';
-                                } elseif ($product->quantity < 10) {
+                                } elseif ($stockQuantity < 10) {
                                     $stockClass = 'badge-warning';
                                 } else {
                                     $stockClass = 'badge-success';
                                 }
                             @endphp
                             <span class="badge {{ $stockClass }} badge-pill">
-                                Stock: {{ number_format($product->quantity) }}
+                                Stock: 
+                                @if ($stockQuantity == floor($stockQuantity))
+                                    {{ number_format($stockQuantity, 0) }}
+                                @else
+                                    {{ number_format($stockQuantity, 2) }}
+                                @endif
                             </span>
                         @endif
                     </div>
