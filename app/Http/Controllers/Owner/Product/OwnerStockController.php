@@ -273,4 +273,20 @@ class OwnerStockController extends Controller
 
         return redirect()->route('owner.user-owner.stocks.index')->with('success', 'Stock deleted successfully!');
     }
+
+    public function deleteStock(Request $request, $id)
+    {
+        $stock = Stock::findOrFail($id);
+        $partner_stocks = Stock::where('owner_id', $stock->owner_id)
+            ->where('type', 'partner')
+            ->where('stock_name', $stock->stock_name)
+            ->get();
+        foreach ($partner_stocks as $ps) {
+            $ps->delete();
+        }
+        
+        $stock->delete();
+
+        return redirect()->route('owner.user-owner.stocks.index')->with('success', 'Stock deleted successfully!');
+    }
 }
