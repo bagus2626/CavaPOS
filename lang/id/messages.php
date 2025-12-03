@@ -100,7 +100,8 @@ return [
                 'back_to_menu' => 'Kembali ke menu',
                 'load_more' => 'Muat Lebih',
                 'loading' => 'Memuat...',
-                'order_again' => 'Pesan Lagi'
+                'order_again' => 'Pesan Lagi',
+                'continue_payment' => 'Lanjutkan Pembayaran'
             ],
             'detail' => [
                 'order_detail' => 'Detail Pesanan',
@@ -134,7 +135,10 @@ return [
                 'no_payment_found_please_confirm_to_cashier' => 'Belum ada data pembayaran tercatat. Jika kamu sudah membayar, silakan konfirmasi ke kasir.',
                 'back_to_menu' => 'Kembali ke menu',
                 'download_receipt' => 'Download Struk',
-                'order_again' => 'Pesan Lagi'
+                'order_again' => 'Pesan Lagi',
+                'unpaid_warning' => 'Anda Belum Menyelesaikan Pembayaran',
+                'please_continue_payment' => 'Silahkan menyelesaikan pembayaran anda terlebih dahulu dengan klik "Lanjutkan Pembayaran".',
+                'continue_payment' => 'Lanjutkan Pembayaran'
             ],
         ],
     ],
