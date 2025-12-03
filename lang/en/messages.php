@@ -100,7 +100,8 @@ return [
                 'back_to_menu' => 'Back to Menu',
                 'load_more' => 'Load More',
                 'loading' => 'Loading...',
-                'order_again' => 'Order Again'
+                'order_again' => 'Order Again',
+                'continue_payment' => 'Continue Payment'
             ],
             'detail' => [
                 'order_detail' => 'Order Detail',
@@ -134,7 +135,10 @@ return [
                 'no_payment_found_please_confirm_to_cashier' => 'No payment data recorded yet. If you have already paid, please confirm to the cashier.',
                 'back_to_menu' => 'Back to Menu',
                 'download_receipt' => 'Download Receipt',
-                'order_again' => 'Order Again'
+                'order_again' => 'Order Again',
+                'unpaid_warning'            => 'Payment Not Completed',
+                'please_continue_payment'   => 'Please complete your payment first by clicking "Continue Payment".',
+                'continue_payment'          => 'Continue Payment',
             ],
         ],
     ],

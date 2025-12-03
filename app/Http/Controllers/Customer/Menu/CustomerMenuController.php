@@ -405,7 +405,7 @@ class CustomerMenuController extends Controller
                     "amount" => $payment->paid_amount ?? 0,
                     "given_names" => $request->order_name ?? "unknow",
                     "description" => "Invoice QRIS",
-                    "invoice_duration" => 10,
+                    "invoice_duration" => 600,
                     "customer" => [
                         "given_names" => $customer ? $customer->name : $request->order_name,
                         "email" => $customer ? $customer->email : "customer@example.com",
@@ -826,12 +826,13 @@ class CustomerMenuController extends Controller
                 'order_details.partnerProduct',
                 'payment',
                 'table',
+                'last_xendit_invoice'
             ])
             ->where('partner_id', $partner->id)
             ->where('customer_id', $customer->id)
             ->orderBy('created_at', 'desc')
             ->paginate(10);
-
+        
         if ($request->ajax()) {
             $view = view('pages.customer.orders.partials._order-cards', [
                 'orderHistory' => $order_history,
