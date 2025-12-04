@@ -1,7 +1,7 @@
 @extends('layouts.owner')
 
-@section('title', 'Transfer Stock')
-@section('page_title', 'Mencatat Transfer Stok')
+@section('title', __('messages.owner.products.stocks.movements_transfer.title'))
+@section('page_title', __('messages.owner.products.stocks.movements_transfer.page_title'))
 
 @section('content')
     <section class="content">
@@ -13,16 +13,23 @@
                 {{-- CARD 1: DETAIL TRANSAKSI --}}
                 <div class="card shadow-sm mb-4">
                     <div class="card-header">
-                        <h3 class="card-title">Detail Transaksi Transfer</h3>
+                        <h3 class="card-title">
+                            {{ __('messages.owner.products.stocks.movements_transfer.card_transaction_title') }}
+                        </h3>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             {{-- Lokasi Asal (FROM) --}}
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="location_from">Lokasi Asal (Dari) <span class="text-danger">*</span></label>
+                                    <label for="location_from">
+                                        {{ __('messages.owner.products.stocks.movements_transfer.location_from_label') }}
+                                        <span class="text-danger">*</span>
+                                    </label>
                                     <select name="location_from" id="location_from" class="form-control" required>
-                                        <option value="_owner">Gudang Owner</option>
+                                        <option value="_owner">
+                                            {{ __('messages.owner.products.stocks.movements_transfer.location_owner_option') }}
+                                        </option>
                                         @foreach ($partners as $partner)
                                             <option value="{{ $partner->id }}">{{ $partner->name }}</option>
                                         @endforeach
@@ -33,9 +40,14 @@
                             {{-- Lokasi Tujuan (TO) --}}
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="location_to">Lokasi Tujuan (Ke) <span class="text-danger">*</span></label>
+                                    <label for="location_to">
+                                        {{ __('messages.owner.products.stocks.movements_transfer.location_to_label') }}
+                                        <span class="text-danger">*</span>
+                                    </label>
                                     <select name="location_to" id="location_to" class="form-control" required>
-                                        <option value="_owner">Gudang Owner</option>
+                                        <option value="_owner">
+                                            {{ __('messages.owner.products.stocks.movements_transfer.location_owner_option') }}
+                                        </option>
                                         @foreach ($partners as $partner)
                                             <option value="{{ $partner->id }}">{{ $partner->name }}</option>
                                         @endforeach
@@ -49,9 +61,16 @@
                             {{-- Catatan --}}
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label for="notes">Catatan (Opsional)</label>
-                                    <input type="text" name="notes" id="notes" class="form-control"
-                                        placeholder="Misal: Transfer untuk restocking outlet atau Transfer nomor #TF-001">
+                                    <label for="notes">
+                                        {{ __('messages.owner.products.stocks.movements_transfer.notes_label') }}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="notes"
+                                        id="notes"
+                                        class="form-control"
+                                        placeholder="{{ __('messages.owner.products.stocks.movements_transfer.notes_placeholder') }}"
+                                    >
                                 </div>
                             </div>
                         </div>
@@ -61,40 +80,61 @@
                 {{-- CARD 2: ITEM TRANSAKSI --}}
                 <div class="card shadow-sm">
                     <div class="card-header">
-                        <h3 class="card-title">Daftar Item yang Ditransfer</h3>
+                        <h3 class="card-title">
+                            {{ __('messages.owner.products.stocks.movements_transfer.card_items_title') }}
+                        </h3>
                     </div>
                     <div class="card-body">
                         <div id="item-repeater-container">
                             {{-- Item pertama --}}
                             <div class="row repeater-item mb-3">
                                 <div class="col-md-5">
-                                    <label>Item Stok <span class="text-danger">*</span></label>
+                                    <label>
+                                        {{ __('messages.owner.products.stocks.movements_transfer.item_stock_label') }}
+                                        <span class="text-danger">*</span>
+                                    </label>
                                     <select name="items[0][stock_id]" class="form-control stock-select" required>
-                                        <option value="">Pilih item stok...</option>
+                                        <option value="">
+                                            {{ __('messages.owner.products.stocks.movements_transfer.item_stock_placeholder') }}
+                                        </option>
                                         @foreach ($stocks as $stock)
                                             <option value="{{ $stock->id }}"
                                                 data-location-id="{{ $stock->partner_id ?? '_owner' }}"
                                                 data-unit-group="{{ $stock->displayUnit->group_label ?? 'pcs' }}"
                                                 data-display-unit-id="{{ $stock->displayUnit->id ?? '' }}"
                                                 data-current-qty="{{ number_format($stock->display_quantity ?? 0, 2) }}"
-                                                data-current-unit="{{ $stock->displayUnit->unit_name ?? 'unit' }}">
+                                                data-current-unit="{{ $stock->displayUnit->unit_name ?? __('messages.owner.products.stocks.movements_transfer.current_stock_unit_default') }}">
                                                 {{ $stock->stock_name }}
-                                                ({{ $stock->partner->name ?? 'Gudang Owner' }})
+                                                ({{ $stock->partner->name ?? __('messages.owner.products.stocks.movements_transfer.location_owner_option') }})
                                             </option>
                                         @endforeach
                                     </select>
                                     <div class="current-stock-info text-muted small mt-1" style="display: none;"></div>
                                 </div>
                                 <div class="col-md-2">
-                                    <label>Jumlah <span class="text-danger">*</span></label>
-                                    <input type="number" name="items[0][quantity]" class="form-control quantity-input"
-                                        step="0.01" placeholder="0.00" required>
+                                    <label>
+                                        {{ __('messages.owner.products.stocks.movements_transfer.quantity_label') }}
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <input
+                                        type="number"
+                                        name="items[0][quantity]"
+                                        class="form-control quantity-input"
+                                        step="0.01"
+                                        placeholder="{{ __('messages.owner.products.stocks.movements_transfer.quantity_placeholder') }}"
+                                        required
+                                    >
                                     <div style="height: 21px;"></div>
                                 </div>
                                 <div class="col-md-2">
-                                    <label>Unit <span class="text-danger">*</span></label>
+                                    <label>
+                                        {{ __('messages.owner.products.stocks.movements_transfer.unit_label') }}
+                                        <span class="text-danger">*</span>
+                                    </label>
                                     <select name="items[0][unit_id]" class="form-control unit-select" required>
-                                        <option value="">Pilih item</option>
+                                        <option value="">
+                                            {{ __('messages.owner.products.stocks.movements_transfer.unit_placeholder_no_stock') }}
+                                        </option>
                                     </select>
                                     <div style="height: 21px;"></div>
                                 </div>
@@ -109,7 +149,8 @@
 
                         {{-- Tombol Tambah Item --}}
                         <button type="button" id="btn-add-item" class="btn btn-sm btn-outline-primary mt-2">
-                            <i class="fas fa-plus"></i> Tambah Item
+                            <i class="fas fa-plus"></i>
+                            {{ __('messages.owner.products.stocks.movements_transfer.add_item_button') }}
                         </button>
                     </div>
                 </div>
@@ -117,7 +158,8 @@
                 {{-- Tombol Aksi --}}
                 <div class="mt-4">
                     <button type="submit" class="btn btn-info">
-                        <i class="fas fa-save"></i> Simpan Transfer
+                        <i class="fas fa-save"></i>
+                        {{ __('messages.owner.products.stocks.movements_transfer.submit_button') }}
                     </button>
                 </div>
             </form>
@@ -128,32 +170,52 @@
     <template id="item-repeater-template">
         <div class="row repeater-item mb-3">
             <div class="col-md-5">
-                <label>Item Stok <span class="text-danger">*</span></label>
+                <label>
+                    {{ __('messages.owner.products.stocks.movements_transfer.item_stock_label') }}
+                    <span class="text-danger">*</span>
+                </label>
                 <select name="items[__INDEX__][stock_id]" class="form-control stock-select" required>
-                    <option value="">Pilih item stok...</option>
+                    <option value="">
+                        {{ __('messages.owner.products.stocks.movements_transfer.item_stock_placeholder') }}
+                    </option>
                     @foreach ($stocks as $stock)
-                        <option value="{{ $stock->id }}" data-location-id="{{ $stock->partner_id ?? '_owner' }}"
+                        <option value="{{ $stock->id }}"
+                            data-location-id="{{ $stock->partner_id ?? '_owner' }}"
                             data-unit-group="{{ $stock->displayUnit->group_label ?? 'pcs' }}"
                             data-display-unit-id="{{ $stock->displayUnit->id ?? '' }}"
                             data-current-qty="{{ number_format($stock->display_quantity ?? 0, 2) }}"
-                            data-current-unit="{{ $stock->displayUnit->unit_name ?? 'unit' }}">
+                            data-current-unit="{{ $stock->displayUnit->unit_name ?? __('messages.owner.products.stocks.movements_transfer.current_stock_unit_default') }}">
                             {{ $stock->stock_name }}
-                            ({{ $stock->partner->name ?? 'Gudang Owner' }})
+                            ({{ $stock->partner->name ?? __('messages.owner.products.stocks.movements_transfer.location_owner_option') }})
                         </option>
                     @endforeach
                 </select>
                 <div class="current-stock-info text-muted small mt-1" style="display: none;"></div>
             </div>
             <div class="col-md-2">
-                <label>Jumlah <span class="text-danger">*</span></label>
-                <input type="number" name="items[__INDEX__][quantity]" class="form-control quantity-input" step="0.01"
-                    placeholder="0.00" required>
+                <label>
+                    {{ __('messages.owner.products.stocks.movements_transfer.quantity_label') }}
+                    <span class="text-danger">*</span>
+                </label>
+                <input
+                    type="number"
+                    name="items[__INDEX__][quantity]"
+                    class="form-control quantity-input"
+                    step="0.01"
+                    placeholder="{{ __('messages.owner.products.stocks.movements_transfer.quantity_placeholder') }}"
+                    required
+                >
                 <div style="height: 21px;"></div>
             </div>
             <div class="col-md-2">
-                <label>Unit <span class="text-danger">*</span></label>
+                <label>
+                    {{ __('messages.owner.products.stocks.movements_transfer.unit_label') }}
+                    <span class="text-danger">*</span>
+                </label>
                 <select name="items[__INDEX__][unit_id]" class="form-control unit-select" required>
-                    <option value="">Pilih item</option>
+                    <option value="">
+                        {{ __('messages.owner.products.stocks.movements_transfer.unit_placeholder_no_stock') }}
+                    </option>
                 </select>
                 <div style="height: 21px;"></div>
             </div>
@@ -177,16 +239,14 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const container = document.getElementById('item-repeater-container');
-            const template = document.getElementById('item-repeater-template');
-            const btnAddItem = document.getElementById('btn-add-item');
+            const container    = document.getElementById('item-repeater-container');
+            const template     = document.getElementById('item-repeater-template');
+            const btnAddItem   = document.getElementById('btn-add-item');
             const locationFrom = document.getElementById('location_from');
-            const locationTo = document.getElementById('location_to');
-            const form = document.getElementById('stockMovementForm');
+            const locationTo   = document.getElementById('location_to');
+            const form         = document.getElementById('stockMovementForm');
 
-            if (!container || !template || !btnAddItem || !locationFrom || !locationTo) {
-                return;
-            }
+            if (!container || !template || !btnAddItem || !locationFrom || !locationTo) return;
             if (typeof allUnits === 'undefined') {
                 console.error('Error: Variabel `allUnits` tidak ditemukan.');
                 return;
@@ -194,10 +254,10 @@
 
             let itemIndex = 1;
 
-            // Filter Stok Berdasarkan Lokasi Asal
+            // Filter stok berdasarkan lokasi asal
             function filterStocksBySourceLocation() {
                 const selectedSource = locationFrom.value;
-                const stockSelects = document.querySelectorAll('.stock-select');
+                const stockSelects   = document.querySelectorAll('.stock-select');
 
                 stockSelects.forEach(select => {
                     const currentVal = select.value;
@@ -209,11 +269,11 @@
                         const stockLocation = option.getAttribute('data-location-id');
 
                         if (stockLocation === selectedSource) {
-                            option.hidden = false;
+                            option.hidden  = false;
                             option.disabled = false;
                             if (option.value === currentVal) isCurrentValValid = true;
                         } else {
-                            option.hidden = true;
+                            option.hidden  = true;
                             option.disabled = true;
                         }
                     });
@@ -225,27 +285,29 @@
                 });
             }
 
-            // Update Unit & Info Kuantitas
+            // Update unit dropdown & info stok
             function updateRowInfo(stockSelectElement) {
                 const selectedOption = stockSelectElement.options[stockSelectElement.selectedIndex];
-                const row = stockSelectElement.closest('.repeater-item');
+                const row            = stockSelectElement.closest('.repeater-item');
                 if (!row) return;
 
                 const unitSelect = row.querySelector('.unit-select');
-                const infoBox = row.querySelector('.current-stock-info');
+                const infoBox    = row.querySelector('.current-stock-info');
 
-                unitSelect.innerHTML = '<option value="">Pilih unit...</option>';
+                unitSelect.innerHTML =
+                    `<option value="">{{ __('messages.owner.products.stocks.movements_transfer.unit_placeholder') }}</option>`;
+
                 if (infoBox) {
-                    infoBox.textContent = '';
+                    infoBox.textContent   = '';
                     infoBox.style.display = 'none';
                 }
 
                 if (!selectedOption || !selectedOption.value) return;
 
-                const unitGroup = selectedOption.getAttribute('data-unit-group');
+                const unitGroup     = selectedOption.getAttribute('data-unit-group');
                 const displayUnitId = selectedOption.getAttribute('data-display-unit-id');
-                const currentQty = selectedOption.getAttribute('data-current-qty');
-                const currentUnit = selectedOption.getAttribute('data-current-unit');
+                const currentQty    = selectedOption.getAttribute('data-current-qty');
+                const currentUnit   = selectedOption.getAttribute('data-current-unit');
 
                 if (unitGroup) {
                     const filteredUnits = allUnits.filter(unit => unit.group_label === unitGroup);
@@ -260,15 +322,17 @@
                 }
 
                 if (currentQty && infoBox) {
-                    infoBox.textContent = `Stok Tersedia: ${currentQty} ${currentUnit}`;
+                    infoBox.textContent =
+                        '{{ __('messages.owner.products.stocks.movements_transfer.current_stock_prefix') }} ' +
+                        currentQty + ' ' + currentUnit;
                     infoBox.style.display = 'block';
                 }
             }
 
-            // Update Opsi Lokasi Tujuan (Auto Select Default)
+            // Update opsi lokasi tujuan (tidak boleh sama dengan asal)
             function updateToOptions() {
                 const selectedFrom = locationFrom.value;
-                const currentTo = locationTo.value;
+                const currentTo    = locationTo.value;
 
                 let firstValidValue = null;
 
@@ -276,10 +340,10 @@
                     if (opt.value === "") return;
 
                     if (opt.value === selectedFrom) {
-                        opt.hidden = true;
+                        opt.hidden  = true;
                         opt.disabled = true;
                     } else {
-                        opt.hidden = false;
+                        opt.hidden  = false;
                         opt.disabled = false;
 
                         if (!firstValidValue) {
@@ -295,64 +359,69 @@
                 }
             }
 
-            // Saat Lokasi Asal (From) Berubah
+            // Saat lokasi asal berubah
             locationFrom.addEventListener('change', function () {
                 updateToOptions();
                 filterStocksBySourceLocation();
             });
 
-            // Tombol Tambah Item 
+            // Tombol tambah item
             btnAddItem.addEventListener('click', function () {
                 let templateHTML = template.innerHTML.replace(/__INDEX__/g, itemIndex);
-                const newRow = document.createElement('div');
+                const newRow     = document.createElement('div');
                 newRow.innerHTML = templateHTML;
                 container.appendChild(newRow.firstElementChild);
+
                 filterStocksBySourceLocation();
                 itemIndex++;
             });
 
-            // Hapus Item
+            // Hapus item
             container.addEventListener('click', function (e) {
                 if (e.target && (e.target.classList.contains('btn-remove-item') || e.target.closest('.btn-remove-item'))) {
                     e.target.closest('.repeater-item').remove();
                 }
             });
 
-            // Saat Stok Dipilih (Change)
+            // Saat stok dipilih
             container.addEventListener('change', function (e) {
                 if (e.target && e.target.classList.contains('stock-select')) {
                     updateRowInfo(e.target);
                 }
             });
 
+            // Inisialisasi awal
             updateToOptions();
             filterStocksBySourceLocation();
 
-            // Update info baris pertama jika sudah terisi
             const firstStockSelect = container.querySelector('.stock-select');
             if (firstStockSelect && firstStockSelect.value) {
                 updateRowInfo(firstStockSelect);
             }
 
-            // Konfirmasi
+            // Konfirmasi submit
             if (form) {
                 form.addEventListener('submit', function (e) {
                     e.preventDefault();
 
                     if (locationFrom.value === locationTo.value) {
-                        Swal.fire('Validasi Gagal', 'Lokasi asal dan tujuan tidak boleh sama!', 'error');
+                        Swal.fire(
+                            '{{ __('messages.owner.products.stocks.movements_transfer.validation_same_location_title') }}',
+                            '{{ __('messages.owner.products.stocks.movements_transfer.validation_same_location_text') }}',
+                            'error'
+                        );
                         return false;
                     }
 
                     Swal.fire({
-                        title: 'Konfirmasi Transfer',
-                        text: "Pastikan data item dan lokasi sudah benar.",
+                        title: '{{ __('messages.owner.products.stocks.movements_transfer.confirm_title') }}',
+                        text: '{{ __('messages.owner.products.stocks.movements_transfer.confirm_text') }}',
                         icon: 'question',
                         showCancelButton: true,
                         confirmButtonColor: '#8c1000',
                         cancelButtonColor: '#6b7280',
-                        confirmButtonText: 'Ya, Transfer!',
-                        cancelButtonText: 'Batal',
+                        confirmButtonText: '{{ __('messages.owner.products.stocks.movements_transfer.confirm_button') }}',
+                        cancelButtonText: '{{ __('messages.owner.products.stocks.movements_transfer.cancel_button') }}',
                         reverseButtons: true
                     }).then((result) => {
                         if (result.isConfirmed) {

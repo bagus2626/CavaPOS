@@ -155,6 +155,21 @@
                         <span>{{ __('messages.customer.orders.histories.order_again') }}</span>
                     </a>
                 @endif
+                @if ($order->order_status === 'PAYMENT')
+                    @if ($order->last_xendit_invoice->invoice_url)
+                        <a href="{{ $order->last_xendit_invoice->invoice_url }}"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs bg-choco md:text-sm text-white hover:bg-soft-choco">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" 
+                                viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor"
+                                class="w-4 h-4">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M3 7.5h18M3 10.5h18M4.5 6A1.5 1.5 0 003 7.5v9A1.5 1.5 0 004.5 18h15a1.5 1.5 0 001.5-1.5v-9A1.5 1.5 0 0019.5 6h-15z" />
+                            </svg>
+
+                            <span>{{ __('messages.customer.orders.histories.continue_payment') }}</span>
+                        </a>
+                    @endif
+                @endif
             </div>
         </div>
     </div>

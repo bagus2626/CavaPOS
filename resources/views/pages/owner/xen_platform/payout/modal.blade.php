@@ -224,7 +224,10 @@
             }
 
             function updateEmailValidationUI() {
-                const emailValue = $emailInput.val().trim();
+                if (!$emailInput.length) {
+                    return true;
+                }
+                const emailValue = ($emailInput.val() || '').trim();
                 const validation = validateMultipleEmails(emailValue);
                 const $emailStatus = $('#email-validation-status');
                 const $emailFeedback = $('#email-validation-feedback');
@@ -319,9 +322,13 @@
 
                 $balanceSpan.text(formatRupiah(balance));
 
-                if (!$emailInput.val().trim() && defaultEmail) {
-                    $emailInput.val(defaultEmail);
-                    updateEmailValidationUI();
+                if ($emailInput.length) {
+                    const emailCurrent = ($emailInput.val() || '').trim();
+
+                    if (!emailCurrent && defaultEmail) {
+                        $emailInput.val(defaultEmail);
+                        updateEmailValidationUI();
+                    }
                 }
 
                 if (level === 0 && !$referenceInput.val()) {

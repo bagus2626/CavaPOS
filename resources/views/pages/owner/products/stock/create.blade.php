@@ -1,7 +1,7 @@
 @extends('layouts.owner')
 
-@section('title', 'Create Stock Item')
-@section('page_title', 'Create New Stock')
+@section('title', __('messages.owner.products.stocks.create_title'))
+@section('page_title', __('messages.owner.products.stocks.create_page_title'))
 
 @section('content')
     <section class="content">
@@ -10,12 +10,12 @@
           <div class="col-12">
 
             <a href="{{ route('owner.user-owner.stocks.index') }}" class="btn btn-secondary mb-3">
-              <i class="fas fa-arrow-left mr-2"></i>Back to Stock List
+              <i class="fas fa-arrow-left mr-2"></i>{{ __('messages.owner.products.stocks.back_to_list') }}
             </a>
 
             @if ($errors->any())
               <div class="alert alert-danger">
-                <strong>Please re-check your input</strong>
+                <strong>{{ __('messages.owner.products.stocks.create_errors_title') }}</strong>
                 <ul class="mb-0 mt-2">
                   @foreach ($errors->all() as $e)
                     <li>{{ $e }}</li>
@@ -26,7 +26,7 @@
 
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title">Stock Information</h3>
+                <h3 class="card-title">{{ __('messages.owner.products.stocks.create_card_title') }}</h3>
               </div>
 
               <form action="{{ route('owner.user-owner.stocks.store') }}" method="POST" id="stockForm" novalidate>
@@ -37,27 +37,27 @@
                     <div class="custom-control custom-switch">
                       <input type="checkbox" class="custom-control-input" id="use_product_name_switch" {{ old('product_id') ? 'checked' : '' }}>
                       <label class="custom-control-label" for="use_product_name_switch">
-                        Use existing product name (from Product Master)
+                        {{ __('messages.owner.products.stocks.use_existing_switch_label') }}
                       </label>
                     </div>
                     <small class="text-muted d-block">
-                      If enabled, choose a product below. The stock name will follow the product name.
+                      {{ __('messages.owner.products.stocks.use_existing_switch_help') }}
                     </small>
                   </div>
 
                   <div id="productPickerWrap" class="row {{ old('product_id') ? '' : 'd-none' }}">
                     <div class="col-md-8">
                       <div class="form-group">
-                        <label for="product_picker" class="required">Choose Product</label>
+                        <label for="product_picker" class="required">{{ __('messages.owner.products.stocks.choose_product_label') }}</label>
                         <select id="product_picker" class="form-control">
-                          <option value="">-- Select Product --</option>
+                          <option value="">{{ __('messages.owner.products.stocks.choose_product_placeholder') }}</option>
                           @foreach($master_products as $p)
                             <option value="{{ $p->id }}" data-name="{{ $p->name }}" {{ old('product_id') == $p->id ? 'selected' : '' }}>
                               {{ $p->name }}
                             </option>
                           @endforeach
                         </select>
-                        <small class="text-muted">Changing the product will update the Stock Name below.</small>
+                        <small class="text-muted">{{ __('messages.owner.products.stocks.choose_product_help') }}</small>
                       </div>
                     </div>
                   </div>
@@ -67,42 +67,42 @@
 
                   {{-- Stock Name --}}
                   <div class="form-group">
-                    <label for="stock_name" class="required">Stock Name</label>
+                    <label for="stock_name" class="required">{{ __('messages.owner.products.stocks.stock_name_label') }}</label>
                     <input type="text" class="form-control @error('stock_name') is-invalid @enderror" id="stock_name" name="stock_name"
-                      value="{{ old('stock_name') }}" placeholder="e.g., Sugar / Flour / Paper Cup" required maxlength="150" {{ old('product_id') ? 'readonly' : '' }}>
+                      value="{{ old('stock_name') }}" placeholder="{{ __('messages.owner.products.stocks.stock_name_placeholder') }}" required maxlength="150" {{ old('product_id') ? 'readonly' : '' }}>
                     @error('stock_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                   </div>
 
                   <div class="form-group">
-                    <label for="unit_id" class="required">Display Unit</label>
+                    <label for="unit_id" class="required">{{ __('messages.owner.products.stocks.display_unit_label') }}</label>
                     <select id="unit_id" name="unit_id" class="form-control @error('unit_id') is-invalid @enderror" required>
-                      <option value="">-- Select Unit --</option>
+                      <option value="">{{ __('messages.owner.products.stocks.display_unit_placeholder') }}</option>
                       @foreach($master_units as $unit)
                         <option value="{{ $unit->id }}" {{ old('unit_id') == $unit->id ? 'selected' : '' }}>
                           {{ $unit->unit_name }} ({{ $unit->group_label }})
                         </option>
                       @endforeach
                     </select>
-                    <small class="text-muted">Unit used to display stock (e.g., Kg, Pcs). Quantity will be 0.</small>
+                    <small class="text-muted">{{ __('messages.owner.products.stocks.display_unit_help') }}</small>
                     @error('unit_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                   </div>
                 <hr>
 
                 {{-- Description --}}
                 <div class="form-group">
-                  <label for="description">Description (optional)</label>
+                  <label for="description">{{ __('messages.owner.products.stocks.description_label') }}</label>
                   <textarea id="description" name="description" class="form-control @error('description') is-invalid @enderror" rows="3"
-                    placeholder="Notes about supplier, quality, size, or other details">{{ old('description') }}</textarea>
+                    placeholder="{{ __('messages.owner.products.stocks.description_placeholder') }}">{{ old('description') }}</textarea>
                   @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
                 </div>
 
                 <div class="card-footer text-right">
                   <button type="reset" class="btn btn-outline-secondary mr-2">
-                    <i class="fas fa-undo mr-1"></i>Reset
+                    <i class="fas fa-undo mr-1"></i>{{ __('messages.owner.products.stocks.reset_button') }}
                   </button>
                   <button type="submit" class="btn btn-success">
-                    <i class="fas fa-save mr-1"></i>Create Stock
+                    <i class="fas fa-save mr-1"></i>{{ __('messages.owner.products.stocks.submit_button') }}
                   </button>
                 </div>
               </form>

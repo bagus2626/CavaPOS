@@ -1096,10 +1096,11 @@
                     );
                     const prov = String(provision || '').toUpperCase();
                     const val = Number(value);
+                    const isRadioMode =
+                        val === 1 && (prov === 'EXACT' || prov === 'MAX' || prov === 'OPTIONAL MAX');
 
-                    // === KHUSUS EXACT 1 → perilaku seperti radio button ===
-                    if (prov === 'EXACT' && val === 1) {
-                        function updateStateExact1(changedCb = null) {
+                    if (isRadioMode) {
+                        function updateStateRadio(changedCb = null) {
                             if (changedCb && changedCb.checked) {
                                 checkboxes.forEach(cb => {
                                     if (cb !== changedCb) cb.checked = false;
@@ -1121,15 +1122,14 @@
                         }
 
                         checkboxes.forEach(cb => {
-                            cb.disabled = false; // jangan pernah di-disable di mode EXACT 1
+                            cb.disabled = false;
                             cb.addEventListener('change', function () {
-                                updateStateExact1(this);
+                                updateStateRadio(this);
                             });
                         });
 
-                        // init awal
-                        updateStateExact1();
-                        return; 
+                        updateStateRadio();
+                        return;
                     }
 
                     function updateState() {
@@ -1185,8 +1185,6 @@
                     checkboxes.forEach(cb => cb.addEventListener('change', updateState));
                     updateState();
                 }
-
-
 
                 function validateAllProvisions() {
                     const poGroups = Array.from(modalContent.querySelectorAll('[data-provision-group]'));
@@ -1922,8 +1920,6 @@
                     const items = window.__REORDER_ITEMS__ || [];
 
                     if (Array.isArray(items) && items.length > 0) {
-                        console.log('Reorder items:', items);
-
                         items.forEach(item => {
                             const productId = parseInt(item.product_id, 10);
                             const optionIds = Array.isArray(item.option_ids) ? item.option_ids : [];
@@ -1945,25 +1941,24 @@
 
                         updateFloatingCartBar();
 
-                        // tampilkan pesan info kalau ada item/opsi yang tidak bisa dimuat
-                        const msgs = window.__REORDER_MESSAGES__ || [];
-                        if (Array.isArray(msgs) && msgs.length > 0 && window.Swal) {
-                            Swal.fire({
-                                icon: 'info',
-                                title: 'Pesan lagi dimuat',
-                                html: `<div style="text-align:left;font-size:13px;">
-                                    <p class="mb-1">Sebagian pesanan dari order sebelumnya sudah dimuat ke keranjang.</p>
-                                    <ul class="mt-2 list-disc pl-5 space-y-1">
-                                        ${msgs.map(m => `<li>${m}</li>`).join('')}
-                                    </ul>
-                                </div>`,
-                                confirmButtonText: 'Mengerti',
-                            });
-                        }
+                        
+                    }
+                    // tampilkan pesan info kalau ada item/opsi yang tidak bisa dimuat
+                    const msgs = window.__REORDER_MESSAGES__ || [];
+                    if (Array.isArray(msgs) && msgs.length > 0 && window.Swal) {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Pesan lagi dimuat',
+                            html: `<div style="text-align:left;font-size:13px;">
+                                <p class="mb-1">{{ __('messages.customer.menu.reorder_information') }}</p>
+                                <ul class="mt-2 list-disc pl-5 space-y-1">
+                                    ${msgs.map(m => `<li>${m}</li>`).join('')}
+                                </ul>
+                            </div>`,
+                            confirmButtonText: "{{ __('messages.customer.menu.understand') }}",
+                        });
                     }
                 })();
-
-
             });
         </script>
 

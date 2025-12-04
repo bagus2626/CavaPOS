@@ -145,15 +145,15 @@ Route::middleware('setlocale')->group(function () {
         Route::post('/owner-verification/{id}/reject', [OwnerVerificationController::class, 'reject'])->name('owner-verification.reject');
         Route::get('/owner-verification/{id}/ktp-image', [OwnerVerificationController::class, 'showKtpImage'])->name('owner-verification.ktp-image');
 
-        Route::prefix('send-payment')->name('send-payment.')->group(function () {
-            Route::prefix('payout')->name('payout.')->group(function () {
-                Route::get('/', [PayoutController::class, 'index'])->name('index');
-                Route::post('get-data', [PayoutController::class, 'getData'])->name('get-data');
-                Route::get('validate-bank', [PayoutController::class, 'validateBankAccount'])->name('validate-bank');
-                Route::post('create', [PayoutController::class, 'createPayout'])->name('create');
-                Route::get('{businessId}/detail/{payoutId}', [PayoutController::class, 'getPayout'])->name('detail');
-            });
-        });
+        // Route::prefix('send-payment')->name('send-payment.')->group(function () {
+        //     Route::prefix('payout')->name('payout.')->group(function () {
+        //         Route::get('/', [PayoutController::class, 'index'])->name('index');
+        //         Route::post('get-data', [PayoutController::class, 'getData'])->name('get-data');
+        //         Route::get('validate-bank', [PayoutController::class, 'validateBankAccount'])->name('validate-bank');
+        //         Route::post('create', [PayoutController::class, 'createPayout'])->name('create');
+        //         Route::get('{businessId}/detail/{payoutId}', [PayoutController::class, 'getPayout'])->name('detail');
+        //     });
+        // });
         Route::post('/owner-verification/register-xendit-account', [OwnerVerificationController::class, 'registerXenditAccount'])->name('owner-verification.register-xendit-account');;
 
 
@@ -331,6 +331,7 @@ Route::middleware('setlocale')->group(function () {
                 Route::resource('promotions', OwnerPromotionController::class);
 
                 Route::prefix('stocks')->name('stocks.')->group(function () {
+                    Route::delete('/delete-stock/{id}', [OwnerStockController::class, 'deleteStock'])->name('delete-stock');
                     Route::resource('/', OwnerStockController::class);
 
                     Route::prefix('movements')->name('movements.')->group(function () {
@@ -372,6 +373,9 @@ Route::middleware('setlocale')->group(function () {
     //Partner
     Route::middleware(['auth', 'is_partner', 'partner.access'])->prefix('partner')->name('partner.')->group(function () {
         Route::get('/', [PartnerDashboardController::class, 'index'])->name('dashboard');
+
+        Route::get('timeline/messages', [PartnerDashboardController::class, 'timelineMessages'])
+            ->name('timeline.messages');
 
         Route::get('products/recipe/ingredients', [PartnerProductController::class, 'getRecipeIngredients'])
             ->name('products.recipe.ingredients');
