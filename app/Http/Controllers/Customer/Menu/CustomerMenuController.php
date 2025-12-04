@@ -467,6 +467,18 @@ class CustomerMenuController extends Controller
 
         $partner = User::findOrFail($data->partner_id);
 
+        if (!empty($partner->logo)) {
+            $logoPath = public_path('storage/' . $partner->logo);
+
+            if (file_exists($logoPath)) {
+                $img = Image::make($logoPath);
+                $img->greyscale(); // Ubah ke hitam putih
+
+                // Encode ke base64 data URL
+                $partner->logo_grayscale = $img->encode('data-url');
+            }
+        }
+
         $customPaper = [0, 0, 227, 600];
         $pdf = Pdf::loadView('pages.employee.cashier.pdf.receipt', [
             'data'     => $data,

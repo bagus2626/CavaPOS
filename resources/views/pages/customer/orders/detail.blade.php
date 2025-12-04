@@ -404,6 +404,43 @@
                 </div>
             @endif
         </div>
+        
+        {{-- WiFi Information --}}
+@if($order->payment_flag == 1 && $partner->is_wifi_shown && ($partner->user_wifi || $partner->pass_wifi))
+    <div class="mt-8">
+        <h2 class="text-sm font-semibold text-gray-800 mb-3">{{ __('WiFi Detail') }}</h2>
+        
+        <div class="border rounded-xl p-4 bg-gray-50">
+            <div class="space-y-3">
+                @if($partner->user_wifi)
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                            {{ __('Nama WiFi (SSID)') }}
+                        </p>
+                        <div class="bg-white rounded-lg px-3 py-2.5 border border-gray-200">
+                            <p class="text-sm font-semibold text-gray-900">
+                                {{ $partner->user_wifi }}
+                            </p>
+                        </div>
+                    </div>
+                @endif
+
+                @if($partner->pass_wifi)
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                            {{ __('Password WiFi') }}
+                        </p>
+                        <div class="bg-white rounded-lg px-3 py-2.5 border border-gray-200">
+                            <p class="text-sm font-semibold text-gray-900 font-mono">
+                                {{ $partner->pass_wifi }}
+                            </p>
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+@endif
 
         {{-- Aksi --}}
         <div class="mt-8 flex flex-wrap items-center justify-between gap-3">
