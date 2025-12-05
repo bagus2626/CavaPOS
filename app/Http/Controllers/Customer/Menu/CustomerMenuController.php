@@ -50,42 +50,188 @@ class CustomerMenuController extends Controller
         $this->recalculationService = $recalculationService;
     }
 
-    public function index($partner_slug, $table_code)
+    public function index(Request $request, $partner_slug, $table_code)
     {
         if (!Auth::guard('customer')->check() && !session()->has('guest_customer')) {
-            // Belum login, tampilkan pilihan login
             return view('pages.customer.auth.login_choice', compact('partner_slug', 'table_code'));
         }
 
-        // Sudah login / guest
         $customer = Auth::guard('customer')->user() ?? session('guest_customer');
 
-        // Ambil menu dari partner/table
         $table = Table::where('table_code', $table_code)
             ->whereHas('partner', fn($q) => $q->where('slug', $partner_slug))
             ->firstOrFail();
-        $partner = User::where('slug', $partner_slug)->first();
+
+        $partner = User::where('slug', $partner_slug)
+            ->where('role', 'partner')
+            ->firstOrFail();
 
         $partner_products = PartnerProduct::with([
-            'category',
-            'parent_options.options',
-            'promotion' => function ($q) {
-                $q->activeToday();
-            },
-            'stock',
-            'parent_options.options.stock',
-        ])
+                'category',
+                'parent_options.options',
+                'promotion' => function ($q) {
+                    $q->activeToday();
+                },
+                'stock',
+                'parent_options.options.stock',
+            ])
             ->where('partner_id', $partner->id)
             ->where('is_active', 1)
             ->get();
 
-        $owner = Owner::where('id', $partner->owner_id)->first();
         $categories = Category::whereIn('id', $partner_products->pluck('category_id'))
             ->orderBy('category_order')
             ->get();
 
-        return view('pages.customer.menu.index', compact('table', 'customer', 'partner', 'partner_products', 'categories'));
+        $reorderItems    = [];
+        $reorderMessages = [];
+
+        if ($request->filled('reorder_order_id') && Auth::guard('customer')->check()) {
+            $reorderOrderId = $request->query('reorder_order_id');
+
+            $bookingOrder = BookingOrder::with([
+                    'order_details.order_detail_options.option',
+                ])
+                ->where('id', $reorderOrderId)
+                ->where('partner_id', $partner->id)
+                ->where('customer_id', $customer->id)
+                ->first();
+
+            if ($bookingOrder) {
+                foreach ($bookingOrder->order_details as $detail) {
+                    $product = $partner_products->firstWhere('id', $detail->partner_product_id);
+                    if (!$product) {
+                        $reorderMessages[] = __('messages.customer.menu.product_not_in_menu', [
+                            'name' => $detail->product_name
+                        ]);
+                        continue;
+                    }
+
+                    if ($product->quantity_available < 1 && !$product->always_available_flag) {
+                        $reorderMessages[] = __('messages.customer.menu.product_out_of_stock', [
+                            'name' => $product->name
+                        ]);
+                        continue;
+                    }
+
+                    $requestedOptions   = $detail->order_detail_options;
+                    $requestedOptionIds = $requestedOptions->pluck('option_id')->filter()->values();
+
+                    $validOptionIds      = [];
+                    $validOptions        = [];
+                    $unavailableOptNames = [];
+
+                    $allOptions = $product->parent_options
+                        ->flatMap(function ($po) {
+                            return $po->options;
+                        });
+
+                    foreach ($requestedOptionIds as $optId) {
+                        $opt = $allOptions->firstWhere('id', $optId);
+
+                        if (!$opt) {
+                            $unavailableOptNames[] =
+                                $requestedOptions->firstWhere('option_id', $optId)->option->name
+                                ?? 'Opsi lama';
+                            continue;
+                        }
+
+                        if ($opt->quantity_available < 1 && !$opt->always_available_flag) {
+                            $unavailableOptNames[] = $opt->name;
+                            continue;
+                        }
+
+                        $validOptionIds[] = $optId;
+                        $validOptions[]   = $opt;
+                    }
+
+                    if ($requestedOptionIds->count() > 0 && count($validOptionIds) === 0) {
+                        $reorderMessages[] = __('messages.customer.menu.options_all_unavailable', [
+                            'name' => $product->name
+                        ]);
+                        continue;
+                    }
+
+                    if (count($unavailableOptNames) > 0 && count($validOptionIds) > 0) {
+                        $reorderMessages[] = __('messages.customer.menu.options_partial_unavailable', [
+                            'name'    => $product->name,
+                            'options' => implode(', ', $unavailableOptNames)
+                        ]);
+                    }
+
+                    $requestedQty = (int) ($detail->quantity ?? $detail->qty ?? 1);
+                    if ($requestedQty < 1) {
+                        $requestedQty = 1;
+                    }
+
+                    if ($product->always_available_flag) {
+                        $maxQtyByProduct = PHP_INT_MAX;
+                    } else {
+                        $maxQtyByProduct = (int) floor($product->quantity_available);
+                    }
+
+                    $maxQtyByOptions = PHP_INT_MAX;
+
+                    foreach ($validOptions as $opt) {
+                        if ($opt->always_available_flag) {
+                            continue;
+                        }
+
+                        $optAvail = (int) floor($opt->quantity_available);
+
+                        if ($optAvail < 0) {
+                            $optAvail = 0;
+                        }
+
+                        $maxQtyByOptions = min($maxQtyByOptions, $optAvail);
+                    }
+
+                    $effectiveAvailable = min($maxQtyByProduct, $maxQtyByOptions);
+
+                    if ($effectiveAvailable < 1) {
+                        $reorderMessages[] = __('messages.customer.menu.options_insufficient_stock', [
+                            'name' => $product->name
+                        ]);
+                        continue;
+                    }
+
+                    if ($effectiveAvailable < $requestedQty) {
+                        $reorderMessages[] = __('messages.customer.menu.qty_reduced', [
+                            'name' => $product->name,
+                            'from' => $requestedQty,
+                            'to'   => $effectiveAvailable
+                        ]);
+                        $finalQty = $effectiveAvailable;
+                    } else {
+                        $finalQty = $requestedQty;
+                    }
+
+                    $reorderItems[] = [
+                        'product_id' => $product->id,
+                        'option_ids' => $validOptionIds,
+                        'qty'        => max(1, (int) $finalQty),
+                        'note'       => $detail->note ?? '',
+                    ];
+                }
+            } else {
+                // kalau order tidak ditemukan / bukan milik user ini
+                $reorderMessages[] = 'Pesanan yang dipilih tidak dapat dimuat ulang.';
+            }
+        }
+
+        return view('pages.customer.menu.index', [
+            'table'           => $table,
+            'customer'        => $customer,
+            'partner'         => $partner,
+            'partner_products'=> $partner_products,
+            'categories'      => $categories,
+            'partner_slug'    => $partner_slug,
+            'table_code'      => $table_code,
+            'reorderItems'    => $reorderItems,
+            'reorderMessages' => $reorderMessages,
+        ]);
     }
+
 
     public function checkout(Request $request, $partner_slug, $table_code)
     {
@@ -214,7 +360,7 @@ class CustomerMenuController extends Controller
 
             // test by qris (hapus kemudian)
             if ($request->payment_method === 'QRIS') {
-                $booking_order->order_status = 'UNPAID';
+                $booking_order->order_status = 'PAYMENT';
                 $booking_order->payment_method = 'QRIS';
 
                 $payment = OrderPayment::create([
@@ -259,7 +405,7 @@ class CustomerMenuController extends Controller
                     "amount" => $payment->paid_amount ?? 0,
                     "given_names" => $request->order_name ?? "unknow",
                     "description" => "Invoice QRIS",
-                    "invoice_duration" => 60,
+                    "invoice_duration" => 600,
                     "customer" => [
                         "given_names" => $customer ? $customer->name : $request->order_name,
                         "email" => $customer ? $customer->email : "customer@example.com",
@@ -642,11 +788,8 @@ class CustomerMenuController extends Controller
                 $subtitle = 'Status pesanan tidak dikenal.';
         }
 
-        // ====== QR CODE 2D UNTUK KASIR ======
-        // Data yang mau di-encode ke QR (bisa kamu sesuaikan formatnya)
         $qrPayload = $order->booking_order_code;
 
-        // Generate PNG QR, lalu jadikan base64 supaya gampang ditaruh di <img>
         $qrPngBase64 = DNS2D::getBarcodePNG($qrPayload, 'QRCODE', 6, 6);
         // =====================================
 
@@ -666,32 +809,44 @@ class CustomerMenuController extends Controller
     {
         $customer = Auth::guard('customer')->user();
 
-        // Hanya customer login yang boleh akses
         if (!$customer || !$customer->id) {
             abort(403, 'Maaf, anda tidak bisa mengakses halaman ini.');
         }
 
-        // Ambil outlet/partner
         $partner = User::where('slug', $partner_slug)
             ->where('role', 'partner')
             ->firstOrFail();
 
-        // Ambil meja (opsional: validasi memang milik partner ini)
         $table = Table::where('table_code', $table_code)
             ->where('partner_id', $partner->id)
             ->firstOrFail();
 
-        // Ambil riwayat order milik customer ini di outlet ini
         $order_history = BookingOrder::with([
                 'order_details.order_detail_options.option',
                 'order_details.partnerProduct',
                 'payment',
                 'table',
+                'last_xendit_invoice'
             ])
             ->where('partner_id', $partner->id)
             ->where('customer_id', $customer->id)
             ->orderBy('created_at', 'desc')
             ->paginate(10);
+        
+        if ($request->ajax()) {
+            $view = view('pages.customer.orders.partials._order-cards', [
+                'orderHistory' => $order_history,
+                'partner'      => $partner,
+                'table'        => $table,
+                'partner_slug' => $partner_slug,
+                'table_code'   => $table_code,
+            ])->render();
+
+            return response()->json([
+                'html'          => $view,
+                'next_page_url' => $order_history->nextPageUrl(),
+            ]);
+        }
 
         return view('pages.customer.orders.histories', [
             'partner'       => $partner,
@@ -702,5 +857,6 @@ class CustomerMenuController extends Controller
             'table_code'    => $table_code,
         ]);
     }
+
 
 }

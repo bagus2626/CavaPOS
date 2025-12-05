@@ -283,15 +283,29 @@ class OwnerListController extends Controller
      */
     private function getProductsStatistics($outletId): array
     {
+        // Count out of stock products
+        $products = PartnerProduct::where('partner_id', $outletId)
+            ->where('always_available_flag', 0)
+            ->with(['stock'])
+            ->get();
+
+        $outOfStockCount = 0;
+
+        foreach ($products as $product) {
+            // Use the model's accessor to determine if out of stock
+            $availableQty = $product->quantity_available ?? 0;
+
+            if ($availableQty <= 0) {
+                $outOfStockCount++;
+            }
+        }
+
         return [
             'totalProducts' => PartnerProduct::where('partner_id', $outletId)->count(),
             'activeProducts' => PartnerProduct::where('partner_id', $outletId)
                 ->where('is_active', 1)
                 ->count(),
-            'outOfStockProducts' => PartnerProduct::where('partner_id', $outletId)
-                ->where('quantity', 0)
-                ->where('always_available_flag', 0)
-                ->count(),
+            'outOfStockProducts' => $outOfStockCount,
             'totalCategories' => PartnerProduct::where('partner_id', $outletId)
                 ->distinct('category_id')
                 ->count('category_id'),

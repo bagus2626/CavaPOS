@@ -201,6 +201,7 @@
 
 
         function showModal(type, id) {
+            console.log(type, id);
             switch (type) {
                 case "create-split-rules":
                     $(`#createDisbursementModal`).modal("show");

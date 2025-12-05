@@ -369,7 +369,7 @@ class CashierTransactionController extends Controller
                     "amount" => $payment->paid_amount ?? 0,
                     "given_names" => $request->order_name ?? "unknow",
                     "description" => "Invoice QRIS",
-                    "invoice_duration" => 60,
+                    "invoice_duration" => 600,
                     "customer" => [
                         "given_names" => $request->order_name ?? "unknow",
                         "email" => "example@example.com",
@@ -658,216 +658,276 @@ class CashierTransactionController extends Controller
     /**
      * Check stock availability in real-time sebelum checkout
      */
-public function checkStockRealtime(Request $request)
-{
-    try {
-        Log::info('Stock check request received', [
-            'items' => $request->input('items', [])
-        ]);
+    public function checkStockRealtime(Request $request)
+    {
+        try {
+            Log::info('Stock check request received', [
+                'items' => $request->input('items', [])
+            ]);
 
-        $items = $request->input('items', []);
-        
-        if (empty($items)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Tidak ada item untuk dicek',
-                'unavailable_items' => []
-            ], 400);
-        }
-
-        $unavailable = [];
-
-        foreach ($items as $item) {
-            $productId = data_get($item, 'product_id');
-            $optionIds = data_get($item, 'option_ids', []);
-            $qty = (int) data_get($item, 'qty', 1);
-
-            if (!$productId) {
-                Log::warning('Product ID missing in item', ['item' => $item]);
-                continue;
+            $items = $request->input('items', []);
+            
+            if (empty($items)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak ada item untuk dicek',
+                    'unavailable_items' => []
+                ], 400);
             }
 
-            // ===== CEK PRODUK UTAMA =====
-            try {
-                $product = PartnerProduct::with(['stock', 'recipes.stock'])
-                    ->find($productId);
+            $unavailable = [];
 
-                if (!$product) {
-                    Log::warning('Product not found', ['product_id' => $productId]);
+            foreach ($items as $item) {
+                $productId = data_get($item, 'product_id');
+                $optionIds = data_get($item, 'option_ids', []);
+                $qty = (int) data_get($item, 'qty', 1);
+
+                if (!$productId) {
+                    Log::warning('Product ID missing in item', ['item' => $item]);
                     continue;
                 }
 
-                // Skip jika always available
-                if ($product->always_available_flag == 1) {
-                    continue;
-                }
+                // ===== CEK PRODUK UTAMA =====
+                try {
+                    $product = PartnerProduct::with(['stock', 'recipes.stock'])
+                        ->find($productId);
 
-                if ($product->stock_type === 'direct') {
-                    $stock = $product->stock;
-                    
-                    if ($stock) {
-                        $available = (int)($stock->quantity ?? 0) - (int)($stock->quantity_reserved ?? 0);
-
-                        if ($available < $qty) {
-                            $unavailable[] = [
-                                'name' => $product->name,
-                                'type' => 'Produk',
-                                'requested' => $qty,
-                                'available' => max(0, $available)
-                            ];
-                        }
-                    }
-                } elseif ($product->stock_type === 'linked') {
-                    // Hitung manual untuk linked stock
-                    $recipes = PartnerProductRecipe::where('partner_product_id', $productId)->get();
-                    
-                    if ($recipes->isEmpty()) {
+                    if (!$product) {
+                        Log::warning('Product not found', ['product_id' => $productId]);
                         continue;
                     }
 
-                    $minAvailable = PHP_INT_MAX;
-                    
-                    foreach ($recipes as $recipe) {
-                        $ingredientStock = Stock::find($recipe->stock_id);
-                        
-                        if (!$ingredientStock) {
-                            $minAvailable = 0;
-                            break;
-                        }
-
-                        $stockAvailable = (int)($ingredientStock->quantity ?? 0) - (int)($ingredientStock->quantity_reserved ?? 0);
-                        $quantityPerUnit = (float)$recipe->quantity_used;
-                        
-                        if ($quantityPerUnit > 0) {
-                            $canMake = floor($stockAvailable / $quantityPerUnit);
-                            $minAvailable = min($minAvailable, $canMake);
-                        } else {
-                            $minAvailable = 0;
-                            break;
-                        }
+                    // Skip jika always available
+                    if ($product->always_available_flag == 1) {
+                        continue;
                     }
 
-                    $available = ($minAvailable === PHP_INT_MAX) ? 0 : $minAvailable;
-
-                    if ($available < $qty) {
-                        $unavailable[] = [
-                            'name' => $product->name,
-                            'type' => 'Produk (Linked)',
-                            'requested' => $qty,
-                            'available' => max(0, $available)
-                        ];
-                    }
-                }
-            } catch (\Exception $e) {
-                Log::error('Error checking product stock', [
-                    'product_id' => $productId,
-                    'error' => $e->getMessage()
-                ]);
-            }
-
-            // ===== CEK OPSI PRODUK =====
-            if (!empty($optionIds)) {
-                try {
-                    $options = PartnerProductOption::with(['stock', 'recipes.stock'])
-                        ->whereIn('id', (array)$optionIds)
-                        ->get();
-
-                    foreach ($options as $opt) {
-                        // Skip jika always available
-                        if ($opt->always_available_flag == 1) {
-                            continue;
-                        }
-
-                        if ($opt->stock_type === 'direct') {
-                            $stock = $opt->stock;
-                            
-                            if ($stock) {
-                                $available = (int)($stock->quantity ?? 0) - (int)($stock->quantity_reserved ?? 0);
-
-                                if ($available < $qty) {
-                                    $unavailable[] = [
-                                        'name' => $opt->name,
-                                        'type' => 'Opsi',
-                                        'requested' => $qty,
-                                        'available' => max(0, $available)
-                                    ];
-                                }
-                            }
-                        } elseif ($opt->stock_type === 'linked') {
-                            $recipes = PartnerProductOptionsRecipe::where('partner_product_option_id', $opt->id)->get();
-                            
-                            if ($recipes->isEmpty()) {
-                                continue;
-                            }
-
-                            $minAvailable = PHP_INT_MAX;
-                            
-                            foreach ($recipes as $recipe) {
-                                $ingredientStock = Stock::find($recipe->stock_id);
-                                
-                                if (!$ingredientStock) {
-                                    $minAvailable = 0;
-                                    break;
-                                }
-
-                                $stockAvailable = (int)($ingredientStock->quantity ?? 0) - (int)($ingredientStock->quantity_reserved ?? 0);
-                                $quantityPerUnit = (float)$recipe->quantity_used;
-                                
-                                if ($quantityPerUnit > 0) {
-                                    $canMake = floor($stockAvailable / $quantityPerUnit);
-                                    $minAvailable = min($minAvailable, $canMake);
-                                } else {
-                                    $minAvailable = 0;
-                                    break;
-                                }
-                            }
-
-                            $available = ($minAvailable === PHP_INT_MAX) ? 0 : $minAvailable;
+                    if ($product->stock_type === 'direct') {
+                        $stock = $product->stock;
+                        
+                        if ($stock) {
+                            $available = (int)($stock->quantity ?? 0) - (int)($stock->quantity_reserved ?? 0);
 
                             if ($available < $qty) {
                                 $unavailable[] = [
-                                    'name' => $opt->name,
-                                    'type' => 'Opsi (Linked)',
+                                    'name' => $product->name,
+                                    'type' => 'Produk',
                                     'requested' => $qty,
                                     'available' => max(0, $available)
                                 ];
                             }
                         }
+                    } elseif ($product->stock_type === 'linked') {
+                        // Hitung manual untuk linked stock
+                        $recipes = PartnerProductRecipe::where('partner_product_id', $productId)->get();
+                        
+                        if ($recipes->isEmpty()) {
+                            continue;
+                        }
+
+                        $minAvailable = PHP_INT_MAX;
+                        
+                        foreach ($recipes as $recipe) {
+                            $ingredientStock = Stock::find($recipe->stock_id);
+                            
+                            if (!$ingredientStock) {
+                                $minAvailable = 0;
+                                break;
+                            }
+
+                            $stockAvailable = (int)($ingredientStock->quantity ?? 0) - (int)($ingredientStock->quantity_reserved ?? 0);
+                            $quantityPerUnit = (float)$recipe->quantity_used;
+                            
+                            if ($quantityPerUnit > 0) {
+                                $canMake = floor($stockAvailable / $quantityPerUnit);
+                                $minAvailable = min($minAvailable, $canMake);
+                            } else {
+                                $minAvailable = 0;
+                                break;
+                            }
+                        }
+
+                        $available = ($minAvailable === PHP_INT_MAX) ? 0 : $minAvailable;
+
+                        if ($available < $qty) {
+                            $unavailable[] = [
+                                'name' => $product->name,
+                                'type' => 'Produk (Linked)',
+                                'requested' => $qty,
+                                'available' => max(0, $available)
+                            ];
+                        }
                     }
                 } catch (\Exception $e) {
-                    Log::error('Error checking option stock', [
-                        'option_ids' => $optionIds,
+                    Log::error('Error checking product stock', [
+                        'product_id' => $productId,
                         'error' => $e->getMessage()
                     ]);
+                }
+
+                // ===== CEK OPSI PRODUK =====
+                if (!empty($optionIds)) {
+                    try {
+                        $options = PartnerProductOption::with(['stock', 'recipes.stock'])
+                            ->whereIn('id', (array)$optionIds)
+                            ->get();
+
+                        foreach ($options as $opt) {
+                            // Skip jika always available
+                            if ($opt->always_available_flag == 1) {
+                                continue;
+                            }
+
+                            if ($opt->stock_type === 'direct') {
+                                $stock = $opt->stock;
+                                
+                                if ($stock) {
+                                    $available = (int)($stock->quantity ?? 0) - (int)($stock->quantity_reserved ?? 0);
+
+                                    if ($available < $qty) {
+                                        $unavailable[] = [
+                                            'name' => $opt->name,
+                                            'type' => 'Opsi',
+                                            'requested' => $qty,
+                                            'available' => max(0, $available)
+                                        ];
+                                    }
+                                }
+                            } elseif ($opt->stock_type === 'linked') {
+                                $recipes = PartnerProductOptionsRecipe::where('partner_product_option_id', $opt->id)->get();
+                                
+                                if ($recipes->isEmpty()) {
+                                    continue;
+                                }
+
+                                $minAvailable = PHP_INT_MAX;
+                                
+                                foreach ($recipes as $recipe) {
+                                    $ingredientStock = Stock::find($recipe->stock_id);
+                                    
+                                    if (!$ingredientStock) {
+                                        $minAvailable = 0;
+                                        break;
+                                    }
+
+                                    $stockAvailable = (int)($ingredientStock->quantity ?? 0) - (int)($ingredientStock->quantity_reserved ?? 0);
+                                    $quantityPerUnit = (float)$recipe->quantity_used;
+                                    
+                                    if ($quantityPerUnit > 0) {
+                                        $canMake = floor($stockAvailable / $quantityPerUnit);
+                                        $minAvailable = min($minAvailable, $canMake);
+                                    } else {
+                                        $minAvailable = 0;
+                                        break;
+                                    }
+                                }
+
+                                $available = ($minAvailable === PHP_INT_MAX) ? 0 : $minAvailable;
+
+                                if ($available < $qty) {
+                                    $unavailable[] = [
+                                        'name' => $opt->name,
+                                        'type' => 'Opsi (Linked)',
+                                        'requested' => $qty,
+                                        'available' => max(0, $available)
+                                    ];
+                                }
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        Log::error('Error checking option stock', [
+                            'option_ids' => $optionIds,
+                            'error' => $e->getMessage()
+                        ]);
+                    }
+                }
+            }
+
+            Log::info('Stock check completed', [
+                'unavailable_count' => count($unavailable),
+                'unavailable_items' => $unavailable
+            ]);
+
+            return response()->json([
+                'success' => empty($unavailable),
+                'unavailable_items' => $unavailable,
+                'message' => empty($unavailable)
+                    ? 'Semua stok tersedia'
+                    : 'Beberapa item tidak tersedia'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Stock check fatal error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->all()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memeriksa stok: ' . $e->getMessage(),
+                'unavailable_items' => []
+            ], 500);
+        }
+    }
+
+    public function softDeleteUnpaidOrder($id)
+    {
+        $order = BookingOrder::findOrFail($id);
+
+        // Kalau mau dibatasi hanya order UNPAID, bisa aktifkan ini:
+        if (!in_array($order->order_status, ['UNPAID', 'EXPIRED'])) {
+            return back()->with('error', 'Order ini tidak dapat dihapus.');
+        }
+
+        if (method_exists($order, 'trashed') && $order->trashed()) {
+            return back()->with('info', 'Order ini sudah dihapus sebelumnya.');
+        }
+
+        $order_details = OrderDetail::where('booking_order_id', $order->id)->get();
+        foreach ($order_details as $detail) {
+            $partner_product = PartnerProduct::findOrFail($detail->partner_product_id);
+            if ($partner_product && $partner_product->always_available_flag === 0) {
+                if ($partner_product->stock_type === 'direct') {
+                    $stock = Stock::where('partner_product_id', $partner_product->id)
+                        ->whereNull('partner_product_option_id')
+                        ->first();
+                    $stock->quantity_reserved -= ($detail->quantity);
+                    $stock->save();
+                } else {
+                    $partner_recipes = PartnerProductRecipe::where('partner_product_id', $partner_product->id)->get();
+                    foreach ($partner_recipes as $pr) {
+                        $stock = Stock::findOrFail($pr->stock_id);
+                        $stock->quantity_reserved -= ($detail->quantity * $pr->quantity_used);
+                        $stock->save();
+                    }
+                }
+            }
+            
+            $order_detail_options = OrderDetailOption::where('order_detail_id', $detail->id)->get();
+            if ($order_detail_options) {
+                foreach ($order_detail_options as $option) {
+                    $partner_option = PartnerProductOption::findOrFail($option->option_id);
+                    if ($partner_option && $partner_option->always_available_flag === 0) {
+                        if ($partner_option->stock_type === 'direct') {
+                            $stockOption = Stock::where('partner_product_option_id', $partner_option->id)->first();
+                            $stockOption->quantity_reserved -= $detail->quantity;
+                            $stockOption->save();
+                        } else {
+                            $partner_option_recipes = PartnerProductOptionsRecipe::where('partner_product_option_id', $partner_option->id)->get();
+                            foreach ($partner_option_recipes as $por) {
+                                $stockOption = Stock::findOrFail($por->stock_id);
+                                $stockOption->quantity_reserved -= ($detail->quantity * $por->quantity_used);
+                                $stockOption->save();
+                            }
+                        }
+                    }
                 }
             }
         }
 
-        Log::info('Stock check completed', [
-            'unavailable_count' => count($unavailable),
-            'unavailable_items' => $unavailable
-        ]);
+        $order->delete(); // soft delete (set deleted_at)
 
-        return response()->json([
-            'success' => empty($unavailable),
-            'unavailable_items' => $unavailable,
-            'message' => empty($unavailable)
-                ? 'Semua stok tersedia'
-                : 'Beberapa item tidak tersedia'
-        ]);
-
-    } catch (\Exception $e) {
-        Log::error('Stock check fatal error', [
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
-            'request' => $request->all()
-        ]);
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Gagal memeriksa stok: ' . $e->getMessage(),
-            'unavailable_items' => []
-        ], 500);
+        return back()->with('success', 'Order berhasil dihapus.');
     }
-}
 }

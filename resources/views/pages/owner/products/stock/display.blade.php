@@ -3,13 +3,13 @@
   <div class="filter-tabs-container">
     <ul class="nav nav-tabs" id="stockFilterTabs">
       <li class="nav-item">
-        <a class="nav-link active" href="#" data-filter-type="all">Semua Stok</a>
+        <a class="nav-link active" href="#" data-filter-type="all">{{ __('messages.owner.products.stocks.all_stock') }}</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#" data-filter-type="master">Bahan Baku</a>
+        <a class="nav-link" href="#" data-filter-type="linked">{{ __('messages.owner.products.stocks.raw_materials') }}</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#" data-filter-type="partner">Produk</a>
+        <a class="nav-link" href="#" data-filter-type="direct">{{ __('messages.owner.products.stocks.products') }}</a>
       </li>
     </ul>
   </div>
@@ -17,7 +17,7 @@
   <div class="ms-auto pt-2 pt-md-0">
     <a href="{{ route('owner.user-owner.stocks.movements.index') }}" class="btn btn-outline-primary btn-movements">
       <i class="fas fa-history me-1"></i>
-      Riwayat Pergerakan
+      {{ __('messages.owner.products.stocks.movement_history') }}
     </a>
   </div>
 </div>
@@ -26,12 +26,11 @@
   <ul class="nav nav-tabs" id="stockPartnerFilterTabs">
     <li class="nav-item">
       <a class="nav-link font-weight-normal active" id="filter-partner-product-tab" href="#"
-        data-filter-partner-type="product">Produk
-        Utama</a>
+        data-filter-partner-type="product">{{ __('messages.owner.products.stocks.main_product') }}</a>
     </li>
     <li class="nav-item">
       <a class="nav-link font-weight-normal" id="filter-partner-option-tab" href="#"
-        data-filter-partner-type="option">Opsi Produk</a>
+        data-filter-partner-type="option">{{ __('messages.owner.products.stocks.product_opt') }}</a>
     </li>
   </ul>
 </div>
@@ -41,19 +40,20 @@
     <thead>
       <tr>
         <th>#</th>
-        <th>Stock Code</th>
-        <th>Stock Name</th>
-        <th>Stock/Quantity</th>
-        <th>Unit</th>
-        <th>Last Price/Unit</th>
+        <th>{{ __('messages.owner.products.stocks.stock_code') }}</th>
+        <th>{{ __('messages.owner.products.stocks.stock_name') }}</th>
+        <th>{{ __('messages.owner.products.stocks.stock_quantity') }}</th>
+        <th>{{ __('messages.owner.products.stocks.unit') }}</th>
+        <th>{{ __('messages.owner.products.stocks.last_price_unit') }}</th>
         {{-- <th>Description</th> --}}
-        <th class="text-nowrap">Actions</th>
+        <th class="text-nowrap">{{ __('messages.owner.products.stocks.actions') }}</th>
       </tr>
     </thead>
     <tbody>
       @foreach ($stocks as $index => $stock)
 
         <tr data-type="{{ $stock->type }}"
+          data-stock_type="{{ $stock->stock_type }}"
           data-partner-type="{{ $stock->partner_product_id && !$stock->partner_product_option_id ? 'product' : ($stock->partner_product_id && $stock->partner_product_option_id ? 'option' : 'none') }}">
           <td class="text-muted">{{ $index + 1 }}</td>
           <td class="mono">{{ $stock->stock_code }}</td>
@@ -64,18 +64,20 @@
             @if($stock->displayUnit)
               {{ $stock->displayUnit->unit_name }}
             @else
-              <span class="text-muted small">(Unit Dasar)</span>
+              <span class="text-muted small">({{ __('messages.owner.products.stocks.base_unit') }})</span>
             @endif
           </td>
 
           <td>{{ $stock->last_price_per_unit }}</td>
           {{-- <td>{{ $stock->description ?? '-' }}</td> --}}
           <td class="text-nowrap">
-            <a href="{{ route('owner.user-owner.stocks.show', $stock->id) }}"
+            {{-- <a href="{{ route('owner.user-owner.stocks.show', $stock->id) }}"
               class="btn btn-sm btn-outline-choco me-1">Detail</a>
             <a href="{{ route('owner.user-owner.stocks.edit', $stock->id) }}"
-              class="btn btn-sm btn-outline-choco me-1">Edit</a>
-            <button onclick="deleteStock({{ $stock->id }})" class="btn btn-sm btn-soft-danger">Delete</button>
+              class="btn btn-sm btn-outline-choco me-1">{{ __('messages.owner.products.stocks.edit') }}</a> --}}
+            @if($stock->type === 'master')
+              <button onclick="deleteStock({{ $stock->id }})" class="btn btn-sm btn-soft-danger">{{ __('messages.owner.products.stocks.delete') }}</button>
+            @endif
           </td>
         </tr>
       @endforeach
@@ -128,7 +130,6 @@
   }
 </style>
 <script>
-  { { --Fungsi deleteStock Anda tetap sama(tidak diubah)-- } }
   function deleteStock(stockId) {
     Swal.fire({
       title: '{{ __('messages.owner.products.promotions.delete_confirmation_1') }}',
@@ -144,7 +145,7 @@
       if (result.isConfirmed) {
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = `/owner/user-owner/stocks/${stockId}`;
+        form.action = `/owner/user-owner/stocks/delete-stock/${stockId}`;
         form.style.display = 'none';
 
         const csrf = document.createElement('input');
@@ -176,16 +177,17 @@
     function applyFilters() {
       tableRows.forEach(row => {
         const rowType = row.getAttribute('data-type');
+        const stockType = row.getAttribute('data-stock_type');
         const rowPartnerType = row.getAttribute('data-partner-type');
 
         let show = false;
 
         if (currentMainFilter === 'all') {
           show = true;
-        } else if (currentMainFilter === 'master') {
-          show = (rowType === 'master');
-        } else if (currentMainFilter === 'partner') {
-          if (rowType === 'partner') {
+        } else if (currentMainFilter === 'linked') {
+          show = (stockType === 'linked');
+        } else if (currentMainFilter === 'direct') {
+          if (stockType === 'direct') {
             if (currentPartnerFilter === 'product') {
               show = (rowPartnerType === 'product');
             } else if (currentPartnerFilter === 'option') {
@@ -212,7 +214,7 @@
 
         currentMainFilter = this.getAttribute('data-filter-type');
 
-        if (currentMainFilter === 'partner') {
+        if (currentMainFilter === 'direct') {
           partnerFilterContainer.style.display = '';
 
           // Reset filter partner ke 'product'
