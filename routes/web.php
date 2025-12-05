@@ -54,7 +54,7 @@ use App\Http\Controllers\Owner\Verification\VerificationController;
 use App\Http\Controllers\PaymentGateway\Xendit\SubAccountController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use \App\Http\Controllers\Admin\MessageNotification\MessageController;
-
+use App\Http\Controllers\Owner\Report\StockReportController;
 
 Route::get('/set-language', function () {
     $locale = request('locale');
@@ -326,7 +326,11 @@ Route::middleware('setlocale')->group(function () {
                     Route::get('order-details/{id}', [SalesReportController::class, 'getOrderDetails'])->name('order-details');
                     Route::resource('sales', SalesReportController::class)->only(['index']);
 
-
+                    Route::prefix('stocks')->name('stocks.')->group(function () {
+                        Route::get('/', [StockReportController::class, 'index'])->name('index');
+                        Route::get('/{stock:stock_code}/history', [StockReportController::class, 'showStockHistory'])->name('history');
+                        Route::get('/export', [StockReportController::class, 'export'])->name('export');
+                    });
                 });
                 Route::resource('promotions', OwnerPromotionController::class);
 
