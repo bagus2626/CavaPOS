@@ -51,7 +51,7 @@
         </div>
 
         {{-- PERINGATAN JIKA PEMBAYARAN BELUM LUNAS --}}
-        @if(!$order->payment_flag && $payment && $payment->payment_status !== 'PAID')
+        @if(!$order->payment_flag && $payment && $payment->payment_status !== 'PAID' && $order->order_status !== 'PAYMENT')
             <div class="mt-4 rounded-xl border border-red-300 bg-red-100 px-4 py-3 text-sm">
                 <div class="flex items-start gap-3">
                     <div class="flex-1 space-y-2">
@@ -170,10 +170,26 @@
                     </div>
                 </div>
             </div>
+        @elseif ($order->order_status === 'PAYMENT')
+            @if ($order->last_xendit_invoice->invoice_url)
+                <div class="mt-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm">
+                    <div class="flex items-start gap-3">
+                        <div class="flex-1 space-y-2">
+                            <p class="font-semibold text-amber-900">
+                                {{ __('messages.customer.orders.detail.unpaid_warning') }}
+                            </p>
+                            <p class="text-xs md:text-sm text-amber-800">
+                                {{ __('messages.customer.orders.detail.please_continue_payment') }}
+                            </p>
+                            <a href="{{ $order->last_xendit_invoice->invoice_url }}"
+                                class="inline-flex items-center px-4 py-2 rounded-lg bg-choco text-sm text-white hover:bg-soft-choco">
+                                    {{ __('messages.customer.orders.detail.continue_payment') }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            @endif
         @endif
-
-
-
 
         {{-- Timeline Status --}}
         @php
