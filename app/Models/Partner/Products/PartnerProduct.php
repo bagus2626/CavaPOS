@@ -101,14 +101,6 @@ class PartnerProduct extends Model
         // 1. Logika untuk Linked Stock (Membaca Kolom Cache)
         if ($this->stock_type === 'linked') {
 
-            // // hapus kode ini jika sudah menkadlankan StockRecalculationService
-            // $cachedQty = (float) $this->available_linked_quantity;
-            // if ($cachedQty > 0) {
-            //     return $cachedQty;
-            // }
-            // return $recipeCalc->calculateLinkedQuantity($this);
-
-            // Ambil nilai dari kolom yang sudah dihitung dan disimpan
             return (float) $this->available_linked_quantity;
         }
 

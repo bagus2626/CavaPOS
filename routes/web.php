@@ -54,7 +54,7 @@ use App\Http\Controllers\Owner\Verification\VerificationController;
 use App\Http\Controllers\PaymentGateway\Xendit\SubAccountController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use \App\Http\Controllers\Admin\MessageNotification\MessageController;
-
+use App\Http\Controllers\Owner\Report\StockReportController;
 
 Route::get('/set-language', function () {
     $locale = request('locale');
@@ -292,6 +292,16 @@ Route::middleware('setlocale')->group(function () {
                 Route::resource('master-products', OwnerMasterProductController::class);
                 Route::get('outlet-products/get-master-products', [OwnerOutletProductController::class, 'getMasterProducts'])->name('outlet-products.get-master-products');
                 Route::resource('outlet-products', OwnerOutletProductController::class);
+
+                Route::get('outlet-products/recipe/ingredients', [OwnerOutletProductController::class, 'getRecipeIngredients'])
+                    ->name('outlet-products.recipe.ingredients');
+
+                Route::get('outlet-products/recipe/load', [OwnerOutletProductController::class, 'loadRecipe'])
+                    ->name('outlet-products.recipe.load');
+
+                Route::post('outlet-products/recipe/save', [OwnerOutletProductController::class, 'saveRecipe'])
+                    ->name('outlet-products.recipe.save');
+
                 Route::resource('products', OwnerProductController::class);
                 Route::post('/categories/reorder', [OwnerCategoryController::class, 'reorder'])->name('categories.reorder');
                 Route::resource('categories', OwnerCategoryController::class);
@@ -326,7 +336,13 @@ Route::middleware('setlocale')->group(function () {
                     Route::get('order-details/{id}', [SalesReportController::class, 'getOrderDetails'])->name('order-details');
                     Route::resource('sales', SalesReportController::class)->only(['index']);
 
+                    Route::prefix('stocks')->name('stocks.')->group(function () {
+                        Route::get('/', [StockReportController::class, 'index'])->name('index');
+                        Route::get('/{stock:stock_code}/movement', [StockReportController::class, 'showStockMovement'])->name('movement');
+                        Route::get('/export', [StockReportController::class, 'export'])->name('export');
 
+                        Route::get('/{stock:stock_code}/movement/export', [StockReportController::class, 'exportMovement'])->name('movement.export');
+                    });
                 });
                 Route::resource('promotions', OwnerPromotionController::class);
 
@@ -457,9 +473,10 @@ Route::middleware('setlocale')->group(function () {
     Route::prefix('customer')->name('customer.')->middleware('customer.access')->group(function () {
         Route::get('{partner_slug}/menu/{table_code}', [CustomerMenuController::class, 'index'])->name('menu.index')->middleware('throttle:10,1');
         Route::post('{partner_slug}/menu/{table_code}/check-stock', [CustomerMenuController::class, 'checkStockRealtime'])->name('menu.check-stock');
-        Route::post('{partner_slug}/checkout/{table_code}', [CustomerMenuController::class, 'checkout'])->name('menu.checkout')->middleware('throttle:3,1');
+        Route::post('{partner_slug}/checkout/{table_code}', [CustomerMenuController::class, 'checkout'])->name('menu.checkout')->middleware('throttle:30,1');
         Route::get('{partner_slug}/order-detail/{table_code}/{order_id}', [CustomerMenuController::class, 'orderDetail'])->name('orders.order-detail');
         Route::get('{partner_slug}/order-histories/{table_code}', [CustomerMenuController::class, 'getOrderHistory'])->name('orders.histories');
+        Route::post('{partner_slug}/unpaid-order/{order_id}', [CustomerMenuController::class, 'makeUnpaidOrder'])->name('orders.unpaid-order');
         Route::get('/orders/{id}/receipt', [CustomerMenuController::class, 'printReceipt'])->name('orders.receipt');
 
         Route::prefix('payment')->name('payment.')->group(function () {

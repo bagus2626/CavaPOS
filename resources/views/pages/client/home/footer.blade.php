@@ -24,21 +24,49 @@
                 
                 <!-- Company Section -->
                 <div class="text-center sm:text-left">
-                    <h4 class="font-poppins text-base md:text-lg font-semibold text-accent-light mb-4">Perusahaan</h4>
+                    <h4 class="font-poppins text-base md:text-lg font-semibold text-accent-light mb-4">
+                        {{ __('messages.home.footer_company') }}
+                    </h4>
                     <ul class="space-y-2">
-                        <li><a href="#" class="text-cream/80 hover:text-accent-light transition-colors text-sm md:text-base">Tentang</a></li>
-                        <li><a href="#" class="text-cream/80 hover:text-accent-light transition-colors text-sm md:text-base">Karir</a></li>
-                        <li><a href="#" class="text-cream/80 hover:text-accent-light transition-colors text-sm md:text-base">Kontak</a></li>
+                        <li>
+                            <a href="#" class="text-cream/80 hover:text-accent-light transition-colors text-sm md:text-base">
+                            {{ __('messages.home.footer_about') }}
+                        </a>
+                    </li>
+                        <li>
+                            <a href="#" class="text-cream/80 hover:text-accent-light transition-colors text-sm md:text-base">
+                            {{ __('messages.home.footer_careers') }}
+                        </a>
+                    </li>
+                        <li>
+                            <a href="#" class="text-cream/80 hover:text-accent-light transition-colors text-sm md:text-base">
+                            {{ __('messages.home.footer_contact') }}
+                        </a>
+                    </li>
                     </ul>
                 </div>
                 
                 <!-- Services Section -->
                 <div class="text-center sm:text-left">
-                    <h4 class="font-poppins text-base md:text-lg font-semibold text-accent-light mb-4">Layanan</h4>
+                    <h4 class="font-poppins text-base md:text-lg font-semibold text-accent-light mb-4">
+                        {{ __('messages.home.footer_service') }}
+                    </h4>
                     <ul class="space-y-2">
-                        <li><a href="#" class="text-cream/80 hover:text-accent-light transition-colors text-sm md:text-base">Dukungan</a></li>
-                        <li><a href="#" class="text-cream/80 hover:text-accent-light transition-colors text-sm md:text-base">Pelatihan</a></li>
-                        <li><a href="#" class="text-cream/80 hover:text-accent-light transition-colors text-sm md:text-base">Konsultasi</a></li>
+                        <li>
+                            <a href="#" class="text-cream/80 hover:text-accent-light transition-colors text-sm md:text-base">
+                            {{ __('messages.home.footer_support') }}
+                        </a>
+                    </li>
+                        <li>
+                            <a href="#" class="text-cream/80 hover:text-accent-light transition-colors text-sm md:text-base">
+                            {{ __('messages.home.footer_training') }}
+                        </a>
+                    </li>
+                        <li>
+                            <a href="#" class="text-cream/80 hover:text-accent-light transition-colors text-sm md:text-base">
+                            {{ __('messages.home.footer_consultation') }}
+                        </a>
+                    </li>
                     </ul>
                 </div>
             </div>

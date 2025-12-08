@@ -80,12 +80,12 @@
             <div class="flex flex-col" id="menu-container">
                 {{-- Segmen Hot Products --}}
                 @if($hotProducts->count())
-                    <div class="hot-products-group bg-amber-50 border-b border-amber-200 pb-2">
-                        <p class="px-4 pt-3 mb-2 text-sm font-semibold text-amber-800 flex items-center gap-2">
+                    <div class="hot-products-group bg-choco border-b border-amber-200 pb-2 rounded-xl mb-3 mx-2">
+                        <p class="px-4 pt-3 mb-2 text-sm font-semibold text-white flex items-center gap-2">
                             🔥 <span>{{ __('messages.customer.menu.hot_products') }}</span>
                         </p>
 
-                        <div class="flex flex-col">
+                        <div class="flex flex-col mx-3">
                             @foreach($hotProducts as $product)
                                 @php
                                     $firstImage = $product->pictures[0]['path'] ?? null;
@@ -120,13 +120,14 @@
 
                                 <div
                                     @class([
-                                        'menu-item menu-item-hot bg-white flex flex-row transition hover:shadow-lg border border-amber-100 rounded-xl px-3',
+                                        'menu-item menu-item-hot bg-amber-50 flex flex-row transition hover:shadow-lg rounded-xl px-3 mb-2 shadow shadow-md shadow-orange-400',
                                         'grayscale' => $product->quantity_available < 1 && $product->always_available_flag == false,
                                     ])
                                     data-category="{{ $product->category_id }}"
+                                    data-product-id="{{ $product->id }}"   {{-- ← TAMBAHAN INI --}}
                                 >
                                     {{-- Gambar + badge PROMO + badge HOT --}}
-                                    <div class="w-28 h-28 flex-shrink-0 rounded-lg m-2 overflow-hidden relative">
+                                    <div class="w-24 h-24 flex-shrink-0 rounded-lg m-2 overflow-hidden relative ">
                                         @if($firstImage)
                                             <img src="{{ asset($firstImage) }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
                                         @else
@@ -255,8 +256,8 @@
                                         'grayscale' => $product->quantity_available < 1 && $product->always_available_flag == false,
                                     ])
                                     data-category="{{ $product->category_id }}"
+                                    data-product-id="{{ $product->id }}"   {{-- ← TAMBAHAN INI --}}
                                 >
-
                                     {{-- Gambar Produk / Placeholder + BADGE --}}
                                     <div class="w-28 h-28 flex-shrink-0 rounded-lg m-2 rounded-bl-lg overflow-hidden relative">
                                         @if($firstImage)
@@ -776,7 +777,7 @@
                     infoDiv.appendChild(nameEl);
 
                     const descEl = document.createElement('p');
-                    descEl.classList.add('text-sm', 'text-gray-500', 'line-clamp-2');
+                    descEl.classList.add('text-sm', 'text-gray-500', 'line-clamp-3');
                     descEl.textContent = productData.description || '';
                     infoDiv.appendChild(descEl);
 
@@ -803,6 +804,19 @@
 
                     // === parent options ===
                     const parentOptions = productData.parent_options || [];
+                    const chooseOptEl = document.getElementById('choose-option');
+                    if (chooseOptEl) {
+                        if (parentOptions.length === 0) {
+                            chooseOptEl.classList.add('hidden');
+                        } else {
+                            chooseOptEl.classList.remove('hidden');
+                        }
+                    }
+                    //hidupin tombol save ketika gaada option sama sekali
+                    if (parentOptions.length === 0) {
+                        saveModalBtn.disabled = false;
+                        saveModalBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
                     parentOptions.forEach(po => {
                         const poDiv = document.createElement('div');
                         poDiv.classList.add('mb-2');
@@ -917,6 +931,8 @@
                     noteWrap.appendChild(noteHint);
                     modalContent.appendChild(noteWrap);
 
+                    calcModalTotal(productData);
+
                     // tampilkan modal
                     modal.classList.add('show');
                     lockBodyScroll();
@@ -1027,20 +1043,35 @@
 
                 // PLUS: jika ada parent_options → buka modal; kalau tidak → tambah line item tanpa opsi ([])
                 document.querySelectorAll('.plus-btn').forEach(button => {
-                    button.addEventListener('click', function() {
+                    button.addEventListener('click', function (e) {
+                        e.stopPropagation(); // jangan trigger click card
+
                         const productId = parseInt(this.dataset.id);
                         const productData = productsData.find(p => p.id === productId);
+                        if (!productData) return;
 
-                        if (productData && (productData.parent_options || []).length > 0) {
-                            currentProductId = productId;
-                            selectedOptions = [];
-                            showModal(productData);
-                        } else {
-                            // langsung tambah kombinasi tanpa opsi
-                            addToCart(productId, []);
-                            updateProductBadge(productId);
-                            printCart('Cart (no-options +):');
+                        currentProductId = productId;
+                        selectedOptions = []; // reset pilihan
+                        showModal(productData); // modal akan menampilkan options kalau ada
+                    });
+                });
+
+                document.querySelectorAll('.menu-item').forEach(card => {
+                    card.addEventListener('click', function (e) {
+                        // kalau yang diklik tombol plus/minus, biarkan handler tombol yang bekerja
+                        if (e.target.closest('.plus-btn') || e.target.closest('.minus-btn')) {
+                            return;
                         }
+
+                        const productId = parseInt(this.dataset.productId);
+                        if (!productId) return;
+
+                        const productData = productsData.find(p => p.id === productId);
+                        if (!productData) return;
+
+                        currentProductId = productId;
+                        selectedOptions = []; // reset pilihan setiap buka modal
+                        showModal(productData);
                     });
                 });
 
@@ -1392,13 +1423,20 @@
                         const img = r.image ?
                             `<img src="${r.image}" class="w-16 h-16 rounded-md object-cover flex-shrink-0" alt="">` :
                             '';
+
+                        // description (kalau ada)
+                        const descText = r.desc
+                            ? `<p class="text-xs text-gray-500 line-clamp-2 mt-0.5">${r.desc}</p>`
+                            : '';
+
                         return `
                             <div class="p-3 flex items-center gap-3" data-key="${r.key}" data-product-id="${r.productId}">
                             ${img}
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-semibold text-gray-800 line-clamp-1">${r.productName}</p>
+                                <p class="text-sm font-semibold text-gray-800 line-clamp-1">${r.productName}fdads</p>
+                                ${descText}
                                 ${optsText}
-                                ${noteText} <!-- <<< NEW -->
+                                ${noteText}
                                 <p class="text-xs text-gray-400 mt-0.5">Harga: ${rupiahFmt.format(r.unit)}</p>
                             </div>
                             <div class="flex items-center gap-2">
@@ -1412,6 +1450,7 @@
                             </div>
                         `;
                     }).join('');
+
 
 
                     // total
@@ -1940,10 +1979,8 @@
                         });
 
                         updateFloatingCartBar();
-
-                        
                     }
-                    // tampilkan pesan info kalau ada item/opsi yang tidak bisa dimuat
+
                     const msgs = window.__REORDER_MESSAGES__ || [];
                     if (Array.isArray(msgs) && msgs.length > 0 && window.Swal) {
                         Swal.fire({
@@ -1956,9 +1993,17 @@
                                 </ul>
                             </div>`,
                             confirmButtonText: "{{ __('messages.customer.menu.understand') }}",
+                        }).then(() => {
+                            // setelah user klik "Mengerti", langsung buka modal checkout
+                            openCheckoutModal();
                         });
+                    } else if (Array.isArray(items) && items.length > 0) {
+                        // kalau tidak ada pesan tambahan, tapi ada item reorder
+                        // tetap langsung buka modal checkout
+                        openCheckoutModal();
                     }
                 })();
+
             });
         </script>
 

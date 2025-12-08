@@ -186,7 +186,7 @@ class OwnerStockMovementController extends Controller
             return back()->with('error', $errorMessage)->withInput();
         }
 
-        return redirect()->route('owner.user-owner.stocks.movements.index')->with('success', 'Transaksi stok berhasil dicatat.');
+        return redirect()->route('owner.user-owner.stocks.index')->with('success', 'Transaksi stok berhasil dicatat.');
     }
 
 

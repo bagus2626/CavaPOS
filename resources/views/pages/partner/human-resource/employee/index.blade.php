@@ -4,6 +4,7 @@
 @section('page_title', __('messages.partner.user_management.employees.all_employees'))
 
 @section('content')
+@vite(['resources/css/app.css'])
 
 <section class="content">
     <div class="container-fluid">
@@ -62,6 +63,7 @@ tbody tr.empty-row td{ color:#6b7280; }
 @endsection
 
 @push('scripts')
+@vite(['resources/js/app.js'])
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
