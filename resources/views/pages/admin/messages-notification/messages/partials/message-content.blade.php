@@ -15,7 +15,7 @@
 
                         {{-- Tombol Back ke list --}}
                         <a href="{{ route('admin.message-notification.messages.index', ['folder' => $folder ?? request('folder','inbox')]) }}"
-                        class="btn btn-sm btn-light btn-back-list">
+                        class="btn btn-sm btn-light btn-back-list align-items-center">
                             <i class="bx bx-chevron-left mr-20"></i> Back to list
                         </a>
 
@@ -81,4 +81,12 @@
         max-height: 480px;     /* bebas: 300–500px */
         object-fit: contain;
     }
+
+    .btn-back-list i {
+    display: inline-flex;
+    align-items: center;
+    font-size: 16px;
+    line-height: 1;
+    }
+
 </style>

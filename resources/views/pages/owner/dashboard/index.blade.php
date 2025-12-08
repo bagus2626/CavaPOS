@@ -162,6 +162,11 @@
         border: 1px solid #eef1f4;
         background: #ffffff;
         padding-right: 0.85rem;
+        min-height: 70px !important;
+    }
+
+    .info-box .info-box-content {
+        line-height: 1 !important;
     }
 
     .info-box .info-box-icon {
