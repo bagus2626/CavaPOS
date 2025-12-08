@@ -220,6 +220,7 @@ return [
             'accounts' => 'Akun',
             'split_payments' => 'Pembayaran Terpisah',
             'withdrawal' => 'Penarikan',
+            'stock_report' => 'Laporan Stok',
         ],
         'dashboard' => [
             'total_users' => 'Total Akun Pengguna',
@@ -626,6 +627,8 @@ return [
                 'whatsapp' => 'WhatsApp',
                 'website' => 'Website',
                 'settings_security' => 'Pengaturan & Keamanan',
+                'contact_name' => 'Nama Kontak',
+                'phone_number' => 'Nomor Telepon',
             ],
         ],
         'products' => [

@@ -33,9 +33,14 @@ class BookingOrder extends Model
         'kitchen_process_id',
         'payment_id',
         'payment_flag',
+        'wifi_snapshot', // ← TAMBAHKAN BARIS INI
     ];
 
     protected $dates = ['deleted_at'];
+
+     protected $casts = [
+        'wifi_snapshot' => 'array',
+    ];
 
     public function table()
     {
@@ -63,5 +68,16 @@ class BookingOrder extends Model
     {
         // pakai created_at, sesuaikan kalau mau pakai kolom lain
         return $this->hasOne(XenditInvoice::class, 'order_id', 'id')->latest('created_at');
+    }
+
+    public function saveWifiSnapshot($wifiSsid, $wifiPassword, $isWifiShown)
+    {
+        $this->wifi_snapshot = [
+            'wifi_ssid' => $wifiSsid,
+            'wifi_password' => $wifiPassword,
+            'wifi_shown' => (int) $isWifiShown,
+            'saved_at' => now()->toDateTimeString(),
+        ];
+        $this->save();
     }
 }
