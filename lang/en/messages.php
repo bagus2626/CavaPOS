@@ -101,7 +101,8 @@ return [
                 'load_more' => 'Load More',
                 'loading' => 'Loading...',
                 'order_again' => 'Order Again',
-                'continue_payment' => 'Continue Payment'
+                'continue_payment' => 'Continue Payment',
+                'failed' => 'FAILED'
             ],
             'detail' => [
                 'order_detail' => 'Order Detail',
@@ -139,6 +140,10 @@ return [
                 'unpaid_warning'            => 'Payment Not Completed',
                 'please_continue_payment'   => 'Please complete your payment first by clicking "Continue Payment".',
                 'continue_payment'          => 'Continue Payment',
+                'order_status' => 'Order Status',
+                'order_status_unknown' => 'Order status unknown.',
+                'pay_at_cashier' => 'I Want To Pay at Cashier',
+                'request_payment_on_cashier_success' => 'Your cashier payment request was successful! Please continue with the payment at the cashier.'
             ],
         ],
     ],

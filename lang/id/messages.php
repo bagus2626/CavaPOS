@@ -101,7 +101,8 @@ return [
                 'load_more' => 'Muat Lebih',
                 'loading' => 'Memuat...',
                 'order_again' => 'Pesan Lagi',
-                'continue_payment' => 'Lanjutkan Pembayaran'
+                'continue_payment' => 'Lanjutkan Pembayaran',
+                'failed' => 'GAGAL'
             ],
             'detail' => [
                 'order_detail' => 'Detail Pesanan',
@@ -138,7 +139,11 @@ return [
                 'order_again' => 'Pesan Lagi',
                 'unpaid_warning' => 'Anda Belum Menyelesaikan Pembayaran',
                 'please_continue_payment' => 'Silahkan menyelesaikan pembayaran anda terlebih dahulu dengan klik "Lanjutkan Pembayaran".',
-                'continue_payment' => 'Lanjutkan Pembayaran'
+                'continue_payment' => 'Lanjutkan Pembayaran',
+                'order_status' => 'Status Pesanan',
+                'order_status_unknown' => 'Status pesanan tidak dikenal.',
+                'pay_at_cashier' => 'Saya Ingin Bayar di Kasir',
+                'request_payment_on_cashier_success' => 'Permohonan pembayaran dikasir sukses! Silahkan lanjutkan pembayaran di kasir.'
             ],
         ],
     ],
