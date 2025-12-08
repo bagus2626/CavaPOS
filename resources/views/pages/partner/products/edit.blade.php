@@ -326,9 +326,6 @@
           <h5 class="modal-title" id="recipeModalLabel">
             <i class="fas fa-clipboard-list me-2"></i>Atur Resep: <span id="modal-item-name"></span>
           </h5>
-          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
         </div>
         <div class="modal-body">
           <div class="alert alert-info">
@@ -346,7 +343,7 @@
           </button>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" dataf-dismiss="modal">Batal</button>
+          <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
           <button type="button" class="btn btn-choco" id="save-recipe">
             <i class="fas fa-save me-1"></i>Simpan Resep
           </button>

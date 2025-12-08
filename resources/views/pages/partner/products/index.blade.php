@@ -4,6 +4,8 @@
 @section('page_title', __('messages.partner.product.all_product.all_products'))
 
 @section('content')
+@vite(['resources/css/app.css'])
+
 <section class="content product-index">
   <div class="container-fluid">
 
@@ -111,6 +113,8 @@
 @endsection
 
 @push('scripts')
+@vite(['resources/js/app.js'])
+
   {{-- SweetAlert2 sudah ada di layout; kalau belum, tetap aman --}}
   <script>
     function deleteProduct(productId) {
