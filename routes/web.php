@@ -292,6 +292,16 @@ Route::middleware('setlocale')->group(function () {
                 Route::resource('master-products', OwnerMasterProductController::class);
                 Route::get('outlet-products/get-master-products', [OwnerOutletProductController::class, 'getMasterProducts'])->name('outlet-products.get-master-products');
                 Route::resource('outlet-products', OwnerOutletProductController::class);
+
+                Route::get('outlet-products/recipe/ingredients', [OwnerOutletProductController::class, 'getRecipeIngredients'])
+                    ->name('outlet-products.recipe.ingredients');
+
+                Route::get('outlet-products/recipe/load', [OwnerOutletProductController::class, 'loadRecipe'])
+                    ->name('outlet-products.recipe.load');
+
+                Route::post('outlet-products/recipe/save', [OwnerOutletProductController::class, 'saveRecipe'])
+                    ->name('outlet-products.recipe.save');
+
                 Route::resource('products', OwnerProductController::class);
                 Route::post('/categories/reorder', [OwnerCategoryController::class, 'reorder'])->name('categories.reorder');
                 Route::resource('categories', OwnerCategoryController::class);
@@ -328,8 +338,10 @@ Route::middleware('setlocale')->group(function () {
 
                     Route::prefix('stocks')->name('stocks.')->group(function () {
                         Route::get('/', [StockReportController::class, 'index'])->name('index');
-                        Route::get('/{stock:stock_code}/history', [StockReportController::class, 'showStockHistory'])->name('history');
+                        Route::get('/{stock:stock_code}/movement', [StockReportController::class, 'showStockMovement'])->name('movement');
                         Route::get('/export', [StockReportController::class, 'export'])->name('export');
+
+                        Route::get('/{stock:stock_code}/movement/export', [StockReportController::class, 'exportMovement'])->name('movement.export');
                     });
                 });
                 Route::resource('promotions', OwnerPromotionController::class);
