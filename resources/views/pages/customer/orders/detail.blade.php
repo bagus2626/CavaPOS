@@ -33,6 +33,11 @@
                 </div>
             </div>
         </div>
+        @if (session('success'))
+            <div class="mt-4 text-xs text-green-600 bg-lime-100 rounded-md p-2">
+                {{ session('success') }}
+            </div>
+        @endif
 
         {{-- Info pemesan & meja --}}
         <div class="mt-6 grid grid-cols-2 gap-4 text-sm">
@@ -112,7 +117,6 @@
                 </div>
             </div>
         @elseif(!$order->payment_flag && !$payment)
-            {{-- Opsional: kalau belum ada record pembayaran sama sekali tapi payment_flag sudah false --}}
             <div class="mt-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm">
                 <div class="flex items-start gap-3">
                     <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-amber-500 text-white text-sm font-bold flex-shrink-0">
@@ -171,7 +175,7 @@
                 </div>
             </div>
         @elseif ($order->order_status === 'PAYMENT')
-            @if ($order->last_xendit_invoice->invoice_url)
+            @if ($order->last_xendit_invoice)
                 <div class="mt-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm">
                     <div class="flex items-start gap-3">
                         <div class="flex-1 space-y-2">
@@ -185,6 +189,44 @@
                                 class="inline-flex items-center px-4 py-2 rounded-lg bg-choco text-sm text-white hover:bg-soft-choco">
                                     {{ __('messages.customer.orders.detail.continue_payment') }}
                             </a>
+                        </div>
+                    </div>
+                </div>
+            @elseif ($payment && !$order->last_xendit_invoice)
+                <div class="mt-4 rounded-xl border border-red-300 bg-red-100 px-4 py-3 text-sm">
+                    <div class="flex items-start gap-3">
+                        <div class="flex-1 space-y-2">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <p class="font-semibold text-amber-900">
+                                    {{ __('messages.customer.orders.detail.your_payment_is_not_paid_yet') }}
+                                </p>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-white text-[11px] font-semibold border border-amber-300 text-amber-800">
+                                    Status: {{ $payment->payment_status }}
+                                </span>
+                            </div>
+
+                            <p class="text-xs md:text-sm text-amber-800">
+                                {{ __('messages.customer.orders.detail.please_come_to_the_cashier') }}
+                            </p>
+
+                            {{-- === TOMBOL SAYA INGIN BAYAR DI KASIR === --}}
+                            <div class="pt-3">
+                                <form
+                                    action="{{ route('customer.orders.unpaid-order', [
+                                        'partner_slug' => $partner->slug,
+                                        'order_id' => $order->id
+                                    ]) }}"
+                                    method="POST"
+                                >
+                                    @csrf
+                                    <button
+                                        type="submit"
+                                        class="w-full py-2 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700 transition"
+                                    >
+                                        {{ __('messages.customer.orders.detail.pay_at_cashier') }}
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -233,7 +275,14 @@
             $maxIndex   = max($totalSteps - 1, 1);
             $currentIndex = min(max($currentIndex, 0), $maxIndex);
 
-            $progressPercent = ($currentIndex / $maxIndex) * 100;
+            $progressMap = [
+                0 => 12.5,   // UNPAID
+                1 => 37.5, // PAID
+                2 => 62.5, // PROCESSED
+                3 => 100,  // SERVED
+            ];
+
+            $progressPercent = $progressMap[$currentIndex] ?? 0;
 
             $currentStep = $steps[$currentIndex] ?? $steps[0];
         @endphp
@@ -423,7 +472,7 @@
 
         {{-- Aksi --}}
         <div class="mt-8 flex flex-wrap items-center justify-between gap-3">
-            @if($order->payment_flag == 1)
+            @if($order->payment_flag == 1 && $customer->id)
             <a href="{{ route('customer.menu.index', [
                             'partner_slug'       => $partner_slug,
                             'table_code'         => $table_code,
@@ -443,12 +492,6 @@
                 @endif
             </div>
         </div>
-
-        @if (session('success'))
-            <div class="mt-4 text-xs text-green-600">
-                {{ session('success') }}
-            </div>
-        @endif
     </div>
 </div>
 @endsection
