@@ -7,15 +7,14 @@
                 
                 <div class="relative z-10">
                     <h2 class="font-poppins text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4 lg:mb-6 leading-tight">
-                        Ayo Kelola Bisnis Anda dengan Lebih Mudah Bersama CAVAA!
+                        {{ __('messages.home.cta_section') }}
                     </h2>
                     <p class="text-base lg:text-lg text-white/90 mb-6 lg:mb-8 max-w-3xl mx-auto leading-relaxed">
-                        Bergabunglah dengan ribuan pemilik bisnis yang telah merasakan kemudahan dan efisiensi dalam mengelola usaha mereka. 
-                        CAVAA hadir sebagai solusi terpercaya untuk mengoptimalkan operasional bisnis Anda.
+                        {{ __('messages.home.cta_section_desc') }}
                     </p>
-                    <a href="#kontak" class="inline-flex items-center px-6 lg:px-8 py-3 lg:py-4 bg-gradient-to-r from-accent to-accent-light text-white font-semibold rounded-full shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
+                    <a href="{{ route('owner.login') }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-6 lg:px-8 py-3 lg:py-4 bg-gradient-to-r from-accent to-accent-light text-white font-semibold rounded-full shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
                         <i class="fas fa-rocket mr-2"></i>
-                        Mulai Gratis Sekarang
+                        {{ __('messages.home.cta_section_button') }}
                     </a>
                 </div>
             </div>
