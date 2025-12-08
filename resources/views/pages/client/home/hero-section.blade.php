@@ -8,20 +8,19 @@
                 <!-- Text Content -->
                 <div class="text-white text-center lg:text-left">
                     <h1 class="font-poppins text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 lg:mb-6 leading-tight">
-                        Kelola Penjualan Lebih Mudah & Praktis
+                        {{ __('messages.home.hero_section') }}
                     </h1>
                     <p class="text-base lg:text-lg mb-6 lg:mb-8 text-white/90 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                        Aplikasi kasir modern yang dirancang khusus untuk coffee shop, retail, restoran, dan berbagai usaha lainnya. 
-                        Tingkatkan efisiensi bisnis dengan sistem yang terbukti.
+                        {{ __('messages.home.hero_section_desc') }}
                     </p>
                     <div class="flex flex-col sm:flex-row gap-3 lg:gap-4 mb-6 lg:mb-8 justify-center lg:justify-start">
                         <a href="#demo" class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-accent to-accent-light text-white font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
                             <i class="fas fa-play mr-2"></i>
-                            Mulai Sekarang
+                            {{ __('messages.home.hero_section_button_start') }}
                         </a>
                         <a href="#kontak" class="inline-flex items-center justify-center px-6 py-3 bg-white/20 backdrop-blur-sm text-white font-semibold rounded-full border border-white/30 hover:bg-white/30 transition-all duration-300">
                             <i class="fas fa-phone mr-2"></i>
-                            Hubungi Kami
+                            {{ __('messages.home.hero_section_button_contact') }}
                         </a>
                     </div>
                     <div class="grid grid-cols-3 gap-4 sm:gap-8 max-w-md mx-auto lg:mx-0 lg:flex lg:max-w-none">

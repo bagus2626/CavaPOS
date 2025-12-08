@@ -4,6 +4,7 @@
 @section('page_title', __('messages.partner.outlet.table_management.tables.table_list'))
 
 @section('content')
+@vite(['resources/css/app.css'])
 
 <section class="content">
   <div class="container-fluid tables-index">
@@ -110,6 +111,8 @@
 @endsection
 
 @push('scripts')
+@vite(['resources/js/app.js'])
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {

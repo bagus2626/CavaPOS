@@ -137,7 +137,7 @@
         <i class="fas fa-info bg-gray"></i>
         <div class="timeline-item">
             <div class="timeline-body text-muted">
-                Tidak ada pesan untuk saat ini.
+                No messages at this time.
             </div>
         </div>
     </div>
