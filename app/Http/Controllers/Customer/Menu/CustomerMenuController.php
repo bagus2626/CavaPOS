@@ -358,6 +358,12 @@ class CustomerMenuController extends Controller
                 }
             }
 
+            $booking_order->saveWifiSnapshot(
+                $partner->user_wifi,
+                $partner->pass_wifi,
+                $partner->is_wifi_shown ?? 0
+            );
+
             // test by qris (hapus kemudian)
             if ($request->payment_method === 'QRIS') {
                 $booking_order->order_status = 'PAYMENT';
@@ -515,6 +521,18 @@ class CustomerMenuController extends Controller
         }
 
         $partner = User::findOrFail($data->partner_id);
+
+        if (!empty($partner->logo)) {
+            $logoPath = public_path('storage/' . $partner->logo);
+
+            if (file_exists($logoPath)) {
+                $img = Image::make($logoPath);
+                $img->greyscale(); // Ubah ke hitam putih
+
+                // Encode ke base64 data URL
+                $partner->logo_grayscale = $img->encode('data-url');
+            }
+        }
 
         $customPaper = [0, 0, 227, 600];
         $pdf = Pdf::loadView('pages.employee.cashier.pdf.receipt', [
@@ -800,6 +818,17 @@ class CustomerMenuController extends Controller
         $qrPngBase64 = DNS2D::getBarcodePNG($qrPayload, 'QRCODE', 6, 6);
         // =====================================
 
+         $wifiData = null;
+        if ($order->payment_flag === 1) {
+            $snapshot = $order->wifi_snapshot;
+            if ($snapshot && ($snapshot['wifi_shown'] ?? 0) == 1) {
+                $wifiData = [
+                    'ssid' => $snapshot['wifi_ssid'] ?? null,
+                    'password' => $snapshot['wifi_password'] ?? null,
+                ];
+            }
+        }
+
         return view('pages.customer.orders.detail', [
             'order'        => $order,
             'partner'      => $partner,
@@ -809,6 +838,7 @@ class CustomerMenuController extends Controller
             'headline'     => $headline,
             'subtitle'     => $subtitle,
             'qrPngBase64'  => $qrPngBase64, // <- kirim ke Blade
+            'wifiData'     => $wifiData, // ← TAMBAHKAN BARIS INI
         ]);
     }
 

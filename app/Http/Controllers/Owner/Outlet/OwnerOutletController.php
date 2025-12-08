@@ -25,7 +25,9 @@ class OwnerOutletController extends Controller
     public function index()
     {
         $owner = Auth::user();
-        $outlets = User::where('owner_id', Auth::id())->get();
+        $outlets = User::where('owner_id', Auth::id())
+            ->orderBy('created_at', 'asc')
+            ->paginate(10);
 
         return view('pages.owner.outlet.index', compact('owner', 'outlets'));
     }
@@ -65,6 +67,9 @@ class OwnerOutletController extends Controller
                 'district' => ['required', 'string', 'max:255'],
                 'village' => ['required', 'string', 'max:255'],
                 'address' => ['required', 'string'],
+                'user_wifi' => ['nullable', 'string', 'max:255'],
+                'pass_wifi' => ['nullable', 'string', 'max:255'],
+                'is_wifi_shown' => ['nullable', 'boolean'],
                 'partner_code' => ['required', 'size:4', 'alpha_num', Rule::unique('users', 'partner_code')],
                 'qr_mode' => ['nullable', 'string', 'in:disabled,barcode_only,cashier_only,both'],
 
@@ -167,6 +172,10 @@ class OwnerOutletController extends Controller
                 'urban_village' => $request->village_name,
                 'urban_village_id' => $request->village,
                 'address' => $request->address,
+                'user_wifi' => $request->user_wifi,
+                'pass_wifi' => $request->pass_wifi,
+                'is_active' => $request->is_active ?? 0,
+                'is_wifi_shown' => $request->is_wifi_shown ?? 0,
                 'is_qr_active' => $isQrActive,
                 'is_cashier_active' => $isCashierActive,
             ]);
@@ -232,7 +241,7 @@ class OwnerOutletController extends Controller
         } else {
             $outlet->qr_mode = 'disabled';
         }
-        
+
 
         return view('pages.owner.outlet.edit', compact('outlet'));
     }
@@ -273,6 +282,10 @@ class OwnerOutletController extends Controller
             // flag hapus
             'remove_background_picture' => ['nullable', 'boolean'],
             'remove_logo'              => ['nullable', 'boolean'],
+
+            'user_wifi' => ['nullable', 'string', 'max:255'],
+            'pass_wifi' => ['nullable', 'string', 'max:255'],
+            'is_wifi_shown' => ['nullable', 'boolean'],
 
             // Validasi untuk field profile_outlet
             'contact_person' => ['nullable', 'string', 'max:255'],
@@ -402,6 +415,9 @@ class OwnerOutletController extends Controller
                 'is_active'        => $request->is_active ?? 0,
                 'is_qr_active'     => $isQrActive,
                 'is_cashier_active' => $isCashierActive,
+                'user_wifi'        => $request->user_wifi,
+                'pass_wifi'        => $request->pass_wifi,
+                'is_wifi_shown'    => $request->is_wifi_shown ?? 0,
             ];
 
             if ($request->filled('password')) {

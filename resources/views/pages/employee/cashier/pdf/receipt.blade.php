@@ -150,6 +150,77 @@
             padding: 4px 0;
         }
 
+        /* ====== WiFi Info ====== */
+.wifi-box {
+    background: #f5f5f5;
+    border-radius: 6px;
+    padding: 10px;
+    margin: 6px 0;
+    text-align: center;
+}
+
+.wifi-title {
+    font-weight: 700;
+    font-size: 10px;
+    color: #333;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.wifi-title i {
+    color: #666;
+    margin-right: 3px;
+}
+
+.wifi-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.wifi-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    font-size: 9px;
+}
+
+.wifi-label {
+    color: #666;
+    font-weight: 600;
+    min-width: 50px;
+    text-align: right;
+}
+
+.wifi-value {
+    color: #111;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.3px;
+    text-align: left;
+    flex: 1;
+    max-width: 120px;
+}
+
+/* ====== Thank You Message ====== */
+.thank-you {
+    text-align: center;
+    color: #444;
+    font-size: 10px;
+    font-weight: 600;
+    margin-top: 8px;
+    line-height: 1.5;
+}
+
+.come-again {
+    font-size: 9px;
+    color: #666;
+    font-weight: 500;
+    font-style: italic;
+}
+
         /* ====== Footer ====== */
         .foot {
             text-align: center;
@@ -282,3 +353,36 @@
                     <td class="val">Rp {{ number_format($payment->change_amount ?? 0, 0, ',', '.') }}</td>
                 </tr>
             </table>
+            {{-- WiFi Information (only if enabled) --}}
+@if ($partner->is_wifi_shown && ($partner->user_wifi || $partner->pass_wifi))
+    <hr class="sep">
+    
+    <div class="wifi-box">
+        <div class="wifi-title">
+            <i class="fas fa-wifi"></i> WiFi
+        </div>
+        <div class="wifi-content">
+            @if ($partner->user_wifi)
+                <div class="wifi-item">
+                    <span class="wifi-label">Username:</span>
+                    <span class="wifi-value">{{ $partner->user_wifi }}</span>
+                </div>
+            @endif
+            @if ($partner->pass_wifi)
+                <div class="wifi-item">
+                    <span class="wifi-label">Password:</span>
+                    <span class="wifi-value">{{ $partner->pass_wifi }}</span>
+                </div>
+            @endif
+        </div>
+    </div>
+@endif
+
+<hr class="sep">
+
+{{-- Thank You Message --}}
+<div class="thank-you">
+    Terima kasih atas kunjungan Anda!
+    <br>
+    <span class="come-again">Sampai jumpa kembali</span>
+</div>

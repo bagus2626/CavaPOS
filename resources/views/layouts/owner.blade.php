@@ -896,7 +896,7 @@
                             class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is('owner.user-owner.report.stocks.*') ? 'active' : '' }}"
                             onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
                             <i class="nav-icon fas fa-boxes-stacked"></i>
-                            <p>Stock Report</p>
+                            <p>{{ __('messages.owner.layout.stock_report') }}</p>
                         </a>
                     </li>
 

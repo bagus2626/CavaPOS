@@ -56,7 +56,7 @@
         </div>
 
         {{-- PERINGATAN JIKA PEMBAYARAN BELUM LUNAS --}}
-        @if(!$order->payment_flag && $payment && $payment->payment_status !== 'PAID' && $order->order_status !== 'PAYMENT')
+        @if(!$order->payment_flag && $payment && $payment->payment_status !== 'PAID')
             <div class="mt-4 rounded-xl border border-red-300 bg-red-100 px-4 py-3 text-sm">
                 <div class="flex items-start gap-3">
                     <div class="flex-1 space-y-2">
@@ -232,6 +232,9 @@
                 </div>
             @endif
         @endif
+
+
+
 
         {{-- Timeline Status --}}
         @php
@@ -470,6 +473,143 @@
             @endif
         </div>
 
+{{-- ============ GANTI SECTION WIFI DENGAN INI ============ --}}
+@if($wifiData && $order->payment_flag === 1)
+    <div class="mt-8">
+        <h2 class="text-sm font-semibold text-gray-800 mb-3">
+            {{ __('messages.customer.orders.detail.wifi_information') ?? 'Informasi WiFi' }}
+        </h2>
+
+        <div class="border rounded-xl p-4 bg-slate-50">
+            <div class="flex items-start gap-3">
+                <div class="flex-shrink-0 w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                    <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
+                    </svg>
+                </div>
+                
+                <div class="flex-1">
+                    <p class="text-xs text-gray-500 mb-3">
+                        {{ __('messages.customer.orders.detail.wifi_description') ?? 'Nikmati koneksi internet gratis selama Anda berada di resto kami' }}
+                    </p>
+
+                    <div class="space-y-3">
+                        {{-- SSID --}}
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-gray-500 uppercase tracking-wide">
+                                    {{ __('messages.customer.orders.detail.wifi_name') ?? 'Nama WiFi (SSID)' }}
+                                </p>
+                                <p class="text-sm font-semibold text-gray-900 mt-0.5">
+                                    {{ $wifiData['ssid'] ?? '-' }}
+                                </p>
+                            </div>
+                            <button 
+                                onclick="copyWifi('{{ $wifiData['ssid'] }}', 'SSID')"
+                                class="flex items-center gap-1 px-3 py-1.5 text-xs text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition-colors"
+                                title="Salin SSID"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                                <span>Salin</span>
+                            </button>
+                        </div>
+
+                        {{-- Password --}}
+                        @if($wifiData['password'])
+                            <div class="pt-3 border-t flex items-center justify-between">
+                                <div>
+                                    <p class="text-xs text-gray-500 uppercase tracking-wide">
+                                        {{ __('messages.customer.orders.detail.wifi_password') ?? 'Password' }}
+                                    </p>
+                                    <p class="text-sm font-semibold text-gray-900 mt-0.5 font-mono">
+                                        {{ $wifiData['password'] }}
+                                    </p>
+                                </div>
+                                <button 
+                                    onclick="copyWifi('{{ $wifiData['password'] }}', 'Password')"
+                                    class="flex items-center gap-1 px-3 py-1.5 text-xs text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-lg transition-colors"
+                                    title="Salin Password"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                    </svg>
+                                    <span>Salin</span>
+                                </button>
+                            </div>
+                        @else
+                            <div class="pt-3 border-t">
+                                <p class="text-xs text-emerald-700 flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {{ __('messages.customer.orders.detail.wifi_open') ?? 'WiFi tanpa password (Terbuka)' }}
+                                </p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Toast Notification --}}
+    <div id="wifi-toast" class="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <div class="flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span id="wifi-toast-message">Tersalin!</span>
+        </div>
+    </div>
+
+    <script>
+        function copyWifi(text, label) {
+            if (!navigator.clipboard) {
+                // Fallback untuk browser lama
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showWifiToast(label + ' tersalin!');
+                } catch (err) {
+                    console.error('Gagal menyalin:', err);
+                }
+                document.body.removeChild(textarea);
+                return;
+            }
+
+            navigator.clipboard.writeText(text).then(() => {
+                showWifiToast(label + ' tersalin!');
+            }).catch(err => {
+                console.error('Gagal menyalin:', err);
+            });
+        }
+
+        function showWifiToast(message) {
+            const toast = document.getElementById('wifi-toast');
+            const messageEl = document.getElementById('wifi-toast-message');
+            
+            if (!toast || !messageEl) return;
+            
+            messageEl.textContent = message;
+            
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 2000);
+        }
+    </script>
+@endif
+        
         {{-- Aksi --}}
         <div class="mt-8 flex flex-wrap items-center justify-between gap-3">
             @if($order->payment_flag == 1 && $customer->id)
