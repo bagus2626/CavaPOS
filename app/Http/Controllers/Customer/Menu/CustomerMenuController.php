@@ -210,7 +210,7 @@ class CustomerMenuController extends Controller
                         'product_id' => $product->id,
                         'option_ids' => $validOptionIds,
                         'qty'        => max(1, (int) $finalQty),
-                        'note'       => $detail->note ?? '',
+                        'note'       => $detail->customer_note ?? '',
                     ];
                 }
             } else {
@@ -443,6 +443,13 @@ class CustomerMenuController extends Controller
                 }
             }
 
+            if (!$customer) {
+                $guestOrders1 = collect(session('guest_orders', []));
+                $guestOrders1->push($booking_order->id);
+
+                session(['guest_orders' => $guestOrders1->unique()->values()->all()]);
+            }
+
             DB::commit();
 
             DB::afterCommit(function () use ($booking_order) {
@@ -457,12 +464,12 @@ class CustomerMenuController extends Controller
 
 
             $url = URL::temporarySignedRoute(
-                'customer.payment.get-payment-cash',
+                'customer.orders.order-detail',
                 now()->addMinutes(120),
                 [
                     'partner_slug' => $partner_slug,
                     'table_code' => $table_code,
-                    'token' => $token
+                    'order_id' => $booking_order->id
                 ]
             );
             return redirect()->to($url)->with('success', 'Product updated successfully!');
@@ -768,24 +775,24 @@ class CustomerMenuController extends Controller
 
         switch ($statusOrder) {
             case 'UNPAID':
-                $headline = 'Status pembayaran';
-                $subtitle = 'Pesanan kamu sudah tercatat, silakan selesaikan pembayaran di kasir atau melalui QRIS.';
+                $headline = __('messages.customer.orders.detail.waiting_for_payment');
+                $subtitle = __('messages.customer.orders.detail.waiting_for_payment_desc');
                 break;
             case 'PAID':
-                $headline = 'Menunggu diproses';
-                $subtitle = 'Pembayaran kamu sudah kami terima. Pesanan sedang menunggu diproses oleh kasir/kitchen.';
+                $headline = __('messages.customer.orders.detail.waiting_to_be_processed');
+                $subtitle = __('messages.customer.orders.detail.waiting_to_be_processed_desc');
                 break;
             case 'PROCESSED':
-                $headline = 'Sedang diproses';
-                $subtitle = 'Pesanan kamu sedang disiapkan. Mohon menunggu, pesanan akan segera disajikan.';
+                $headline = __('messages.customer.orders.detail.being_processed');
+                $subtitle = __('messages.customer.orders.detail.being_processed_desc');
                 break;
             case 'SERVED':
-                $headline = 'Selesai';
-                $subtitle = 'Pesanan kamu sudah selesai dan telah disajikan. Selamat menikmati!';
+                $headline = __('messages.customer.orders.detail.served');
+                $subtitle = __('messages.customer.orders.detail.served_desc');
                 break;
             default:
-                $headline = 'Status pesanan';
-                $subtitle = 'Status pesanan tidak dikenal.';
+                $headline = __('messages.customer.orders.detail.order_status');
+                $subtitle = __('messages.customer.orders.detail.order_status_unknown');
         }
 
         $qrPayload = $order->booking_order_code;
@@ -858,5 +865,34 @@ class CustomerMenuController extends Controller
         ]);
     }
 
+    public function makeUnpaidOrder(Request $request, $partner_slug, $order_id)
+    {
+        DB::beginTransaction();
+        try {
+            $order = BookingOrder::findOrFail($order_id);
+            $customer = Auth::guard('customer')->user();
+            if (!$customer) {
+                abort(403, 'Unauthorized User');
+            }
+            if ($order->customer_id !== $customer->id) {
+                abort(401, 'Unauthorized');
+            }
+            if ($order->order_status !== 'PAYMENT') {
+                abort(404, 'Order Not Found');
+            }
+
+            $order->order_status = 'UNPAID';
+            $order->save();
+
+            DB::commit();
+            event(new OrderCreated($order));
+
+            return redirect()->back()->with('success', __('messages.customer.orders.detail.request_payment_on_cashier_success'));
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+        }
+        
+    }
 
 }

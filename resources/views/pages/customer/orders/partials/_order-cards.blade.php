@@ -75,9 +75,15 @@
         {{-- Baris status --}}
         <div class="flex flex-wrap items-center gap-2 mt-1">
             {{-- Status pesanan --}}
-            <span class="inline-flex items-center px-1 py-1 rounded-md text-[11px] font-semibold border {{ $orderStatusColor }}">
-                {{ $order->order_status }}
-            </span>
+            @if ($order->order_status === 'PAYMENT' && !$order->last_xendit_invoice && $payment)
+                <span class="inline-flex items-center px-1 py-1 rounded-md text-[11px] font-semibold border bg-red-400 text-white {{ $orderStatusColor }}">
+                    {{ __('messages.customer.orders.histories.failed') }}
+                </span>
+            @else
+                <span class="inline-flex items-center px-1 py-1 rounded-md text-[11px] font-semibold border {{ $orderStatusColor }}">
+                    {{ $order->order_status }}
+                </span>
+            @endif
 
             {{-- Status pembayaran --}}
             <span class="inline-flex items-center px-1 py-1 rounded-md text-[11px] font-semibold border {{ $paymentStatusColor }}">
@@ -156,7 +162,7 @@
                     </a>
                 @endif
                 @if ($order->order_status === 'PAYMENT')
-                    @if ($order->last_xendit_invoice->invoice_url)
+                    @if ($order->last_xendit_invoice)
                         <a href="{{ $order->last_xendit_invoice->invoice_url }}"
                         class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs bg-choco md:text-sm text-white hover:bg-soft-choco">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" 
