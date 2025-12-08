@@ -15,8 +15,12 @@ use App\Models\Product\MasterProductParentOption;
 use App\Models\Product\MasterProductOption;
 use App\Models\Product\Specification;
 use App\Models\Admin\Product\Category;
+use App\Models\Partner\Products\PartnerProductOptionsRecipe;
+use App\Models\Partner\Products\PartnerProductRecipe;
 use App\Models\Store\Stock;
 use App\Models\Store\StockMovement;
+use App\Services\StockRecalculationService;
+use App\Services\UnitConversionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -30,6 +34,13 @@ use Illuminate\Support\Facades\Validator;
 
 class OwnerOutletProductController extends Controller
 {
+
+    protected StockRecalculationService $recalculationService;
+    public function __construct(StockRecalculationService $recalculationService)
+    {
+        $this->recalculationService = $recalculationService;
+    }
+
     public function index()
     {
         $owner = Auth::user();
@@ -138,7 +149,7 @@ class OwnerOutletProductController extends Controller
         if (!$defaultPcsUnit) {
             return redirect()->back()->withInput()->withErrors(['error' => 'Setup Error: Unit dasar "pcs" tidak ditemukan.']);
         }
-        
+
         $defaultPcsUnitId = $defaultPcsUnit->id;
         $pcsConversionValue = (float) $defaultPcsUnit->base_unit_conversion_value;
 
@@ -291,7 +302,8 @@ class OwnerOutletProductController extends Controller
             'parent_options.options.stock',
             'category',
             'owner',
-            'stock'
+            'stock',
+            'partner' // TAMBAHKAN: Load relasi partner
         )
             ->where('owner_id', $owner->id)
             ->where('id', $outlet_product->id)
@@ -322,23 +334,28 @@ class OwnerOutletProductController extends Controller
 
     public function update(Request $request, $id)
     {
+        $owner = Auth::user();
+
         DB::beginTransaction();
         try {
-            $product = PartnerProduct::with(['parent_options.options.stock', 'stock'])->findOrFail($id);
-            $owner = Auth::user();
+            // Dapatkan Produk dengan relasi lengkap
+            $product = PartnerProduct::with(['parent_options.options.stock', 'stock'])
+                ->where('owner_id', $owner->id)
+                ->findOrFail($id);
 
             $hasOptions = $product->parent_options
                 ->flatMap(fn($parent) => $parent->options ?? collect())
                 ->isNotEmpty();
 
-            // ===== Validasi =====
+            // ===== VALIDASI (Mengikuti Logic Partner) =====
             $rules = [
+                'stock_type'       => ['required', 'in:direct,linked'],
                 'always_available' => ['nullable', 'in:0,1'],
                 'quantity'         => ['nullable', 'integer', 'min:0'],
                 'is_active'        => ['required', 'in:0,1'],
                 'is_hot_product'   => ['required', 'in:0,1'],
                 'promotion_id'     => ['nullable', 'integer', 'exists:promotions,id'],
-                'options'                     => [$hasOptions ? 'required' : 'sometimes', 'array'],
+                'options'          => [$hasOptions ? 'required' : 'sometimes', 'array'],
                 'options.*.stock_type'        => ['required', 'in:direct,linked'],
                 'options.*.always_available'  => ['nullable', 'in:0,1'],
                 'options.*.quantity'          => ['nullable', 'integer', 'min:0'],
@@ -346,8 +363,11 @@ class OwnerOutletProductController extends Controller
 
             $validator = Validator::make($request->all(), $rules);
 
+            // VALIDASI CUSTOM: Quantity required HANYA jika DIRECT dan TIDAK Always Available
             $validator->after(function ($v) use ($request, $product, $hasOptions) {
-                if ($product->stock_type === 'direct') {
+                // Validasi Produk Utama
+                $prodStockType = $request->input('stock_type');
+                if ($prodStockType === 'direct') {
                     $prodAA = (int)$request->input('always_available', 0) === 1;
                     if (!$prodAA) {
                         $q = $request->input('quantity', null);
@@ -357,11 +377,10 @@ class OwnerOutletProductController extends Controller
                     }
                 }
 
+                // Validasi Opsi
                 if ($hasOptions) {
                     foreach ((array)$request->input('options', []) as $oid => $opt) {
                         $optStockType = $opt['stock_type'] ?? 'direct';
-
-                        // Hanya validasi quantity jika stock_type = direct
                         if ($optStockType === 'direct') {
                             $oa = (int)($opt['always_available'] ?? 0) === 1;
                             if (!$oa) {
@@ -376,13 +395,14 @@ class OwnerOutletProductController extends Controller
 
             $validated = $validator->validate();
 
+            // ===== PERSIAPAN DATA =====
             $productAlways = (int)($request->input('always_available', 0)) === 1;
-            $newIsActive   = (int) ($validated['is_active'] ?? 0);
-            $newIsHotProduct   = (int) ($validated['is_hot_product'] ?? 0);
-            $promotionId   = $request->filled('promotion_id') ? (int) $validated['promotion_id'] : null;
-            $newQuantity   = $productAlways ? 0 : (int) ($validated['quantity'] ?? 0);
+            $newStockType  = $validated['stock_type'];
+            $newIsActive   = (int)($validated['is_active'] ?? 0);
+            $newIsHotProduct = (int)($validated['is_hot_product'] ?? 0);
+            $promotionId   = $request->filled('promotion_id') ? (int)$validated['promotion_id'] : null;
 
-            // Get PCS unit ID
+            // Get PCS Unit ID
             $pcsUnit = MasterUnit::where(function ($query) use ($owner) {
                 $query->where('owner_id', $owner->id)->orWhereNull('owner_id');
             })
@@ -397,93 +417,30 @@ class OwnerOutletProductController extends Controller
             }
             $pcsUnitId = $pcsUnit->id;
 
-            // ===== Update kolom di 'partner_products' =====
-            $product->is_active = $newIsActive;
-            $product->is_hot_product = $newIsHotProduct;
-            $product->promo_id  = $promotionId;
-            $product->always_available_flag = $productAlways ? 1 : 0;
-            $product->save();
+            // ===== UPDATE KOLOM DI partner_products =====
+            $product->update([
+                'is_active'             => $newIsActive,
+                'is_hot_product'        => $newIsHotProduct,
+                'promo_id'              => $promotionId,
+                'stock_type'            => $newStockType,
+                'always_available_flag' => $productAlways ? 1 : 0,
+            ]);
 
-            // ===== Update tabel 'stocks' untuk Product (Hanya jika 'direct') =====
-            if ($product->stock_type === 'direct') {
-                if ($product->stock) {
-                    $product->stock->quantity = $newQuantity + ($product->stock->quantity_reserved ?? 0);
-                    $product->stock->save();
-                } else if (!$productAlways) {
-                    $product->stock()->create([
-                        'stock_code' => $this->generateUniqueStockCode(),
-                        'owner_id'   => $product->owner_id,
-                        'partner_id' => $product->partner_id,
-                        'type'       => 'partner',
-                        'stock_name' => $product->name,
-                        'quantity'   => $newQuantity,
-                        'display_unit_id' => $pcsUnitId,
-                        'owner_master_product_id' => $product->master_product_id,
-                        'partner_product_id' => $product->id,
-                        'last_price_per_unit' => $product->price,
-                        'description' => $product->description,
-                    ]);
-                }
-            }
+            // ===== SYNC PRODUCT STOCK (Mengikuti Logic Partner) =====
+            $this->syncProductStock(
+                $product,
+                $newStockType,
+                $productAlways,
+                (int)($validated['quantity'] ?? 0),
+                $pcsUnitId
+            );
 
-            // ===== Update tiap Option  =====
-            $optionInputs = $request->input('options', []);
-            if (!empty($optionInputs)) {
-                $optionIds = array_map('intval', array_keys($optionInputs));
-                $options = PartnerProductOption::with('stock')
-                    ->whereIn('id', $optionIds)
-                    ->whereHas('parent', function ($q) use ($product) {
-                        $q->where('partner_product_id', $product->id);
-                    })
-                    ->get()
-                    ->keyBy('id');
-
-                foreach ($optionInputs as $optId => $payload) {
-                    $optId = (int)$optId;
-                    if (!$options->has($optId)) continue;
-
-                    $optModel = $options[$optId];
-                    $optStockType = $payload['stock_type'] ?? 'direct';
-                    $optAlways = (int)($payload['always_available'] ?? 0) === 1;
-                    $optQty = ($optStockType === 'direct' && !$optAlways) ? (int)($payload['quantity'] ?? 0) : 0;
-
-                    // Update option model
-                    $optModel->stock_type = $optStockType;
-                    $optModel->always_available_flag = $optAlways ? 1 : 0;
-                    $optModel->save();
-
-                    // ===== Handle Stock untuk Option =====
-                    if ($optStockType === 'direct') {
-                        // Jika direct, kelola stock
-                        if ($optModel->stock) {
-                            // Update existing stock
-                            $optModel->stock->quantity = $optQty + ($optModel->stock->quantity_reserved ?? 0);
-                            $optModel->stock->save();
-                        } else if (!$optAlways) {
-                            // Create new stock jika belum ada dan bukan always available
-                            Stock::create([
-                                'stock_code' => $this->generateUniqueStockCode(),
-                                'owner_id'   => $product->owner_id,
-                                'partner_id' => $product->partner_id,
-                                'type'       => 'partner',
-                                'stock_name' => $product->name . ' - ' . $optModel->name,
-                                'quantity'   => $optQty,
-                                'display_unit_id' => $pcsUnitId,
-                                'owner_master_product_id' => $product->master_product_id,
-                                'partner_product_id' => $product->id,
-                                'partner_product_option_id' => $optModel->id,
-                                'last_price_per_unit' => $optModel->price,
-                                'description' => $optModel->description,
-                            ]);
-                        }
-                    } else {
-                        // Jika linked, hapus stock yang ada (jika ada)
-                        if ($optModel->stock) {
-                            $optModel->stock->delete();
-                        }
-                    }
-                }
-            }
+            // ===== SYNC OPTION STOCKS =====
+            $this->syncOptionStocks(
+                $product,
+                $request->input('options', []),
+                $pcsUnitId
+            );
 
             DB::commit();
 
@@ -496,6 +453,361 @@ class OwnerOutletProductController extends Controller
                 ->back()
                 ->withInput()
                 ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Menangani update/pembuatan/penghapusan stok untuk produk utama.
+     * (SAMA dengan PartnerProductController)
+     */
+    private function syncProductStock(
+        PartnerProduct $product,
+        string $newStockType,
+        bool $productAlways,
+        int $newQuantity,
+        int $pcsUnitId
+    ): void {
+        // Mengubah ke LINKED atau tetap LINKED
+        if ($newStockType === 'linked') {
+            // Jika ada stok direct yang lama, HAPUS
+            if ($product->stock) {
+                $product->stock->delete();
+                unset($product->stock);
+                $product->load('stock');
+            }
+            // Trigger recalculation untuk linked stock
+            $this->recalculationService->recalculateSingleTarget($product);
+        }
+        // DIRECT (Termasuk switch dari LINKED ke DIRECT)
+        elseif ($newStockType === 'direct') {
+            $existingStock = Stock::where('partner_product_id', $product->id)
+                ->whereNull('partner_product_option_id')
+                ->first();
+
+            // Cek apakah entri stok direct sudah ada di DB
+            if ($existingStock) {
+                // UPDATE STOK YANG ADA
+                // PENTING: Tambahkan quantity_reserved untuk menjaga stock yang ter-reserve
+                $existingStock->quantity = $productAlways ? 0 : $newQuantity + ($existingStock->quantity_reserved ?? 0);
+                $existingStock->save();
+            } else {
+                // Buat stok baru (baik Always Available maupun tidak)
+                Stock::create([
+                    'stock_code'              => $this->generateUniqueStockCode(),
+                    'stock_type'              => 'direct',
+                    'owner_id'                => $product->owner_id,
+                    'partner_id'              => $product->partner_id,
+                    'type'                    => 'partner',
+                    'stock_name'              => $product->name,
+                    'quantity'                => $productAlways ? 0 : $newQuantity,
+                    'display_unit_id'         => $pcsUnitId,
+                    'owner_master_product_id' => $product->master_product_id,
+                    'partner_product_id'      => $product->id,
+                    'last_price_per_unit'     => $product->price,
+                    'description'             => $product->description,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Menangani update/pembuatan/penghapusan stok untuk opsi produk.
+     * (SAMA dengan PartnerProductController)
+     */
+    private function syncOptionStocks(
+        PartnerProduct $product,
+        array $optionInputs,
+        int $pcsUnitId
+    ): void {
+        if (empty($optionInputs)) return;
+
+        $optionIds = array_map('intval', array_keys($optionInputs));
+        $options = PartnerProductOption::with('stock')
+            ->whereIn('id', $optionIds)
+            ->where('partner_product_id', $product->id)
+            ->get()
+            ->keyBy('id');
+
+        foreach ($optionInputs as $optId => $payload) {
+            $optId = (int)$optId;
+            if (!$options->has($optId)) continue;
+
+            $optModel = $options[$optId];
+            $optStockType = $payload['stock_type'] ?? 'direct';
+            $optAlways = (int)($payload['always_available'] ?? 0) === 1;
+
+            // Kuantitas hanya relevan jika DIRECT dan TIDAK Always Available
+            $optQty = ($optStockType === 'direct' && !$optAlways) ? (int)($payload['quantity'] ?? 0) : 0;
+
+            // Update model opsi (stock_type, always_available)
+            $optModel->stock_type = $optStockType;
+            $optModel->always_available_flag = $optAlways;
+            $optModel->save();
+
+            // Berubah dari DIRECT ke LINKED atau tetap LINKED
+            if ($optStockType === 'linked') {
+                // Hapus stok direct yang ada
+                if ($optModel->stock) {
+                    $optModel->stock->delete();
+                    unset($optModel->stock);
+                    $optModel->load('stock');
+                }
+                // Trigger recalculation
+                $this->recalculationService->recalculateSingleTarget($optModel);
+            }
+            // DIRECT
+            elseif ($optStockType === 'direct') {
+                // Query fresh dari database untuk memastikan data terkini
+                $existingStock = Stock::where('partner_product_option_id', $optModel->id)
+                    ->first();
+
+                if ($existingStock) {
+                    // Update stok yang sudah ada
+                    // PENTING: Tambahkan quantity_reserved
+                    $existingStock->quantity = $optQty + ($existingStock->quantity_reserved ?? 0);
+                    $existingStock->save();
+                } else {
+                    // Buat stok baru
+                    Stock::create([
+                        'stock_code'               => $this->generateUniqueStockCode(),
+                        'stock_type'               => 'direct',
+                        'owner_id'                 => $product->owner_id,
+                        'partner_id'               => $product->partner_id,
+                        'type'                     => 'partner',
+                        'stock_name'               => $product->name . ' - ' . $optModel->name,
+                        'quantity'                 => $optQty,
+                        'display_unit_id'          => $pcsUnitId,
+                        'owner_master_product_id'  => $product->master_product_id,
+                        'partner_product_id'       => $product->id,
+                        'partner_product_option_id' => $optModel->id,
+                        'last_price_per_unit'      => $optModel->price,
+                        'description'              => $optModel->description,
+                    ]);
+                }
+            }
+        }
+    }
+
+
+    public function getRecipeIngredients(Request $request)
+    {
+        $owner = Auth::user();
+        $owner_id = $owner->id;
+
+        // TAMBAHKAN: Validasi dan ambil partner_id dari request
+        $request->validate([
+            'partner_id' => 'required|integer|exists:users,id'
+        ]);
+
+        $partnerId = (int) $request->input('partner_id');
+
+        // VERIFIKASI: Pastikan partner ini milik owner yang sedang login
+        $partner = \App\Models\User::where('id', $partnerId)
+            ->where('owner_id', $owner->id)
+            ->firstOrFail();
+
+        // 1. Ambil HANYA Stock (Linked) milik Partner TERTENTU
+        $stocks = Stock::with('displayUnit', 'partner')
+            ->where('owner_id', $owner->id)
+            ->where('partner_id', $partnerId)  // FILTER BY PARTNER
+            ->where('stock_type', 'linked')
+            ->get();
+
+        // 2. Ambil Semua Unit yang tersedia untuk owner ini
+        $allUnits = MasterUnit::where(function ($query) use ($owner_id) {
+            $query->where('owner_id', $owner_id)->orWhereNull('owner_id');
+        })->get();
+
+        // 3. Mapping data untuk JSON response
+        $data = $stocks->map(function ($stock) use ($allUnits) {
+            $currentGroup = $stock->displayUnit->group_label ?? null;
+
+            $compatibleUnits = [];
+            if ($currentGroup) {
+                $compatibleUnits = $allUnits->where('group_label', $currentGroup)
+                    ->values()
+                    ->map(fn($u) => [
+                        'id' => $u->id,
+                        'name' => $u->unit_name,
+                        'is_base' => $u->is_base_unit
+                    ]);
+            }
+
+            return [
+                'id' => $stock->id,
+                'name' => $stock->stock_name . ' (' . ($stock->partner->name ?? 'Gudang Owner') . ')',
+                'current_unit_id' => $stock->display_unit_id,
+                'current_unit_name' => $stock->displayUnit->unit_name ?? '-',
+                'available_units' => $compatibleUnits
+            ];
+        });
+
+        return response()->json($data);
+    }
+
+    public function loadRecipe(Request $request, UnitConversionService $converter)
+    {
+        try {
+            $itemType = $request->input('item_type'); // 'product' or 'option'
+            $itemId = $request->input('item_id');
+
+            $recipe = [];
+
+            if ($itemType === 'product') {
+                $recipe = PartnerProductRecipe::where('partner_product_id', $itemId)
+                    ->with(['stock'])
+                    ->get()
+                    ->map(function ($item) use ($converter) {
+
+                        $baseQuantity = $item->quantity_used;
+                        $displayUnitId = $item->display_unit_id;
+
+                        $displayQuantity = $converter->convertToDisplayUnit(
+                            (float) $baseQuantity,
+                            (int) $displayUnitId
+                        );
+
+                        return [
+                            'stock_id' => $item->stock_id,
+                            'quantity_used' => number_format($displayQuantity, 2, '.', ''),
+                            'unit_id' => $displayUnitId,
+                            'stock_name' => $item->stock->stock_name,
+                        ];
+                    });
+            } elseif ($itemType === 'option') {
+                $recipe = PartnerProductOptionsRecipe::where('partner_product_option_id', $itemId)
+                    ->with(['stock'])
+
+                    ->get()
+                    ->map(function ($item) use ($converter) {
+
+                        $baseQuantity = $item->quantity_used;
+                        $displayUnitId = $item->display_unit_id;
+
+                        $displayQuantity = $converter->convertToDisplayUnit(
+                            (float) $baseQuantity,
+                            (int) $displayUnitId
+                        );
+
+                        return [
+                            'stock_id' => $item->stock_id,
+                            'quantity_used' => number_format($displayQuantity, 2, '.', ''),
+                            'unit_id' => $displayUnitId,
+                            'stock_name' => $item->stock->stock_name,
+                        ];
+                    });
+            }
+
+            return response()->json([
+                'success' => true,
+                'recipe' => $recipe
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to load recipe'], 500);
+        }
+    }
+
+    public function saveRecipe(Request $request, UnitConversionService $converter, StockRecalculationService $recalculator)
+    {
+        try {
+            $request->validate([
+                'item_type' => 'required|in:product,option',
+                'item_id' => 'required|integer',
+                'recipe_items' => 'required|array|min:1',
+                'recipe_items.*.stock_id' => 'required|integer|exists:stocks,id',
+                'recipe_items.*.quantity' => 'required|numeric|min:0.01',
+                'recipe_items.*.unit_id' => 'required|integer|exists:master_units,id',
+            ]);
+
+            $itemType = $request->input('item_type');
+            $itemId = $request->input('item_id');
+            $recipeItems = $request->input('recipe_items');
+            $currentOwnerId = auth()->user()->id; // ID Owner yang sedang login
+
+            DB::beginTransaction();
+
+            if ($itemType === 'product') {
+                // Verifikasi Produk: Pastikan produk ada dan dimiliki oleh Owner yang login
+                $product = PartnerProduct::where('id', $itemId)
+                    ->where('owner_id', $currentOwnerId)
+                    ->firstOrFail();
+
+                // Delete existing recipe
+                PartnerProductRecipe::where('partner_product_id', $itemId)->delete();
+
+                // Insert new recipe items
+                foreach ($recipeItems as $item) {
+                    // Convert quantity to base unit
+                    $convertedQuantity = $converter->convertToBaseUnit(
+                        $item['quantity'],
+                        $item['unit_id']
+                    );
+
+                    PartnerProductRecipe::create([
+                        'partner_product_id' => $itemId,
+                        'stock_id' => $item['stock_id'],
+                        'quantity_used' => $convertedQuantity,
+                        'display_unit_id' => $item['unit_id'],
+                    ]);
+                }
+
+                // Update product stock_type ke 'linked' dan picu recalculation
+                if ($product->stock_type !== 'linked') {
+                    $product->update(['stock_type' => 'linked']);
+                }
+                $recalculator->recalculateSingleTarget($product);
+            } elseif ($itemType === 'option') {
+                // Verifikasi Opsi: Ambil opsi dan verifikasi kepemilikan melalui produk induk
+                $option = PartnerProductOption::findOrFail($itemId);
+
+                $product = PartnerProduct::where('id', $option->partner_product_id)
+                    ->where('owner_id', $currentOwnerId)
+                    ->firstOrFail(); // Pastikan Owner memiliki produk induk
+
+                // Delete existing recipe
+                PartnerProductOptionsRecipe::where('partner_product_option_id', $itemId)->delete();
+
+                // Insert new recipe items
+                foreach ($recipeItems as $item) {
+                    $convertedQuantity = $converter->convertToBaseUnit(
+                        $item['quantity'],
+                        $item['unit_id']
+                    );
+
+                    PartnerProductOptionsRecipe::create([
+                        'partner_product_option_id' => $itemId,
+                        'stock_id' => $item['stock_id'],
+                        'quantity_used' => $convertedQuantity,
+                        'display_unit_id' => $item['unit_id'],
+                    ]);
+                }
+
+                // Update option stock_type ke 'linked' dan picu recalculation
+                if ($option->stock_type !== 'linked') {
+                    $option->update(['stock_type' => 'linked']);
+                }
+                $recalculator->recalculateSingleTarget($option);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Resep berhasil disimpan'
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyimpan resep: ' . $e->getMessage()
+            ], 500);
         }
     }
 

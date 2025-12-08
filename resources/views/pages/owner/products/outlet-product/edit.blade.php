@@ -149,7 +149,7 @@
 
                       @foreach($data->parent_options as $parent)
                         <div class="mb-3 p-2 border rounded">
-                          <div class="d-flex justify-content-between align-items-center mb-2">
+                          <div class="d-flex justify-content-between align-items-start mb-2">
                             <div class="font-weight-bold">
                               {{ $parent->name }}
                               @if($parent->provision)
@@ -170,7 +170,7 @@
                               @endif
                             </div>
                             @if($parent->description)
-                              <div class="text-muted small">{{ $parent->description }}</div>
+                              <div class="text-muted small ml-3">{{ $parent->description }}</div>
                             @endif
                           </div>
 
@@ -179,33 +179,32 @@
                               <table class="table table-sm mb-0">
                                 <thead class="thead-light">
                                   <tr>
-                                    <th style="width:25%">{{ __('messages.owner.products.outlet_products.option') }}</th>
-                                    <th class="text-right" style="width:15%">{{ __('messages.owner.products.outlet_products.price') }}</th>
-                                    <th class="text-center" style="width:15%">Stock Type</th>
-                                    <th class="text-center" style="width:30%">{{ __('messages.owner.products.outlet_products.new_stock') }}</th>
-                                    <th class="text-right" style="width:15%">{{ __('messages.owner.products.outlet_products.old_stock') }}</th>
+                                    <th style="width:20%">{{ __('messages.owner.products.outlet_products.option') }}</th>
+                                    <th class="text-right" style="width:12%">{{ __('messages.owner.products.outlet_products.price') }}</th>
+                                    <th class="text-center" style="width:13%">Stock Type</th>
+                                    <th class="text-center" style="width:45%">{{ __('messages.owner.products.outlet_products.new_stock') }}</th>
+                                    <th class="text-center" style="width:10%">Last</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   @foreach($parent->options as $opt)
                                     @php
-                                      // Get stock_type dari option atau default ke 'direct'
                                       $optStockType = old("options.{$opt->id}.stock_type", $opt->stock_type ?? 'direct');
+                                      $optUnlimited = old("options.{$opt->id}.always_available", $opt->always_available_flag ?? 0);
                                     @endphp
                                     <tr>
-                                      <td>{{ $opt->name }}</td>
+                                      <td class="font-weight-bold">{{ $opt->name }}</td>
                                       <td class="text-right">
                                         Rp {{ number_format((float) ($opt->price ?? 0), 0, ',', '.') }}
                                       </td>
                                       <td class="text-center">
-                                        {{-- Stock Type Selector --}}
                                         <select 
                                           name="options[{{ $opt->id }}][stock_type]" 
                                           class="form-control form-control-sm opt-stock-type"
                                           data-opt-id="{{ $opt->id }}"
                                         >
-                                          <option value="direct" {{ $optStockType === 'direct' ? 'selected' : '' }}>Direct</option>
-                                          <option value="linked" {{ $optStockType === 'linked' ? 'selected' : '' }}>Linked</option>
+                                          <option value="direct" {{ $optStockType === 'direct' ? 'selected' : '' }}>Direct Stock</option>
+                                          <option value="linked" {{ $optStockType === 'linked' ? 'selected' : '' }}>Linked (Recipe Based)</option>
                                         </select>
                                       </td>
                                       <td class="text-center">
@@ -220,7 +219,7 @@
                                             value="1"
                                             data-qty="#opt-qty-{{ $opt->id }}"
                                             data-wrap="#opt-qty-wrap-{{ $opt->id }}"
-                                            {{ old("options.{$opt->id}.always_available", $opt->always_available_flag ?? 0) ? 'checked' : '' }}
+                                            {{ $optUnlimited ? 'checked' : '' }}
                                           >
                                           <label class="custom-control-label" for="opt-aa-{{ $opt->id }}">{{ __('messages.owner.products.outlet_products.always_available') }}</label>
                                         </div>
@@ -240,7 +239,7 @@
                                               class="form-control text-center"
                                               min="0"
                                               step="1"
-                                              value="{{ old("options.{$opt->id}.quantity", $opt->quantity_available ?? 0) }}"
+                                              value="{{ (int) old("options.{$opt->id}.quantity", $opt->quantity_available ?? 0) }}"
                                               style="max-width:120px"
                                             >
                                             <div class="input-group-append">
@@ -251,14 +250,18 @@
                                           </div>
                                         </div>
 
-                                        {{-- Info untuk linked stock --}}
-                                        <div id="opt-linked-info-{{ $opt->id }}" class="mt-2 alert alert-info py-2 small opt-linked-info" style="display:none;">
-                                          <i class="fas fa-link mr-1"></i>
-                                          Stok diatur oleh resep (Bahan Mentah).
+                                        {{-- Info + Button untuk linked stock --}}
+                                        <div id="opt-linked-info-{{ $opt->id }}" class="mt-2 opt-linked-info" style="display:none;">
+                                          <div class="alert alert-info py-2 px-2 mb-1 small">
+                                            <i class="fas fa-link mr-1"></i>Stok diatur oleh resep
+                                          </div>
+                                          <button type="button" class="btn btn-sm btn-outline-choco btn-block btn-manage-recipe" data-opt-id="{{ $opt->id }}" data-opt-name="{{ $opt->name }}">
+                                            Atur Resep
+                                          </button>
                                         </div>
                                       </td>
-                                      <td class="text-right">
-                                        <span class="text-muted small">{{ old("options.{$opt->id}.quantity", $opt->quantity_available ?? 0) }}</span>
+                                      <td class="text-center">
+                                        <span class="text-muted small">{{ (int) ($opt->quantity_available ?? 0) }}</span>
                                       </td>
                                     </tr>
                                   @endforeach
@@ -280,15 +283,25 @@
                     <h5 class="mb-3">{{ __('messages.owner.products.outlet_products.update_stock_status') }}</h5>
 
                     @php
+                      $prodUnlimited = old('always_available', $data->always_available_flag ?? 0);
+                      $prodStockType = old('stock_type', $data->stock_type ?? 'direct');
                       $initialQuantity = 0;
-
                       if ($data->stock_type === 'direct' && $data->stock) {
                         $initialQuantity = (int) $data->quantity_available;
                       }
                     @endphp
 
+                    {{-- Stock Type Product --}}
+                    <div class="form-group mb-3">
+                      <label class="mb-2 font-weight-bold">Stock Type</label>
+                      <select name="stock_type" id="product_stock_type" class="form-control">
+                        <option value="direct" {{ $prodStockType === 'direct' ? 'selected' : '' }}>Direct Stock</option>
+                        <option value="linked" {{ $prodStockType === 'linked' ? 'selected' : '' }}>Linked (Recipe Based)</option>
+                      </select>
+                    </div>
+
                     {{-- Toggle always available (product) --}}
-                    <div class="form-group">
+                    <div class="form-group mb-3" id="product_aa_group">
                       <div class="custom-control custom-switch">
                         <input type="hidden" name="always_available" value="0">
                         <input
@@ -297,7 +310,7 @@
                           id="aa_product"
                           name="always_available"
                           value="1"
-                          {{ old('always_available', $data->always_available_flag ?? 0) ? 'checked' : '' }}
+                          {{ $prodUnlimited ? 'checked' : '' }}
                         >
                         <label class="custom-control-label" for="aa_product">
                           {{ __('messages.owner.products.outlet_products.always_available_product') }}
@@ -306,53 +319,53 @@
                       <small class="text-muted">{{ __('messages.owner.products.outlet_products.if_active_stock_hidden') }}</small>
                     </div>
 
-                    {{-- Blok Stok Utama (Input 'quantity') --}}
-                    @if($data->stock_type === 'direct')
-                      <div class="form-group" id="product_qty_group">
-                        <label class="mb-1">{{ __('messages.owner.products.outlet_products.stock_product') }} (pcs)</label>
-                        <div class="input-group">
-                          <div class="input-group-prepend">
-                            <button type="button" class="btn btn-outline-secondary" id="btn-qty-dec">
-                              <i class="fas fa-minus"></i>
-                            </button>
-                          </div>
-                          <input
-                            type="number"
-                            id="quantity"
-                            name="quantity"
-                            class="form-control text-center"
-                            min="0"
-                            step="1"
-                            value="{{ old('quantity', $initialQuantity) }}" 
-                          >
-                          <div class="input-group-append">
-                            <button type="button" class="btn btn-outline-secondary" id="btn-qty-inc">
-                              <i class="fas fa-plus"></i>
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary" id="btn-qty-max">{{ __('messages.owner.products.outlet_products.max') }}</button>
-                          </div>
+                    {{-- Quantity Input (untuk direct) --}}
+                    <div class="form-group mb-3" id="product_qty_group">
+                      <label class="mb-1 font-weight-bold">{{ __('messages.owner.products.outlet_products.stock_product') }} (pcs)</label>
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <button type="button" class="btn btn-outline-secondary" id="btn-qty-dec">
+                            <i class="fas fa-minus"></i>
+                          </button>
                         </div>
-                        @error('quantity')
-                          <small class="text-danger d-block mt-1">{{ $message }}</small>
-                        @enderror
+                        <input
+                          type="number"
+                          id="quantity"
+                          name="quantity"
+                          class="form-control text-center"
+                          min="0"
+                          step="1"
+                          value="{{ old('quantity', $initialQuantity) }}" 
+                        >
+                        <div class="input-group-append">
+                          <button type="button" class="btn btn-outline-secondary" id="btn-qty-inc">
+                            <i class="fas fa-plus"></i>
+                          </button>
+                          <button type="button" class="btn btn-outline-secondary" id="btn-qty-max">{{ __('messages.owner.products.outlet_products.max') }}</button>
+                        </div>
                       </div>
+                      @error('quantity')
+                        <small class="text-danger d-block mt-1">{{ $message }}</small>
+                      @enderror
+                    </div>
 
-                      @if($pcsUnitId)
-                        <input type="hidden" name="display_unit_id" value="{{ $pcsUnitId }}">
-                      @else
-                        <div class="alert alert-danger small py-2">
-                          Error: Unit dasar 'pcs' tidak terdefinisi di Master Units.
-                        </div>
-                      @endif
+                    {{-- Linked Info + Button (untuk linked) --}}
+                    <div class="form-group mb-3" id="product_linked_group" style="display:none;">
+                      <label class="mb-2 font-weight-bold">{{ __('messages.owner.products.outlet_products.stock_product') }}</label>
+                      <div class="alert alert-info py-2 mb-2">
+                        <i class="fas fa-link mr-2"></i>
+                        <span>Stok diatur oleh resep.</span>
+                      </div>
+                      <button type="button" class="btn btn-outline-choco btn-block" id="btn-manage-product-recipe" data-product-id="{{ $data->id }}" data-product-name="{{ $data->name }}" data-partner-id={{ $data->partner_id }}>
+                        Atur Resep Produk
+                      </button>
+                    </div>
 
+                    @if($pcsUnitId)
+                      <input type="hidden" name="display_unit_id" value="{{ $pcsUnitId }}">
                     @else
-                      <div class="form-group">
-                        <label class="mb-1">{{ __('messages.owner.products.outlet_products.stock_product') }}</label>
-                        <div class="alert alert-info py-2 small">
-                            <i class="fas fa-link mr-1"></i>
-                            Stok diatur oleh resep (Bahan Mentah).
-                        </div>
-                        <input type="hidden" name="quantity" value="0">
+                      <div class="alert alert-danger small py-2">
+                        Error: Unit dasar 'pcs' tidak terdefinisi di Master Units.
                       </div>
                     @endif
 
@@ -458,6 +471,44 @@
     </div>
   </section>
 
+  {{-- Recipe Management Modal --}}
+  <div class="modal fade" id="recipeModal" tabindex="-1" role="dialog" aria-labelledby="recipeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-choco text-white">
+          <h5 class="modal-title" id="recipeModalLabel">
+            <i class="fas fa-clipboard-list mr-2"></i>Atur Resep: <span id="modal-item-name"></span>
+          </h5>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle mr-2"></i>
+            <strong>Cara Kerja:</strong> Tambahkan bahan mentah yang dibutuhkan untuk membuat produk ini. Sistem akan menghitung stok otomatis berdasarkan ketersediaan bahan.
+          </div>
+
+          {{-- Recipe Items List --}}
+          <div id="recipe-items-container">
+            {{-- Will be populated via JavaScript --}}
+          </div>
+
+          <button type="button" class="btn btn-outline-primary btn-sm mt-3" id="add-recipe-item">
+            <i class="fas fa-plus mr-1"></i>Tambah Bahan
+          </button>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
+          <button type="button" class="btn btn-primary" id="save-recipe">
+            <i class="fas fa-save mr-1"></i>Simpan Resep
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
   <style>
   /* ===== Owner › Outlet Product Edit (page scope) ===== */
   .owner-op-edit{
@@ -521,11 +572,20 @@
   .owner-op-edit [id^="opt-qty-wrap-"].d-none{ opacity:0; transform:translateY(-4px); }
 
   .owner-op-edit .text-muted{ color:#6b7280 !important; }
+
+  .btn-outline-choco{ color:var(--choco); border-color:var(--choco); }
+  .btn-outline-choco:hover{ color:#fff; background:var(--choco); border-color:var(--choco); }
+
+  .bg-choco{ background: linear-gradient(135deg, var(--choco), var(--soft-choco)); }
   </style>
 
 @endsection
 
-@section('scripts')
+
+@push('scripts')
+  <script src="{{ asset('js/owner/outlet-product/edit.js') }}"></script>
+@endpush
+{{-- @section('scripts')
   <script>
     // Quantity helpers (produk)
     (function () {
@@ -657,4 +717,4 @@
       });
     })();
   </script>
-@endsection
+@endsection --}}
