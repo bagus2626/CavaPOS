@@ -235,6 +235,30 @@
                         </div>
                         <div class="section-body">
                             <div class="form-grid form-grid-2">
+                                {{-- Logo --}}
+                                <div class="form-group">
+                                    <span
+                                        class="form-label">{{ __('messages.owner.outlet.all_outlets.upload_logo_optional') }}</span>
+                                    <div class="media-upload-group">
+                                        <div class="media-preview media-preview-logo {{ $outlet->logo ? '' : 'd-none' }}"
+                                            id="imagePreviewWrapper2">
+                                            <img id="imagePreview2"
+                                                src="{{ $outlet->logo ? asset('storage/' . $outlet->logo) : '' }}"
+                                                alt="Logo Preview" class="media-image media-image-logo">
+                                            <button type="button" id="clearImageBtn2"
+                                                class="media-remove-btn">&times;</button>
+                                        </div>
+                                        <button type="button" class="btn-upload"
+                                            onclick="document.getElementById('logo').click()">
+                                            {{ __('Change Logo') }}
+                                        </button>
+                                        <input type="file" name="logo" id="logo" class="d-none"
+                                            accept="image/*">
+                                        <input type="hidden" name="remove_logo" id="remove_logo" value="0">
+                                        <small
+                                            class="form-hint">{{ __('messages.owner.outlet.all_outlets.muted_text_2') }}</small>
+                                    </div>
+                                </div>
                                 {{-- Background Picture --}}
                                 <div class="form-group">
                                     <span
@@ -256,31 +280,6 @@
                                             accept="image/*">
                                         <input type="hidden" name="remove_background_picture"
                                             id="remove_background_picture" value="0">
-                                        <small
-                                            class="form-hint">{{ __('messages.owner.outlet.all_outlets.muted_text_2') }}</small>
-                                    </div>
-                                </div>
-
-                                {{-- Logo --}}
-                                <div class="form-group">
-                                    <span
-                                        class="form-label">{{ __('messages.owner.outlet.all_outlets.upload_logo_optional') }}</span>
-                                    <div class="media-upload-group">
-                                        <div class="media-preview media-preview-logo {{ $outlet->logo ? '' : 'd-none' }}"
-                                            id="imagePreviewWrapper2">
-                                            <img id="imagePreview2"
-                                                src="{{ $outlet->logo ? asset('storage/' . $outlet->logo) : '' }}"
-                                                alt="Logo Preview" class="media-image media-image-logo">
-                                            <button type="button" id="clearImageBtn2"
-                                                class="media-remove-btn">&times;</button>
-                                        </div>
-                                        <button type="button" class="btn-upload"
-                                            onclick="document.getElementById('logo').click()">
-                                            {{ __('Change Logo') }}
-                                        </button>
-                                        <input type="file" name="logo" id="logo" class="d-none"
-                                            accept="image/*">
-                                        <input type="hidden" name="remove_logo" id="remove_logo" value="0">
                                         <small
                                             class="form-hint">{{ __('messages.owner.outlet.all_outlets.muted_text_2') }}</small>
                                     </div>
@@ -1680,20 +1679,28 @@
             });
 
             document.getElementById('cropBackgroundBtn').addEventListener('click', function() {
-                const canvas = backgroundCropper.getCroppedCanvas();
+                const canvas = backgroundCropper.getCroppedCanvas({
+                    maxWidth: 1600,      // samakan dengan resize di server
+                    maxHeight: 1600,
+                    imageSmoothingQuality: 'high',
+                });
+
                 canvas.toBlob(function(blob) {
-                    const file = new File([blob], 'background.png', {
-                        type: 'image/png'
+                    console.log('Background blob size (bytes):', blob.size); // bisa cek di console
+
+                    const file = new File([blob], 'background.jpg', {
+                        type: 'image/jpeg'
                     });
+
                     const dataTransfer = new DataTransfer();
                     dataTransfer.items.add(file);
                     imageInput.files = dataTransfer.files;
 
-                    imagePreview.src = canvas.toDataURL();
+                    imagePreview.src = canvas.toDataURL('image/jpeg', 0.8);
                     imagePreviewWrapper.classList.remove('d-none');
                     removeBackgroundInput.value = '0';
                     cropBackgroundModal.modal('hide');
-                });
+                }, 'image/jpeg', 0.8); // quality 0.8 biar lebih kecil
             });
 
             clearImageBtn.addEventListener('click', function() {
@@ -1736,20 +1743,28 @@
             });
 
             document.getElementById('cropLogoBtn').addEventListener('click', function() {
-                const canvas = logoCropper.getCroppedCanvas();
+                const canvas = logoCropper.getCroppedCanvas({
+                    maxWidth: 800,
+                    maxHeight: 800,
+                    imageSmoothingQuality: 'high',
+                });
+
                 canvas.toBlob(function(blob) {
-                    const file = new File([blob], 'logo.png', {
-                        type: 'image/png'
+                    console.log('Logo blob size (bytes):', blob.size);
+
+                    const file = new File([blob], 'logo.jpg', {
+                        type: 'image/jpeg'
                     });
+
                     const dataTransfer = new DataTransfer();
                     dataTransfer.items.add(file);
                     logoInput.files = dataTransfer.files;
 
-                    imagePreview2.src = canvas.toDataURL();
+                    imagePreview2.src = canvas.toDataURL('image/jpeg', 0.8);
                     imagePreviewWrapper2.classList.remove('d-none');
                     removeLogoInput.value = '0';
                     cropLogoModal.modal('hide');
-                });
+                }, 'image/jpeg', 0.8);
             });
 
             clearImageBtn2.addEventListener('click', function() {

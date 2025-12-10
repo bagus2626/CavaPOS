@@ -276,8 +276,8 @@ class OwnerOutletController extends Controller
             'address'  => ['required', 'string'],
             'is_active' => ['nullable', 'boolean'],
             'qr_mode' => ['nullable', 'string', 'in:disabled,barcode_only,cashier_only,both'],
-            'image'    => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:2048'],
-            'logo'     => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:2048'],
+            'image'    => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:4096'],
+            'logo'     => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:4096'],
 
             // flag hapus
             'remove_background_picture' => ['nullable', 'boolean'],
@@ -478,7 +478,7 @@ class OwnerOutletController extends Controller
 
             return redirect()
                 ->route('owner.user-owner.outlets.index')
-                ->with('success', 'Employee deleted successfully!');
+                ->with('success', 'Outlet deleted successfully!');
         } catch (\Throwable $e) {
             return back()
                 ->withErrors(['error' => 'Gagal menghapus: ' . $e->getMessage()]);

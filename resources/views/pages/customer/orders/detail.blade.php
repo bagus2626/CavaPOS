@@ -56,7 +56,7 @@
         </div>
 
         {{-- PERINGATAN JIKA PEMBAYARAN BELUM LUNAS --}}
-        @if(!$order->payment_flag && $payment && $payment->payment_status !== 'PAID')
+        @if(!$order->payment_flag && $payment && $payment->payment_status !== 'PAID' && $order->order_status !== 'PAYMENT')
             <div class="mt-4 rounded-xl border border-red-300 bg-red-100 px-4 py-3 text-sm">
                 <div class="flex items-start gap-3">
                     <div class="flex-1 space-y-2">
@@ -232,9 +232,6 @@
                 </div>
             @endif
         @endif
-
-
-
 
         {{-- Timeline Status --}}
         @php

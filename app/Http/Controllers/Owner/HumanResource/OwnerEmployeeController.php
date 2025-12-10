@@ -21,14 +21,35 @@ use Illuminate\Support\Str;
 
 class OwnerEmployeeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $owner_id = Auth::id();
+
         $partners = User::where('owner_id', $owner_id)->get();
-        $partners_ids = $partners->pluck('id');
-        $employees = Employee::with('partner')->whereIn('partner_id', $partners_ids)->get();
-        $roles = $employees->pluck('role')->unique()->sort()->values();
-        return view('pages.owner.human-resource.employee.index', compact('partners', 'employees', 'roles'));
+        $partnerIds = $partners->pluck('id');
+
+        $employeesQuery = Employee::with('partner')
+            ->whereIn('partner_id', $partnerIds);
+
+        $currentPartnerId = $request->input('partner_id');
+
+        if (!empty($currentPartnerId)) {
+            $employeesQuery->where('partner_id', $currentPartnerId);
+        }
+
+        $employees = $employeesQuery
+            ->orderBy('id', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+
+        $roles = (clone $employeesQuery)->pluck('role')->unique()->sort()->values();
+
+        return view('pages.owner.human-resource.employee.index', compact(
+            'partners',
+            'employees',
+            'roles',
+            'currentPartnerId',
+        ));
     }
 
     public function create()

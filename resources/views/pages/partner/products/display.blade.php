@@ -15,14 +15,13 @@
     <tbody>
       @foreach ($products as $index => $product)
               <tr data-category="{{ $product->category_id }}">
-                <td class="text-muted">{{ $index + 1 }}</td>
-
+                <td class="text-muted">
+                  {{ $products->firstItem() + $index }}
+                </td>
                 <td class="fw-600">{{ $product->name }}</td>
-
                 <td class="col-desc">
                   <div class="clamp-2">{{ $product->description ?? '—' }}</div>
                 </td>
-
                 <td class="col-options">
                   @if($product->parent_options->isEmpty())
                     <span class="text-muted">—</span>
@@ -34,9 +33,7 @@
                     </div>
                   @endif
                 </td>
-
                 <td>
-
                   @php
                     $qtyAvailable = round($product->quantity_available, 0);
                   @endphp
@@ -53,9 +50,7 @@
                     <span class="" title="Stok tidak ditemukan">0</span>
                   @endif
                 </td>
-
                 <td>Rp&nbsp;{{ number_format($product->price, 0, ',', '.') }}</td>
-
                 <td class="col-images">
                   @if(!empty($product->pictures) && is_array($product->pictures))
                     <div class="thumb-list">
@@ -72,7 +67,6 @@
                     <span class="text-muted">{{ __('messages.partner.product.all_product.no_images') }}</span>
                   @endif
                 </td>
-
                 <td class="col-actions">
                   <div class="btn-group btn-group-sm">
                     <a href="{{ route('partner.products.show', $product->id) }}" class="btn btn-outline-secondary btn-pill">
@@ -87,7 +81,6 @@
                     </button> --}}
                   </div>
                 </td>
-
               </tr>
       @endforeach
     </tbody>

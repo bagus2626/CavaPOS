@@ -51,6 +51,56 @@ return [
             'guest' => 'Tamu',
             'order_history' => 'Riwayat Pesanan'
         ],
+        'forgot_password' => [
+            'forgot_password' => 'Lupa Password',
+            'forgot_password_instruction' => 'Masukkan email yang terdaftar. Kami akan mengirimkan tautan untuk reset password.',
+            'send_reset_link' => 'Kirim Link Reset',
+            'back_to_login' => 'Kembali ke Login'
+        ],
+        'login_choice' => [
+            'welcome_to' => 'Selamat datang di',
+            'choose_how_to_log_in' => 'Pilih cara masuk',
+            'login_with_email_or_register' => 'Masuk dengan Email/Daftar',
+            'login_with_google' => 'Masuk dengan Google',
+            'continue_with_guest' => 'Lanjut sebagai Tamu',
+            'login_instruction' => 'Masuk untuk mendapatkan pengalaman terbaik di menu kami'
+        ],
+        'login' => [
+            'customer_login' => 'Login Customer',
+            'password' => 'Kata Sandi',
+            'remember_me' => 'Ingat saya',
+            'forgot_password' => 'Lupa kata sandi?',
+            'login' => 'Masuk',
+            'or' => 'atau',
+            'login_with_google' => 'Masuk dengan Google',
+            'continue_with_guest' => 'Lanjut sebagai Tamu',
+            'dont_have_an_account_yet' => 'Belum punya akun?',
+            'register_now' => 'Daftar sekarang'
+        ],
+        'register' => [
+            'register_customer' => 'Daftar Customer',
+            'full_name' => 'Nama Lengkap',
+            'phone_number' => 'No HP',
+            'password', 'Kata Sandi',
+            'password_confirmation' => 'Konfirmasi Kata Sandi',
+            'register' => 'Daftar',
+            'or' => 'atau',
+            'register_with_google' => 'Daftar dengan Google',
+            'have_an_account_yet_login' => 'Sudah punya akun? Masuk'
+        ],
+        'reset_password' => [
+            'reset_password' => 'Atur Ulang Kata Sandi',
+            'new_password' => 'Kata Sandi Baru',
+            'password_confirmation' => 'Konfirmasi Kata Sandi',
+        ],
+        'verify_email' => [
+            'email_verification' => 'Verifikasi Email',
+            'verification_information' => 'Link verifikasi telah dikirim ke email Anda.',
+            'verification_information_1' => 'Link verifikasi baru telah dikirim ke email Anda.',
+            'verification_information_2' => 'Kami telah mengirimkan link verifikasi ke email Anda. Jika belum menerima, klik tombol di bawah untuk mengirim ulang.',
+            're_send_verification' => 'Kirim Ulang Link Verifikasi',
+            'logout' => 'Keluar'
+        ],
         'menu' => [
             'table' => 'Meja',
             'all' => 'Semua',
@@ -578,7 +628,7 @@ return [
                 'upload_picture' => 'Unggah Gambar Latar',
                 'upload_logo_optional' => 'Unggah Logo (opsional)',
                 'upload_logo' => 'Unggah Logo',
-                'muted_text_2' => 'JPG/PNG/WEBP, maks 2 MB. Biarkan kosong jika tidak mengubah gambar.',
+                'muted_text_2' => 'JPG/PNG/WEBP, maks 4 MB. Biarkan kosong jika tidak mengubah gambar.',
                 'outlet_status' => 'Status Toko',
                 'activate_outlet' => 'Aktifkan Toko',
                 'muted_text_3' => 'Jika dimatikan, outlet tidak tampil untuk pelanggan.',
@@ -683,11 +733,11 @@ return [
                 'product_images_max' => 'Gambar Produk (Maks 5)',
                 'can_upload_to_5' => 'Kamu bisa unggah sampai dengan 5 gambar.',
                 'product_description_placeholder' => 'Masukkan deskripsi produk',
-                'add_menu_option' => 'Tambah Pilihan Menu',
+                'add_menu_option' => 'Tambah Kategori Pilihan',
                 'reset' => 'Reset/Atur Ulang',
                 'category_option' => 'Kategori Pilihan',
-                'menu_name' => 'Nama Menu',
-                'enter_menu_name' => 'Masukkan nama menu',
+                'menu_name' => 'Nama Kategori Pilihan',
+                'enter_menu_name' => 'Masukkan nama kategori pilihan',
                 'menu_description' => 'Deskripsi Menu',
                 'select_provision' => 'Pilih Ketentuan',
                 'optional' => 'Opsional',

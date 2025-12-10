@@ -101,7 +101,7 @@
             <div class="rounded-2xl border border-choco/10 p-4 bg-white shadow-sm">
                 <p class="metric-label text-xs text-gray-500">Belum Bayar (Cash)</p>
                 <p class="mt-2 text-3xl font-extrabold text-soft-choco" id="metric-unpaid-cash">
-                    {{ number_format($ordersToday->where('payment_method', 'CASH')->where('payment_flag', 0)->count() ?? 0) }}
+                    {{ number_format($ordersToday->where('payment_flag', 0)->count() ?? 0) }}
                 </p>
             </div>
 
@@ -140,65 +140,70 @@
 
         {{-- TABS --}}
         <div class="mb-6">
-            <div class="inline-flex rounded-xl border border-choco/20 bg-white overflow-hidden">
-                @php
-                    // Label tab
-                    $tabs = [
-                        'pembelian' => 'Pembelian',
-                        'pembayaran' => 'Pembayaran',
-                        'proses' => 'Proses',
-                        'selesai' => 'Selesai',
-                    ];
+            <div class="flex justify-center">
+                <div class="flex flex-wrap justify-center rounded-xl border border-choco/20 bg-white overflow-hidden max-w-full">
+                    @php
+                        $tabs = [
+                            'pembelian'  => 'Pembelian',
+                            'pembayaran' => 'Pembayaran',
+                            'proses'     => 'Proses',
+                            'selesai'    => 'Selesai',
+                        ];
 
-                    // Hitung jumlah untuk badge
-                    $tabCounts = [
-                        // Pembayaran: Cash & belum bayar
-                        'pembayaran' => number_format(
-                            $ordersToday->whereIn('payment_method', ['CASH', 'QRIS'])
-                                ->whereIn('order_status', ['UNPAID', 'EXPIRED'])
-                                ->where('payment_flag', 0)
-                                ->count() ?? 0
-                        ),
-                        // Proses: status PROCESSED
-                        'proses' => number_format(
-                            $ordersToday->whereIn('order_status', ['PROCESSED', 'PAID'])->count() ?? 0
-                        ),
-                        // Selesai (opsional): status SERVED
-                        'selesai' => number_format(
-                            $ordersToday->where('order_status', 'SERVED')->count() ?? 0
-                        ),
-                    ];
+                        $tabCounts = [
+                            'pembayaran' => number_format(
+                                $ordersToday->whereIn('payment_method', ['CASH', 'QRIS'])
+                                    ->whereIn('order_status', ['UNPAID', 'EXPIRED'])
+                                    ->where('payment_flag', 0)
+                                    ->count() ?? 0
+                            ),
+                            'proses' => number_format(
+                                $ordersToday->whereIn('order_status', ['PROCESSED', 'PAID'])->count() ?? 0
+                            ),
+                            'selesai' => number_format(
+                                $ordersToday->where('order_status', 'SERVED')->count() ?? 0
+                            ),
+                        ];
+                    @endphp
 
-                @endphp
+                    @foreach ($tabs as $key => $label)
+                        <button
+                            type="button"
+                            data-tab="{{ $key }}"
+                            class="tab-btn
+                                flex-1 basis-1/2 
+                                sm:flex-none sm:basis-auto
+                                px-3 py-2
+                                text-xs sm:text-sm font-semibold text-center
+                                hover:bg-soft-choco/10
+                                focus:ring-2 focus:ring-soft-choco/30
+                                {{ $loop->first ? 'bg-soft-choco/10 text-choco' : 'text-gray-700' }}"
+                        >
+                            <span class="inline-flex items-center gap-2">
+                                <span>{{ $label }}</span>
+                                @if(isset($tabCounts[$key]))
+                                    <span
+                                        id="tab-badge-{{ $key }}"
+                                        class="inline-flex items-center justify-center rounded-full
+                                            bg-choco/10 text-choco text-[11px] font-bold px-2 py-0.5"
+                                    >
+                                        {{ $tabCounts[$key] }}
+                                    </span>
+                                @endif
+                            </span>
+                        </button>
 
-
-                @foreach ($tabs as $key => $label)
-                    <button type="button" class="tab-btn px-4 py-2 text-sm font-semibold hover:bg-soft-choco/10 focus:ring-2 focus:ring-soft-choco/30
-                                            {{ $loop->first ? 'bg-soft-choco/10 text-choco' : 'text-gray-700' }}"
-                        data-tab="{{ $key }}">
-                        <span class="inline-flex items-center gap-2">
-                            <span>{{ $label }}</span>
-                            @if(isset($tabCounts[$key]))
-                                <span 
-                                    id="tab-badge-{{ $key }}"
-                                    class="ml-1 inline-flex items-center justify-center rounded-full
-                                                                bg-choco/10 text-choco text-[11px] font-bold px-2 py-0.5">
-                                    {{ $tabCounts[$key] }}
-                                </span>
-                            @endif
-                        </span>
-                    </button>
-                    @if (!$loop->last)
-                        <span class="w-px bg-choco/10"></span>
-                    @endif
-                @endforeach
-
+                        @if (!$loop->last)
+                            <span class="hidden sm:block w-px bg-choco/10"></span>
+                        @endif
+                    @endforeach
+                </div>
             </div>
         </div>
 
         {{-- TAB CONTENT CONTAINER --}}
         <div id="tabContent"
-            class="relative rounded-2xl border border-choco/10 bg-white shadow-sm overflow-hidden overflow-y-auto mb-7 h-[70vh] [scrollbar-gutter:stable]">
+            class="relative w-full max-w-full rounded-2xl border border-choco/10 bg-white shadow-sm overflow-hidden overflow-y-auto mb-7 h-[70vh] [scrollbar-gutter:stable]">
             <div id="tabLoading" class="hidden p-10 text-center text-gray-500">Memuat…</div>
         </div>
 
@@ -261,7 +266,7 @@
                     <h2 class="font-semibold text-choco">Data Order ({{ $periodLabel }})</h2>
                     <span class="text-xs text-gray-500">{{ $ordersToday->count() }} order</span>
                 </div>
-                <div class="overflow-x-auto overflow-y-auto flex-1">
+                <div class="overflow-x-auto overflow-y-auto flex-1 w-full max-w-full">
                     <table class="min-w-full text-sm">
                         <thead class="bg-[#fcecec] text-gray-700 sticky top-0 z-10">
                             <tr>
@@ -314,9 +319,6 @@
                                                 class="text-sm px-3 py-1.5 rounded-lg border border-choco/20 text-choco hover:bg-soft-choco/10 focus:ring-2 focus:ring-soft-choco/30">
                                                 Detail
                                             </a>
-                                            <a href="#"
-                                                class="px-3 py-1.5 rounded-lg border border-choco/20 text-choco hover:bg-soft-choco/10"
-                                                target="_blank">Cetak</a>
                                             @if ($o->payment_method === 'CASH' && $o->status === 'UNPAID')
                                                 <button type="button"
                                                     class="px-3 py-1.5 rounded-lg bg-choco text-white hover:bg-choco/90"

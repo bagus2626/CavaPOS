@@ -253,7 +253,7 @@
                                 <div
                                     @class([
                                         'menu-item bg-white flex flex-row transition hover:shadow-lg px-4 border-b border-gray-200',
-                                        'grayscale' => $product->quantity_available < 1 && $product->always_available_flag == false,
+                                        'grayscale pointer-events-none cursor-default' => $product->quantity_available < 1 && $product->always_available_flag == false,
                                     ])
                                     data-category="{{ $product->category_id }}"
                                     data-product-id="{{ $product->id }}"   {{-- ← TAMBAHAN INI --}}
@@ -1058,7 +1058,6 @@
 
                 document.querySelectorAll('.menu-item').forEach(card => {
                     card.addEventListener('click', function (e) {
-                        // kalau yang diklik tombol plus/minus, biarkan handler tombol yang bekerja
                         if (e.target.closest('.plus-btn') || e.target.closest('.minus-btn')) {
                             return;
                         }
@@ -1069,11 +1068,20 @@
                         const productData = productsData.find(p => p.id === productId);
                         if (!productData) return;
 
+                        const stockQty = Number(productData.quantity_available) || 0;
+                        const alwaysAvailable = Boolean(productData.always_available_flag);
+
+                        if (stockQty < 1 && !alwaysAvailable) {
+                            console.log('Product sold out, card click disabled:', productData.name);
+                            return;
+                        }
+
                         currentProductId = productId;
                         selectedOptions = []; // reset pilihan setiap buka modal
                         showModal(productData);
                     });
                 });
+
 
                 // MINUS: kurangi total agregat produk dengan mengurangi line item "terakhir"
                 document.querySelectorAll('.minus-btn').forEach(button => {
