@@ -1,10 +1,10 @@
 @extends('layouts.customer')
 
-@section('title', 'Login Customer')
+@section('title', __('messages.customer.login.customer_login'))
 
 @section('content')
 <div class="w-full max-w-md bg-white shadow-lg rounded-lg p-6 md:p-8">
-    <h2 class="text-2xl font-bold text-center mb-6">Login Customer</h2>
+    <h2 class="text-2xl font-bold text-center mb-6">{{ __('messages.customer.login.customer_login') }}</h2>
 
     {{-- Form login email/password --}}
     <form method="POST" action="{{ route('customer.login.submit', ['partner_slug' => $partner_slug, 'table_code' => $table_code]) }}" class="space-y-4">
@@ -20,7 +20,7 @@
         </div>
 
         <div>
-            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+            <label for="password" class="block text-sm font-medium text-gray-700">{{ __('messages.customer.login.password') }}</label>
             <input id="password" type="password" name="password" required
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
             @error('password')
@@ -31,12 +31,12 @@
         <div class="flex items-center justify-between">
             <div class="flex items-center">
                 <input id="remember" type="checkbox" name="remember" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                <label for="remember" class="ml-2 block text-sm text-gray-900">Ingat saya</label>
+                <label for="remember" class="ml-2 block text-sm text-gray-900">{{ __('messages.customer.login.remember_me') }}</label>
             </div>
             <div class="text-sm">
                 <a href="{{ route('customer.password.request', ['partner_slug' => $partner_slug, 'table_code' => $table_code]) }}"
                 class="text-blue-600 hover:text-blue-800">
-                    Lupa password?
+                    {{ __('messages.customer.login.forgot_password') }}
                 </a>
             </div>
         </div>
@@ -44,7 +44,7 @@
         <div>
             <button type="submit"
                 class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md transition">
-                Login
+                {{ __('messages.customer.login.login') }}
             </button>
         </div>
     </form>
@@ -52,7 +52,7 @@
     {{-- Divider --}}
     <div class="flex items-center my-6">
         <hr class="flex-grow border-gray-300">
-        <span class="mx-2 text-gray-400 text-sm">atau</span>
+        <span class="mx-2 text-gray-400 text-sm">{{ __('messages.customer.login.or') }}</span>
         <hr class="flex-grow border-gray-300">
     </div>
 
@@ -62,20 +62,20 @@
         <a href="{{ route('customer.google.redirect', ['provider' => 'google', 'partner_slug' => $partner_slug, 'table_code' => $table_code]) }}"
            class="w-full inline-flex justify-center items-center border border-gray-300 rounded-md py-2 px-4 mb-2 hover:bg-gray-100 transition">
             <img src="{{ asset('images/google-logo.png') }}" class="w-6 h-6 mr-2" alt="Google">
-            Login dengan Google
+            {{ __('messages.customer.login.login_with_google') }}
         </a>
 
         <form method="POST" action="{{ route('customer.guest', ['partner_slug' => $partner_slug, 'table_code' => $table_code]) }}" class="w-full">
             @csrf
             <button class="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800 w-full" type="submit">
-                Lanjut sebagai Guest
+                {{ __('messages.customer.login.continue_with_guest') }}
             </button>
         </form>
     </div>
 
     {{-- Footer kecil --}}
     <p class="mt-6 text-center text-gray-500 text-sm">
-        Belum punya akun? <a href="{{ route('customer.register', ['partner_slug' => $partner_slug, 'table_code' => $table_code]) }}" class="text-blue-600 hover:text-blue-800">Daftar sekarang</a>
+        {{ __('messages.customer.login.dont_have_an_account_yet') }} <a href="{{ route('customer.register', ['partner_slug' => $partner_slug, 'table_code' => $table_code]) }}" class="text-blue-600 hover:text-blue-800">{{ __('messages.customer.login.register_now') }}</a>
     </p>
 </div>
 @endsection

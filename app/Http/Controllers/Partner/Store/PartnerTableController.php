@@ -25,10 +25,19 @@ use Illuminate\Support\Str;
 
 class PartnerTableController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $tables = Table::where('partner_id', Auth::id())->get();
-        $table_classes = $tables->pluck('table_class')->unique();
+        $query = Table::where('partner_id', Auth::id());
+
+        if ($request->filled('table_class')) {
+            $query->where('table_class', $request->table_class);
+        }
+
+        $tables = $query->paginate(10)->withQueryString();
+
+        $table_classes = Table::where('partner_id', Auth::id())
+            ->pluck('table_class')
+            ->unique();
 
         return view('pages.partner.store.tables.index', compact('tables', 'table_classes'));
     }
@@ -128,6 +137,7 @@ class PartnerTableController extends Controller
     public function update(Request $request, $id)
     {
         DB::beginTransaction();
+
         try {
             $table = Table::where('id', $id)
                 ->where('partner_id', Auth::id())
@@ -138,44 +148,64 @@ class PartnerTableController extends Controller
                 'table_class' => 'required|string|max:255',
                 'description' => 'nullable|string',
                 'images'      => 'nullable|array|max:5',
+                'images.*'    => 'image|mimes:jpeg,jpg,png,webp|max:4096', // tiap file max 4MB
             ]);
 
-            $storedImages = $table->images ?? [];
+            // pastikan images selalu array
+            $storedImages = is_array($table->images)
+                ? $table->images
+                : (json_decode($table->images ?? '[]', true) ?: []);
 
-            // 🔹 Hapus gambar jika ada pilihan
-            if ($request->has('delete_images')) {
-                foreach ($request->delete_images as $filename) {
-                    $storedImages = array_filter($storedImages, function ($img) use ($filename) {
-                        if ($img['filename'] === $filename) {
-                            // hapus file fisik juga
-                            $path = str_replace('storage/', 'public/', $img['path']);
-                            if (Storage::exists($path)) {
-                                Storage::delete($path);
-                            }
-                            return false; // exclude dari array
+            $disk = Storage::disk('public');
+
+            // 🔹 Hapus gambar lama yang dipilih di form (delete_images[])
+            if ($request->filled('delete_images') && is_array($request->delete_images)) {
+                $filenamesToDelete = $request->delete_images;
+
+                $storedImages = array_values(array_filter($storedImages, function ($img) use ($filenamesToDelete, $disk) {
+                    $filename = $img['filename'] ?? null;
+
+                    if ($filename && in_array($filename, $filenamesToDelete)) {
+                        // path di DB bisa "storage/uploads/..." atau "uploads/..."
+                        $storedPath   = $img['path'] ?? '';
+                        $relativePath = ltrim(preg_replace('#^storage/#', '', $storedPath), '/');
+                        // sekarang $relativePath = "uploads/store/tables/xxx.jpg"
+
+                        if ($relativePath && $disk->exists($relativePath)) {
+                            $disk->delete($relativePath);
                         }
-                        return true;
-                    });
-                }
-                // re-index array biar rapi
-                $storedImages = array_values($storedImages);
+
+                        return false; // buang dari array images
+                    }
+
+                    return true; // tetap dipertahankan
+                }));
             }
 
             // 🔹 Upload gambar baru
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
-                    $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-                    $path = $image->storeAs('uploads/store/tables', $filename, 'public');
+                    if (!$image->isValid()) {
+                        continue;
+                    }
 
-                    // Resize (opsional)
-                    $img = Image::make(storage_path('app/public/' . $path));
+                    $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+
+                    // simpan ke disk public
+                    $path = $image->storeAs('uploads/store/tables', $filename, 'public');
+                    // $path contoh: "uploads/store/tables/xxx.jpg"
+
+                    // resize (opsional)
+                    $fullPath = storage_path('app/public/' . $path);
+                    $img = Image::make($fullPath);
                     $img->resize(800, null, function ($constraint) {
                         $constraint->aspectRatio();
                         $constraint->upsize();
                     })->save();
 
                     $storedImages[] = [
-                        'path'     => 'storage/' . $path,
+                        // simpan tanpa "storage/" supaya konsisten ke depan
+                        'path'     => "storage/" . $path,
                         'filename' => $filename,
                         'mime'     => $image->getClientMimeType(),
                         'size'     => $image->getSize(),
@@ -183,6 +213,7 @@ class PartnerTableController extends Controller
                 }
             }
 
+            // 🔹 Update table
             $table->update([
                 'table_no'    => $validated['table_no'],
                 'table_class' => $validated['table_class'],
@@ -193,11 +224,13 @@ class PartnerTableController extends Controller
 
             DB::commit();
 
-            return redirect()->route('partner.store.tables.index')
+            return redirect()
+                ->route('partner.store.tables.index')
                 ->with('success', 'Table updated successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->withInput()
+            return back()
+                ->withInput()
                 ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }

@@ -46,13 +46,25 @@ class CustomerPasswordResetController extends Controller
     // Form reset password (dibuka dari email). partner_slug & table_code akan dikirim via query
     public function resetForm(Request $request, string $token)
     {
+        $partner_slug = $request->query('partner_slug');
+        $table_code   = $request->query('table_code');
+
+        // simpan ke session supaya bisa dipakai di update()
+        if ($partner_slug && $table_code) {
+            session([
+                'customer.partner_slug' => $partner_slug,
+                'customer.table_code'   => $table_code,
+            ]);
+        }
+
         return view('pages.customer.auth.reset-password', [
             'token'        => $token,
             'email'        => $request->query('email'),
-            'partner_slug' => $request->query('partner_slug'),
-            'table_code'   => $request->query('table_code'),
+            'partner_slug' => $partner_slug,
+            'table_code'   => $table_code,
         ]);
     }
+
 
     // Proses update password
     public function update(Request $request)

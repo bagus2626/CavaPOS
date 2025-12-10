@@ -20,8 +20,7 @@
     <tbody>
       @foreach ($employees as $index => $employee)
         <tr data-category="{{ $employee->partner_id }}">
-          <td class="text-muted">{{ $index + 1 }}</td>
-
+          <td class="text-muted">{{ $employees->firstItem() + $index }}</td>
           <td class="fw-600">{{ $employee->partner->name }}</td>
           <td>{{ $employee->name }}</td>
           <td>{{ $employee->user_name }}</td>

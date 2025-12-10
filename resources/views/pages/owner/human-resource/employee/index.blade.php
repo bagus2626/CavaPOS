@@ -6,20 +6,32 @@
 @section('content')
 <section class="content owner-emp">
   <div class="container-fluid">
+    @php
+      $currentPartnerId = $currentPartnerId ?? request('partner_id');
+    @endphp
+
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
       <a href="{{ route('owner.user-owner.employees.create') }}" class="btn btn-choco btn-pill">
         <i class="fas fa-user-plus mr-2"></i> {{ __('messages.owner.user_management.employees.add_employee') }}
       </a>
 
       <div class="filter-bar mb-3">
-        <button class="btn filter-btn rounded-pill active" data-category="all">{{ __('messages.owner.user_management.employees.all') }}</button>
+        {{-- ALL --}}
+        <a href="{{ route('owner.user-owner.employees.index') }}"
+          class="btn filter-btn rounded-pill {{ $currentPartnerId ? '' : 'active' }}">
+            {{ __('messages.owner.user_management.employees.all') }}
+        </a>
+
+        {{-- PER OUTLET --}}
         @foreach($partners as $partner)
-          <button class="btn filter-btn rounded-pill" data-category="{{ $partner->id }}">
+          <a href="{{ route('owner.user-owner.employees.index', ['partner_id' => $partner->id]) }}"
+            class="btn filter-btn rounded-pill {{ (int)$currentPartnerId === (int)$partner->id ? 'active' : '' }}">
             {{ $partner->name }}
-          </button>
+          </a>
         @endforeach
       </div>
     </div>
+
 
     @if(session('success'))
       <div class="alert alert-success brand-alert">{{ session('success') }}</div>
@@ -28,6 +40,12 @@
     {{-- tabel karyawan --}}
     <div class="owner-emp-table">
       @include('pages.owner.human-resource.employee.display')
+    </div>
+    {{-- pagination --}}
+    <div class="owner-emp__pagination mt-3">
+        <div class="d-flex justify-content-end">
+            {{ $employees->links() }}
+        </div>
     </div>
   </div>
 </section>
@@ -113,6 +131,69 @@
 .owner-emp-table .empty-row td{
   background:#fff; color:#6b7280;
 }
+
+<style>
+:root{
+  --choco:#8c1000; --soft-choco:#c12814; --ink:#22272b; --paper:#f7f7f8;
+  --radius:12px; --shadow:0 6px 20px rgba(0,0,0,.08);
+}
+
+/* ==== Filter buttons (choco style) ==== */
+.owner-emp .filter-bar{ display:flex; flex-wrap:wrap; gap:.4rem; }
+.owner-emp .filter-btn{
+  border:1px solid #e5e7eb; color:#374151; background:#fff;
+  padding:.35rem .85rem; font-weight:600; font-size:.85rem;
+  box-shadow:0 1px 2px rgba(0,0,0,.04); transition:.15s ease;
+}
+.owner-emp .filter-btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 6px 16px rgba(0,0,0,.08);
+}
+.owner-emp .filter-btn.active{
+  background:var(--choco); color:#fff; border-color:var(--choco);
+  box-shadow:0 8px 24px rgba(140,16,0,.20);
+}
+
+/* ==== Pagination Choco Style ==== */
+.owner-emp__pagination .pagination{
+    margin-bottom:0;
+    gap:.25rem;
+}
+
+.owner-emp__pagination .page-item .page-link{
+    color:var(--choco);
+    border-radius:999px;
+    padding:.35rem .75rem;
+    font-weight:600;
+    font-size:.85rem;
+    border:1px solid #e5e7eb;
+    background-color:#fff;
+    transition:all .15s ease;
+}
+
+.owner-emp__pagination .page-item .page-link:hover{
+    background-color:var(--choco);
+    color:#fff;
+    border-color:var(--choco);
+    box-shadow:0 6px 14px rgba(140,16,0,.18);
+}
+
+.owner-emp__pagination .page-item.active .page-link{
+    background-color:var(--choco);
+    border-color:var(--choco);
+    color:#fff;
+    box-shadow:0 6px 14px rgba(140,16,0,.18);
+}
+
+.owner-emp__pagination .page-item.disabled .page-link{
+    color:#9ca3af;
+    background-color:#f3f4f6;
+    border-color:#e5e7eb;
+    box-shadow:none;
+    cursor:not-allowed;
+}
+</style>
+
 
 </style>
 @endsection

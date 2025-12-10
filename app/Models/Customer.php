@@ -5,7 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Contracts\Auth\MustVerifyEmail; // ← tambahkan
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\CustomerVerifyEmail;
 
 class Customer extends Authenticatable implements MustVerifyEmail // ← implement
 {
@@ -19,4 +20,5 @@ class Customer extends Authenticatable implements MustVerifyEmail // ← impleme
         'password' => 'hashed',
         'email_verified_at' => 'datetime', // ← tambahkan
     ];
+
 }

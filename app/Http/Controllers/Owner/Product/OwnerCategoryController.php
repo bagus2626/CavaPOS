@@ -8,6 +8,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class OwnerCategoryController extends Controller
 {
@@ -88,9 +90,17 @@ class OwnerCategoryController extends Controller
             'images'        => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        $imageData = $category->images; // ambil data lama dulu
+        $imageData = $category->images;
 
         if ($request->hasFile('images')) {
+
+            if (is_array($category->images) && isset($category->images['path'])) {
+                $oldPath = public_path($category->images['path']);
+                if (File::exists($oldPath)) {
+                    File::delete($oldPath);
+                }
+            }
+
             $file = $request->file('images');
             $filename = time() . '.' . $file->getClientOriginalExtension();
             $destinationPath = public_path('uploads/categories');
@@ -99,7 +109,6 @@ class OwnerCategoryController extends Controller
                 mkdir($destinationPath, 0777, true);
             }
 
-            // resize & compress
             $img = Image::make($file->getRealPath());
             $img->resize(800, null, function ($constraint) {
                 $constraint->aspectRatio();
@@ -147,8 +156,38 @@ class OwnerCategoryController extends Controller
 
     public function destroy(Category $category)
     {
+        $images = is_string($category->images)
+            ? json_decode($category->images, true)
+            : $category->images;
+
+        if (is_array($images)) {
+
+            // Kalau bentuknya single object: ['mime' => ..., 'path' => ...]
+            if (isset($images['path'])) {
+                $paths = [$images['path']];
+            } else {
+                // Kalau bentuknya array of object: [ ['path' => ...], ['path' => ...], ... ]
+                $paths = array_column($images, 'path');
+            }
+
+            foreach ($paths as $relativePath) {
+                if (!$relativePath) {
+                    continue;
+                }
+
+                $relativePath = ltrim(preg_replace('#^public/#', '', $relativePath), '/');
+                $fullPath = public_path($relativePath);
+
+                if (File::exists($fullPath)) {
+                    File::delete($fullPath);
+                }
+            }
+        }
+
         $category->delete();
 
-        return redirect()->route('owner.user-owner.categories.index')->with('success', 'Category deleted successfully.');
+        return redirect()
+            ->route('owner.user-owner.categories.index')
+            ->with('success', 'Category deleted successfully.');
     }
 }

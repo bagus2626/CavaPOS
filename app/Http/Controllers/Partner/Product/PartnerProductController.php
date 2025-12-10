@@ -33,13 +33,32 @@ class PartnerProductController extends Controller
         $this->recalculationService = $recalculationService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::where('owner_id', Auth::user()->owner_id)->get();
-        $products = PartnerProduct::with('parent_options.options', 'category', 'stock')
-            ->where('partner_id', Auth::id())
-            ->get();
-        return view('pages.partner.products.index', compact('products', 'categories'));
+        $partnerId = Auth::id();
+        $ownerId   = Auth::user()->owner_id;
+
+        $categories = Category::where('owner_id', $ownerId)->get();
+
+        $categoryId = $request->query('category'); // bisa null / 'all' / '5'
+
+        $productsQuery = PartnerProduct::with('parent_options.options', 'category', 'stock')
+            ->where('partner_id', $partnerId);
+
+        if ($categoryId && $categoryId !== 'all') {
+            $productsQuery->where('category_id', $categoryId);
+        }
+
+        $products = $productsQuery
+            ->orderBy('name')
+            ->paginate(10) 
+            ->withQueryString();
+
+        return view('pages.partner.products.index', compact(
+            'products',
+            'categories',
+            'categoryId'
+        ));
     }
 
     public function create()

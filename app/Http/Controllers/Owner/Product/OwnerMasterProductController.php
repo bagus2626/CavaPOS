@@ -23,13 +23,26 @@ use Illuminate\Support\Arr;
 
 class OwnerMasterProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $categories = Category::where('owner_id', Auth::id())->get();
-        $products = MasterProduct::with('parent_options.options', 'category', 'promotion')
-            ->where('owner_id', Auth::id())
-            ->get();
-        return view('pages.owner.products.master-product.index', compact('products', 'categories'));
+
+        $productsQuery = MasterProduct::with('parent_options.options', 'category', 'promotion')
+            ->where('owner_id', Auth::id());
+
+        // ambil parameter ?category=...
+        $categoryId = $request->query('category');
+
+        if (!empty($categoryId) && $categoryId !== 'all') {
+            $productsQuery->where('category_id', $categoryId);
+        }
+
+        $products = $productsQuery
+            ->orderBy('id', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('pages.owner.products.master-product.index', compact('products', 'categories', 'categoryId'));
     }
 
     public function create()
