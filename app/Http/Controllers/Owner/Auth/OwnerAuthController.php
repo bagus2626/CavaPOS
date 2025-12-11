@@ -15,6 +15,10 @@ class OwnerAuthController extends Controller
 {
     public function create()
     {
+        if (Auth::guard('owner')->check()) {
+            return redirect()->route('owner.user-owner.dashboard');
+        }
+
         return view('pages.owner.auth.register');
     }
 
@@ -57,6 +61,10 @@ class OwnerAuthController extends Controller
 
     public function login()
     {
+        if (Auth::guard('owner')->check()) {
+            return redirect()->route('owner.user-owner.dashboard');
+        }
+
         return view('pages.owner.auth.login');
     }
 

@@ -473,6 +473,12 @@ class OwnerOutletController extends Controller
                     $disk->delete($outlet->background_picture);
                 }
             }
+            if (!empty($outlet->logo)) {
+                $disk = Storage::disk('public');
+                if ($disk->exists($outlet->logo)) {
+                    $disk->delete($outlet->logo);
+                }
+            }
 
             $outlet->delete();
 

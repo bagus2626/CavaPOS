@@ -62,7 +62,7 @@ function deleteProduct(productId) {
         {{-- Per kategori --}}
         @foreach($categories as $category)
           <a href="{{ route('owner.user-owner.master-products.index', ['category' => $category->id]) }}"
-            class="btn btn-outline-choco btn-sm filter-btn rounded-pill {{ (string)$currentCategory === (string)$category->id ? 'active' : '' }}">
+            class="btn btn-outline-choco btn-sm filter-btn rounded-pill ml-1 {{ (string)$currentCategory === (string)$category->id ? 'active' : '' }}">
             {{ $category->category_name }}
           </a>
         @endforeach
