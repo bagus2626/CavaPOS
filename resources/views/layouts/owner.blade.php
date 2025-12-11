@@ -84,6 +84,12 @@
             padding: 18px 0.5rem;
         }
 
+        .wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
         .content-wrapper {
             background: transparent;
         }

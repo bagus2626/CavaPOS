@@ -140,7 +140,7 @@
                                     <span class="text-danger">*</span></label>
                                 <input type="email" name="email" id="email"
                                     class="form-control @error('email') is-invalid @enderror"
-                                    value="{{ old('email', $employee->email ?? '') }}" placeholder="name@company.com"
+                                    value="{{ old('email', $employee->email ?? '') }}" placeholder="email@email.com"
                                     required maxlength="254" autocomplete="email" autocapitalize="off" spellcheck="false"
                                     inputmode="email">
                                 @error('email')

@@ -225,6 +225,8 @@ class OwnerMasterProductController extends Controller
                 'images.*'         => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
                 'existing_images'  => 'nullable|array',
                 'menu_options'     => 'nullable|array',
+                'apply_price_all_outlets' => 'required|boolean',
+                'apply_promotion_all_outlets' => 'required|boolean',
             ]);
             // dd($validated);
 
@@ -410,7 +412,13 @@ class OwnerMasterProductController extends Controller
             $partner_products = PartnerProduct::where('master_product_id', $product->id)->get();
             if ($partner_products) {
                 // fungsi untuk foreach partner_product
-                $this->syncPartnerProductsFromMaster($product, $partner_products, false, true);
+                $this->syncPartnerProductsFromMaster(
+                    $product, 
+                    $partner_products, 
+                    $validated['apply_price_all_outlets'], 
+                    $validated['apply_promotion_all_outlets'], 
+                    true
+                );
             }
 
             DB::commit();
@@ -432,6 +440,7 @@ class OwnerMasterProductController extends Controller
         MasterProduct $master,
         Collection $partnerProducts,
         bool $propagatePrice = true,
+        bool $propagatePromo = true,
         bool $syncOptions = true
     ): void {
         // --- Peta master untuk opsi (memudahkan lookup)
@@ -446,12 +455,15 @@ class OwnerMasterProductController extends Controller
             $payload = [
                 'name'        => $master->name,
                 'category_id' => $master->category_id,
-                'promo_id'    => $master->promo_id,
                 'description' => $master->description,
             ];
 
             if ($propagatePrice) {
                 $payload['price'] = $master->price;
+            }
+
+            if ($propagatePromo) {
+                $payload['promo_id'] = $master->promo_id;
             }
 
             // Jika Anda ingin juga menyalin gambar master → uncomment baris berikut
@@ -539,6 +551,12 @@ class OwnerMasterProductController extends Controller
                         Storage::disk('public')->delete($filePath);
                     }
                 }
+            }
+        }
+        $partner_products = PartnerProduct::where('master_product_id', $master_product->id)->get();
+        if ($partner_products) {
+            foreach ($partner_products as $pp) {
+                $pp->delete();
             }
         }
 

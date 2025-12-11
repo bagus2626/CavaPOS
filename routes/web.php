@@ -58,6 +58,7 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use \App\Http\Controllers\Admin\MessageNotification\MessageController;
 use App\Http\Controllers\Owner\Report\StockReportController;
 use App\Notifications\CustomerVerifyEmail;
+use App\Models\Owner;
 
 Route::get('/set-language', function () {
     $locale = request('locale');
@@ -233,6 +234,26 @@ Route::middleware('setlocale')->group(function () {
 
         Route::get('/auth/google/redirect', [OwnerAuthController::class, 'redirect'])->name('google.redirect');
 
+        Route::get('email/verify/{id}/{hash}', function (Request $request, $id, $hash) {
+                $owner = Owner::findOrFail($id);
+
+                if (! hash_equals(
+                    (string) $hash,
+                    sha1($owner->getEmailForVerification())
+                )) {
+                    abort(403, 'Link verifikasi tidak valid.');
+                }
+
+                if (! $owner->hasVerifiedEmail()) {
+                    $owner->markEmailAsVerified();
+                    event(new Verified($owner));
+                }
+
+                return redirect()
+                    ->route('owner.login')
+                    ->with('success', 'Email Anda berhasil diverifikasi. Silakan login.');
+            })->middleware('signed')->name('verification.verify');
+
         Route::middleware('guest:owner')->group(function () {
             // minta link reset
             Route::get('forgot-password', [OwnerPasswordResetController::class, 'requestForm'])->name('password.request');
@@ -253,16 +274,30 @@ Route::middleware('setlocale')->group(function () {
 
             // Resend link (rate limited)
             Route::post('/email/verification-notification', function (Request $request) {
-                $request->user('owner')->sendEmailVerificationNotification();
+                $owner = $request->user('owner');
+
+                if ($owner && $owner->hasVerifiedEmail()) {
+                    auth('owner')->logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+
+                    return redirect()
+                        ->route('owner.login')
+                        ->with('success', 'Email Anda sudah terverifikasi. Silakan login.');
+                }
+
+                $owner->sendEmailVerificationNotification();
+
                 return back()->with('status', 'verification-link-sent');
             })->middleware('throttle:6,1')->name('verification.send');
 
+
             // Verify link (signed)
-            Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-                $request->fulfill(); // set email_verified_at
-                return redirect()->route('owner.user-owner.dashboard')
-                    ->with('success', 'Email Anda berhasil diverifikasi.');
-            })->middleware('signed')->name('verification.verify');
+            // Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+            //     $request->fulfill();
+            //     return redirect()->route('owner.user-owner.dashboard')
+            //         ->with('success', 'Email Anda berhasil diverifikasi.');
+            // })->middleware('signed')->name('verification.verify');
         });
 
         // OWNER area
@@ -294,6 +329,7 @@ Route::middleware('setlocale')->group(function () {
                 Route::resource('employees', OwnerEmployeeController::class);
                 Route::resource('master-products', OwnerMasterProductController::class);
                 Route::get('outlet-products/get-master-products', [OwnerOutletProductController::class, 'getMasterProducts'])->name('outlet-products.get-master-products');
+                Route::get('outlet-products/list-product', [OwnerOutletProductController::class, 'list'])->name('outlet-products.list');
                 Route::resource('outlet-products', OwnerOutletProductController::class);
 
                 Route::get('outlet-products/recipe/ingredients', [OwnerOutletProductController::class, 'getRecipeIngredients'])
