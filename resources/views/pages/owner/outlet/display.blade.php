@@ -107,7 +107,7 @@
                     <td class="col-actions">
                         <div class="action-btns d-inline-flex">
                             <a href="{{ route('owner.user-owner.outlets.edit', $outlet->id) }}"
-                                class="btn btn-outline-choco mr-1">{{ __('messages.owner.outlet.all_outlets.edit') }}</a>
+                                class="btn btn-outline-choco bg-transparent mr-1">{{ __('messages.owner.outlet.all_outlets.edit') }}</a>
                             <button onclick="deleteOutlet({{ $outlet->id }})"
                                 class="btn btn-soft-danger">{{ __('messages.owner.outlet.all_outlets.delete') }}</button>
                         </div>

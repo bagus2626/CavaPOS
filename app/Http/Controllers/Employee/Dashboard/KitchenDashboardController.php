@@ -339,22 +339,24 @@ public function markAsServed($orderId)
             $qty = $detail->quantity;
             $product = $detail->partnerProduct;
 
-            // Pengurangan Produk Utama
-            if ($product->stock_type === 'direct' && $product->always_available_flag === 0 && $product->stock) {
-                $this->processStockConsumption($product->stock, $qty, $masterMovement);
-            } elseif ($product->stock_type === 'linked') {
-                $this->processRecipeConsumption($product->recipes, $qty, $masterMovement);
-            }
+            if ($product) {
+                // Pengurangan Produk Utama
+                if ($product->stock_type === 'direct' && $product->always_available_flag === 0 && $product->stock) {
+                    $this->processStockConsumption($product->stock, $qty, $masterMovement);
+                } elseif ($product->stock_type === 'linked') {
+                    $this->processRecipeConsumption($product->recipes, $qty, $masterMovement);
+                }
 
-            // Pengurangan Opsi Produk
-            foreach ($detail->order_detail_options as $detailOption) {
-                $opt = $detailOption->option;
-                if (!$opt) continue;
+                // Pengurangan Opsi Produk
+                foreach ($detail->order_detail_options as $detailOption) {
+                    $opt = $detailOption->option;
+                    if (!$opt) continue;
 
-                if ($opt->stock_type === 'direct' && $opt->always_available_flag === 0 && $opt->stock) {
-                    $this->processStockConsumption($opt->stock, $qty, $masterMovement);
-                } elseif ($opt->stock_type === 'linked') {
-                    $this->processRecipeConsumption($opt->recipes, $qty, $masterMovement);
+                    if ($opt->stock_type === 'direct' && $opt->always_available_flag === 0 && $opt->stock) {
+                        $this->processStockConsumption($opt->stock, $qty, $masterMovement);
+                    } elseif ($opt->stock_type === 'linked') {
+                        $this->processRecipeConsumption($opt->recipes, $qty, $masterMovement);
+                    }
                 }
             }
         }

@@ -43,22 +43,61 @@ class OwnerOutletProductController extends Controller
 
     public function index()
     {
-        $owner = Auth::user();
+        $owner   = Auth::user();
+
         $outlets = User::where('owner_id', $owner->id)
             ->select('id', 'name')
             ->orderBy('name')
             ->get();
+
         $categories = Category::where('owner_id', $owner->id)
             ->orderBy('category_name')
             ->get();
-        $master_product = MasterProduct::where('owner_id', $owner->id)->get();
-        $productsByOutlet = PartnerProduct::with('parent_options.options', 'category', 'promotion', 'stock.displayUnit')
-            ->where('owner_id', $owner->id)
-            ->get()
-            ->groupBy('partner_id');
+
         $promotions = Promotion::where('owner_id', $owner->id)->get();
-        return view('pages.owner.products.outlet-product.index', compact('productsByOutlet', 'categories', 'outlets', 'master_product', 'promotions'));
+
+        return view('pages.owner.products.outlet-product.index', compact(
+            'outlets', 'categories', 'promotions'
+        ));
     }
+
+    public function list(Request $request)
+    {
+        $owner      = Auth::user();
+        $outletId   = $request->get('outlet_id');
+        $categoryId = $request->get('category_id', 'all');
+        $perPage    = 5;
+
+        if (!$outletId) {
+            return response()->json([
+                'html' => '<tbody><tr><td colspan="8" class="text-center text-muted">Outlet tidak ditemukan.</td></tr></tbody>'
+            ]);
+        }
+
+        $query = PartnerProduct::with(['category', 'promotion', 'stock.displayUnit'])
+            ->where('owner_id', $owner->id)
+            ->where('partner_id', $outletId);
+
+        if ($categoryId !== 'all') {
+            $query->where('category_id', $categoryId);
+        }
+
+        $products = $query->orderBy('name')->paginate($perPage);
+        // dd($products->toArray());
+
+        $html = view('pages.owner.products.outlet-product._table', [
+            'products'   => $products,
+            'outletId'   => $outletId,   // ⬅️ WAJIB
+            'categoryId' => $categoryId, // ⬅️ WAJIB
+        ])->render();
+
+        return response()->json([
+            'html' => $html,
+        ]);
+    }
+
+
+
 
     public function create()
     {
@@ -338,6 +377,7 @@ class OwnerOutletProductController extends Controller
 
         DB::beginTransaction();
         try {
+            // dd($request->all());
             // Dapatkan Produk dengan relasi lengkap
             $product = PartnerProduct::with(['parent_options.options.stock', 'stock'])
                 ->where('owner_id', $owner->id)
@@ -352,6 +392,7 @@ class OwnerOutletProductController extends Controller
                 'stock_type'       => ['required', 'in:direct,linked'],
                 'always_available' => ['nullable', 'in:0,1'],
                 'quantity'         => ['nullable', 'integer', 'min:0'],
+                'price'            => ['required'],
                 'is_active'        => ['required', 'in:0,1'],
                 'is_hot_product'   => ['required', 'in:0,1'],
                 'promotion_id'     => ['nullable', 'integer', 'exists:promotions,id'],
@@ -395,12 +436,16 @@ class OwnerOutletProductController extends Controller
 
             $validated = $validator->validate();
 
+            $rawPrice = preg_replace('/[^0-9]/', '', $validated['price']);
+            $price    = $rawPrice !== '' ? (int) $rawPrice : 0;
+
             // ===== PERSIAPAN DATA =====
             $productAlways = (int)($request->input('always_available', 0)) === 1;
             $newStockType  = $validated['stock_type'];
             $newIsActive   = (int)($validated['is_active'] ?? 0);
             $newIsHotProduct = (int)($validated['is_hot_product'] ?? 0);
             $promotionId   = $request->filled('promotion_id') ? (int)$validated['promotion_id'] : null;
+            $newPrice      = $price ?? 0;
 
             // Get PCS Unit ID
             $pcsUnit = MasterUnit::where(function ($query) use ($owner) {
@@ -424,6 +469,7 @@ class OwnerOutletProductController extends Controller
                 'promo_id'              => $promotionId,
                 'stock_type'            => $newStockType,
                 'always_available_flag' => $productAlways ? 1 : 0,
+                'price'                 => $newPrice,
             ]);
 
             // ===== SYNC PRODUCT STOCK (Mengikuti Logic Partner) =====

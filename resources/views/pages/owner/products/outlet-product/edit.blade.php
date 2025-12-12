@@ -291,6 +291,35 @@
                       }
                     @endphp
 
+                    {{-- === NEW: Editable price for outlet product === --}}
+                    <div class="form-group mb-3">
+                      <label class="mb-1 font-weight-bold">
+                        {{ __('messages.owner.products.outlet_products.price') }}
+                      </label>
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text">Rp.</span>
+                        </div>
+                        <input
+                          type="text"
+                          name="price"
+                          id="outlet_price"
+                          class="form-control"
+                          value="{{ old('price', number_format((float) ($data->price ?? 0), 0, ',', '.')) }}"
+                          autocomplete="off"
+                          required
+                        >
+                      </div>
+                      @error('price')
+                        <small class="text-danger d-block mt-1">{{ $message }}</small>
+                      @enderror
+                      <small class="text-muted">
+                        {{-- sesuaikan text sesuai kebutuhan --}}
+                        {{ __('messages.owner.products.outlet_products.price_outlet_hint') ?? 'Harga ini hanya berlaku untuk outlet ini.' }}
+                      </small>
+                    </div>
+                    {{-- === END NEW PRICE FIELD === --}}
+
                     {{-- Stock Type Product --}}
                     <div class="form-group mb-3">
                       <label class="mb-2 font-weight-bold">Stock Type</label>
@@ -584,137 +613,20 @@
 
 @push('scripts')
   <script src="{{ asset('js/owner/outlet-product/edit.js') }}"></script>
-@endpush
-{{-- @section('scripts')
+
   <script>
-    // Quantity helpers (produk)
-    (function () {
-      const qty = document.getElementById('quantity');
-      const dec = document.getElementById('btn-qty-dec');
-      const inc = document.getElementById('btn-qty-inc');
-      const max = document.getElementById('btn-qty-max');
-      const toInt = (v) => { const n = parseInt(v, 10); return isNaN(n) ? 0 : n; };
+  (function () {
+    const priceInput = document.getElementById('outlet_price');
+    if (!priceInput) return;
 
-      dec?.addEventListener('click', () => { if (qty.disabled) return; qty.value = Math.max(0, toInt(qty.value) - 1); });
-      inc?.addEventListener('click', () => { if (qty.disabled) return; qty.value = toInt(qty.value) + 1; });
-      max?.addEventListener('click', () => { if (qty.disabled) return; qty.value = 999999999; });
-    })();
-
-    // is_active switch <-> hidden input
-    (function () {
-      const sw = document.getElementById('is_active_switch');
-      const hid = document.getElementById('is_active');
-      const lab = document.getElementById('is_active_label');
-      function sync(){
-        hid.value = sw.checked ? 1 : 0;
-        if (lab) lab.textContent = sw.checked ? 'Active' : 'Inactive';
+    priceInput.addEventListener('input', function () {
+      let raw = this.value.replace(/[^0-9]/g, '');
+      if (!raw) {
+        this.value = '';
+        return;
       }
-      sw?.addEventListener('change', sync);
-    })();
-
-    (function () {
-      const sw = document.getElementById('is_hot_product_switch');
-      const hid = document.getElementById('is_hot_product');
-      const lab = document.getElementById('is_hot_product_label');
-      function sync(){
-        hid.value = sw.checked ? 1 : 0;
-        if (lab) lab.textContent = sw.checked ? 'Active' : 'Inactive';
-      }
-      sw?.addEventListener('change', sync);
-    })();
-
-    // +/- untuk option quantity (hindari update saat disabled)
-    (function () {
-      const toInt = (v) => { const n = parseInt(v, 10); return isNaN(n) ? 0 : n; };
-      document.addEventListener('click', function (e) {
-        if (e.target.closest('.btn-opt-dec')) {
-          const target = e.target.closest('.btn-opt-dec').dataset.target;
-          const input = document.querySelector(target);
-          if (!input || input.disabled) return;
-          input.value = Math.max(0, toInt(input.value) - 1);
-        }
-        if (e.target.closest('.btn-opt-inc')) {
-          const target = e.target.closest('.btn-opt-inc').dataset.target;
-          const input = document.querySelector(target);
-          if (!input || input.disabled) return;
-          input.value = toInt(input.value) + 1;
-        }
-      });
-    })();
-
-    // NEW: toggle logic product & options (always available)
-    (function () {
-      function hideQty(wrapperEl, inputEl, checked) {
-        if (!wrapperEl || !inputEl) return;
-        if (checked) {
-          if (!inputEl.dataset.prev) inputEl.dataset.prev = inputEl.value || '0';
-          wrapperEl.classList.add('d-none');
-          inputEl.disabled = true;
-        } else {
-          wrapperEl.classList.remove('d-none');
-          inputEl.disabled = false;
-          if (inputEl.dataset.prev) inputEl.value = inputEl.dataset.prev;
-        }
-      }
-
-      // Product toggle
-      const aaProd = document.getElementById('aa_product');
-      const prodWrap = document.getElementById('product_qty_group');
-      const prodQty = document.getElementById('quantity');
-      function syncProd() { hideQty(prodWrap, prodQty, aaProd?.checked); }
-      aaProd?.addEventListener('change', syncProd);
-      syncProd();
-
-      // Option toggles
-      function syncOneOpt(toggle) {
-        const qtySel = toggle.getAttribute('data-qty');
-        const wrapSel = toggle.getAttribute('data-wrap');
-        const qty = document.querySelector(qtySel);
-        const wrap = document.querySelector(wrapSel);
-        hideQty(wrap, qty, toggle.checked);
-      }
-      document.querySelectorAll('.opt-aa').forEach(tg => {
-        tg.addEventListener('change', () => syncOneOpt(tg));
-        syncOneOpt(tg);
-      });
-    })();
-
-    // NEW: Stock Type Toggle Logic for Options
-    (function () {
-      function handleStockTypeChange(selectEl) {
-        const optId = selectEl.dataset.optId;
-        const stockType = selectEl.value;
-
-        const aaContainer = document.querySelector(`.opt-aa-container-${optId}`);
-        const qtyWrapper = document.getElementById(`opt-qty-wrap-${optId}`);
-        const linkedInfo = document.getElementById(`opt-linked-info-${optId}`);
-        const aaCheckbox = document.getElementById(`opt-aa-${optId}`);
-
-        if (stockType === 'linked') {
-          // Hide always available & quantity, show linked info
-          if (aaContainer) aaContainer.style.display = 'none';
-          if (qtyWrapper) qtyWrapper.style.display = 'none';
-          if (linkedInfo) linkedInfo.style.display = 'block';
-          // Uncheck always available jika sedang aktif
-          if (aaCheckbox) aaCheckbox.checked = false;
-        } else {
-          // Show always available & quantity, hide linked info
-          if (aaContainer) aaContainer.style.display = 'inline-block';
-          if (qtyWrapper) qtyWrapper.style.display = 'block';
-          if (linkedInfo) linkedInfo.style.display = 'none';
-        }
-      }
-
-      // Initialize all stock type selectors
-      document.querySelectorAll('.opt-stock-type').forEach(select => {
-        // Handle initial state
-        handleStockTypeChange(select);
-
-        // Add change listener
-        select.addEventListener('change', function() {
-          handleStockTypeChange(this);
-        });
-      });
-    })();
-  </script>
-@endsection --}}
+      this.value = new Intl.NumberFormat('id-ID').format(parseInt(raw, 10));
+    });
+  })();
+</script>
+@endpush

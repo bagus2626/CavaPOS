@@ -4,7 +4,9 @@ use App\Http\Controllers\Owner\Product\OwnerStockMovementController;
 use App\Jobs\SendAdminEmailVerification;
 use App\Jobs\SendEmailVerification;
 use Pusher\Pusher;
+use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Broadcast;
@@ -55,6 +57,8 @@ use App\Http\Controllers\PaymentGateway\Xendit\SubAccountController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use \App\Http\Controllers\Admin\MessageNotification\MessageController;
 use App\Http\Controllers\Owner\Report\StockReportController;
+use App\Notifications\CustomerVerifyEmail;
+use App\Models\Owner;
 
 Route::get('/set-language', function () {
     $locale = request('locale');
@@ -230,6 +234,26 @@ Route::middleware('setlocale')->group(function () {
 
         Route::get('/auth/google/redirect', [OwnerAuthController::class, 'redirect'])->name('google.redirect');
 
+        Route::get('email/verify/{id}/{hash}', function (Request $request, $id, $hash) {
+                $owner = Owner::findOrFail($id);
+
+                if (! hash_equals(
+                    (string) $hash,
+                    sha1($owner->getEmailForVerification())
+                )) {
+                    abort(403, 'Link verifikasi tidak valid.');
+                }
+
+                if (! $owner->hasVerifiedEmail()) {
+                    $owner->markEmailAsVerified();
+                    event(new Verified($owner));
+                }
+
+                return redirect()
+                    ->route('owner.login')
+                    ->with('success', 'Email Anda berhasil diverifikasi. Silakan login.');
+            })->middleware('signed')->name('verification.verify');
+
         Route::middleware('guest:owner')->group(function () {
             // minta link reset
             Route::get('forgot-password', [OwnerPasswordResetController::class, 'requestForm'])->name('password.request');
@@ -250,16 +274,30 @@ Route::middleware('setlocale')->group(function () {
 
             // Resend link (rate limited)
             Route::post('/email/verification-notification', function (Request $request) {
-                $request->user('owner')->sendEmailVerificationNotification();
+                $owner = $request->user('owner');
+
+                if ($owner && $owner->hasVerifiedEmail()) {
+                    auth('owner')->logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+
+                    return redirect()
+                        ->route('owner.login')
+                        ->with('success', 'Email Anda sudah terverifikasi. Silakan login.');
+                }
+
+                $owner->sendEmailVerificationNotification();
+
                 return back()->with('status', 'verification-link-sent');
             })->middleware('throttle:6,1')->name('verification.send');
 
+
             // Verify link (signed)
-            Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-                $request->fulfill(); // set email_verified_at
-                return redirect()->route('owner.user-owner.dashboard')
-                    ->with('success', 'Email Anda berhasil diverifikasi.');
-            })->middleware('signed')->name('verification.verify');
+            // Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+            //     $request->fulfill();
+            //     return redirect()->route('owner.user-owner.dashboard')
+            //         ->with('success', 'Email Anda berhasil diverifikasi.');
+            // })->middleware('signed')->name('verification.verify');
         });
 
         // OWNER area
@@ -291,6 +329,7 @@ Route::middleware('setlocale')->group(function () {
                 Route::resource('employees', OwnerEmployeeController::class);
                 Route::resource('master-products', OwnerMasterProductController::class);
                 Route::get('outlet-products/get-master-products', [OwnerOutletProductController::class, 'getMasterProducts'])->name('outlet-products.get-master-products');
+                Route::get('outlet-products/list-product', [OwnerOutletProductController::class, 'list'])->name('outlet-products.list');
                 Route::resource('outlet-products', OwnerOutletProductController::class);
 
                 Route::get('outlet-products/recipe/ingredients', [OwnerOutletProductController::class, 'getRecipeIngredients'])
@@ -469,6 +508,42 @@ Route::middleware('setlocale')->group(function () {
         });
     });
 
+    // customer verify email
+    Route::get('customer/email/verify/{id}/{hash}', function (Request $request, $id, $hash) {
+        $customer = Customer::findOrFail($id);
+
+        if (! hash_equals(
+            (string) $hash,
+            sha1($customer->getEmailForVerification())
+        )) {
+            abort(403, 'Link verifikasi tidak valid.');
+        }
+
+        if (! $customer->hasVerifiedEmail()) {
+            $customer->markEmailAsVerified();
+            event(new Verified($customer));
+        }
+
+        $partnerSlug = $request->query('partner_slug');
+        $tableCode   = $request->query('table_code');
+
+        if ($partnerSlug && $tableCode) {
+            return redirect()->route('customer.menu.index', [
+                'partner_slug' => $partnerSlug,
+                'table_code'   => $tableCode,
+            ])->with('success', 'Email Anda berhasil diverifikasi.');
+        }
+
+        return redirect('/')
+            ->with('success', 'Email Anda berhasil diverifikasi.');
+    })->middleware('signed')->name('customer.verification.verify');
+
+    Route::get('customer/reset-password/{token}', [CustomerPasswordResetController::class, 'resetForm'])
+                ->name('customer.password.reset');
+    Route::post('customer/reset-password', [CustomerPasswordResetController::class, 'update'])
+            ->name('customer.password.update');
+
+
     //customer
     Route::prefix('customer')->name('customer.')->middleware('customer.access')->group(function () {
         Route::get('{partner_slug}/menu/{table_code}', [CustomerMenuController::class, 'index'])->name('menu.index')->middleware('throttle:10,1');
@@ -503,21 +578,11 @@ Route::middleware('setlocale')->group(function () {
         Route::post('logout', [CustomerAuthController::class, 'logoutSimple'])->name('logout.simple');
 
         Route::middleware('guest:customer')->group(function () {
-            // Form minta link reset (bawa partner_slug & table_code agar bisa direstor)
             Route::get('forgot-password/{partner_slug}/{table_code}', [CustomerPasswordResetController::class, 'requestForm'])
                 ->name('password.request');
 
-            // Kirim email reset
             Route::post('forgot-password/{partner_slug}/{table_code}', [CustomerPasswordResetController::class, 'sendLink'])
                 ->name('password.email');
-
-            // Form reset dari email (token + email di query; partner_slug & table_code optional via query)
-            Route::get('reset-password/{token}', [CustomerPasswordResetController::class, 'resetForm'])
-                ->name('password.reset');
-
-            // Submit reset
-            Route::post('reset-password', [CustomerPasswordResetController::class, 'update'])
-                ->name('password.update');
         });
 
         Route::middleware('auth:customer')->group(function () {
@@ -528,20 +593,22 @@ Route::middleware('setlocale')->group(function () {
 
             // Kirim ulang link (rate limited)
             Route::post('/email/verification-notification', function (Request $request) {
-                $request->user('customer')->sendEmailVerificationNotification();
+                $customer = $request->user('customer');
+
+                // ambil dari session (sudah kamu simpan waktu login/register)
+                $partnerSlug = session('customer.partner_slug');
+                $tableCode   = session('customer.table_code');
+
+                if ($partnerSlug && $tableCode) {
+                    $customer->notify(new CustomerVerifyEmail($partnerSlug, $tableCode));
+                } else {
+                    // fallback: kirim URL tanpa konteks meja (optional)
+                    $customer->notify(new CustomerVerifyEmail('', ''));
+                }
+
                 return back()->with('status', 'verification-link-sent');
             })->middleware('throttle:6,1')->name('verification.send');
-
-            // Link verifikasi (signed)
-            Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-                $request->fulfill(); // set email_verified_at
-
-                // Ambil tujuan yg kita simpan ketika register/login
-                $dest = session('customer.intended') ?? route('home');
-                session()->forget('customer.intended');
-
-                return redirect($dest)->with('success', 'Email Anda berhasil diverifikasi.');
-            })->middleware('signed')->name('verification.verify');
+            
         });
 
         Route::middleware('auth:customer', 'verified')->group(function () {

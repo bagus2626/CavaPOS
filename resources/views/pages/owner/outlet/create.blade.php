@@ -463,7 +463,7 @@
                             </div>
 
                             <div id="wifiFormFields" class="form-grid form-grid-2 mt-4"
-                                style="display: {{ old('wifi_enabled') ? 'grid' : 'none' }};">
+                                style="display: {{ old('is_wifi_shown') ? 'grid' : 'none' }};">
                                 <label class="form-group">
                                     <span class="form-label">{{ __('WiFi Name (SSID)') }}</span>
                                     <div class="input-with-icon">
@@ -477,13 +477,10 @@
                                     <span class="form-label">{{ __('WiFi Password') }}</span>
                                     <div class="input-with-icon">
                                         <i class="fas fa-key input-icon"></i>
-                                        <div class="input-with-button" style="width: 100%;">
-                                            <input type="password" id="pass_wifi" name="pass_wifi" class="form-input"
-                                                value="{{ old('pass_wifi') }}" placeholder="WiFi Password"
-                                                style="padding-left: 2.75rem;">
-                                            <button type="button" id="toggleWifiPassword"
-                                                class="input-button">{{ __('Show') }}</button>
-                                        </div>
+                                        <input type="password" id="pass_wifi" name="pass_wifi" class="form-input"
+                                            value="{{ old('pass_wifi') }}" placeholder="WiFi Password">
+                                        <button type="button" id="toggleWifiPassword"
+                                            class="input-button-inline">{{ __('Show') }}</button>
                                     </div>
                                 </label>
                             </div>
@@ -860,6 +857,7 @@
         }
 
         /* ===== Input Variations ===== */
+        /* ===== Input Variations ===== */
         .input-with-button {
             display: flex;
             position: relative;
@@ -867,20 +865,28 @@
 
         .input-prefix {
             position: absolute;
-            left: 1rem;
+            left: 0.875rem;
             top: 50%;
             transform: translateY(-50%);
             color: #6b7280;
             font-weight: 500;
             pointer-events: none;
             z-index: 1;
+            font-size: 0.9375rem;
         }
 
+        /* DEFAULT: Input dengan button TANPA prefix = padding normal */
         .input-with-button .form-input {
             flex: 1;
             border-top-right-radius: 0;
             border-bottom-right-radius: 0;
-            padding-left: 2.5rem;
+            padding-left: 1rem;
+            /* TAMBAHKAN INI - padding normal seperti input biasa */
+        }
+
+        /* KHUSUS: Hanya yang punya prefix dapat padding ekstra */
+        .input-with-button:has(.input-prefix) .form-input {
+            padding-left: 2.25rem;
         }
 
         .input-button {
@@ -908,14 +914,15 @@
 
         .input-icon {
             position: absolute;
-            left: 1rem;
+            left: 0.875rem;
             color: #9ca3af;
             pointer-events: none;
             z-index: 1;
+            font-size: 0.9375rem;
         }
 
         .input-with-icon .form-input {
-            padding-left: 2.75rem;
+            padding-left: 2.5rem;
         }
 
         .input-with-prefix {
@@ -923,11 +930,36 @@
         }
 
         .input-with-prefix .input-prefix {
-            left: 1rem;
+            left: 0.875rem;
         }
 
         .input-with-prefix .form-input {
-            padding-left: 3rem;
+            padding-left: 2.75rem;
+        }
+
+        .input-button-inline {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 0.375rem 0.875rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            font-size: 0.8125rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        .input-button-inline:hover {
+            background: var(--primary-dark);
+        }
+
+        .input-with-icon:has(.input-button-inline) .form-input {
+            padding-right: 5.5rem;
         }
 
         .select-wrapper {
@@ -1306,12 +1338,14 @@
             updateCharCounter(document.getElementById('address'), 'address-counter');
 
             // ==== WiFi toggle ====
-            const wifiToggle = document.getElementById('wifi_enabled');
+            const wifiToggle = document.getElementById('is_wifi_shown');
             const wifiFields = document.getElementById('wifiFormFields');
             if (wifiToggle && wifiFields) {
                 wifiToggle.addEventListener('change', function() {
                     wifiFields.style.display = this.checked ? 'grid' : 'none';
                 });
+                // Set initial state
+                wifiFields.style.display = wifiToggle.checked ? 'grid' : 'none';
             }
 
             // ==== Password toggles ====

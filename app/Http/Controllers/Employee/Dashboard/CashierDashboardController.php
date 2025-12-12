@@ -36,7 +36,7 @@ class CashierDashboardController extends Controller
 
         // Ambil filter dari query string
         $payment = $request->string('payment')->toString(); // 'CASH' | 'QRIS' | ''
-        $status  = $request->string('status')->toString();  // 'PAID' | 'UNPAID' | ''
+        $status  = $request->input('status', '');  // 'PAID' | 'UNPAID' | ''
         $q       = $request->string('q')->toString();
 
         // Ambil tanggal dari request
@@ -71,7 +71,15 @@ class CashierDashboardController extends Controller
                 Carbon::parse($to)->endOfDay(),
             ])
             ->when($payment, fn($q2) => $q2->where('payment_method', $payment))
-            ->when($status,  fn($q2) => $q2->where('order_status', $status))
+            ->when($status !== '', function ($q2) use ($status) {
+                // status 0/1 → payment_flag
+                if (in_array((string)$status, ['0', '1'], true)) {
+                    $q2->where('payment_flag', (int)$status);
+                } else {
+                    // status string → order_status
+                    $q2->where('order_status', $status);
+                }
+            })
             ->when($q, function ($q2) use ($q) {
                 $q2->where(function ($qq) use ($q) {
                     $qq->where('booking_order_code', 'like', "%{$q}%")
@@ -187,7 +195,7 @@ class CashierDashboardController extends Controller
     {
         $ordersToday = $this->getOrdersTodayWithFilters($request);
 
-        $unpaidCash = $ordersToday->where('payment_method', 'CASH')->where('payment_flag', 0)->count();
+        $unpaidCash = $ordersToday->where('payment_flag', 0)->count();
         $onProcess  = $ordersToday->whereIn('order_status', ['PROCESSED', 'PAID'])->count();
         $served     = $ordersToday->where('order_status', 'SERVED')->count();
 

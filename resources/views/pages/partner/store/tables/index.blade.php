@@ -12,12 +12,23 @@
       <i class="fas fa-plus mr-1"></i> {{ __('messages.partner.outlet.table_management.tables.add_table') }}
     </a>
 
+    @php
+      $currentClass = request('table_class'); // dari query ?table_class=...
+    @endphp
+
     <div class="mb-3">
-      <button class="btn btn-outline-choco btn-sm filter-btn rounded-pill active" data-category="all">{{ __('messages.partner.outlet.table_management.tables.all') }}</button>
+      {{-- ALL --}}
+      <a href="{{ route('partner.store.tables.index') }}"
+        class="btn btn-outline-choco btn-sm rounded-pill filter-btn {{ $currentClass ? '' : 'active' }}">
+          {{ __('messages.partner.outlet.table_management.tables.all') }}
+      </a>
+
+      {{-- PER CLASS --}}
       @foreach($table_classes as $table_class)
-        <button class="btn btn-outline-choco btn-sm filter-btn rounded-pill" data-category="{{ $table_class }}">
+        <a href="{{ route('partner.store.tables.index', ['table_class' => $table_class]) }}"
+          class="btn btn-outline-choco btn-sm rounded-pill filter-btn {{ $currentClass === $table_class ? 'active' : '' }}">
           {{ $table_class }}
-        </button>
+        </a>
       @endforeach
     </div>
 
@@ -28,6 +39,12 @@
     {{-- bungkus display biar CSS page-scope --}}
     <div class="tables-index__table">
       @include('pages.partner.store.tables.display')
+    </div>
+    {{-- Pagination --}}
+    <div class="tables-index__pagination mt-3">
+        <div class="d-flex justify-content-end">
+            {{ $tables->withQueryString()->links() }}
+        </div>
     </div>
   </div>
 </section>
@@ -107,6 +124,46 @@
   background:#fecaca; color:#7f1d1d; border-color:#fca5a5;
 }
 
+/* ===== Pagination Choco Style (Tables Index) ===== */
+.tables-index__pagination .pagination {
+    margin-bottom: 0;
+    gap: .25rem;
+}
+
+.tables-index__pagination .page-item .page-link {
+    color: var(--choco);
+    border-radius: 999px;
+    padding: .35rem .75rem;
+    font-weight: 600;
+    font-size: .85rem;
+    border: 1px solid #e5e7eb;
+    background-color: #fff;
+    transition: all .15s ease;
+}
+
+.tables-index__pagination .page-item .page-link:hover {
+    background-color: var(--choco);
+    color: #fff;
+    border-color: var(--choco);
+    box-shadow: 0 6px 14px rgba(140,16,0,.18);
+}
+
+.tables-index__pagination .page-item.active .page-link {
+    background-color: var(--choco);
+    border-color: var(--choco);
+    color: #fff;
+    box-shadow: 0 6px 14px rgba(140,16,0,.18);
+}
+
+.tables-index__pagination .page-item.disabled .page-link {
+    color: #9ca3af;
+    background-color: #f3f4f6;
+    border-color: #e5e7eb;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+
 </style>
 @endsection
 
@@ -114,47 +171,4 @@
 @vite(['resources/js/app.js'])
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const filterButtons = document.querySelectorAll('.filter-btn');
-
-    filterButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            console.log('Tombol diklik:', this.textContent);
-            const categoryId = this.getAttribute('data-category');
-
-            // hapus class active dari semua tombol
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
-
-            const tableBody = document.querySelector('tbody');
-            const tableRows = document.querySelectorAll('tbody tr');
-
-            let visibleCount = 0; // hitung row yang tampil
-
-            tableRows.forEach((row, index) => {
-                if(categoryId === 'all' || row.getAttribute('data-category') === categoryId) {
-                    row.style.display = '';
-                    visibleCount++;
-                    row.querySelector('td').textContent = visibleCount; // update nomor urut di kolom pertama
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-
-            // hapus row "data tidak ditemukan" dulu kalau ada
-            const emptyRow = tableBody.querySelector('.empty-row');
-            if(emptyRow) emptyRow.remove();
-
-            // jika tidak ada row yang tampil, tampilkan pesan
-            if(visibleCount === 0) {
-                const tr = document.createElement('tr');
-                tr.classList.add('empty-row');
-                tr.innerHTML = `<td colspan="5" class="text-center">Data tidak ditemukan</td>`;
-                tableBody.appendChild(tr);
-            }
-        });
-    });
-});
-</script>
 @endpush

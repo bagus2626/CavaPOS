@@ -21,34 +21,72 @@
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
+    @php
+        $currentLocale = session('app_locale', app()->getLocale());
+    @endphp
     <body class="font-sans antialiased bg-gray-100 dark:bg-black text-gray-900 dark:text-white">
         {{-- === Custom Header Section === --}}
         <header class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-primary/10">
             <nav class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+                {{-- Logo --}}
                 <div class="font-poppins">
                     <img src="{{ asset('images/cava-logo3-gradient.png') }}" 
                         alt="CAVAA Logo" 
                         class="h-8 md:h-10 object-contain" />
                 </div>
 
-                <!-- Desktop & Tablet Menu -->
-                <ul class="hidden md:flex space-x-6 items-center">
-                    <li><a href="#home" class="text-gray-700 hover:text-primary transition-colors font-medium">Home</a></li>
-                    <li><a href="#fitur" class="text-gray-700 hover:text-primary transition-colors font-medium">Fitur</a></li>
-                    <li><a href="#kontak" class="text-gray-700 hover:text-primary transition-colors font-medium">Kontak</a></li>
-                </ul>
+                {{-- Menu + Search + Language + Mobile Button --}}
+                <div class="flex items-center gap-4">
+                    <!-- Desktop & Tablet Menu -->
+                    <ul class="hidden md:flex space-x-6 items-center">
+                        <li><a href="#home" class="text-gray-700 hover:text-primary transition-colors font-medium">Home</a></li>
+                        <li><a href="#fitur" class="text-gray-700 hover:text-primary transition-colors font-medium">Fitur</a></li>
+                        <li><a href="#kontak" class="text-gray-700 hover:text-primary transition-colors font-medium">Kontak</a></li>
+                    </ul>
 
-                <!-- Search Bar -->
-                <div class="relative hidden md:block">
-                    <input type="text" placeholder="Search....." 
-                        class="pl-10 pr-4 py-2 border border-primary/20 rounded-full bg-amber-50/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary w-40 md:w-48 lg:w-64">
-                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-primary"></i>
+                    <!-- Search Bar -->
+                    <div class="relative hidden md:block">
+                        <input type="text" placeholder="Search....." 
+                            class="pl-10 pr-4 py-2 border border-primary/20 rounded-full bg-amber-50/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary w-40 md:w-48 lg:w-64">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-primary"></i>
+                    </div>
+
+                    <!-- Language Switcher (Desktop) -->
+                    <div class="hidden md:flex items-center space-x-1">
+                        @php
+                            $currentLocale = session('app_locale', app()->getLocale());
+                        @endphp
+
+                        <form action="{{ route('language.set') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="locale" value="id">
+                            <button type="submit"
+                                class="px-3 py-1 text-xs font-semibold rounded-full border
+                                    {{ $currentLocale === 'id'
+                                        ? 'bg-choco text-white border-choco'
+                                        : 'bg-tansparent text-gray-700 border-choco/40 hover:bg-soft-choco/10' }}">
+                                ID
+                            </button>
+                        </form>
+
+                        <form action="{{ route('language.set') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="locale" value="en">
+                            <button type="submit"
+                                class="px-3 py-1 text-xs font-semibold rounded-full border
+                                    {{ $currentLocale === 'en'
+                                        ? 'bg-choco text-white border-choco'
+                                        : 'bg-transparent text-gray-700 border-choco/40 hover:bg-soft-choco/10' }}">
+                                EN
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Mobile Menu Button -->
+                    <button class="md:hidden text-choco" onclick="toggleMobileMenu()">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
                 </div>
-
-                <!-- Mobile Menu Button -->
-                <button class="md:hidden text-primary" onclick="toggleMobileMenu()">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
             </nav>
 
             <!-- Mobile Menu -->
@@ -58,6 +96,37 @@
                     <li><a href="#fitur" class="block text-gray-700 hover:text-primary transition-colors font-medium py-2" onclick="toggleMobileMenu()">Fitur</a></li>
                     <li><a href="#kontak" class="block text-gray-700 hover:text-primary transition-colors font-medium py-2" onclick="toggleMobileMenu()">Kontak</a></li>
                 </ul>
+
+                <!-- Language Switcher (Mobile) -->
+                <div class="mt-4 pt-3 border-t border-primary/10">
+                    <p class="text-xs text-gray-400 mb-2">Language</p>
+
+                    <div class="flex gap-2">
+                        <form action="{{ route('language.set') }}" method="POST" class="flex-1">
+                            @csrf
+                            <input type="hidden" name="locale" value="id">
+                            <button type="submit"
+                                class="w-full px-3 py-1 text-xs font-semibold rounded-full border
+                                    {{ $currentLocale === 'id'
+                                        ? 'bg-choco text-white border-choco'
+                                        : 'bg-transparent text-gray-700 border-choco/40 hover:bg-soft-choco/10' }}">
+                                Indonesia
+                            </button>
+                        </form>
+
+                        <form action="{{ route('language.set') }}" method="POST" class="flex-1">
+                            @csrf
+                            <input type="hidden" name="locale" value="en">
+                            <button type="submit"
+                                class="w-full px-3 py-1 text-xs font-semibold rounded-full border
+                                    {{ $currentLocale === 'en'
+                                        ? 'bg-choco text-white border-choco'
+                                        : 'bg-transparent text-gray-700 border-choco/40 hover:bg-soft-choco/10' }}">
+                                English
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </header>
     
@@ -124,6 +193,16 @@
         <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js" defer></script>
         <script src="https://unpkg.com/@formkit/auto-animate@1" defer></script>
+        <script>
+            function toggleMobileMenu() {
+                const menu = document.getElementById('mobileMenu');
+
+                if (!menu) return;
+
+                // toggle kelas "hidden" saja sudah cukup, karena default-nya kamu kasih class "hidden"
+                menu.classList.toggle('hidden');
+            }
+        </script>
         @stack('scripts')
     </body>
 </html>

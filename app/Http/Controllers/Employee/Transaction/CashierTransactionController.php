@@ -161,25 +161,26 @@ class CashierTransactionController extends Controller
             foreach ($booking_order->order_details as $detail) {
                 $qty = $detail->quantity;
                 $product = $detail->partnerProduct;
+                if($product) {
+                    // A. Pengurangan Produk Utama
+                    if ($product->stock_type === 'direct' && $product->always_available_flag === 0 && $product->stock) {
+                        // Kurangi fisik (quantity) dan hapus reservasi (quantity_reserved)
+                        $this->processStockConsumption($product->stock, $qty, $masterMovement);
+                    } elseif ($product->stock_type === 'linked') {
+                        // Kurangi bahan baku (ingredients)
+                        $this->processRecipeConsumption($product->recipes, $qty, $masterMovement);
+                    }
 
-                // A. Pengurangan Produk Utama
-                if ($product->stock_type === 'direct' && $product->always_available_flag === 0 && $product->stock) {
-                    // Kurangi fisik (quantity) dan hapus reservasi (quantity_reserved)
-                    $this->processStockConsumption($product->stock, $qty, $masterMovement);
-                } elseif ($product->stock_type === 'linked') {
-                    // Kurangi bahan baku (ingredients)
-                    $this->processRecipeConsumption($product->recipes, $qty, $masterMovement);
-                }
+                    // B. Pengurangan Opsi Produk
+                    foreach ($detail->order_detail_options as $detailOption) {
+                        $opt = $detailOption->option;
+                        if (!$opt) continue;
 
-                // B. Pengurangan Opsi Produk
-                foreach ($detail->order_detail_options as $detailOption) {
-                    $opt = $detailOption->option;
-                    if (!$opt) continue;
-
-                    if ($opt->stock_type === 'direct' && $opt->always_available_flag === 0 && $opt->stock) {
-                        $this->processStockConsumption($opt->stock, $qty, $masterMovement);
-                    } elseif ($opt->stock_type === 'linked') {
-                        $this->processRecipeConsumption($opt->recipes, $qty, $masterMovement);
+                        if ($opt->stock_type === 'direct' && $opt->always_available_flag === 0 && $opt->stock) {
+                            $this->processStockConsumption($opt->stock, $qty, $masterMovement);
+                        } elseif ($opt->stock_type === 'linked') {
+                            $this->processRecipeConsumption($opt->recipes, $qty, $masterMovement);
+                        }
                     }
                 }
             }

@@ -22,9 +22,9 @@
 
             {{-- Menu Desktop --}}
             <div class="hidden md:flex items-center space-x-6">
-                <a href="#" class="text-gray-700 hover:text-choco">Home</a>
+                {{-- <a href="#" class="text-gray-700 hover:text-choco">Home</a>
                 <a href="#" class="text-gray-700 hover:text-choco">Menu</a>
-                <a href="#" class="text-gray-700 hover:text-choco">Contact</a>
+                <a href="#" class="text-gray-700 hover:text-choco">Contact</a> --}}
 
                 @auth('employee')
                     @php

@@ -1,17 +1,17 @@
 @extends('layouts.customer')
 
-@section('title','Lupa Password')
+@section('title',__('messages.customer.forgot_password.forgot_password'))
 
 @section('content')
 <div class="w-full max-w-md bg-white shadow-lg rounded-lg p-6 md:p-8">
-    <h2 class="text-2xl font-bold text-center mb-6">Lupa Password</h2>
+    <h2 class="text-2xl font-bold text-center mb-6">{{ __('messages.customer.forgot_password.forgot_password') }}</h2>
 
     @if (session('status'))
         <div class="mb-4 text-sm text-green-600">{{ session('status') }}</div>
     @endif
 
     <p class="text-sm text-gray-600 mb-4">
-        Masukkan email yang terdaftar. Kami akan mengirimkan tautan untuk reset password.
+        {{ __('messages.customer.forgot_password.forgot_password_instruction') }}
     </p>
 
     <form method="POST" action="{{ route('customer.password.email', compact('partner_slug','table_code')) }}" class="space-y-4">
@@ -26,13 +26,13 @@
 
         <button type="submit"
                 class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md">
-            Kirim Link Reset
+            {{ __('messages.customer.forgot_password.send_reset_link') }}
         </button>
     </form>
 
     <div class="text-center mt-4">
         <a href="{{ route('customer.login', compact('partner_slug','table_code')) }}" class="text-sm text-blue-600 hover:text-blue-800">
-            Kembali ke Login
+            {{ __('messages.customer.forgot_password.back_to_login') }}
         </a>
     </div>
 </div>
