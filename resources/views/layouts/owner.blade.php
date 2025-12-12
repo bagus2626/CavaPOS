@@ -611,7 +611,7 @@
 
                         <li class="nav-item {{ Route::is($employeeRoutes) ? 'menu-open' : '' }}">
                             <a href="javascript:void(0)"
-                                class="nav-link {{ !$isVerified ? 'disabled-link' : '' }} {{ Route::is($employeeRoutes) ? 'active' : '' }}"
+                                class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($employeeRoutes) ? 'active' : '' }}"
                                 onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
                                 <i class="nav-icon fas fa-users"></i>
                                 <p>
@@ -621,7 +621,7 @@
                                     @endif
                                 </p>
                             </a>
-                            <ul class="nav nav-treeview {{ !$isVerified ? 'disabled' : '' }}">
+                            <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
                                 <li class="nav-item">
                                     <a href="{{ route('owner.user-owner.employees.index') }}"
                                         class="nav-link {{ Route::is('owner.user-owner.employees.*') ? 'active' : '' }}">
@@ -846,7 +846,7 @@
                     @endphp
                     <li class="nav-item {{ Route::is($settingRoutes) ? 'menu-open' : '' }}">
                         <a href="javascript:void(0)"
-                            class="nav-link {{ !$isVerified ? 'disabled-link' : '' }} {{ Route::is($settingRoutes) ? 'active' : '' }}"
+                            class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($settingRoutes) ? 'active' : '' }}"
                             onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
                             <i class="nav-icon fas fa-cog"></i>
                             <p>
@@ -856,7 +856,7 @@
                                 @endif
                             </p>
                         </a>
-                        <ul class="nav nav-treeview {{ !$isVerified ? 'disabled' : '' }}">
+                        <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
                             {{-- Submenu: Settings (ini adalah link ke halaman settings sebenarnya) --}}
                             <li class="nav-item">
                                 <a href="{{ route('owner.user-owner.settings.index') }}"
