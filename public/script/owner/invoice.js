@@ -269,7 +269,10 @@ window.initInvoiceTab = function(accountId) {
             const formattedAmount = new Intl.NumberFormat('id-ID').format(item.amount ?? 0);
 
             rowsHtml += `
-        <tr data-id="${item.id}">
+        <tr class="invoice-clickable-row"
+            data-invoice-id="${item.id ?? ''}"
+            data-business-id="${item.user_id ?? ''}"
+            style="cursor: pointer;">
             <td class="text-bold-500">${item.id ?? '-'}</td>
             <td>
                 <span class="font-weight-bold">${tanggal}</span><br>
