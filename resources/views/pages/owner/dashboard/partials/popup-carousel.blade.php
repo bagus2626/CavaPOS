@@ -147,7 +147,7 @@
         /* ===== Image Styles ===== */
         .popup-full-screen-image {
             max-width: 100%;
-            max-height: 100%;   
+            max-height: 380px;   
             width: auto;
             height: auto;
             object-fit: contain;
@@ -262,7 +262,7 @@
         /* ===== Responsive ===== */
         @media (max-width: 991.98px) {
             .popup-modal .modal-dialog {
-                max-width: 95%;
+                max-width: 480px;
             }
 
             .popup-full-image-container {
@@ -290,7 +290,7 @@
 
         @media (max-width: 767.98px) {
             .popup-modal .modal-dialog {
-                max-width: 95%;
+                max-width: 380px;
                 margin: 0.5rem auto;
             }
 
@@ -328,7 +328,7 @@
 
         @media (max-width: 575.98px) {
             .popup-full-image-container {
-                height: 350px;
+                height: 330px;
             }
 
             .popup-link-badge {

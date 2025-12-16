@@ -157,7 +157,6 @@
                                 @endforelse
                                 <tr id="noResultRow" style="display: none;">
                                     <td colspan="6" class="text-center text-muted py-4">
-                                        <i class="fas fa-search fa-2x mb-2"></i>
                                         <p class="mb-0">{{ __('messages.owner.stock_report.table.no_result') }} "<span id="searchKeyword"></span>"</p>
                                     </td>
                                 </tr>

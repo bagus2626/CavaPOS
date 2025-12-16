@@ -138,7 +138,6 @@
 @include('pages.employee.cashier.dashboard.modals.detail')
 @include('pages.employee.cashier.dashboard.modals.served')
 
-<script src="{{ asset('js/employee/cashier/dashboard/detail.js') }}"></script>
 <script>
 (function () {
   // Delegasi klik untuk semua tombol yang punya data-print-receipt-process

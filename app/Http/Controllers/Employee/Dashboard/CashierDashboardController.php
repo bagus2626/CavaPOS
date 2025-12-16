@@ -116,7 +116,6 @@ class CashierDashboardController extends Controller
         ));
     }
 
-
     public function show(Request $request, string $tab)
     {
         // dd($request->all());

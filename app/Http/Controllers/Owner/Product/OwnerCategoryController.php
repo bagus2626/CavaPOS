@@ -20,7 +20,7 @@ class OwnerCategoryController extends Controller
         $owner_id = Auth::id();
         $categories = Category::where('owner_id', $owner_id)
             ->orderBy('category_order')
-            ->paginate(5);
+            ->paginate(10);
         // dd($categories);
         return view('pages.owner.products.categories.index', compact('categories'));
     }
@@ -90,9 +90,22 @@ class OwnerCategoryController extends Controller
             'category_name' => 'required|string|max:255',
             'description'   => 'nullable|string',
             'images'        => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'keep_existing_image' => 'nullable|in:0,1',
         ]);
 
         $imageData = $category->images;
+
+        if ($request->keep_existing_image == '0' && $category->images) {
+            // Hapus file fisik dari server
+            if (is_array($category->images) && isset($category->images['path'])) {
+                $oldPath = public_path($category->images['path']);
+                if (File::exists($oldPath)) {
+                    File::delete($oldPath);
+                }
+            }
+            // Set imageData menjadi null
+            $imageData = null;
+        }
 
         if ($request->hasFile('images')) {
 

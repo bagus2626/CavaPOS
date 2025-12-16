@@ -45,20 +45,18 @@
         <th>{{ __('messages.owner.products.stocks.stock_quantity') }}</th>
         <th>{{ __('messages.owner.products.stocks.unit') }}</th>
         <th>{{ __('messages.owner.products.stocks.last_price_unit') }}</th>
-        {{-- <th>Description</th> --}}
         <th class="text-nowrap">{{ __('messages.owner.products.stocks.actions') }}</th>
       </tr>
     </thead>
     <tbody>
-      @foreach ($stocks as $index => $stock)
-
+      @forelse ($stocks as $index => $stock)
         <tr data-type="{{ $stock->type }}"
           data-stock_type="{{ $stock->stock_type }}"
           data-partner-type="{{ $stock->partner_product_id && !$stock->partner_product_option_id ? 'product' : ($stock->partner_product_id && $stock->partner_product_option_id ? 'option' : 'none') }}">
-          <td class="text-muted">{{ $index + 1 }}</td>
+          <td class="text-muted">{{ $stocks->firstItem() + $index }}</td>
           <td class="mono">{{ $stock->stock_code }}</td>
           <td class="fw-600">{{ $stock->stock_name }}</td>
-          <td>{{ number_format($stock->display_quantity, 2) }}</td>
+          <td>{{ number_format($stock->display_quantity, 2, ',', '.') }}</td>
 
           <td>
             @if($stock->displayUnit)
@@ -69,25 +67,34 @@
           </td>
 
           <td>{{ $stock->last_price_per_unit }}</td>
-          {{-- <td>{{ $stock->description ?? '-' }}</td> --}}
           <td class="text-nowrap">
-            {{-- <a href="{{ route('owner.user-owner.stocks.show', $stock->id) }}"
-              class="btn btn-sm btn-outline-choco me-1">Detail</a>
-            <a href="{{ route('owner.user-owner.stocks.edit', $stock->id) }}"
-              class="btn btn-sm btn-outline-choco me-1">{{ __('messages.owner.products.stocks.edit') }}</a> --}}
             @if($stock->type === 'master')
               <button onclick="deleteStock({{ $stock->id }})" class="btn btn-sm btn-soft-danger">{{ __('messages.owner.products.stocks.delete') }}</button>
             @endif
           </td>
         </tr>
-      @endforeach
+      @empty
+        <tr>
+          <td colspan="7" class="text-center text-muted py-4">
+            {{ __('messages.owner.products.stocks.no_stock_found') }}
+          </td>
+        </tr>
+      @endforelse
     </tbody>
   </table>
 </div>
 
-<style>
-  /* ... (Semua CSS Anda yang lama tetap di sini) ... */
+{{-- Pagination Links --}}
+<div class="d-flex justify-content-between align-items-center mt-3">
+  <div class="text-muted small">
+    Showing {{ $stocks->firstItem() ?? 0 }} to {{ $stocks->lastItem() ?? 0 }} of {{ $stocks->total() }} entries
+  </div>
+  <div>
+    {{ $stocks->links() }}
+  </div>
+</div>
 
+<style>
   .owner-stocks .owner-stocks-table {
     border-radius: 12px;
     box-shadow: 0 6px 20px rgba(0, 0, 0, .08);
@@ -95,13 +102,11 @@
     background: #fff;
   }
 
-  /* ... ... */
   .owner-stocks .btn-soft-danger:hover {
     background: #fecaca;
     color: #7f1d1d;
     border-color: #fca5a5;
   }
-
 
   .owner-stocks .nav-tabs {
     border-bottom: 2px solid #eef1f4;
@@ -111,24 +116,50 @@
     border: none;
     border-bottom: 3px solid transparent;
     color: #6b7280;
-    /* abu-abu */
     font-weight: 600;
     padding: 0.75rem 1rem;
   }
 
   .owner-stocks .nav-tabs .nav-link.active {
     border-color: #8c1000;
-    /* var(--choco) */
     color: #8c1000;
-    /* var(--choco) */
     background-color: transparent;
   }
 
   .owner-stocks .nav-tabs .nav-link:hover {
     border-color: #e5e7eb;
-    /* abu-abu muda */
+  }
+
+  /* Custom Pagination Style */
+  .pagination {
+    margin-bottom: 1rem;
+  }
+
+  .page-link {
+    color: #8c1000;
+    border-color: #dee2e6;
+  }
+
+  .page-link:hover {
+    color: #6b0d00;
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+  }
+
+  .page-item.active .page-link {
+    background-color: #8c1000;
+    border-color: #8c1000;
+    color: white;
+  }
+
+  .page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+    background-color: #fff;
+    border-color: #dee2e6;
   }
 </style>
+
 <script>
   function deleteStock(stockId) {
     Swal.fire({
@@ -136,7 +167,7 @@
       text: "{{ __('messages.owner.products.promotions.delete_confirmation_2') }}",
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#8c1000', // brand choco
+      confirmButtonColor: '#8c1000',
       cancelButtonColor: '#6b7280',
       confirmButtonText: '{{ __('messages.owner.products.promotions.delete_confirmation_3') }}',
       cancelButtonText: '{{ __('messages.owner.products.promotions.cancel') }}',
@@ -175,7 +206,14 @@
     let currentPartnerFilter = 'product';
 
     function applyFilters() {
+      let visibleCount = 0;
+      
       tableRows.forEach(row => {
+        // Skip empty state row
+        if (row.querySelector('td[colspan]')) {
+          return;
+        }
+
         const rowType = row.getAttribute('data-type');
         const stockType = row.getAttribute('data-stock_type');
         const rowPartnerType = row.getAttribute('data-partner-type');
@@ -197,8 +235,16 @@
             show = false;
           }
         }
+        
         row.style.display = show ? '' : 'none';
+        if (show) visibleCount++;
       });
+
+      // Show/hide empty state if no visible rows
+      const emptyRow = document.querySelector('.owner-stocks-table tbody tr td[colspan]');
+      if (emptyRow && emptyRow.parentElement) {
+        emptyRow.parentElement.style.display = visibleCount === 0 ? '' : 'none';
+      }
     }
 
     // Event listener untuk tab filter utama
@@ -206,7 +252,6 @@
       tab.addEventListener('click', function (e) {
         e.preventDefault();
 
-        // Tukar kelas 'active' untuk filter utama
         mainFilterTabs.forEach(t => {
           t.classList.remove('active');
         });
@@ -216,11 +261,8 @@
 
         if (currentMainFilter === 'direct') {
           partnerFilterContainer.style.display = '';
-
-          // Reset filter partner ke 'product'
           currentPartnerFilter = 'product';
 
-          // Reset style tombol sub-filter
           partnerFilterTabs.forEach(t => {
             t.classList.remove('active');
           });

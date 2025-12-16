@@ -46,10 +46,11 @@ class OwnerStockController extends Controller
             $query->where('partner_id', $filterLocation);
         }
 
-        $stocks = $query->get();
+        // Gunakan paginate() dengan 10 items per halaman
+        $stocks = $query->paginate(20)->withQueryString();
 
         // Konversi quantity untuk tampilan
-        $stocks->transform(function ($stock) {
+        $stocks->getCollection()->transform(function ($stock) {
             if ($stock->displayUnit) {
                 $stock->display_quantity = $this->unitConversionService->convertToDisplayUnit(
                     $stock->quantity,
@@ -284,7 +285,7 @@ class OwnerStockController extends Controller
         foreach ($partner_stocks as $ps) {
             $ps->delete();
         }
-        
+
         $stock->delete();
 
         return redirect()->route('owner.user-owner.stocks.index')->with('success', 'Stock deleted successfully!');

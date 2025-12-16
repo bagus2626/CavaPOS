@@ -46,6 +46,8 @@
                 {{ __('messages.partner.outlet.table_management.tables.occupied') }}
               @elseif ($table->status === 'reserved')
                 {{ __('messages.partner.outlet.table_management.tables.reserved') }}
+              @elseif($table->status === 'not_available')
+                {{ __('messages.partner.outlet.table_management.tables.not_available') }}
               @else
                 -
               @endif

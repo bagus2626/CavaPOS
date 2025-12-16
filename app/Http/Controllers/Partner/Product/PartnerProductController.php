@@ -51,7 +51,7 @@ class PartnerProductController extends Controller
 
         $products = $productsQuery
             ->orderBy('name')
-            ->paginate(10) 
+            ->paginate(10)
             ->withQueryString();
 
         return view('pages.partner.products.index', compact(
@@ -193,14 +193,29 @@ class PartnerProductController extends Controller
         }
     }
 
-
     public function show(PartnerProduct $product)
     {
-        $categories = Category::where('partner_id', Auth::id())->get();
-        $data = PartnerProduct::with('parent_options.options', 'category')
-            ->where('partner_id', Auth::id())
+        $partner = Auth::user();
+
+        // Eager Load: Menerapkan filter stok dan memuat resep
+        $data = PartnerProduct::with([
+            'parent_options.options.stock' => fn($q) => $q->where('partner_id', $partner->id),
+            'parent_options.options.recipes.stock.displayUnit',
+            'category',
+            // Stock utama produk
+            'stock' => fn($q) => $q->where('partner_id', $partner->id),
+            // Resep utama produk
+            'recipes.stock.displayUnit',
+        ])
+            ->where('partner_id', $partner->id)
             ->where('id', $product->id)
-            ->first();
+            ->firstOrFail(); // Gunakan firstOrFail untuk konsistensi
+
+        // Memuat ulang data opsi setelah filter (penting)
+        $data->load(['parent_options.options.stock', 'parent_options.options.recipes']);
+
+        $categories = Category::where('partner_id', $partner->id)->get();
+
         return view('pages.partner.products.show', compact('data', 'categories'));
     }
 
@@ -371,7 +386,6 @@ class PartnerProductController extends Controller
                     $product->update(['stock_type' => 'linked']);
                 }
                 $recalculator->recalculateSingleTarget($product);
-
             } elseif ($itemType === 'option') {
                 // Verify option exists
                 $option = PartnerProductOption::findOrFail($itemId);

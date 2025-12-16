@@ -1,8 +1,11 @@
 @extends('layouts.owner')
 
+@section('title', __('messages.owner.products.categories.categories_list'))
+@section('page_title', __('messages.owner.products.categories.categories'))
+
 @section('content')
-<div class="container owner-categories mt-4"> {{-- PAGE SCOPE --}}
-    <h1 class="page-title">{{ __('messages.owner.products.categories.categories') }}</h1>
+<section class="content">
+<div class="container-fluid owner-categories"> {{-- PAGE SCOPE --}}
     <a href="{{ route('owner.user-owner.categories.create') }}" class="btn btn-primary mb-3">
         + {{ __('messages.owner.products.categories.add_category') }}
     </a>
@@ -67,12 +70,20 @@
       </table>
     </div>
 
-    <div class="d-flex justify-content-center">
-        {{ $categories->links() }}
+  {{-- Pagination Links --}}
+  <div class="d-flex justify-content-between align-items-center">
+    <div class="text-muted small">
+      Showing {{ $categories->firstItem() ?? 0 }} to {{ $categories->lastItem() ?? 0 }} of {{ $categories->total() }} entries
     </div>
+    <div>
+      {{ $categories->links() }}
+    </div>
+  </div>
 </div>
 
 @include('pages.owner.products.categories.category-order-modal')
+
+</section>
 
 <style>
 /* ===== Owner › Categories (page scope) ===== */
@@ -139,17 +150,35 @@
   border-radius:10px; min-width:72px; padding:.28rem .6rem;
 }
 
-/* Pagination (Laravel) */
-.owner-categories .pagination{ gap:.35rem; }
-.owner-categories .page-link{
-  color:var(--choco); border:1px solid #e5e7eb; border-radius:999px;
-}
-.owner-categories .page-item.active .page-link{
-  background:var(--choco); border-color:var(--choco); color:#fff;
-}
-.owner-categories .page-link:hover{
-  color:#fff; background:var(--choco); border-color:var(--choco);
-}
+
+/* Custom Pagination Style */
+  .pagination {
+    margin-bottom: 1rem;
+  }
+
+  .page-link {
+    color: var(--choco);
+    border-color: #dee2e6;
+  }
+
+  .page-link:hover {
+    color: #6b0d00;
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+  }
+
+  .page-item.active .page-link {
+    background-color: var(--choco);
+    border-color: var(--choco);
+    color: white;
+  }
+
+  .page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+    background-color: #fff;
+    border-color: #dee2e6;
+  }
 
 /* Support Tailwind-like width classes used in markup */
 .owner-categories .w-\[5\%\]{ width:5% !important; }

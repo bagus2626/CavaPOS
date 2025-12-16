@@ -60,7 +60,7 @@
 
                         <div class="meta small text-muted">
                           <div class="mb-1"><i class="fas fa-tags me-1"></i>
-                            Price:
+                            {{ __('messages.partner.product.all_product.price') }}:
                             <strong>Rp {{ number_format((float) ($data->price ?? 0), 0, ',', '.') }}</strong>
                           </div>
 
@@ -345,7 +345,7 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
           <button type="button" class="btn btn-choco" id="save-recipe">
-            <i class="fas fa-save me-1"></i>Simpan Resep
+            <i class="fas fa-save mr-1"></i>Simpan Resep
           </button>
         </div>
       </div>
@@ -379,11 +379,15 @@
     border-radius:10px;
   }
 
-  /* Thumb */
   .thumb-120{
-    width:120px; height:120px; object-fit:cover;
-    border-radius:12px; border:0; box-shadow: var(--shadow);
-  }
+  width:120px; 
+  height:120px; 
+  object-fit:cover;
+  border-radius:12px; 
+  border:0; 
+  box-shadow: var(--shadow);
+  margin-right: 1rem; /* Tambahkan ini */
+}
 
   /* Badges soft */
   .badges-row .badge{ margin-right:.35rem; }
@@ -444,6 +448,29 @@
   .bg-choco{ background: linear-gradient(135deg, var(--choco), var(--soft-choco)); }
   .recipe-item{ background:#fafbfc; transition: all .2s ease; border:1px solid #e5e7eb; }
   .recipe-item:hover{ background:#f3f4f6; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+
+  /* Tambahkan di bagian <style> */
+
+/* Spacing untuk button group di mobile */
+.product-stock .d-flex.justify-content-end {
+  gap: 0.5rem;
+}
+
+/* Atau jika menggunakan margin */
+.product-stock .d-flex.justify-content-end .btn {
+  margin-left: 0.5rem;
+}
+
+.product-stock .d-flex.justify-content-end .btn:first-child {
+  margin-left: 0;
+}
+
+/* Responsive spacing */
+@media (max-width: 576px) {
+  .product-stock .d-flex.justify-content-end {
+    gap: 0.75rem;
+  }
+}
 
   </style>
 @endsection

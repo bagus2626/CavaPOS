@@ -161,7 +161,7 @@ class CashierTransactionController extends Controller
             foreach ($booking_order->order_details as $detail) {
                 $qty = $detail->quantity;
                 $product = $detail->partnerProduct;
-                if($product) {
+                if ($product) {
                     // A. Pengurangan Produk Utama
                     if ($product->stock_type === 'direct' && $product->always_available_flag === 0 && $product->stock) {
                         // Kurangi fisik (quantity) dan hapus reservasi (quantity_reserved)
@@ -385,7 +385,7 @@ class CashierTransactionController extends Controller
                     "failure_redirect_url" => url("employee/cashier/open-order/" . $booking_order->id),
                     "currency" => "IDR",
                     "items" => $items,
-//                    "payment_methods" => ["QRIS"],
+                    //                    "payment_methods" => ["QRIS"],
                     "metadata" => [
                         "store_branch" => $partner->name
                     ]
@@ -396,7 +396,7 @@ class CashierTransactionController extends Controller
                 $invoiceData = $invoice['data'] ?? null;
                 DB::commit();
 
-                if($invoice['success']){
+                if ($invoice['success']) {
                     return response()->json([
                         'redirect' => $invoiceData['invoice_url']
                     ]);
@@ -476,33 +476,47 @@ class CashierTransactionController extends Controller
         return $pdf->stream("receipt-{$data->booking_order_code}.pdf");
     }
 
+    // Di dalam Controller
     public function processOrder($id)
     {
         $cashier = Auth::user();
         $booking_order = BookingOrder::with('order_details')->findOrFail($id);
+
+        // 1. Verifikasi Kepemilikan (Tetap)
         if ($booking_order->partner_id !== $cashier->partner_id) {
-            return redirect()->back()->with('error', 'Tidak bisa proses order toko lain!');
+            return response()->json(['status' => 'error', 'message' => 'Tidak bisa proses order toko lain!'], 403);
         }
 
         DB::beginTransaction();
         try {
+            // 2. VERIFIKASI STATUS KRITIS: Cek apakah order sudah PROCESSED atau SERVED
+            if (in_array($booking_order->order_status, ['PROCESSED', 'SERVED'])) {
+                DB::rollBack(); // Tidak ada perubahan, jadi rollback aman.
 
+                // Berikan respon sukses SEMU (TAPI status khusus)
+                return response()->json([
+                    'status' => 'warning', // Status baru untuk frontend
+                    'message' => 'Order ini sudah diproses oleh tim lain (Kitchen). Order akan di-refresh.',
+                    'already_processed' => true // Flag khusus
+                ]);
+            }
+
+            // 3. Jika status masih UNPAID/PENDING, lanjutkan proses
             $booking_order->order_status = 'PROCESSED';
             $booking_order->cashier_process_id = $cashier->id;
             $booking_order->save();
+
             foreach ($booking_order->order_details as $detail) {
                 $detail->status = 'PROCESSED BY CASHIER';
                 $detail->save();
             }
+
             DB::commit();
 
-            return response()->json(['status' => 'ok', 'message' => 'Order processed']);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            // kalau booking_order tidak ketemu
-            return response()->json(['status' => 'error', 'message' => 'Gagal Proses Order']);
+            return response()->json(['status' => 'ok', 'message' => 'Order berhasil diproses.']);
         } catch (\Exception $e) {
-            // general error lainnya
-            return response()->json(['status' => 'error', 'message' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+            DB::rollBack();
+            return response()->json(['status' => 'error', 'message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
         }
     }
 
@@ -698,7 +712,7 @@ class CashierTransactionController extends Controller
             ]);
 
             $items = $request->input('items', []);
-            
+
             if (empty($items)) {
                 return response()->json([
                     'success' => false,
@@ -736,7 +750,7 @@ class CashierTransactionController extends Controller
 
                     if ($product->stock_type === 'direct') {
                         $stock = $product->stock;
-                        
+
                         if ($stock) {
                             $available = (int)($stock->quantity ?? 0) - (int)($stock->quantity_reserved ?? 0);
 
@@ -752,16 +766,16 @@ class CashierTransactionController extends Controller
                     } elseif ($product->stock_type === 'linked') {
                         // Hitung manual untuk linked stock
                         $recipes = PartnerProductRecipe::where('partner_product_id', $productId)->get();
-                        
+
                         if ($recipes->isEmpty()) {
                             continue;
                         }
 
                         $minAvailable = PHP_INT_MAX;
-                        
+
                         foreach ($recipes as $recipe) {
                             $ingredientStock = Stock::find($recipe->stock_id);
-                            
+
                             if (!$ingredientStock) {
                                 $minAvailable = 0;
                                 break;
@@ -769,7 +783,7 @@ class CashierTransactionController extends Controller
 
                             $stockAvailable = (int)($ingredientStock->quantity ?? 0) - (int)($ingredientStock->quantity_reserved ?? 0);
                             $quantityPerUnit = (float)$recipe->quantity_used;
-                            
+
                             if ($quantityPerUnit > 0) {
                                 $canMake = floor($stockAvailable / $quantityPerUnit);
                                 $minAvailable = min($minAvailable, $canMake);
@@ -812,7 +826,7 @@ class CashierTransactionController extends Controller
 
                             if ($opt->stock_type === 'direct') {
                                 $stock = $opt->stock;
-                                
+
                                 if ($stock) {
                                     $available = (int)($stock->quantity ?? 0) - (int)($stock->quantity_reserved ?? 0);
 
@@ -827,16 +841,16 @@ class CashierTransactionController extends Controller
                                 }
                             } elseif ($opt->stock_type === 'linked') {
                                 $recipes = PartnerProductOptionsRecipe::where('partner_product_option_id', $opt->id)->get();
-                                
+
                                 if ($recipes->isEmpty()) {
                                     continue;
                                 }
 
                                 $minAvailable = PHP_INT_MAX;
-                                
+
                                 foreach ($recipes as $recipe) {
                                     $ingredientStock = Stock::find($recipe->stock_id);
-                                    
+
                                     if (!$ingredientStock) {
                                         $minAvailable = 0;
                                         break;
@@ -844,7 +858,7 @@ class CashierTransactionController extends Controller
 
                                     $stockAvailable = (int)($ingredientStock->quantity ?? 0) - (int)($ingredientStock->quantity_reserved ?? 0);
                                     $quantityPerUnit = (float)$recipe->quantity_used;
-                                    
+
                                     if ($quantityPerUnit > 0) {
                                         $canMake = floor($stockAvailable / $quantityPerUnit);
                                         $minAvailable = min($minAvailable, $canMake);
@@ -887,7 +901,6 @@ class CashierTransactionController extends Controller
                     ? 'Semua stok tersedia'
                     : 'Beberapa item tidak tersedia'
             ]);
-
         } catch (\Exception $e) {
             Log::error('Stock check fatal error', [
                 'error' => $e->getMessage(),
@@ -935,7 +948,7 @@ class CashierTransactionController extends Controller
                     }
                 }
             }
-            
+
             $order_detail_options = OrderDetailOption::where('order_detail_id', $detail->id)->get();
             if ($order_detail_options) {
                 foreach ($order_detail_options as $option) {

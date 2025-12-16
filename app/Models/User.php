@@ -39,14 +39,14 @@ class User extends Authenticatable
         'urban_village',
         'urban_village_id',
         'address',
-        'user_wifi',        // TAMBAHKAN
-        'pass_wifi',        // TAMBAHKAN
+        'user_wifi',        
+        'pass_wifi',        
         'pic_name',
         'pic_email',
         'pic_phone_number',
         'pic_role',
         'is_active',
-        'is_wifi_shown',    // TAMBAHKAN
+        'is_wifi_shown',    
         'is_qr_active',
         'is_cashier_active',
 
