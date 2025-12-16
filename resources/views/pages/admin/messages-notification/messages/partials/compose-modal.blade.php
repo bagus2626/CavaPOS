@@ -228,195 +228,194 @@
 {{-- preview attachments --}}
 
 <style>
-/* Fix overflow untuk modal dan card */
-.snow-container {
-    position: relative;
-    overflow: visible !important;
-}
+    /* Fix overflow untuk modal dan card */
+    .snow-container {
+        position: relative;
+        overflow: visible !important;
+    }
 
-.compose-quill-toolbar {
-    border: none !important;
-    border-bottom: 1px solid #ddd !important;
-    padding: 8px 5px !important;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    background: #fafafa;
-    overflow: visible !important;
-}
-
-.compose-quill-toolbar .ql-formats {
-    margin-right: 8px !important;
-    display: inline-flex;
-    align-items: center;
-    flex-wrap: nowrap;
-}
-
-.compose-quill-toolbar button,
-.compose-quill-toolbar select {
-    margin: 0 2px !important;
-}
-
-/* Fix untuk dropdown dan tooltip yang terpotong */
-.compose-quill-toolbar .ql-picker {
-    position: relative;
-}
-
-.compose-quill-toolbar .ql-picker-options {
-    position: absolute;
-    z-index: 1050 !important;
-    background: white;
-    border: 1px solid #ccc;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    max-height: 200px;
-    overflow-y: auto;
-}
-
-.compose-quill-toolbar .ql-tooltip {
-    position: absolute !important;
-    z-index: 1051 !important;
-    left: 0 !important;
-    top: 100% !important;
-    margin-top: 5px !important;
-}
-
-/* Styling untuk editor area */
-.compose-editor {
-    min-height: 200px;
-    max-height: 400px;
-    overflow-y: auto;
-    background: white;
-}
-
-.compose-editor .ql-editor {
-    padding: 12px 15px;
-    min-height: 200px;
-}
-
-.compose-editor.ql-blank::before {
-    color: #aaa;
-    font-style: italic;
-}
-
-/* Fix z-index untuk modal agar dropdown tidak tertutup */
-.modal-content {
-    overflow: visible !important;
-}
-
-.card-content {
-    overflow: visible !important;
-}
-
-/* Responsiveness untuk toolbar */
-@media (max-width: 768px) {
     .compose-quill-toolbar {
-        padding: 5px 3px !important;
-        gap: 3px;
+        border: none !important;
+        border-bottom: 1px solid #ddd !important;
+        padding: 8px 5px !important;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        background: #fafafa;
+        overflow: visible !important;
     }
-    
+
     .compose-quill-toolbar .ql-formats {
-        margin-right: 5px !important;
+        margin-right: 8px !important;
+        display: inline-flex;
+        align-items: center;
+        flex-wrap: nowrap;
     }
-    
+
     .compose-quill-toolbar button,
     .compose-quill-toolbar select {
-        margin: 0 1px !important;
+        margin: 0 2px !important;
     }
-}
 
-/* Tambahan untuk memastikan color picker tidak terpotong */
-.ql-color-picker .ql-picker-options,
-.ql-background .ql-picker-options {
-    width: 152px !important;
-}
+    /* Fix untuk dropdown dan tooltip yang terpotong */
+    .compose-quill-toolbar .ql-picker {
+        position: relative;
+    }
 
-/* Fix untuk link/video tooltip input - Posisi dan styling yang lebih baik */
-.ql-snow .ql-tooltip {
-    position: absolute !important;
-    transform: translateX(-50%) !important;
-    left: 50% !important;
-    top: 45px !important;
-    background: white;
-    border: 1px solid #ccc;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    padding: 8px 12px;
-    border-radius: 6px;
-    z-index: 1061 !important;
-    white-space: nowrap;
-}
+    .compose-quill-toolbar .ql-picker-options {
+        position: absolute;
+        z-index: 1050 !important;
+        background: white;
+        border: 1px solid #ccc;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        max-height: 200px;
+        overflow-y: auto;
+    }
 
-.ql-snow .ql-tooltip::before {
-    content: "Visit URL:";
-    line-height: 26px;
-    margin-right: 8px;
-    color: #444;
-    font-size: 13px;
-}
+    .compose-quill-toolbar .ql-tooltip {
+        position: absolute !important;
+        z-index: 1051 !important;
+        left: 0 !important;
+        top: 100% !important;
+        margin-top: 5px !important;
+    }
 
-.ql-snow .ql-tooltip[data-mode=link]::before {
-    content: "Enter link:";
-}
+    /* Styling untuk editor area */
+    .compose-editor {
+        min-height: 200px;
+        max-height: 400px;
+        overflow-y: auto;
+        background: white;
+    }
 
-.ql-snow .ql-tooltip[data-mode=video]::before {
-    content: "Enter video:";
-}
+    .compose-editor .ql-editor {
+        padding: 12px 15px;
+        min-height: 200px;
+    }
 
-.ql-snow .ql-tooltip input[type=text] {
-    width: 200px;
-    padding: 6px 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 13px;
-    outline: none;
-}
+    .compose-editor.ql-blank::before {
+        color: #aaa;
+        font-style: italic;
+    }
 
-.ql-snow .ql-tooltip input[type=text]:focus {
-    border-color: #4a90e2;
-    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
-}
+    /* Fix z-index untuk modal agar dropdown tidak tertutup */
+    .modal-content {
+        overflow: visible !important;
+    }
 
-.ql-snow .ql-tooltip a.ql-action,
-.ql-snow .ql-tooltip a.ql-remove {
-    margin-left: 4px;
-    padding: 0;
-    text-decoration: none;
-    font-size: 13px;
-    display: inline-block;
-    transition: all 0.2s;
-    border: none;
-    background: transparent;
-    color: #333 !important;
-    cursor: pointer;
-}
+    .card-content {
+        overflow: visible !important;
+    }
 
-.ql-snow .ql-tooltip a.ql-action:hover {
-    text-decoration: underline;
-}
+    /* Responsiveness untuk toolbar */
+    @media (max-width: 768px) {
+        .compose-quill-toolbar {
+            padding: 5px 3px !important;
+            gap: 3px;
+        }
 
-.ql-snow .ql-tooltip a.ql-action::after {
-    content: 'Save';
-    border: none;
-}
+        .compose-quill-toolbar .ql-formats {
+            margin-right: 5px !important;
+        }
 
-.ql-snow .ql-tooltip a.ql-remove::before {
-    content: 'Remove';
-    color: #dc3545;
-}
+        .compose-quill-toolbar button,
+        .compose-quill-toolbar select {
+            margin: 0 1px !important;
+        }
+    }
 
-.ql-snow .ql-tooltip a.ql-remove:hover {
-    text-decoration: underline;
-}
+    /* Tambahan untuk memastikan color picker tidak terpotong */
+    .ql-color-picker .ql-picker-options,
+    .ql-background .ql-picker-options {
+        width: 152px !important;
+    }
 
-/* Hide default content */
-.ql-snow .ql-tooltip a.ql-action::before, {
+    /* Fix untuk link/video tooltip input - Posisi dan styling yang lebih baik */
+    .ql-snow .ql-tooltip {
+        position: absolute !important;
+        transform: translateX(-50%) !important;
+        left: 50% !important;
+        top: 45px !important;
+        background: white;
+        border: 1px solid #ccc;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        padding: 8px 12px;
+        border-radius: 6px;
+        z-index: 1061 !important;
+        white-space: nowrap;
+    }
+
+    .ql-snow .ql-tooltip::before {
+        content: "Visit URL:";
+        line-height: 26px;
+        margin-right: 8px;
+        color: #444;
+        font-size: 13px;
+    }
+
+    .ql-snow .ql-tooltip[data-mode=link]::before {
+        content: "Enter link:";
+    }
+
+    .ql-snow .ql-tooltip[data-mode=video]::before {
+        content: "Enter video:";
+    }
+
+    .ql-snow .ql-tooltip input[type=text] {
+        width: 200px;
+        padding: 6px 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 13px;
+        outline: none;
+    }
+
+    .ql-snow .ql-tooltip input[type=text]:focus {
+        border-color: #4a90e2;
+        box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+    }
+
+    .ql-snow .ql-tooltip a.ql-action,
+    .ql-snow .ql-tooltip a.ql-remove {
+        margin-left: 4px;
+        padding: 0;
+        text-decoration: none;
+        font-size: 13px;
+        display: inline-block;
+        transition: all 0.2s;
+        border: none;
+        background: transparent;
+        color: #333 !important;
+        cursor: pointer;
+    }
+
+    .ql-snow .ql-tooltip a.ql-action:hover {
+        text-decoration: underline;
+    }
+
+    .ql-snow .ql-tooltip a.ql-action::after {
+        content: 'Save';
+        border: none;
+    }
+
+    .ql-snow .ql-tooltip a.ql-remove::before {
+        content: 'Remove';
+        color: #dc3545;
+    }
+
+    .ql-snow .ql-tooltip a.ql-remove:hover {
+        text-decoration: underline;
+    }
+
+    /* Hide default content */
+    .ql-snow .ql-tooltip a.ql-action::before,
+    {
     display: none;
-}
-
+    }
 </style>
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-
         // Inisialisasi Quill
         var quill = new Quill('.compose-editor', {
             theme: 'snow',
@@ -507,8 +506,20 @@
 
         // Fungsi untuk validasi file
         function isFileAllowed(file) {
-            const ext = getFileExtension(file.name);
+            const messageType = $('#messageType').val();
 
+            // Validasi khusus untuk popup - hanya terima image
+            if (messageType === 'popup') {
+                if (!file.type.startsWith('image/')) {
+                    return {
+                        allowed: false,
+                        message: `Popup notification hanya menerima file gambar. File "${file.name}" bukan gambar.`
+                    };
+                }
+            }
+
+            // Validasi blocked extensions
+            const ext = getFileExtension(file.name);
             if (blockedExtensions.includes(ext)) {
                 return {
                     allowed: false,
@@ -538,11 +549,11 @@
             if (blockedFiles.length === 0) return;
 
             const warningBox = $(`
-            <div id="file-warning-box" class="alert alert-danger mb-2" role="alert";>
+            <div id="file-warning-box" class="alert alert-danger mb-2" role="alert">
                 ${blockedFiles.map(name => `
                     <div class="d-flex align-items-center mb-1">
                         <i class='bx bx-error-circle mr-1'></i>
-                        File&nbsp;<strong>${name}</strong>&nbsp;tidak dapat diupload
+                        ${typeof name === 'string' && name.includes('memerlukan') ? name : `File&nbsp;<strong>${name}</strong>&nbsp;tidak dapat diupload`}
                     </div>
                 `).join('')}
             </div>
@@ -551,12 +562,12 @@
             // Tambahkan di awal preview area
             preview.prepend(warningBox);
 
-            // Auto hide setelah 8 detik
+            // Auto hide setelah 5 detik
             setTimeout(function() {
                 warningBox.fadeOut(300, function() {
                     $(this).remove();
                 });
-            }, 3000);
+            }, 5000);
         }
 
         // Fungsi untuk render preview attachments
@@ -679,40 +690,79 @@
             }
         });
 
-        // Event handler submit form
-        var form = document.getElementById('compose-form');
-        form.addEventListener('submit', function(e) {
-            document.getElementById('quillBody').value = quill.root.innerHTML;
+        // Function untuk toggle fields berdasarkan message type
+        function toggleFieldsBasedOnMessageType() {
+            const messageType = $('#messageType').val();
+            const $subjectWrapper = $('#emailSubject').closest('.form-label-group');
+            const $bodyWrapper = $('.snow-container');
+            const $attachmentWrapper = $('#emailAttach').closest('.form-group');
+            const $attachmentLabel = $('#emailAttach').next('label');
 
-            const selected = $('#recipientData').select2('data').map(function(item) {
-                return {
-                    id: item.id,
-                    role: item.role || null,
-                    email: item.email || null
-                };
-            });
-
-            document.getElementById('recipientsMeta').value = JSON.stringify(selected);
-
-            // Validasi akhir untuk attachment sebelum submit
-            if (selectedFiles.length > 0) {
-                let hasInvalidFile = false;
-                selectedFiles.forEach(file => {
-                    const validation = isFileAllowed(file);
-                    if (!validation.allowed) {
-                        hasInvalidFile = true;
-                    }
-                });
-
-                if (hasInvalidFile) {
-                    e.preventDefault();
-                    showFileWarning(['Terdapat file yang tidak diizinkan']);
-                    return false;
-                }
+            // Popup Link Field (buat baru jika belum ada)
+            let $popupLinkWrapper = $('#popup-link-wrapper');
+            if (!$popupLinkWrapper.length) {
+                $popupLinkWrapper = $(`
+                <div class="form-group" id="popup-link-wrapper" style="display: none;">
+                    <label for="popupLink">Link URL</label>
+                    <input type="text" id="popupLink" name="popup_link" class="form-control" placeholder="cafe.vastech.co.id">
+                </div>
+            `);
+                $attachmentWrapper.before($popupLinkWrapper);
             }
-        });
 
-        handleOptions();
+            if (messageType === 'popup') {
+                // Hide subject dan body untuk popup
+                $subjectWrapper.hide();
+                $bodyWrapper.hide();
+
+                // Remove required dari subject untuk popup
+                $('#emailSubject').removeAttr('required');
+
+                // Show popup link field
+                $popupLinkWrapper.show();
+
+                // Update label attachment untuk image only
+                $attachmentLabel.text('Attach image file (Required)');
+
+                // Update accept attribute untuk image only
+                $('#emailAttach').attr('accept', 'image/*');
+                $('#emailAttach').attr('required', true);
+
+                // Clear subject dan body value
+                $('#emailSubject').val('');
+                quill.setContents([]);
+
+                // Clear existing files yang bukan gambar
+                selectedFiles = selectedFiles.filter(file => file.type.startsWith('image/'));
+                updateFileInput();
+                renderAttachmentPreviews();
+
+            } else {
+                // Show subject dan body untuk message
+                $subjectWrapper.show();
+                $bodyWrapper.show();
+
+                // Add required ke subject untuk message
+                $('#emailSubject').attr('required', true);
+
+                // Hide popup link field
+                $popupLinkWrapper.hide();
+                $('#popupLink').val('');
+
+                // Reset label attachment
+                $attachmentLabel.text('Attach file(s)');
+
+                // Reset accept attribute untuk all files
+                $('#emailAttach').removeAttr('accept');
+                $('#emailAttach').removeAttr('required');
+            }
+        }
+
+        // Event handler messageType change
+        $('#messageType').on('change', function() {
+            toggleFieldsBasedOnMessageType();
+            handleOptions();
+        });
 
         // Schedule toggle & range dengan validasi waktu
         var $scheduleWrapper = $('#schedule-range-wrapper');
@@ -735,8 +785,8 @@
                 var endDate = new Date(endVal);
 
                 if (endDate <= startDate) {
-                    // alert('Waktu expired harus setelah waktu mulai');
                     $scheduleEnd.val('');
+                    alert('Waktu selesai harus lebih besar dari waktu mulai');
                     return false;
                 }
             }
@@ -747,8 +797,8 @@
                 var now = new Date();
 
                 if (startDate < now) {
-                    // alert('Waktu mulai tidak boleh di masa lampau');
                     $scheduleStart.val('');
+                    alert('Waktu mulai tidak boleh di masa lampau');
                     return false;
                 }
             }
@@ -815,10 +865,55 @@
             }
         });
 
-        // Form submit validation
+        // Event handler submit form
         var form = document.getElementById('compose-form');
         form.addEventListener('submit', function(e) {
-            document.getElementById('quillBody').value = quill.root.innerHTML;
+            const messageType = $('#messageType').val();
+
+            // Validasi khusus untuk popup
+            if (messageType === 'popup') {
+                // Validasi: popup harus ada attachment gambar
+                if (selectedFiles.length === 0) {
+                    e.preventDefault();
+                    showFileWarning(['Popup notification memerlukan minimal 1 file gambar']);
+                    return false;
+                }
+
+                // Validasi: semua file harus gambar
+                const hasNonImage = selectedFiles.some(file => !file.type.startsWith('image/'));
+                if (hasNonImage) {
+                    e.preventDefault();
+                    showFileWarning(['Popup notification hanya menerima file gambar']);
+                    return false;
+                }
+
+                // Set subject dengan placeholder jika popup
+                if (!$('#emailSubject').val()) {
+                    $('#emailSubject').val('Popup Notification - ' + new Date().toISOString());
+                }
+
+                // Set body dengan popup link jika ada
+                const popupLink = $('#popupLink').val();
+                if (popupLink) {
+                    document.getElementById('quillBody').value =
+                        `<a href="${popupLink}" target="_blank">${popupLink}</a>`;
+                } else {
+                    document.getElementById('quillBody').value = '<p>Popup Notification</p>';
+                }
+            } else {
+                // Untuk message biasa, validasi hanya subject
+                const subjectValue = $('#emailSubject').val().trim();
+                
+                if (!subjectValue) {
+                    e.preventDefault();
+                    alert('Subject harus diisi');
+                    $('#emailSubject').focus();
+                    return false;
+                }
+
+                // Set body dari quill (boleh kosong)
+                document.getElementById('quillBody').value = quill.root.innerHTML;
+            }
 
             const selected = $('#recipientData').select2('data').map(function(item) {
                 return {
@@ -838,7 +933,7 @@
                 }
             }
 
-            // Validasi attachment tetap sama...
+            // Validasi attachment
             if (selectedFiles.length > 0) {
                 let hasInvalidFile = false;
                 selectedFiles.forEach(file => {
@@ -855,5 +950,9 @@
                 }
             }
         });
+
+        // Call toggle pada load untuk set initial state
+        toggleFieldsBasedOnMessageType();
+        handleOptions();
     });
 </script>

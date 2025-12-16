@@ -5,7 +5,7 @@
     <td>
         <div class="media">
             @if ($outlet->logo)
-                <img src="{{ $outlet->logo }}" alt="{{ $outlet->name }}"
+                <img src="{{ asset('storage/' . $outlet->logo) }}" alt="{{ $outlet->name }}"
                     class="rounded-circle mr-1"
                     style="width: 48px; height: 48px; object-fit: cover;">
             @else

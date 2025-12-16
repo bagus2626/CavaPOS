@@ -1,7 +1,7 @@
 @extends('layouts.partner')
 
-@section('title', 'Employee Detail')
-@section('page_title', 'Employee Detail')
+@section('title', __('messages.partner.user_management.employees.employee_detail'))
+@section('page_title', __('messages.partner.user_management.employees.employee_detail'))
 
 @section('content')
 @php
@@ -21,7 +21,7 @@
 
   <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
     <a href="{{ route('partner.user-management.employees.index') }}" class="btn btn-outline-choco">
-      <i class="fas fa-arrow-left mr-2"></i> Back to Employees
+      <i class="fas fa-arrow-left mr-2"></i> {{ __('messages.partner.user_management.employees.back_to_employees') }}
     </a>
 
     <div class="btn-group">
@@ -52,9 +52,13 @@
       <div class="employee-hero__meta">
         <h3 class="employee-name mb-1">{{ $data->name }}</h3>
         @if($isActive)
-          <span class="badge badge-status badge-status--active"><i class="fas fa-check-circle mr-1"></i>Aktif</span>
+          <span class="badge badge-status badge-status--active"><i class="fas fa-check-circle mr-1"></i>
+            {{ __('messages.partner.user_management.employees.active') }}
+          </span>
         @else
-          <span class="badge badge-status badge-status--inactive"><i class="fas fa-minus-circle mr-1"></i>Nonaktif</span>
+          <span class="badge badge-status badge-status--inactive"><i class="fas fa-minus-circle mr-1"></i>
+            {{ __('messages.partner.user_management.employees.non_active') }}
+          </span>
         @endif
       </div>
     </div>
@@ -64,31 +68,31 @@
       <div class="row">
         <div class="col-md-6">
           <dl class="meta-list">
-            <dt>Username</dt>
+            <dt>{{ __('messages.partner.user_management.employees.username') }}</dt>
             <dd>{{ $data->user_name }}</dd>
 
-            <dt>Email</dt>
+            <dt>{{ __('messages.partner.user_management.employees.email') }}</dt>
             <dd><a class="link-ink" href="mailto:{{ $data->email }}">{{ $data->email }}</a></dd>
 
-            <dt>Role</dt>
+            <dt>{{ __('messages.partner.user_management.employees.role') }}</dt>
             <dd>{{ $data->role }}</dd>
           </dl>
         </div>
         <div class="col-md-6">
           <dl class="meta-list">
-            <dt>Status</dt>
+            <dt>{{ __('messages.partner.user_management.employees.status') }}</dt>
             <dd>
               @if($isActive)
-                <span class="badge badge-status badge-status--active">Aktif</span>
+                <span class="badge badge-status badge-status--active">{{ __('messages.partner.user_management.employees.active') }}</span>
               @else
-                <span class="badge badge-status badge-status--inactive">Nonaktif</span>
+                <span class="badge badge-status badge-status--inactive">{{ __('messages.partner.user_management.employees.role') }}</span>
               @endif
             </dd>
 
-            <dt>Dibuat</dt>
+            <dt>{{ __('messages.partner.user_management.employees.created') }}</dt>
             <dd>{{ optional($data->created_at)->format('d M Y, H:i') ?? '—' }}</dd>
 
-            <dt>Diperbarui</dt>
+            <dt>{{ __('messages.partner.user_management.employees.updated') }}</dt>
             <dd>{{ optional($data->updated_at)->format('d M Y, H:i') ?? '—' }}</dd>
           </dl>
         </div>

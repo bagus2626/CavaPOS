@@ -1,8 +1,11 @@
 @extends('layouts.owner')
 
+@section('title', __('messages.owner.products.categories.edit_category'))
+@section('page_title', __('messages.owner.products.categories.edit_category'))
+
 @section('content')
-<div class="container owner-category-edit mt-4"> {{-- PAGE SCOPE --}}
-    <h1 class="page-title mb-3">{{ __('messages.owner.products.categories.edit_category') }}</h1>
+<section class="content">
+<div class="container-fluid owner-category-edit"> {{-- PAGE SCOPE --}}
 
     <form method="POST"
           action="{{ route('owner.user-owner.categories.update', $category) }}"
@@ -30,43 +33,95 @@
             @error('description') <div class="invalid-hint">{{ $message }}</div> @enderror
         </div>
 
+        {{-- Existing Image --}}
+        @if($category->images && isset($category->images['path']))
+        <div class="form-group">
+            <div id="existing-image-container">
+                <div class="position-relative d-inline-block">
+                    <img id="existing-image-preview"
+                        src="{{ asset($category->images['path']) }}"
+                        alt="{{ $category->category_name }}"
+                        class="thumb">
+                    <button type="button" 
+                            class="btn btn-danger btn-sm position-absolute"
+                            style="top: 5px; right: 5px;"
+                            onclick="removeExistingImage()"
+                            title="Hapus gambar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <input type="hidden" name="keep_existing_image" id="keep_existing_image" value="1">
+            </div>
+        </div>
+        @endif
+
         {{-- Image --}}
         <div class="form-group">
-            <label for="images" class="form-label">{{ __('messages.owner.products.categories.picture') }}</label>
-            <input type="file" name="images" id="images" class="form-control" accept="image/*" onchange="previewImage(event)">
+            <input type="file" name="images" id="images" class="form-control" accept="image/*" onchange="previewNewImage(event)">
             @error('images') <div class="invalid-hint">{{ $message }}</div> @enderror
 
             <div class="mt-2">
-                @if($category->images && isset($category->images['path']))
-                    <img id="image-preview"
-                         src="{{ asset($category->images['path']) }}"
-                         alt="{{ $category->category_name }}"
-                         class="thumb">
-                @else
-                    <img id="image-preview" src="#" alt="Preview" class="thumb d-none">
-                @endif
+                <img id="new-image-preview" src="#" alt="Preview" class="thumb d-none">
             </div>
         </div>
 
-        <div class="d-flex gap-2 mt-3">
-            <button type="submit" class="btn btn-primary">{{ __('messages.owner.products.categories.update') }}</button>
-            <a href="{{ route('owner.user-owner.categories.index') }}" class="btn btn-outline-choco">{{ __('messages.owner.products.categories.back') }}</a>
+        <div class="card-footer text-right">
+            <a href="{{ route('owner.user-owner.categories.index') }}" class="btn btn-outline-choco mr-2">
+              {{ __('messages.owner.products.categories.back') }}
+            </a>
+            <button type="submit" class="btn btn-primary mr-1">
+              {{ __('messages.owner.products.categories.update') }}
+            </button>
         </div>
     </form>
 </div>
+</section>
 
 <script>
-function previewImage(event) {
-  const input = event.target;
-  const preview = document.getElementById('image-preview');
-  if (input.files && input.files[0]) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-          preview.src = e.target.result;
-          preview.classList.remove('d-none');
-      };
-      reader.readAsDataURL(input.files[0]);
-  }
+function previewNewImage(event) {
+    const input = event.target;
+    const preview = document.getElementById('new-image-preview');
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.classList.remove('d-none');
+        };
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        preview.src = '#';
+        preview.classList.add('d-none');
+    }
+}
+
+// Fungsi untuk menghapus gambar existing
+function removeExistingImage() {
+    
+    // Sembunyikan container existing image
+    const container = document.getElementById('existing-image-container');
+    if (container) {
+        container.style.display = 'none';
+    }
+    
+    // Set hidden input untuk menandai bahwa gambar akan dihapus
+    const keepInput = document.getElementById('keep_existing_image');
+    if (keepInput) {
+        keepInput.value = '0';
+    }
+    
+    // Reset file input jika ada
+    const fileInput = document.getElementById('images');
+    if (fileInput) {
+        fileInput.value = '';
+    }
+    
+    // Sembunyikan preview gambar baru jika ada
+    const newPreview = document.getElementById('new-image-preview');
+    if (newPreview) {
+        newPreview.src = '#';
+        newPreview.classList.add('d-none');
+    }
 }
 </script>
 
@@ -123,5 +178,18 @@ function previewImage(event) {
 
 /* Small gaps utility */
 .owner-category-edit .gap-2{ gap:.5rem; }
+
+/* Position relative untuk button delete */
+.owner-category-edit .position-relative {
+    position: relative;
+}
+
+.owner-category-edit .position-absolute {
+    position: absolute;
+}
+
+.owner-category-edit .d-inline-block {
+    display: inline-block;
+}
 </style>
 @endsection

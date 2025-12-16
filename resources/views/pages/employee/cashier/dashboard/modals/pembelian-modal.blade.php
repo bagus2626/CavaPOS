@@ -123,20 +123,43 @@
 
           {{-- Pilih Meja --}}
             <div>
-                <label for="orderTable" class="block text-sm font-medium mb-1">Pilih Meja</label>
-                <select id="orderTable"
-                        class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-choco/40"
-                        required>
-                    <option value="" selected disabled>Pilih meja</option>
-                    @foreach($tables as $table)
-                    <option value="{{ $table->id }}"
-                            data-table-no="{{ $table->table_no }}"
-                            data-table-class="{{ $table->table_class }}">
-                        Meja {{ $table->table_no }} — {{ $table->table_class }}
-                    </option>
-                    @endforeach
-                </select>
-            </div>
+              <label for="orderTable" class="block text-sm font-medium mb-1">Pilih Meja</label>
+              <select id="orderTable"
+                      class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-choco/40"
+                      required>
+                  <option value="" selected disabled>Pilih meja</option>
+                  @foreach($tables as $table)
+                      @php
+                          $isDisabled = $table->status === 'not_available';
+                          $statusLabel = '';
+                          
+                          switch($table->status) {
+                              case 'occupied':
+                                  $statusLabel = ' (Sedang Sibuk)';
+                                  break;
+                              case 'reserved':
+                                  $statusLabel = ' (Sudah Dipesan)';
+                                  break;
+                              case 'not_available':
+                                  $statusLabel = ' (Tidak Tersedia)';
+                                  break;
+                          }
+                      @endphp
+                      
+                      <option value="{{ $table->id }}"
+                              data-table-no="{{ $table->table_no }}"
+                              data-table-class="{{ $table->table_class }}"
+                              data-table-status="{{ $table->status }}"
+                              @if($isDisabled) disabled @endif
+                              @if($isDisabled) class="text-gray-400" @endif>
+                          Meja {{ $table->table_no }} — {{ $table->table_class }}{{ $statusLabel }}
+                      </option>
+                  @endforeach
+              </select>
+              <p class="mt-1 text-xs text-gray-500">
+                  Meja yang tidak tersedia tidak dapat dipilih
+              </p>
+          </div>
           <div>
             <label for="paymentMethod" class="block text-sm font-medium mb-1">Metode Pembayaran</label>
             <select id="paymentMethod" class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-choco/40" required>
