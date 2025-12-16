@@ -18,7 +18,7 @@ class OwnerCategoryController extends Controller
         $owner_id = Auth::id();
         $categories = Category::where('owner_id', $owner_id)
             ->orderBy('category_order')
-            ->paginate(5);
+            ->paginate(10);
         // dd($categories);
         return view('pages.owner.products.categories.index', compact('categories'));
     }

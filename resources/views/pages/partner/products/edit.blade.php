@@ -345,7 +345,7 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
           <button type="button" class="btn btn-choco" id="save-recipe">
-            <i class="fas fa-save me-1"></i>Simpan Resep
+            <i class="fas fa-save mr-1"></i>Simpan Resep
           </button>
         </div>
       </div>
