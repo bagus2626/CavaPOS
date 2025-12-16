@@ -4,7 +4,8 @@
 @section('page_title', __('messages.owner.user_management.employees.edit_employee'))
 
 @section('content')
-    <div class="container owner-emp-edit"> {{-- tambahkan class page-scope --}}
+<div class="content">
+        <div class="container-fluid owner-emp-edit"> {{-- tambahkan class page-scope --}}
         <a href="{{ route('owner.user-owner.employees.index') }}" class="btn btn-outline-choco mb-3">
             <i class="fas fa-arrow-left mr-2"></i>{{ __('messages.owner.user_management.employees.back_to_employees') }}
         </a>
@@ -163,7 +164,7 @@
                             <small class="text-muted d-block">Format: JPG, PNG, WEBP. Max 2 MB.</small>
                             @error('image')
                                 <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror>
+                            @enderror
 
                             {{-- Preview lama / baru --}}
                             <div id="imagePreviewWrapper" class="mt-2 {{ $employee->image ? '' : 'd-none' }}">
@@ -267,6 +268,7 @@
             </div>
         </div>
     </div>
+</div>
 
     <style>
         <style>
