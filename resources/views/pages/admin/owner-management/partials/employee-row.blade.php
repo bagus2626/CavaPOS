@@ -5,7 +5,7 @@
     <td>
         <div class="media align-items-center">
             @if ($employee->image)
-                <img src="{{ asset($employee->image) }}" alt="{{ $employee->name }}" class="rounded-circle mr-1"
+                <img src="{{ asset('storage/' .$employee->image) }}" alt="{{ $employee->name }}" class="rounded-circle mr-1"
                     style="width: 48px; height: 48px; object-fit: cover;">
             @else
                 <div class="rounded-circle mr-1 d-flex align-items-center justify-content-center bg-light"

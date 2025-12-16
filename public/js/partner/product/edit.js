@@ -102,13 +102,13 @@
       if (aaGroup) aaGroup.style.display = "none";
       if (qtyGroup) qtyGroup.style.display = "none";
       if (linkedGroup) linkedGroup.style.display = "block";
-      
+
       // PENTING: Disable input dan set ke 0
       if (qtyInput) {
         qtyInput.disabled = true;
         qtyInput.value = 0;
       }
-      
+
       // Uncheck always available
       if (aaCheckbox) {
         aaCheckbox.checked = false;
@@ -118,7 +118,7 @@
       if (aaGroup) aaGroup.style.display = "block";
       if (qtyGroup) qtyGroup.style.display = "block";
       if (linkedGroup) linkedGroup.style.display = "none";
-      
+
       // PENTING: Enable input kembali (kecuali jika AA checked)
       if (qtyInput && aaCheckbox) {
         if (aaCheckbox.checked) {
@@ -172,7 +172,7 @@
         linkedInfo.classList.add("d-none");
         linkedInfo.style.display = "none";
       }
-      
+
       if (aaCheckbox && qtyWrapper) {
         if (aaCheckbox.checked) {
           qtyWrapper.classList.add("d-none");
@@ -206,6 +206,76 @@
   const modal = document.getElementById("recipeModal");
   const $modal = $("#recipeModal");
 
+  // Check if SweetAlert2 is loaded
+  const hasSwal = typeof Swal !== "undefined";
+
+  // Helper functions for alerts
+  function showError(title, message) {
+    if (hasSwal) {
+      Swal.fire({
+        icon: "error",
+        title: title,
+        text: message,
+        confirmButtonColor: "#8c1000",
+        confirmButtonText: "OK",
+      });
+    } else {
+      alert(`${title}\n${message}`);
+    }
+  }
+
+  function showSuccess(title, message, callback) {
+    if (hasSwal) {
+      Swal.fire({
+        icon: "success",
+        title: title,
+        text: message,
+        confirmButtonColor: "#8c1000",
+        confirmButtonText: "OK",
+        timer: 2000,
+        timerProgressBar: true,
+      }).then(() => {
+        if (callback) callback();
+      });
+    } else {
+      alert(`${title}\n${message}`);
+      if (callback) callback();
+    }
+  }
+
+  function showWarning(title, message) {
+    if (hasSwal) {
+      Swal.fire({
+        icon: "warning",
+        title: title,
+        text: message,
+        confirmButtonColor: "#8c1000",
+        confirmButtonText: "OK",
+      });
+    } else {
+      alert(`${title}\n${message}`);
+    }
+  }
+
+  function showLoading(message = "Memproses...") {
+    if (hasSwal) {
+      Swal.fire({
+        title: message,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+    }
+  }
+
+  function closeLoading() {
+    if (hasSwal) {
+      Swal.close();
+    }
+  }
+
   // 1. FUNGSI MODAL MURNI BS4 / JQUERY
   function showModal() {
     if (typeof $ !== "undefined") {
@@ -221,41 +291,9 @@
     }
   }
 
-  // 2. FUNGSI SELECT2 (Dipertahankan)
-  function initializeSelect2OnNewItem() {
-    document
-      .querySelectorAll(".recipe-item .select2-init")
-      .forEach((selectElement) => {
-        // FIX: Cek JQuery di sini juga
-        if (typeof $ === "function" && $.fn.select2) {
-          const $select = $(selectElement);
+  // 2. Select2 DIHAPUS - Tidak digunakan lagi
 
-          if (!$select.data("select2")) {
-            $select.select2({
-              dropdownParent: $modal, // Gunakan objek jQuery $modal
-              theme: "bootstrap4",
-              placeholder: $select.data("placeholder") || "Cari...",
-              width: "100%",
-              minimumInputLength: 0,
-              allowClear: true,
-            });
-
-            $select.removeClass("select2-init");
-
-            $select.on("select2:select", function (e) {
-              e.target.dispatchEvent(new Event("change", { bubbles: true }));
-            });
-          }
-        } else {
-          // ERROR: Ini mengindikasikan Select2.js atau jQuery.js dimuat SETELAH edit.js
-          console.warn(
-            "Select2 atau jQuery belum selesai dimuat. Fitur pencarian dinonaktifkan."
-          );
-        }
-      });
-  }
-
-  // 3. Load Data dari Server (Dipertahankan)
+  // 3. Load Data dari Server
   function loadRecipeData() {
     const container = document.getElementById("recipe-items-container");
     container.innerHTML =
@@ -290,12 +328,7 @@
         ) {
           // Load existing recipe
           recipeData.recipe.forEach((item) => {
-            // PENTING: Menggunakan item.unit_id yang berasal dari kolom display_unit_id di DB
-            addRecipeItemRow(
-              item.stock_id,
-              item.unit_id, // <--- Nilai unit yang sudah diset di DB
-              item.quantity_used
-            );
+            addRecipeItemRow(item.stock_id, item.unit_id, item.quantity_used);
           });
         } else {
           // Add empty row
@@ -309,7 +342,6 @@
   }
 
   // Fungsi dipanggil saat modal dibuka, setelah stock dipilih, atau saat baris baru ditambah
-
   function updateUnitOptions(
     stockId,
     unitSelectElement,
@@ -363,9 +395,7 @@
         <div class="row align-items-end">
           <div class="col-md-5">
             <label class="mb-1 fw-600 small">Bahan Baku</label>
-            <select class="form-control form-control-sm recipe-stock-select select2-init" 
-                    data-placeholder="Cari Bahan Baku..." 
-                    required>
+            <select class="form-control form-control-sm recipe-stock-select" required>
               ${stockOptionsHtml}
             </select>
           </div>
@@ -393,8 +423,6 @@
 
     container.insertAdjacentHTML("beforeend", template);
 
-    initializeSelect2OnNewItem();
-
     if (selectedStockId) {
       const lastRow = container.lastElementChild;
       const unitSelect = lastRow.querySelector(".recipe-unit-select");
@@ -402,7 +430,7 @@
     }
   }
 
-  // 4. Save Recipe Function (Perbaikan Konflik Alert)
+  // 4. Save Recipe Function
   function saveRecipe() {
     const recipeItems = [];
     let isValid = true;
@@ -434,14 +462,18 @@
     });
 
     if (!isValid) {
-      alert("Mohon lengkapi semua field resep.");
+      showWarning("Data Tidak Lengkap", "Mohon lengkapi semua field resep.");
       return;
     }
 
-    // Disable button and show loading
-    saveBtn.disabled = true;
-    saveBtn.innerHTML =
-      '<i class="fas fa-spinner fa-spin me-1"></i>Menyimpan...';
+    // Show loading
+    if (hasSwal) {
+      showLoading("Menyimpan resep...");
+    } else {
+      saveBtn.disabled = true;
+      saveBtn.innerHTML =
+        '<i class="fas fa-spinner fa-spin me-1"></i>Menyimpan...';
+    }
 
     // Get CSRF token
     const csrfToken = document
@@ -463,31 +495,29 @@
       }),
     })
       .then(async (response) => {
-        // Perbaikan: Jika response BUKAN 2xx (response.ok = false), kita throw error
         if (!response.ok) {
           const errorData = await response.json();
-          // Throw error with message captured from server (e.g., Validation error)
           throw new Error(errorData.message || "Error saat pemrosesan server.");
         }
         return response.json();
       })
       .then((data) => {
-        // Sukses (Status 200/201)
-        if (data.success) {
-          alert("Resep berhasil disimpan!");
-          hideModal();
+        closeLoading();
 
-          // FIX: Tunda reload untuk menyelesaikan promise fetch
-          setTimeout(() => {
-            window.location.reload();
-          }, 50);
+        if (data.success) {
+          hideModal();
+          showSuccess("Berhasil!", "Resep berhasil disimpan!", () => {
+            setTimeout(() => {
+              window.location.reload();
+            }, 500);
+          });
         } else {
-          // Fallback: Seharusnya tidak terjadi jika response.ok dicek di atas
-          alert("Gagal menyimpan resep: " + (data.message || "Unknown error."));
+          showError("Gagal", data.message || "Unknown error.");
         }
       })
       .catch((error) => {
-        // Tampilkan pesan error yang lebih detail
+        closeLoading();
+
         let msg = error.message;
         if (msg.includes("Validation error")) {
           msg =
@@ -495,11 +525,13 @@
         }
 
         console.error("Error saving recipe:", error);
-        alert("Terjadi kesalahan saat menyimpan resep: " + msg);
+        showError("Terjadi Kesalahan", msg);
       })
       .finally(() => {
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = '<i class="fas fa-save me-1"></i>Simpan Resep';
+        if (!hasSwal) {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = '<i class="fas fa-save me-1"></i>Simpan Resep';
+        }
       });
   }
 
@@ -542,10 +574,35 @@
   document.addEventListener("click", function (e) {
     if (e.target.closest(".remove-recipe-item")) {
       const recipeItem = e.target.closest(".recipe-item");
-      if (document.querySelectorAll(".recipe-item").length > 1) {
-        recipeItem.remove();
+      const totalItems = document.querySelectorAll(".recipe-item").length;
+
+      if (totalItems > 1) {
+        if (hasSwal) {
+          Swal.fire({
+            title: "Hapus Bahan?",
+            text: "Apakah Anda yakin ingin menghapus bahan ini?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#8c1000",
+            cancelButtonColor: "#6c757d",
+            confirmButtonText: "Ya, Hapus",
+            cancelButtonText: "Batal",
+            reverseButtons: true,
+          }).then((result) => {
+            if (result.isConfirmed) {
+              recipeItem.remove();
+            }
+          });
+        } else {
+          if (confirm("Apakah Anda yakin ingin menghapus bahan ini?")) {
+            recipeItem.remove();
+          }
+        }
       } else {
-        alert("Minimal harus ada 1 bahan dalam resep.");
+        showWarning(
+          "Tidak Bisa Dihapus",
+          "Minimal harus ada 1 bahan dalam resep."
+        );
       }
     }
   });

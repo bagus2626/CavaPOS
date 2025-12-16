@@ -546,7 +546,6 @@
           showLoaderOnConfirm: true,
           allowOutsideClick: () => !Swal.isLoading(),
 
-          // Eksekusi fetch di preConfirm (ada loader otomatis)
           preConfirm: async () => {
             try {
               const response = await fetch(processUrl, {
@@ -570,11 +569,17 @@
               }
 
               if (!response.ok) {
+                // Tangani error HTTP
                 const msg =
                   (json && (json.message || json.error)) ||
                   "Gagal memproses order.";
                 Swal.showValidationMessage(msg);
                 return false;
+              }
+
+              // Cek flag khusus dari Controller
+              if (json && json.already_processed) {
+                return json; // Kembalikan payload warning
               }
 
               return (
@@ -592,18 +597,28 @@
         // Jika batal
         if (!isConfirmed) return;
 
-        // Sukses → tampilkan notifikasi dan refresh
-        const message =
-          (payload && (payload.message || payload.status)) ||
-          "Order berhasil diproses.";
-        await Swal.fire({
-          icon: "success",
-          title: "Berhasil",
-          text: message,
-          confirmButtonText: "OK",
-        });
+        // Cek status warning dari backend
+        if (payload && payload.already_processed) {
+          await Swal.fire({
+            icon: "warning", // Notifikasi berbeda
+            title: "Sudah Diproses!",
+            text: payload.message, // "Order ini sudah diproses oleh tim lain (Kitchen)..."
+            confirmButtonText: "OK, Refresh",
+          });
+        } else {
+          // Sukses Normal
+          const message =
+            (payload && (payload.message || payload.status)) ||
+            "Order berhasil diproses.";
+          await Swal.fire({
+            icon: "success",
+            title: "Berhasil",
+            text: message,
+            confirmButtonText: "OK",
+          });
+        }
 
-        // Redirect/refresh
+        // Selalu refresh setelah konfirmasi (baik sukses normal atau warning)
         if (payload && payload.redirect_url) {
           window.location.href = payload.redirect_url;
         } else {

@@ -6,6 +6,9 @@
 @section('content')
     <section class="content">
         <div class="container-fluid owner-stocks">
+            <a href="{{ route('owner.user-owner.stocks.index') }}" class="btn btn-primary mb-3">
+                <i class="fas fa-arrow-left mr-2"></i>{{ __('messages.owner.products.stocks.back_to_list') }}
+            </a>
             <form action="{{ route('owner.user-owner.stocks.movements.store') }}" method="POST" id="stockMovementForm">
                 @csrf
                 <input type="hidden" name="movement_type" value="transfer" id="movement_type">
@@ -64,13 +67,8 @@
                                     <label for="notes">
                                         {{ __('messages.owner.products.stocks.movements_transfer.notes_label') }}
                                     </label>
-                                    <input
-                                        type="text"
-                                        name="notes"
-                                        id="notes"
-                                        class="form-control"
-                                        placeholder="{{ __('messages.owner.products.stocks.movements_transfer.notes_placeholder') }}"
-                                    >
+                                    <input type="text" name="notes" id="notes" class="form-control"
+                                        placeholder="{{ __('messages.owner.products.stocks.movements_transfer.notes_placeholder') }}">
                                 </div>
                             </div>
                         </div>
@@ -116,14 +114,10 @@
                                         {{ __('messages.owner.products.stocks.movements_transfer.quantity_label') }}
                                         <span class="text-danger">*</span>
                                     </label>
-                                    <input
-                                        type="number"
-                                        name="items[0][quantity]"
-                                        class="form-control quantity-input"
+                                    <input type="number" name="items[0][quantity]" class="form-control quantity-input"
                                         step="0.01"
                                         placeholder="{{ __('messages.owner.products.stocks.movements_transfer.quantity_placeholder') }}"
-                                        required
-                                    >
+                                        required>
                                     <div style="height: 21px;"></div>
                                 </div>
                                 <div class="col-md-2">
@@ -156,7 +150,7 @@
                 </div>
 
                 {{-- Tombol Aksi --}}
-                <div class="mt-4">
+                <div class="mt-4 mb-4">
                     <button type="submit" class="btn btn-info">
                         <i class="fas fa-save"></i>
                         {{ __('messages.owner.products.stocks.movements_transfer.submit_button') }}
@@ -179,8 +173,7 @@
                         {{ __('messages.owner.products.stocks.movements_transfer.item_stock_placeholder') }}
                     </option>
                     @foreach ($stocks as $stock)
-                        <option value="{{ $stock->id }}"
-                            data-location-id="{{ $stock->partner_id ?? '_owner' }}"
+                        <option value="{{ $stock->id }}" data-location-id="{{ $stock->partner_id ?? '_owner' }}"
                             data-unit-group="{{ $stock->displayUnit->group_label ?? 'pcs' }}"
                             data-display-unit-id="{{ $stock->displayUnit->id ?? '' }}"
                             data-current-qty="{{ number_format($stock->display_quantity ?? 0, 2) }}"
@@ -197,14 +190,9 @@
                     {{ __('messages.owner.products.stocks.movements_transfer.quantity_label') }}
                     <span class="text-danger">*</span>
                 </label>
-                <input
-                    type="number"
-                    name="items[__INDEX__][quantity]"
-                    class="form-control quantity-input"
-                    step="0.01"
+                <input type="number" name="items[__INDEX__][quantity]" class="form-control quantity-input" step="0.01"
                     placeholder="{{ __('messages.owner.products.stocks.movements_transfer.quantity_placeholder') }}"
-                    required
-                >
+                    required>
                 <div style="height: 21px;"></div>
             </div>
             <div class="col-md-2">
@@ -239,12 +227,12 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const container    = document.getElementById('item-repeater-container');
-            const template     = document.getElementById('item-repeater-template');
-            const btnAddItem   = document.getElementById('btn-add-item');
+            const container = document.getElementById('item-repeater-container');
+            const template = document.getElementById('item-repeater-template');
+            const btnAddItem = document.getElementById('btn-add-item');
             const locationFrom = document.getElementById('location_from');
-            const locationTo   = document.getElementById('location_to');
-            const form         = document.getElementById('stockMovementForm');
+            const locationTo = document.getElementById('location_to');
+            const form = document.getElementById('stockMovementForm');
 
             if (!container || !template || !btnAddItem || !locationFrom || !locationTo) return;
             if (typeof allUnits === 'undefined') {
@@ -257,7 +245,7 @@
             // Filter stok berdasarkan lokasi asal
             function filterStocksBySourceLocation() {
                 const selectedSource = locationFrom.value;
-                const stockSelects   = document.querySelectorAll('.stock-select');
+                const stockSelects = document.querySelectorAll('.stock-select');
 
                 stockSelects.forEach(select => {
                     const currentVal = select.value;
@@ -269,11 +257,11 @@
                         const stockLocation = option.getAttribute('data-location-id');
 
                         if (stockLocation === selectedSource) {
-                            option.hidden  = false;
+                            option.hidden = false;
                             option.disabled = false;
                             if (option.value === currentVal) isCurrentValValid = true;
                         } else {
-                            option.hidden  = true;
+                            option.hidden = true;
                             option.disabled = true;
                         }
                     });
@@ -288,26 +276,26 @@
             // Update unit dropdown & info stok
             function updateRowInfo(stockSelectElement) {
                 const selectedOption = stockSelectElement.options[stockSelectElement.selectedIndex];
-                const row            = stockSelectElement.closest('.repeater-item');
+                const row = stockSelectElement.closest('.repeater-item');
                 if (!row) return;
 
                 const unitSelect = row.querySelector('.unit-select');
-                const infoBox    = row.querySelector('.current-stock-info');
+                const infoBox = row.querySelector('.current-stock-info');
 
                 unitSelect.innerHTML =
                     `<option value="">{{ __('messages.owner.products.stocks.movements_transfer.unit_placeholder') }}</option>`;
 
                 if (infoBox) {
-                    infoBox.textContent   = '';
+                    infoBox.textContent = '';
                     infoBox.style.display = 'none';
                 }
 
                 if (!selectedOption || !selectedOption.value) return;
 
-                const unitGroup     = selectedOption.getAttribute('data-unit-group');
+                const unitGroup = selectedOption.getAttribute('data-unit-group');
                 const displayUnitId = selectedOption.getAttribute('data-display-unit-id');
-                const currentQty    = selectedOption.getAttribute('data-current-qty');
-                const currentUnit   = selectedOption.getAttribute('data-current-unit');
+                const currentQty = selectedOption.getAttribute('data-current-qty');
+                const currentUnit = selectedOption.getAttribute('data-current-unit');
 
                 if (unitGroup) {
                     const filteredUnits = allUnits.filter(unit => unit.group_label === unitGroup);
@@ -332,7 +320,7 @@
             // Update opsi lokasi tujuan (tidak boleh sama dengan asal)
             function updateToOptions() {
                 const selectedFrom = locationFrom.value;
-                const currentTo    = locationTo.value;
+                const currentTo = locationTo.value;
 
                 let firstValidValue = null;
 
@@ -340,10 +328,10 @@
                     if (opt.value === "") return;
 
                     if (opt.value === selectedFrom) {
-                        opt.hidden  = true;
+                        opt.hidden = true;
                         opt.disabled = true;
                     } else {
-                        opt.hidden  = false;
+                        opt.hidden = false;
                         opt.disabled = false;
 
                         if (!firstValidValue) {
@@ -368,7 +356,7 @@
             // Tombol tambah item
             btnAddItem.addEventListener('click', function () {
                 let templateHTML = template.innerHTML.replace(/__INDEX__/g, itemIndex);
-                const newRow     = document.createElement('div');
+                const newRow = document.createElement('div');
                 newRow.innerHTML = templateHTML;
                 container.appendChild(newRow.firstElementChild);
 
