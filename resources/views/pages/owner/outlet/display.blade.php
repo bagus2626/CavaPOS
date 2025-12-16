@@ -41,8 +41,7 @@
 
                         @if ($img)
                             <a href="{{ $img }}" target="_blank" rel="noopener">
-                                <img src="{{ $img }}" alt="{{ $outlet->name }}" class="avatar-48"
-                                    loading="lazy">
+                                <img src="{{ $img }}" alt="{{ $outlet->name }}" class="avatar-48" loading="lazy">
                             </a>
                         @else
                             <span class="text-muted">—</span>
@@ -60,8 +59,7 @@
 
                         @if ($img)
                             <a href="{{ $img }}" target="_blank" rel="noopener">
-                                <img src="{{ $img }}" alt="{{ $outlet->name }}" class="avatar-48"
-                                    loading="lazy">
+                                <img src="{{ $img }}" alt="{{ $outlet->name }}" class="avatar-48" loading="lazy">
                             </a>
                         @else
                             <span class="text-muted">—</span>
@@ -69,27 +67,29 @@
                     </td>
 
                     <td class="col-status-icons">
-    <div class="status-list">
-        <div class="status-row">
-            <span class="status-label">Outlet</span>
-            <span class="status-badge {{ (int) $outlet->is_active === 1 ? 'badge-on' : 'badge-off' }}">
-                {{ (int) $outlet->is_active === 1 ? 'ON' : 'OFF' }}
-            </span>
-        </div>
-        <div class="status-row">
-            <span class="status-label">QRIS</span>
-            <span class="status-badge {{ (int) $outlet->is_qr_active === 1 ? 'badge-on' : 'badge-off' }}">
-                {{ (int) $outlet->is_qr_active === 1 ? 'ON' : 'OFF' }}
-            </span>
-        </div>
-        <div class="status-row">
-            <span class="status-label">Cashier</span>
-            <span class="status-badge {{ (int) $outlet->is_cashier_active === 1 ? 'badge-on' : 'badge-off' }}">
-                {{ (int) $outlet->is_cashier_active === 1 ? 'ON' : 'OFF' }}
-            </span>
-        </div>
-    </div>
-</td>
+                        <div class="status-list">
+                            <div class="status-row">
+                                <span class="status-label">Outlet</span>
+                                <span class="status-badge {{ (int) $outlet->is_active === 1 ? 'badge-on' : 'badge-off' }}">
+                                    {{ (int) $outlet->is_active === 1 ? 'ON' : 'OFF' }}
+                                </span>
+                            </div>
+                            <div class="status-row">
+                                <span class="status-label">QRIS</span>
+                                <span
+                                    class="status-badge {{ (int) $outlet->is_qr_active === 1 ? 'badge-on' : 'badge-off' }}">
+                                    {{ (int) $outlet->is_qr_active === 1 ? 'ON' : 'OFF' }}
+                                </span>
+                            </div>
+                            <div class="status-row">
+                                <span class="status-label">Cashier</span>
+                                <span
+                                    class="status-badge {{ (int) $outlet->is_cashier_active === 1 ? 'badge-on' : 'badge-off' }}">
+                                    {{ (int) $outlet->is_cashier_active === 1 ? 'ON' : 'OFF' }}
+                                </span>
+                            </div>
+                        </div>
+                    </td>
 
                     <td class="col-status">
                         @if ((int) $outlet->is_wifi_shown === 1)
@@ -118,9 +118,15 @@
         </tbody>
     </table>
 
-    {{-- Pagination --}}
-    <div class="pagination-wrapper mt-4">
-        {{ $outlets->onEachSide(2)->links() }}
+    {{-- Pagination Links --}}
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="text-muted small">
+            Showing {{ $outlets->firstItem() ?? 0 }} to {{ $outlets->lastItem() ?? 0 }} of {{ $outlets->total() }}
+            entries
+        </div>
+        <div>
+            {{ $outlets->links() }}
+        </div>
     </div>
 </div>
 
@@ -192,49 +198,49 @@
     }
 
     /* Status List - Clean & Simple */
-.col-status-icons {
-    min-width: 130px;
-}
+    .col-status-icons {
+        min-width: 130px;
+    }
 
-.status-list {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
+    .status-list {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
 
-.status-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-}
+    .status-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
 
-.status-label {
-    font-size: 11px;
-    color: #6b7280;
-    font-weight: 500;
-    min-width: 50px;
-}
+    .status-label {
+        font-size: 11px;
+        color: #6b7280;
+        font-weight: 500;
+        min-width: 50px;
+    }
 
-.status-badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 10px;
-    font-weight: 700;
-    text-align: center;
-    min-width: 32px;
-}
+    .status-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 700;
+        text-align: center;
+        min-width: 32px;
+    }
 
-.badge-on {
-    background: #d1fae5;
-    color: #065f46;
-}
+    .badge-on {
+        background: #d1fae5;
+        color: #065f46;
+    }
 
-.badge-off {
-    background: #f3f4f6;
-    color: #6b7280;
-}
+    .badge-off {
+        background: #f3f4f6;
+        color: #6b7280;
+    }
 
 
     /* Badges (soft) */
@@ -291,80 +297,33 @@
         border-color: #fca5a5;
     }
 
-    /* Pagination */
-    .pagination-wrapper {
-        display: flex;
-        justify-content: center;
-        padding: 1.5rem 0;
+    /* Custom Pagination Style */
+    .pagination {
+        margin-bottom: 1rem;
     }
 
-    .pagination-wrapper .pagination {
-        display: flex;
-        gap: 0.5rem;
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-    .pagination-wrapper .page-item {
-        display: inline-block;
-    }
-
-    .pagination-wrapper .page-link {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 38px;
-        height: 38px;
-        padding: 0.5rem 0.75rem;
+    .page-link {
         color: var(--choco);
-        background: #fff;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        text-decoration: none;
-        font-weight: 500;
-        transition: all 0.2s ease;
-        font-size: 0.875rem;
+        border-color: #dee2e6;
     }
 
-    .pagination-wrapper .page-link:hover {
-        background: rgba(140, 16, 0, 0.04);
+    .page-link:hover {
+        color: #6b0d00;
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+    }
+
+    .page-item.active .page-link {
+        background-color: var(--choco);
         border-color: var(--choco);
-        color: var(--choco);
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        color: white;
     }
 
-    .pagination-wrapper .page-item.active .page-link {
-        background: var(--choco);
-        border-color: var(--choco);
-        color: #fff;
-        box-shadow: 0 2px 6px rgba(140, 16, 0, 0.25);
-    }
-
-    .pagination-wrapper .page-item.disabled .page-link {
-        color: #9ca3af;
-        background: #f9fafb;
-        border-color: #e5e7eb;
-        cursor: not-allowed;
-        opacity: 0.6;
-    }
-
-    .pagination-wrapper .page-item.disabled .page-link:hover {
-        background: #f9fafb;
-        border-color: #e5e7eb;
-        transform: none;
-        box-shadow: none;
-    }
-
-    /* Dots separator */
-    .pagination-wrapper .page-item .page-link[aria-disabled="true"] {
+    .page-item.disabled .page-link {
+        color: #6c757d;
         pointer-events: none;
-        background: transparent;
-        border: none;
-        color: #9ca3af;
+        background-color: #fff;
+        border-color: #dee2e6;
     }
 </style>
 
@@ -385,9 +344,9 @@
                     form.action = `/owner/user-owner/outlets/${outletId}`;
                     form.style.display = 'none';
                     form.innerHTML = `
-        @csrf
-        <input type="hidden" name="_method" value="DELETE">
-      `;
+                @csrf
+                <input type="hidden" name="_method" value="DELETE">
+              `;
                     document.body.appendChild(form);
                     form.submit();
                 }
@@ -397,8 +356,8 @@
     <script>
         function generateBarcode(tableId) {
             axios.get(`/partner/store/tables/generate-barcode/${tableId}`, {
-                    responseType: 'blob'
-                })
+                responseType: 'blob'
+            })
                 .then(response => {
                     const url = window.URL.createObjectURL(new Blob([response.data]));
                     const link = document.createElement('a');

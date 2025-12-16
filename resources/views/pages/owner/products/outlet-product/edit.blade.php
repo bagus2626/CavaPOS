@@ -255,7 +255,7 @@
                                           <div class="alert alert-info py-2 px-2 mb-1 small">
                                             <i class="fas fa-link mr-1"></i>Stok diatur oleh resep
                                           </div>
-                                          <button type="button" class="btn btn-sm btn-outline-choco btn-block btn-manage-recipe" data-opt-id="{{ $opt->id }}" data-opt-name="{{ $opt->name }}">
+                                          <button type="button" class="btn btn-sm btn-outline-choco btn-block btn-manage-recipe" data-opt-id="{{ $opt->id }}" data-opt-name="{{ $opt->name }}" data-partner-id="{{ $data->partner_id }}">
                                             Atur Resep
                                           </button>
                                         </div>

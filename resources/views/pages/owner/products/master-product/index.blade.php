@@ -86,10 +86,15 @@ function deleteProduct(productId) {
       <div class="card-body p-0">
         @include('pages.owner.products.master-product.display')
       </div>
-      <div class="card-footer bg-white border-0">
-        <div class="d-flex justify-content-end">
-          {{ $products->withQueryString()->links() }}
-        </div>
+    </div>
+    
+    {{-- Pagination Links --}}
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="text-muted small">
+        Showing {{ $products->firstItem() ?? 0 }} to {{ $products->lastItem() ?? 0 }} of {{ $products->total() }} entries
+      </div>
+      <div>
+        {{ $products->links() }}
       </div>
     </div>
 
@@ -194,38 +199,35 @@ function deleteProduct(productId) {
   box-shadow:0 0 0 .2rem rgba(140,16,0,.15);
 }
 
-/* ===== Pagination Choco Style ===== */
-.owner-products-index .pagination {
-    margin: 0;
-}
 
-.owner-products-index .pagination .page-item .page-link {
+/* Custom Pagination Style */
+  .pagination {
+    margin-bottom: 1rem;
+  }
+
+  .page-link {
     color: var(--choco);
-    border-radius: 8px;
-    padding: .45rem .8rem;
-    font-weight: 600;
-    border: 1px solid #e5e7eb;
-    transition: all .15s ease;
-}
+    border-color: #dee2e6;
+  }
 
-.owner-products-index .pagination .page-item .page-link:hover {
-    background-color: var(--choco);
-    color: #fff;
-    border-color: var(--choco);
-}
+  .page-link:hover {
+    color: #6b0d00;
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+  }
 
-.owner-products-index .pagination .page-item.active .page-link {
+  .page-item.active .page-link {
     background-color: var(--choco);
     border-color: var(--choco);
-    color: #fff;
-}
+    color: white;
+  }
 
-.owner-products-index .pagination .page-item.disabled .page-link {
-    color: #9ca3af !important;
-    background-color: #f3f4f6;
-    border-color: #e5e7eb;
-    cursor: not-allowed;
-}
+  .page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+    background-color: #fff;
+    border-color: #dee2e6;
+  }
 
 </style>
 @endsection

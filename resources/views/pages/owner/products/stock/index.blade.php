@@ -8,7 +8,7 @@
     <div class="container-fluid owner-stocks"> {{-- PAGE SCOPE --}}
 
       <div class="d-flex flex-wrap gap-2 mb-3 align-items-center justify-content-between">
-        <a href="{{ route('owner.user-owner.stocks.create') }}" class="btn btn-primary">
+        <a href="{{ route('owner.user-owner.stocks.create') }}" class="btn btn-primary mb-3">
           <i class="fas fa-plus me-1"></i>
           {{ __('messages.owner.products.stocks.add_stock_item') }}
         </a>
