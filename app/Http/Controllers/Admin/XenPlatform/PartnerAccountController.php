@@ -123,7 +123,7 @@ class PartnerAccountController extends Controller
             }
 
         } catch (\Exception $e) {
-            Log::error('Xendit Partner Account Error: ' . $e->getMessage(), [
+            Log::error('Xendit Owner Account Error: ' . $e->getMessage(), [
                 'request_params' => $apiParams,
             ]);
             $errorMessage = 'Gagal mengambil data akun dari Xendit. Silakan coba lagi. (' . $e->getMessage() . ')';

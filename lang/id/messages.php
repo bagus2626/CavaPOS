@@ -159,6 +159,21 @@ return [
             'qty_reduced' => 'Jumlah pesanan ":name" dikurangi dari :from menjadi :to berdasarkan stok tersisa produk dan opsi yang dipilih.',
             'order_not_found' => 'Pesanan yang dipilih tidak dapat dimuat ulang.',
             'understand' => 'Mengerti',
+            'stock' => 'Stok',
+            'limited_stock' => 'Stok terbatas',
+            'stock_max_reached_title' => 'Stok maksimum tercapai',
+            'stock_max_reached_text'  => ':item sudah mencapai batas stok dan tidak dapat ditambah.',
+            'cannot_add_stock' => 'Tidak bisa ditambah (dibatasi: :item)',
+            'remaining_can_add' => 'Sisa bisa ditambah: :qty (dibatasi: :item)',
+            'cart_empty' => 'Keranjang masih kosong.',
+            'checking_stock' => 'Memeriksa ketersediaan stok…',
+            'stock_not_enough_title' => 'Stok tidak mencukupi',
+            'refresh_page' => 'Refresh halaman',
+            'cancel' => 'Batal',
+            'please_refresh_page_for_qty' => 'Silakan refresh halaman untuk melihat stok terbaru.',
+            'checkout_confirmation' => 'Konfirmasi checkout',
+            'processing_payment' => 'Memproses pembayaran…',
+            'reorder_loading' => 'Pesanan ulang sedang dimuat'
         ],
         'payment' => [
             'show_order_code' => 'Tunjukkan Kode Pemesanan',
@@ -1122,6 +1137,8 @@ return [
                 'drag_drop_instruction' => 'Seret dan lepas untuk mengatur ulang urutan kategori.',
                 'close' => 'Tutup',
                 'save_order' => 'Simpan Urutan',
+                'cannot_delete_title' => 'Tidak dapat menghapus',
+                'cannot_delete_used_text' => 'Kategori ":name" saat ini digunakan oleh produk. Harap ubah kategori produk terlebih dahulu.'
             ],
             'promotions' => [
                 'promotion_list' => 'Daftar Promosi',

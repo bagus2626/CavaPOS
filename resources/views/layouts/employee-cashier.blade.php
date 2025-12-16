@@ -12,6 +12,9 @@
     @stack('head')
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
+    @vite('resources/js/echo.js')
+
+
 </head>
 <body class="bg-gray-100 min-h-screen font-sans text-gray-800 overflow-x-hidden">
     {{-- <pre class="pt-96">{{ print_r(session()->all(), true) }}</pre> --}}

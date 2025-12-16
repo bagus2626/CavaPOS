@@ -1,4 +1,5 @@
 console.log("cashier.js loaded");
+
 // cashier.js (eksternal - tidak ada Blade tag di sini)
 (function () {
   function setBadge(id, n) {

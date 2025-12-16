@@ -38,20 +38,14 @@
           return res.json();
         })
         .then((order) => {
+          const paymentNote = (order?.payment?.note || "").toString().trim();
+
           let html = `
             <div class="space-y-1">
-              <p><span class="text-gray-500">Kode:</span> <span class="font-semibold">${
-                order.booking_order_code
-              }</span></p>
-              <p><span class="text-gray-500">Nama:</span> ${
-                order.customer_name ?? "-"
-              }</p>
-              <p><span class="text-gray-500">Meja:</span> ${
-                order.table?.table_no ?? "-"
-              }</p>
-              <p><span class="text-gray-500">Total:</span> <span class="font-semibold">${rupiah(
-                order.total_order_value
-              )}</span></p>
+              <p><span class="text-gray-500">Kode:</span> <span class="font-semibold">${order.booking_order_code}</span></p>
+              <p><span class="text-gray-500">Nama:</span> ${order.customer_name ?? "-"}</p>
+              <p><span class="text-gray-500">Meja:</span> ${order.table?.table_no ?? "-"}</p>
+              <p><span class="text-gray-500">Total:</span> <span class="font-semibold">${rupiah(order.total_order_value)}</span></p>
               <p>
                 <span class="text-gray-500">Status:</span>
                 <span class="${
@@ -65,7 +59,19 @@
                 }">${order.order_status}</span>
               </p>
             </div>
+          `;
 
+          // ✅ TAMBAHAN: tampilkan payment note jika ada
+          if (paymentNote) {
+            html += `
+              <div class="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
+                <p class="text-xs font-semibold text-amber-800 mb-1">Catatan Pembayaran</p>
+                <p class="text-sm text-amber-900 whitespace-pre-line">${paymentNote}</p>
+              </div>
+            `;
+          }
+
+          html += `
             <hr class="my-3">
             <h4 class="font-semibold mb-2">Items</h4>
             <ul class="space-y-3">
@@ -75,31 +81,17 @@
             html += `
               <li class="border-b pb-2">
                 <div class="font-medium text-choco">
-                  ${
-                    it.partner_product && it.product_name
-                      ? it.product_name
-                      : "Produk"
-                  } \u00D7 ${it.quantity}
-                  = ${rupiah(
-                    (it.base_price - (it.promo_amount ?? 0)) * it.quantity
-                  )}
-                  ${
-                    it.customer_note
-                      ? `<span class="text-xs text-gray-500 italic">(${it.customer_note})</span>`
-                      : ""
-                  }
+                  ${it.partner_product && it.product_name ? it.product_name : "Produk"} × ${it.quantity}
+                  = ${rupiah((it.base_price - (it.promo_amount ?? 0)) * it.quantity)}
+                  ${it.customer_note ? `<span class="text-xs text-gray-500 italic">(${it.customer_note})</span>` : ""}
                 </div>
             `;
             if (it.order_detail_options && it.order_detail_options.length) {
               html += `<ul class="list-none ml-4 mt-1 space-y-1 text-sm text-gray-600">`;
               it.order_detail_options.forEach((opt) => {
                 html += `<li>- ${
-                  opt.option && opt.option.parent && opt.option.parent.name
-                    ? opt.option.parent.name
-                    : "Opsi"
-                }: ${opt.option?.name ?? "-"} \u00D7 ${it.quantity} = ${rupiah(
-                  opt.price * it.quantity
-                )} </li>`;
+                  opt.option && opt.option.parent && opt.option.parent.name ? opt.option.parent.name : "Opsi"
+                }: ${opt.option?.name ?? "-"} × ${it.quantity} = ${rupiah(opt.price * it.quantity)} </li>`;
               });
               html += `</ul>`;
             }
@@ -152,25 +144,126 @@
         ?.getAttribute("content") || "";
 
     // Buka modal dari tombol proses pembayaran
-    qsa("[data-cash-btn]").forEach((btn) => {
-      btn.addEventListener("click", function () {
-        const id = this.getAttribute("data-order-id");
-        const code = this.getAttribute("data-order-code");
-        const name = this.getAttribute("data-order-name");
-        const total = Number(this.getAttribute("data-order-total") || 0);
-        const action = this.getAttribute("data-cash-url");
-        const url = this.getAttribute("data-cash-get-url");
+    // qsa("[data-cash-btn]").forEach((btn) => {
+    //   btn.addEventListener("click", function () {
+    //     const id = this.getAttribute("data-order-id");
+    //     const code = this.getAttribute("data-order-code");
+    //     const name = this.getAttribute("data-order-name");
+    //     const total = Number(this.getAttribute("data-order-total") || 0);
+    //     const action = this.getAttribute("data-cash-url");
+    //     const url = this.getAttribute("data-cash-get-url");
 
-        if (url && detailItem) {
-          fetch(url, {
-            headers: { "X-Requested-With": "XMLHttpRequest" },
+    //     if (url && detailItem) {
+    //       fetch(url, {
+    //         headers: { "X-Requested-With": "XMLHttpRequest" },
+    //       })
+    //         .then((res) => {
+    //           if (!res.ok) throw new Error("Network error");
+    //           return res.json();
+    //         })
+    //         .then((order) => {
+    //           let html = `
+    //           <p><strong>Order Status:</strong>
+    //             <span class="${
+    //               order.order_status === "UNPAID"
+    //                 ? "text-red-600 font-semibold"
+    //                 : order.order_status === "PROCESSED"
+    //                 ? "text-blue-600 font-semibold"
+    //                 : order.order_status === "SERVED"
+    //                 ? "text-green-600 font-semibold"
+    //                 : "text-gray-600"
+    //             }">${order.order_status}</span>
+    //           </p>
+    //           <hr class="my-2">
+    //           <h3 class="font-semibold mb-2">Items:</h3>
+    //           <ul class="list-none space-y-3">
+    //         `;
+    //           (order.order_details || []).forEach((it) => {
+    //             html += `
+    //             <li class="border-b pb-2">
+    //               <div class="font-medium text-choco">
+    //                 ${
+    //                   it.partner_product && it.partner_product.name
+    //                     ? it.partner_product.name
+    //                     : "Produk"
+    //                 } \u00D7 ${it.quantity}
+    //                 = ${rupiah(
+    //                   (it.base_price - (it.promo_amount ?? 0)) * it.quantity
+    //                 )}
+    //                 ${
+    //                   it.customer_note
+    //                     ? `<span class="text-sm text-gray-500 italic">(${it.customer_note})</span>`
+    //                     : ""
+    //                 }
+    //               </div>
+    //           `;
+    //             if (it.order_detail_options && it.order_detail_options.length) {
+    //               html += `<ul class="list-none ml-4 mt-1 space-y-1 text-sm text-gray-600">`;
+    //               it.order_detail_options.forEach((opt) => {
+    //                 html += `<li>- ${
+    //                   opt.option && opt.option.parent && opt.option.parent.name
+    //                     ? opt.option.parent.name
+    //                     : "Opsi"
+    //                 }: ${opt.option?.name ?? "-"} \u00D7 ${
+    //                   it.quantity
+    //                 } = ${rupiah(opt.price * it.quantity)} </li>`;
+    //               });
+    //               html += `</ul>`;
+    //             }
+    //             html += `</li>`;
+    //           });
+    //           html += `</ul>`;
+    //           detailItem.innerHTML = html;
+    //         })
+    //         .catch(() => {
+    //           detailItem.innerHTML =
+    //             '<p class="text-red-500">Gagal memuat data.</p>';
+    //         });
+    //     }
+
+    //     if (orderIdEl) orderIdEl.value = id;
+    //     if (orderCodeEl) orderCodeEl.textContent = code;
+    //     if (orderNameEl) orderNameEl.textContent = name;
+    //     if (orderTotalEl) orderTotalEl.textContent = rupiah(total);
+    //     if (orderTotalRawEl) orderTotalRawEl.value = total;
+
+    //     if (paidInput) paidInput.value = "";
+    //     if (changeDisplay) changeDisplay.value = "Rp 0";
+    //     if (changeAmount) changeAmount.value = 0;
+    //     if (errorBox) {
+    //       errorBox.classList.add("hidden");
+    //       errorBox.textContent = "";
+    //     }
+
+    //     if (form && action)
+    //       form.setAttribute(
+    //         "action",
+    //         action.replace("__ID__", encodeURIComponent(id))
+    //       );
+
+    //     cashModal.classList.remove("hidden");
+    //     if (paidInput) paidInput.focus();
+    //   });
+    // });
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-cash-btn]");
+      if (!btn) return;
+
+      const id     = btn.getAttribute("data-order-id");
+      const code   = btn.getAttribute("data-order-code");
+      const name   = btn.getAttribute("data-order-name");
+      const total  = Number(btn.getAttribute("data-order-total") || 0);
+      const action = btn.getAttribute("data-cash-url");
+      const url    = btn.getAttribute("data-cash-get-url");
+
+      if (url && detailItem) {
+        fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+          .then((res) => {
+            if (!res.ok) throw new Error("Network error");
+            return res.json();
           })
-            .then((res) => {
-              if (!res.ok) throw new Error("Network error");
-              return res.json();
-            })
-            .then((order) => {
-              let html = `
+          .then((order) => {
+            let html = `
               <p><strong>Order Status:</strong>
                 <span class="${
                   order.order_status === "UNPAID"
@@ -186,18 +279,17 @@
               <h3 class="font-semibold mb-2">Items:</h3>
               <ul class="list-none space-y-3">
             `;
-              (order.order_details || []).forEach((it) => {
-                html += `
+
+            (order.order_details || []).forEach((it) => {
+              html += `
                 <li class="border-b pb-2">
                   <div class="font-medium text-choco">
                     ${
                       it.partner_product && it.partner_product.name
                         ? it.partner_product.name
                         : "Produk"
-                    } \u00D7 ${it.quantity}
-                    = ${rupiah(
-                      (it.base_price - (it.promo_amount ?? 0)) * it.quantity
-                    )}
+                    } × ${it.quantity}
+                    = ${rupiah((it.base_price - (it.promo_amount ?? 0)) * it.quantity)}
                     ${
                       it.customer_note
                         ? `<span class="text-sm text-gray-500 italic">(${it.customer_note})</span>`
@@ -205,54 +297,50 @@
                     }
                   </div>
               `;
-                if (it.order_detail_options && it.order_detail_options.length) {
-                  html += `<ul class="list-none ml-4 mt-1 space-y-1 text-sm text-gray-600">`;
-                  it.order_detail_options.forEach((opt) => {
-                    html += `<li>- ${
-                      opt.option && opt.option.parent && opt.option.parent.name
-                        ? opt.option.parent.name
-                        : "Opsi"
-                    }: ${opt.option?.name ?? "-"} \u00D7 ${
-                      it.quantity
-                    } = ${rupiah(opt.price * it.quantity)} </li>`;
-                  });
-                  html += `</ul>`;
-                }
-                html += `</li>`;
-              });
-              html += `</ul>`;
-              detailItem.innerHTML = html;
-            })
-            .catch(() => {
-              detailItem.innerHTML =
-                '<p class="text-red-500">Gagal memuat data.</p>';
+              if (it.order_detail_options && it.order_detail_options.length) {
+                html += `<ul class="list-none ml-4 mt-1 space-y-1 text-sm text-gray-600">`;
+                it.order_detail_options.forEach((opt) => {
+                  html += `<li>- ${
+                    opt.option && opt.option.parent && opt.option.parent.name
+                      ? opt.option.parent.name
+                      : "Opsi"
+                  }: ${opt.option?.name ?? "-"} × ${it.quantity} = ${rupiah(opt.price * it.quantity)}</li>`;
+                });
+                html += `</ul>`;
+              }
+              html += `</li>`;
             });
-        }
 
-        if (orderIdEl) orderIdEl.value = id;
-        if (orderCodeEl) orderCodeEl.textContent = code;
-        if (orderNameEl) orderNameEl.textContent = name;
-        if (orderTotalEl) orderTotalEl.textContent = rupiah(total);
-        if (orderTotalRawEl) orderTotalRawEl.value = total;
+            html += `</ul>`;
+            detailItem.innerHTML = html;
+          })
+          .catch(() => {
+            detailItem.innerHTML = '<p class="text-red-500">Gagal memuat data.</p>';
+          });
+      }
 
-        if (paidInput) paidInput.value = "";
-        if (changeDisplay) changeDisplay.value = "Rp 0";
-        if (changeAmount) changeAmount.value = 0;
-        if (errorBox) {
-          errorBox.classList.add("hidden");
-          errorBox.textContent = "";
-        }
+      if (orderIdEl) orderIdEl.value = id || "";
+      if (orderCodeEl) orderCodeEl.textContent = code || "";
+      if (orderNameEl) orderNameEl.textContent = name || "";
+      if (orderTotalEl) orderTotalEl.textContent = rupiah(total);
+      if (orderTotalRawEl) orderTotalRawEl.value = total;
 
-        if (form && action)
-          form.setAttribute(
-            "action",
-            action.replace("__ID__", encodeURIComponent(id))
-          );
+      if (paidInput) paidInput.value = "";
+      if (changeDisplay) changeDisplay.value = "Rp 0";
+      if (changeAmount) changeAmount.value = 0;
+      if (errorBox) {
+        errorBox.classList.add("hidden");
+        errorBox.textContent = "";
+      }
 
-        cashModal.classList.remove("hidden");
-        if (paidInput) paidInput.focus();
-      });
+      if (form && action && id) {
+        form.setAttribute("action", action.replace("__ID__", encodeURIComponent(id)));
+      }
+
+      cashModal.classList.remove("hidden");
+      if (paidInput) paidInput.focus();
     });
+
 
     // Tutup modal
     closeBtns.forEach((b) =>
@@ -619,6 +707,95 @@
         }
 
         // Selalu refresh setelah konfirmasi (baik sukses normal atau warning)
+        if (payload && payload.redirect_url) {
+          window.location.href = payload.redirect_url;
+        } else {
+          location.reload();
+        }
+      });
+    });
+  })();
+
+  (function processToPaid() {
+    const processBtns = document.querySelectorAll("[data-turn-to-paid-btn]");
+
+    processBtns.forEach((btn) => {
+      btn.addEventListener("click", async function () {
+        const orderId = this.getAttribute("data-order-id");
+        const orderName = this.getAttribute("data-order-name");
+        const baseUrl = this.getAttribute("data-order-url");
+        const processUrl = baseUrl.replace("__ID__", orderId);
+
+        // KONFIRMASI lebih dulu
+        const { isConfirmed, value: payload } = await Swal.fire({
+          icon: "question",
+          title: "Batalkan Proses Order Ini?",
+          text: `Anda akan membatalkan memproses order (${orderName}). Lanjutkan?`,
+          showCancelButton: true,
+          confirmButtonText: "Ya, Batalkan Proses",
+          cancelButtonText: "Kembali",
+          reverseButtons: true,
+          showLoaderOnConfirm: true,
+          allowOutsideClick: () => !Swal.isLoading(),
+
+          // Eksekusi fetch di preConfirm (ada loader otomatis)
+          preConfirm: async () => {
+            try {
+              const response = await fetch(processUrl, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Accept: "application/json",
+                  "X-CSRF-TOKEN": document
+                    .querySelector('meta[name="csrf-token"]')
+                    .getAttribute("content"),
+                },
+                body: JSON.stringify({ order_id: orderId }),
+              });
+
+              const raw = await response.text();
+              let json = null;
+              try {
+                json = JSON.parse(raw);
+              } catch (_) {
+                /* biarkan null */
+              }
+
+              if (!response.ok) {
+                const msg =
+                  (json && (json.message || json.error)) ||
+                  "Gagal memproses order.";
+                Swal.showValidationMessage(msg);
+                return false;
+              }
+
+              return (
+                json || { status: "ok", message: "Order berhasil diproses." }
+              );
+            } catch (err) {
+              Swal.showValidationMessage(
+                err?.message || "Terjadi kesalahan jaringan."
+              );
+              return false;
+            }
+          },
+        });
+
+        // Jika batal
+        if (!isConfirmed) return;
+
+        // Sukses → tampilkan notifikasi dan refresh
+        const message =
+          (payload && (payload.message || payload.status)) ||
+          "Order berhasil diproses.";
+        await Swal.fire({
+          icon: "success",
+          title: "Berhasil",
+          text: message,
+          confirmButtonText: "OK",
+        });
+
+        // Redirect/refresh
         if (payload && payload.redirect_url) {
           window.location.href = payload.redirect_url;
         } else {
