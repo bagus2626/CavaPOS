@@ -162,17 +162,14 @@
                     </div>
                 </div>
 
-                <!-- Active Orders Rafi --> 
+                <!-- Active Orders --> 
                 <div class="mb-4 md:mb-5 lg:mb-6">
                     <h2 class="text-base md:text-lg lg:text-xl font-bold text-gray-900 dark:text-white mb-3 md:mb-4">
                         Active Orders
                     </h2> 
 
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 lg:gap-5" id="activeOrders">
-                        <div class="col-span-full flex flex-col items-center justify-center text-center py-10 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                            <div class="text-4xl mb-3 text-gray-400"></div>
-                            <div class="text-gray-500 dark:text-gray-400 text-sm">Loading active orders...</div>
-                        </div>
+                        <!-- Container kosong, akan diisi oleh JavaScript -->
                     </div>
                 </div>
             </main>
@@ -230,10 +227,7 @@
         <div id="queueTabContent" class="h-full p-3">
             <div class="flex flex-col h-full">
                 <div class="flex-1 overflow-y-auto scrollbar-thin" id="mobileOrderQueue">
-                    <div class="text-center text-text-secondary-light dark:text-text-secondary-dark py-10">
-                        <div class="text-4xl mb-2"></div>
-                        <div class="text-sm">Loading orders...</div>
-                    </div>
+                    <!-- Container kosong, akan diisi oleh JavaScript -->
                 </div>
             </div>
         </div>
@@ -253,10 +247,7 @@
                     </div>
                 </div>
                 <div class="flex-1 overflow-y-auto scrollbar-thin" id="mobileServedOrders">
-                    <div class="text-center text-text-secondary-light dark:text-text-secondary-dark py-10">
-                        <div class="text-4xl mb-2"></div>
-                        <div class="text-sm">Loading served orders...</div>
-                    </div>
+                    <!-- Container kosong, akan diisi oleh JavaScript -->
                 </div>
             </div>
         </div>

@@ -381,51 +381,52 @@ public function markAsServed($orderId)
 }
 
     private function formatOrderData($order, $queueNumber = null, $activeQueueNumber = null)
-    {
-        $orderTime = $order->order_status === 'PROCESSED'
-            ? ($order->updated_at ? $order->updated_at->format('H:i') : '00:00')
-            : ($order->created_at ? $order->created_at->format('H:i') : '00:00');
+{
+    $orderTime = $order->order_status === 'PROCESSED'
+        ? ($order->updated_at ? $order->updated_at->format('H:i') : '00:00')
+        : ($order->created_at ? $order->created_at->format('H:i') : '00:00');
 
-        $processDate = $order->order_status === 'PROCESSED' && $order->updated_at
-            ? $order->updated_at->format('d M Y')
-            : ($order->created_at ? $order->created_at->format('d M Y') : '');
+    $processDate = $order->order_status === 'PROCESSED' && $order->updated_at
+        ? $order->updated_at->format('d M Y')
+        : ($order->created_at ? $order->created_at->format('d M Y') : '');
 
-        $orderDetails = $order->order_details ?? collect();
-        $totalItems = $orderDetails->sum('quantity');
+    $orderDetails = $order->order_details ?? collect();
+    $totalItems = $orderDetails->sum('quantity');
 
-        $tableClass = $order->table->table_class ?? 'Indoor';
-        $tableConfig = $this->getTableConfig($tableClass);
+    $tableClass = $order->table->table_class ?? 'Indoor';
+    $tableConfig = $this->getTableConfig($tableClass);
 
-        return [
-            'id' => $order->id,
-            'queue_number' => $queueNumber,
-            'active_queue_number' => $activeQueueNumber,
-            'booking_order_code' => $order->booking_order_code ?? 'N/A',
-            'customer_name' => $this->cleanCustomerName($order->customer_name),
-            'order_status' => $order->order_status,
-            'order_time' => $orderTime,
-            'order_date' => $processDate,
-            'total_items' => $totalItems,
-            'table' => $order->table,
-            'table_class' => $tableClass,
-            'table_type_badge' => $tableConfig['badge'],
-            'table_type_color' => $tableConfig['color'],
-            'customer_order_note' => $order->customer_order_note ?? '',
-            'order_details' => $orderDetails->map(function ($detail) {
-                return [
-                    'id' => $detail->id,
-                    'product_name' => $detail->product_name ?? 'Product',
-                    'quantity' => $detail->quantity ?? 1,
-                    'customer_note' => $detail->customer_note ?? '',
-                    'options' => ($detail->order_detail_options ?? collect())->map(function ($option) {
-                        return [
-                            'name' => $option->partner_product_option_name ?? 'Option'
-                        ];
-                    })
-                ];
-            })
-        ];
-    }
+    return [
+        'id' => $order->id,
+        'queue_number' => $queueNumber,
+        'active_queue_number' => $activeQueueNumber,
+        'booking_order_code' => $order->booking_order_code ?? 'N/A',
+        'customer_name' => $this->cleanCustomerName($order->customer_name),
+        'order_status' => $order->order_status,
+        'order_time' => $orderTime,
+        'order_date' => $processDate,
+        'total_items' => $totalItems,
+        'table' => $order->table,
+        'table_class' => $tableClass,
+        'table_type_badge' => $tableConfig['badge'],
+        'table_type_color' => $tableConfig['color'],
+        'customer_order_note' => $order->customer_order_note ?? '',
+        'cashier_process_id' => $order->cashier_process_id, // ✅ TAMBAHKAN INI
+        'order_details' => $orderDetails->map(function ($detail) {
+            return [
+                'id' => $detail->id,
+                'product_name' => $detail->product_name ?? 'Product',
+                'quantity' => $detail->quantity ?? 1,
+                'customer_note' => $detail->customer_note ?? '',
+                'options' => ($detail->order_detail_options ?? collect())->map(function ($option) {
+                    return [
+                        'name' => $option->partner_product_option_name ?? 'Option'
+                    ];
+                })
+            ];
+        })
+    ];
+}
 
     private function formatServedOrderData($order)
     {

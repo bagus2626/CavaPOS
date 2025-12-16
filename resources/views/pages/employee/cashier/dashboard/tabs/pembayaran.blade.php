@@ -87,7 +87,6 @@
 @include('pages.employee.cashier.dashboard.modals.cash')
 @include('pages.employee.cashier.dashboard.modals.detail')
 
-<script src="{{ asset('js/employee/cashier/dashboard/detail.js') }}"></script>
 <script>
     function handleSoftDeleteClick(button) {
         console.log('tsettt');
