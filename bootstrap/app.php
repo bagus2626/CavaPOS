@@ -32,6 +32,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'partner.access' => \App\Http\Middleware\PartnerAccess::class,
             'customer.access' => \App\Http\Middleware\CustomerAccess::class,
             'employee.access' => \App\Http\Middleware\EmployeeAccess::class,
+            'check.table.status' => \App\Http\Middleware\CheckTableStatus::class,
 
         ]);
 

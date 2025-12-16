@@ -37,7 +37,7 @@ class OwnerDashboardController extends Controller
         $orders_gross_income = $orders->sum('total_order_value');
         $total_orders = $orders->count();
 
-        $last_orders = $orders->latest()->take(10)->get();
+        $last_orders = $orders->whereIn('order_status', ['PAID', 'PROCESSED', 'SERVED'])->latest()->take(10)->get();
 
         $popups = Message::with(['recipients', 'attachments'])
             ->whereHas('recipients', function ($q) use ($owner) {
