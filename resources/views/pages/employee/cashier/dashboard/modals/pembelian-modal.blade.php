@@ -10,11 +10,17 @@
       <p id="floatingCartTotal" class="text-lg font-extrabold text-gray-900">Rp 0</p>
     </div>
 
-    <button id="floatingCartClear" class="p-2 rounded-lg border border-gray-200 hover:bg-gray-50" aria-label="Hapus keranjang">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 7h12M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2m1 0v12a2 2 0 01-2 2H8a2 2 0 01-2-2V7m3 4v6m4-6v6" />
+    <button id="floatingCartClear"
+          class="p-2 rounded-lg border border-gray-200 hover:bg-gray-50"
+          aria-label="Buka keranjang"
+          title="Keranjang">
+      <!-- SVG cart -->
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-choco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M6 6h15l-1.5 9h-12L6 6Zm0 0L5 3H2m6 19a1 1 0 100-2 1 1 0 000 2Zm10 0a1 1 0 100-2 1 1 0 000 2Z" />
       </svg>
-    </button>
+  </button>
+
 
     <button id="floatingCartPay" class="px-4 py-2 rounded-lg bg-choco text-white font-semibold hover:bg-soft-choco">
       Checkout <span id="floatingCartCount" class="ml-1 text-white/90 text-sm"></span>

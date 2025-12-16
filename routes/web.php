@@ -479,6 +479,7 @@ Route::middleware('setlocale')->group(function () {
             Route::post('cash-payment/{id}', [CashierTransactionController::class, 'cashPayment'])->name('cash-payment');
             Route::get('order-detail/{id}', [CashierTransactionController::class, 'orderDetail'])->name('order-detail');
             Route::get('print-receipt/{id}', [CashierTransactionController::class, 'printReceipt'])->name('print-receipt');
+            Route::post('cancel-process-order/{id}', [CashierTransactionController::class, 'cancelProcessOrder'])->name('cancel-process-order');
             Route::post('process-order/{id}', [CashierTransactionController::class, 'processOrder'])->name('process-order');
             Route::post('finish-order/{id}', [CashierTransactionController::class, 'finishOrder'])->name('finish-order');
             Route::post('checkout-order', [CashierTransactionController::class, 'checkout'])->name('checkout');

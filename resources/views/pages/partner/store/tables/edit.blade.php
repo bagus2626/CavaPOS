@@ -137,8 +137,8 @@
 
         {{-- Submit --}}
         <div class="d-flex justify-content-end">
-          <a href="{{ route('partner.store.tables.index') }}" class="btn btn-outline-choco me-2">{{ __('messages.partner.outlet.table_management.tables.cancel') }}</a>
-          <button type="submit" class="btn btn-choco">{{ __('messages.partner.outlet.table_management.tables.update') }}</button>
+          <a href="{{ route('partner.store.tables.index') }}" class="btn btn-outline-choco me-2 m-1">{{ __('messages.partner.outlet.table_management.tables.cancel') }}</a>
+          <button type="submit" class="btn btn-choco m-1">{{ __('messages.partner.outlet.table_management.tables.update') }}</button>
         </div>
       </form>
     </div>

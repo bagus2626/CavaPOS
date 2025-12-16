@@ -19,7 +19,7 @@
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm font-semibold text-gray-900">
-                                        {{ $i->booking_order_code }} &middot; Meja {{ $i->table->table_no }} . {{ $i->payment_method }}
+                                        {{ $i->booking_order_code }} &middot; Meja {{ $i->table->table_no ?? '-' }} . {{ $i->payment_method }}
                                     </p>
                                     <p class="text-xs text-gray-500">
                                         Rp {{ number_format($i->total_order_value, 0, ',', '.') }}
