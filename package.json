@@ -5,7 +5,7 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "serve-full": "concurrently \"php artisan serve --host=192.168.1.107 --port=8000\" \"npm run dev\""
+        "serve-full": "concurrently \"php artisan serve --host=localhost --port=8000\" \"npm run dev\""
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.2",
@@ -28,6 +28,7 @@
         "admin-lte": "^3.2.0",
         "aos": "^2.3.4",
         "bootstrap": "^5.3.6",
+        "cropperjs": "^2.1.0",
         "jquery": "^3.7.1"
     }
 }
