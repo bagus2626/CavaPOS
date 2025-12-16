@@ -18,16 +18,6 @@
                         <a href="{{ route('owner.user-owner.promotions.edit', $data->id) }}" class="btn btn-warning mr-2">
                             <i class="fas fa-edit mr-1"></i>{{ __('messages.owner.products.promotions.edit') }}
                         </a>
-                        {{-- contoh tombol hapus (opsional)
-                        <form action="{{ route('owner.user-owner.promotions.destroy', $data->id) }}" method="POST" class="d-inline"
-                              onsubmit="return confirm('Yakin hapus promo ini?')">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-danger">
-                                <i class="fas fa-trash mr-1"></i>Delete
-                            </button>
-                        </form>
-                        --}}
                     </div>
                 </div>
 
@@ -135,14 +125,14 @@
                         </div>
                     </div>
 
-                    <div class="card-footer text-right">
+                    {{-- <div class="card-footer text-right">
                         <a href="{{ route('owner.user-owner.promotions.index') }}" class="btn btn-outline-secondary mr-2">
                             <i class="fas fa-list mr-1"></i>{{ __('messages.owner.products.promotions.back_to_list') }}
                         </a>
                         <a href="{{ route('owner.user-owner.promotions.edit', $data->id) }}" class="btn btn-primary">
                             <i class="fas fa-edit mr-1"></i>{{ __('messages.owner.products.promotions.edit_promotion') }}
                         </a>
-                    </div>
+                    </div> --}}
                 </div>
 
             </div>

@@ -72,7 +72,7 @@
                         <button
                             type="button"
                             id="scanBarcodeBtn"
-                            class="bg-soft-choco/30 w-12 flex items-center justify-center
+                            class="bg-soft-choco/30 w-16 flex items-center justify-center
                                 hover:bg-gray-300 border-y border-gray-300"
                             title="Scan Barcode"
                         >
@@ -86,7 +86,11 @@
                         {{-- Cari --}}
                         <button type="submit"
                             class="shrink-0 bg-choco text-white px-4 rounded-r-xl hover:bg-choco/90 focus:ring-2 focus:ring-soft-choco/40">
-                            Cari
+                            <img
+                                src="{{ asset('icons/icon-search-white.png') }}"
+                                alt="Scan Barcode"
+                                class="h-5 w-auto object-contain"
+                            >
                         </button>
                     </div>
                 </div>

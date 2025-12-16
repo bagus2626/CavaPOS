@@ -117,7 +117,7 @@
     {{-- ACTIONS --}}
     <td class="text-end">
       <a href="{{ route('owner.user-owner.outlet-products.edit', $p->id) }}"
-         class="btn btn-outline-dark btn-sm">
+         class="btn btn-outline-dark btn-sm mb-1">
         {{ __('messages.owner.products.outlet_products.edit') }}
       </a>
       <button class="btn btn-primary btn-sm" onclick="deleteProduct({{ $p->id }})">

@@ -95,6 +95,19 @@ class CashierDashboardController extends Controller
 
         $ordersToday = (clone $base)->latest()->get();
         // dd($ordersToday);
+        $tabCounts = [
+            'pembayaran' => $ordersToday
+                ->whereIn('payment_method', ['CASH', 'QRIS'])
+                ->whereIn('order_status', ['UNPAID', 'EXPIRED'])
+                ->where('payment_flag', 0)
+                ->count(),
+            'proses' => $ordersToday
+                ->whereIn('order_status', ['PROCESSED', 'PAID'])
+                ->count(),
+            'selesai' => $ordersToday
+                ->where('order_status', 'SERVED')
+                ->count(),
+        ];
         $pendingCashOrders = (clone $base)
             ->where('payment_method', 'CASH')
             ->where('payment_flag', 0)
@@ -110,6 +123,7 @@ class CashierDashboardController extends Controller
             'partner',
             'pendingCashOrders',
             'ordersToday',
+            'tabCounts',
             'metrics',
             'periodLabel',
             'needPaymentOrder'

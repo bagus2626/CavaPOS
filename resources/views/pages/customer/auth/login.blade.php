@@ -3,7 +3,7 @@
 @section('title', __('messages.customer.login.customer_login'))
 
 @section('content')
-<div class="w-full max-w-md bg-white shadow-lg rounded-lg p-6 md:p-8">
+<div class="w-full max-w-md bg-white shadow-lg rounded-lg p-6 md:p-8 my-20">
     <h2 class="text-2xl font-bold text-center mb-6">{{ __('messages.customer.login.customer_login') }}</h2>
 
     {{-- Form login email/password --}}

@@ -26,9 +26,9 @@
     <div class="col-md-3 form-group">
         <label for="filter-type">Account Type</label>
         <select id="filter-type" class="select2 form-control select-light-secondary" data-placeholder="Select type..." multiple>
-            <option value="MANAGED">MANAGED</option>
+            {{-- <option value="MANAGED">MANAGED</option> --}}
             <option value="OWNED">OWNED</option>
-            <option value="CUSTOM">CUSTOM</option>
+            {{-- <option value="CUSTOM">CUSTOM</option> --}}
         </select>
     </div>
 
