@@ -366,6 +366,36 @@
         .sidebar-collapse .main-sidebar:hover {
             width: 250px !important;
         }
+        /* Sembunyikan dropdown/submenu saat sidebar collapse */
+.sidebar-collapse .main-sidebar:not(:hover) .nav-treeview {
+    display: none !important;
+}
+
+/* Sembunyikan arrow indicator saat sidebar collapse */
+.sidebar-collapse .main-sidebar:not(:hover) .nav-link .right {
+    display: none !important;
+}
+
+/* Pastikan icon tetap terlihat saat sidebar collapse */
+.sidebar-collapse .main-sidebar:not(:hover) .nav-link {
+}
+
+.sidebar-collapse .main-sidebar:not(:hover) .nav-link p {
+    display: none;
+}
+
+.sidebar-collapse .main-sidebar:not(:hover) .nav-icon {
+    margin-right: 0 !important;
+}
+
+
+.sidebar-collapse .main-sidebar:hover .nav-link p {
+    display: inline-block;
+}
+
+.sidebar-collapse .main-sidebar:hover .nav-icon {
+    margin-right: 0.5rem !important;
+}
     </style>
 </head>
 
@@ -384,9 +414,6 @@
                 <li class="nav-item d-none d-sm-inline-block">
                     <a href="{{ route('partner.dashboard') }}"
                         class="nav-link">{{ __('messages.partner.layout.dashboard') }}</a>
-                </li>
-                <li class="nav-item d-none d-sm-inline-block">
-                    <a href="#" class="nav-link">{{ __('messages.partner.layout.support') }}</a>
                 </li>
             </ul>
 
@@ -437,7 +464,7 @@
                     </div>
 
                 </li>
-                <!-- Notifications Dropdown Menu -->
+                {{-- <!-- Notifications Dropdown Menu -->
                 <li class="nav-item dropdown">
                     <a class="nav-link" data-toggle="dropdown" href="#">
                         <i class="far fa-bell"></i>
@@ -463,7 +490,7 @@
                         <div class="dropdown-divider"></div>
                         <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
                     </div>
-                </li>
+                </li> --}}
 
                 <!-- Fullscreen Toggle -->
                 <li class="nav-item">
@@ -472,34 +499,37 @@
                     </a>
                 </li>
 
-                <!-- User Dropdown Menu asd-->
+                <!-- User Dropdown Menu -->
                 <li class="nav-item dropdown user-menu">
-                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
+                    <a href="#" class="nav-link dropdown-toggle d-flex align-items-center"
+                        data-toggle="dropdown">
                         @if (auth()->user()->logo)
                             <img src="{{ asset('storage/' . auth()->user()->logo) }}"
-                                class="user-image img-circle elevation-2" alt="User Image">
+                                class="user-image img-circle elevation-2" alt="User Image"
+                                style="width: 32px; height: 32px; object-fit: cover;">
                         @else
                             <div class="user-image img-circle elevation-2 d-inline-flex align-items-center justify-content-center"
-                                style="width: 25px; height: 25px; vertical-align: middle; background-color: #9ca3af;">
-                                <svg style="width: 14px; height: 14px; color: #ffffff;" fill="currentColor"
+                                style="width: 32px; height: 32px; background-color: #9ca3af;">
+                                <svg style="width: 18px; height: 18px; color: #ffffff;" fill="currentColor"
                                     viewBox="0 0 24 24">
                                     <path
                                         d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
                                 </svg>
                             </div>
                         @endif
-                        <span class="d-none d-md-inline">
+                        <span class="d-none d-md-inline ml-2">
                             @auth {{ auth()->user()->name }}
                             @else
                             User Partner @endauth
                         </span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right rounded-2xl soft-shadow">
-                        <!-- User image asd-->
-                        <li class="user-header bg-choco text-white text center">
+                        <!-- User image -->
+                        <li class="user-header bg-choco text-white text-center">
                             @if (auth()->user()->logo)
                                 <img src="{{ asset('storage/' . auth()->user()->logo) }}"
-                                    class="img-circle elevation-2" alt="User Image">
+                                    class="img-circle elevation-2" alt="User Image"
+                                    style="width: 90px; height: 90px; object-fit: cover;">
                             @else
                                 <div class="img-circle elevation-2 d-inline-flex align-items-center justify-content-center mx-auto"
                                     style="width: 90px; height: 90px; background-color: #9ca3af;">
@@ -510,7 +540,7 @@
                                     </svg>
                                 </div>
                             @endif
-                            <p>
+                            <p class="mt-2">
                                 @auth {{ auth()->user()->name }}
                                 @else
                                 User Partner @endauth
@@ -522,7 +552,7 @@
                             </p>
                         </li>
 
-                        <!-- Menu Footer asd-->
+                        <!-- Menu Footer -->
                         <li class="user-footer">
                             <a href="#"
                                 class="btn btn-default btn-flat">{{ __('messages.partner.layout.profile') }}</a>
@@ -888,7 +918,6 @@
 
         /* level 1 (Store) */
         .nav-sidebar .nav-item {
-            background-color: #eae4e4;
             color: #ffffff;
         }
 

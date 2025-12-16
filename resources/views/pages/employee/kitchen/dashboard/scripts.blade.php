@@ -18,7 +18,10 @@
             this.cache = new Map();
             this.cacheTimeout = 30000;
             this.pendingRequests = new Map();
+
         }
+
+
 
 
         async getOrderQueue(page = 1) {
@@ -122,16 +125,33 @@
             if (!order) return '';
 
             const hasNotes = order.order_details?.some(detail => detail.customer_note?.trim());
-            const isTakenByCashier = order.cashier_process_id;
+            const isTakenByCashier = order.cashier_process_id; // ✅ CEK FLAG INI
 
-            return `<div class="compact-queue-card kitchen-queue-item kitchen-details-btn bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all cursor-pointer p-2.5 mb-2 border border-gray-200 dark:border-gray-700 hover:border-red-500 ${isTakenByCashier ? 'opacity-60 cursor-not-allowed border-orange-300 bg-orange-50 dark:bg-orange-900/10' : ''}" data-order-id="${order.id}" data-customer-name="${(order.customer_name || '').toLowerCase()}" data-order-code="${(order.booking_order_code || '').toLowerCase()}" data-cashier-taken="${isTakenByCashier ? 'true' : 'false'}">${isTakenByCashier ? `
-                <div class="flex items-center gap-1 mb-1.5 text-orange-600 dark:text-orange-400 text-xs"><span class="material-icons" style="font-size: 12px;">person</span><span class="font-semibold">Sedang diproses kasir</span></div>` : ''}
-                <div class="flex items-start justify-between mb-1"><div class="text-red-600 font-black text-sm leading-none">${order.booking_order_code || 'N/A'}</div></div>
-                <div class="flex items-center justify-between mb-1"><div class="text-xs font-bold text-gray-900 dark:text-white truncate flex-1 pr-2" title="${order.customer_name || 'Customer'}">${order.customer_name || 'Customer'}</div>${hasNotes ? `
-                <div class="bg-yellow-400 rounded w-4 h-4 flex items-center justify-center shadow-sm flex-shrink-0"><span class="material-icons text-white" style="font-size: 12px;">sticky_note_2</span></div>` : ''}</div><div class="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400"><span class="font-semibold text-red-500 text-xs">${order.order_time || '00:00'}</span>
-                    <span>•</span><span>${order.total_items || 0} items</span><span>•</span><span class="text-xs">T${order.table?.table_no || '0'}</span></div></div>`;
+            return `<div class="compact-queue-card kitchen-queue-item kitchen-details-btn bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all cursor-pointer p-2.5 mb-2 border border-gray-200 dark:border-gray-700 hover:border-red-500 ${isTakenByCashier ? 'opacity-60 cursor-not-allowed border-orange-300 bg-orange-50 dark:bg-orange-900/10' : ''}" data-order-id="${order.id}" data-customer-name="${(order.customer_name || '').toLowerCase()}" data-order-code="${(order.booking_order_code || '').toLowerCase()}" data-cashier-taken="${isTakenByCashier ? 'true' : 'false'}">
+        ${isTakenByCashier ? `
+        <div class="flex items-center gap-1 mb-1.5 text-orange-600 dark:text-orange-400 text-xs">
+            <span class="material-icons" style="font-size: 12px;">person</span>
+            <span class="font-semibold">Sedang diproses kasir</span>
+        </div>` : ''}
+        <div class="flex items-start justify-between mb-1">
+            <div class="text-red-600 font-black text-sm leading-none">${order.booking_order_code || 'N/A'}</div>
+        </div>
+        <div class="flex items-center justify-between mb-1">
+            <div class="text-xs font-bold text-gray-900 dark:text-white truncate flex-1 pr-2" title="${order.customer_name || 'Customer'}">${order.customer_name || 'Customer'}</div>
+            ${hasNotes ? `
+            <div class="bg-yellow-400 rounded w-4 h-4 flex items-center justify-center shadow-sm flex-shrink-0">
+                <span class="material-icons text-white" style="font-size: 12px;">sticky_note_2</span>
+            </div>` : ''}
+        </div>
+        <div class="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
+            <span class="font-semibold text-red-500 text-xs">${order.order_time || '00:00'}</span>
+            <span>•</span>
+            <span>${order.total_items || 0} items</span>
+            <span>•</span>
+            <span class="text-xs">T${order.table?.table_no || '0'}</span>
+        </div>
+    </div>`;
         }
-
         static createActiveOrderCard(order) {
             if (!order) return '';
 
@@ -183,17 +203,27 @@
             return texts[tableClass] || tableClass;
         }
 
+        // Ganti method showEmptyState di class KitchenUIRenderer
         static showEmptyState(container, type) {
             const states = {
-                active: `<div class="col-span-full flex flex-col items-center justify-center text-center py-40 "><div class="text-5xl mb-4 text-gray-400">🍳</div> <div class="text-sm text-text-secondary-light dark:text-text-secondary-dark">No Active Orders</div></div>`,
-                served: `<div class="flex flex-col items-center justify-center text-center py-12 text-gray-500 dark:text-gray-400"><div class="text-4xl mb-4">✅</div><div class="text-sm">No Served Orders</div></div>`
+                queue: `<div class="text-center text-gray-500 dark:text-gray-400 py-12">
+            <div class="text-sm">No orders in queue</div>
+        </div>`,
+                active: `<div class="col-span-full text-center text-gray-500 dark:text-gray-400 py-12">
+            <div class="text-sm">No active orders</div>
+        </div>`,
+                served: `<div class="text-center text-gray-500 dark:text-gray-400 py-12">
+            <div class="text-sm">No served orders</div>
+        </div>`
             };
             container.innerHTML = states[type] || states.active;
         }
 
+        // Ganti method showLoadingState di class KitchenUIRenderer
         static showLoadingState(container) {
-            container.innerHTML =
-                `<div class="col-span-full flex flex-col items-center justify-center text-center text-center py-40">Loading...</div>`;
+            container.innerHTML = `<div class="col-span-full text-center text-gray-500 dark:text-gray-400 py-12">
+        <div class="text-sm">Loading...</div>
+    </div>`;
         }
     }
 
@@ -279,7 +309,6 @@
             this.queueOrders = [];
             this.activeOrders = [];
             this.servedOrders = [];
-            this.allServedOrders = [];
             this.currentOrderId = null;
             this.confirmationOrderId = null;
             this.currentDate = new Date().toISOString().split('T')[0];
@@ -288,6 +317,12 @@
             this.isRefreshing = false;
             this.servedOrdersDisplayCount = 20;
             this.servedOrdersLoadMoreSize = 10;
+
+            this.pollingInterval = null;
+            this.pollingIntervalTime = 3000; // Poll setiap 3 detik
+            this.lastQueueHash = null;
+            this.lastActiveHash = null;
+            this.lastServedHash = null;
 
             // Queue pagination
             this.queueCurrentPage = 1;
@@ -305,44 +340,164 @@
         }
 
         async init() {
-            this.showLoadingStates();
             await this.loadAllData();
             this.setupEventListeners();
             this.initializeMobile();
             this.setupRefreshButton();
+            this.startRealtimePolling();
         }
 
-        // Tombol refresh manual
-        setupRefreshButton() {
-            const refreshBtn = document.getElementById('refreshBtn');
-            const refreshIcon = document.getElementById('refreshIcon');
+        // ✅ TAMBAH METHOD BARU INI
+startRealtimePolling() {
+    if (this.pollingInterval) {
+        clearInterval(this.pollingInterval);
+    }
 
-            if (refreshBtn) {
-                refreshBtn.addEventListener('click', async () => {
-                    if (this.isRefreshing) return;
+    this.pollingInterval = setInterval(async () => {
+        if (this.isRefreshing) return;
 
-                    refreshIcon.style.animation = 'spin 1s linear infinite';
-                    refreshBtn.disabled = true;
+        try {
+            await this.checkForUpdates();
+        } catch (error) {
+            console.error('Polling error:', error);
+        }
+    }, this.pollingIntervalTime);
+}
 
-                    try {
-                        this.api.clearCache();
-                        await this.loadAllData();
-                    } finally {
-                        setTimeout(() => {
-                            refreshIcon.style.animation = '';
-                            refreshBtn.disabled = false;
-                        }, 500);
-                    }
-                });
+// ✅ TAMBAH METHOD BARU INI
+stopRealtimePolling() {
+    if (this.pollingInterval) {
+        clearInterval(this.pollingInterval);
+        this.pollingInterval = null;
+    }
+}
+
+// ✅ TAMBAH METHOD BARU INI
+async checkForUpdates() {
+    try {
+        const results = await Promise.allSettled([
+            this.api.getOrderQueue(1),
+            this.api.getActiveOrders(),
+            this.api.getServedOrders(this.currentDate, 1)
+        ]);
+
+        let hasQueueChanges = false;
+        let hasActiveChanges = false;
+        let hasServedChanges = false;
+
+        // Check Queue changes
+        if (results[0].status === 'fulfilled' && results[0].value?.success) {
+            const newQueueData = results[0].value.data;
+            const newQueueHash = this.generateHash(newQueueData.queue_orders);
+            
+            if (this.lastQueueHash !== newQueueHash) {
+                this.lastQueueHash = newQueueHash;
+                hasQueueChanges = true;
+                
+                this.queueOrders = newQueueData.queue_orders || [];
+                this.queueTotal = newQueueData.total_waiting || 0;
+                this.queueTotalPages = newQueueData.total_pages || 1;
+                this.queueHasMore = newQueueData.has_more || false;
             }
         }
 
-        showLoadingStates() {
-            ['orderQueue', 'activeOrders', 'servedOrders'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.innerHTML = '<div class="col-span-full text-center py-40">Loading...</div>';
-            });
+        // Check Active changes
+        if (results[1].status === 'fulfilled' && results[1].value?.success) {
+            const newActiveOrders = results[1].value.data?.active_orders || [];
+            const newActiveHash = this.generateHash(newActiveOrders);
+            
+            if (this.lastActiveHash !== newActiveHash) {
+                this.lastActiveHash = newActiveHash;
+                hasActiveChanges = true;
+                
+                this.activeOrders = newActiveOrders;
+            }
         }
+
+        // Check Served changes
+        if (results[2].status === 'fulfilled' && results[2].value?.success) {
+            const newServedData = results[2].value.data;
+            const newServedHash = this.generateHash(newServedData.served_orders);
+            
+            if (this.lastServedHash !== newServedHash) {
+                this.lastServedHash = newServedHash;
+                hasServedChanges = true;
+                
+                this.servedOrders = newServedData.served_orders || [];
+                this.servedTotal = newServedData.total_served || 0;
+                this.servedTotalPages = newServedData.total_pages || 1;
+                this.servedHasMore = newServedData.has_more || false;
+            }
+        }
+
+        // ✅ Hanya render yang berubah
+        if (hasQueueChanges) {
+            this.renderOrderQueue();
+            this.renderMobileQueue();
+        }
+        
+        if (hasActiveChanges) {
+            this.renderActiveOrdersDirect();
+        }
+        
+        if (hasServedChanges) {
+            this.renderServedOrders();
+            this.renderMobileServed();
+        }
+
+        // ✅ Update counters hanya jika ada perubahan
+        if (hasQueueChanges || hasActiveChanges || hasServedChanges) {
+            this.updateCountersRealtime();
+            this.updateMobileTabCounts();
+        }
+
+    } catch (error) {
+        console.error('Check updates error:', error);
+    }
+}
+
+// ✅ TAMBAH METHOD HELPER BARU INI
+generateHash(data) {
+    return JSON.stringify(data || []);
+}
+
+        // Tombol refresh manual
+        setupRefreshButton() {
+    const refreshBtn = document.getElementById('refreshBtn');
+    const refreshIcon = document.getElementById('refreshIcon');
+
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', async () => {
+            if (this.isRefreshing) return;
+
+            refreshIcon.style.animation = 'spin 1s linear infinite';
+            refreshBtn.disabled = true;
+
+            try {
+                this.api.clearCache();
+                
+                // Reset hash untuk force update
+                this.lastQueueHash = null;
+                this.lastActiveHash = null;
+                this.lastServedHash = null;
+                
+                await this.loadAllData();
+            } finally {
+                setTimeout(() => {
+                    refreshIcon.style.animation = '';
+                    refreshBtn.disabled = false;
+                }, 500);
+            }
+        });
+    }
+}
+
+        // showLoadingStates() {
+        //     ['orderQueue', 'activeOrders', 'servedOrders'].forEach(id => {
+        //         const el = document.getElementById(id);
+        //         if (el) el.innerHTML = '<div class="col-span-full text-center py-40">Loading...</div>';
+        //     });
+        // }
 
         async loadAllData() {
             if (this.isRefreshing) return;
@@ -351,6 +506,14 @@
                 this.isRefreshing = true;
                 this.queueCurrentPage = 1;
                 this.servedCurrentPage = 1;
+
+                // ✅ Set empty state dulu sebelum fetch (opsional, bisa juga tidak)
+                this.queueOrders = [];
+                this.activeOrders = [];
+                this.servedOrders = [];
+
+                // ✅ Render empty state immediately (tanpa loading icon)
+                this.batchRender();
 
                 const results = await Promise.allSettled([
                     this.api.getActiveOrders(),
@@ -372,7 +535,6 @@
                                 this.queueCurrentPage = result.value.data?.current_page || 1;
                                 break;
                             case 2:
-
                                 this.servedOrders = result.value.data?.served_orders || [];
                                 this.servedTotal = result.value.data?.total_served || 0;
                                 this.servedTotalPages = result.value.data?.total_pages || 1;
@@ -386,12 +548,11 @@
                 this.batchRender();
 
             } catch (error) {
-                throw error;
+                console.error('Load data error:', error);
             } finally {
                 this.isRefreshing = false;
             }
         }
-
         async loadMoreQueueOrders() {
             if (this.isLoadingMoreQueue || !this.queueHasMore) return;
 
@@ -467,16 +628,14 @@
                     this.orderMatchesSearch(order, this.searchTerm)
                 );
 
-                if (filteredOrders.length === 0 && !this.searchTerm) {
-                    KitchenUIRenderer.showEmptyState(container, 'queue');
-                    return;
-                }
-
-                if (filteredOrders.length === 0 && this.searchTerm) {
+                if (filteredOrders.length === 0) {
+                    // ✅ Satu empty state untuk semua kondisi
+                    const message = this.searchTerm ?
+                        `No results for "${this.searchTerm}"` :
+                        'No orders in queue';
                     container.innerHTML = `
-                <div class="text-center text-gray-500 py-8">
-                    <div class="text-4xl mb-2">🔍</div>
-                    <div class="text-sm">No results for "${this.searchTerm}"</div>
+                <div class="text-center text-gray-500 dark:text-gray-400 py-12">
+                    <div class="text-sm">${message}</div>
                 </div>
             `;
                     return;
@@ -495,7 +654,6 @@
 
                 container.innerHTML = '';
                 container.appendChild(fragment);
-
 
                 if (!this.searchTerm && this.queueHasMore) {
                     this.addLoadMoreButton(container);
@@ -628,16 +786,14 @@
                     this.orderMatchesSearch(order, this.searchTerm)
                 );
 
-                if (filteredOrders.length === 0 && !this.searchTerm) {
-                    KitchenUIRenderer.showEmptyState(container, 'served');
-                    return;
-                }
-
-                if (filteredOrders.length === 0 && this.searchTerm) {
+                if (filteredOrders.length === 0) {
+                    // ✅ Satu empty state untuk semua kondisi
+                    const message = this.searchTerm ?
+                        `No results for "${this.searchTerm}"` :
+                        'No served orders';
                     container.innerHTML = `
-                <div class="text-center text-gray-500 py-8">
-                    <div class="text-4xl mb-2">🔍</div>
-                    <div class="text-sm">No results for "${this.searchTerm}"</div>
+                <div class="text-center text-gray-500 dark:text-gray-400 py-12">
+                    <div class="text-sm">${message}</div>
                 </div>
             `;
                     return;
@@ -846,13 +1002,42 @@
             }
         }
 
+        // ✅ TAMBAHKAN METHOD INI DI SINI (DALAM CLASS)
+        updateCountersRealtime() {
+            try {
+                // Update waiting count
+                const waitingCount = document.getElementById('waitingCount');
+                if (waitingCount) {
+                    waitingCount.textContent = this.queueTotal || 0;
+                }
+
+                // Update cooking count
+                const cookingCount = document.getElementById('cookingCount');
+                if (cookingCount) {
+                    cookingCount.textContent = this.activeOrders.length;
+                }
+
+                // Update completed count
+                const completedCount = document.getElementById('completedCount');
+                if (completedCount) {
+                    completedCount.textContent = this.servedTotal || 0;
+                }
+
+                // Update mobile badge
+                this.updateMobileBadge();
+
+                // Update mobile tab counts
+                this.updateMobileTabCounts();
+            } catch (error) {
+                console.error('Error updating counters:', error);
+            }
+        }
+
         showServedOrderDetails(orderId) {
             try {
                 let order = (this.servedOrders || []).find(o => o.id == orderId);
 
-                if (!order && this.allServedOrders && this.allServedOrders.length > 0) {
-                    order = this.allServedOrders.find(o => o.id == orderId);
-                }
+
 
                 if (!order) {
                     throw error;
@@ -943,14 +1128,26 @@
                 const activeElement = document.getElementById(`kitchen-active-order-${orderId}`);
                 if (activeElement) {
                     activeElement.style.pointerEvents = 'none';
-                    activeElement.style.opacity = '0.5';
                 }
 
                 try {
                     const result = await this.api.cancelOrder(orderId);
 
                     if (result && result.success) {
+                        // ✅ Animasi instant (150ms)
+                        if (activeElement) {
+                            activeElement.style.transition = 'all 0.15s ease-out';
+                            activeElement.style.transform = 'scale(0.85)';
+                            activeElement.style.opacity = '0';
+
+                            setTimeout(() => {
+                                activeElement.remove();
+                            }, 150);
+                        }
+
                         const oldQueueNumber = order.active_queue_number;
+
+                        // Remove dari active
                         this.activeOrders = this.activeOrders.filter(o => o.id != orderId);
                         this.renumberActiveOrdersAfter(oldQueueNumber);
 
@@ -960,11 +1157,12 @@
                             active_queue_number: undefined
                         };
 
-                        // ✅ TAMBAHKAN: Increment queueTotal
                         this.queueTotal++;
 
-                        // Tambah dan sort
-                        this.queueOrders.push(restoredOrder);
+                        // Add kembali ke queue
+                        this.queueOrders.unshift(restoredOrder); // Tambah di awal
+
+                        // Sort jika perlu
                         this.queueOrders.sort((a, b) => {
                             const timeA = a.order_time ? a.order_time.split(':').map(Number) : [0, 0];
                             const timeB = b.order_time ? b.order_time.split(':').map(Number) : [0, 0];
@@ -975,43 +1173,55 @@
                             return a.id - b.id;
                         });
 
-                        // ✅ TAMBAHKAN: Update counter setelah queueTotal berubah
-                        this.updateCounters();
+                        // ✅ Update counters immediately
+                        this.updateCountersRealtime();
 
-                        // Smooth remove dari active
-                        if (activeElement) {
-                            activeElement.style.transition = 'all 0.3s ease-out';
-                            activeElement.style.transform = 'scale(0.8)';
-                            activeElement.style.opacity = '0';
-                            setTimeout(() => activeElement.remove(), 300);
-                        }
-
-                        // Re-render queue
+                        // ✅ Render queue dengan optimisasi (100ms)
                         setTimeout(() => {
                             const container = document.getElementById('orderQueue');
                             if (container) {
-                                const scrollTop = container.scrollTop;
-                                this.renderOrderQueue();
-                                container.scrollTop = scrollTop;
+                                // ✅ Cari posisi yang tepat untuk insert
+                                const existingCards = Array.from(container.querySelectorAll(
+                                    '.kitchen-queue-item'));
+                                const orderIndex = this.queueOrders.findIndex(o => o.id === orderId);
+
+                                // Create new card
+                                const tempDiv = document.createElement('div');
+                                tempDiv.innerHTML = KitchenUIRenderer.createQueueItem(restoredOrder);
+                                const newCard = tempDiv.firstChild;
+
+                                // Insert di posisi yang tepat
+                                if (orderIndex === 0) {
+                                    container.insertBefore(newCard, container.firstChild);
+                                } else if (orderIndex < existingCards.length) {
+                                    container.insertBefore(newCard, existingCards[orderIndex]);
+                                } else {
+                                    const loadMoreBtn = document.getElementById('loadMoreQueueBtn');
+                                    if (loadMoreBtn) {
+                                        container.insertBefore(newCard, loadMoreBtn);
+                                    } else {
+                                        container.appendChild(newCard);
+                                    }
+                                }
+
+                                // Highlight animation
+                                newCard.style.backgroundColor = '#fef3c7';
+                                newCard.style.transition = 'background-color 1s ease';
 
                                 setTimeout(() => {
-                                    const returnedCard = container.querySelector(
-                                        `[data-order-id="${orderId}"]`);
-                                    if (returnedCard) {
-                                        returnedCard.style.backgroundColor = '#fef3c7';
-                                        returnedCard.style.transition = 'background-color 2s ease';
-
-                                        setTimeout(() => {
-                                            returnedCard.style.backgroundColor = '';
-                                        }, 2000);
-                                    }
-                                }, 100);
+                                    newCard.style.backgroundColor = '';
+                                }, 1000);
                             }
 
-                            this.renderMobileQueue();
-                        }, 350);
-
-                        this.updateMobileCountersOnly();
+                            // Update mobile tanpa re-render penuh
+                            const mobileContainer = document.getElementById('mobileOrderQueue');
+                            if (mobileContainer) {
+                                const tempDiv = document.createElement('div');
+                                tempDiv.innerHTML = KitchenUIRenderer.createQueueItem(restoredOrder);
+                                const mobileCard = tempDiv.firstChild;
+                                mobileContainer.insertBefore(mobileCard, mobileContainer.firstChild);
+                            }
+                        }, 100);
 
                     } else {
                         if (activeElement) {
@@ -1028,7 +1238,7 @@
                 }
 
             } catch (error) {
-                throw error;
+                console.error('Cancel order error:', error);
             }
         }
 
@@ -1052,8 +1262,10 @@
                     id: 'mobileQueueSearch',
                     callback: () => {
                         this.handleSearch();
-                        this.updater.filterOrdersVisibility('mobileOrderQueue', this.searchTerm);
-                        this.updater.filterOrdersVisibility('mobileServedOrders', this.searchTerm);
+                        // Update mobile UI setelah handleSearch()
+                        this.renderMobileQueue();
+                        this.renderMobileServed();
+                        this.updateMobileTabCounts();
                     }
                 }
             ];
@@ -1223,12 +1435,6 @@
                 this.updateCounters();
             }
         }
-        async loadAllServedOrders() {
-            const result = await this.api.getAllServedOrders();
-            if (result?.success) {
-                this.allServedOrders = result.data?.served_orders || [];
-            }
-        }
 
         setupMobileSidebar() {
             const mobileToggle = document.getElementById('mobileSidebarToggle');
@@ -1271,7 +1477,6 @@
 
             if (mobileQueueSearch) {
                 let searchTimeout;
-
                 const newSearch = mobileQueueSearch.cloneNode(true);
                 mobileQueueSearch.parentNode.replaceChild(newSearch, mobileQueueSearch);
 
@@ -1283,18 +1488,14 @@
                         this.searchTerm = searchTerm;
                         this.isGlobalSearch = !!searchTerm;
 
-                        if (this.isGlobalSearch && this.searchTerm) {
-                            this.loadAllServedOrders().then(() => {
-                                this.renderMobileQueue();
-                                this.renderMobileServed();
-                                this.updateMobileTabCounts();
-                            });
-                        } else {
-                            this.renderMobileQueue();
-                            this.renderMobileServed();
-                            this.updateMobileTabCounts();
-                        }
-                    }, 500);
+                        // Gunakan method yang sama dengan desktop
+                        this.handleSearch();
+
+                        // Update mobile specific UI
+                        this.renderMobileQueue();
+                        this.renderMobileServed();
+                        this.updateMobileTabCounts();
+                    }, 300); // Debounce 300ms sama dengan desktop
                 }, {
                     passive: true
                 });
@@ -1305,6 +1506,7 @@
                         newSearch.blur();
                         this.searchTerm = '';
                         this.isGlobalSearch = false;
+                        this.handleSearch();
                         this.renderMobileQueue();
                         this.renderMobileServed();
                         this.updateMobileTabCounts();
@@ -1377,28 +1579,14 @@
                 servedTabContent.classList.remove('hidden');
                 queueTabContent.classList.add('hidden');
 
-                if (this.searchTerm && this.isGlobalSearch) {
-                    this.loadAllServedOrders().then(() => {
-                        this.renderMobileServed();
-                    });
-                } else {
-                    this.renderMobileServed();
-                }
+                this.renderMobileServed();
             }
         }
 
         loadMobileData() {
-            if (this.searchTerm && this.isGlobalSearch) {
-                this.loadAllServedOrders().then(() => {
-                    this.renderMobileQueue();
-                    this.renderMobileServed();
-                    this.updateMobileTabCounts();
-                });
-            } else {
-                this.renderMobileQueue();
-                this.renderMobileServed();
-                this.updateMobileTabCounts();
-            }
+            this.renderMobileQueue();
+            this.renderMobileServed();
+            this.updateMobileTabCounts();
         }
 
         renderMobileQueue() {
@@ -1406,40 +1594,37 @@
             if (!container) return;
 
             try {
-                let filteredQueue = this.queueOrders || [];
-
-                if (this.searchTerm && this.searchTerm.length > 0) {
-                    filteredQueue = filteredQueue.filter(order =>
-                        this.orderMatchesSearch(order, this.searchTerm)
-                    );
-                }
+                // Gunakan filter yang sama dengan desktop
+                const filteredQueue = (this.queueOrders || []).filter(order =>
+                    this.orderMatchesSearch(order, this.searchTerm)
+                );
 
                 if (filteredQueue.length === 0) {
                     const message = this.searchTerm ?
-                        `No orders found for "${this.searchTerm}"` :
+                        `No results for "${this.searchTerm}"` :
                         'No orders in queue';
                     container.innerHTML = `
-                <div class="text-center text-gray-500 dark:text-gray-400 py-8">
-                    <div class="text-sm font-medium">${message}</div>
-                    ${this.searchTerm ? '<div class="text-xs mt-2">Try a different search term</div>' : ''}
+                <div class="text-center text-gray-500 dark:text-gray-400 py-12">
+                    <div class="text-sm">${message}</div>
                 </div>
             `;
-                } else {
-                    const fragment = document.createDocumentFragment();
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = filteredQueue.map(order =>
-                        KitchenUIRenderer.createQueueItem(order)
-                    ).join('');
-
-                    while (tempDiv.firstChild) {
-                        fragment.appendChild(tempDiv.firstChild);
-                    }
-
-                    container.innerHTML = '';
-                    container.appendChild(fragment);
+                    return;
                 }
+
+                const fragment = document.createDocumentFragment();
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = filteredQueue.map(order =>
+                    KitchenUIRenderer.createQueueItem(order)
+                ).join('');
+
+                while (tempDiv.firstChild) {
+                    fragment.appendChild(tempDiv.firstChild);
+                }
+
+                container.innerHTML = '';
+                container.appendChild(fragment);
             } catch (error) {
-                throw error;
+                console.error('Error rendering mobile queue:', error);
                 container.innerHTML = `
             <div class="text-center text-red-500 py-8">
                 <div class="text-sm">Error loading orders</div>
@@ -1453,44 +1638,37 @@
             if (!container) return;
 
             try {
-                let ordersToFilter = this.isGlobalSearch && this.searchTerm ?
-                    this.allServedOrders : this.servedOrders;
-
-                let filteredServed = ordersToFilter || [];
-
-                if (this.searchTerm && this.searchTerm.length > 0) {
-                    filteredServed = filteredServed.filter(order =>
-                        this.orderMatchesSearch(order, this.searchTerm)
-                    );
-                }
+                // Gunakan filter yang sama dengan desktop
+                const filteredServed = (this.servedOrders || []).filter(order =>
+                    this.orderMatchesSearch(order, this.searchTerm)
+                );
 
                 if (filteredServed.length === 0) {
                     const message = this.searchTerm ?
-                        `No served orders found for "${this.searchTerm}"` :
+                        `No results for "${this.searchTerm}"` :
                         'No served orders';
                     container.innerHTML = `
-                <div class="text-center text-gray-500 dark:text-gray-400 py-8">
-                    <div class="text-4xl mb-2">✅</div>
-                    <div class="text-sm font-medium">${message}</div>
-                    ${this.searchTerm ? '<div class="text-xs mt-2">Try a different search term</div>' : ''}
+                <div class="text-center text-gray-500 dark:text-gray-400 py-12">
+                    <div class="text-sm">${message}</div>
                 </div>
             `;
-                } else {
-                    const fragment = document.createDocumentFragment();
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = filteredServed.map(order =>
-                        KitchenUIRenderer.createServedOrderItem(order)
-                    ).join('');
-
-                    while (tempDiv.firstChild) {
-                        fragment.appendChild(tempDiv.firstChild);
-                    }
-
-                    container.innerHTML = '';
-                    container.appendChild(fragment);
+                    return;
                 }
+
+                const fragment = document.createDocumentFragment();
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = filteredServed.map(order =>
+                    KitchenUIRenderer.createServedOrderItem(order)
+                ).join('');
+
+                while (tempDiv.firstChild) {
+                    fragment.appendChild(tempDiv.firstChild);
+                }
+
+                container.innerHTML = '';
+                container.appendChild(fragment);
             } catch (error) {
-                throw error;
+                console.error('Error rendering mobile served:', error);
                 container.innerHTML = `
             <div class="text-center text-red-500 py-8">
                 <div class="text-sm">Error loading served orders</div>
@@ -1498,7 +1676,6 @@
         `;
             }
         }
-
         updateMobileTabCounts() {
             const queueTabCount = document.getElementById('queueTabCount');
             const servedTabCount = document.getElementById('servedTabCount');
@@ -1514,16 +1691,10 @@
             }
 
             if (servedTabCount) {
-                let servedCount = this.servedOrders.length;
-                if (this.searchTerm && this.isGlobalSearch) {
-                    servedCount = (this.allServedOrders || []).filter(order =>
-                        this.orderMatchesSearch(order, this.searchTerm)
-                    ).length;
-                } else if (this.searchTerm) {
-                    servedCount = this.servedOrders.filter(order =>
-                        this.orderMatchesSearch(order, this.searchTerm)
-                    ).length;
-                }
+                const servedCount = this.searchTerm ?
+                    (this.servedOrders || []).filter(order => this.orderMatchesSearch(order, this.searchTerm))
+                    .length :
+                    this.servedTotal || 0;
                 servedTabCount.textContent = `(${servedCount})`;
             }
         }
@@ -1544,6 +1715,20 @@
                 if (!order) return;
 
                 this.currentOrderId = orderId;
+
+                // CEK & DISABLE TOMBOL START COOKING JIKA DIPROSES KASIR
+                const startCookingBtn = document.getElementById('startCookingBtn');
+                if (startCookingBtn) {
+                    if (order.cashier_process_id) {
+                        startCookingBtn.disabled = true;
+                        startCookingBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                        startCookingBtn.textContent = 'Sedang Diproses Kasir';
+                    } else {
+                        startCookingBtn.disabled = false;
+                        startCookingBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        startCookingBtn.textContent = 'Start Cooking';
+                    }
+                }
 
                 const orderCodeBadge = document.getElementById('queueModalOrderCode');
                 if (orderCodeBadge) orderCodeBadge.textContent = order.booking_order_code || 'N/A';
@@ -1902,15 +2087,27 @@
                 const queueElement = document.querySelector(`#orderQueue [data-order-id="${orderId}"]`);
                 if (queueElement) {
                     queueElement.style.pointerEvents = 'none';
-                    queueElement.style.opacity = '0.5';
                 }
 
                 try {
                     const result = await this.api.pickUpOrder(orderId);
 
                     if (result && result.success) {
-                        this.queueOrders = this.queueOrders.filter(o => o.id != orderId);
+                        // ✅ Animasi instant - hapus langsung
+                        if (queueElement) {
+                            queueElement.style.transition = 'all 0.15s ease-out';
+                            queueElement.style.transform = 'translateX(100%)';
+                            queueElement.style.opacity = '0';
 
+                            // Hapus dari DOM sangat cepat (150ms)
+                            setTimeout(() => {
+                                queueElement.remove();
+                            }, 150);
+                        }
+
+                        // Remove dari queue
+                        this.queueOrders = this.queueOrders.filter(o => o.id != orderId);
+                        this.queueTotal = Math.max(0, this.queueTotal - 1);
 
                         const now = new Date();
                         const currentTime =
@@ -1925,21 +2122,23 @@
                         };
                         this.activeOrders.push(newActiveOrder);
 
-                        if (queueElement) {
-                            queueElement.style.transition = 'all 0.3s ease-out';
-                            queueElement.style.transform = 'translateX(100%)';
-                            queueElement.style.opacity = '0';
+                        // ✅ Update counters immediately
+                        this.updateCountersRealtime();
 
-                            setTimeout(() => {
-                                queueElement.remove();
-                            }, 300);
-                        }
-
+                        // ✅ Render active order lebih cepat (100ms) - bersamaan dengan animasi
                         setTimeout(() => {
                             this.addSingleActiveOrderCard(newActiveOrder);
-                        }, 350);
 
-                        this.updateMobileCountersOnly();
+                            // Update mobile tanpa re-render penuh
+                            const mobileContainer = document.getElementById('mobileOrderQueue');
+                            if (mobileContainer) {
+                                const mobileCard = mobileContainer.querySelector(
+                                    `[data-order-id="${orderId}"]`);
+                                if (mobileCard) {
+                                    mobileCard.remove();
+                                }
+                            }
+                        }, 100);
 
                     } else {
                         if (queueElement) {
@@ -1956,7 +2155,7 @@
                 }
 
             } catch (error) {
-                throw error;
+                console.error('Pick up order error:', error);
             }
         }
 
@@ -1971,16 +2170,27 @@
                 const activeElement = document.getElementById(`kitchen-active-order-${orderId}`);
                 if (activeElement) {
                     activeElement.style.pointerEvents = 'none';
-                    activeElement.style.opacity = '0.5';
                 }
 
                 try {
                     const result = await this.api.markAsServed(orderId);
 
                     if (result && result.success) {
-                        const oldQueueNumber = order.active_queue_number;
-                        this.activeOrders = this.activeOrders.filter(o => o.id != orderId);
+                        // ✅ Animasi instant (150ms)
+                        if (activeElement) {
+                            activeElement.style.transition = 'all 0.15s ease-out';
+                            activeElement.style.transform = 'scale(0.85)';
+                            activeElement.style.opacity = '0';
 
+                            setTimeout(() => {
+                                activeElement.remove();
+                            }, 150);
+                        }
+
+                        const oldQueueNumber = order.active_queue_number;
+
+                        // Remove dari active orders
+                        this.activeOrders = this.activeOrders.filter(o => o.id != orderId);
                         this.renumberActiveOrdersAfter(oldQueueNumber);
 
                         const servedOrder = {
@@ -1988,24 +2198,27 @@
                             order_status: 'SERVED',
                             served_time: new Date().toTimeString().slice(0, 5)
                         };
+
+                        // Add ke served
                         this.servedOrders.unshift(servedOrder);
+                        this.servedTotal++;
 
+                        // ✅ Update counters immediately
+                        this.updateCountersRealtime();
 
-                        if (activeElement) {
-                            activeElement.style.transition = 'all 0.3s ease-out';
-                            activeElement.style.transform = 'scale(0.8)';
-                            activeElement.style.opacity = '0';
-
-                            setTimeout(() => {
-                                activeElement.remove();
-                            }, 300);
-                        }
-
+                        // ✅ Render served order sangat cepat (100ms)
                         setTimeout(() => {
                             this.addSingleServedOrderCard(servedOrder);
-                        }, 350);
 
-                        this.updateMobileCountersOnly();
+                            // Update mobile tanpa re-render penuh
+                            const mobileContainer = document.getElementById('mobileServedOrders');
+                            if (mobileContainer) {
+                                const tempDiv = document.createElement('div');
+                                tempDiv.innerHTML = KitchenUIRenderer.createServedOrderItem(servedOrder);
+                                const mobileCard = tempDiv.firstChild;
+                                mobileContainer.insertBefore(mobileCard, mobileContainer.firstChild);
+                            }
+                        }, 100);
 
                     } else {
                         if (activeElement) {
@@ -2023,7 +2236,7 @@
                 }
 
             } catch (error) {
-                throw error;
+                console.error('Mark as served error:', error);
             }
         }
 
@@ -2061,19 +2274,38 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        try {
-            if (document.getElementById('headerTime')) {
-                updateHeaderTime();
-                setInterval(updateHeaderTime, 1000);
-            }
 
-            window.kitchenDashboard = new KitchenDashboard();
-            window.kitchenDashboard.init();
-        } catch (error) {
-            throw error;
+    document.addEventListener('DOMContentLoaded', function() {
+    try {
+        if (document.getElementById('headerTime')) {
+            updateHeaderTime();
+            setInterval(updateHeaderTime, 1000);
         }
-    });
+
+        // ✅ Stop polling saat page unload
+        window.addEventListener('beforeunload', () => {
+            if (window.kitchenDashboard) {
+                window.kitchenDashboard.stopRealtimePolling(); // ✅ GANTI
+            }
+        });
+
+        // ✅ TAMBAH: Pause polling saat tab tidak aktif
+        document.addEventListener('visibilitychange', () => {
+            if (window.kitchenDashboard) {
+                if (document.hidden) {
+                    window.kitchenDashboard.stopRealtimePolling();
+                } else {
+                    window.kitchenDashboard.startRealtimePolling();
+                }
+            }
+        });
+
+        window.kitchenDashboard = new KitchenDashboard();
+        window.kitchenDashboard.init();
+    } catch (error) {
+        throw error;
+    }
+});
 </script>
 
 <style>

@@ -28,87 +28,107 @@ use Illuminate\Support\Str;
 class CashierDashboardController extends Controller
 {
     public function index(Request $request)
-    {
-        $employee = Employee::findOrFail(Auth::id());
-        $partner  = $employee->partner;
-        
-        
+{
+    $employee = Employee::findOrFail(Auth::id());
+    $partner  = $employee->partner;
+    
+    // Ambil filter dari query string
+    $payment = $request->string('payment')->toString(); // 'CASH' | 'QRIS' | ''
+    $status  = $request->input('status', '');  // 'PAID' | 'UNPAID' | ''
+    $q       = $request->string('q')->toString();
 
-        // Ambil filter dari query string
-        $payment = $request->string('payment')->toString(); // 'CASH' | 'QRIS' | ''
-        $status  = $request->input('status', '');  // 'PAID' | 'UNPAID' | ''
-        $q       = $request->string('q')->toString();
+    // Ambil tanggal dari request
+    $from = $request->date('from');
+    $to   = $request->date('to');
 
-        // Ambil tanggal dari request
-        $from = $request->date('from');
-        $to   = $request->date('to');
-
-        // Atur default tanggal
-        if (!$from && !$to) {
-            // Default: hari ini
-            $from = $to = Carbon::today();
-        } elseif ($from && !$to) {
-            // Kalau hanya "dari" → sampai hari ini
-            $to = Carbon::today();
-        } elseif (!$from && $to) {
-            // Kalau hanya "sampai" → dari awal bulan (bisa kamu ubah sesuai kebutuhan)
-            $from = Carbon::parse($to)->startOfMonth();
-        }
-
-        // Label periode untuk ditampilkan
-        if ($from->equalTo($to)) {
-            $periodLabel = $from->translatedFormat('d F Y');
-        } else {
-            $periodLabel = $from->translatedFormat('d F Y') . " - " . $to->translatedFormat('d F Y');
-        }
-
-        // Base query: partner + rentang tanggal (inklusif)
-        $base = BookingOrder::query()
-            ->with('table')
-            ->where('partner_id', $partner->id)
-            ->whereBetween('created_at', [
-                Carbon::parse($from)->startOfDay(),
-                Carbon::parse($to)->endOfDay(),
-            ])
-            ->when($payment, fn($q2) => $q2->where('payment_method', $payment))
-            ->when($status !== '', function ($q2) use ($status) {
-                // status 0/1 → payment_flag
-                if (in_array((string)$status, ['0', '1'], true)) {
-                    $q2->where('payment_flag', (int)$status);
-                } else {
-                    // status string → order_status
-                    $q2->where('order_status', $status);
-                }
-            })
-            ->when($q, function ($q2) use ($q) {
-                $q2->where(function ($qq) use ($q) {
-                    $qq->where('booking_order_code', 'like', "%{$q}%")
-                        ->orWhere('customer_name', 'like', "%{$q}%")
-                        ->orWhereHas('table', fn($t) => $t->where('table_no', 'like', "%{$q}%"));
-                });
-            })
-            ->orderBy('created_at', 'ASC');
-
-        $ordersToday = (clone $base)->latest()->get();
-        $pendingCashOrders = (clone $base)
-            ->where('payment_method', 'CASH')
-            ->where('payment_flag', 0)
-            ->latest()->get();
-
-        $metrics = [
-            'qris_paid'     => (clone $base)->where('payment_method', 'QRIS')->where('order_status', 'PAID')->count(),
-            'revenue_today' => (clone $base)->where('order_status', 'PAID')->sum('total_order_value'),
-        ];
-
-        return view('pages.employee.cashier.dashboard.index', compact(
-            'employee',
-            'partner',
-            'pendingCashOrders',
-            'ordersToday',
-            'metrics',
-            'periodLabel'
-        ));
+    // Atur default tanggal
+    if (!$from && !$to) {
+        // Default: hari ini
+        $from = $to = Carbon::today();
+    } elseif ($from && !$to) {
+        // Kalau hanya "dari" → sampai hari ini
+        $to = Carbon::today();
+    } elseif (!$from && $to) {
+        // Kalau hanya "sampai" → dari awal bulan
+        $from = Carbon::parse($to)->startOfMonth();
     }
+
+    // Label periode untuk ditampilkan
+    if ($from->equalTo($to)) {
+        $periodLabel = $from->translatedFormat('d F Y');
+    } else {
+        $periodLabel = $from->translatedFormat('d F Y') . " - " . $to->translatedFormat('d F Y');
+    }
+
+    // Base query: partner + rentang tanggal (inklusif)
+    $base = BookingOrder::query()
+        ->with('table')
+        ->where('partner_id', $partner->id)
+        ->whereBetween('created_at', [
+            Carbon::parse($from)->startOfDay(),
+            Carbon::parse($to)->endOfDay(),
+        ]);
+
+    // ✅ CLONE untuk ordersToday SEBELUM filter diterapkan
+    $ordersToday = (clone $base)->latest()->get();
+
+    // ✅ CLONE terpisah untuk pendingCash
+    $pendingCashOrders = (clone $base)
+        ->where('payment_method', 'CASH')
+        ->where('payment_flag', 0)
+        ->latest()->get();
+
+    // ✅ HITUNG badge dari ordersToday (sebelum filter)
+    $tabCounts = [
+        'pembayaran' => $ordersToday
+            ->whereIn('payment_method', ['CASH', 'QRIS'])
+            ->whereIn('order_status', ['UNPAID', 'EXPIRED'])
+            ->where('payment_flag', 0)
+            ->count(),
+        'proses' => $ordersToday
+            ->whereIn('order_status', ['PROCESSED', 'PAID'])
+            ->count(),
+        'selesai' => $ordersToday
+            ->where('order_status', 'SERVED')
+            ->count(),
+    ];
+
+    // ✅ Sekarang terapkan filter untuk tampilan table
+    $ordersFiltered = (clone $base)
+        ->when($payment, fn($q2) => $q2->where('payment_method', $payment))
+        ->when($status !== '', function ($q2) use ($status) {
+            if (in_array((string)$status, ['0', '1'], true)) {
+                $q2->where('payment_flag', (int)$status);
+            } else {
+                $q2->where('order_status', $status);
+            }
+        })
+        ->when($q, function ($q2) use ($q) {
+            $q2->where(function ($qq) use ($q) {
+                $qq->where('booking_order_code', 'like', "%{$q}%")
+                    ->orWhere('customer_name', 'like', "%{$q}%")
+                    ->orWhereHas('table', fn($t) => $t->where('table_no', 'like', "%{$q}%"));
+            });
+        })
+        ->latest()
+        ->get();
+
+    $metrics = [
+        'qris_paid'     => $ordersToday->where('payment_method', 'QRIS')->where('order_status', 'PAID')->count(),
+        'revenue_today' => $ordersToday->where('order_status', 'PAID')->sum('total_order_value'),
+    ];
+
+    return view('pages.employee.cashier.dashboard.index', compact(
+        'employee',
+        'partner',
+        'pendingCashOrders',
+        'ordersToday',       // ✅ Data lengkap untuk metrics & badge
+        'ordersFiltered',    // ✅ Data ter-filter untuk table
+        'tabCounts',         // ✅ Badge count
+        'metrics',
+        'periodLabel'
+    ));
+}
 
 
     public function show(Request $request, string $tab)

@@ -20,7 +20,7 @@
   $isActive = (int) ($emp->is_active ?? 0) === 1;
 @endphp
 
-<div class="container owner-emp-show">
+<div class="container-fluid owner-emp-show px-4 py-3">
   {{-- Toolbar --}}
   <div class="d-flex justify-content-between align-items-center mb-3">
     <a href="{{ route('owner.user-owner.employees.index') }}" class="btn btn-outline-choco">
