@@ -218,14 +218,16 @@
 
 
                                 <!-- Action Buttons -->
-                                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
-                                    <button type="button" id="btnCancel" class="btn btn-outline-secondary px-4">
-                                        <i class="fas fa-undo mr-2"></i>{{ __('messages.owner.settings.settings.reset') }}
-                                    </button>
-                                    <button type="submit" class="btn btn-primary btn-md px-5">
-                                        <i
-                                            class="fas fa-save mr-2"></i>{{ __('messages.owner.settings.settings.save_changes') }}
-                                    </button>
+                                <div class="pt-3 border-top">
+                                    <div class="d-flex flex-column flex-sm-row gap-2 justify-content-sm-between align-items-stretch align-items-sm-center">
+                                        <button type="button" id="btnCancel" class="btn btn-outline-secondary px-4 w-100 w-sm-auto m-1">
+                                            <i class="fas fa-undo mr-2"></i>{{ __('messages.owner.settings.settings.reset') }}
+                                        </button>
+
+                                        <button type="submit" class="btn btn-primary btn-md px-5 w-100 w-sm-auto m-1">
+                                            <i class="fas fa-save mr-2"></i>{{ __('messages.owner.settings.settings.save_changes') }}
+                                        </button>
+                                    </div>
                                 </div>
                             </form>
                         </div>

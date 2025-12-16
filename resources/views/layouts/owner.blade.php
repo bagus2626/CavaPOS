@@ -1414,6 +1414,18 @@
             });
         </script>
     @endif
+    @if(session('swal_error'))
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+        Swal.fire({
+            icon: 'warning',
+            title: @json(session('swal_error.title')),
+            text: @json(session('swal_error.text')),
+            confirmButtonColor: '#8c1000',
+        });
+        });
+        </script>
+    @endif
 
 </body>
 

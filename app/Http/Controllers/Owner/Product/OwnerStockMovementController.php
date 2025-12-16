@@ -82,23 +82,38 @@ class OwnerStockMovementController extends Controller
         ]);
     }
 
+
     public function createAdjustment()
     {
         $owner = Auth::user();
 
         $stocks = Stock::where('owner_id', $owner->id)
-            ->with('partner')
+            ->with('partner', 'displayUnit')
             ->orderBy('stock_name')
             ->get();
+
+        $stocks->each(function ($stock) {
+            $displayQty = 0;
+            if ($stock->displayUnit) {
+                $displayQty = $this->unitConversionService->convertToDisplayUnit(
+                    $stock->quantity,
+                    $stock->display_unit_id
+                );
+            }
+            $stock->setAttribute('display_quantity', round($displayQty, 4)); // Membulatkan untuk tampilan
+        });
 
         $partners = User::where('owner_id', $owner->id)
             ->where('role', 'partner')
             ->orderBy('name')
             ->get();
 
+        $allUnits = MasterUnit::all();
+
         return view('pages.owner.products.stock-movements.create-adjustment', [
             'stocks' => $stocks,
             'partners' => $partners,
+            'allUnits' => $allUnits,
         ]);
     }
 
@@ -166,6 +181,17 @@ class OwnerStockMovementController extends Controller
                 'items.*.unit_id' => 'required|exists:master_units,id',
                 'items.*.quantity' => 'required|numeric|min:0.01',
             ]);
+        } elseif ($type === 'out') {
+            $validatedData = $request->validate([
+                'movement_type' => 'required|in:out',
+                'location_from' => 'required|string',
+                'category' => 'required|string|max:100|not_in:transfer_out,transfer_in', // Kecualikan kategori transfer
+                'notes' => 'nullable|string|max:1000',
+                'items' => 'required|array|min:1',
+                'items.*.stock_id' => ['required', 'string', Rule::exists('stocks', 'id')->where('owner_id', $owner->id)],
+                'items.*.unit_id' => 'required|exists:master_units,id',
+                'items.*.quantity' => 'required|numeric|min:0.01',
+            ]);
         } else {
             return back()->with('error', 'Tipe transaksi tidak valid.')->withInput();
         }
@@ -177,6 +203,8 @@ class OwnerStockMovementController extends Controller
                 $this->processStockIn($request, $owner, $validatedData['items']);
             } elseif ($type === 'transfer') {
                 $this->processTransfer($request, $owner, $validatedData['items']);
+            } elseif ($type === 'out') {
+                $this->processAdjustment($request, $owner, $validatedData['items']);
             }
 
             DB::commit();
@@ -311,7 +339,7 @@ class OwnerStockMovementController extends Controller
             ]);
             // Kurangi stok ASAL
             $stockFrom->decrement('quantity', $quantityInBaseUnit);
-            
+
             $this->recalculationService->recalculateLinkedProducts($stockFrom);
 
 
@@ -365,6 +393,68 @@ class OwnerStockMovementController extends Controller
         }
     }
 
+    private function processAdjustment(Request $request, $owner, $items)
+    {
+        $locationFrom = $request->input('location_from') == '_owner' ? null : $request->input('location_from');
+        $category = $request->input('category');
+
+        // Buat Gerakan KELUAR (OUT)
+        $movement = StockMovement::create([
+            'owner_id' => $owner->id,
+            'partner_id' => $locationFrom,
+            'type' => 'out', // Tipe selalu 'out'
+            'category' => $category,
+            'notes' => $request->input('notes'),
+        ]);
+
+        foreach ($items as $item) {
+            $inputQuantity = $item['quantity'];
+            $inputUnitId = $item['unit_id'];
+
+            // Konversi kuantitas ke unit dasar
+            $quantityInBaseUnit = $this->unitConversionService->convertToBaseUnit(
+                $inputQuantity,
+                $inputUnitId
+            );
+
+            // --- Validasi & Update Stok ASAL (Stock Out) ---
+            $stockFrom = Stock::where('id', $item['stock_id'])
+                ->where('owner_id', $owner->id)
+                ->where('partner_id', $locationFrom)
+                ->first();
+
+            if (!$stockFrom) {
+                $failedStockName = Stock::find($item['stock_id'])->stock_name ?? "ID {$item['stock_id']}";
+                $locationName = $locationFrom == null ? "Gudang Owner" : User::find($locationFrom)->name;
+                throw new \Exception("Item '{$failedStockName}' tidak terdaftar di lokasi asal '{$locationName}'.");
+            }
+
+            // Cek ketersediaan stok
+            if ($stockFrom->quantity < $quantityInBaseUnit) {
+                // Konversi untuk ditampilkan dalam pesan error
+                $availableInDisplayUnit = $this->unitConversionService->convertToDisplayUnit(
+                    $stockFrom->quantity,
+                    $stockFrom->display_unit_id ?? 1
+                );
+                $displayUnit = $stockFrom->displayUnit ? $stockFrom->displayUnit->unit_name : 'unit';
+
+                throw new \Exception("Stok '{$stockFrom->stock_name}' tidak mencukupi untuk adjustment (Hanya tersisa: {$availableInDisplayUnit} {$displayUnit}).");
+            }
+
+            // Catat item KELUAR
+            $movement->items()->create([
+                'stock_id' => $stockFrom->id,
+                'quantity' => $quantityInBaseUnit,
+                'unit_price' => $stockFrom->last_price_per_unit
+            ]);
+
+            // Kurangi stok
+            $stockFrom->decrement('quantity', $quantityInBaseUnit);
+
+            $this->recalculationService->recalculateLinkedProducts($stockFrom);
+        }
+    }
+
     public function getMovementItemsJson(Request $request, $id)
     {
         $owner = Auth::user();
@@ -399,7 +489,7 @@ class OwnerStockMovementController extends Controller
 
             return [
                 'stock_name' => $stockName,
-                'display_quantity' => $displayQty,
+                'display_quantity' => number_format($displayQty, 2, ',', '.'),
                 'display_unit_name' => $unitName,
                 'quantity_raw' => $item->quantity,
                 'unit_price_formatted' => $unitPriceFormatted,

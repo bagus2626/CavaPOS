@@ -13,7 +13,7 @@
                 <input type="hidden" id="validate_account_holder_name" name="validate_account_holder_name" value="">
                 <div class="modal-body">
                     <div class="form-group">
-                        <label>Partner Account</label>
+                        <label>Owner Account</label>
                         <select class="form-control select2" name="for_user_id" id="for_user_id">
                             <option value="" selected>Select...</option>
                             @foreach($accounts AS $account)
@@ -335,7 +335,7 @@
                 const $btn = $(this);
 
                 if (!bankCode || !$accountSelect.val()) {
-                    console.warn("Mohon pilih Partner Account dan Bank Penerima.");
+                    console.warn("Mohon pilih Owner Account dan Bank Penerima.");
                     controlFormState(1);
                     return;
                 }
