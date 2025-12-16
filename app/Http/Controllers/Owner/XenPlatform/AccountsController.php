@@ -335,6 +335,7 @@ class AccountsController extends Controller
 
     public function filter(Request $request, $tab)
     {
+        // dd($request->all());
         $accountId = $this->xenditAccountId;
         $account = $this->getProfile($accountId, $request);
 

@@ -370,7 +370,7 @@ class CashierTransactionController extends Controller
                     "amount" => $payment->paid_amount ?? 0,
                     "given_names" => $request->order_name ?? "unknow",
                     "description" => "Invoice QRIS",
-                    "invoice_duration" => 600,
+                    "invoice_duration" => 10,
                     "customer" => [
                         "given_names" => $request->order_name ?? "unknow",
                         "email" => "example@example.com",
@@ -503,6 +503,7 @@ class CashierTransactionController extends Controller
 
             // 3. Jika status masih UNPAID/PENDING, lanjutkan proses
             $booking_order->order_status = 'PROCESSED';
+            $booking_order->cashier_process_id = $cashier->id;
             $booking_order->save();
 
             foreach ($booking_order->order_details as $detail) {
@@ -516,6 +517,36 @@ class CashierTransactionController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['status' => 'error', 'message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function cancelProcessOrder($id)
+    {
+        $cashier = Auth::user();
+        $booking_order = BookingOrder::with('order_details')->findOrFail($id);
+        if ($booking_order->partner_id !== $cashier->partner_id) {
+            return redirect()->back()->with('error', 'Tidak bisa batalkan proses order toko lain!');
+        }
+
+        DB::beginTransaction();
+        try {
+
+            $booking_order->order_status = 'PAID';
+            $booking_order->cashier_process_id = null;
+            $booking_order->save();
+            foreach ($booking_order->order_details as $detail) {
+                $detail->status = '';
+                $detail->save();
+            }
+            DB::commit();
+
+            return response()->json(['status' => 'ok', 'message' => 'Process cancelled']);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            // kalau booking_order tidak ketemu
+            return response()->json(['status' => 'error', 'message' => 'Gagal Batalkan Proses Order']);
+        } catch (\Exception $e) {
+            // general error lainnya
+            return response()->json(['status' => 'error', 'message' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
 

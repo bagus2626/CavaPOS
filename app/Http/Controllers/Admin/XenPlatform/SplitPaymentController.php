@@ -185,7 +185,7 @@ class SplitPaymentController extends Controller
                 'split_rule_name.required' => 'Split rule name is required',
                 'split_rule_name.string' => 'Split rule name must be a string',
                 'split_rule_name.max' => 'Split rule name may not be greater than 255 characters',
-                'partner_account_id.required' => 'Partner account is required',
+                'partner_account_id.required' => 'Owner account is required',
                 'split_type_option.required' => 'Split type is required',
                 'split_type_option.in' => 'Split type must be FLAT or PERCENT',
                 'description.string' => 'Description must be a string',
@@ -250,7 +250,7 @@ class SplitPaymentController extends Controller
             if (!$subAccount) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Partner account not found'
+                    'message' => 'Owner account not found'
                 ], 404);
             }
 

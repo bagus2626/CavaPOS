@@ -69,9 +69,9 @@
   <div class="flex flex-col" id="menu-container">
     {{-- Segmen Hot Products --}}
     @if($hotProducts->count())
-        <div class="hot-products-group bg-amber-50 border-b border-amber-200 pb-2">
+        <div class="hot-products-group bg-choco border-b border-amber-200 pb-2">
             <p class="px-4 pt-3 mb-2 text-sm font-semibold text-amber-800 flex items-center gap-2">
-                🔥 <span>Hot Products</span>
+                🔥 <span class="text-white">Hot Products</span>
             </p>
 
             <div class="flex flex-col">
@@ -103,7 +103,7 @@
 
                     <div
                         @class([
-                            'menu-item menu-item-hot bg-white flex flex-row transition hover:shadow-lg border border-amber-100 rounded-xl px-3',
+                            'menu-item menu-item-hot bg-white flex flex-row transition hover:shadow-lg border border-amber-100 rounded-xl px-3 mx-3 my-1',
                             'grayscale' => $product->quantity_available < 1 && $product->always_available_flag === 0,
                         ])
                         data-category="{{ $product->category_id }}"
@@ -161,6 +161,7 @@
                             {{-- Tombol Qty (LINKED ke list biasa lewat data-id) --}}
                             <div class="mt-1 mb-2 flex items-center ml-auto space-x-4">
                                 <button
+                                    type="button"
                                     class="minus-btn w-8 h-8 flex items-center justify-center border border-choco rounded-lg font-bold text-choco hover:bg-gray-100 hidden"
                                     data-id="{{ $product->id }}"
                                 >-</button>
@@ -169,6 +170,7 @@
                                     <p class="text-gray-700 text-xs">Habis</p>
                                 @else
                                     <button
+                                        type="button"
                                         class="plus-btn w-8 h-8 flex items-center justify-center border rounded-lg font-bold text-white bg-choco hover:bg-soft-choco"
                                         data-id="{{ $product->id }}"
                                     >+</button>
@@ -186,7 +188,7 @@
       @if($products->count() > 0)
             @php
               $categoryName = $categories->firstWhere('id', $categoryId)->category_name ?? 'Uncategorized';
-              $productsOnCategory = App\Models\Partner\Products\PartnerProduct::where('category_id', $categoryId)->count();
+              $productsOnCategory = $products->count();
             @endphp
 
             <div class="category-group" data-category="{{ $categoryId }}">
@@ -254,6 +256,7 @@
 
                           <div class="mb-2 flex items-center ml-auto space-x-4">
                             <button
+                              type="button"
                               class="minus-btn w-9 h-9 flex items-center justify-center border border-choco rounded-lg font-bold text-choco hover:bg-gray-100 hidden"
                               data-id="{{ $product->id }}">-</button>
                             <span class="qty text-lg font-semibold text-gray-800 hidden" data-id="{{ $product->id }}">0</span>
@@ -262,6 +265,7 @@
                               <p class="text-gray-700">Habis</p>
                             @else
                               <button
+                                type="button"
                                 class="plus-btn w-9 h-9 flex items-center justify-center border rounded-lg font-bold text-white bg-choco hover:bg-soft-choco"
                                 data-id="{{ $product->id }}">+</button>
                             @endif
@@ -386,6 +390,8 @@
 
 <script>
 window.initPembelianTab = function initPembelianTab() {
+  if (window.__PEMBELIAN_INITED__) return;   // ✅ cegah double init
+  window.__PEMBELIAN_INITED__ = true;
   // ======== ELEMENTS (Modal Parent Options) ========
   const modal            = document.getElementById('parentOptionsModal');
   const modalContent     = document.getElementById('modalContent');
@@ -424,35 +430,59 @@ window.initPembelianTab = function initPembelianTab() {
   // ======== DATA ========
   const productsData = @json($productsData);
 
-  // ======== SCROLL LOCK ========
-  let __savedScrollY = 0;
-  let __prevScrollBehavior = '';
-  function lockBodyScroll() {
-    __savedScrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
-    const html = document.documentElement;
-    __prevScrollBehavior = html.style.scrollBehavior;
-    html.style.scrollBehavior = 'auto';
-    document.body.classList.add('modal-open');
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${__savedScrollY}px`;
-    document.body.style.left = '0';
-    document.body.style.right = '0';
-    document.body.style.width = '100%';
-  }
-  function unlockBodyScroll() {
-    const html = document.documentElement;
-    document.body.classList.remove('modal-open');
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.left = '';
-    document.body.style.right = '';
-    document.body.style.width = '';
-    requestAnimationFrame(() => {
-      window.scrollTo({ top: __savedScrollY || 0, left: 0, behavior: 'auto' });
-      requestAnimationFrame(() => { html.style.scrollBehavior = __prevScrollBehavior || ''; });
-    });
+  // ======== SCROLL LOCK MANAGER (ANTI MACET, ANTI LOMPAT) ========
+  const __SCROLLER = document.getElementById('pembelianScroll') || document.scrollingElement;
+
+  // simpan state global (biar aman kalau beberapa modal pakai lock)
+  let __LOCK_COUNT = 0;
+  let __savedScrollTop = 0;
+
+  let __savedBodyOverflow = '';
+  let __savedHtmlOverflow = '';
+  let __savedBodyPaddingRight = '';
+
+  function getScrollbarWidth() {
+    return window.innerWidth - document.documentElement.clientWidth;
   }
 
+  function lockBodyScroll() {
+    if (__LOCK_COUNT === 0) {
+      // simpan posisi scroll dari scroller aktif
+      __savedScrollTop = (__SCROLLER === document.scrollingElement)
+        ? (window.pageYOffset || document.documentElement.scrollTop || 0)
+        : (__SCROLLER.scrollTop || 0);
+
+      // simpan style awal
+      __savedBodyOverflow = document.body.style.overflow;
+      __savedHtmlOverflow = document.documentElement.style.overflow;
+      __savedBodyPaddingRight = document.body.style.paddingRight;
+
+      // kunci scroll
+      const sbw = getScrollbarWidth();
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden'; // ✅ penting (Safari/iOS/Chrome tertentu)
+      if (sbw > 0) document.body.style.paddingRight = `${sbw}px`;
+    }
+
+    __LOCK_COUNT++;
+  }
+
+  function unlockBodyScroll() {
+    __LOCK_COUNT = Math.max(0, __LOCK_COUNT - 1);
+    if (__LOCK_COUNT > 0) return; // masih ada modal lain yang membuka
+
+    // restore style
+    document.body.style.overflow = __savedBodyOverflow || '';
+    document.documentElement.style.overflow = __savedHtmlOverflow || '';
+    document.body.style.paddingRight = __savedBodyPaddingRight || '';
+
+    // restore posisi scroll
+    if (__SCROLLER === document.scrollingElement) {
+      window.scrollTo(0, __savedScrollTop || 0);
+    } else {
+      __SCROLLER.scrollTop = __savedScrollTop || 0;
+    }
+  }
 
   // ======== STATE ========
   let currentProductId = null;
@@ -494,22 +524,49 @@ window.initPembelianTab = function initPembelianTab() {
     row.lineTotal = row.unitPrice * row.qty;
   }
   function addToCart(productId, optionsArr, qty = 1, note = '') {
-    const key = keyOf(productId, optionsArr);
-    const pd  = getProductDataById(productId);
-    const promoId = pd.promotion?.id ?? null; // <— ambil id promo
+      const key = keyOf(productId, optionsArr);
+      const pd  = getProductDataById(productId);
+      const promoId = pd.promotion?.id ?? null;
 
-    if (!cart[key]) {
-      cart[key] = { productId, options: (optionsArr || []).slice(), qty: 0, unitPrice: 0, lineTotal: 0, note: '', promo_id: promoId };
-    } else if (cart[key].promo_id == null) {
-      cart[key].promo_id = promoId; // jaga-jaga
-    }
+      if (!cart[key]) {
+        cart[key] = { productId, options: (optionsArr || []).slice(), qty: 0, unitPrice: 0, lineTotal: 0, note: '', promo_id: promoId };
+      } else if (cart[key].promo_id == null) {
+        cart[key].promo_id = promoId;
+      }
 
-    cart[key].qty += qty;
-    if (note && note.trim().length > 0) cart[key].note = note.trim();
-    recomputeLineTotal(key);
-    lastKeyPerProduct[productId] = key;
-    updateFloatingCartBar();
-    return key;
+      // batas maksimal untuk kombinasi produk+opsi ini (dikurangi yang sudah ada di cart)
+      const cap = maxQtyForSelection(pd, optionsArr);
+      const existingLineQty = (cart[key]?.qty || 0);
+
+      // sisa qty yang masih boleh ditambah untuk LINE ini
+      const canAdd = Number.isFinite(cap) ? Math.max(0, cap - existingLineQty) : qty;
+
+      if (Number.isFinite(cap) && canAdd <= 0) {
+        Swal && Swal.fire({
+          toast:true, position:'top-end', timer:1800, showConfirmButton:false,
+          icon:'warning', title:'Stok tidak mencukupi'
+        });
+        return key;
+      }
+
+      const addQty = Number.isFinite(cap) ? Math.min(qty, canAdd) : qty;
+
+      if (addQty < qty) {
+        Swal && Swal.fire({
+          toast:true, position:'top-end', timer:2000, showConfirmButton:false,
+          icon:'info', title:`Qty disesuaikan (maks ${existingLineQty + addQty})`
+        });
+      }
+
+      // ✅ hanya tambah SEKALI
+      cart[key].qty += addQty;
+
+      if (note && note.trim().length > 0) cart[key].note = note.trim();
+      recomputeLineTotal(key);
+      lastKeyPerProduct[productId] = key;
+
+      updateFloatingCartBar();
+      return key;
   }
 
   function minusFromCart(productId, optionsArr) {
@@ -525,6 +582,56 @@ window.initPembelianTab = function initPembelianTab() {
     for (const k in cart) if (cart[k].productId === productId) total += cart[k].qty;
     return total;
   }
+
+  function sumQtyUsingOption(optionId) {
+    let total = 0;
+    for (const k in cart) {
+      const row = cart[k];
+      if (!row || row.qty <= 0) continue;
+      if ((row.options || []).includes(optionId)) total += row.qty;
+    }
+    return total;
+  }
+
+  function getOptionObj(productData, optId) {
+    for (const po of (productData.parent_options || [])) {
+      for (const opt of (po.options || [])) {
+        if (opt.id === optId) return opt;
+      }
+    }
+    return null;
+  }
+
+  // remaining stok produk (dikurangi qty di cart)
+  function remainingProductQty(productData) {
+    const always = Boolean(productData.always_available_flag);
+    if (always) return Number.POSITIVE_INFINITY;
+    const stock = Math.max(0, Math.floor(Number(productData.quantity_available) || 0));
+    const used  = sumQtyByProduct(productData.id);
+    return Math.max(0, stock - used);
+  }
+
+  // remaining stok option (dikurangi qty di cart)
+  function remainingOptionQty(productData, optId) {
+    const opt = getOptionObj(productData, optId);
+    if (!opt) return 0;
+    const always = Boolean(opt.always_available_flag);
+    if (always) return Number.POSITIVE_INFINITY;
+    const stock = Math.max(0, Math.floor(Number(opt.quantity_available) || 0));
+    const used  = sumQtyUsingOption(optId);
+    return Math.max(0, stock - used);
+  }
+
+  // batas maksimal qty untuk kombinasi produk+opsi tsb
+  function maxQtyForSelection(productData, optionIds) {
+    let cap = remainingProductQty(productData);
+    (optionIds || []).forEach(oid => {
+      cap = Math.min(cap, remainingOptionQty(productData, oid));
+    });
+    if (!Number.isFinite(cap)) cap = Number.POSITIVE_INFINITY;
+    return cap;
+  }
+
   function updateProductBadge(productId) {
       const qtySpans  = document.querySelectorAll('.qty[data-id="' + productId + '"]');
       const minusBtns = document.querySelectorAll('.minus-btn[data-id="' + productId + '"]');
@@ -727,12 +834,14 @@ window.initPembelianTab = function initPembelianTab() {
     const stockQty = Number(productData.quantity_available) || 0;
     const alwaysAvailable = Boolean(productData.always_available_flag);
 
+    const remainProd = remainingProductQty(productData);
+
     if (alwaysAvailable) {
       stockEl.innerHTML = '<span class="text-green-600">✓ Selalu Tersedia</span>';
-    } else if (stockQty > 10) {
-      stockEl.innerHTML = `<span class="text-green-600">Stok: ${stockQty}</span>`;
-    } else if (stockQty > 0) {
-      stockEl.innerHTML = `<span class="text-orange-600">⚠ Stok Terbatas: ${stockQty}</span>`;
+    } else if (remainProd > 5) {
+      stockEl.innerHTML = `<span class="text-green-600">Stok: ${remainProd}</span>`;
+    } else if (remainProd > 0) {
+      stockEl.innerHTML = `<span class="text-orange-600">⚠ Sisa: ${remainProd}</span>`;
     } else {
       stockEl.innerHTML = '<span class="text-red-600">✕ Stok Habis</span>';
     }
@@ -765,76 +874,90 @@ window.initPembelianTab = function initPembelianTab() {
       poDiv.appendChild(title);
 
       (po.options || []).forEach(opt => {
-        const label = document.createElement('label');
-        label.className = 'flex items-center gap-2 w-full py-1 pl-1';
+          const label = document.createElement('label');
+          label.className = 'flex items-center gap-2 w-full py-1 pl-1';
 
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.value = opt.id;
-        checkbox.className = 'h-5 w-5 rounded-md border border-gray-500 transition focus:outline-none focus:ring-2 disabled:opacity-60 disabled:cursor-not-allowed';
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.value = opt.id;
+          checkbox.className = 'h-5 w-5 rounded-md border border-gray-500 transition focus:outline-none focus:ring-2 disabled:opacity-60 disabled:cursor-not-allowed';
 
-        const nameSpan = document.createElement('span');
-        nameSpan.className = 'flex-1';
-        nameSpan.textContent = opt.name;
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'flex-1';
+          nameSpan.textContent = opt.name;
 
-        const priceSpan = document.createElement('span');
-        priceSpan.className = 'ml-auto text-sm font-medium';
+          const rightWrap = document.createElement('span');
+          rightWrap.className = 'ml-auto flex items-center gap-2';
 
-        const qty = Number(opt.quantity_available) || 0;
-        const alwaysAvailable = Boolean(opt.always_available_flag);
-        const priceNum = Number(opt.price) || 0;
+          const priceSpan = document.createElement('span');
+          priceSpan.className = 'text-sm font-medium';
 
-        if (qty < 1 && !alwaysAvailable) {
-          priceSpan.textContent = 'Habis';
-          priceSpan.classList.add('text-red-600');
-          checkbox.disabled = true;
-          label.classList.add('line-through', 'opacity-60', 'cursor-not-allowed');
-          const val = parseInt(checkbox.value, 10);
-          selectedOptions = selectedOptions.filter(v => v !== val);
-        } else {
-          priceSpan.textContent = (priceNum === 0) ? 'Free' : rupiahFmt.format(priceNum);
-          const val = parseInt(checkbox.value, 10);
-          checkbox.checked = selectedOptions.includes(val);
-          // checkbox.addEventListener('change', function() {
-          //   const v = parseInt(this.value, 10);
-          //   if (this.checked) {
-          //     if (!selectedOptions.includes(v)) selectedOptions.push(v);
-          //   } else {
-          //     selectedOptions = selectedOptions.filter(x => x !== v);
-          //   }
-          //   const pd = getProductDataById(currentProductId);
-          //   calcModalTotal(pd);
-          //   validateAllProvisions();
-          // });
-          checkbox.addEventListener('change', function () {
-              const group = poDiv; // grup ini
+          const stockBadge = document.createElement('span');
+          stockBadge.className = 'text-[11px] font-medium';
+
+          const optPrice = Number(opt.price) || 0;
+          const optAlways = Boolean(opt.always_available_flag);
+
+          // remaining option = stok option - qty option yg sudah dipakai di cart
+          const remainOpt = remainingOptionQty(productData, opt.id);
+
+          // tampil harga
+          priceSpan.textContent = (optPrice === 0) ? 'Free' : rupiahFmt.format(optPrice);
+
+          // logic stok option
+          if (!optAlways && remainOpt <= 0) {
+            stockBadge.textContent = 'Habis';
+            stockBadge.classList.add('text-red-600');
+
+            checkbox.disabled = true;
+            label.classList.add('line-through', 'opacity-60', 'cursor-not-allowed');
+          } else {
+            checkbox.disabled = false;
+
+            // badge stok kecil (<=5 kasih warning)
+            if (optAlways) {
+              stockBadge.textContent = '✓';
+              stockBadge.classList.add('text-green-600');
+            } else if (remainOpt <= 5) {
+              stockBadge.textContent = `⚠ ${remainOpt}`;
+              stockBadge.classList.add('text-orange-600');
+            } else {
+              stockBadge.textContent = `${remainOpt}`;
+              stockBadge.classList.add('text-gray-500');
+            }
+
+            // event: kalau centang option -> update cap qty produk+option
+            checkbox.addEventListener('change', function () {
+              const group = poDiv;
               const prov  = String(group.dataset.provision || '').toUpperCase();
               const val   = Number(group.dataset.value);
 
-              // Khusus EXACT 1: perilaku seperti radio (pindah pilihan)
               if (prov === 'EXACT' && val === 1 && this.checked) {
-                  group.querySelectorAll('input[type="checkbox"]').forEach(cb2 => {
-                      if (cb2 !== this) cb2.checked = false;
-                  });
+                group.querySelectorAll('input[type="checkbox"]').forEach(cb2 => {
+                  if (cb2 !== this) cb2.checked = false;
+                });
               }
 
-              // Sync selectedOptions dari semua checkbox yang tercentang
               selectedOptions = Array.from(
-                  modalContent.querySelectorAll('input[type="checkbox"]:checked')
+                modalContent.querySelectorAll('input[type="checkbox"]:checked')
               ).map(c => parseInt(c.value, 10));
 
               const pd = getProductDataById(currentProductId);
               calcModalTotal(pd);
               validateAllProvisions();
-          });
+              updateModalQtyDisplay(); // ✅ penting: cap berubah kalau option berubah
+            });
+          }
 
-        }
+          rightWrap.appendChild(priceSpan);
+          rightWrap.appendChild(stockBadge);
 
-        label.appendChild(checkbox);
-        label.appendChild(nameSpan);
-        label.appendChild(priceSpan);
-        poDiv.appendChild(label);
+          label.appendChild(checkbox);
+          label.appendChild(nameSpan);
+          label.appendChild(rightWrap);
+          poDiv.appendChild(label);
       });
+
 
       modalContent.appendChild(poDiv);
       // enforce
@@ -875,29 +998,43 @@ window.initPembelianTab = function initPembelianTab() {
     updateModalQtyDisplay(); // ← Dipanggil terakhir agar validasi stok berjalan
   }
 
- function updateModalQtyDisplay() {
+  function updateModalQtyDisplay() {
+      if (!modalQtyValue) return;
       modalQtyValue.innerText = modalQty;
       modalQtyMinus.disabled = modalQty <= 1;
-      
-      if (currentProductId) {
-        const pd = getProductDataById(currentProductId);
-        const stockInfo = document.getElementById('productStockInfo');
-        const stockQty = Number(pd.quantity_available) || 0;
-        const alwaysAvailable = Boolean(pd.always_available_flag);
-        
-        if (stockInfo && !alwaysAvailable) {
-          if (modalQty >= stockQty) {
-            stockInfo.innerHTML = `<span class="text-red-600">Stok: ${stockQty}</span>`;
-            modalQtyPlus.disabled = true;
-          } else {
-            stockInfo.innerHTML = `<span class="text-green-600">Stok: ${stockQty}</span>`;
-            modalQtyPlus.disabled = false;
-          }
-        } else if (alwaysAvailable) {
-          modalQtyPlus.disabled = false;
-        }
+
+      if (!currentProductId) return;
+
+      const pd = getProductDataById(currentProductId);
+      const cap = maxQtyForSelection(pd, selectedOptions); // ✅ stok produk & option yg dipilih
+      const stockInfo = document.getElementById('productStockInfo');
+
+      if (!Number.isFinite(cap)) {
+        // unlimited (selalu tersedia)
+        modalQtyPlus.disabled = false;
+        if (stockInfo) stockInfo.innerHTML = `<span class="text-green-600">✓ Selalu Tersedia</span>`;
+        return;
+      }
+
+      if (cap <= 0) {
+        modalQtyPlus.disabled = true;
+        if (stockInfo) stockInfo.innerHTML = `<span class="text-red-600">✕ Stok tidak cukup untuk pilihan ini</span>`;
+        return;
+      }
+
+      // jaga qty tidak melewati cap
+      if (modalQty > cap) modalQty = cap;
+      modalQtyValue.innerText = modalQty;
+
+      modalQtyPlus.disabled = modalQty >= cap;
+
+      // info cap
+      if (stockInfo) {
+        if (cap <= 5) stockInfo.innerHTML = `<span class="text-orange-600">⚠ Maksimum untuk pilihan ini: ${cap}</span>`;
+        else stockInfo.innerHTML = `<span class="text-green-600">Maksimum untuk pilihan ini: ${cap}</span>`;
       }
   }
+
 
   modalQtyMinus.addEventListener('click', () => {
     if (modalQty > 1) {
@@ -924,10 +1061,27 @@ window.initPembelianTab = function initPembelianTab() {
   });
 
   // CLOSE modal
-  closeModalBtn.addEventListener('click', () => {
+  // ===== CLOSE Parent Options Modal (rapi + pasti unlock) =====
+  function closeParentModal() {
     modal.classList.remove('show');
-    setTimeout(() => { modal.classList.add('hidden'); unlockBodyScroll(); }, 300);
+
+    setTimeout(() => {
+      modal.classList.add('hidden');
+
+      // ✅ paksa unlock sampai habis (kalau lockBodyScroll kepanggil dobel)
+      while (__LOCK_COUNT > 0) unlockBodyScroll();
+
+      // ✅ safety net (kalau ada yang nyangkut dari library lain)
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      document.body.style.paddingRight = '';
+    }, 300);
+  }
+  closeModalBtn.addEventListener('click', closeParentModal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeParentModal();
   });
+
 
   // SAVE modal (SATU handler saja)
   saveModalBtn.addEventListener('click', function () {
@@ -1040,6 +1194,20 @@ window.initPembelianTab = function initPembelianTab() {
       const opts = r.optNames.length ? `<p class="text-xs text-gray-500 line-clamp-1">${r.optNames.join(', ')}</p>` : '';
       const note = r.note ? `<p class="text-xs text-gray-600 mt-1 italic line-clamp-2">Catatan: ${r.note}</p>` : '';
       const img  = r.image ? `<img src="${r.image}" class="w-16 h-16 rounded-md object-cover flex-shrink-0" alt="">` : '';
+      const pdLine = getProductDataById(r.productId);
+      const capLine = maxQtyForSelection(pdLine, r.options); // batas maksimum line ini
+      const remainLine = Number.isFinite(capLine) ? Math.max(0, capLine - r.qty) : Number.POSITIVE_INFINITY;
+
+      const stockHint = Number.isFinite(remainLine)
+        ? (remainLine <= 0
+            ? `<span class="text-xs text-red-600">Stok habis untuk pilihan ini</span>`
+            : (remainLine <= 5
+                ? `<span class="text-xs text-orange-600">⚠ Sisa ${remainLine} lagi untuk pilihan ini</span>`
+                : `<span class="text-xs text-gray-500">Sisa ${remainLine}</span>`
+              )
+          )
+        : `<span class="text-xs text-green-600">✓ Selalu tersedia</span>`;
+
       return `
         <div class="p-3 flex items-center gap-3" data-key="${r.key}" data-product-id="${r.productId}">
           ${img}
@@ -1048,11 +1216,13 @@ window.initPembelianTab = function initPembelianTab() {
             ${opts}
             ${note}
             <p class="text-xs text-gray-400 mt-0.5">Harga: ${rupiahFmt.format(r.unit)}</p>
+            <div class="mt-1">${stockHint}</div>
           </div>
           <div class="flex items-center gap-2">
             <button class="cm-minus w-8 h-8 flex items-center justify-center border rounded-lg">-</button>
             <span class="cm-qty w-6 text-center font-semibold">${r.qty}</span>
-            <button class="cm-plus w-8 h-8 flex items-center justify-center border rounded-lg bg-choco text-white">+</button>
+            <button class="cm-plus w-8 h-8 flex items-center justify-center border rounded-lg bg-choco text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              ${Number.isFinite(remainLine) && remainLine <= 0 ? 'disabled' : ''}>+</button>
           </div>
           <div class="ml-3 text-right">
             <p class="text-sm font-bold">${rupiahFmt.format(r.line)}</p>
@@ -1077,7 +1247,15 @@ window.initPembelianTab = function initPembelianTab() {
     if (!plusBtn && !minusBtn) return;
     const rowEl = e.target.closest('[data-key]'); if (!rowEl) return;
     const key = rowEl.getAttribute('data-key'); const row = cart[key]; if (!row) return;
-    if (plusBtn) addToCart(row.productId, row.options);
+    if (plusBtn) {
+      const pd = getProductDataById(row.productId);
+      const cap = maxQtyForSelection(pd, row.options);
+      if (Number.isFinite(cap) && row.qty >= cap) {
+        Swal && Swal.fire({ toast:true, position:'top-end', timer:1800, showConfirmButton:false, icon:'warning', title:'Stok tidak mencukupi' });
+      } else {
+        addToCart(row.productId, row.options);
+      }
+    }
     else if (minusBtn) minusFromCart(row.productId, row.options);
     updateProductBadge(row.productId); updateFloatingCartBar(); renderCartManager();
   });
@@ -1407,6 +1585,8 @@ window.initPembelianTab = function initPembelianTab() {
     const filterButtons  = document.querySelectorAll('.filter-btn');
     const categoryGroups = document.querySelectorAll('.category-group');
     const items          = document.querySelectorAll('.menu-item');
+    const hotGroup = document.querySelector('.hot-products-group');
+    const hotItems = document.querySelectorAll('.menu-item-hot');
 
     const searchInput = document.getElementById('menuSearch');
     const searchClear = document.getElementById('menuSearchClear');
@@ -1448,6 +1628,15 @@ window.initPembelianTab = function initPembelianTab() {
         item.style.display = show ? 'flex' : 'none';
         if (show) anyShown = true;
       });
+
+      if (hotGroup) {
+        let hotShown = 0;
+        hotItems.forEach(item => {
+          // menu-item-hot juga sudah ikut di-set display oleh items.forEach
+          if (item.style.display !== 'none') hotShown++;
+        });
+        hotGroup.style.display = (hotShown > 0) ? 'block' : 'none';
+      }
 
       // group heading: tampil kalau minimal satu item di group yang lolos
       categoryGroups.forEach(group => {

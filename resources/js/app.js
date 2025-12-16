@@ -3,10 +3,13 @@ window.$ = $;
 window.jQuery = $;
 
 import "./bootstrap";
-import "./echo";
 import Alpine from "alpinejs";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
+window.Html5Qrcode = Html5Qrcode;
+window.Html5QrcodeSupportedFormats = Html5QrcodeSupportedFormats;
+
 
 AOS.init({
     once: true, // animasi hanya jalan sekali

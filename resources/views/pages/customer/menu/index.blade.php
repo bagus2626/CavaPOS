@@ -203,10 +203,7 @@
                         @php
                             $categoryName =
                                 $categories->firstWhere('id', $categoryId)->category_name ?? 'Uncategorized';
-                            $productsOnCategory = App\Models\Partner\Products\PartnerProduct::where(
-                                'category_id',
-                                $categoryId,
-                            )->count();
+                            $productsOnCategory = $products->count();
                         @endphp
 
                         <div class="category-group" data-category="{{ $categoryId }}">
@@ -707,6 +704,40 @@
                     return total;
                 }
 
+                // total qty di cart yang menggunakan option tertentu (untuk produk tertentu)
+                function sumQtyByOption(productId, optId) {
+                    let total = 0;
+                    for (const k in cart) {
+                        const row = cart[k];
+                        if (!row) continue;
+                        if (row.productId === productId && (row.options || []).includes(optId)) {
+                        total += row.qty || 0;
+                        }
+                    }
+                    return total;
+                }
+
+                // remaining stok produk setelah dikurangi cart
+                function remainingProductStock(productData) {
+                    const stock = Math.max(0, Math.floor(Number(productData.quantity_available) || 0));
+                    const always = Boolean(productData.always_available_flag);
+                    if (always) return Number.POSITIVE_INFINITY;
+
+                    const used = sumQtyByProduct(productData.id);
+                    return Math.max(0, stock - used);
+                }
+
+                // remaining stok option setelah dikurangi cart
+                function remainingOptionStock(productData, opt) {
+                    const alwaysOpt = (opt.always_available_flag === 1 || opt.always_available_flag === true);
+                    if (alwaysOpt) return Number.POSITIVE_INFINITY;
+
+                    const stock = Math.max(0, Math.floor(Number(opt.quantity_available) || 0));
+                    const used  = sumQtyByOption(productData.id, opt.id);
+                    return Math.max(0, stock - used);
+                }
+
+
                 // Update badge qty + visibility tombol minus di kartu produk
                 function updateProductBadge(productId) {
                     const qtySpans  = document.querySelectorAll('.qty[data-id="' + productId + '"]');
@@ -857,38 +888,46 @@
                             const priceSpan = document.createElement('span');
                             priceSpan.classList.add('ml-auto', 'text-sm', 'font-medium');
 
-                            const qty = Number(opt.quantity_available) || 0;
-                            const alwaysAvailable = opt.always_available_flag === 1;
+                            const remOpt = remainingOptionStock(productData, opt);
+                            const alwaysAvailable = (opt.always_available_flag === 1 || opt.always_available_flag === true);
                             const priceNum = Number(opt.price) || 0;
 
-                            if (qty < 1 && !alwaysAvailable) {
+                            if (!alwaysAvailable && remOpt < 1) {
                                 priceSpan.textContent = '{{ __('messages.customer.menu.sold') }}';
                                 priceSpan.classList.add('text-red-600');
                                 checkbox.disabled = true;
-                                checkbox.disabled = true;
                                 checkbox.checked = false;
-                                checkbox.dataset.sold = '1'; 
+                                checkbox.dataset.sold = '1';
                                 label.classList.add('line-through', 'opacity-60', 'cursor-not-allowed');
+
                                 const val = parseInt(checkbox.value, 10);
                                 selectedOptions = selectedOptions.filter(v => v !== val);
                             } else {
-                                priceSpan.textContent = (priceNum === 0) ?
-                                    '{{ __('messages.customer.menu.free') }}' : rupiahFmt.format(
-                                        priceNum);
+                                priceSpan.textContent = (priceNum === 0)
+                                    ? '{{ __('messages.customer.menu.free') }}'
+                                    : rupiahFmt.format(priceNum);
+
+                                // (opsional) tampilkan sisa stok option kecil
+                                if (!alwaysAvailable && remOpt <= 5) {
+                                    // tambahkan info kecil, biar user sadar
+                                    priceSpan.textContent += ` (sisa ${remOpt})`;
+                                }
+
                                 const val = parseInt(checkbox.value, 10);
                                 checkbox.checked = selectedOptions.includes(val);
+
                                 checkbox.addEventListener('change', function() {
                                     const v = parseInt(this.value, 10);
                                     if (this.checked) {
-                                        if (!selectedOptions.includes(v)) selectedOptions.push(v);
+                                    if (!selectedOptions.includes(v)) selectedOptions.push(v);
                                     } else {
-                                        selectedOptions = selectedOptions.filter(x => x !== v);
+                                    selectedOptions = selectedOptions.filter(x => x !== v);
                                     }
-                                    // ← TAMBAHAN: Hitung ulang total saat opsi berubah
                                     const pd = productsData.find(p => p.id === currentProductId);
-                                    if (pd) calcModalTotal(pd);
+                                    if (pd) syncModalQtyAndStock(pd);
                                 });
                             }
+
 
                             label.appendChild(checkbox);
                             label.appendChild(nameSpan);
@@ -900,7 +939,7 @@
 
                         // enforce UX rules for this parent group
                         enforceProvision(poDiv, po.provision, po.provision_value);
-                        calcModalTotal(productData); // hitung pertama kali
+                        // calcModalTotal(productData); // hitung pertama kali
                     });
 
                     // === Catatan (textarea) ===
@@ -939,7 +978,7 @@
                     modal.classList.remove('hidden');
                     
                     // ← TAMBAHAN: Panggil updateModalQtyDisplay() di akhir agar validasi stok berjalan
-                    updateModalQtyDisplay();
+                    syncModalQtyAndStock(productData);
                 }
 
                 // ===== UI qty di modal =====
@@ -959,10 +998,10 @@
                         
                         if (stockInfo && !alwaysAvailable) {
                         if (modalQty >= stockQty) {
-                            stockInfo.innerHTML = `<span class="text-red-600">Stok: ${stockQty}</span>`;
+                            stockInfo.innerHTML = `<span class="text-red-600">{{ __('messages.customer.menu.stock') }}: ${stockQty}</span>`;
                             modalQtyPlus.disabled = true;
                         } else {
-                            stockInfo.innerHTML = `<span class="text-green-600">Stok: ${stockQty}</span>`;
+                            stockInfo.innerHTML = `<span class="text-green-600">{{ __('messages.customer.menu.stock') }}: ${stockQty}</span>`;
                             modalQtyPlus.disabled = false;
                         }
                         } else if (alwaysAvailable) {
@@ -974,13 +1013,9 @@
                 modalQtyMinus.addEventListener('click', () => {
                     if (modalQty > 1) {
                         modalQty--;
-                        updateModalQtyDisplay();
-                        if (currentProductId) {
-                            const pd = productsData.find(p => p.id === currentProductId);
-                            calcModalTotal(pd);
-                        }
+                        const pd = getProductDataById(currentProductId);
+                        if (pd) syncModalQtyAndStock(pd);
                     } else {
-                        // qty = 1 dan user klik "-", anggap batal → tutup modal
                         closeOptionsModal();
                     }
                 });
@@ -990,20 +1025,17 @@
                     const pd = getProductDataById(currentProductId);
                     if (!pd) return;
 
-                    const productStock = Number(pd.quantity_available) || 0;
-                    const alwaysAvailable = Boolean(pd.always_available_flag);
-                    
-                    // ===== TAMBAHAN: Validasi Stok =====
-                    if (!alwaysAvailable && modalQty >= productStock) {
-                        // Jangan tambah qty jika sudah mencapai stok maksimal
+                    const maxAllowed = computeMaxQtyAllowed(pd);
+                    const attemptedQty = modalQty + 1;
+
+                    if (maxAllowed !== Number.POSITIVE_INFINITY && attemptedQty > maxAllowed) {
+                        renderOptionStockWarnings(pd); // <-- pakai attemptedQty
                         return;
                     }
 
-                    modalQty++; 
-                    updateModalQtyDisplay();
-                    calcModalTotal(pd);
+                    modalQty++;
+                    syncModalQtyAndStock(pd);
                 });
-
 
                 // SAVE (modal): simpan sebagai line item per kombinasi opsi
                 saveModalBtn.addEventListener('click', function() {
@@ -1125,7 +1157,7 @@
                         selectedOptions = [];
                         modalQty = 1;
                         modalNote = '';
-                        updateModalQtyDisplay();
+                        // updateModalQtyDisplay();
                     }, 300);
                 }
 
@@ -1142,7 +1174,10 @@
                         function updateStateRadio(changedCb = null) {
                             if (changedCb && changedCb.checked) {
                                 checkboxes.forEach(cb => {
-                                    if (cb !== changedCb) cb.checked = false;
+                                    if (cb !== changedCb && cb.checked) {
+                                    cb.checked = false;
+                                    cb.dispatchEvent(new Event('change', { bubbles: true }));
+                                    }
                                 });
                             }
 
@@ -1154,11 +1189,12 @@
 
                             if (currentProductId) {
                                 const pd = productsData.find(p => p.id === currentProductId);
-                                if (pd) calcModalTotal(pd);
+                                if (pd) syncModalQtyAndStock(pd);   // ✅ PENTING: refresh maxAllowed + tombol +
                             }
 
                             validateAllProvisions();
                         }
+
 
                         checkboxes.forEach(cb => {
                             cb.disabled = false;
@@ -1415,14 +1451,28 @@
 
                     if (rows.length === 0) {
                         cartManagerBody.innerHTML = `
-                    <div class="p-6 text-center text-gray-500">
-                        Keranjang masih kosong.
-                    </div>`;
+                        <div class="p-6 text-center text-gray-500">
+                            {{ ('__messages.customer.menu.cart_empty') }}
+                        </div>`;
                         cartManagerTotal.textContent = rupiahFmt.format(0);
                         return;
                     }
 
                     cartManagerBody.innerHTML = rows.map(r => {
+                        const pd = getProductDataById(r.productId);
+                        const remainingAdd = computeMaxQtyAllowedForLine(pd, r.options);
+                        const reachedMax = (remainingAdd !== Number.POSITIVE_INFINITY) && (remainingAdd < 1);
+
+                        let limitInfo = '';
+                        if (remainingAdd !== Number.POSITIVE_INFINITY) {
+                            const limiters = getLimiterLabelsForLine(pd, r.options, remainingAdd);
+                            const who = limiters.length ? limiters.join(', ') : (pd.name || 'Item');
+
+                            limitInfo = `<p class="text-xs ${reachedMax ? 'text-red-600' : 'text-gray-500'} mt-0.5">
+                                ${reachedMax ? `{{ __("messages.customer.menu.cannot_add_stock", ["item" => '${who}']) }}` : `{{ __("messages.customer.menu.remaining_can_add", ["item" => '${who}', "qty" => '${remainingAdd}']) }}`}
+                                </p>`;
+                        }
+
                         const optsText = r.optNames.length ?
                             `<p class="text-xs text-gray-500 line-clamp-1">${r.optNames.join(', ')}</p>` : '';
                         const noteText = r.note ?
@@ -1441,16 +1491,19 @@
                             <div class="p-3 flex items-center gap-3" data-key="${r.key}" data-product-id="${r.productId}">
                             ${img}
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-semibold text-gray-800 line-clamp-1">${r.productName}fdads</p>
+                                <p class="text-sm font-semibold text-gray-800 line-clamp-1">${r.productName}</p>
                                 ${descText}
                                 ${optsText}
                                 ${noteText}
+                                ${limitInfo}
                                 <p class="text-xs text-gray-400 mt-0.5">Harga: ${rupiahFmt.format(r.unit)}</p>
                             </div>
                             <div class="flex items-center gap-2">
                                 <button class="cm-minus w-8 h-8 flex items-center justify-center border rounded-lg">-</button>
                                 <span class="cm-qty w-6 text-center font-semibold">${r.qty}</span>
-                                <button class="cm-plus w-8 h-8 flex items-center justify-center border rounded-lg bg-choco text-white">+</button>
+                                <button class="cm-plus w-8 h-8 flex items-center justify-center border rounded-lg bg-choco text-white
+                                    disabled:opacity-50 disabled:cursor-not-allowed"
+                                    ${reachedMax ? 'disabled' : ''}>+</button>
                             </div>
                             <div class="ml-3 text-right">
                                 <p class="text-sm font-bold">${rupiahFmt.format(r.line)}</p>
@@ -1480,7 +1533,25 @@
                     if (!row) return;
 
                     if (plusBtn) {
-                        addToCart(row.productId, row.options); // tambah 1
+                        const pd = getProductDataById(row.productId);
+                        const maxAllowed = computeMaxQtyAllowedForLine(pd, row.options);
+
+                        // Kalau qty saat ini sudah >= maxAllowed -> mentok
+                        const remainingAdd = computeMaxQtyAllowedForLine(pd, row.options);
+
+                        if (remainingAdd !== Number.POSITIVE_INFINITY && remainingAdd < 1) {
+                            const limiters = getLimiterLabelsForLine(pd, row.options, remainingAdd);
+                            const who = limiters.length ? limiters.join(', ') : (pd.name || 'Item');
+
+                            Swal.fire({
+                                icon: 'warning',
+                                title: '{{ __("messages.customer.menu.stock_max_reached_title") }}',
+                                text: `{{ __("messages.customer.menu.stock_max_reached_text", ["item" => '${who}']) }}`,
+                            });
+                            return;
+                        }
+
+                        addToCart(row.productId, row.options); // aman tambah
                     } else if (minusBtn) {
                         minusFromCart(row.productId, row.options); // kurang 1
                     }
@@ -1722,7 +1793,7 @@
                     // ===== VALIDASI STOK REAL-TIME =====
                     checkoutPayBtn.disabled = true;
                     Swal.fire({ 
-                        title:'Memeriksa ketersediaan stok…', 
+                        title:'{{ __('messages.customer.menu.checking_stock') }}', 
                         allowOutsideClick:false, 
                         didOpen:() => Swal.showLoading() 
                     });
@@ -1755,15 +1826,15 @@
                             
                             const result = await Swal.fire({
                                 icon: 'error',
-                                title: 'Stok Tidak Mencukupi',
+                                title: '{{ __('messages.customer.menu.stock_not_enough_title') }}',
                                 html: `
                                     <div class="text-center">
-                                        <p class="mt-3 text-sm text-gray-600">Silakan refresh halaman untuk melihat stok terbaru.</p>
+                                        <p class="mt-3 text-sm text-gray-600">{{ __('messages.customer.menu.please_refresh_page_for_qty') }}</p>
                                     </div>
                                 `,
                                 showCancelButton: true,
-                                confirmButtonText: 'Refresh Halaman',
-                                cancelButtonText: 'Batal',
+                                confirmButtonText: '{{ __('messages.customer.menu.refresh_page') }}',
+                                cancelButtonText: '{{ __('messages.customer.menu.cancel') }}',
                                 confirmButtonColor: '#3085d6',
                             });
                             
@@ -1784,7 +1855,7 @@
                     // Konfirmasi ringkas
                     const confirm = await Swal.fire({
                         icon: 'question',
-                        title: 'Konfirmasi Checkout',
+                        title: '{{ __('messages.customer.menu.checkout_confirmation') }}',
                         html: `
                 <div style="text-align:left">
                     <div>{{ __('messages.customer.menu.nama_pemesan') }}: <b>${orderName}</b></div>
@@ -1817,7 +1888,7 @@
                     // Loading
                     checkoutPayBtn.disabled = true;
                     Swal.fire({
-                        title: 'Memproses pembayaran…',
+                        title: '{{ __('messages.customer.menu.processing_payment') }}',
                         allowOutsideClick: false,
                         didOpen: () => Swal.showLoading()
                     });
@@ -1993,7 +2064,7 @@
                     if (Array.isArray(msgs) && msgs.length > 0 && window.Swal) {
                         Swal.fire({
                             icon: 'info',
-                            title: 'Pesan lagi dimuat',
+                            title: '{{ __('messages.customer.menu.reorder_loading') }}',
                             html: `<div style="text-align:left;font-size:13px;">
                                 <p class="mb-1">{{ __('messages.customer.menu.reorder_information') }}</p>
                                 <ul class="mt-2 list-disc pl-5 space-y-1">
@@ -2012,6 +2083,234 @@
                     }
                 })();
 
+                function getSelectedOptionObjects(productData) {
+                    const chosen = new Set((selectedOptions || []).map(Number));
+                    const opts = [];
+
+                    (productData.parent_options || []).forEach(po => {
+                        (po.options || []).forEach(opt => {
+                        if (chosen.has(Number(opt.id))) opts.push(opt);
+                        });
+                    });
+
+                    return opts;
+                    }
+
+                    function computeMaxQtyAllowed(productData) {
+                        const maxByProduct = remainingProductStock(productData);
+
+                        let maxByOptions = Number.POSITIVE_INFINITY;
+                        const selectedOptObjs = getSelectedOptionObjects(productData);
+
+                        selectedOptObjs.forEach(opt => {
+                            const remOpt = remainingOptionStock(productData, opt);
+                            maxByOptions = Math.min(maxByOptions, remOpt);
+                        });
+
+                        const maxAllowed = Math.min(maxByProduct, maxByOptions);
+                        return Number.isFinite(maxAllowed) ? maxAllowed : Number.POSITIVE_INFINITY;
+                    }
+
+                    function computeMaxQtyAllowedForLine(productData, optionsArr) {
+                        const maxByProduct = remainingProductStock(productData);
+
+                        let maxByOptions = Number.POSITIVE_INFINITY;
+                        const chosen = new Set((optionsArr || []).map(Number));
+
+                        (productData.parent_options || []).forEach(po => {
+                            (po.options || []).forEach(opt => {
+                            if (chosen.has(Number(opt.id))) {
+                                const remOpt = remainingOptionStock(productData, opt);
+                                maxByOptions = Math.min(maxByOptions, remOpt);
+                            }
+                            });
+                        });
+
+                        const maxAllowed = Math.min(maxByProduct, maxByOptions);
+                        return Number.isFinite(maxAllowed) ? maxAllowed : Number.POSITIVE_INFINITY;
+                    }
+
+                    function getLimiterLabelsForLine(productData, optionsArr, maxAllowed) {
+                        const labels = [];
+
+                        const alwaysProduct = Boolean(productData.always_available_flag);
+                        const remProduct    = remainingProductStock(productData); // ✅
+
+                        if (!alwaysProduct && remProduct === maxAllowed) {
+                            labels.push(`${productData.name || 'Produk'} (stok produk)`);
+                        }
+
+                        const chosen = new Set((optionsArr || []).map(Number));
+                        (productData.parent_options || []).forEach(po => {
+                            (po.options || []).forEach(opt => {
+                            if (!chosen.has(Number(opt.id))) return;
+
+                            const alwaysOpt = (opt.always_available_flag === 1 || opt.always_available_flag === true);
+                            if (alwaysOpt) return;
+
+                            const remOpt = remainingOptionStock(productData, opt); // ✅
+                            if (remOpt === maxAllowed) labels.push(`${opt.name || 'Option'} (stok opsi)`);
+                            });
+                        });
+
+                        return [...new Set(labels)];
+                    }
+
+                    function getLimiterLabels(productData, maxAllowed) {
+                        const labels = [];
+
+                        const alwaysProduct = Boolean(productData.always_available_flag);
+                        const remProduct    = remainingProductStock(productData); // ✅ sisa setelah cart
+
+                        if (!alwaysProduct && remProduct === maxAllowed) {
+                            labels.push(`${productData.name || 'Produk'} (stok produk)`);
+                        }
+
+                        const selectedOptObjs = getSelectedOptionObjects(productData);
+                        selectedOptObjs.forEach(opt => {
+                            const alwaysOpt = (opt.always_available_flag === 1 || opt.always_available_flag === true);
+                            if (alwaysOpt) return;
+
+                            const remOpt = remainingOptionStock(productData, opt); // ✅ sisa setelah cart
+                            if (remOpt === maxAllowed) labels.push(`${opt.name || 'Option'} (stok opsi)`);
+                        });
+
+                        return [...new Set(labels)];
+                    }
+
+                    function renderOptionStockWarnings(productData, desiredQty = modalQty) {
+                        const el = document.getElementById('optionStockWarnings');
+                        if (!el) return;
+
+                        el.innerHTML = '';
+
+                        const selectedOptObjs = getSelectedOptionObjects(productData);
+                        if (!selectedOptObjs.length) return;
+
+                        selectedOptObjs.forEach(opt => {
+                            const alwaysOpt = (opt.always_available_flag === 1 || opt.always_available_flag === true);
+                            if (alwaysOpt) return;
+
+                            const optStock = remainingOptionStock(productData, opt);
+
+                            // ✅ tampilkan jika stok opsi tinggal 5 ke bawah
+                            if (optStock > 0 && optStock <= 5) {
+                                const div = document.createElement('div');
+
+                                // kalau user minta qty melebihi stok opsi -> merah, kalau tidak -> orange (low stock)
+                                div.className = (desiredQty > optStock)
+                                    ? 'text-red-600 font-medium'
+                                    : 'text-orange-600 font-medium';
+
+                                div.textContent =
+                                    (desiredQty > optStock)
+                                        ? `Pilihan "${opt.name}" hanya tersisa ${optStock}`
+                                        : `Pilihan "${opt.name}" hanya tersisa ${optStock}`;
+
+                                el.appendChild(div);
+                            }
+
+                        });
+                    }
+
+
+
+                    /**
+                     * ✅ SATU PINTU: sinkron qty + stok + warning + tombol + + total
+                     */
+                    function syncModalQtyAndStock(productData) {
+                        if (!productData) return;
+
+                        // 1) hitung batas qty maksimal berdasarkan stok product & opsi terpilih
+                        const maxAllowed = computeMaxQtyAllowed(productData);
+
+                        const warnEl = document.getElementById('optionStockWarnings');
+                        if (warnEl) {
+                            const remP = remainingProductStock(productData);
+                            const selectedOptObjs = getSelectedOptionObjects(productData);
+
+                            const optsInfo = selectedOptObjs
+                                .map(opt => {
+                                const remO = remainingOptionStock(productData, opt);
+                                return `• ${opt.name}: sisa ${remO}`;
+                                })
+                                .join('<br>');
+
+                            warnEl.innerHTML = `
+                                <div class="text-gray-600">
+                                <div>Stok produk tersisa: <b>${remP === Number.POSITIVE_INFINITY ? '∞' : remP}</b></div>
+                                ${optsInfo ? `<div class="mt-1">${optsInfo}</div>` : ''}
+                                </div>
+                            ` + warnEl.innerHTML; // biar pesan merah "maks" tetap ada
+                        }
+
+                        // 2) kalau modalQty melebihi batas, clamp
+                        if (maxAllowed !== Number.POSITIVE_INFINITY) {
+                            if (maxAllowed < 1) {
+                            modalQty = 1; // tetap minimal 1, tapi tombol + akan mati
+                            } else if (modalQty > maxAllowed) {
+                            modalQty = maxAllowed;
+                            }
+                        }
+                        if (modalQty < 1) modalQty = 1;
+
+                        // 3) update angka qty
+                        if (modalQtyValue) modalQtyValue.innerText = modalQty;
+
+                        // 4) update info stok produk (opsional, pakai elemen yang sudah kamu buat)
+                        const stockInfo = document.getElementById('productStockInfo');
+                        const stockQty = remainingProductStock(productData);
+                        const alwaysAvailable = Boolean(productData.always_available_flag);
+
+                        if (stockInfo) {
+                            if (alwaysAvailable) {
+                            stockInfo.innerHTML = '<span class="text-green-600">✓ {{ __("messages.customer.menu.always_available") }}</span>';
+                            } else if (stockQty > 10) {
+                            stockInfo.innerHTML = `<span class="text-green-600">{{ __("messages.customer.menu.stock") }}: ${stockQty}</span>`;
+                            } else if (stockQty > 0) {
+                            stockInfo.innerHTML = `<span class="text-orange-600">⚠ {{ __("messages.customer.menu.limited_stock") }}: ${stockQty}</span>`;
+                            } else {
+                            stockInfo.innerHTML = '<span class="text-red-600">✕ {{ __("messages.customer.menu.sold") }}</span>';
+                            }
+                        }
+
+                        // 5) disable/enable tombol plus berdasarkan maxAllowed
+                        if (modalQtyPlus) {
+                            if (maxAllowed === Number.POSITIVE_INFINITY) {
+                            modalQtyPlus.disabled = false;
+                            } else {
+                            modalQtyPlus.disabled = (modalQty >= maxAllowed) || (maxAllowed < 1);
+                            }
+                        }
+
+                        renderOptionStockWarnings(productData, modalQty);
+
+                            if (warnEl) {
+                            warnEl.dataset.maxReached = '0';
+
+                            // Hapus pesan max sebelumnya biar tidak numpuk
+                            warnEl.querySelectorAll('[data-max-msg="1"]').forEach(n => n.remove());
+
+                            if (maxAllowed !== Number.POSITIVE_INFINITY && maxAllowed > 0 && modalQty >= maxAllowed) {
+                                warnEl.dataset.maxReached = '1';
+
+                                const limiters = getLimiterLabels(productData, maxAllowed);
+                                const who = limiters.length ? limiters.join(', ') : 'Item';
+
+                                const maxMsg = document.createElement('div');
+                                maxMsg.dataset.maxMsg = '1';
+                                maxMsg.className = 'text-red-600 font-medium';
+                                maxMsg.textContent = `"${who}" telah mencapai stok maksimum (${maxAllowed})`;
+                                warnEl.prepend(maxMsg);
+                            }
+                        }
+
+
+                        // 6) tampilkan warning opsi yang tidak cukup
+                        
+                        // 7) hitung ulang total harga modal
+                        calcModalTotal(productData);
+                    }
             });
         </script>
 
@@ -2105,6 +2404,13 @@
                             group.style.display = hasVisible ? 'block' : 'none';
                         }
                     });
+
+                    const hotGroup = document.querySelector('.hot-products-group');
+                    if (hotGroup) {
+                        const hotItems = hotGroup.querySelectorAll('.menu-item'); // menu-item-hot juga masuk
+                        const hasVisibleHot = Array.from(hotItems).some(it => it.style.display !== 'none');
+                        hotGroup.style.display = hasVisibleHot ? 'block' : 'none';
+                    }
 
                     // banner & tombol clear
                     ensureNoResultBanner(!anyShown, nq);

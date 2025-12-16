@@ -159,6 +159,24 @@ return [
             'qty_reduced' => 'The quantity of ":name" was reduced from :from to :to based on the remaining stock of the product and selected options.',
             'order_not_found' => 'The selected order cannot be reloaded.',
             'understand' => 'I Understand',
+            'stock' => 'Stock',
+            'limited_stock' => 'Limited stock',
+            'stock_max_reached_title' => 'Maximum stock reached',
+            'stock_max_reached_text'  => ':item has reached the stock limit and cannot be increased.',
+            'cannot_add_stock' => 'Cannot add more (limited by :item)',
+            'remaining_can_add' => 'Remaining addable: :qty (limited by :item)',
+            'cart_empty' => 'Your cart is empty.',
+            'checking_stock' => 'Checking stock availability…',
+
+            'stock_not_enough_title' => 'Insufficient stock',
+            'refresh_page' => 'Refresh page',
+            'cancel' => 'Cancel',
+            'please_refresh_page_for_qty' => 'Please refresh the page to see the latest stock.',
+            'checkout_confirmation' => 'Checkout confirmation',
+            'processing_payment' => 'Processing payment…',
+            'reorder_loading' => 'Reorder is being loaded',
+
+
         ],
         'payment' => [
             'show_order_code' => 'Show Order Code',
@@ -1116,12 +1134,13 @@ return [
                 'back' => 'Back',
                 'edit_category' => 'Edit Category',
                 'update' => 'Update',
-
                 'category_order' => 'Category Order',
                 'reorder_categories' => 'Reorder Categories',
                 'drag_drop_instruction' => 'Drag and drop to reorder categories.',
                 'close' => 'Close',
                 'save_order' => 'Save Order',
+                'cannot_delete_title' => 'Cannot delete',
+                'cannot_delete_used_text' => 'Category ":name" is currently used by products. Please change the product category first.',
             ],
             'promotions' => [
                 'promotion_list' => 'Promotion List',

@@ -20,7 +20,7 @@
                     <div class="form-group">
                         <label>Source Account</label>
                         <select class="form-control select2" name="partner_account_id" id="partner_account_id" required>
-                            <option value="" selected>Select Partner Account</option>
+                            <option value="" selected>Select Owner Account</option>
                             @foreach($accounts AS $account)
                                 <option value="{{ $account['xendit_user_id'] }}">{{ $account['business_name'] }}</option>
                             @endforeach
@@ -318,7 +318,7 @@
             }
 
             if (!partnerAccountId) {
-                showFieldError('#partner_account_id', 'Please select a partner account.');
+                showFieldError('#partner_account_id', 'Please select a owner account.');
                 isValid = false;
             }
 

@@ -98,6 +98,8 @@ class CustomerMenuController extends Controller
                 ->first();
 
             if ($bookingOrder) {
+                $remainingByProduct = [];
+                $remainingByOption  = []; 
                 foreach ($bookingOrder->order_details as $detail) {
                     $product = $partner_products->firstWhere('id', $detail->partner_product_id);
                     if (!$product) {
@@ -112,6 +114,13 @@ class CustomerMenuController extends Controller
                             'name' => $product->name
                         ]);
                         continue;
+                    }
+
+                    $productId = $product->id;
+                    if (!array_key_exists($productId, $remainingByProduct)) {
+                        $remainingByProduct[$productId] = $product->always_available_flag
+                            ? PHP_INT_MAX
+                            : max(0, (int) floor($product->quantity_available));
                     }
 
                     $requestedOptions   = $detail->order_detail_options;
@@ -143,6 +152,12 @@ class CustomerMenuController extends Controller
 
                         $validOptionIds[] = $optId;
                         $validOptions[]   = $opt;
+
+                        if (!array_key_exists($opt->id, $remainingByOption)) {
+                            $remainingByOption[$opt->id] = $opt->always_available_flag
+                                ? PHP_INT_MAX
+                                : max(0, (int) floor($opt->quantity_available));
+                        }
                     }
 
                     if ($requestedOptionIds->count() > 0 && count($validOptionIds) === 0) {
@@ -164,26 +179,11 @@ class CustomerMenuController extends Controller
                         $requestedQty = 1;
                     }
 
-                    if ($product->always_available_flag) {
-                        $maxQtyByProduct = PHP_INT_MAX;
-                    } else {
-                        $maxQtyByProduct = (int) floor($product->quantity_available);
-                    }
+                    $maxQtyByProduct = $remainingByProduct[$productId];
 
                     $maxQtyByOptions = PHP_INT_MAX;
-
-                    foreach ($validOptions as $opt) {
-                        if ($opt->always_available_flag) {
-                            continue;
-                        }
-
-                        $optAvail = (int) floor($opt->quantity_available);
-
-                        if ($optAvail < 0) {
-                            $optAvail = 0;
-                        }
-
-                        $maxQtyByOptions = min($maxQtyByOptions, $optAvail);
+                    foreach ($validOptionIds as $optId) {
+                        $maxQtyByOptions = min($maxQtyByOptions, $remainingByOption[$optId] ?? 0);
                     }
 
                     $effectiveAvailable = min($maxQtyByProduct, $maxQtyByOptions);
@@ -206,6 +206,16 @@ class CustomerMenuController extends Controller
                         $finalQty = $requestedQty;
                     }
 
+                    if ($remainingByProduct[$productId] !== PHP_INT_MAX) {
+                        $remainingByProduct[$productId] -= $finalQty;
+                    }
+
+                    foreach ($validOptionIds as $optId) {
+                        if (($remainingByOption[$optId] ?? PHP_INT_MAX) !== PHP_INT_MAX) {
+                            $remainingByOption[$optId] -= $finalQty;
+                        }
+                    }
+                    
                     $reorderItems[] = [
                         'product_id' => $product->id,
                         'option_ids' => $validOptionIds,

@@ -82,12 +82,12 @@
                         @endif
                     </span>
                 @else
-                    <a href="#"
+                    {{-- <a href="#"
                         class="text-gray-700 hover:text-blue-500">{{ __('messages.customer.navbar.home') }}</a>
                     <a href="#"
                         class="text-gray-700 hover:text-blue-500">{{ __('messages.customer.navbar.menu') }}</a>
                     <a href="#"
-                        class="text-gray-700 hover:text-blue-500">{{ __('messages.customer.navbar.contact') }}</a>
+                        class="text-gray-700 hover:text-blue-500">{{ __('messages.customer.navbar.contact') }}</a> --}}
                 @endif
 
                 <div class="relative" id="cust-lang-desktop">
@@ -211,12 +211,12 @@
                 @endif
             </div>
         @else
-            <a href="#"
+            {{-- <a href="#"
                 class="block px-4 py-2 text-gray-700 hover:bg-gray-100">{{ __('messages.customer.navbar.home') }}</a>
             <a href="#"
                 class="block px-4 py-2 text-gray-700 hover:bg-gray-100">{{ __('messages.customer.navbar.menu') }}</a>
             <a href="#"
-                class="block px-4 py-2 text-gray-700 hover:bg-gray-100">{{ __('messages.customer.navbar.contact') }}</a>
+                class="block px-4 py-2 text-gray-700 hover:bg-gray-100">{{ __('messages.customer.navbar.contact') }}</a> --}}
         @endif
 
         {{-- LANG SWITCH (MOBILE) --}}

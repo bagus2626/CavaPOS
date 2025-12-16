@@ -72,6 +72,7 @@
         </div>
 
         <h3 class="shrink-0 text-lg font-semibold mt-2" id="choose-option">{{ __('messages.customer.menu.pilih_opsi') }}</h3>
+        <div id="optionStockWarnings" class="shrink-0 mt-1 space-y-1 text-xs"></div>
 
         {{-- AREA SCROLLABLE: hanya parent options + note yang bisa di-scroll --}}
         <div id="modalScrollArea" class="min-h-0 flex-1 overflow-y-auto pr-1 -mr-1"
