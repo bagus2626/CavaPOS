@@ -759,6 +759,10 @@ return [
                 'crop_background_picture' => 'Crop Background Picture',
                 'drag_to_move_scroll_zoom' => 'Drag to move, scroll to zoom, or use the corners to resize the crop area.',
                 'crop_logo_title' => 'Crop Logo',
+                'choose_province' => 'Select Province',
+                'choose_city' => 'Select City/Regency',
+                'choose_district' => 'Select District',
+                'choose_village' => 'Select Village/Subdistrict',
             ],
         ],
         'products' => [
@@ -909,6 +913,16 @@ return [
                 'last_updated' => 'Last Updated',
                 'owner' => 'Owner',
                 'hot_product' => 'Hot Product',
+                'stock_management' => 'Stock Management',
+                'stock_type_selection' => 'Stock Type Selection',
+                'direct_stock_input' => 'Direct Stock Input',
+                'link_to_raw_materials' => 'Link to Raw Materials',
+                'enter_quantity_directly' => 'Enter quantity directly. Stock decreases when product is sold.',
+                'connect_product_to_raw_materials' => 'Connect product to raw material ingredients.',
+                'note_linked_stock' => 'Note:',
+                'linked_stock_info' => 'Product will be created with 0 stock. You can configure raw material links in <strong>Stock Management</strong> page.',
+                'enter_initial_stock' => 'Enter initial stock quantity for this product',
+                'price_outlet_hint' => 'This price only applies to this outlet',
             ],
             'stocks' => [
                 'add_stock_item'        => 'Add Stock Item',
@@ -1299,9 +1313,24 @@ return [
                     'entries' => 'entries',
                 ],
             ],
-        ]
+        ],
     ],
     'partner' => [
+        'auth' => [
+            'login' => [
+                'title' => 'Welcome Partner!',
+                'subtitle' => 'Sign in to continue to',
+                'partner_dashboard' => 'Partner Dashboard',
+                'username' => 'Username',
+                'username_placeholder' => 'Enter username',
+                'password' => 'Password',
+                'password_placeholder' => 'Enter password',
+                'forgot_password' => 'Forgot password?',
+                'remember_me' => 'Remember me',
+                'login_button' => 'Login',
+                'copyright' => 'All rights reserved.',
+            ],
+        ],
         'layout' => [
             'outlet_panel' => 'Outlet Panel',
             'dashboard' => 'Dashboard',

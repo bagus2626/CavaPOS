@@ -81,8 +81,7 @@ return [
             'register_customer' => 'Daftar Customer',
             'full_name' => 'Nama Lengkap',
             'phone_number' => 'No HP',
-            'password',
-            'Kata Sandi',
+            'password' => 'Kata Sandi',
             'password_confirmation' => 'Konfirmasi Kata Sandi',
             'register' => 'Daftar',
             'or' => 'atau',
@@ -761,7 +760,11 @@ return [
                 'crop_background_picture' => 'Potong Gambar Latar',
                 'drag_to_move_scroll_zoom' => 'Seret untuk memindahkan, scroll untuk zoom, atau gunakan sudut untuk mengubah ukuran area potong.',
                 'crop_logo_title' => 'Potong Logo',
-                
+                'choose_province' => 'Pilih Provinsi',
+                'choose_city' => 'Pilih Kota/Kabupaten',
+                'choose_district' => 'Pilih Kecamatan',
+                'choose_village' => 'Pilih Kelurahan/Desa',
+
             ],
         ],
         'products' => [
@@ -912,6 +915,16 @@ return [
                 'last_updated' => 'Terakhir Diperbarui',
                 'owner' => 'Pemilik',
                 'hot_product' => 'Produk Unggulan',
+                'stock_management' => 'Manajemen Stok',
+                'stock_type_selection' => 'Pilihan Jenis Stok',
+                'direct_stock_input' => 'Input Stok Langsung',
+                'link_to_raw_materials' => 'Hubungkan ke Bahan Baku',
+                'enter_quantity_directly' => 'Masukkan jumlah secara langsung. Stok akan berkurang ketika produk terjual.',
+                'connect_product_to_raw_materials' => 'Hubungkan produk dengan bahan baku.',
+                'note_linked_stock' => 'Catatan:',
+                'linked_stock_info' => 'Produk akan dibuat dengan stok 0. Anda dapat mengatur hubungan dengan bahan baku di halaman <strong>Manajemen Stok</strong>.',
+                'enter_initial_stock' => 'Masukkan jumlah stok awal untuk produk ini',
+                'price_outlet_hint' => 'Harga ini hanya berlaku untuk outlet ini',
             ],
             'stocks' => [
                 'add_stock_item' => 'Tambah Item Stok',
@@ -1302,9 +1315,24 @@ return [
                     'entries' => 'entri',
                 ],
             ],
-        ]
+        ],
     ],
     'partner' => [
+        'auth' => [
+            'login' => [
+                'title' => 'Selamat Datang Partner!',
+                'subtitle' => 'Masuk untuk melanjutkan ke',
+                'partner_dashboard' => 'Dashboard Partner',
+                'username' => 'Username',
+                'username_placeholder' => 'Masukkan username',
+                'password' => 'Password',
+                'password_placeholder' => 'Masukkan password',
+                'forgot_password' => 'Lupa password?',
+                'remember_me' => 'Ingat saya',
+                'login_button' => 'Masuk',
+                'copyright' => 'All rights reserved.',
+            ],
+        ],
         'layout' => [
             'outlet_panel' => 'Panel Toko',
             'dashboard' => 'Dashboard',

@@ -132,7 +132,106 @@
   background:#fff; color:#6b7280;
 }
 
-<style>
+/* ==== Spacing antara filter bar dan tabel ==== */
+.owner-emp .filter-bar {
+  margin-bottom: 1.5rem !important;
+}
+
+/* ==== Desktop Layout Fix ==== */
+@media (min-width: 769px) {
+  .owner-emp .d-flex.justify-content-between {
+    align-items: flex-start !important;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Tombol Add Employee tetap di kiri */
+  .owner-emp .btn-choco.btn-pill {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  /* Filter bar di kanan dengan wrap */
+  .owner-emp .filter-bar {
+    flex: 1;
+    justify-content: flex-end;
+    margin-bottom: 1.5rem !important;
+  }
+}
+
+/* ==== Responsive Mobile Fix ==== */
+@media (max-width: 768px) {
+  /* Container utama */
+  .owner-emp .d-flex.justify-content-between {
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Tombol Add Employee */
+  .owner-emp .btn-choco.btn-pill {
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Filter bar wrapper */
+  .owner-emp .filter-bar {
+    width: 100%;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem !important;
+  }
+
+  /* Filter buttons */
+  .owner-emp .filter-btn {
+    flex: 1 1 auto;
+    min-width: fit-content;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    text-align: center;
+  }
+
+  /* Table responsive */
+  .owner-emp-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .owner-emp-table .table {
+    min-width: 600px;
+  }
+
+  /* Pagination mobile */
+  .owner-emp__pagination .pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.25rem;
+  }
+
+  .owner-emp__pagination .page-item .page-link {
+    padding: 0.4rem 0.65rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* ==== Extra small devices ==== */
+@media (max-width: 576px) {
+  .owner-emp .filter-btn {
+    font-size: 0.8rem;
+    padding: 0.45rem 0.85rem;
+  }
+
+  .owner-emp-table thead th {
+    font-size: 0.85rem;
+    padding: 0.75rem 0.5rem;
+  }
+
+  .owner-emp-table tbody td {
+    font-size: 0.85rem;
+    padding: 0.75rem 0.5rem;
+  }
+}
+
 :root{
   --choco:#8c1000; --soft-choco:#c12814; --ink:#22272b; --paper:#f7f7f8;
   --radius:12px; --shadow:0 6px 20px rgba(0,0,0,.08);

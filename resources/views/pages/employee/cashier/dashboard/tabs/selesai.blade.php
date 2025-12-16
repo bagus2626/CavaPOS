@@ -49,4 +49,3 @@
 @include('pages.employee.cashier.dashboard.modals.detail')
 @include('pages.employee.cashier.dashboard.modals.served')
 
-<script src="{{ asset('js/employee/cashier/dashboard/detail.js') }}"></script>

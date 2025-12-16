@@ -139,67 +139,52 @@
         </div>
 
         {{-- TABS --}}
-        <div class="mb-6">
-            <div class="flex justify-center">
-                <div class="flex flex-wrap justify-center rounded-xl border border-choco/20 bg-white overflow-hidden max-w-full">
-                    @php
-                        $tabs = [
-                            'pembelian'  => 'Pembelian',
-                            'pembayaran' => 'Pembayaran',
-                            'proses'     => 'Proses',
-                            'selesai'    => 'Selesai',
-                        ];
+<div class="mb-6">
+    <div class="flex justify-center">
+        <div class="flex flex-wrap justify-center rounded-xl border border-choco/20 bg-white overflow-hidden max-w-full">
+            @php
+                $tabs = [
+                    'pembelian'  => 'Pembelian',
+                    'pembayaran' => 'Pembayaran',
+                    'proses'     => 'Proses',
+                    'selesai'    => 'Selesai',
+                ];
+            @endphp
 
-                        $tabCounts = [
-                            'pembayaran' => number_format(
-                                $ordersToday->whereIn('payment_method', ['CASH', 'QRIS'])
-                                    ->whereIn('order_status', ['UNPAID', 'EXPIRED'])
-                                    ->where('payment_flag', 0)
-                                    ->count() ?? 0
-                            ),
-                            'proses' => number_format(
-                                $ordersToday->whereIn('order_status', ['PROCESSED', 'PAID'])->count() ?? 0
-                            ),
-                            'selesai' => number_format(
-                                $ordersToday->where('order_status', 'SERVED')->count() ?? 0
-                            ),
-                        ];
-                    @endphp
-
-                    @foreach ($tabs as $key => $label)
-                        <button
-                            type="button"
-                            data-tab="{{ $key }}"
-                            class="tab-btn
-                                flex-1 basis-1/2 
-                                sm:flex-none sm:basis-auto
-                                px-3 py-2
-                                text-xs sm:text-sm font-semibold text-center
-                                hover:bg-soft-choco/10
-                                focus:ring-2 focus:ring-soft-choco/30
-                                {{ $loop->first ? 'bg-soft-choco/10 text-choco' : 'text-gray-700' }}"
-                        >
-                            <span class="inline-flex items-center gap-2">
-                                <span>{{ $label }}</span>
-                                @if(isset($tabCounts[$key]))
-                                    <span
-                                        id="tab-badge-{{ $key }}"
-                                        class="inline-flex items-center justify-center rounded-full
-                                            bg-choco/10 text-choco text-[11px] font-bold px-2 py-0.5"
-                                    >
-                                        {{ $tabCounts[$key] }}
-                                    </span>
-                                @endif
+            @foreach ($tabs as $key => $label)
+                <button
+                    type="button"
+                    data-tab="{{ $key }}"
+                    class="tab-btn
+                        flex-1 basis-1/2 
+                        sm:flex-none sm:basis-auto
+                        px-3 py-2
+                        text-xs sm:text-sm font-semibold text-center
+                        hover:bg-soft-choco/10
+                        focus:ring-2 focus:ring-soft-choco/30
+                        {{ $loop->first ? 'bg-soft-choco/10 text-choco' : 'text-gray-700' }}"
+                >
+                    <span class="inline-flex items-center gap-2">
+                        <span>{{ $label }}</span>
+                        @if(isset($tabCounts[$key]))
+                            <span
+                                id="tab-badge-{{ $key }}"
+                                class="inline-flex items-center justify-center rounded-full
+                                    bg-choco/10 text-choco text-[11px] font-bold px-2 py-0.5"
+                            >
+                                {{ number_format($tabCounts[$key]) }}
                             </span>
-                        </button>
-
-                        @if (!$loop->last)
-                            <span class="hidden sm:block w-px bg-choco/10"></span>
                         @endif
-                    @endforeach
-                </div>
-            </div>
+                    </span>
+                </button>
+
+                @if (!$loop->last)
+                    <span class="hidden sm:block w-px bg-choco/10"></span>
+                @endif
+            @endforeach
         </div>
+    </div>
+</div>
 
         {{-- TAB CONTENT CONTAINER --}}
         <div id="tabContent"
@@ -357,6 +342,7 @@
   window.CASHIER_PARTNER_ID   = "{{ $partner->id }}";
   window.CASHIER_METRICS_URL  = "{{ route('employee.cashier.metrics') }}";
 </script>
+<script src="{{ asset('js/employee/cashier/dashboard/detail.js') }}"></script>
 <script>
     (function () {
         const tabBtns = document.querySelectorAll('.tab-btn');
@@ -401,6 +387,8 @@
                 tabLoading.classList.add('hidden');
             }
         }
+
+        
 
         // initial load
         if (tabBtns.length) {

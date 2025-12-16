@@ -55,14 +55,13 @@
                 <div class="sections-container">
 
                     {{-- SECTION 1: Basic Info --}}
-                    <div class="section-item" open>
+                    <div class="section-item" >
                         <div class="section-header">
                             <div class="section-header-content">
                                 <i class="fas fa-info-circle"></i>
                                 <span
                                     class="section-title">{{ __('messages.owner.outlet.all_outlets.base_information') }}</span>
                             </div>
-                            <i class="fas fa-chevron-down section-arrow"></i>
                         </div>
                         <div class="section-body">
                             <div class="form-grid form-grid-2x2">
@@ -125,7 +124,7 @@
                                         class="form-label required">{{ __('messages.owner.outlet.all_outlets.email_outlet') }}</span>
                                     <input type="email" name="email" id="email"
                                         class="form-input @error('email') is-invalid @enderror" value="{{ old('email') }}"
-                                        required placeholder="name@company.com">
+                                        required placeholder="email@email.com">
                                     @error('email')
                                         <span class="form-error">{{ $message }}</span>
                                     @enderror
@@ -135,14 +134,13 @@
                     </div>
 
                     {{-- SECTION 2: Address --}}
-                    <div class="section-item" open>
+                    <div class="section-item" >
                         <div class="section-header">
                             <div class="section-header-content">
                                 <i class="fas fa-location-dot"></i>
                                 <span
                                     class="section-title">{{ __('messages.owner.outlet.all_outlets.outlet_address') }}</span>
                             </div>
-                            <i class="fas fa-chevron-down section-arrow"></i>
                         </div>
                         <div class="section-body">
                             <div class="form-grid form-grid-2x2">
@@ -214,7 +212,7 @@
                                 </label>
 
                                 <label class="form-group form-group-full">
-                                    <span class="form-label">Google Maps Embed URL</span>
+                                    <span class="form-label">{{ __('messages.owner.outlet.all_outlets.google_maps_embed_url') }}</span>
                                     <div class="input-with-icon">
                                         <i class="fas fa-map-marked-alt input-icon"></i>
                                         <input type="url" id="gmaps_url" name="gmaps_url" class="form-input"
@@ -222,7 +220,7 @@
                                             placeholder="https://www.google.com/maps/embed?pb=...">
                                     </div>
                                     <small class="form-hint">
-                                        <i class="fas fa-info-circle"></i> Copy embed URL dari Google Maps
+                                        <i class="fas fa-info-circle"></i>{{ __('messages.owner.outlet.all_outlets.copy_embed_url_from_google_maps') }}
                                     </small>
                                 </label>
                             </div>
@@ -230,14 +228,13 @@
                     </div>
 
                     {{-- SECTION 4: Media/Branding --}}
-                    <div class="section-item" open>
+                    <div class="section-item" >
                         <div class="section-header">
                             <div class="section-header-content">
                                 <i class="fas fa-image"></i>
                                 <span
                                     class="section-title">{{ __('messages.owner.outlet.all_outlets.contact_picture') }}</span>
                             </div>
-                            <i class="fas fa-chevron-down section-arrow"></i>
                         </div>
                         <div class="section-body">
                             <div class="form-grid form-grid-2">
@@ -254,7 +251,7 @@
                                         </div>
                                         <button type="button" class="btn-upload"
                                             onclick="document.getElementById('image').click()">
-                                            {{ __('Change Photo') }}
+                                           {{ __('messages.owner.outlet.all_outlets.change_photo') }}
                                         </button>
                                         <input type="file" name="image" id="image" class="d-none"
                                             accept="image/*">
@@ -276,7 +273,7 @@
                                         </div>
                                         <button type="button" class="btn-upload"
                                             onclick="document.getElementById('logo').click()">
-                                            {{ __('Change Logo') }}
+                                            {{ __('messages.owner.outlet.all_outlets.change_logo') }}
                                         </button>
                                         <input type="file" name="logo" id="logo" class="d-none"
                                             accept="image/*">
@@ -289,27 +286,26 @@
                     </div>
 
                     {{-- SECTION 3: Contact --}}
-                    <div class="section-item" open>
+                    <div class="section-item">
                         <div class="section-header">
                             <div class="section-header-content">
                                 <i class="fas fa-phone"></i>
-                                <span class="section-title">Kontak & Sosial Media</span>
+                                <span class="section-title">{{ __('messages.owner.outlet.all_outlets.contact_and_social_media') }}</span>
                             </div>
-                            <i class="fas fa-chevron-down section-arrow"></i>
                         </div>
                         <div class="section-body">
                             <div class="form-grid form-grid-2">
                                 <label class="form-group">
-                                    <span class="form-label">{{ __('Contact Name') }}</span>
+                                    <span class="form-label">{{ __('messages.owner.outlet.all_outlets.contact_name') }}</span>
                                     <div class="input-with-icon">
                                         <i class="fas fa-user input-icon"></i>
                                         <input type="text" id="contact_person" name="contact_person"
-                                            class="form-input" value="{{ old('contact_person') }}" placeholder="Name">
+                                            class="form-input" value="{{ old('contact_person') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.contact_name') }}">
                                     </div>
                                 </label>
 
                                 <label class="form-group">
-                                    <span class="form-label">{{ __('Phone Number') }}</span>
+                                    <span class="form-label">{{ __('messages.owner.outlet.all_outlets.phone_number') }}</span>
                                     <div class="input-with-icon">
                                         <i class="fas fa-phone input-icon"></i>
                                         <input type="tel" id="contact_phone" name="contact_phone" class="form-input"
@@ -369,14 +365,13 @@
                     </div>
 
                     {{-- SECTION 5: Status --}}
-                    <div class="section-item" open>
+                    <div class="section-item" >
                         <div class="section-header">
                             <div class="section-header-content">
                                 <i class="fas fa-toggle-on"></i>
                                 <span
                                     class="section-title">{{ __('messages.owner.outlet.all_outlets.outlet_status') }}</span>
                             </div>
-                            <i class="fas fa-chevron-down section-arrow"></i>
                         </div>
                         <div class="section-body">
                             {{-- Outlet Status --}}
@@ -475,12 +470,15 @@
 
                                 <label class="form-group">
                                     <span class="form-label">{{ __('WiFi Password') }}</span>
-                                    <div class="input-with-icon">
-                                        <i class="fas fa-key input-icon"></i>
-                                        <input type="password" id="pass_wifi" name="pass_wifi" class="form-input"
-                                            value="{{ old('pass_wifi') }}" placeholder="WiFi Password">
-                                        <button type="button" id="toggleWifiPassword"
-                                            class="input-button-inline">{{ __('Show') }}</button>
+                                    <div class="input-with-button">
+                                        <div class="input-with-icon">
+                                            <i class="fas fa-key input-icon"></i>
+                                            <input type="password" id="pass_wifi" name="pass_wifi" class="form-input"
+                                                value="{{ old('pass_wifi') }}" placeholder="WiFi Password">
+                                        </div>
+                                        <button type="button" id="toggleWifiPassword" class="input-button">
+                                            {{ __('Show') }}
+                                        </button>
                                     </div>
                                 </label>
                             </div>
@@ -494,11 +492,11 @@
                 <div class="form-actions">
                     <button type="button" id="cancelBtn" class="btn-cancel">
                         <i class="fas fa-times"></i>
-                        {{ __('Cancel') }}
+                        {{ __('messages.owner.outlet.all_outlets.cancel') }}
                     </button>
                     <button type="submit" id="saveBtn" class="btn-save">
                         <i class="fas fa-save"></i>
-                        <span class="btn-label">{{ __('Save') }}</span>
+                        <span class="btn-label">{{ __('messages.owner.outlet.all_outlets.save') }}</span>
                         <span class="spinner-border spinner-border-sm d-none"></span>
                     </button>
                 </div>
@@ -512,7 +510,7 @@
             <div class="modal-content border-0 shadow-lg">
                 <div class="modal-header bg-choco text-white border-0" style="background: #8a1000 !important;">
                     <h5 class="modal-title font-weight-bold">
-                        <i class="fas fa-crop mr-2"></i>Crop Background Picture
+                        <i class="fas fa-crop mr-2"></i>{{ __('messages.owner.outlet.all_outlets.crop_background_picture') }}
                     </h5>
                     <button type="button" class="close text-white" data-dismiss="modal">
                         <span>&times;</span>
@@ -522,7 +520,7 @@
                     <div class="alert alert-info border-0 mb-3"
                         style="background: #eff6ff; border: 1px solid #dbeafe !important; color: #1d4ed8;">
                         <i class="fas fa-info-circle mr-2"></i>
-                        <small>Drag to move, scroll to zoom, or use the corners to resize the crop area.</small>
+                        <small>{{ __('messages.owner.outlet.all_outlets.drag_to_move_scroll_zoom') }}</small>
                     </div>
                     <div class="img-container-crop">
                         <img id="imageToCropBackground" style="max-width: 100%;">
@@ -556,7 +554,7 @@
                     <div class="alert alert-info border-0 mb-3"
                         style="background: #eff6ff; border: 1px solid #dbeafe !important; color: #1d4ed8;">
                         <i class="fas fa-info-circle mr-2"></i>
-                        <small>Drag to move, scroll to zoom, or use the corners to resize the crop area.</small>
+                        <small>{{ __('messages.owner.outlet.all_outlets.drag_to_move_scroll_zoom') }}</small>
                     </div>
                     <div class="img-container-crop">
                         <img id="imageToCropLogo" style="max-width: 100%;">
@@ -707,21 +705,15 @@
         .section-header {
             padding: 1.25rem 1.5rem;
             background: linear-gradient(135deg, rgba(138, 16, 0, 0.03) 0%, rgba(138, 16, 0, 0.01) 100%);
-            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: space-between;
             user-select: none;
-            transition: all 0.3s ease;
             list-style: none;
         }
 
         .section-header::-webkit-details-marker {
             display: none;
-        }
-
-        .section-header:hover {
-            background: linear-gradient(135deg, rgba(138, 16, 0, 0.06) 0%, rgba(138, 16, 0, 0.02) 100%);
         }
 
         .section-header-content {
@@ -739,16 +731,6 @@
             font-size: 1.125rem;
             font-weight: 600;
             color: var(--text-dark);
-        }
-
-        .section-arrow {
-            color: var(--primary);
-            transition: transform 0.3s ease;
-            font-size: 0.875rem;
-        }
-
-        .section-item[open] .section-arrow {
-            transform: rotate(180deg);
         }
 
         .section-body {
@@ -857,7 +839,6 @@
         }
 
         /* ===== Input Variations ===== */
-        /* ===== Input Variations ===== */
         .input-with-button {
             display: flex;
             position: relative;
@@ -960,6 +941,24 @@
 
         .input-with-icon:has(.input-button-inline) .form-input {
             padding-right: 5.5rem;
+        }
+
+        /* Fix untuk password wifi yang ada icon DAN button */
+        .input-with-button .input-with-icon {
+            flex: 1;
+            position: relative;
+        }
+
+        .input-with-button .input-with-icon .form-input {
+            width: 100%;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            padding-left: 2.5rem;
+        }
+
+        .input-with-button .input-button {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
         }
 
         .select-wrapper {
@@ -1355,16 +1354,18 @@
                 if (toggle && input) {
                     toggle.addEventListener('click', function(e) {
                         e.preventDefault();
-                        const type = input.type === 'password' ? 'text' : 'password';
-                        input.type = type;
-                        this.textContent = type === 'password' ? 'Show' : 'Hide';
+                        e.stopPropagation();
+                        const isPassword = input.type === 'password';
+                        input.type = isPassword ? 'text' : 'password';
+                        this.textContent = isPassword ? 'Hide' : 'Show';
                     });
                 }
             }
 
             setupPasswordToggle('togglePassword', 'password');
             setupPasswordToggle('togglePasswordConfirm', 'password_confirmation');
-            setupPasswordToggle('toggleWifiPassword', 'wifi_password');
+            setupPasswordToggle('toggleWifiPassword',
+                'pass_wifi');
 
             // ==== Username check ====
             const btnCheck = document.getElementById('btnCheckUsername');
@@ -1799,6 +1800,17 @@
             const spnDistrict = document.getElementById('spnDistrict');
             const spnVillage = document.getElementById('spnVillage');
 
+            // Ambil translated text dari Blade
+        const translations = {
+            chooseProvince: '{{ __("messages.owner.outlet.all_outlets.choose_province") }}',
+            chooseCity: '{{ __("messages.owner.outlet.all_outlets.choose_city") }}',
+            chooseDistrict: '{{ __("messages.owner.outlet.all_outlets.choose_district") }}',
+            chooseVillage: '{{ __("messages.owner.outlet.all_outlets.choose_village") }}',
+            selectProvinceFirst: '{{ __("messages.owner.outlet.all_outlets.select_province_first") }}',
+            selectCityFirst: '{{ __("messages.owner.outlet.all_outlets.select_city_first") }}',
+            selectDistrictFirst: '{{ __("messages.owner.outlet.all_outlets.select_district_first") }}',
+        };
+
             function setLoading(selectEl, spinnerEl, isLoading, placeholder) {
                 if (!selectEl) return;
                 if (isLoading) {
@@ -1845,68 +1857,68 @@
             }
 
             // Load Provinces on page load
-            if (provinceSelect) {
-                loadOptions(
-                    `${API_BASE}/provinces.json`,
-                    provinceSelect,
-                    spnProvince,
-                    'Pilih Provinsi'
-                );
-            }
+if (provinceSelect) {
+    loadOptions(
+        `${API_BASE}/provinces.json`,
+        provinceSelect,
+        spnProvince,
+        translations.chooseProvince
+    );
+}
 
-            // Province Change Handler
-            provinceSelect?.addEventListener('change', function() {
-                fillHiddenName(provinceSelect, provinceNameInput);
-                resetSelect(citySelect, 'Pilih Kota/Kabupaten');
-                resetSelect(districtSelect, 'Pilih Kecamatan');
-                resetSelect(villageSelect, 'Pilih Kelurahan');
-                if (citySelect) citySelect.disabled = true;
-                if (districtSelect) districtSelect.disabled = true;
-                if (villageSelect) villageSelect.disabled = true;
+// Province Change Handler
+provinceSelect?.addEventListener('change', function() {
+    fillHiddenName(provinceSelect, provinceNameInput);
+    resetSelect(citySelect, translations.chooseCity);
+    resetSelect(districtSelect, translations.chooseDistrict);
+    resetSelect(villageSelect, translations.chooseVillage);
+    if (citySelect) citySelect.disabled = true;
+    if (districtSelect) districtSelect.disabled = true;
+    if (villageSelect) villageSelect.disabled = true;
 
-                if (this.value) {
-                    loadOptions(
-                        `${API_BASE}/regencies/${this.value}.json`,
-                        citySelect,
-                        spnCity,
-                        'Pilih Kota/Kabupaten'
-                    );
-                }
-            });
+    if (this.value) {
+        loadOptions(
+            `${API_BASE}/regencies/${this.value}.json`,
+            citySelect,
+            spnCity,
+            translations.chooseCity
+        );
+    }
+});
 
-            // City Change Handler
-            citySelect?.addEventListener('change', function() {
-                fillHiddenName(citySelect, cityNameInput);
-                resetSelect(districtSelect, 'Pilih Kecamatan');
-                resetSelect(villageSelect, 'Pilih Kelurahan');
-                if (districtSelect) districtSelect.disabled = true;
-                if (villageSelect) villageSelect.disabled = true;
+// City Change Handler
+citySelect?.addEventListener('change', function() {
+    fillHiddenName(citySelect, cityNameInput);
+    resetSelect(districtSelect, translations.chooseDistrict);
+    resetSelect(villageSelect, translations.chooseVillage);
+    if (districtSelect) districtSelect.disabled = true;
+    if (villageSelect) villageSelect.disabled = true;
 
-                if (this.value) {
-                    loadOptions(
-                        `${API_BASE}/districts/${this.value}.json`,
-                        districtSelect,
-                        spnDistrict,
-                        'Pilih Kecamatan'
-                    );
-                }
-            });
+    if (this.value) {
+        loadOptions(
+            `${API_BASE}/districts/${this.value}.json`,
+            districtSelect,
+            spnDistrict,
+            translations.chooseDistrict
+        );
+    }
+});
 
-            // District Change Handler
-            districtSelect?.addEventListener('change', function() {
-                fillHiddenName(districtSelect, districtNameInput);
-                resetSelect(villageSelect, 'Pilih Kelurahan');
-                if (villageSelect) villageSelect.disabled = true;
+// District Change Handler
+districtSelect?.addEventListener('change', function() {
+    fillHiddenName(districtSelect, districtNameInput);
+    resetSelect(villageSelect, translations.chooseVillage);
+    if (villageSelect) villageSelect.disabled = true;
 
-                if (this.value) {
-                    loadOptions(
-                        `${API_BASE}/villages/${this.value}.json`,
-                        villageSelect,
-                        spnVillage,
-                        'Pilih Kelurahan'
-                    );
-                }
-            });
+    if (this.value) {
+        loadOptions(
+            `${API_BASE}/villages/${this.value}.json`,
+            villageSelect,
+            spnVillage,
+            translations.chooseVillage
+        );
+    }
+});
 
             // Village Change Handler
             villageSelect?.addEventListener('change', function() {

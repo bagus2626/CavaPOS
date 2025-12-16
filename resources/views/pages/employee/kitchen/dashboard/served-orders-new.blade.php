@@ -18,13 +18,7 @@
     
     <div class="flex-1 overflow-hidden px-4">
         <div id="servedOrders" class="h-full overflow-y-auto scrollbar-thin space-y-2 py-3">
-            <div class="bg-white dark:bg-gray-800 rounded shadow-sm p-8 text-center border border-gray-200 dark:border-gray-700">
-                <div class="w-14 h-14 bg-green-50 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <span class="material-icons text-green-600 dark:text-green-400 text-3xl">check_circle</span>
-                </div>
-                <p class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Loading served orders...</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Please wait</p>
-            </div>
+            <!-- Container kosong, akan diisi oleh JavaScript -->
         </div>
     </div>
 </div>
