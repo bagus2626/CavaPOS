@@ -612,17 +612,20 @@
     if (paidInput) paidInput.addEventListener("input", recalcServedChange);
   })();
 
-  (function paidToProcess() {
-    const processBtns = document.querySelectorAll("[data-turn-to-process-btn]");
+  (function bindDynamicButtons() {
+    document.addEventListener("click", async (e) => {
+      // ===============================
+      // PROSES (PAID -> PROCESSED)
+      // ===============================
+      const btnProcess = e.target.closest("[data-turn-to-process-btn]");
+      if (btnProcess) {
+        const orderId   = btnProcess.getAttribute("data-order-id");
+        const orderName = btnProcess.getAttribute("data-order-name");
+        const baseUrl   = btnProcess.getAttribute("data-order-url");
+        const processUrl = baseUrl?.replace("__ID__", orderId);
 
-    processBtns.forEach((btn) => {
-      btn.addEventListener("click", async function () {
-        const orderId = this.getAttribute("data-order-id");
-        const orderName = this.getAttribute("data-order-name");
-        const baseUrl = this.getAttribute("data-order-url");
-        const processUrl = baseUrl.replace("__ID__", orderId);
+        if (!orderId || !processUrl) return;
 
-        // KONFIRMASI lebih dulu
         const { isConfirmed, value: payload } = await Swal.fire({
           icon: "question",
           title: "Proses order ini?",
@@ -633,7 +636,6 @@
           reverseButtons: true,
           showLoaderOnConfirm: true,
           allowOutsideClick: () => !Swal.isLoading(),
-
           preConfirm: async () => {
             try {
               const response = await fetch(processUrl, {
@@ -643,102 +645,66 @@
                   Accept: "application/json",
                   "X-CSRF-TOKEN": document
                     .querySelector('meta[name="csrf-token"]')
-                    .getAttribute("content"),
+                    ?.getAttribute("content"),
                 },
                 body: JSON.stringify({ order_id: orderId }),
               });
 
               const raw = await response.text();
               let json = null;
-              try {
-                json = JSON.parse(raw);
-              } catch (_) {
-                /* biarkan null */
-              }
+              try { json = JSON.parse(raw); } catch (_) {}
 
               if (!response.ok) {
-                // Tangani error HTTP
-                const msg =
-                  (json && (json.message || json.error)) ||
-                  "Gagal memproses order.";
+                const msg = (json && (json.message || json.error)) || "Gagal memproses order.";
                 Swal.showValidationMessage(msg);
                 return false;
               }
 
-              // Cek flag khusus dari Controller
-              if (json && json.already_processed) {
-                return json; // Kembalikan payload warning
-              }
-
-              return (
-                json || { status: "ok", message: "Order berhasil diproses." }
-              );
+              return json || { status: "ok", message: "Order berhasil diproses." };
             } catch (err) {
-              Swal.showValidationMessage(
-                err?.message || "Terjadi kesalahan jaringan."
-              );
+              Swal.showValidationMessage(err?.message || "Terjadi kesalahan jaringan.");
               return false;
             }
           },
         });
 
-        // Jika batal
         if (!isConfirmed) return;
 
-        // Cek status warning dari backend
-        if (payload && payload.already_processed) {
-          await Swal.fire({
-            icon: "warning", // Notifikasi berbeda
-            title: "Sudah Diproses!",
-            text: payload.message, // "Order ini sudah diproses oleh tim lain (Kitchen)..."
-            confirmButtonText: "OK, Refresh",
-          });
-        } else {
-          // Sukses Normal
-          const message =
-            (payload && (payload.message || payload.status)) ||
-            "Order berhasil diproses.";
-          await Swal.fire({
-            icon: "success",
-            title: "Berhasil",
-            text: message,
-            confirmButtonText: "OK",
-          });
-        }
+        await Swal.fire({
+          icon: "success",
+          title: "Berhasil",
+          text: payload?.message || "Order berhasil diproses.",
+          confirmButtonText: "OK",
+        });
 
-        // Selalu refresh setelah konfirmasi (baik sukses normal atau warning)
-        if (payload && payload.redirect_url) {
-          window.location.href = payload.redirect_url;
-        } else {
-          location.reload();
-        }
-      });
-    });
-  })();
+        if (payload?.redirect_url) window.location.href = payload.redirect_url;
+        else location.reload();
 
-  (function processToPaid() {
-    const processBtns = document.querySelectorAll("[data-turn-to-paid-btn]");
+        return; // stop
+      }
 
-    processBtns.forEach((btn) => {
-      btn.addEventListener("click", async function () {
-        const orderId = this.getAttribute("data-order-id");
-        const orderName = this.getAttribute("data-order-name");
-        const baseUrl = this.getAttribute("data-order-url");
-        const processUrl = baseUrl.replace("__ID__", orderId);
+      // ===============================
+      // BATAL PROSES (PROCESSED -> PAID)
+      // ===============================
+      const btnCancel = e.target.closest("[data-turn-to-paid-btn]");
+      if (btnCancel) {
+        const orderId   = btnCancel.getAttribute("data-order-id");
+        const orderName = btnCancel.getAttribute("data-order-name");
+        const baseUrl   = btnCancel.getAttribute("data-order-url");
+        const processUrl = baseUrl?.replace("__ID__", orderId);
 
-        // KONFIRMASI lebih dulu
+        if (!orderId || !processUrl) return;
+
         const { isConfirmed, value: payload } = await Swal.fire({
           icon: "question",
-          title: "Batalkan Proses Order Ini?",
+          title: "Batalkan proses order ini?",
           text: `Anda akan membatalkan memproses order (${orderName}). Lanjutkan?`,
           showCancelButton: true,
-          confirmButtonText: "Ya, Batalkan Proses",
+          confirmButtonText: "Ya, batalkan",
           cancelButtonText: "Kembali",
           reverseButtons: true,
           showLoaderOnConfirm: true,
           allowOutsideClick: () => !Swal.isLoading(),
-
-          // Eksekusi fetch di preConfirm (ada loader otomatis)
           preConfirm: async () => {
             try {
               const response = await fetch(processUrl, {
@@ -748,60 +714,42 @@
                   Accept: "application/json",
                   "X-CSRF-TOKEN": document
                     .querySelector('meta[name="csrf-token"]')
-                    .getAttribute("content"),
+                    ?.getAttribute("content"),
                 },
                 body: JSON.stringify({ order_id: orderId }),
               });
 
               const raw = await response.text();
               let json = null;
-              try {
-                json = JSON.parse(raw);
-              } catch (_) {
-                /* biarkan null */
-              }
+              try { json = JSON.parse(raw); } catch (_) {}
 
               if (!response.ok) {
-                const msg =
-                  (json && (json.message || json.error)) ||
-                  "Gagal memproses order.";
+                const msg = (json && (json.message || json.error)) || "Gagal membatalkan proses.";
                 Swal.showValidationMessage(msg);
                 return false;
               }
 
-              return (
-                json || { status: "ok", message: "Order berhasil diproses." }
-              );
+              return json || { status: "ok", message: "Proses berhasil dibatalkan." };
             } catch (err) {
-              Swal.showValidationMessage(
-                err?.message || "Terjadi kesalahan jaringan."
-              );
+              Swal.showValidationMessage(err?.message || "Terjadi kesalahan jaringan.");
               return false;
             }
           },
         });
 
-        // Jika batal
         if (!isConfirmed) return;
 
-        // Sukses → tampilkan notifikasi dan refresh
-        const message =
-          (payload && (payload.message || payload.status)) ||
-          "Order berhasil diproses.";
         await Swal.fire({
           icon: "success",
           title: "Berhasil",
-          text: message,
+          text: payload?.message || "Proses berhasil dibatalkan.",
           confirmButtonText: "OK",
         });
 
-        // Redirect/refresh
-        if (payload && payload.redirect_url) {
-          window.location.href = payload.redirect_url;
-        } else {
-          location.reload();
-        }
-      });
+        if (payload?.redirect_url) window.location.href = payload.redirect_url;
+        else location.reload();
+      }
     });
   })();
+
 })();
