@@ -376,11 +376,11 @@
       <div class="mb-3">
         <div class="d-flex flex-wrap gap-2">
           {{-- Opsional: tombol "All Outlets" --}}
-          <button class="btn btn-sm rounded-pill outlet-pill active"
+          <button class="btn btn-sm rounded-pill outlet-pill active mb-1"
             data-outlet="all">{{ __('messages.owner.products.outlet_products.all_outlets') }}</button>
 
           @foreach($outlets as $o)
-            <button class="btn btn-sm rounded-pill outlet-pill ml-1" data-outlet="{{ $o->id }}">
+            <button class="btn btn-sm rounded-pill outlet-pill ml-1 mb-1" data-outlet="{{ $o->id }}">
               {{ $o->name }}
             </button>
           @endforeach
@@ -414,10 +414,10 @@
             {{-- Category filter (per outlet) --}}
             <div class="mb-3">
               <div class="d-flex flex-wrap gap-2">
-                <button class="btn btn-sm rounded-pill category-pill active"
+                <button class="btn btn-sm rounded-pill category-pill active mb-1"
                   data-category="all">{{ __('messages.owner.products.outlet_products.all') }}</button>
                 @foreach($categories as $c)
-                  <button class="btn btn-sm rounded-pill category-pill ml-1" data-category="{{ $c->id }}">
+                  <button class="btn btn-sm rounded-pill category-pill ml-1 mb-1" data-category="{{ $c->id }}">
                     {{ $c->category_name }}
                   </button>
                 @endforeach

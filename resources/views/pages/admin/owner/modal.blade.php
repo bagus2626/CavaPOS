@@ -27,7 +27,7 @@
                         <select name="account_type" id="account_type" class="form-control" required>
                             <option value="">-- Select Type --</option>
                             <option value="OWNED">OWNED</option>
-                            <option value="MANAGED">MANAGED</option>
+                            {{-- <option value="MANAGED">MANAGED</option> --}}
                         </select>
                     </div>
 

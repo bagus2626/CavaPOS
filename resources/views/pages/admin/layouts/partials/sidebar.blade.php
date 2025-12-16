@@ -38,7 +38,7 @@
                     <li @if (Request::segment(2) == 'xen_platform' && Request::segment(3) == 'partner-account') class="active" @endif>
                         <a href="{{ route('admin.xen_platform.partner-account.index') }}">
                             <i class="bx bx-right-arrow-alt"></i>
-                            <span class="menu-item" data-i18n="partner-accounts">Partner Accounts</span></a>
+                            <span class="menu-item" data-i18n="partner-accounts">Owner Accounts</span></a>
                     </li>
                     <li @if (Request::segment(2) == 'xen_platform' && Request::segment(3) == 'split-payments') class="active" @endif>
                         <a href="{{ route('admin.xen_platform.split-payments.index') }}">

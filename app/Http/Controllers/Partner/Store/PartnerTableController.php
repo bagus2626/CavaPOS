@@ -148,52 +148,55 @@ class PartnerTableController extends Controller
                 'table_class' => 'required|string|max:255',
                 'description' => 'nullable|string',
                 'images'      => 'nullable|array|max:5',
-                'images.*'    => 'image|mimes:jpeg,jpg,png,webp|max:4096', // tiap file max 4MB
+                'images.*'    => 'image|mimes:jpeg,jpg,png,webp|max:4096',
             ]);
 
-            // pastikan images selalu array
+            $disk = Storage::disk('public');
+
             $storedImages = is_array($table->images)
                 ? $table->images
                 : (json_decode($table->images ?? '[]', true) ?: []);
 
-            $disk = Storage::disk('public');
+            if ($request->hasFile('images') && count($request->file('images')) > 0) {
 
-            // 🔹 Hapus gambar lama yang dipilih di form (delete_images[])
-            if ($request->filled('delete_images') && is_array($request->delete_images)) {
-                $filenamesToDelete = $request->delete_images;
+                foreach ($storedImages as $img) {
+                    $storedPath   = $img['path'] ?? '';
+                    $relativePath = ltrim(preg_replace('#^storage/#', '', $storedPath), '/'); // "uploads/..."
 
-                $storedImages = array_values(array_filter($storedImages, function ($img) use ($filenamesToDelete, $disk) {
-                    $filename = $img['filename'] ?? null;
-
-                    if ($filename && in_array($filename, $filenamesToDelete)) {
-                        // path di DB bisa "storage/uploads/..." atau "uploads/..."
-                        $storedPath   = $img['path'] ?? '';
-                        $relativePath = ltrim(preg_replace('#^storage/#', '', $storedPath), '/');
-                        // sekarang $relativePath = "uploads/store/tables/xxx.jpg"
-
-                        if ($relativePath && $disk->exists($relativePath)) {
-                            $disk->delete($relativePath);
-                        }
-
-                        return false; // buang dari array images
+                    if ($relativePath && $disk->exists($relativePath)) {
+                        $disk->delete($relativePath);
                     }
+                }
 
-                    return true; // tetap dipertahankan
-                }));
+                $storedImages = [];
+            } else {
+                if ($request->filled('delete_images') && is_array($request->delete_images)) {
+                    $filenamesToDelete = $request->delete_images;
+
+                    $storedImages = array_values(array_filter($storedImages, function ($img) use ($filenamesToDelete, $disk) {
+                        $filename = $img['filename'] ?? null;
+
+                        if ($filename && in_array($filename, $filenamesToDelete)) {
+                            $storedPath   = $img['path'] ?? '';
+                            $relativePath = ltrim(preg_replace('#^storage/#', '', $storedPath), '/');
+
+                            if ($relativePath && $disk->exists($relativePath)) {
+                                $disk->delete($relativePath);
+                            }
+
+                            return false;
+                        }
+                        return true;
+                    }));
+                }
             }
 
-            // 🔹 Upload gambar baru
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
-                    if (!$image->isValid()) {
-                        continue;
-                    }
+                    if (!$image->isValid()) continue;
 
                     $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-
-                    // simpan ke disk public
                     $path = $image->storeAs('uploads/store/tables', $filename, 'public');
-                    // $path contoh: "uploads/store/tables/xxx.jpg"
 
                     // resize (opsional)
                     $fullPath = storage_path('app/public/' . $path);
@@ -204,7 +207,6 @@ class PartnerTableController extends Controller
                     })->save();
 
                     $storedImages[] = [
-                        // simpan tanpa "storage/" supaya konsisten ke depan
                         'path'     => "storage/" . $path,
                         'filename' => $filename,
                         'mime'     => $image->getClientMimeType(),
@@ -213,7 +215,6 @@ class PartnerTableController extends Controller
                 }
             }
 
-            // 🔹 Update table
             $table->update([
                 'table_no'    => $validated['table_no'],
                 'table_class' => $validated['table_class'],
@@ -236,9 +237,9 @@ class PartnerTableController extends Controller
     }
 
 
+
     public function destroy(Table $table)
     {
-        // Hapus gambar dari storage
         if ($table->images) {
             foreach ($table->images as $image) {
                 if (isset($image['path'])) {
