@@ -5,7 +5,8 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "serve-full": "concurrently \"php artisan serve --host=192.168.1.107 --port=8000\" \"npm run dev\""
+        "serve-full": "concurrently \"php artisan serve --host=localhost --port=8000\" \"npm run dev\"",
+        "queue-work": "concurrently \"php artisan queue:work database --queue=broadcasts --sleep=1 --tries=3 --timeout=30\" \"php artisan queue:work database --queue=email --sleep=1 --tries=3 --timeout=30\""
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.2",
