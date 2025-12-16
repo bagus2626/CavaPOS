@@ -21,13 +21,7 @@
     
     <div class="flex-1 overflow-hidden px-4">
         <div class="h-full overflow-y-auto scrollbar-thin space-y-3 py-4" id="orderQueue">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-8 text-center border border-gray-200 dark:border-gray-700">
-                <div class="w-14 h-14 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <span class="text-3xl">🔭</span>
-                </div>
-                <p class="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Loading orders...</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Please wait</p>
-            </div>
+            <!-- Container kosong, akan diisi oleh JavaScript -->
         </div>
     </div>
 </div>

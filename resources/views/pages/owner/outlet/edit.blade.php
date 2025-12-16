@@ -55,14 +55,13 @@
                 <div class="sections-container">
 
                     {{-- SECTION 1: Basic Info --}}
-                    <div class="section-item" open>
+                    <div class="section-item">
                         <div class="section-header">
                             <div class="section-header-content">
                                 <i class="fas fa-info-circle"></i>
                                 <span
                                     class="section-title">{{ __('messages.owner.outlet.all_outlets.base_information') }}</span>
                             </div>
-                            <i class="fas fa-chevron-down section-arrow"></i>
                         </div>
                         <div class="section-body">
                             <div class="form-grid form-grid-2x2">
@@ -126,14 +125,13 @@
                     </div>
 
                     {{-- SECTION 2: Address --}}
-                    <div class="section-item" open>
+                    <div class="section-item" >
                         <div class="section-header">
                             <div class="section-header-content">
                                 <i class="fas fa-location-dot"></i>
                                 <span
                                     class="section-title">{{ __('messages.owner.outlet.all_outlets.outlet_address') }}</span>
                             </div>
-                            <i class="fas fa-chevron-down section-arrow"></i>
                         </div>
                         <div class="section-body">
                             <div class="form-grid form-grid-2x2">
@@ -216,7 +214,7 @@
                                             placeholder="https://www.google.com/maps/embed?pb=...">
                                     </div>
                                     <small class="form-hint">
-                                        <i class="fas fa-info-circle"></i> Copy embed URL dari Google Maps
+                                        <i class="fas fa-info-circle"></i> {{ __('messages.owner.outlet.all_outlets.copy_embed_url_from_google_maps') }}
                                     </small>
                                 </label>
                             </div>
@@ -224,14 +222,13 @@
                     </div>
 
                     {{-- SECTION 4: Media/Branding --}}
-                    <div class="section-item" open>
+                    <div class="section-item">
                         <div class="section-header">
                             <div class="section-header-content">
                                 <i class="fas fa-image"></i>
                                 <span
                                     class="section-title">{{ __('messages.owner.outlet.all_outlets.contact_picture') }}</span>
                             </div>
-                            <i class="fas fa-chevron-down section-arrow"></i>
                         </div>
                         <div class="section-body">
                             <div class="form-grid form-grid-2">
@@ -250,7 +247,7 @@
                                         </div>
                                         <button type="button" class="btn-upload"
                                             onclick="document.getElementById('logo').click()">
-                                            {{ __('Change Logo') }}
+                                            {{ __('messages.owner.outlet.all_outlets.change_logo') }}
                                         </button>
                                         <input type="file" name="logo" id="logo" class="d-none"
                                             accept="image/*">
@@ -289,18 +286,17 @@
                     </div>
 
                     {{-- SECTION 3: Contact --}}
-                    <div class="section-item" open>
+                    <div class="section-item">
                         <div class="section-header">
                             <div class="section-header-content">
                                 <i class="fas fa-phone"></i>
-                                <span class="section-title">Kontak & Sosial Media</span>
+                                <span class="section-title">{{ __('messages.owner.outlet.all_outlets.contact_and_social_media') }}</span>
                             </div>
-                            <i class="fas fa-chevron-down section-arrow"></i>
                         </div>
                         <div class="section-body">
                             <div class="form-grid form-grid-2">
                                 <label class="form-group">
-                                    <span class="form-label">{{ __('Contact Name') }}</span>
+                                    <span class="form-label">{{ __('messages.owner.outlet.all_outlets.contact_name') }}</span>
                                     <div class="input-with-icon">
                                         <i class="fas fa-user input-icon"></i>
                                         <input type="text" id="contact_person" name="contact_person"
@@ -310,7 +306,7 @@
                                 </label>
 
                                 <label class="form-group">
-                                    <span class="form-label">{{ __('Phone Number') }}</span>
+                                    <span class="form-label">{{ __('messages.owner.outlet.all_outlets.phone_number') }}</span>
                                     <div class="input-with-icon">
                                         <i class="fas fa-phone input-icon"></i>
                                         <input type="tel" id="contact_phone" name="contact_phone" class="form-input"
@@ -372,14 +368,13 @@
 
 
                     {{-- SECTION 5: Status --}}
-                    <div class="section-item" open>
+                    <div class="section-item">
                         <div class="section-header">
                             <div class="section-header-content">
                                 <i class="fas fa-toggle-on"></i>
                                 <span
                                     class="section-title">{{ __('messages.owner.outlet.all_outlets.outlet_status') }}</span>
                             </div>
-                            <i class="fas fa-chevron-down section-arrow"></i>
                         </div>
                         <div class="section-body">
                             {{-- Outlet Status --}}
@@ -718,21 +713,15 @@
         .section-header {
             padding: 1.25rem 1.5rem;
             background: linear-gradient(135deg, rgba(138, 16, 0, 0.03) 0%, rgba(138, 16, 0, 0.01) 100%);
-            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: space-between;
             user-select: none;
-            transition: all 0.3s ease;
             list-style: none;
         }
 
         .section-header::-webkit-details-marker {
             display: none;
-        }
-
-        .section-header:hover {
-            background: linear-gradient(135deg, rgba(138, 16, 0, 0.06) 0%, rgba(138, 16, 0, 0.02) 100%);
         }
 
         .section-header-content {
@@ -750,16 +739,6 @@
             font-size: 1.125rem;
             font-weight: 600;
             color: var(--text-dark);
-        }
-
-        .section-arrow {
-            color: var(--primary);
-            transition: transform 0.3s ease;
-            font-size: 0.875rem;
-        }
-
-        .section-item[open] .section-arrow {
-            transform: rotate(180deg);
         }
 
         .section-body {

@@ -54,7 +54,7 @@
 
         {{-- ========== STOCK TYPE SELECTION (Bootstrap Style) ========== --}}
         <div class="mb-3">
-          <label class="form-label">Stock Management <span class="text-danger">*</span></label>
+          <label class="form-label">{{ __('messages.owner.products.outlet_products.stock_management') }}<span class="text-danger">*</span></label>
 
           <div class="form-check p-3 border rounded" style="transition: all 0.2s ease;">
             <input class="form-check-input" type="radio" name="stock_type" id="stock_type_direct" value="direct" checked
@@ -62,9 +62,9 @@
             <label class="form-check-label w-100" for="stock_type_direct" style="cursor: pointer; margin-left: 0.5rem;">
               <div class="d-flex align-items-center" style="gap: 8px; margin-bottom: 6px;">
                 <i class="fas fa-box"></i>
-                <strong>Direct Stock Input</strong>
+                <strong>{{ __('messages.owner.products.outlet_products.direct_stock_input') }}</strong>
               </div>
-              <small class="text-muted d-block">Enter quantity directly. Stock decreases when product is sold.</small>
+              <small class="text-muted d-block">{{ __('messages.owner.products.outlet_products.enter_quantity_directly') }}</small>
             </label>
           </div>
 
@@ -74,9 +74,9 @@
             <label class="form-check-label w-100" for="stock_type_linked" style="cursor: pointer; margin-left: 0.5rem;">
               <div class="d-flex align-items-center" style="gap: 8px; margin-bottom: 6px;">
                 <i class="fas fa-link"></i>
-                <strong>Link to Raw Materials</strong>
+                <strong>{{ __('messages.owner.products.outlet_products.link_to_raw_materials') }}</strong>
               </div>
-              <small class="text-muted d-block">Connect product to raw material ingredients.</small>
+              <small class="text-muted d-block">{{ __('messages.owner.products.outlet_products.connect_product_to_raw_materials') }}</small>
             </label>
           </div>
         </div>
@@ -87,14 +87,13 @@
               class="text-danger">*</span></label>
           <input type="number" min="0" step="1" id="qp_quantity" name="quantity" class="form-control" value="0"
             required>
-          <small class="form-text text-muted">Enter initial stock quantity for this product</small>
+          <small class="form-text text-muted">{{ __('messages.owner.products.outlet_products.enter_initial_stock') }}</small>
         </div>
 
         {{-- Info message for linked stock --}}
         <div class="alert alert-info d-none" id="linked_stock_info" style="font-size: 0.9rem;">
           <i class="fas fa-info-circle mr-1"></i>
-          <strong>Note:</strong> Product will be created with 0 stock.
-          You can configure raw material links in <strong>Stock Management</strong> page.
+          <strong>{{ __('messages.owner.products.outlet_products.note_linked_stock') }}</strong>{{ __('messages.owner.products.outlet_products.linked_stock_info') }}
         </div>
 
         {{-- Status --}}

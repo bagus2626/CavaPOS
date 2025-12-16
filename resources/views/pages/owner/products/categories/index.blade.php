@@ -1,8 +1,11 @@
 @extends('layouts.owner')
 
+@section('title', __('messages.owner.products.categories.categories_list'))
+@section('page_title', __('messages.owner.products.categories.categories'))
+
 @section('content')
-<div class="container owner-categories mt-4"> {{-- PAGE SCOPE --}}
-    <h1 class="page-title">{{ __('messages.owner.products.categories.categories') }}</h1>
+<section class="content">
+<div class="container-fluid owner-categories"> {{-- PAGE SCOPE --}}
     <a href="{{ route('owner.user-owner.categories.create') }}" class="btn btn-primary mb-3">
         + {{ __('messages.owner.products.categories.add_category') }}
     </a>
@@ -79,6 +82,8 @@
 </div>
 
 @include('pages.owner.products.categories.category-order-modal')
+
+</section>
 
 <style>
 /* ===== Owner › Categories (page scope) ===== */

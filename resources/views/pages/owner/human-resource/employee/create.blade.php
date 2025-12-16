@@ -4,7 +4,7 @@
 @section('page_title', __('messages.owner.user_management.employees.create_new_employee'))
 
 @section('content')
-    <div class="container owner-emp-create"> {{-- tambahkan class page-scope --}}
+    <div class="container-fluid owner-emp-create px-4 py-3"> {{-- tambahkan class page-scope --}}
         <a href="{{ route('owner.user-owner.employees.index') }}" class="btn btn-outline-choco mb-3">
             <i class="fas fa-arrow-left mr-2"></i>{{ __('messages.owner.user_management.employees.back_to_employees') }}
         </a>
@@ -214,12 +214,12 @@
                     </div>
 
                     {{-- Submit --}}
-                    <div class="d-flex justify-content-end">
-                        <a href="{{ route('owner.user-owner.employees.index') }}"
-                            class="btn btn-light border me-2">{{ __('messages.owner.user_management.employees.cancel') }}</a>
-                        <button type="submit"
-                            class="btn btn-choco">{{ __('messages.owner.user_management.employees.save') }}</button>
-                    </div>
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+    <a href="{{ route('owner.user-owner.employees.index') }}" 
+       class="btn btn-light border">{{ __('messages.owner.user_management.employees.cancel') }}</a>
+    <button type="submit" 
+            class="btn btn-choco">{{ __('messages.owner.user_management.employees.save') }}</button>
+</div>
                 </form>
                 <div class="modal fade" id="cropModal" tabindex="-1" role="dialog">
                     <div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="max-width: 650px">
@@ -258,7 +258,6 @@
     </div>
 
     <style>
-        <style>
 
         /* ===== Owner › Employee Create (page scope) ===== */
         .owner-emp-create {
@@ -445,76 +444,113 @@
             color: #6b7280 !important;
         }
 
-        /* ===== Crop Modal Styles ===== */
-        .owner-emp-create #cropModal .modal-dialog {
-            max-width: 650px;
-            width: 90%;
-            margin: 1.75rem auto;
-        }
+        /* ===== CROP MODAL - EMPLOYEE PHOTO (Circular) ===== */
+.owner-emp-create #cropModal .modal-dialog {
+    max-width: 650px;
+    width: 90%;
+    margin: 1.75rem auto;
+}
 
-        .owner-emp-create #cropModal .modal-content {
-            border-radius: 15px;
-            overflow: hidden;
-        }
+.owner-emp-create #cropModal .modal-content {
+    border-radius: 20px;
+    overflow: hidden;
+}
 
-        .owner-emp-create #cropModal .modal-header.bg-choco {
-            background-color: var(--choco);
-        }
+.owner-emp-create #cropModal .modal-header {
+    background-color: var(--choco);
+    border-radius: 20px 20px 0 0;
+}
 
-        .owner-emp-create #cropModal .modal-body {
-            padding: 1.5rem;
-            background: #f8f9fa;
-        }
+.owner-emp-create #cropModal .modal-footer {
+    border-radius: 0 0 20px 20px;
+}
 
-        .owner-emp-create .img-container-crop {
-            width: 100%;
-            height: 450px;
-            background: #ffffff;
-            border-radius: 8px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid #dee2e6;
-        }
+.owner-emp-create #cropModal .modal-body {
+    padding: 1.5rem;
+    background: #f8f9fa;
+}
 
-        .owner-emp-create .img-container-crop img {
-            max-width: 100%;
-            max-height: 100%;
-            display: block;
-        }
+.owner-emp-create #cropModal .alert-info {
+    border-radius: 10px;
+    background: #e0f2fe;
+    border: 1px solid #bae6fd;
+    color: #075985;
+}
 
-        .owner-emp-create .cropper-container {
-            background-color: #f8f9fa;
-        }
+.owner-emp-create .img-container-crop {
+    width: 100%;
+    height: 450px;
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
 
-        @media (max-width: 768px) {
-            .owner-emp-create #cropModal .modal-dialog {
-                max-width: 95%;
-                width: 95%;
-                margin: 1rem auto;
-            }
+.owner-emp-create .img-container-crop img {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+}
 
-            .owner-emp-create .img-container-crop {
-                height: 300px;
-            }
-        }
+/* Cropper styling - CIRCULAR for employee photo */
+.owner-emp-create #cropModal .cropper-view-box,
+.owner-emp-create #cropModal .cropper-face {
+    border-radius: 50% !important;
+}
 
-        @media (max-width: 576px) {
-            .owner-emp-create #cropModal .modal-dialog {
-                margin: 0.5rem auto;
-            }
+.owner-emp-create #cropModal .cropper-container {
+    background-color: #f8f9fa;
+}
 
-            .owner-emp-create .img-container-crop {
-                height: 250px;
-            }
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .owner-emp-create #cropModal .modal-dialog {
+        max-width: 95%;
+        width: 95%;
+        margin: 1rem auto;
+    }
 
-            .owner-emp-create #cropModal .modal-body {
-                padding: 0.75rem;
-            }
-        }
-    </style>
+    .owner-emp-create .img-container-crop {
+        height: 350px;
+    }
 
+    .owner-emp-create #cropModal .modal-body {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .owner-emp-create #cropModal .modal-dialog {
+        margin: 0.5rem auto;
+        width: 98%;
+    }
+
+    .owner-emp-create #cropModal .modal-content {
+        border-radius: 16px;
+    }
+
+    .owner-emp-create .img-container-crop {
+        height: 280px;
+    }
+
+    .owner-emp-create #cropModal .modal-body {
+        padding: 0.75rem;
+    }
+}
+
+/* Spacing untuk action buttons */
+.owner-emp-create .d-flex.gap-2 > .btn {
+    min-width: 100px;
+    padding: 0.5rem 1.5rem;
+}
+
+.owner-emp-create .d-flex.gap-2 {
+    gap: 0.75rem !important;
+}
     </style>
 @endsection
 

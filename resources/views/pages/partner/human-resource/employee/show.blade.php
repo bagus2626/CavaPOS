@@ -1,7 +1,7 @@
 @extends('layouts.partner')
 
-@section('title', 'Employee Detail')
-@section('page_title', 'Employee Detail')
+@section('title', __('messages.partner.user_management.employees.employee_detail'))
+@section('page_title', __('messages.partner.user_management.employees.employee_detail'))
 
 @section('content')
   @php

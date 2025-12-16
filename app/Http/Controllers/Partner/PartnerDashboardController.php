@@ -38,7 +38,7 @@ class PartnerDashboardController extends Controller
         $total_orders = $orders->count();
 
         // 10 pesanan terakhir
-        $last_orders = $orders->latest()->take(10)->get();
+        $last_orders = $orders->whereIn('order_status', ['PAID', 'PROCESSED', 'SERVED'])->latest()->take(10)->get();
 
         // Popup messages untuk partner
         $popups = Message::with(['recipients', 'attachments'])

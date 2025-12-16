@@ -171,6 +171,19 @@ class MessageController extends Controller
                 'status'    => 'sent'
             ]);
 
+            if ($request->filled('popup_link') && $request->message_type === 'popup') {
+                $link = $request->popup_link;
+
+                // Auto tambah https:// jika tidak ada protokol
+                if (!preg_match('/^https?:\/\//i', $link)) {
+                    $link = 'https://' . $link;
+                }
+
+                $message->body = '<a href="' . $link . '" target="_blank">' . $link . '</a>';
+                $message->save();
+            }
+
+
             if ($request->filled('schedule_start')) {
                 $message->scheduled_at = $request->input('schedule_start');
                 $message->save();
