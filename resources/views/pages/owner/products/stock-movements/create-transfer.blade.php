@@ -151,10 +151,11 @@
 
                 {{-- Tombol Aksi --}}
                 <div class="mt-4 mb-4">
-                    <button type="submit" class="btn btn-info">
+                    <button type="submit" class="btn btn-info" id="btn-submit" disabled>
                         <i class="fas fa-save"></i>
                         {{ __('messages.owner.products.stocks.movements_transfer.submit_button') }}
                     </button>
+
                 </div>
             </form>
         </div>
@@ -418,6 +419,59 @@
                     });
                 });
             }
+
+            // Aktifkan tombol submit jika ada perubahan pada form
+            const submitBtn = document.getElementById('btn-submit');
+
+            function isFormValid() {
+                // lokasi harus beda
+                if (!locationFrom.value || !locationTo.value) return false;
+                if (locationFrom.value === locationTo.value) return false;
+
+                const items = document.querySelectorAll('.repeater-item');
+                if (items.length === 0) return false;
+
+                let valid = true;
+
+                items.forEach(row => {
+                    const stock = row.querySelector('.stock-select');
+                    const qty = row.querySelector('.quantity-input');
+                    const unit = row.querySelector('.unit-select');
+
+                    if (
+                        !stock || !stock.value ||
+                        !qty || !qty.value || Number(qty.value) <= 0 ||
+                        !unit || !unit.value
+                    ) {
+                        valid = false;
+                    }
+                });
+
+                return valid;
+            }
+
+            function updateSubmitButton() {
+                submitBtn.disabled = !isFormValid();
+            }
+
+            // 🔁 Pantau perubahan form
+            form.addEventListener('input', updateSubmitButton);
+            form.addEventListener('change', updateSubmitButton);
+
+            // Saat tambah / hapus item
+            btnAddItem.addEventListener('click', () => {
+                setTimeout(updateSubmitButton, 50);
+            });
+
+            container.addEventListener('click', e => {
+                if (e.target.closest('.btn-remove-item')) {
+                    setTimeout(updateSubmitButton, 50);
+                }
+            });
+
+            // Inisialisasi awal
+            updateSubmitButton();
+
         });
     </script>
 @endpush

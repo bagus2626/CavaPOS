@@ -7,8 +7,8 @@
     <section class="content">
         <div class="container-fluid owner-stocks">
             <a href="{{ route('owner.user-owner.stocks.index') }}" class="btn btn-primary mb-3">
-              <i class="fas fa-arrow-left mr-2"></i>{{ __('messages.owner.products.stocks.back_to_list') }}
-            </a>            
+                <i class="fas fa-arrow-left mr-2"></i>{{ __('messages.owner.products.stocks.back_to_list') }}
+            </a>
             <form action="{{ route('owner.user-owner.stocks.movements.store') }}" method="POST" id="stockMovementForm">
                 @csrf
                 <input type="hidden" name="movement_type" value="in">
@@ -64,13 +64,8 @@
                                     <label for="notes">
                                         {{ __('messages.owner.products.stocks.movements_create_in.notes_label') }}
                                     </label>
-                                    <input
-                                        type="text"
-                                        name="notes"
-                                        id="notes"
-                                        class="form-control"
-                                        placeholder="{{ __('messages.owner.products.stocks.movements_create_in.notes_placeholder') }}"
-                                    >
+                                    <input type="text" name="notes" id="notes" class="form-control"
+                                        placeholder="{{ __('messages.owner.products.stocks.movements_create_in.notes_placeholder') }}">
                                 </div>
                             </div>
                         </div>
@@ -113,14 +108,10 @@
                                         {{ __('messages.owner.products.stocks.movements_create_in.quantity_label') }}
                                         <span class="text-danger">*</span>
                                     </label>
-                                    <input
-                                        type="number"
-                                        name="items[0][quantity]"
-                                        class="form-control quantity-input"
+                                    <input type="number" name="items[0][quantity]" class="form-control quantity-input"
                                         step="0.01"
                                         placeholder="{{ __('messages.owner.products.stocks.movements_create_in.quantity_placeholder') }}"
-                                        required
-                                    >
+                                        required>
                                 </div>
                                 <div class="col-md-2">
                                     <label>
@@ -137,13 +128,8 @@
                                     <label>
                                         {{ __('messages.owner.products.stocks.movements_create_in.unit_price_label') }}
                                     </label>
-                                    <input
-                                        type="number"
-                                        name="items[0][unit_price]"
-                                        class="form-control"
-                                        step="0.01"
-                                        placeholder="{{ __('messages.owner.products.stocks.movements_create_in.unit_price_placeholder') }}"
-                                    >
+                                    <input type="number" name="items[0][unit_price]" class="form-control" step="0.01"
+                                        placeholder="{{ __('messages.owner.products.stocks.movements_create_in.unit_price_placeholder') }}">
                                 </div>
                                 <div class="col-md-1">
                                     {{-- Baris pertama tidak punya tombol hapus --}}
@@ -151,7 +137,7 @@
                             </div>
                         </div>
 
-                        <button type="button" id="btn-add-item" class="btn btn-sm btn-outline-primary mt-2">
+                        <button type="button" id="btn-add-item" class="btn btn-sm btn-outline-primary mt-2" disabled>
                             <i class="fas fa-plus"></i>
                             {{ __('messages.owner.products.stocks.movements_create_in.add_item_button') }}
                         </button>
@@ -160,10 +146,11 @@
 
                 {{-- Tombol Aksi --}}
                 <div class="mt-4 mb-4">
-                    <button type="submit" class="btn btn-success">
+                    <button type="submit" class="btn btn-success" id="btn-submit" disabled>
                         <i class="fas fa-save"></i>
                         {{ __('messages.owner.products.stocks.movements_create_in.submit_button') }}
                     </button>
+
                 </div>
             </form>
         </div>
@@ -181,12 +168,9 @@
                         {{ __('messages.owner.products.stocks.movements_create_in.item_stock_placeholder') }}
                     </option>
                     @foreach ($stocks as $stock)
-                        <option
-                            value="{{ $stock->id }}"
-                            data-location-id="{{ $stock->partner_id ?? '_owner' }}"
+                        <option value="{{ $stock->id }}" data-location-id="{{ $stock->partner_id ?? '_owner' }}"
                             data-unit-group="{{ $stock->displayUnit->group_label ?? 'pcs' }}"
-                            data-display-unit-id="{{ $stock->displayUnit->id ?? '' }}"
-                        >
+                            data-display-unit-id="{{ $stock->displayUnit->id ?? '' }}">
                             {{ $stock->stock_name }}
                             ({{ $stock->partner->name ?? __('messages.owner.products.stocks.movements_create_in.location_owner_option') }})
                         </option>
@@ -198,14 +182,9 @@
                     {{ __('messages.owner.products.stocks.movements_create_in.quantity_label') }}
                     <span class="text-danger">*</span>
                 </label>
-                <input
-                    type="number"
-                    name="items[__INDEX__][quantity]"
-                    class="form-control quantity-input"
-                    step="0.01"
+                <input type="number" name="items[__INDEX__][quantity]" class="form-control quantity-input" step="0.01"
                     placeholder="{{ __('messages.owner.products.stocks.movements_create_in.quantity_placeholder') }}"
-                    required
-                >
+                    required>
             </div>
             <div class="col-md-2">
                 <label>
@@ -222,13 +201,8 @@
                 <label>
                     {{ __('messages.owner.products.stocks.movements_create_in.unit_price_label_with_unit') }}
                 </label>
-                <input
-                    type="number"
-                    name="items[__INDEX__][unit_price]"
-                    class="form-control"
-                    step="0.01"
-                    placeholder="{{ __('messages.owner.products.stocks.movements_create_in.unit_price_placeholder') }}"
-                >
+                <input type="number" name="items[__INDEX__][unit_price]" class="form-control" step="0.01"
+                    placeholder="{{ __('messages.owner.products.stocks.movements_create_in.unit_price_placeholder') }}">
             </div>
             <div class="col-md-1">
                 <button type="button" class="btn btn-sm btn-danger btn-remove-item">
@@ -373,6 +347,63 @@
                     });
                 });
             }
+
+            // Aktifkan tombol tambah item dan submit
+            const submitBtn = document.getElementById('btn-submit');
+            const addItemBtn = document.getElementById('btn-add-item');
+
+            function isFormValid() {
+                // lokasi tujuan wajib
+                if (!locationSelect.value) return false;
+
+                const items = document.querySelectorAll('.repeater-item');
+                if (items.length === 0) return false;
+
+                let valid = true;
+
+                items.forEach(row => {
+                    const stock = row.querySelector('.stock-select');
+                    const qty = row.querySelector('.quantity-input');
+                    const unit = row.querySelector('.unit-select');
+
+                    if (
+                        !stock || !stock.value ||
+                        !qty || !qty.value || Number(qty.value) <= 0 ||
+                        !unit || !unit.value
+                    ) {
+                        valid = false;
+                    }
+                });
+
+                return valid;
+            }
+
+            function updateButtons() {
+                const valid = isFormValid();
+
+                submitBtn.disabled = !valid;
+                addItemBtn.disabled = !valid;
+            }
+
+            // Pantau perubahan form
+            form.addEventListener('input', updateButtons);
+            form.addEventListener('change', updateButtons);
+
+            // Saat tambah item
+            addItemBtn.addEventListener('click', () => {
+                setTimeout(updateButtons, 50);
+            });
+
+            // Saat hapus item
+            container.addEventListener('click', e => {
+                if (e.target.closest('.btn-remove-item')) {
+                    setTimeout(updateButtons, 50);
+                }
+            });
+
+            // Init awal
+            updateButtons();
+
         });
     </script>
 @endsection
