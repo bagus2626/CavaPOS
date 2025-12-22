@@ -816,7 +816,7 @@
                                     {{ __('messages.owner.layout.user_management') }}
                                     @if ($isVerified)
                                         <i class="fas fa-angle-left right"></i>
-                                    @endif
+                                    @endif  
                                 </p>
                             </a>
                             <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">

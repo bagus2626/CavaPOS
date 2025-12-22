@@ -401,7 +401,6 @@
                         Error: Unit dasar 'pcs' tidak terdefinisi di Master Units.
                       </div>
                     @endif
-
                     {{-- Status (is_active) --}}
                     <div class="form-group">
                       <label class="mb-1">{{ __('messages.owner.products.outlet_products.status') }}</label>

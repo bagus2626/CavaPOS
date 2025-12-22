@@ -30,7 +30,7 @@ class OwnerDashboardController extends Controller
         $total_outlets = $outlets->count();
         $outlet_ids = $outlets->pluck('id')->toArray();
         $total_employees = Employee::whereIn('partner_id', $outlet_ids)->count();
-        $total_accounts = $total_outlets + $total_employees + 1;
+        $total_accounts = $total_outlets + $total_employees;
         $orders = BookingOrder::whereIn('partner_id', $outlet_ids)
             ->whereYear('created_at', now()->year);
 
