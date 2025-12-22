@@ -947,7 +947,6 @@ return [
                 'type_no_change' => 'Tidak Ada Perubahan',
                 'type_increase' => 'Penambahan',
                 'type_decrease' => 'Pengurangan',
-
                 'recipe_management' => 'Manajemen Resep',
                 'manage_recipe' => 'Atur Resep',
                 'manage_product_recipe' => 'Atur Resep Produk',

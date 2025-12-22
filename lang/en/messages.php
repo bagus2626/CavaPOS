@@ -948,7 +948,6 @@ return [
                 'type_no_change' => 'No Changes',
                 'type_increase' => 'Increase',
                 'type_decrease' => 'Decrease',
-
                 'recipe_management' => 'Recipe Management',
                 'manage_recipe' => 'Manage Recipe',
                 'manage_product_recipe' => 'Manage Product Recipe',
