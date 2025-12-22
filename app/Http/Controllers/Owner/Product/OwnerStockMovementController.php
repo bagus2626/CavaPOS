@@ -83,7 +83,7 @@ class OwnerStockMovementController extends Controller
     }
 
 
-    public function createAdjustment()
+   public function createAdjustment()
     {
         $owner = Auth::user();
 
@@ -100,7 +100,7 @@ class OwnerStockMovementController extends Controller
                     $stock->display_unit_id
                 );
             }
-            $stock->setAttribute('display_quantity', round($displayQty, 4)); // Membulatkan untuk tampilan
+            $stock->setAttribute('display_quantity', round($displayQty, 4));
         });
 
         $partners = User::where('owner_id', $owner->id)
@@ -110,10 +110,27 @@ class OwnerStockMovementController extends Controller
 
         $allUnits = MasterUnit::all();
 
+        // Daftar kategori default yang sudah ada di hardcode view
+        $defaultCategories = [
+            'damaged', 
+            'expired', 
+            'internal_use', 
+            'lost', 
+            'audit_adjustment'
+        ];
+
+        // Ambil kategori kustom yang pernah disimpan sebelumnya
+        $customCategories = StockMovement::where('owner_id', $owner->id)
+            ->whereNotIn('category', $defaultCategories)
+            ->distinct()
+            ->pluck('category');
+        // -----------------------------
+
         return view('pages.owner.products.stock-movements.create-adjustment', [
             'stocks' => $stocks,
             'partners' => $partners,
             'allUnits' => $allUnits,
+            'customCategories' => $customCategories, // <-- Jangan lupa dikirim ke view
         ]);
     }
 
@@ -181,11 +198,23 @@ class OwnerStockMovementController extends Controller
                 'items.*.unit_id' => 'required|exists:master_units,id',
                 'items.*.quantity' => 'required|numeric|min:0.01',
             ]);
+        } elseif ($type === 'adjustment') {
+            $validatedData = $request->validate([
+                'movement_type' => 'required|in:adjustment',
+                'location' => 'required|string',
+                'category' => 'required|string|max:100',
+                'notes' => 'nullable|string|max:1000',
+                'items' => 'required|array|min:1',
+                'items.*.stock_id' => ['required', 'string', Rule::exists('stocks', 'id')->where('owner_id', $owner->id)],
+                'items.*.unit_id' => 'required|exists:master_units,id',
+                'items.*.new_quantity' => 'required|numeric|min:0',
+                'items.*.current_quantity' => 'required|numeric|min:0',
+            ]);
         } elseif ($type === 'out') {
             $validatedData = $request->validate([
                 'movement_type' => 'required|in:out',
                 'location_from' => 'required|string',
-                'category' => 'required|string|max:100|not_in:transfer_out,transfer_in', // Kecualikan kategori transfer
+                'category' => 'required|string|max:100|not_in:transfer_out,transfer_in',
                 'notes' => 'nullable|string|max:1000',
                 'items' => 'required|array|min:1',
                 'items.*.stock_id' => ['required', 'string', Rule::exists('stocks', 'id')->where('owner_id', $owner->id)],
@@ -203,8 +232,10 @@ class OwnerStockMovementController extends Controller
                 $this->processStockIn($request, $owner, $validatedData['items']);
             } elseif ($type === 'transfer') {
                 $this->processTransfer($request, $owner, $validatedData['items']);
-            } elseif ($type === 'out') {
+            } elseif ($type === 'adjustment') {
                 $this->processAdjustment($request, $owner, $validatedData['items']);
+            } elseif ($type === 'out') {
+                $this->processStockOut($request, $owner, $validatedData['items']);
             }
 
             DB::commit();
@@ -395,6 +426,130 @@ class OwnerStockMovementController extends Controller
 
     private function processAdjustment(Request $request, $owner, $items)
     {
+        $location = $request->input('location') == '_owner' ? null : $request->input('location');
+        $category = $request->input('category');
+        $notes = $request->input('notes');
+
+        // Grouping items berdasarkan tipe movement (in atau out)
+        $itemsIn = [];
+        $itemsOut = [];
+
+        foreach ($items as $item) {
+            $inputNewQuantity = $item['new_quantity'];
+            $inputCurrentQuantity = $item['current_quantity'];
+            $inputUnitId = $item['unit_id'];
+
+            // Konversi ke unit dasar
+            $newQuantityInBaseUnit = $this->unitConversionService->convertToBaseUnit(
+                $inputNewQuantity,
+                $inputUnitId
+            );
+
+            $currentQuantityInBaseUnit = $this->unitConversionService->convertToBaseUnit(
+                $inputCurrentQuantity,
+                $inputUnitId
+            );
+
+            // Hitung selisih
+            $difference = $newQuantityInBaseUnit - $currentQuantityInBaseUnit;
+
+            // Skip jika tidak ada perubahan
+            if ($difference == 0) {
+                continue;
+            }
+
+            // Validasi stok
+            $stock = Stock::where('id', $item['stock_id'])
+                ->where('owner_id', $owner->id)
+                ->where('partner_id', $location)
+                ->first();
+
+            if (!$stock) {
+                $failedStockName = Stock::find($item['stock_id'])->stock_name ?? "ID {$item['stock_id']}";
+                $locationName = $location == null ? "Gudang Owner" : User::find($location)->name;
+                throw new \Exception("Item '{$failedStockName}' tidak terdaftar di lokasi '{$locationName}'.");
+            }
+
+            // Tentukan tipe movement dan grouping
+            if ($difference > 0) {
+                // PENAMBAHAN STOK (IN)
+                $itemsIn[] = [
+                    'stock' => $stock,
+                    'quantity' => abs($difference)
+                ];
+            } else {
+                // PENGURANGAN STOK (OUT)
+                // Cek ketersediaan stok
+                if ($stock->quantity < abs($difference)) {
+                    $availableInDisplayUnit = $this->unitConversionService->convertToDisplayUnit(
+                        $stock->quantity,
+                        $stock->display_unit_id ?? 1
+                    );
+                    $displayUnit = $stock->displayUnit ? $stock->displayUnit->unit_name : 'unit';
+
+                    throw new \Exception("Stok '{$stock->stock_name}' tidak mencukupi untuk adjustment (Hanya tersisa: {$availableInDisplayUnit} {$displayUnit}).");
+                }
+
+                $itemsOut[] = [
+                    'stock' => $stock,
+                    'quantity' => abs($difference)
+                ];
+            }
+        }
+
+        // Buat 1 movement IN jika ada penambahan stok
+        if (!empty($itemsIn)) {
+            $movementIn = StockMovement::create([
+                'owner_id' => $owner->id,
+                'partner_id' => $location,
+                'type' => 'in',
+                'category' => $category,
+                'notes' => $notes,
+            ]);
+
+            foreach ($itemsIn as $itemData) {
+                $stock = $itemData['stock'];
+                $quantity = $itemData['quantity'];
+
+                $movementIn->items()->create([
+                    'stock_id' => $stock->id,
+                    'quantity' => $quantity,
+                    'unit_price' => $stock->last_price_per_unit
+                ]);
+
+                $stock->increment('quantity', $quantity);
+                $this->recalculationService->recalculateLinkedProducts($stock);
+            }
+        }
+
+        // Buat 1 movement OUT jika ada pengurangan stok
+        if (!empty($itemsOut)) {
+            $movementOut = StockMovement::create([
+                'owner_id' => $owner->id,
+                'partner_id' => $location,
+                'type' => 'out',
+                'category' => $category,
+                'notes' => $notes,
+            ]);
+
+            foreach ($itemsOut as $itemData) {
+                $stock = $itemData['stock'];
+                $quantity = $itemData['quantity'];
+
+                $movementOut->items()->create([
+                    'stock_id' => $stock->id,
+                    'quantity' => $quantity,
+                    'unit_price' => $stock->last_price_per_unit
+                ]);
+
+                $stock->decrement('quantity', $quantity);
+                $this->recalculationService->recalculateLinkedProducts($stock);
+            }
+        }
+    }
+
+    private function processStockOut(Request $request, $owner, $items)
+    {
         $locationFrom = $request->input('location_from') == '_owner' ? null : $request->input('location_from');
         $category = $request->input('category');
 
@@ -402,7 +557,7 @@ class OwnerStockMovementController extends Controller
         $movement = StockMovement::create([
             'owner_id' => $owner->id,
             'partner_id' => $locationFrom,
-            'type' => 'out', // Tipe selalu 'out'
+            'type' => 'out',
             'category' => $category,
             'notes' => $request->input('notes'),
         ]);
@@ -411,13 +566,11 @@ class OwnerStockMovementController extends Controller
             $inputQuantity = $item['quantity'];
             $inputUnitId = $item['unit_id'];
 
-            // Konversi kuantitas ke unit dasar
             $quantityInBaseUnit = $this->unitConversionService->convertToBaseUnit(
                 $inputQuantity,
                 $inputUnitId
             );
 
-            // --- Validasi & Update Stok ASAL (Stock Out) ---
             $stockFrom = Stock::where('id', $item['stock_id'])
                 ->where('owner_id', $owner->id)
                 ->where('partner_id', $locationFrom)
@@ -429,9 +582,7 @@ class OwnerStockMovementController extends Controller
                 throw new \Exception("Item '{$failedStockName}' tidak terdaftar di lokasi asal '{$locationName}'.");
             }
 
-            // Cek ketersediaan stok
             if ($stockFrom->quantity < $quantityInBaseUnit) {
-                // Konversi untuk ditampilkan dalam pesan error
                 $availableInDisplayUnit = $this->unitConversionService->convertToDisplayUnit(
                     $stockFrom->quantity,
                     $stockFrom->display_unit_id ?? 1
@@ -441,14 +592,12 @@ class OwnerStockMovementController extends Controller
                 throw new \Exception("Stok '{$stockFrom->stock_name}' tidak mencukupi untuk adjustment (Hanya tersisa: {$availableInDisplayUnit} {$displayUnit}).");
             }
 
-            // Catat item KELUAR
             $movement->items()->create([
                 'stock_id' => $stockFrom->id,
                 'quantity' => $quantityInBaseUnit,
                 'unit_price' => $stockFrom->last_price_per_unit
             ]);
 
-            // Kurangi stok
             $stockFrom->decrement('quantity', $quantityInBaseUnit);
 
             $this->recalculationService->recalculateLinkedProducts($stockFrom);

@@ -57,7 +57,9 @@ class OwnerOutletProductController extends Controller
         $promotions = Promotion::where('owner_id', $owner->id)->get();
 
         return view('pages.owner.products.outlet-product.index', compact(
-            'outlets', 'categories', 'promotions'
+            'outlets',
+            'categories',
+            'promotions'
         ));
     }
 
@@ -377,8 +379,6 @@ class OwnerOutletProductController extends Controller
 
         DB::beginTransaction();
         try {
-            // dd($request->all());
-            // Dapatkan Produk dengan relasi lengkap
             $product = PartnerProduct::with(['parent_options.options.stock', 'stock'])
                 ->where('owner_id', $owner->id)
                 ->findOrFail($id);
@@ -387,11 +387,12 @@ class OwnerOutletProductController extends Controller
                 ->flatMap(fn($parent) => $parent->options ?? collect())
                 ->isNotEmpty();
 
-            // ===== VALIDASI (Mengikuti Logic Partner) =====
+            // ===== VALIDASI =====
             $rules = [
                 'stock_type'       => ['required', 'in:direct,linked'],
                 'always_available' => ['nullable', 'in:0,1'],
-                'quantity'         => ['nullable', 'integer', 'min:0'],
+                'new_quantity'     => ['nullable', 'integer', 'min:0'],
+                'current_quantity' => ['nullable', 'integer', 'min:0'],
                 'price'            => ['required'],
                 'is_active'        => ['required', 'in:0,1'],
                 'is_hot_product'   => ['required', 'in:0,1'],
@@ -399,21 +400,21 @@ class OwnerOutletProductController extends Controller
                 'options'          => [$hasOptions ? 'required' : 'sometimes', 'array'],
                 'options.*.stock_type'        => ['required', 'in:direct,linked'],
                 'options.*.always_available'  => ['nullable', 'in:0,1'],
-                'options.*.quantity'          => ['nullable', 'integer', 'min:0'],
+                'options.*.new_quantity'      => ['nullable', 'integer', 'min:0'], // UBAH
+                'options.*.current_quantity'  => ['nullable', 'integer', 'min:0'], // TAMBAH
             ];
 
             $validator = Validator::make($request->all(), $rules);
 
-            // VALIDASI CUSTOM: Quantity required HANYA jika DIRECT dan TIDAK Always Available
+            // VALIDASI CUSTOM
             $validator->after(function ($v) use ($request, $product, $hasOptions) {
-                // Validasi Produk Utama
                 $prodStockType = $request->input('stock_type');
                 if ($prodStockType === 'direct') {
                     $prodAA = (int)$request->input('always_available', 0) === 1;
                     if (!$prodAA) {
-                        $q = $request->input('quantity', null);
+                        $q = $request->input('new_quantity', null);
                         if ($q === null || $q === '') {
-                            $v->errors()->add('quantity', 'Quantity is required unless product is set to always available.');
+                            $v->errors()->add('new_quantity', 'New quantity is required unless product is set to always available.');
                         }
                     }
                 }
@@ -425,8 +426,9 @@ class OwnerOutletProductController extends Controller
                         if ($optStockType === 'direct') {
                             $oa = (int)($opt['always_available'] ?? 0) === 1;
                             if (!$oa) {
-                                if (!array_key_exists('quantity', $opt) || $opt['quantity'] === '' || $opt['quantity'] === null) {
-                                    $v->errors()->add("options.$oid.quantity", 'Quantity is required unless this option is set to always available.');
+                                // UBAH: cek new_quantity bukan quantity
+                                if (!array_key_exists('new_quantity', $opt) || $opt['new_quantity'] === '' || $opt['new_quantity'] === null) {
+                                    $v->errors()->add("options.$oid.new_quantity", 'New quantity is required unless this option is set to always available.');
                                 }
                             }
                         }
@@ -472,16 +474,18 @@ class OwnerOutletProductController extends Controller
                 'price'                 => $newPrice,
             ]);
 
-            // ===== SYNC PRODUCT STOCK (Mengikuti Logic Partner) =====
-            $this->syncProductStock(
+            // ===== SYNC PRODUCT STOCK WITH ADJUSTMENT LOGIC =====
+            $this->syncProductStockWithAdjustment(
                 $product,
                 $newStockType,
                 $productAlways,
-                (int)($validated['quantity'] ?? 0),
-                $pcsUnitId
+                (int)($validated['new_quantity'] ?? 0),
+                (int)($validated['current_quantity'] ?? 0),
+                $pcsUnitId,
+                $owner
             );
 
-            // ===== SYNC OPTION STOCKS =====
+            // ===== SYNC OPTION STOCKS (sama seperti sebelumnya) =====
             $this->syncOptionStocks(
                 $product,
                 $request->input('options', []),
@@ -503,62 +507,118 @@ class OwnerOutletProductController extends Controller
     }
 
     /**
-     * Menangani update/pembuatan/penghapusan stok untuk produk utama.
-     * (SAMA dengan PartnerProductController)
+     * Sync product stock dengan logic adjustment (IN/OUT movement)
      */
-    private function syncProductStock(
+    private function syncProductStockWithAdjustment(
         PartnerProduct $product,
         string $newStockType,
         bool $productAlways,
         int $newQuantity,
-        int $pcsUnitId
+        int $currentQuantity,
+        int $pcsUnitId,
+        $owner
     ): void {
-        // Mengubah ke LINKED atau tetap LINKED
+        // LINKED: Hapus stok direct dan trigger recalculation
         if ($newStockType === 'linked') {
-            // Jika ada stok direct yang lama, HAPUS
             if ($product->stock) {
                 $product->stock->delete();
                 unset($product->stock);
                 $product->load('stock');
             }
-            // Trigger recalculation untuk linked stock
             $this->recalculationService->recalculateSingleTarget($product);
+            return;
         }
-        // DIRECT (Termasuk switch dari LINKED ke DIRECT)
-        elseif ($newStockType === 'direct') {
-            $existingStock = Stock::where('partner_product_id', $product->id)
-                ->whereNull('partner_product_option_id')
-                ->first();
 
-            // Cek apakah entri stok direct sudah ada di DB
-            if ($existingStock) {
-                // UPDATE STOK YANG ADA
-                // PENTING: Tambahkan quantity_reserved untuk menjaga stock yang ter-reserve
-                $existingStock->quantity = $productAlways ? 0 : $newQuantity + ($existingStock->quantity_reserved ?? 0);
-                $existingStock->save();
-            } else {
-                // Buat stok baru (baik Always Available maupun tidak)
-                Stock::create([
-                    'stock_code'              => $this->generateUniqueStockCode(),
-                    'stock_type'              => 'direct',
-                    'owner_id'                => $product->owner_id,
-                    'partner_id'              => $product->partner_id,
-                    'type'                    => 'partner',
-                    'stock_name'              => $product->name,
-                    'quantity'                => $productAlways ? 0 : $newQuantity,
-                    'display_unit_id'         => $pcsUnitId,
-                    'owner_master_product_id' => $product->master_product_id,
-                    'partner_product_id'      => $product->id,
-                    'last_price_per_unit'     => $product->price,
-                    'description'             => $product->description,
-                ]);
-            }
+        // DIRECT: Handle adjustment
+        $existingStock = Stock::where('partner_product_id', $product->id)
+            ->whereNull('partner_product_option_id')
+            ->first();
+
+        // Hitung selisih
+        $difference = $newQuantity - $currentQuantity;
+
+        // Jika belum ada stok, buat baru
+        if (!$existingStock) {
+            Stock::create([
+                'stock_code'              => $this->generateUniqueStockCode(),
+                'stock_type'              => 'direct',
+                'owner_id'                => $product->owner_id,
+                'partner_id'              => $product->partner_id,
+                'type'                    => 'partner',
+                'stock_name'              => $product->name,
+                'quantity'                => $productAlways ? 0 : $newQuantity,
+                'display_unit_id'         => $pcsUnitId,
+                'owner_master_product_id' => $product->master_product_id,
+                'partner_product_id'      => $product->id,
+                'last_price_per_unit'     => $product->price,
+                'description'             => $product->description,
+            ]);
+            return;
         }
+
+        // Jika Always Available, set quantity ke 0
+        if ($productAlways) {
+            $existingStock->quantity = $existingStock->quantity_reserved ?? 0;
+            $existingStock->save();
+            return;
+        }
+
+        // Jika tidak ada perubahan, skip
+        if ($difference == 0) {
+            return;
+        }
+
+        // Buat stock movement berdasarkan selisih
+        $category = 'stock_adjustment'; // Kategori default untuk adjustment dari owner
+
+        if ($difference > 0) {
+            // PENAMBAHAN STOK (IN)
+            $movement = StockMovement::create([
+                'owner_id' => $owner->id,
+                'partner_id' => $product->partner_id,
+                'type' => 'in',
+                'category' => $category,
+            ]);
+
+            $movement->items()->create([
+                'stock_id' => $existingStock->id,
+                'quantity' => abs($difference),
+                'unit_price' => $existingStock->last_price_per_unit
+            ]);
+
+            $existingStock->increment('quantity', abs($difference));
+        } else {
+            // PENGURANGAN STOK (OUT)
+            // Validasi ketersediaan
+            if ($existingStock->quantity < abs($difference)) {
+                throw new \Exception(
+                    "Stok '{$existingStock->stock_name}' tidak mencukupi. " .
+                        "Tersedia: {$existingStock->quantity} pcs"
+                );
+            }
+
+            $movement = StockMovement::create([
+                'owner_id' => $owner->id,
+                'partner_id' => $product->partner_id,
+                'type' => 'out',
+                'category' => $category,
+            ]);
+
+            $movement->items()->create([
+                'stock_id' => $existingStock->id,
+                'quantity' => abs($difference),
+                'unit_price' => $existingStock->last_price_per_unit
+            ]);
+
+            $existingStock->decrement('quantity', abs($difference));
+        }
+
+        // Recalculate linked products jika ada
+        $this->recalculationService->recalculateLinkedProducts($existingStock);
     }
 
     /**
      * Menangani update/pembuatan/penghapusan stok untuk opsi produk.
-     * (SAMA dengan PartnerProductController)
      */
     private function syncOptionStocks(
         PartnerProduct $product,
@@ -567,6 +627,7 @@ class OwnerOutletProductController extends Controller
     ): void {
         if (empty($optionInputs)) return;
 
+        $owner = Auth::user();
         $optionIds = array_map('intval', array_keys($optionInputs));
         $options = PartnerProductOption::with('stock')
             ->whereIn('id', $optionIds)
@@ -582,55 +643,108 @@ class OwnerOutletProductController extends Controller
             $optStockType = $payload['stock_type'] ?? 'direct';
             $optAlways = (int)($payload['always_available'] ?? 0) === 1;
 
-            // Kuantitas hanya relevan jika DIRECT dan TIDAK Always Available
-            $optQty = ($optStockType === 'direct' && !$optAlways) ? (int)($payload['quantity'] ?? 0) : 0;
-
-            // Update model opsi (stock_type, always_available)
+            // Update model opsi
             $optModel->stock_type = $optStockType;
             $optModel->always_available_flag = $optAlways;
             $optModel->save();
 
-            // Berubah dari DIRECT ke LINKED atau tetap LINKED
+            // LINKED: Hapus stok direct dan trigger recalculation
             if ($optStockType === 'linked') {
-                // Hapus stok direct yang ada
                 if ($optModel->stock) {
                     $optModel->stock->delete();
                     unset($optModel->stock);
                     $optModel->load('stock');
                 }
-                // Trigger recalculation
                 $this->recalculationService->recalculateSingleTarget($optModel);
+                continue;
             }
-            // DIRECT
-            elseif ($optStockType === 'direct') {
-                // Query fresh dari database untuk memastikan data terkini
-                $existingStock = Stock::where('partner_product_option_id', $optModel->id)
-                    ->first();
 
-                if ($existingStock) {
-                    // Update stok yang sudah ada
-                    // PENTING: Tambahkan quantity_reserved
-                    $existingStock->quantity = $optQty + ($existingStock->quantity_reserved ?? 0);
-                    $existingStock->save();
-                } else {
-                    // Buat stok baru
-                    Stock::create([
-                        'stock_code'               => $this->generateUniqueStockCode(),
-                        'stock_type'               => 'direct',
-                        'owner_id'                 => $product->owner_id,
-                        'partner_id'               => $product->partner_id,
-                        'type'                     => 'partner',
-                        'stock_name'               => $product->name . ' - ' . $optModel->name,
-                        'quantity'                 => $optQty,
-                        'display_unit_id'          => $pcsUnitId,
-                        'owner_master_product_id'  => $product->master_product_id,
-                        'partner_product_id'       => $product->id,
-                        'partner_product_option_id' => $optModel->id,
-                        'last_price_per_unit'      => $optModel->price,
-                        'description'              => $optModel->description,
-                    ]);
-                }
+            // DIRECT: Handle adjustment
+            $newQuantity = (int)($payload['new_quantity'] ?? 0);
+            $currentQuantity = (int)($payload['current_quantity'] ?? 0);
+            $difference = $newQuantity - $currentQuantity;
+
+            $existingStock = Stock::where('partner_product_option_id', $optModel->id)
+                ->first();
+
+            // Jika belum ada stok, buat baru
+            if (!$existingStock) {
+                Stock::create([
+                    'stock_code'               => $this->generateUniqueStockCode(),
+                    'stock_type'               => 'direct',
+                    'owner_id'                 => $product->owner_id,
+                    'partner_id'               => $product->partner_id,
+                    'type'                     => 'partner',
+                    'stock_name'               => $product->name . ' - ' . $optModel->name,
+                    'quantity'                 => $optAlways ? 0 : $newQuantity,
+                    'display_unit_id'          => $pcsUnitId,
+                    'owner_master_product_id'  => $product->master_product_id,
+                    'partner_product_id'       => $product->id,
+                    'partner_product_option_id' => $optModel->id,
+                    'last_price_per_unit'      => $optModel->price,
+                    'description'              => $optModel->description,
+                ]);
+                continue;
             }
+
+            // Jika Always Available, set quantity ke reserved only
+            if ($optAlways) {
+                $existingStock->quantity = $existingStock->quantity_reserved ?? 0;
+                $existingStock->save();
+                continue;
+            }
+
+            // Jika tidak ada perubahan, skip
+            if ($difference == 0) {
+                continue;
+            }
+
+            // Buat stock movement berdasarkan selisih
+            $category = 'stock_adjustment';
+            $itemName = $product->name . ' - ' . $optModel->name;
+
+            if ($difference > 0) {
+                // PENAMBAHAN STOK (IN)
+                $movement = StockMovement::create([
+                    'owner_id' => $owner->id,
+                    'partner_id' => $product->partner_id,
+                    'type' => 'in',
+                    'category' => $category,
+                ]);
+
+                $movement->items()->create([
+                    'stock_id' => $existingStock->id,
+                    'quantity' => abs($difference),
+                    'unit_price' => $existingStock->last_price_per_unit
+                ]);
+
+                $existingStock->increment('quantity', abs($difference));
+            } else {
+                // PENGURANGAN STOK (OUT)
+                if ($existingStock->quantity < abs($difference)) {
+                    throw new \Exception(
+                        "Stok '{$existingStock->stock_name}' tidak mencukupi. " .
+                            "Tersedia: {$existingStock->quantity} pcs"
+                    );
+                }
+
+                $movement = StockMovement::create([
+                    'owner_id' => $owner->id,
+                    'partner_id' => $product->partner_id,
+                    'type' => 'out',
+                    'category' => $category,
+                ]);
+
+                $movement->items()->create([
+                    'stock_id' => $existingStock->id,
+                    'quantity' => abs($difference),
+                    'unit_price' => $existingStock->last_price_per_unit
+                ]);
+
+                $existingStock->decrement('quantity', abs($difference));
+            }
+
+            $this->recalculationService->recalculateLinkedProducts($existingStock);
         }
     }
 
@@ -681,7 +795,7 @@ class OwnerOutletProductController extends Controller
 
             return [
                 'id' => $stock->id,
-                'name' => $stock->stock_name . ' (' . ($stock->partner->name ?? 'Gudang Owner') . ')',
+                'name' => $stock->stock_name,
                 'current_unit_id' => $stock->display_unit_id,
                 'current_unit_name' => $stock->displayUnit->unit_name ?? '-',
                 'available_units' => $compatibleUnits
