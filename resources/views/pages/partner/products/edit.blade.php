@@ -231,7 +231,7 @@
 
                     {{-- Stock Type Product --}}
                     <div class="form-group mb-3">
-                      <label class="mb-2 fw-600">Stock Type</label>
+                      <label class="mb-2 fw-600">{{ __('messages.partner.product.all_product.stock_type') }}</label>
                       <select name="stock_type" id="product_stock_type" class="form-control">
                         <option value="direct" {{ $prodStockType === 'direct' ? 'selected' : '' }}>Direct Stock</option>
                         <option value="linked" {{ $prodStockType === 'linked' ? 'selected' : '' }}>Linked (Recipe Based)</option>

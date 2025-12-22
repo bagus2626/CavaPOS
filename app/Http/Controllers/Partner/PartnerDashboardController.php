@@ -28,7 +28,7 @@ class PartnerDashboardController extends Controller
         $total_products = PartnerProduct::where('partner_id', $partner->id)->count();
 
         // Total akun (partner + karyawan)
-        $total_accounts = $total_employees + 1;
+        $total_accounts = $total_employees;
 
         // Orders untuk outlet ini
         $orders = BookingOrder::where('partner_id', $partner->id)

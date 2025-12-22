@@ -941,6 +941,8 @@ return [
                 'linked_stock_info' => 'Product will be created with 0 stock. You can configure raw material links in <strong>Stock Management</strong> page.',
                 'enter_initial_stock' => 'Enter initial stock quantity for this product',
                 'price_outlet_hint' => 'This price only applies to this outlet',
+                'stock_type' => 'Stock Type',
+                'last' => 'Last',
             ],
             'stocks' => [
                 'add_stock_item'        => 'Add Stock Item',
@@ -1544,7 +1546,8 @@ return [
                 'save_changes' => 'Save Changes',
                 'created' => 'Created',
                 'last_updated' => 'Last Updated',
-                'owner' => 'Owner'
+                'owner' => 'Owner',
+                'stock_type' => 'Stock Type'
             ],
         ],
     ],

@@ -461,6 +461,7 @@
                                                     <th>PAYMENT METHOD</th>
                                                     <th>TOTAL</th>
                                                     <th>ORDER DATE</th>
+                                                    <th>STATUS</th>
                                                     <th>DETAIL</th>
                                                 </tr>
                                             </thead>

@@ -181,9 +181,9 @@
                                   <tr>
                                     <th style="width:20%">{{ __('messages.owner.products.outlet_products.option') }}</th>
                                     <th class="text-right" style="width:12%">{{ __('messages.owner.products.outlet_products.price') }}</th>
-                                    <th class="text-center" style="width:13%">Stock Type</th>
+                                    <th class="text-center" style="width:13%">{{ __('messages.owner.products.outlet_products.stock_type') }}</th>
                                     <th class="text-center" style="width:45%">{{ __('messages.owner.products.outlet_products.new_stock') }}</th>
-                                    <th class="text-center" style="width:10%">Last</th>
+                                    <th class="text-center" style="width:10%">{{ __('messages.owner.products.outlet_products.last') }}</th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -322,7 +322,7 @@
 
                     {{-- Stock Type Product --}}
                     <div class="form-group mb-3">
-                      <label class="mb-2 font-weight-bold">Stock Type</label>
+                      <label class="mb-2 font-weight-bold">{{ __('messages.owner.products.outlet_products.stock_type') }}</label>
                       <select name="stock_type" id="product_stock_type" class="form-control">
                         <option value="direct" {{ $prodStockType === 'direct' ? 'selected' : '' }}>Direct Stock</option>
                         <option value="linked" {{ $prodStockType === 'linked' ? 'selected' : '' }}>Linked (Recipe Based)</option>

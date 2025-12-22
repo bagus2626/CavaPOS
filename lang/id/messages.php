@@ -940,6 +940,8 @@ return [
                 'linked_stock_info' => 'Produk akan dibuat dengan stok 0. Anda dapat mengatur hubungan dengan bahan baku di halaman <strong>Manajemen Stok</strong>.',
                 'enter_initial_stock' => 'Masukkan jumlah stok awal untuk produk ini',
                 'price_outlet_hint' => 'Harga ini hanya berlaku untuk outlet ini',
+                'stock_type' => 'Jenis Stok',
+                'last' => 'Terakhir',
             ],
             'stocks' => [
                 'add_stock_item' => 'Tambah Item Stok',
@@ -1543,7 +1545,8 @@ return [
                 'save_changes' => 'Simpan Perubahan',
                 'created' => 'Dibuat',
                 'last_updated' => 'Update Terakhir',
-                'owner' => 'Pemilik'
+                'owner' => 'Pemilik',
+                'stock_type' => 'Jenis Stok'
             ],
         ],
     ],
