@@ -31,13 +31,16 @@ class OwnerDashboardController extends Controller
         $outlet_ids = $outlets->pluck('id')->toArray();
         $total_employees = Employee::whereIn('partner_id', $outlet_ids)->count();
         $total_accounts = $total_outlets + $total_employees;
-        $orders = BookingOrder::whereIn('partner_id', $outlet_ids)
-            ->whereYear('created_at', now()->year);
 
-        $orders_gross_income = $orders->sum('total_order_value');
-        $total_orders = $orders->count();
+        $ordersQuery = BookingOrder::whereIn('partner_id', $outlet_ids)
+            ->whereYear('created_at', now()->year)
+            ->whereIn('order_status', ['PAID', 'PROCESSED', 'SERVED']);
 
-        $last_orders = $orders->whereIn('order_status', ['PAID', 'PROCESSED', 'SERVED'])->latest()->take(10)->get();
+        $orders_gross_income = (clone $ordersQuery)->sum('total_order_value');
+
+        $total_orders = (clone $ordersQuery)->count();
+
+        $last_orders = (clone $ordersQuery)->latest()->take(10)->get();
 
         $popups = Message::with(['recipients', 'attachments'])
             ->whereHas('recipients', function ($q) use ($owner) {
@@ -116,7 +119,7 @@ class OwnerDashboardController extends Controller
             'total_outlets'      => $total_outlets,
             'total_employees'    => $total_employees,
             'total_accounts'     => $total_accounts,
-            'orders_gross_income'=> $orders_gross_income,
+            'orders_gross_income' => $orders_gross_income,
             'total_orders'       => $total_orders,
             'total_products'     => $total_products,
             'last_orders'        => $last_orders,
@@ -171,5 +174,4 @@ class OwnerDashboardController extends Controller
 
         return view('pages.owner.dashboard.partials.timeline-items', compact('messages'));
     }
-
 }

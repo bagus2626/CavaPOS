@@ -151,12 +151,12 @@
 function deleteTable(tableId) {
   const swal = window.$swal || window.Swal;
   swal.fire({
-    title: 'Apakah Anda yakin?',
-    text: 'Anda tidak dapat mengembalikan data tersebut!',
+    title: '{{ __('messages.partner.outlet.table_management.tables.delete_confirm_1') }}',
+    text: '{{ __('messages.partner.outlet.table_management.tables.delete_confirm_2') }}',
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonText: 'Ya, Hapus!',
-    cancelButtonText: 'Batalkan'
+    confirmButtonText: '{{ __('messages.partner.outlet.table_management.tables.delete_confirm_3') }}',
+    cancelButtonText: '{{ __('messages.partner.outlet.table_management.tables.delete_confirm_4') }}'
   }).then((result) => {
     if (!result.isConfirmed) return;
 

@@ -12,7 +12,8 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('guest')->group(function () {
+// Route untuk PARTNER dengan middleware redirect.auth.role
+Route::middleware('redirect.auth.role')->group(function () {
     Route::get('partner/register', [RegisteredUserController::class, 'create'])
         ->name('register');
 
@@ -22,7 +23,19 @@ Route::middleware('guest')->group(function () {
         ->name('login');
 
     Route::post('partner/login', [AuthenticatedSessionController::class, 'store']);
+});
 
+// Route untuk ADMIN dengan middleware redirect.auth.role
+Route::middleware('redirect.auth.role')->group(function () {
+    Route::get('admin/login', [AdminAuthenticatedSessionController::class, 'create'])
+        ->name('admin.login');
+
+    Route::post('admin/login', [AdminAuthenticatedSessionController::class, 'store'])
+        ->name('admin.login.submit');
+});
+
+// Route untuk password reset (tetap pakai guest)
+Route::middleware('guest')->group(function () {
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');
 
@@ -34,12 +47,6 @@ Route::middleware('guest')->group(function () {
 
     Route::post('reset-password', [NewPasswordController::class, 'store'])
         ->name('password.store');
-
-    Route::get('admin/login', [AdminAuthenticatedSessionController::class, 'create'])
-        ->name('admin.login');
-
-    Route::post('admin/login', [AdminAuthenticatedSessionController::class, 'store'])
-        ->name('admin.login');
 });
 
 Route::middleware('auth')->group(function () {

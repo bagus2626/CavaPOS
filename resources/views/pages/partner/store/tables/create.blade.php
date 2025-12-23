@@ -53,15 +53,20 @@
                                 <select name="status" id="status"
                                     class="form-control select2 @error('status') is-invalid @enderror" required>
                                     <option value="">
-                                        {{ __('messages.partner.outlet.table_management.tables.choose_status') }}</option>
+                                        {{ __('messages.partner.outlet.table_management.tables.choose_status') }}
+                                    </option>
                                     <option value="available" {{ old('status') == 'available' ? 'selected' : '' }}>
-                                        {{ __('messages.partner.outlet.table_management.tables.available') }}</option>
+                                        {{ __('messages.partner.outlet.table_management.tables.available') }}
+                                    </option>
                                     <option value="occupied" {{ old('status') == 'occupied' ? 'selected' : '' }}>
-                                        {{ __('messages.partner.outlet.table_management.tables.occupied') }}</option>
+                                        {{ __('messages.partner.outlet.table_management.tables.occupied') }}
+                                    </option>
                                     <option value="reserved" {{ old('status') == 'reserved' ? 'selected' : '' }}>
-                                        {{ __('messages.partner.outlet.table_management.tables.reserved') }}</option>
+                                        {{ __('messages.partner.outlet.table_management.tables.reserved') }}
+                                    </option>
                                     <option value="not_available" {{ old('status') == 'not_available' ? 'selected' : '' }}>
-                                        {{ __('messages.partner.outlet.table_management.tables.not_available') }}</option>
+                                        {{ __('messages.partner.outlet.table_management.tables.not_available') }}
+                                    </option>
                                 </select>
                                 @error('status')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -86,8 +91,7 @@
 
                                         @if (!empty($table_classes) && $table_classes->count() > 0)
                                             @foreach ($table_classes as $class)
-                                                <option value="{{ $class }}"
-                                                    {{ old('table_class') == $class ? 'selected' : '' }}>
+                                                <option value="{{ $class }}" {{ old('table_class') == $class ? 'selected' : '' }}>
                                                     {{ $class }}
                                                 </option>
                                             @endforeach
@@ -124,14 +128,10 @@
                             <div class="col-md-6 mb-3">
                                 <label for="images"
                                     class="form-label">{{ __('messages.partner.outlet.table_management.tables.upload_images') }}</label>
-                                <input type="file" name="images[]" id="images"
-                                    class="form-control @error('images') is-invalid @enderror" accept="image/*" multiple>
-                                <small
-                                    class="text-muted d-block">{{ __('messages.partner.outlet.table_management.tables.muted_text_1') }}</small>
+                                <input type="file" name="images" id="images"
+                                    class="form-control @error('images') is-invalid @enderror" accept="image/*">
+                                <small class="text-muted d-block">Gunakan JPG, PNG, atau WEBP. Maksimal 2MB.</small>
                                 @error('images')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                                @error('images.*')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
 
@@ -396,55 +396,54 @@
 
 @push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Select2 (status)
+        document.addEventListener('DOMContentLoaded', function () {
             if (window.jQuery && $('.select2').length) {
                 $('.select2').select2({
                     theme: 'bootstrap-5'
                 });
             }
 
-            // Preview & validasi gambar (maks 3, tipe & size)
             const input = document.getElementById('images');
             const previewWrap = document.getElementById('imagesPreview');
             const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'];
             const MAX_SIZE = 2 * 1024 * 1024; // 2MB
-            const MAX_FILES = 3;
 
             if (input && previewWrap) {
-                input.addEventListener('change', () => {
-                    const files = Array.from(input.files || []);
-                    if (files.length > MAX_FILES) {
-                        alert(`Maksimal ${MAX_FILES} gambar.`);
-                        input.value = '';
+                input.addEventListener('change', function () {
+                    const file = this.files[0];
+
+                    if (!file) {
                         previewWrap.innerHTML = '';
                         return;
                     }
-                    for (const f of files) {
-                        if (!ALLOWED.includes(f.type)) {
-                            alert('Gunakan JPG, PNG, atau WEBP.');
-                            input.value = '';
-                            previewWrap.innerHTML = '';
-                            return;
-                        }
-                        if (f.size > MAX_SIZE) {
-                            alert('Ukuran file melebihi 2 MB.');
-                            input.value = '';
-                            previewWrap.innerHTML = '';
-                            return;
-                        }
+
+                    if (!ALLOWED.includes(file.type)) {
+                        alert('Gunakan format gambar JPG, PNG, atau WEBP.');
+                        this.value = '';
+                        previewWrap.innerHTML = '';
+                        return;
                     }
+
+                    if (file.size > MAX_SIZE) {
+                        alert('Ukuran file tidak boleh melebihi 2 MB.');
+                        this.value = '';
+                        previewWrap.innerHTML = '';
+                        return;
+                    }
+
                     previewWrap.innerHTML = '';
-                    files.forEach((file) => {
-                        const url = URL.createObjectURL(file);
-                        const a = document.createElement('div');
-                        a.className = 'thumb-item';
-                        a.innerHTML = `
-          <img src="${url}" class="thumb-img" alt="${file.name}">
-          <div class="thumb-caption">${file.name}</div>
-        `;
-                        previewWrap.appendChild(a);
-                    });
+                    const url = URL.createObjectURL(file);
+                    const thumbItem = document.createElement('div');
+                    thumbItem.style.maxWidth = '250px';
+                    thumbItem.innerHTML = `
+                            <div class="card shadow-sm border-0 mt-2">
+                                <img src="${url}" class="card-img-top rounded" style="height: 150px; object-fit: cover;">
+                                <div class="card-body p-2 bg-light text-center">
+                                    <small class="text-truncate d-block" style="max-width: 230px;">${file.name}</small>
+                                </div>
+                            </div>
+                        `;
+                    previewWrap.appendChild(thumbItem);
                 });
             }
 
@@ -458,7 +457,6 @@
 
             let isInputMode = false;
 
-            // Initialize Select2
             if (selectClass.length) {
                 selectClass.select2({
                     theme: 'bootstrap-5',
@@ -467,24 +465,13 @@
                 });
             }
 
-            // Handle klik tombol "Tambah Kelas Baru"
-            if (btnAddNewClass) {
-                btnAddNewClass.addEventListener('click', function() {
-                    switchToInputMode();
-                });
-            }
-
-            // Fungsi untuk switch ke input mode
             function switchToInputMode() {
                 isInputMode = true;
                 selectMode.style.display = 'none';
                 inputMode.style.display = 'block';
-
-                // Disable select dan set required ke input
                 selectClass.prop('required', false);
                 newClassInput.required = true;
 
-                // Focus ke input dengan smooth animation
                 setTimeout(() => {
                     newClassInput.focus();
                     inputMode.style.opacity = '1';
@@ -494,55 +481,45 @@
                 inputMode.style.transition = 'opacity 0.2s ease';
             }
 
-            // Fungsi untuk kembali ke select mode
             function switchToSelectMode() {
                 isInputMode = false;
                 inputMode.style.display = 'none';
                 selectMode.style.display = 'block';
-
-                // Enable select dan remove required dari input
                 selectClass.prop('required', true);
                 newClassInput.required = false;
                 newClassInput.value = '';
-
-                // Reset select ke empty
                 selectClass.val('').trigger('change');
             }
 
-            // Handle tombol batal
+            if (btnAddNewClass) {
+                btnAddNewClass.addEventListener('click', switchToInputMode);
+            }
+
             if (cancelBtn) {
                 cancelBtn.addEventListener('click', switchToSelectMode);
             }
 
-            // Handle form submit
             if (form) {
-                form.addEventListener('submit', function(e) {
+                form.addEventListener('submit', function (e) {
                     if (isInputMode) {
                         const newClassName = newClassInput.value.trim();
 
                         if (!newClassName) {
                             e.preventDefault();
-                            alert(
-                                'Silakan masukkan nama kelas baru atau klik "Batal" untuk memilih kelas yang ada'
-                                );
+                            alert('Silakan masukkan nama kelas baru atau klik "Batal".');
                             newClassInput.focus();
                             return false;
                         }
 
-                        // Buat option baru dan set sebagai selected
                         const newOption = new Option(newClassName, newClassName, true, true);
                         selectClass.append(newOption).trigger('change');
 
-                        // Re-enable select sebelum submit
                         selectClass.prop('required', true);
                         newClassInput.required = false;
-
-                        console.log('New class created:', newClassName);
                     }
                 });
             }
 
-            // Handle initial state jika ada error dan old() value
             const initialValue = selectClass.val();
             if (!initialValue && '{{ old('new_table_class') }}') {
                 switchToInputMode();

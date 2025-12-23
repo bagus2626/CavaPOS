@@ -334,7 +334,7 @@
 
 @endsection
 
-@push('scripts')
+{{-- @push('scripts')
   <script>
     // Helper hapus global: gunakan $swal kalau sudah di-layout, fallback ke Swal
     function confirmDeletion(url, opts = {}) {
@@ -369,4 +369,4 @@
       form.submit();
     }
   </script>
-@endpush
+@endpush --}}

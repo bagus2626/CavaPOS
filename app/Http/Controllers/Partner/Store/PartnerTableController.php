@@ -52,48 +52,40 @@ class PartnerTableController extends Controller
     {
         DB::beginTransaction();
         try {
-            // dd($request->all());
             $validated = $request->validate([
                 'table_no' => 'required|string|max:255',
                 'table_class' => 'required|string|max:255',
                 'description' => 'nullable|string',
-                'images' => 'nullable|array|max:5',
+                'images' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', // Ubah ke tunggal
             ], [
                 'table_no.required' => 'Nomor meja wajib diisi.',
                 'table_class.required' => 'Kelas meja wajib diisi.',
-                'images.array' => 'Gambar harus berupa array.',
-                'images.max' => 'Maksimal 5 gambar yang diizinkan.',
+                'images.image' => 'File harus berupa gambar.',
+                'images.max' => 'Ukuran gambar maksimal 2MB.',
             ]);
 
-            $storedImages = [];
+            $storedImageData = null; // Bukan array lagi
             if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-                    $path = $image->storeAs('uploads/store/tables', $filename, 'public');
+                $image = $request->file('images'); // Ambil satu file
+                $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                $path = $image->storeAs('uploads/store/tables', $filename, 'public');
 
-                    // Optional: Compress & resize image
-                    $img = Image::make(storage_path('app/public/' . $path));
-                    $img->resize(800, null, function ($constraint) {
-                        $constraint->aspectRatio();
-                        $constraint->upsize();
-                    })->save();
+                // Compress & resize image
+                $img = Image::make(storage_path('app/public/' . $path));
+                $img->resize(800, null, function ($constraint) {
+                    $constraint->aspectRatio();
+                    $constraint->upsize();
+                })->save();
 
-                    $storedImages[] = [
-                        'path'     => 'storage/' . $path,
-                        'filename' => $filename,
-                        'mime'     => $image->getClientMimeType(),
-                        'size'     => $image->getSize(),
-                    ];
-                }
+                $storedImageData = [
+                    'path'     => 'storage/' . $path,
+                    'filename' => $filename,
+                    'mime'     => $image->getClientMimeType(),
+                    'size'     => $image->getSize(),
+                ];
             }
-            //generate table barcode
-            $barcode = 'TB' . strtoupper(uniqid());
-            //generate table URL
-            // $table_url = route('customer.menu.index', [
-            //     'partner_slug' => Auth::user()->slug,
-            //     'table_code'   => $barcode,
-            // ]);
 
+            $barcode = 'TB' . strtoupper(uniqid());
             $table_url = 'customer/' . Auth::user()->slug . '/menu' . '/' . $barcode;
 
             $table = new Table();
@@ -103,7 +95,7 @@ class PartnerTableController extends Controller
             $table->table_class = $validated['table_class'];
             $table->description = $validated['description'] ?? null;
             $table->status = $request->input('status', 'available');
-            $table->images = $storedImages ?? null;
+            $table->images = $storedImageData; // Simpan data gambar tunggal
             $table->table_url = $table_url ?? null;
             $table->save();
 
@@ -111,13 +103,10 @@ class PartnerTableController extends Controller
 
             return redirect()
                 ->route('partner.store.tables.index')
-                ->with('success', 'Product added successfully!');
+                ->with('success', 'Meja berhasil ditambahkan!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()
-                ->back()
-                ->withInput()
-                ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+            return redirect()->back()->withInput()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
 
@@ -137,82 +126,55 @@ class PartnerTableController extends Controller
     public function update(Request $request, $id)
     {
         DB::beginTransaction();
-
         try {
-            $table = Table::where('id', $id)
-                ->where('partner_id', Auth::id())
-                ->firstOrFail();
+            $table = Table::where('id', $id)->where('partner_id', Auth::id())->firstOrFail();
 
             $validated = $request->validate([
                 'table_no'    => 'required|string|max:255',
                 'table_class' => 'required|string|max:255',
                 'description' => 'nullable|string',
-                'images'      => 'nullable|array|max:5',
-                'images.*'    => 'image|mimes:jpeg,jpg,png,webp|max:4096',
+                'images'      => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048', // Tunggal
             ]);
 
             $disk = Storage::disk('public');
+            $storedImages = $table->images; // Ambil data lama
 
-            $storedImages = is_array($table->images)
-                ? $table->images
-                : (json_decode($table->images ?? '[]', true) ?: []);
-
-            if ($request->hasFile('images') && count($request->file('images')) > 0) {
-
-                foreach ($storedImages as $img) {
-                    $storedPath   = $img['path'] ?? '';
-                    $relativePath = ltrim(preg_replace('#^storage/#', '', $storedPath), '/'); // "uploads/..."
-
-                    if ($relativePath && $disk->exists($relativePath)) {
-                        $disk->delete($relativePath);
+            // Logika Hapus Gambar Lama
+            if ($request->keep_existing_image == '0' || $request->hasFile('images')) {
+                if (!empty($storedImages)) {
+                    // Karena data lama mungkin berbentuk array (dari sistem sebelumnya)
+                    $oldImages = is_array($storedImages) ? $storedImages : json_decode($storedImages, true);
+                    foreach ($oldImages as $img) {
+                        $relativePath = ltrim(preg_replace('#^storage/#', '', $img['path']), '/');
+                        if ($disk->exists($relativePath)) {
+                            $disk->delete($relativePath);
+                        }
                     }
                 }
-
-                $storedImages = [];
-            } else {
-                if ($request->filled('delete_images') && is_array($request->delete_images)) {
-                    $filenamesToDelete = $request->delete_images;
-
-                    $storedImages = array_values(array_filter($storedImages, function ($img) use ($filenamesToDelete, $disk) {
-                        $filename = $img['filename'] ?? null;
-
-                        if ($filename && in_array($filename, $filenamesToDelete)) {
-                            $storedPath   = $img['path'] ?? '';
-                            $relativePath = ltrim(preg_replace('#^storage/#', '', $storedPath), '/');
-
-                            if ($relativePath && $disk->exists($relativePath)) {
-                                $disk->delete($relativePath);
-                            }
-
-                            return false;
-                        }
-                        return true;
-                    }));
-                }
+                $storedImages = null; // Reset data di DB
             }
 
+            // Simpan Gambar Baru (Jika ada)
             if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    if (!$image->isValid()) continue;
+                $image = $request->file('images');
+                $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                $path = $image->storeAs('uploads/store/tables', $filename, 'public');
 
-                    $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-                    $path = $image->storeAs('uploads/store/tables', $filename, 'public');
+                // Resize & Compress
+                $imgRes = Image::make(storage_path('app/public/' . $path));
+                $imgRes->resize(800, null, function ($constraint) {
+                    $constraint->aspectRatio();
+                    $constraint->upsize();
+                })->save();
 
-                    // resize (opsional)
-                    $fullPath = storage_path('app/public/' . $path);
-                    $img = Image::make($fullPath);
-                    $img->resize(800, null, function ($constraint) {
-                        $constraint->aspectRatio();
-                        $constraint->upsize();
-                    })->save();
-
-                    $storedImages[] = [
-                        'path'     => "storage/" . $path,
-                        'filename' => $filename,
-                        'mime'     => $image->getClientMimeType(),
-                        'size'     => $image->getSize(),
-                    ];
-                }
+                // Simpan sebagai array pembungkus (agar konsisten dengan format data lama jika perlu)
+                // atau simpan sebagai satu objek. Di sini kita simpan sebagai array tunggal.
+                $storedImages = [[
+                    'path'     => "storage/" . $path,
+                    'filename' => $filename,
+                    'mime'     => $image->getClientMimeType(),
+                    'size'     => $image->getSize(),
+                ]];
             }
 
             $table->update([
@@ -224,15 +186,10 @@ class PartnerTableController extends Controller
             ]);
 
             DB::commit();
-
-            return redirect()
-                ->route('partner.store.tables.index')
-                ->with('success', 'Table updated successfully!');
+            return redirect()->route('partner.store.tables.index')->with('success', 'Table updated successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()
-                ->withInput()
-                ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+            return back()->withInput()->withErrors(['error' => 'Gagal memperbarui: ' . $e->getMessage()]);
         }
     }
 
@@ -400,5 +357,4 @@ class PartnerTableController extends Controller
 
         return $pngBinary; // string binary PNG
     }
-
 }

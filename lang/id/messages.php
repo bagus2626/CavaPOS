@@ -318,6 +318,134 @@ return [
                 'copyright' => 'Seluruh hak cipta dilindungi.',
             ],
         ],
+        'verification' => [
+            'page_title' => 'Verifikasi Akun',
+            'header_title' => 'Verifikasi Akun Owner',
+            'header_desc' => 'Lengkapi data diri dan informasi usaha Anda untuk mendapatkan akses penuh ke panel owner. Verifikasi ini diperlukan untuk memastikan keamanan dan kredibilitas bisnis Anda.',
+
+            // Alert Penolakan
+            'rejected_title' => 'Verifikasi Ditolak',
+            'rejection_reason' => 'Alasan Penolakan:',
+            'rejection_instruction' => 'Silakan perbaiki data sesuai dengan alasan penolakan di atas dan kirim ulang verifikasi.',
+
+            // Seksi Data Pribadi
+            'personal_title' => 'Data Pribadi Owner',
+            'personal_subtitle' => 'Informasi identitas pemilik usaha',
+            'owner_name' => 'Nama Lengkap Owner',
+            'owner_name_placeholder' => 'Masukkan nama lengkap',
+            'owner_phone' => 'Nomor HP/WhatsApp',
+            'owner_email' => 'Email Owner',
+            'email_disabled_info' => 'Email tidak dapat diubah dan menggunakan email dari akun yang terdaftar',
+            'ktp_number' => 'Nomor KTP',
+            'ktp_number_placeholder' => '16 digit nomor KTP',
+
+            // Foto KTP
+            'ktp_photo' => 'Foto KTP',
+            'ktp_optional' => '(Opsional - kosongkan jika tidak ingin mengubah)',
+            'ktp_prev_photo' => 'Foto KTP Sebelumnya:',
+            'ktp_keep_info' => 'Foto ini akan tetap digunakan jika Anda tidak mengunggah foto baru. Klik tombol Hapus untuk menghapus dan upload foto baru.',
+            'ktp_upload_new' => 'Klik untuk upload foto KTP baru',
+            'ktp_upload_default' => 'Klik untuk upload foto KTP',
+            'ktp_upload_hint' => 'PNG, JPG, JPEG (Max. 1MB)',
+            'ktp_upload_warning' => 'Pastikan foto KTP jelas & semua tulisan terbaca',
+
+            // Seksi Informasi Usaha
+            'business_title' => 'Informasi Usaha',
+            'business_subtitle' => 'Detail bisnis dan lokasi',
+            'business_name' => 'Nama Usaha',
+            'business_name_placeholder' => 'Contoh: Warung Nasi Padang Mak Bundo',
+            'business_category' => 'Jenis Usaha',
+            'business_category_select' => 'Pilih Jenis Usaha',
+            'business_address' => 'Alamat Lengkap Usaha',
+            'business_address_placeholder' => 'Jalan, nomor, RT/RW, kelurahan, kecamatan, kota/kabupaten, provinsi, kode pos',
+            'business_phone' => 'No. Telepon/WhatsApp Bisnis',
+            'business_email' => 'Email Bisnis',
+            'business_email_optional' => '(Opsional)',
+
+            // Logo Usaha
+            'business_logo' => 'Logo Usaha',
+            'logo_prev' => 'Logo Sebelumnya:',
+            'logo_keep_info' => 'Logo ini akan tetap digunakan jika Anda tidak mengunggah logo baru.',
+            'logo_upload_new' => 'Klik untuk upload logo baru',
+            'logo_upload_default' => 'Klik untuk upload logo usaha',
+            'logo_upload_hint' => 'PNG, JPG, JPEG (Max. 2MB)',
+
+            // Info Penting
+            'important_info' => 'Informasi Penting',
+            'info_1' => 'Proses verifikasi akan memakan waktu maksimal 2x24 jam kerja.',
+            'info_2' => 'Pastikan semua data yang diinput sesuai dengan dokumen asli.',
+            'info_3' => 'Foto KTP harus jelas, tidak buram, dan terbaca dengan baik.',
+            'info_4' => 'Status verifikasi akan dikirimkan melalui email dan notifikasi di panel.',
+
+            // Syarat & Ketentuan
+            'terms_agreement' => 'Saya menyatakan bahwa data yang saya berikan adalah benar dan dapat dipertanggungjawabkan. Saya juga menyetujui',
+            'terms_link' => 'Syarat & Ketentuan',
+            'privacy_link' => 'Kebijakan Privasi',
+            'agreement_suffix' => 'yang berlaku.',
+
+            // Tombol
+            'btn_send' => 'Kirim Verifikasi',
+            'btn_resend' => 'Kirim Ulang Verifikasi',
+            'btn_loading' => 'Mengirim...',
+
+            // Pesan Error JS
+            'err_name_min' => 'Nama minimal 3 karakter',
+            'err_phone_format' => 'Nomor HP harus dimulai dengan 08 atau 62 (10-15 digit)',
+            'err_ktp_format' => 'Nomor KTP harus 16 digit angka',
+            'err_address_min' => 'Alamat minimal 10 karakter',
+            'err_email_format' => 'Format email tidak valid',
+            'err_file_image' => 'File harus berupa gambar (JPG, PNG)',
+            'err_form_invalid' => 'Mohon periksa kembali, masih ada data yang tidak valid.',
+
+            // SweetAlert
+            'swal_confirm_title' => 'Konfirmasi Pengiriman',
+            'swal_confirm_text' => 'Apakah Anda yakin semua data yang diisi sudah benar?',
+            'swal_confirm_btn' => 'Ya, Kirim!',
+            'swal_cancel_btn' => 'Batal',
+
+            'status' => [
+                'page_title' => 'Status Verifikasi',
+                'header_title' => 'Status Verifikasi Akun',
+                'header_desc' => 'Terima kasih telah mengirimkan data verifikasi. Berikut adalah status pengajuan Anda.',
+
+                // Status Badges
+                'pending' => 'Menunggu Verifikasi',
+                'rejected' => 'Verifikasi Ditolak',
+                'submitted_at' => 'Diajukan pada',
+                'reviewed_at' => 'Ditolak pada',
+                'process_estimation' => 'Estimasi Proses',
+                'estimation_time' => '1-2 Hari Kerja',
+                'max_time' => 'Maks 2x24 jam',
+
+                // Rejection Section
+                'rejection_title' => 'Alasan Penolakan',
+                'rejection_note' => 'Catatan:',
+                'rejection_instruction' => 'Silakan perbaiki data sesuai catatan di atas dan ajukan verifikasi ulang.',
+
+                // Info Box
+                'info_title' => 'Informasi Penting',
+                'info_point_1' => 'Proses verifikasi memakan waktu maksimal 2x24 jam kerja',
+                'info_point_2' => 'Anda akan menerima notifikasi email ketika verifikasi selesai',
+                'info_point_3' => 'Pastikan email Anda aktif untuk menerima notifikasi',
+                'info_point_4' => 'Jika ada pertanyaan, hubungi support kami',
+
+                // Labels
+                'owner_data' => 'Data Pribadi Owner',
+                'business_data' => 'Informasi Usaha',
+                'ktp_hidden' => '****************',
+                'view_ktp' => 'Foto KTP',
+                'view_logo' => 'Logo Usaha',
+                'btn_resubmit' => 'Ajukan Verifikasi Ulang',
+
+                // Success Modal (SweetAlert)
+                'swal_success_title' => 'Verifikasi Terkirim!',
+                'swal_success_p1' => 'Data verifikasi Anda telah berhasil dikirim. Kami akan segera memprosesnya (maks. 2x24 jam kerja).',
+                'swal_success_p2' => 'Status verifikasi akan kami informasikan melalui email ke:',
+                'swal_success_warning' => 'Harap periksa email Anda secara berkala, termasuk folder Spam.',
+                'swal_success_btn' => 'Baik, Mengerti',
+            ],
+        ],
+
         'layout' => [
             'owner_panel' => 'Panel Pemilik',
             'dashboard' => 'Dashboard',
@@ -1149,6 +1277,8 @@ return [
                 'picture' => 'Gambar',
                 'actions' => 'Aksi',
                 'no_pictures_yet' => 'Belum ada gambar',
+                'error_size_image' => 'Ukuran gambar terlalu besar. Maksimal 2 MB.',
+                'note_image' => '* Format: JPG, JPEG, PNG (Maks: 2 MB)',
                 'edit' => 'Ubah',
                 'delete' => 'Hapus',
                 'delete_confirmation_1' => 'Hapus kategori?',
@@ -1513,7 +1643,7 @@ return [
                     'create_new_table' => 'Tambahkan Meja Baru',
                     're_check_input' => 'Periksa kembali input:',
                     'choose_status' => '-- Pilih Status --',
-                    'upload_images' => 'Unggah Gambar (maks 3)',
+                    'upload_images' => 'Unggah Gambar',
                     'muted_text_1' => 'JPG, PNG, WEBP • Maks 2 MB per file • Maks 3 file.',
                     'cancel' => 'Batalkan',
                     'save' => 'Simpan',
