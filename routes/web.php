@@ -74,21 +74,6 @@ Route::post('/set-language', function () {
     return back();
 })->name('language.set');
 
-Route::get('send-email', function () {
-    $owner = (object) [
-        'name' => 'adin abimanyu',
-        'email' => 'adin123@gmail.com',
-        'verification_status' => 'pending'
-    ];
-
-    $verification = (object)[
-        'id' => 1,
-    ];
-
-    SendEmailVerification::dispatch($owner, $verification)->onQueue('send-email-verification');
-    SendAdminEmailVerification::dispatch($owner, $verification)->onQueue('send-email-verification');
-});
-
 Route::middleware('setlocale')->group(function () {
 
     Route::get('/', function () {
@@ -279,7 +264,7 @@ Route::middleware('setlocale')->group(function () {
 
                 if ($owner && $owner->hasVerifiedEmail()) {
                     auth('owner')->logout();
-                    $request->session()->invalidate();
+                    // $request->session()->invalidate();
                     $request->session()->regenerateToken();
 
                     return redirect()

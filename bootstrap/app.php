@@ -24,7 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'is_partner' => IsPartner::class,
             'is_employee' => IsEmployee::class,
             'is_owner' => IsOwner::class,
-            'redirect.auth.role' => \App\Http\Middleware\RedirectIfAuthenticatedWithRole::class,
+            'redirect.auth.role' => RedirectIfAuthenticatedWithRole::class,
             'auth' => \App\Http\Middleware\Authenticate::class,
             'setlocale' => \App\Http\Middleware\SetLocale::class,
             'owner.verification.access' => \App\Http\Middleware\OwnerVerification::class,
