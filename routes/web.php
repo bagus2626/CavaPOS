@@ -1,26 +1,35 @@
 <?php
 
-//use App\Http\Controllers\Owner\Product\OwnerProductController;
-//use App\Http\Controllers\Owner\Product\OwnerPromotionController;
-//use App\Http\Controllers\Owner\Report\SalesReportController;
-//use App\Http\Controllers\PaymentGateway\Xendit\WebhookController;
+use App\Http\Controllers\Owner\Product\OwnerStockMovementController;
+use App\Jobs\SendAdminEmailVerification;
+use App\Jobs\SendEmailVerification;
 use Pusher\Pusher;
+use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Broadcast;
 use App\Http\Controllers\ProfileController;
 // use App\Http\Controllers\Public\PriceController;
 use App\Http\Controllers\Admin\Dashboard\DashboardController;
+use App\Http\Controllers\Admin\OwnerManagement\OwnerListController;
 use App\Http\Controllers\Admin\OwnerVerification\OwnerVerificationController;
 use App\Http\Controllers\Admin\XenPlatform\PartnerAccountController;
 use App\Http\Controllers\Admin\XenPlatform\SplitPaymentController;
+use App\Http\Controllers\Admin\XenPlatform\BalanceController;
+use App\Http\Controllers\Admin\XenPlatform\DisbursementController;
+use App\Http\Controllers\Admin\XenPlatform\TransactionsController;
 use App\Http\Controllers\Admin\SendPayment\PayoutController;
 use App\Http\Controllers\Owner\Auth\OwnerAuthController;
 use App\Http\Controllers\Owner\Auth\OwnerPasswordResetController;
 use App\Http\Controllers\Owner\OwnerDashboardController;
 use App\Http\Controllers\Owner\Outlet\OwnerOutletController;
+use App\Http\Controllers\Owner\SettingsProfile\OwnerSettingsController;
 use App\Http\Controllers\Owner\Report\SalesReportController;
+use App\Http\Controllers\Owner\XenPlatform\AccountsController;
+use App\Http\Controllers\Owner\XenPlatform\OwnerPayoutController;
+use App\Http\Controllers\Owner\XenPlatform\OwnerSplitPaymentController;
 use App\Http\Controllers\Partner\PartnerDashboardController;
 use App\Http\Controllers\Auth\GoogleCallbackController;
 use App\Http\Controllers\Owner\Product\OwnerPromotionController;
@@ -46,6 +55,11 @@ use App\Http\Controllers\Employee\Transaction\KitchenTransactionController;
 use App\Http\Controllers\Owner\Verification\VerificationController;
 use App\Http\Controllers\PaymentGateway\Xendit\SubAccountController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use \App\Http\Controllers\Admin\MessageNotification\MessageController;
+use App\Http\Controllers\Customer\Table\TableStatusController;
+use App\Http\Controllers\Owner\Report\StockReportController;
+use App\Notifications\CustomerVerifyEmail;
+use App\Models\Owner;
 
 Route::get('/set-language', function () {
     $locale = request('locale');
@@ -59,6 +73,21 @@ Route::post('/set-language', function () {
     session(['app_locale' => $locale]);
     return back();
 })->name('language.set');
+
+Route::get('send-email', function () {
+    $owner = (object) [
+        'name' => 'adin abimanyu',
+        'email' => 'adin123@gmail.com',
+        'verification_status' => 'pending'
+    ];
+
+    $verification = (object)[
+        'id' => 1,
+    ];
+
+    SendEmailVerification::dispatch($owner, $verification)->onQueue('send-email-verification');
+    SendAdminEmailVerification::dispatch($owner, $verification)->onQueue('send-email-verification');
+});
 
 Route::middleware('setlocale')->group(function () {
 
@@ -87,64 +116,110 @@ Route::middleware('setlocale')->group(function () {
 
     Route::middleware('guest')->group(function () {});
 
+    Route::get('/partner/account-suspended', function () {
+        return view('pages.owner.owner-management.partner-account-suspended');
+    })->name('partner.account.suspended')->middleware('partner.access');
+
+    Route::get('/employee/account-suspended', function () {
+        return view('pages.owner.owner-management.employee-account-suspended');
+    })->name('employee.account.suspended')->middleware('employee.access');
+
+    Route::get('/customer/account-suspended', function () {
+        return view('pages.owner.owner-management.customer-account-suspended');
+    })->name('customer.account.suspended')->middleware('customer.access');
+
 
     //admin
     Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+        Route::prefix('owner-list')->name('owner-list.')->group(function () {
+            Route::get('/', [OwnerListController::class, 'index'])->name('index');
+            // In your admin routes group
+            Route::post('{owner}/toggle-status', [OwnerListController::class, 'toggleStatus'])->name('toggle-status');
+            Route::post('{ownerId}/outlets/{outletId}/toggle-status', [OwnerListController::class, 'toggleOutletStatus'])->name('outlets.toggle-status');
+            Route::post('{ownerId}/outlets/{outletId}/employees/{employeeId}/toggle-status', [OwnerListController::class, 'toggleEmployeeStatus'])->name('employees.toggle-status');
+
+            Route::get('{ownerId}/outlets', [OwnerListController::class, 'showOutlets'])->name('outlets');
+            Route::get('{ownerId}/outlets/{outletId}/data', [OwnerListController::class, 'showOutletData'])->name('outlet-data');
+        });
+
         Route::get('/owner-verification', [OwnerVerificationController::class, 'index'])->name('owner-verification');
 
         Route::get('/owner-verification/{id}', [OwnerVerificationController::class, 'show'])->name('owner-verification.show');
-
         Route::post('/owner-verification/{id}/approve', [OwnerVerificationController::class, 'approve'])->name('owner-verification.approve');
         Route::post('/owner-verification/{id}/reject', [OwnerVerificationController::class, 'reject'])->name('owner-verification.reject');
-
         Route::get('/owner-verification/{id}/ktp-image', [OwnerVerificationController::class, 'showKtpImage'])->name('owner-verification.ktp-image');
 
-        Route::prefix('send-payment')->name('send-payment.')->group(function () {
-            Route::prefix('payout')->name('payout.')->group(function () {
-                Route::get('/', [PayoutController::class, 'index'])->name('index');
-                Route::post('get-data', [PayoutController::class, 'getData'])->name('get-data');
-                Route::get('validate-bank', [PayoutController::class, 'validateBankAccount'])->name('validate-bank');
-                Route::post('create', [PayoutController::class, 'createPayout'])->name('create');
-                Route::get('{businessId}/detail/{payoutId}', [PayoutController::class, 'getPayout'])->name('detail');
-
-            });
-        });
+        // Route::prefix('send-payment')->name('send-payment.')->group(function () {
+        //     Route::prefix('payout')->name('payout.')->group(function () {
+        //         Route::get('/', [PayoutController::class, 'index'])->name('index');
+        //         Route::post('get-data', [PayoutController::class, 'getData'])->name('get-data');
+        //         Route::get('validate-bank', [PayoutController::class, 'validateBankAccount'])->name('validate-bank');
+        //         Route::post('create', [PayoutController::class, 'createPayout'])->name('create');
+        //         Route::get('{businessId}/detail/{payoutId}', [PayoutController::class, 'getPayout'])->name('detail');
+        //     });
+        // });
+        Route::post('/owner-verification/register-xendit-account', [OwnerVerificationController::class, 'registerXenditAccount'])->name('owner-verification.register-xendit-account');;
 
 
         Route::prefix('xen_platform')->name('xen_platform.')->group(function () {
+            Route::prefix('transactions')->name('transactions.')->group(function () {
+                Route::get('/', [TransactionsController::class, 'index'])->name('index');
+                Route::post('data', [TransactionsController::class, 'getData'])->name('data');
+                Route::get('detail/{id}', [TransactionsController::class, 'getTransactionById'])->name('detail');
+            });
+
+            Route::prefix('balance')->name('balance.')->group(function () {
+                Route::get('/', [BalanceController::class, 'index'])->name('index');
+                Route::post('data', [BalanceController::class, 'getData'])->name('data');
+            });
+
             Route::prefix('partner-account')->name('partner-account.')->group(function () {
-                Route::get('{accountId}/information', [PartnerAccountController::class, 'showAccountInfo'])->name('information');
-                Route::get('{accountId}/tab/{tab}', [PartnerAccountController::class, 'getTabData']);
-                Route::get('{accountId}/filter/{tab}', [PartnerAccountController::class, 'filter']);;
-                Route::get('{accountId}/transaction-detail/{transactionId}', [PartnerAccountController::class, 'getTransactionById']);
-
+                Route::prefix('{accountId}')->group(function () {
+                    Route::get('information', [PartnerAccountController::class, 'showAccountInfo'])->name('information');
+                    Route::get('tab/{tab}', [PartnerAccountController::class, 'getTabData']);
+                    Route::get('filter/{tab}', [PartnerAccountController::class, 'filter']);;
+                    Route::get('transaction-detail/{transactionId}', [PartnerAccountController::class, 'getTransactionById']);
+                    Route::get('invoice-detail/{invoiceId}', [PartnerAccountController::class, 'getInvoiceById']);
+                });
             });
-
             Route::resource('partner-account', PartnerAccountController::class);
-            Route::prefix('split-payments')->name('split-payments.')->group(function () {
-                Route::get('split-payments', [SplitPaymentController::class, 'getSplitPayments']);
 
-                Route::get('split-rules', [SplitPaymentController::class, 'getSplitRules']);
-                Route::post('split-rules/create', [SplitPaymentController::class, 'createSplitRule'])->name('split-rules.create');
+            Route::prefix('split-payments')->name('split-payments.')->group(function () {
+                Route::get('/', [SplitPaymentController::class, 'index'])->name('index');
+                Route::get('/data', [SplitPaymentController::class, 'getSplitPayments']);;
+                Route::prefix('rules')->name('rules.')->group(function () {
+                    Route::get('/data', [SplitPaymentController::class, 'getSplitRules']);
+                    Route::post('/create', [SplitPaymentController::class, 'createSplitRule'])->name('create');
+                });
             });
-            Route::resource('split-payments', SplitPaymentController::class);
+
+            Route::prefix('disbursement')->name('disbursement.')->group(function () {
+                Route::get('/', [DisbursementController::class, 'index'])->name('index');
+                Route::post('get-data', [DisbursementController::class, 'getData'])->name('get-data');
+                Route::get('validate-bank', [DisbursementController::class, 'validateBankAccount'])->name('validate-bank');
+                Route::post('create', [DisbursementController::class, 'createPayout'])->name('create');
+                Route::get('{businessId}/detail/{disbursementId}', [DisbursementController::class, 'getPayout'])->name('detail');
+            });
         });
 
         Route::prefix('xendit')->name('xendit.')->group(function () {
             Route::prefix('sub-account')->name('sub-account.')->group(function () {
-                Route::post('create', [SubAccountController::class, 'createAccount'])->name('create');
                 Route::get('list', [SubAccountController::class, 'getSubAccounts'])->name('list');
                 Route::get('profile/{id}', [SubAccountController::class, 'getSubAccountById'])->name('profile');
             });
 
 
             Route::prefix('balance')->name('balance.')->group(function () {
-//                Route::post('create', [SubAccountController::class, 'createAccount'])->name('create');
-//                Route::get('list', [SubAccountController::class, 'getSubAccounts'])->name('list');
+                //                Route::post('create', [SubAccountController::class, 'createAccount'])->name('create');
+                //                Route::get('list', [SubAccountController::class, 'getSubAccounts'])->name('list');
             });
         });
 
+        Route::prefix('message-notification')->name('message-notification.')->group(function () {
+            Route::get('/get-recipients', [MessageController::class, 'getRecipients'])->name('get-recipients');
+            Route::resource('messages', MessageController::class);
+        });
     });
 
     // Owner
@@ -159,6 +234,26 @@ Route::middleware('setlocale')->group(function () {
         Route::post('logout',    [OwnerAuthController::class, 'logout'])->name('logout');
 
         Route::get('/auth/google/redirect', [OwnerAuthController::class, 'redirect'])->name('google.redirect');
+
+        Route::get('email/verify/{id}/{hash}', function (Request $request, $id, $hash) {
+                $owner = Owner::findOrFail($id);
+
+                if (! hash_equals(
+                    (string) $hash,
+                    sha1($owner->getEmailForVerification())
+                )) {
+                    abort(403, 'Link verifikasi tidak valid.');
+                }
+
+                if (! $owner->hasVerifiedEmail()) {
+                    $owner->markEmailAsVerified();
+                    event(new Verified($owner));
+                }
+
+                return redirect()
+                    ->route('owner.login')
+                    ->with('success', 'Email Anda berhasil diverifikasi. Silakan login.');
+            })->middleware('signed')->name('verification.verify');
 
         Route::middleware('guest:owner')->group(function () {
             // minta link reset
@@ -180,20 +275,41 @@ Route::middleware('setlocale')->group(function () {
 
             // Resend link (rate limited)
             Route::post('/email/verification-notification', function (Request $request) {
-                $request->user('owner')->sendEmailVerificationNotification();
+                $owner = $request->user('owner');
+
+                if ($owner && $owner->hasVerifiedEmail()) {
+                    auth('owner')->logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+
+                    return redirect()
+                        ->route('owner.login')
+                        ->with('success', 'Email Anda sudah terverifikasi. Silakan login.');
+                }
+
+                $owner->sendEmailVerificationNotification();
+
                 return back()->with('status', 'verification-link-sent');
             })->middleware('throttle:6,1')->name('verification.send');
 
+
             // Verify link (signed)
-            Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-                $request->fulfill(); // set email_verified_at
-                return redirect()->route('owner.user-owner.dashboard')
-                    ->with('success', 'Email Anda berhasil diverifikasi.');
-            })->middleware('signed')->name('verification.verify');
+            // Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+            //     $request->fulfill();
+            //     return redirect()->route('owner.user-owner.dashboard')
+            //         ->with('success', 'Email Anda berhasil diverifikasi.');
+            // })->middleware('signed')->name('verification.verify');
         });
 
         // OWNER area
         Route::middleware(['auth:owner', 'is_owner:owner', 'verified'])->prefix('user-owner')->name('user-owner.')->group(function () {
+
+
+            Route::middleware('owner.access')->group(function () {
+                Route::get('/inactive-owners', function () {
+                    return view('pages.owner.owner-management.owner-account-inactive');
+                })->name('inactive-owners');
+            });
 
 
             Route::middleware('owner.verification.access')->prefix('verification')->name('verification.')->group(function () {
@@ -204,8 +320,9 @@ Route::middleware('setlocale')->group(function () {
             });
 
 
-            Route::middleware('owner.verification.access')->group(function () {
+            Route::middleware('owner.verification.access', 'owner.access')->group(function () {
                 Route::get('/', [OwnerDashboardController::class, 'index'])->name('dashboard');
+                Route::get('timeline/messages', [OwnerDashboardController::class, 'timelineMessages'])->name('timeline.messages');
                 Route::get('outlets/check-username', [OwnerOutletController::class, 'checkUsername'])->name('outlets.check-username')->middleware('throttle:30,1');
                 Route::get('outlets/check-slug', [OwnerOutletController::class, 'checkSlug'])->name('outlets.check-slug')->middleware('throttle:30,1');
                 Route::resource('outlets', OwnerOutletController::class);
@@ -213,19 +330,90 @@ Route::middleware('setlocale')->group(function () {
                 Route::resource('employees', OwnerEmployeeController::class);
                 Route::resource('master-products', OwnerMasterProductController::class);
                 Route::get('outlet-products/get-master-products', [OwnerOutletProductController::class, 'getMasterProducts'])->name('outlet-products.get-master-products');
+                Route::get('outlet-products/list-product', [OwnerOutletProductController::class, 'list'])->name('outlet-products.list');
                 Route::resource('outlet-products', OwnerOutletProductController::class);
+
+                Route::get('outlet-products/recipe/ingredients', [OwnerOutletProductController::class, 'getRecipeIngredients'])
+                    ->name('outlet-products.recipe.ingredients');
+
+                Route::get('outlet-products/recipe/load', [OwnerOutletProductController::class, 'loadRecipe'])
+                    ->name('outlet-products.recipe.load');
+
+                Route::post('outlet-products/recipe/save', [OwnerOutletProductController::class, 'saveRecipe'])
+                    ->name('outlet-products.recipe.save');
+
                 Route::resource('products', OwnerProductController::class);
+                Route::post('/categories/reorder', [OwnerCategoryController::class, 'reorder'])->name('categories.reorder');
                 Route::resource('categories', OwnerCategoryController::class);
 
+                Route::prefix('xen_platform')->name('xen_platform.')->group(function () {
+                    Route::prefix('accounts')->name('accounts.')->group(function () {
+                        Route::get('information', [AccountsController::class, 'showAccountInfo'])->name('information');
+                        Route::get('tab/{tab}', [AccountsController::class, 'getTabData']);
+                        Route::get('filter/{tab}', [AccountsController::class, 'filter']);;
+                        Route::get('transaction-detail/{transactionId}', [AccountsController::class, 'getTransactionById']);
+                        Route::get('invoice-detail/{invoiceId}', [AccountsController::class, 'getInvoiceById']);
+                    });
+
+                    Route::prefix('split-payment')->name('split-payment.')->group(function () {
+                        Route::get('/', [OwnerSplitPaymentController::class, 'index'])->name('index');
+                        Route::get('/get-data', [OwnerSplitPaymentController::class, 'getSplitPayments'])->name('data');
+                    });
+
+                    Route::prefix('payout')->name('payout.')->group(function () {
+                        Route::get('/', [OwnerPayoutController::class, 'index'])->name('index');
+                        Route::post('get-data', [OwnerPayoutController::class, 'getData'])->name('get-data');
+                        Route::get('validate-bank', [OwnerPayoutController::class, 'validateBankAccount'])->name('validate-bank');
+                        Route::post('create', [OwnerPayoutController::class, 'createPayout'])->name('create');
+                        Route::get('detail/{payoutId}', [OwnerPayoutController::class, 'getPayout'])->name('detail');
+                    });
+                });
+
                 Route::prefix('report')->name('report.')->group(function () {
+                    // Existing Sales Report Routes
                     Route::get('sales/export', [SalesReportController::class, 'export'])->name('sales.export');
-                    Route::get('sales/products', [SalesReportController::class, 'getTopProductsAjax'])->name('sales.products'); // ROUTE BARU
+                    Route::get('sales/products', [SalesReportController::class, 'getTopProductsAjax'])->name('sales.products');
                     Route::get('order-details/{id}', [SalesReportController::class, 'getOrderDetails'])->name('order-details');
                     Route::resource('sales', SalesReportController::class)->only(['index']);
+
+                    Route::prefix('stocks')->name('stocks.')->group(function () {
+                        Route::get('/', [StockReportController::class, 'index'])->name('index');
+                        Route::get('/{stock:stock_code}/movement', [StockReportController::class, 'showStockMovement'])->name('movement');
+                        Route::get('/export', [StockReportController::class, 'export'])->name('export');
+
+                        Route::get('/{stock:stock_code}/movement/export', [StockReportController::class, 'exportMovement'])->name('movement.export');
+                    });
                 });
                 Route::resource('promotions', OwnerPromotionController::class);
-                Route::resource('stocks', OwnerStockController::class);
+
+                Route::prefix('stocks')->name('stocks.')->group(function () {
+                    Route::delete('/delete-stock/{id}', [OwnerStockController::class, 'deleteStock'])->name('delete-stock');
+                    Route::resource('/', OwnerStockController::class);
+
+                    Route::prefix('movements')->name('movements.')->group(function () {
+                        Route::get('/', [OwnerStockMovementController::class, 'index'])->name('index');
+
+                        Route::get('/stock-in/create', [OwnerStockMovementController::class, 'createStockIn'])->name('create-stock-in');
+                        Route::get('/adjustment/create', [OwnerStockMovementController::class, 'createAdjustment'])->name('create-adjustment');
+                        Route::get('/transfer/create', [OwnerStockMovementController::class, 'createTransfer'])->name('create-transfer');
+
+                        Route::post('/', [OwnerStockMovementController::class, 'store'])->name('store');
+                        Route::get('/{id}/items', [OwnerStockMovementController::class, 'getMovementItemsJson'])->name('items.json');
+                    });
+                });
+
+
+                Route::prefix('settings')->name('settings.')->group(function () {
+                    Route::get('/', [OwnerSettingsController::class, 'index'])->name('index');
+                    Route::post('/personal-info', [OwnerSettingsController::class, 'updatePersonalInfo'])->name('update-personal-info');
+                    Route::post('/photo', [OwnerSettingsController::class, 'updatePhoto'])->name('update-photo');
+                    Route::post('/delete-photo', [OwnerSettingsController::class, 'deletePhoto'])->name('delete-photo');
+                    Route::post('/logo', [OwnerSettingsController::class, 'updateLogo'])->name('update-logo');
+                    Route::post('/change-password', [OwnerSettingsController::class, 'changePassword'])->name('change-password');
+                });
             });
+
+
 
 
             // Route::middleware('owner.not_approved')->prefix('verification')->name('verification.')->group(function () {
@@ -239,11 +427,25 @@ Route::middleware('setlocale')->group(function () {
     });
 
     //Partner
-    Route::middleware(['auth', 'is_partner'])->prefix('partner')->name('partner.')->group(function () {
+    Route::middleware(['auth', 'is_partner', 'partner.access'])->prefix('partner')->name('partner.')->group(function () {
         Route::get('/', [PartnerDashboardController::class, 'index'])->name('dashboard');
+
+        Route::get('timeline/messages', [PartnerDashboardController::class, 'timelineMessages'])
+            ->name('timeline.messages');
+
+        Route::get('products/recipe/ingredients', [PartnerProductController::class, 'getRecipeIngredients'])
+            ->name('products.recipe.ingredients');
+
+        Route::get('products/recipe/load', [PartnerProductController::class, 'loadRecipe'])
+            ->name('products.recipe.load');
+
+        Route::post('products/recipe/save', [PartnerProductController::class, 'saveRecipe'])
+            ->name('products.recipe.save');
+
         Route::resource('products', PartnerProductController::class);
         Route::prefix('store')->name('store.')->group(function () {
             Route::get('tables/generate-barcode/{tableId}', [PartnerTableController::class, 'generateBarcode'])->name('tables.generate-barcode');
+            Route::get('tables/generate-all-barcode', [PartnerTableController::class, 'generateAllBarcode'])->name('tables.generate-all-barcode');
             Route::resource('tables', PartnerTableController::class);
         });
         Route::prefix('user-management')->name('user-management.')->group(function () {
@@ -269,21 +471,26 @@ Route::middleware('setlocale')->group(function () {
         Route::post('logout', [EmployeeAuthController::class, 'logout'])->name('logout');
 
         // CASHIER area
-        Route::middleware(['auth:employee', 'is_employee:CASHIER'])->prefix('cashier')->name('cashier.')->group(function () {
+        Route::middleware(['auth:employee', 'employee.access', 'is_employee:CASHIER'])->prefix('cashier')->name('cashier.')->group(function () {
             Route::get('dashboard', [CashierDashboardController::class, 'index'])->name('dashboard');
+            Route::get('metrics', [CashierDashboardController::class, 'metrics'])->name('metrics');
             Route::get('tab/{tab}', [CashierDashboardController::class, 'show'])->name('tab');
+            Route::get('/open-order/{id}', [CashierDashboardController::class, 'openOrder'])->name('open-order');
+
             Route::post('cash-payment/{id}', [CashierTransactionController::class, 'cashPayment'])->name('cash-payment');
             Route::get('order-detail/{id}', [CashierTransactionController::class, 'orderDetail'])->name('order-detail');
             Route::get('print-receipt/{id}', [CashierTransactionController::class, 'printReceipt'])->name('print-receipt');
+            Route::post('cancel-process-order/{id}', [CashierTransactionController::class, 'cancelProcessOrder'])->name('cancel-process-order');
             Route::post('process-order/{id}', [CashierTransactionController::class, 'processOrder'])->name('process-order');
             Route::post('finish-order/{id}', [CashierTransactionController::class, 'finishOrder'])->name('finish-order');
             Route::post('checkout-order', [CashierTransactionController::class, 'checkout'])->name('checkout');
+            Route::post('check-stock', [CashierTransactionController::class, 'checkStockRealtime'])->name('check-stock');
+            Route::delete('order/{id}/soft-delete', [CashierTransactionController::class, 'softDeleteUnpaidOrder'])->name('order.soft-delete');
         });
 
 
         // KITCHEN area
-
-        Route::middleware(['auth:employee', 'is_employee:KITCHEN'])->prefix('kitchen')->name('kitchen.')->group(function () {
+        Route::middleware(['auth:employee', 'employee.access', 'is_employee:KITCHEN'])->prefix('kitchen')->name('kitchen.')->group(function () {
             Route::get('dashboard', [KitchenDashboardController::class, 'index'])->name('dashboard');
 
             // API Endpoints - UPDATE YANG SUDAH ADA
@@ -292,6 +499,7 @@ Route::middleware('setlocale')->group(function () {
             Route::get('orders/served', [KitchenDashboardController::class, 'getServedOrders'])->name('orders.served');
             Route::put('orders/{orderId}/pickup', [KitchenDashboardController::class, 'pickUpOrder'])->name('orders.pickup');
             Route::put('orders/{orderId}/serve', [KitchenDashboardController::class, 'markAsServed'])->name('orders.serve');
+            Route::put('orders/{orderId}/cancel', [KitchenDashboardController::class, 'cancelOrder'])->name('orders.cancel');
 
             // TAMBAH ROUTE BARU UNTUK KITCHEN_STATUS
             Route::get('orders/my-active', [KitchenDashboardController::class, 'getMyActiveOrders'])->name('orders.my-active');
@@ -302,10 +510,52 @@ Route::middleware('setlocale')->group(function () {
         });
     });
 
+    // customer verify email
+    Route::get('customer/email/verify/{id}/{hash}', function (Request $request, $id, $hash) {
+        $customer = Customer::findOrFail($id);
+
+        if (! hash_equals(
+            (string) $hash,
+            sha1($customer->getEmailForVerification())
+        )) {
+            abort(403, 'Link verifikasi tidak valid.');
+        }
+
+        if (! $customer->hasVerifiedEmail()) {
+            $customer->markEmailAsVerified();
+            event(new Verified($customer));
+        }
+
+        $partnerSlug = $request->query('partner_slug');
+        $tableCode   = $request->query('table_code');
+
+        if ($partnerSlug && $tableCode) {
+            return redirect()->route('customer.menu.index', [
+                'partner_slug' => $partnerSlug,
+                'table_code'   => $tableCode,
+            ])->with('success', 'Email Anda berhasil diverifikasi.');
+        }
+
+        return redirect('/')
+            ->with('success', 'Email Anda berhasil diverifikasi.');
+    })->middleware('signed')->name('customer.verification.verify');
+
+    Route::get('customer/reset-password/{token}', [CustomerPasswordResetController::class, 'resetForm'])
+                ->name('customer.password.reset');
+    Route::post('customer/reset-password', [CustomerPasswordResetController::class, 'update'])
+            ->name('customer.password.update');
+
+
     //customer
-    Route::prefix('customer')->name('customer.')->group(function () {
-        Route::get('{partner_slug}/menu/{table_code}', [CustomerMenuController::class, 'index'])->name('menu.index');
-        Route::post('{partner_slug}/checkout/{table_code}', [CustomerMenuController::class, 'checkout'])->name('menu.checkout');
+    Route::prefix('customer')->name('customer.')->middleware('customer.access')->group(function () {
+        Route::get('{partner_slug}/table-status/{table_code}',[TableStatusController::class, 'show'])->name('table.status');
+
+        Route::get('{partner_slug}/menu/{table_code}', [CustomerMenuController::class, 'index'])->name('menu.index')->middleware(['throttle:10,1', 'check.table.status']);
+        Route::post('{partner_slug}/menu/{table_code}/check-stock', [CustomerMenuController::class, 'checkStockRealtime'])->name('menu.check-stock');
+        Route::post('{partner_slug}/checkout/{table_code}', [CustomerMenuController::class, 'checkout'])->name('menu.checkout')->middleware(['throttle:30,1', 'check.table.status']);
+        Route::get('{partner_slug}/order-detail/{table_code}/{order_id}', [CustomerMenuController::class, 'orderDetail'])->name('orders.order-detail');
+        Route::get('{partner_slug}/order-histories/{table_code}', [CustomerMenuController::class, 'getOrderHistory'])->name('orders.histories');
+        Route::post('{partner_slug}/unpaid-order/{order_id}', [CustomerMenuController::class, 'makeUnpaidOrder'])->name('orders.unpaid-order');
         Route::get('/orders/{id}/receipt', [CustomerMenuController::class, 'printReceipt'])->name('orders.receipt');
 
         Route::prefix('payment')->name('payment.')->group(function () {
@@ -332,21 +582,11 @@ Route::middleware('setlocale')->group(function () {
         Route::post('logout', [CustomerAuthController::class, 'logoutSimple'])->name('logout.simple');
 
         Route::middleware('guest:customer')->group(function () {
-            // Form minta link reset (bawa partner_slug & table_code agar bisa direstor)
             Route::get('forgot-password/{partner_slug}/{table_code}', [CustomerPasswordResetController::class, 'requestForm'])
                 ->name('password.request');
 
-            // Kirim email reset
             Route::post('forgot-password/{partner_slug}/{table_code}', [CustomerPasswordResetController::class, 'sendLink'])
                 ->name('password.email');
-
-            // Form reset dari email (token + email di query; partner_slug & table_code optional via query)
-            Route::get('reset-password/{token}', [CustomerPasswordResetController::class, 'resetForm'])
-                ->name('password.reset');
-
-            // Submit reset
-            Route::post('reset-password', [CustomerPasswordResetController::class, 'update'])
-                ->name('password.update');
         });
 
         Route::middleware('auth:customer')->group(function () {
@@ -357,20 +597,22 @@ Route::middleware('setlocale')->group(function () {
 
             // Kirim ulang link (rate limited)
             Route::post('/email/verification-notification', function (Request $request) {
-                $request->user('customer')->sendEmailVerificationNotification();
+                $customer = $request->user('customer');
+
+                // ambil dari session (sudah kamu simpan waktu login/register)
+                $partnerSlug = session('customer.partner_slug');
+                $tableCode   = session('customer.table_code');
+
+                if ($partnerSlug && $tableCode) {
+                    $customer->notify(new CustomerVerifyEmail($partnerSlug, $tableCode));
+                } else {
+                    // fallback: kirim URL tanpa konteks meja (optional)
+                    $customer->notify(new CustomerVerifyEmail('', ''));
+                }
+
                 return back()->with('status', 'verification-link-sent');
             })->middleware('throttle:6,1')->name('verification.send');
-
-            // Link verifikasi (signed)
-            Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-                $request->fulfill(); // set email_verified_at
-
-                // Ambil tujuan yg kita simpan ketika register/login
-                $dest = session('customer.intended') ?? route('home');
-                session()->forget('customer.intended');
-
-                return redirect($dest)->with('success', 'Email Anda berhasil diverifikasi.');
-            })->middleware('signed')->name('verification.verify');
+            
         });
 
         Route::middleware('auth:customer', 'verified')->group(function () {
@@ -379,5 +621,5 @@ Route::middleware('setlocale')->group(function () {
             })->name('dashboard');
         });
     });
-});
 require __DIR__ . '/auth.php';
+});

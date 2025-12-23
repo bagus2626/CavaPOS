@@ -9,7 +9,7 @@
                 <div class="dropdown-menu p-3" aria-labelledby="dropdownFilterInvoice" style="max-width: 95vw; width: 600px;">
                     <div class="d-flex justify-content-between mb-2">
                         <button class="btn btn-sm btn-outline-secondary" id="clear-all-invoice-filters" type="button">Clear All</button>
-                        <button class="btn btn-sm btn-primary" id="close-filter-invoice-dropdown-btn" type="button" data-toggle="dropdown">Tutup</button>
+                        <button class="btn btn-sm btn-primary" id="close-filter-invoice-dropdown-btn" type="button" data-toggle="dropdown">Close</button>
                     </div>
 
                     <div class="row" id="popup-invoice-filter-options">
@@ -28,16 +28,26 @@
                             <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input invoice-filter-checkbox" id="inv-type-api" data-filter-group="client_types" value="API_GATEWAY"><label class="custom-control-label" for="inv-type-api">API Gateway</label></div>
                             <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input invoice-filter-checkbox" id="inv-type-dashboard" data-filter-group="client_types" value="DASHBOARD"><label class="custom-control-label" for="inv-type-dashboard">Dashboard</label></div>
                             <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input invoice-filter-checkbox" id="inv-type-integration" data-filter-group="client_types" value="INTEGRATION"><label class="custom-control-label" for="inv-type-integration">Integration</label></div>
+                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input invoice-filter-checkbox" id="inv-type-on-demand" data-filter-group="client_types" value="ON_DEMAND"><label class="custom-control-label" for="inv-type-on-demand">On Demand</label></div>
                             <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input invoice-filter-checkbox" id="inv-type-recurring" data-filter-group="client_types" value="RECURRING"><label class="custom-control-label" for="inv-type-recurring">Recurring</label></div>
+                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input invoice-filter-checkbox" id="inv-type-mobile" data-filter-group="client_types" value="MOBILE"><label class="custom-control-label" for="inv-type-mobile">Mobile</label></div>
                         </div>
 
                         {{-- Kolom 3: PAYMENT CHANNELS--}}
-                        <div class="col-12 col-lg-4 px-2">
-                            <h6 class="font-weight-bold border-bottom pb-1">PAYMENT CHANNEL</h6>
-                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input invoice-filter-checkbox" id="inv-channel-va" data-filter-group="payment_channels" value="VIRTUAL_ACCOUNT"><label class="custom-control-label" for="inv-channel-va">Virtual Account</label></div>
-                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input invoice-filter-checkbox" id="inv-channel-ewallet" data-filter-group="payment_channels" value="EWALLET"><label class="custom-control-label" for="inv-channel-ewallet">E-Wallet</label></div>
-                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input invoice-filter-checkbox" id="inv-channel-retail" data-filter-group="payment_channels" value="RETAIL_OUTLET"><label class="custom-control-label" for="inv-channel-retail">Retail Outlet</label></div>
-                        </div>
+{{--                        <div class="col-12 col-lg-4 px-2">--}}
+{{--                            <h6 class="font-weight-bold border-bottom pb-1">PAYMENT CHANNEL</h6>--}}
+{{--                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input invoice-filter-checkbox" id="inv-channel-bank" data-filter-group="payment_channels" value="BANK"><label class="custom-control-label" for="inv-channel-bank">Bank</label></div>--}}
+{{--                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input invoice-filter-checkbox" id="inv-channel-cards" data-filter-group="payment_channels" value="CARDS"><label class="custom-control-label" for="inv-channel-cards">Cards</label></div>--}}
+{{--                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input invoice-filter-checkbox" id="inv-channel-cardless-credit" data-filter-group="payment_channels" value="CARDLESS_CREDIT"><label class="custom-control-label" for="inv-channel-cardless-credit">Cardless Credit</label></div>--}}
+{{--                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input invoice-filter-checkbox" id="inv-channel-cash" data-filter-group="payment_channels" value="CASH"><label class="custom-control-label" for="inv-channel-cash">Cash</label></div>--}}
+{{--                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input invoice-filter-checkbox" id="inv-channel-direct-debit" data-filter-group="payment_channels" value="DIRECT_DEBIT"><label class="custom-control-label" for="inv-channel-direct-debit">Direct Debit</label></div>--}}
+{{--                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input invoice-filter-checkbox" id="inv-channel-e-wallet" data-filter-group="payment_channels" value="EWALLET"><label class="custom-control-label" for="inv-channel-e-wallet">E-Wallet</label></div>--}}
+{{--                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input invoice-filter-checkbox" id="inv-channel-paylater" data-filter-group="payment_channels" value="PAYLATER"><label class="custom-control-label" for="inv-channel-paylater">PayLater</label></div>--}}
+{{--                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input invoice-filter-checkbox" id="inv-channel-qr" data-filter-group="payment_channels" value="QR_CODE"><label class="custom-control-label" for="inv-channel-qr">QR Code</label></div>--}}
+{{--                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input invoice-filter-checkbox" id="inv-channel-retail-outlet" data-filter-group="payment_channels" value="RETAIL_OUTLET"><label class="custom-control-label" for="inv-channel-retail-outlet">Retail Outlet</label></div>--}}
+{{--                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input invoice-filter-checkbox" id="inv-channel-va" data-filter-group="payment_channels" value="VIRTUAL_ACCOUNT"><label class="custom-control-label" for="inv-channel-va">Virtual Account</label></div>--}}
+{{--                            <div class="custom-control custom-checkbox"><input type="checkbox" class="custom-control-input invoice-filter-checkbox" id="inv-channel-xenplatform" data-filter-group="payment_channels" value="XENPLATFORM"><label class="custom-control-label" for="inv-channel-xenplatform">Xenplatform</label></div>--}}
+{{--                        </div>--}}
                     </div>
                 </div>
             </div>
@@ -55,7 +65,7 @@
                     </div>
                     <input type="text" class="form-control daterange-invoice"
                            name="date_invoice" id="daterange-invoice"
-                           placeholder="Pilih Rentang Tanggal">
+                           placeholder="Select Date Range">
                     <div class="form-control-position">
                         <i class="bx bx-calendar-check"></i>
                     </div>
@@ -69,8 +79,8 @@
                     <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="search-invoice-type-toggle">External ID</button>
                     <div class="dropdown-menu">
                         <a class="dropdown-item search-invoice-type-select" href="#" data-search-key="external_id">External ID</a>
-                        <a class="dropdown-item search-invoice-type-select" href="#" data-search-key="on_demand_link">On Demand Link</a>
-                        <a class="dropdown-item search-invoice-type-select" href="#" data-search-key="recurring_payment_id">Recurring ID</a>
+{{--                        <a class="dropdown-item search-invoice-type-select" href="#" data-search-key="on_demand_link">On Demand Link</a>--}}
+{{--                        <a class="dropdown-item search-invoice-type-select" href="#" data-search-key="recurring_payment_id">Recurring ID</a>--}}
                     </div>
                 </div>
                 <input type="text" class="form-control" placeholder="Search External ID..." aria-label="Search" id="global-invoice-search-input">
@@ -80,10 +90,10 @@
             {{-- 4. Tombol Aksi --}}
             <div class="d-flex w-md-auto">
                 <button id="apply-invoice-filter-btn" class="btn btn-primary mr-1 flex-grow-1" type="button">
-                    <i class="bx bx-search"></i>
+                    <i class="bx bx-filter-alt"></i> Apply Filter
                 </button>
                 <button id="reset-invoice-filter-btn" class="btn btn-secondary" type="button" title="Reset semua filter">
-                    <i class="bx bx-reset"></i>
+                    <i class="bx bx-reset"></i> Reset
                 </button>
             </div>
 

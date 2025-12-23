@@ -8,7 +8,16 @@
         <th>{{ __('messages.partner.outlet.table_management.tables.description') }}</th>
         <th style="width:120px">{{ __('messages.partner.outlet.table_management.tables.status') }}</th>
         <th style="width:140px">{{ __('messages.partner.outlet.table_management.tables.picture') }}</th>
-        <th style="width:140px">Barcode</th>
+        <th style="width:140px">
+            Barcode
+            <a href="{{ route('partner.store.tables.generate-all-barcode') }}" 
+              target="_blank"
+              class="text-danger ms-1"
+              title="Download Barcode (PDF)">
+                <i class="fas fa-file-pdf text-danger fs-5"></i>
+            </a>
+        </th>
+
         <th style="width:220px">{{ __('messages.partner.outlet.table_management.tables.actions') }}</th>
       </tr>
     </thead>
@@ -37,6 +46,8 @@
                 {{ __('messages.partner.outlet.table_management.tables.occupied') }}
               @elseif ($table->status === 'reserved')
                 {{ __('messages.partner.outlet.table_management.tables.reserved') }}
+              @elseif($table->status === 'not_available')
+                {{ __('messages.partner.outlet.table_management.tables.not_available') }}
               @else
                 -
               @endif

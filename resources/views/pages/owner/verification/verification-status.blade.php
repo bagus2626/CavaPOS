@@ -2,6 +2,7 @@
 @section('page_title', 'Status Verifikasi')
 
 @section('content')
+    @vite(['resources/css/app.css'])
     <section class="content">
         <div class="container-fluid">
 
@@ -319,7 +320,8 @@
     @endpush
 
     @push('scripts')
-    <script>
+        @vite(['resources/js/app.js'])
+        <script>
         function openImageModal(src, caption) {
             document.getElementById('modalImage').src = src;
             document.getElementById('modalCaption').textContent = caption;

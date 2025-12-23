@@ -1,4 +1,5 @@
 console.log("cashier.js loaded");
+
 // cashier.js (eksternal - tidak ada Blade tag di sini)
 (function () {
   function setBadge(id, n) {
@@ -29,6 +30,7 @@ console.log("cashier.js loaded");
     // tentukan tab tujuan berdasarkan status
     const statusToTab = {
       UNPAID: "pembayaran",
+      EXPIRED: "pembayaran",
       PROCESSED: "proses",
       PAID: "proses", // optional kalau mau
     };
@@ -51,6 +53,64 @@ console.log("cashier.js loaded");
             </div>`;
     list.prepend(li);
   }
+
+  function formatRupiah(num) {
+    return new Intl.NumberFormat("id-ID").format(num || 0);
+  }
+
+  function refreshMetrics() {
+    if (!window.CASHIER_METRICS_URL) {
+      console.warn("CASHIER_METRICS_URL belum diset");
+      return;
+    }
+
+    const qs = new URLSearchParams(window.location.search);
+
+    fetch(window.CASHIER_METRICS_URL + "?" + qs.toString(), {
+      headers: { "X-Requested-With": "XMLHttpRequest" },
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        const elTotal   = document.getElementById("metric-total-order");
+        const elUnpaid  = document.getElementById("metric-unpaid-cash");
+        const elPaid    = document.getElementById("metric-paid-cash");
+        const elQris    = document.getElementById("metric-qris-paid");
+        const elProcess = document.getElementById("metric-on-process");
+        const elRev     = document.getElementById("metric-revenue");
+
+        if (elTotal)   elTotal.textContent   = formatRupiah(data.total_order);
+        if (elUnpaid)  elUnpaid.textContent  = formatRupiah(data.unpaid_cash);
+        if (elPaid)    elPaid.textContent    = formatRupiah(data.paid_cash);
+        if (elQris)    elQris.textContent    = formatRupiah(data.qris_paid);
+        if (elProcess) elProcess.textContent = formatRupiah(data.on_process);
+        if (elRev)     elRev.textContent     = "Rp " + formatRupiah(data.revenue);
+
+        // 🔹 UPDATE BADGE TAB
+        const bdPembayaran = document.getElementById("tab-badge-pembayaran");
+        const bdProses     = document.getElementById("tab-badge-proses");
+        const bdSelesai    = document.getElementById("tab-badge-selesai");
+
+        if (bdPembayaran && typeof data.badge_pembayaran !== "undefined") {
+          bdPembayaran.textContent = formatRupiah(data.badge_pembayaran);
+        }
+        if (bdProses && typeof data.badge_proses !== "undefined") {
+          bdProses.textContent = formatRupiah(data.badge_proses);
+        }
+        if (bdSelesai && typeof data.badge_selesai !== "undefined") {
+          bdSelesai.textContent = formatRupiah(data.badge_selesai);
+        }
+
+        // 🔹 UPDATE ANGKA "XX order" di panel kiri
+        const pendingLabel = document.getElementById("pending-cash-count");
+        if (pendingLabel && typeof data.pending_cash_count !== "undefined") {
+          pendingLabel.textContent = `${formatRupiah(data.pending_cash_count)} order`;
+        }
+      })
+      .catch((err) => {
+        console.error("Gagal refresh metrics:", err);
+      });
+  }
+
 
   function startListener() {
     if (!window.Echo) {
@@ -94,6 +154,8 @@ console.log("cashier.js loaded");
       count += 1;
       setBadge("notif-badge-desktop", count);
       setBadge("notif-badge-mobile", count);
+
+      refreshMetrics();
     });
 
     // user gesture untuk mengizinkan audio (opsional)

@@ -21,30 +21,28 @@ class AuthenticatedSessionController extends Controller
 
     public function store(LoginRequest $request): RedirectResponse
     {
-        // dd($request->all());
         $request->authenticate();
         $request->session()->regenerate();
 
         $user = $request->user();
 
-        $intended = session()->get('url.intended');
-
-        if ($user->role === 'admin') {
-            if ($intended && str_starts_with($intended, url('/admin'))) {
-                return redirect()->intended();
-            }
-
-            return redirect('/admin/dashboard');
-        } elseif ($user->role === 'partner') {
-            if ($intended && str_starts_with($intended, url('/partner'))) {
-                return redirect()->intended();
-            }
-
-            return redirect('/partner');
+        if ($user->role !== 'partner') {
+            Auth::logout();
+            return redirect()->route('login')->withErrors([
+                'email' => 'Akses ditolak. Akun ini bukan akun partner.'
+            ]);
         }
 
-        return redirect()->intended(route('dashboard'));
+        // Lanjutkan login untuk role partner
+        $intended = session()->get('url.intended');
+
+        if ($intended && str_starts_with($intended, url('/partner'))) {
+            return redirect()->intended();
+        }
+
+        return redirect('/partner');
     }
+
 
 
     /**

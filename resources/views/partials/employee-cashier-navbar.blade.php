@@ -11,7 +11,7 @@
             </a> --}}
 
             {{-- Brand --}}
-            <div class="flex-1 flex justify-center">
+            <div class="flex justify-center">
                 <a href="{{ route('employee.cashier.dashboard') }}">
                         <!-- Logo untuk Light Mode -->
                         <img src="{{ asset('images/cava-logo2-gradient.png') }}"
@@ -22,9 +22,9 @@
 
             {{-- Menu Desktop --}}
             <div class="hidden md:flex items-center space-x-6">
-                <a href="#" class="text-gray-700 hover:text-choco">Home</a>
+                {{-- <a href="#" class="text-gray-700 hover:text-choco">Home</a>
                 <a href="#" class="text-gray-700 hover:text-choco">Menu</a>
-                <a href="#" class="text-gray-700 hover:text-choco">Contact</a>
+                <a href="#" class="text-gray-700 hover:text-choco">Contact</a> --}}
 
                 @auth('employee')
                     @php
@@ -185,31 +185,6 @@
         });
     });
 </script>
-{{-- <script>
-document.addEventListener('DOMContentLoaded', function () {
-  const enableBtn = document.getElementById('enable-sound');
-  if (!enableBtn) return;
-
-  const testAudio = new Audio('/sounds/bell-notification-337658.mp3');
-
-  // Coba autoplay saat load. Jika ditolak, tampilkan tombol.
-  testAudio.play()
-    .then(() => {
-      // Autoplay diizinkan → tombol tetap hidden (memang sengaja)
-    })
-    .catch(() => {
-      // Autoplay ditolak → munculkan tombol agar user memberi izin
-      enableBtn.classList.remove('hidden');
-    });
-
-  // Klik tombol = minta izin sekali, lalu sembunyikan
-  enableBtn.addEventListener('click', () => {
-    (new Audio('/sounds/bell-notification-337658.mp3')).play()
-      .then(() => enableBtn.classList.add('hidden'))
-      .catch(() => {/* tetap tampil kalau masih gagal */});
-  });
-});
-</script> --}}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   // util

@@ -148,4 +148,15 @@ class XenditService
 
         return $this->request('get', "v2/payouts/{$payoutId}", [], $headers);
     }
+
+    public function getInvoiceById(?string $forUserId = null, ?string $id = null)
+    {
+        $headers = [];
+
+        if ($forUserId) {
+            $headers['for-user-id'] = $forUserId;
+        }
+
+        return $this->request('get', "v2/invoices/{$id}", [], $headers);
+    }
 }

@@ -15,6 +15,7 @@ class InvoiceController extends Controller
     {
         $this->xendit = $xendit;
     }
+
     public function createInvoice(string $bookingOrderId, string $xenditSubAccount = null, string $xenditSplitRule = null, array $payload)
     {
         try {
@@ -23,7 +24,7 @@ class InvoiceController extends Controller
             if (!$response->successful()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Invoice gagal dibuat',
+                    'message' => 'Failed to create invoice',
                     'errors' => $response->json(),
                 ], $response->status());
             }
@@ -31,24 +32,24 @@ class InvoiceController extends Controller
             $invoiceData = $response->json();
 
             XenditInvoice::create([
-                'order_id'          => $bookingOrderId,
+                'order_id' => $bookingOrderId,
                 'xendit_invoice_id' => $invoiceData['id'],
-                'external_id'       => $invoiceData['external_id'],
-                'amount'            => $invoiceData['amount'],
-                'status'            => $invoiceData['status'],
-                'invoice_url'       => $invoiceData['invoice_url'],
-                'raw_response'      => $invoiceData,
+                'external_id' => $invoiceData['external_id'],
+                'amount' => $invoiceData['amount'],
+                'status' => $invoiceData['status'],
+                'invoice_url' => $invoiceData['invoice_url'],
+                'raw_response' => $invoiceData,
             ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Invoice berhasil dibuat',
+                'message' => 'Invoice created successfully',
                 'data' => $invoiceData,
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'error'   => 'Failed to create invoice with split rules',
+                'error' => 'Failed to create invoice with split rules',
                 'message' => $e->getMessage(),
             ], 500);
         }
@@ -59,35 +60,56 @@ class InvoiceController extends Controller
         try {
             $response = $this->xendit->getAllInvoices($subAccountId, $params);
 
-            Log::info('DEBUG XENDIT INVOICES REQUEST', [
-                'account_id' => $subAccountId,
-                'params'     => $params,
-                'response'   => $response,
-            ]);
-
             if (!$response->successful()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Gagal mengambil data invoice dari Xendit',
-                    'errors'  => $response->json(),
+                    'message' => 'Failed to fetch invoices from Xendit',
+                    'errors' => $response->json(),
                 ], $response->status());
             }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Data invoice berhasil diambil',
-                'data'    => $response->json(),
+                'message' => 'Invoices fetched successfully',
+                'data' => $response->json(),
             ]);
         } catch (\Throwable $e) {
             Log::error('XENDIT INVOICE ERROR', [
                 'message' => $e->getMessage(),
-                'trace'   => $e->getTraceAsString(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan internal server',
-                'error'   => $e->getMessage(),
+                'message' => 'Internal server error occurred',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function getInvoiceById(string $subAccountId = null, string $invoiceId = null)
+    {
+        try {
+            $response = $this->xendit->getInvoiceById($subAccountId, $invoiceId);
+
+            if (!$response->successful()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to fetch invoice from Xendit',
+                    'errors' => $response->json(),
+                ], $response->status());
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Invoice fetched successfully',
+                'data' => $response->json(),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Internal server error occurred',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

@@ -20,13 +20,24 @@ use Endroid\QrCode\Writer\PngWriter;
 use Endroid\QrCode\Label\Font\NotoSans;
 use Endroid\QrCode\Color\Color;
 use Illuminate\Http\Response;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Str;
 
 class PartnerTableController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $tables = Table::where('partner_id', Auth::id())->get();
-        $table_classes = $tables->pluck('table_class')->unique();
+        $query = Table::where('partner_id', Auth::id());
+
+        if ($request->filled('table_class')) {
+            $query->where('table_class', $request->table_class);
+        }
+
+        $tables = $query->paginate(10)->withQueryString();
+
+        $table_classes = Table::where('partner_id', Auth::id())
+            ->pluck('table_class')
+            ->unique();
 
         return view('pages.partner.store.tables.index', compact('tables', 'table_classes'));
     }
@@ -126,6 +137,7 @@ class PartnerTableController extends Controller
     public function update(Request $request, $id)
     {
         DB::beginTransaction();
+
         try {
             $table = Table::where('id', $id)
                 ->where('partner_id', Auth::id())
@@ -136,44 +148,66 @@ class PartnerTableController extends Controller
                 'table_class' => 'required|string|max:255',
                 'description' => 'nullable|string',
                 'images'      => 'nullable|array|max:5',
+                'images.*'    => 'image|mimes:jpeg,jpg,png,webp|max:4096',
             ]);
 
-            $storedImages = $table->images ?? [];
+            $disk = Storage::disk('public');
 
-            // 🔹 Hapus gambar jika ada pilihan
-            if ($request->has('delete_images')) {
-                foreach ($request->delete_images as $filename) {
-                    $storedImages = array_filter($storedImages, function ($img) use ($filename) {
-                        if ($img['filename'] === $filename) {
-                            // hapus file fisik juga
-                            $path = str_replace('storage/', 'public/', $img['path']);
-                            if (Storage::exists($path)) {
-                                Storage::delete($path);
+            $storedImages = is_array($table->images)
+                ? $table->images
+                : (json_decode($table->images ?? '[]', true) ?: []);
+
+            if ($request->hasFile('images') && count($request->file('images')) > 0) {
+
+                foreach ($storedImages as $img) {
+                    $storedPath   = $img['path'] ?? '';
+                    $relativePath = ltrim(preg_replace('#^storage/#', '', $storedPath), '/'); // "uploads/..."
+
+                    if ($relativePath && $disk->exists($relativePath)) {
+                        $disk->delete($relativePath);
+                    }
+                }
+
+                $storedImages = [];
+            } else {
+                if ($request->filled('delete_images') && is_array($request->delete_images)) {
+                    $filenamesToDelete = $request->delete_images;
+
+                    $storedImages = array_values(array_filter($storedImages, function ($img) use ($filenamesToDelete, $disk) {
+                        $filename = $img['filename'] ?? null;
+
+                        if ($filename && in_array($filename, $filenamesToDelete)) {
+                            $storedPath   = $img['path'] ?? '';
+                            $relativePath = ltrim(preg_replace('#^storage/#', '', $storedPath), '/');
+
+                            if ($relativePath && $disk->exists($relativePath)) {
+                                $disk->delete($relativePath);
                             }
-                            return false; // exclude dari array
+
+                            return false;
                         }
                         return true;
-                    });
+                    }));
                 }
-                // re-index array biar rapi
-                $storedImages = array_values($storedImages);
             }
 
-            // 🔹 Upload gambar baru
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
+                    if (!$image->isValid()) continue;
+
                     $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
                     $path = $image->storeAs('uploads/store/tables', $filename, 'public');
 
-                    // Resize (opsional)
-                    $img = Image::make(storage_path('app/public/' . $path));
+                    // resize (opsional)
+                    $fullPath = storage_path('app/public/' . $path);
+                    $img = Image::make($fullPath);
                     $img->resize(800, null, function ($constraint) {
                         $constraint->aspectRatio();
                         $constraint->upsize();
                     })->save();
 
                     $storedImages[] = [
-                        'path'     => 'storage/' . $path,
+                        'path'     => "storage/" . $path,
                         'filename' => $filename,
                         'mime'     => $image->getClientMimeType(),
                         'size'     => $image->getSize(),
@@ -191,19 +225,21 @@ class PartnerTableController extends Controller
 
             DB::commit();
 
-            return redirect()->route('partner.store.tables.index')
+            return redirect()
+                ->route('partner.store.tables.index')
                 ->with('success', 'Table updated successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->withInput()
+            return back()
+                ->withInput()
                 ->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
 
 
+
     public function destroy(Table $table)
     {
-        // Hapus gambar dari storage
         if ($table->images) {
             foreach ($table->images as $image) {
                 if (isset($image['path'])) {
@@ -224,6 +260,60 @@ class PartnerTableController extends Controller
             abort(404, 'Table URL not found');
         }
 
+        $storeName = Auth::user()->name;
+
+        $pngBinary = $this->buildBarcodePng($table, $storeName);
+
+        return response($pngBinary, 200)->header('Content-Type', 'image/png');
+    }
+
+
+    public function generateAllBarcode(Request $request)
+    {
+        $outlet = Auth::user();
+
+        // ambil semua table milik outlet ini
+        $tables = Table::where('partner_id', $outlet->id)
+            ->orderBy('table_class')
+            ->orderBy('table_no')
+            ->get();
+
+        if ($tables->isEmpty()) {
+            return back()->with('error', 'Tidak ada meja yang tersedia untuk dibuat barcode.');
+        }
+
+        $storeName = $outlet->name;
+
+        // buat array data: tiap item punya table dan src base64 png
+        $barcodes = $tables->map(function ($table) use ($storeName) {
+            $pngBinary   = $this->buildBarcodePng($table, $storeName);
+            $base64      = base64_encode($pngBinary);
+            $dataUri     = 'data:image/png;base64,' . $base64;
+
+            return [
+                'table' => $table,
+                'src'   => $dataUri,
+            ];
+        });
+
+        // render ke PDF A6
+        $pdf = Pdf::loadView('pages.partner.store.tables.pdf.all-barcodes-pdf', [
+            'barcodes'  => $barcodes,
+            'storeName' => $storeName,
+        ])->setPaper('a6', 'portrait'); // ukuran A6, 1 barcode per halaman
+
+        $fileName = 'barcodes-' . Str::slug($storeName) . '.pdf';
+
+        return $pdf->stream($fileName);
+    }
+
+
+    private function buildBarcodePng(Table $table, string $storeName): string
+    {
+        if (!$table->table_url) {
+            throw new \RuntimeException('Table URL not found');
+        }
+
         // Generate QR code normal (tanpa label bawaan!)
         $result = Builder::create()
             ->writer(new PngWriter())
@@ -238,60 +328,77 @@ class PartnerTableController extends Controller
         $qrString = $result->getString();
         $qrImage = imagecreatefromstring($qrString);
 
-        $qrWidth = imagesx($qrImage);
+        $qrWidth  = imagesx($qrImage);
         $qrHeight = imagesy($qrImage);
 
         // Tambahkan padding hitam
-        $paddingTop = 100;   // diperbesar agar muat teks di atas QR
-        $paddingSide = 40;
+        $paddingTop    = 100;  // diperbesar agar muat teks di atas QR
+        $paddingSide   = 40;
         $paddingBottom = 100;
 
-        $finalWidth = $qrWidth + ($paddingSide * 2);
+        $finalWidth  = $qrWidth + ($paddingSide * 2);
         $finalHeight = $qrHeight + $paddingTop + $paddingBottom;
 
         // Buat canvas hitam
         $canvas = imagecreatetruecolor($finalWidth, $finalHeight);
-        $black = imagecolorallocate($canvas, 0, 0, 0);
-        $white = imagecolorallocate($canvas, 255, 255, 255);
+        $black  = imagecolorallocate($canvas, 0, 0, 0);
+        $white  = imagecolorallocate($canvas, 255, 255, 255);
         imagefill($canvas, 0, 0, $black);
 
         // Ambil nama store dan teks table
-        $storeName = Auth::user()->name;
         $tableText = "Table: {$table->table_no}";
-
-        $fontPath = public_path('fonts/MotleyForcesRegular-w1rZ3.ttf');
+        $fontPath  = public_path('fonts/MotleyForcesRegular-w1rZ3.ttf');
 
         // ====== TULIS STORE NAME DI ATAS QR ======
-        $fontSizeStore = 18; // lebih kecil
-        $bboxStore = imagettfbbox($fontSizeStore, 0, $fontPath, $storeName);
-        $storeWidth = $bboxStore[2] - $bboxStore[0];
-        $storeHeight = $bboxStore[1] - $bboxStore[7];
-        $xStore = ($finalWidth - $storeWidth) / 2;
-        $yStore = ($paddingTop / 2) + ($storeHeight / 2); // posisikan di tengah padding atas
+        $fontSizeStore = 18;
+        $bboxStore     = imagettfbbox($fontSizeStore, 0, $fontPath, $storeName);
+        $storeWidth    = $bboxStore[2] - $bboxStore[0];
+        $storeHeight   = $bboxStore[1] - $bboxStore[7];
+        $xStore        = ($finalWidth - $storeWidth) / 2;
+        $yStore        = ($paddingTop / 2) + ($storeHeight / 2);
 
-        imagettftext($canvas, $fontSizeStore, 0, (int)$xStore, (int)$yStore, $white, $fontPath, $storeName);
+        imagettftext(
+            $canvas,
+            $fontSizeStore,
+            0,
+            (int) $xStore,
+            (int) $yStore,
+            $white,
+            $fontPath,
+            $storeName
+        );
 
         // ====== TEMPATKAN QR DI TENGAH ======
         imagecopy($canvas, $qrImage, $paddingSide, $paddingTop, 0, 0, $qrWidth, $qrHeight);
 
         // ====== TULIS TABLE TEXT DI BAWAH QR ======
-        $fontSizeTable = 28; // lebih besar
-        $bboxTable = imagettfbbox($fontSizeTable, 0, $fontPath, $tableText);
-        $tableWidth = $bboxTable[2] - $bboxTable[0];
-        $tableHeight = $bboxTable[1] - $bboxTable[7];
-        $xTable = ($finalWidth - $tableWidth) / 2;
-        $yTable = $qrHeight + $paddingTop + (($paddingBottom + $tableHeight) / 2);
+        $fontSizeTable = 28;
+        $bboxTable     = imagettfbbox($fontSizeTable, 0, $fontPath, $tableText);
+        $tableWidth    = $bboxTable[2] - $bboxTable[0];
+        $tableHeight   = $bboxTable[1] - $bboxTable[7];
+        $xTable        = ($finalWidth - $tableWidth) / 2;
+        $yTable        = $qrHeight + $paddingTop + (($paddingBottom + $tableHeight) / 2);
 
-        imagettftext($canvas, $fontSizeTable, 0, (int)$xTable, (int)$yTable, $white, $fontPath, $tableText);
+        imagettftext(
+            $canvas,
+            $fontSizeTable,
+            0,
+            (int) $xTable,
+            (int) $yTable,
+            $white,
+            $fontPath,
+            $tableText
+        );
 
-        // Output ke browser
+        // Kembalikan sebagai string PNG
         ob_start();
         imagepng($canvas);
-        $output = ob_get_clean();
+        $pngBinary = ob_get_clean();
 
         imagedestroy($qrImage);
         imagedestroy($canvas);
 
-        return response($output, 200)->header('Content-Type', 'image/png');
+        return $pngBinary; // string binary PNG
     }
+
 }

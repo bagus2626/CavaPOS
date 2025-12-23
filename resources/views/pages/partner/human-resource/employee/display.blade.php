@@ -59,12 +59,14 @@
               <a href="{{ route('partner.user-management.employees.show', $employee->id) }}" class="btn btn-outline-choco">
                 <i class="fas fa-eye mr-1"></i> Detail
               </a>
-              <a href="{{ route('partner.user-management.employees.edit', $employee->id) }}" class="btn btn-choco">
+
+              {{-- rafi --}}
+              {{-- <a href="{{ route('partner.user-management.employees.edit', $employee->id) }}" class="btn btn-choco">
                 <i class="fas fa-pen mr-1"></i> {{ __('messages.partner.user_management.employees.edit') }}
               </a>
               <button onclick="deleteEmployee({{ $employee->id }})" class="btn btn-soft-danger">
                 <i class="fas fa-trash-alt mr-1"></i> Delete
-              </button>
+              </button> --}}
             </div>
           </td>
         </tr>

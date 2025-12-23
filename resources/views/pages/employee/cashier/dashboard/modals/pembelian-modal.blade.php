@@ -10,11 +10,17 @@
       <p id="floatingCartTotal" class="text-lg font-extrabold text-gray-900">Rp 0</p>
     </div>
 
-    <button id="floatingCartClear" class="p-2 rounded-lg border border-gray-200 hover:bg-gray-50" aria-label="Hapus keranjang">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 7h12M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2m1 0v12a2 2 0 01-2 2H8a2 2 0 01-2-2V7m3 4v6m4-6v6" />
+    <button id="floatingCartClear"
+          class="p-2 rounded-lg border border-gray-200 hover:bg-gray-50"
+          aria-label="Buka keranjang"
+          title="Keranjang">
+      <!-- SVG cart -->
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-choco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M6 6h15l-1.5 9h-12L6 6Zm0 0L5 3H2m6 19a1 1 0 100-2 1 1 0 000 2Zm10 0a1 1 0 100-2 1 1 0 000 2Z" />
       </svg>
-    </button>
+  </button>
+
 
     <button id="floatingCartPay" class="px-4 py-2 rounded-lg bg-choco text-white font-semibold hover:bg-soft-choco">
       Checkout <span id="floatingCartCount" class="ml-1 text-white/90 text-sm"></span>
@@ -123,20 +129,43 @@
 
           {{-- Pilih Meja --}}
             <div>
-                <label for="orderTable" class="block text-sm font-medium mb-1">Pilih Meja</label>
-                <select id="orderTable"
-                        class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-choco/40"
-                        required>
-                    <option value="" selected disabled>Pilih meja</option>
-                    @foreach($tables as $table)
-                    <option value="{{ $table->id }}"
-                            data-table-no="{{ $table->table_no }}"
-                            data-table-class="{{ $table->table_class }}">
-                        Meja {{ $table->table_no }} — {{ $table->table_class }}
-                    </option>
-                    @endforeach
-                </select>
-            </div>
+              <label for="orderTable" class="block text-sm font-medium mb-1">Pilih Meja</label>
+              <select id="orderTable"
+                      class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-choco/40"
+                      required>
+                  <option value="" selected disabled>Pilih meja</option>
+                  @foreach($tables as $table)
+                      @php
+                          $isDisabled = $table->status === 'not_available';
+                          $statusLabel = '';
+                          
+                          switch($table->status) {
+                              case 'occupied':
+                                  $statusLabel = ' (Sedang Sibuk)';
+                                  break;
+                              case 'reserved':
+                                  $statusLabel = ' (Sudah Dipesan)';
+                                  break;
+                              case 'not_available':
+                                  $statusLabel = ' (Tidak Tersedia)';
+                                  break;
+                          }
+                      @endphp
+                      
+                      <option value="{{ $table->id }}"
+                              data-table-no="{{ $table->table_no }}"
+                              data-table-class="{{ $table->table_class }}"
+                              data-table-status="{{ $table->status }}"
+                              @if($isDisabled) disabled @endif
+                              @if($isDisabled) class="text-gray-400" @endif>
+                          Meja {{ $table->table_no }} — {{ $table->table_class }}{{ $statusLabel }}
+                      </option>
+                  @endforeach
+              </select>
+              <p class="mt-1 text-xs text-gray-500">
+                  Meja yang tidak tersedia tidak dapat dipilih
+              </p>
+          </div>
           <div>
             <label for="paymentMethod" class="block text-sm font-medium mb-1">Metode Pembayaran</label>
             <select id="paymentMethod" class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-choco/40" required>

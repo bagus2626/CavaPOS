@@ -1,10 +1,12 @@
 @extends('layouts.owner')
-@section('title', 'Business Performance Dashboard')
+@section('title', __('messages.owner.sales_report.business_performance_dashboard'))
 
-@section('page_title', 'Business Performance Dashboard')
+@section('page_title', __('messages.owner.sales_report.business_performance_dashboard'))
 
 @section('content')
-    <section class="content">
+    @vite(['resources/css/app.css'])
+
+    <section class="content mb-4">
         <div class="container-fluid">
             <div class="bg-white rounded-xl shadow-md p-6 mb-6">
                 <form method="GET" action="{{ route('owner.user-owner.report.sales.index') }}" id="partner-filter-form">
@@ -13,7 +15,7 @@
 
                             <select name="partner_id" id="partner-select"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-choco focus:border-transparent">
-                                <option value="">All Partners/Outlets</option>
+                                <option value="">{{ __('messages.owner.sales_report.all_outlets') }}</option>
                                 @foreach($partners as $partner)
                                     <option value="{{ $partner->id }}" {{ ($filters['partner_id'] ?? '') == $partner->id ? 'selected' : '' }}>
                                         {{ $partner->name }} ({{ $partner->partner_code }})
@@ -25,7 +27,7 @@
                         <div class="flex gap-2 items-end">
                             <button type="submit"
                                 class="px-6 py-2 bg-choco text-white text-sm font-medium rounded-lg hover:bg-opacity-90 transition duration-200">
-                                Apply
+                                {{ __('messages.owner.sales_report.apply') }}
                             </button>
                         </div>
                     </div>
@@ -60,11 +62,11 @@
                             <i class="fas fa-info-circle text-blue-600"></i>
                             <div>
                                 <p class="text-sm font-medium text-blue-900">
-                                    Showing data for: <span class="font-bold">{{ $selectedPartner->name }}</span>
+                                    {{ __('messages.owner.sales_report.showing_data_for') }}: <span class="font-bold">{{ $selectedPartner->name }}</span>
                                 </p>
                                 <p class="text-xs text-blue-700 mt-1">
-                                    Partner Code: {{ $selectedPartner->partner_code }} |
-                                    Location: {{ $selectedPartner->city }}, {{ $selectedPartner->province }}
+                                    {{ __('messages.owner.sales_report.partner_code') }}: {{ $selectedPartner->partner_code }} |
+                                    {{ __('messages.owner.sales_report.location') }}: {{ $selectedPartner->city }}, {{ $selectedPartner->province }}
                                 </p>
                             </div>
                         </div>
@@ -83,11 +85,11 @@
                             <div class="flex flex-wrap gap-2">
                                 <div class="flex bg-gray-100 rounded-lg p-1">
                                     <button type="button" onclick="changeFilterPeriod('yearly')" id="filter-btn-yearly"
-                                        class="px-3 py-1 text-sm font-medium rounded-md transition-colors duration-200">Tahunan</button>
+                                        class="px-3 py-1 text-sm font-medium rounded-md transition-colors duration-200">{{ __('messages.owner.sales_report.annualy') }}</button>
                                     <button type="button" onclick="changeFilterPeriod('monthly')" id="filter-btn-monthly"
-                                        class="px-3 py-1 text-sm font-medium rounded-md transition-colors duration-200">Bulanan</button>
+                                        class="px-3 py-1 text-sm font-medium rounded-md transition-colors duration-200">{{ __('messages.owner.sales_report.monthly') }}</button>
                                     <button type="button" onclick="changeFilterPeriod('daily')" id="filter-btn-daily"
-                                        class="px-3 py-1 text-sm font-medium rounded-md">Harian</button>
+                                        class="px-3 py-1 text-sm font-medium rounded-md">{{ __('messages.owner.sales_report.daily') }}</button>
                                 </div>
                             </div>
 
@@ -100,7 +102,7 @@
                                             d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
                                         </path>
                                     </svg>
-                                    Export Excel
+                                    {{ __('messages.owner.sales_report.export_excel') }}
                                 </a>
                             </div>
                         </div>
@@ -110,7 +112,7 @@
                             <div id="global-yearly-filter"
                                 class="period-filter hidden grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">From Year</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.owner.sales_report.from_year') }}</label>
                                     <select name="year_from" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
                                         @for ($year = date('Y'); $year >= date('Y') - 5; $year--)
                                             <option value="{{ $year }}" {{ ($filters['year_from'] ?? date('Y')) == $year ? 'selected' : '' }}>{{ $year }}</option>
@@ -118,7 +120,7 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">To Year</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.owner.sales_report.to_year') }}</label>
                                     <select name="year_to" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
                                         @for ($year = date('Y'); $year >= date('Y') - 5; $year--)
                                             <option value="{{ $year }}" {{ ($filters['year_to'] ?? date('Y')) == $year ? 'selected' : '' }}>{{ $year }}</option>
@@ -127,8 +129,9 @@
                                 </div>
                                 <div class="flex justify-start">
                                     <button type="submit" name="period" value="yearly"
-                                        class="px-4 py-2 bg-choco text-white text-sm font-medium rounded-lg hover:bg-indigo-700">Apply
-                                        Filters</button>
+                                        class="px-4 py-2 bg-choco text-white text-sm font-medium rounded-lg hover:bg-indigo-700">
+                                        {{ __('messages.owner.sales_report.apply_filter') }}
+                                    </button>
                                 </div>
                             </div>
 
@@ -136,7 +139,7 @@
                             <div id="global-monthly-filter"
                                 class="period-filter hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Select Year</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.owner.sales_report.select_year') }}</label>
                                     <select name="month_year" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
                                         @for ($year = date('Y'); $year >= date('Y') - 5; $year--)
                                             <option value="{{ $year }}" {{ ($filters['month_year'] ?? date('Y')) == $year ? 'selected' : '' }}>{{ $year }}
@@ -145,86 +148,112 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">From Month</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.owner.sales_report.from_month') }}</label>
                                     <select name="month_from" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                                        <option value="1" {{ ($filters['month_from'] ?? 1) == 1 ? 'selected' : '' }}>Januari
+                                        <option value="1" {{ ($filters['month_from'] ?? 1) == 1 ? 'selected' : '' }}>
+                                            {{ __('messages.owner.sales_report.january') }}
                                         </option>
-                                        <option value="2" {{ ($filters['month_from'] ?? 1) == 2 ? 'selected' : '' }}>Februari
+                                        <option value="2" {{ ($filters['month_from'] ?? 1) == 2 ? 'selected' : '' }}>
+                                            {{ __('messages.owner.sales_report.february') }}
                                         </option>
-                                        <option value="3" {{ ($filters['month_from'] ?? 1) == 3 ? 'selected' : '' }}>Maret
+                                        <option value="3" {{ ($filters['month_from'] ?? 1) == 3 ? 'selected' : '' }}>
+                                            {{ __('messages.owner.sales_report.march') }}
                                         </option>
-                                        <option value="4" {{ ($filters['month_from'] ?? 1) == 4 ? 'selected' : '' }}>April
+                                        <option value="4" {{ ($filters['month_from'] ?? 1) == 4 ? 'selected' : '' }}>
+                                            {{ __('messages.owner.sales_report.april') }}
                                         </option>
-                                        <option value="5" {{ ($filters['month_from'] ?? 1) == 5 ? 'selected' : '' }}>Mei
+                                        <option value="5" {{ ($filters['month_from'] ?? 1) == 5 ? 'selected' : '' }}>
+                                            {{ __('messages.owner.sales_report.may') }}
                                         </option>
-                                        <option value="6" {{ ($filters['month_from'] ?? 1) == 6 ? 'selected' : '' }}>Juni
+                                        <option value="6" {{ ($filters['month_from'] ?? 1) == 6 ? 'selected' : '' }}>
+                                            {{ __('messages.owner.sales_report.june') }}
                                         </option>
-                                        <option value="7" {{ ($filters['month_from'] ?? 1) == 7 ? 'selected' : '' }}>Juli
+                                        <option value="7" {{ ($filters['month_from'] ?? 1) == 7 ? 'selected' : '' }}>
+                                            {{ __('messages.owner.sales_report.july') }}
                                         </option>
-                                        <option value="8" {{ ($filters['month_from'] ?? 1) == 8 ? 'selected' : '' }}>Agustus
+                                        <option value="8" {{ ($filters['month_from'] ?? 1) == 8 ? 'selected' : '' }}>
+                                            {{ __('messages.owner.sales_report.august') }}
                                         </option>
-                                        <option value="9" {{ ($filters['month_from'] ?? 1) == 9 ? 'selected' : '' }}>September
+                                        <option value="9" {{ ($filters['month_from'] ?? 1) == 9 ? 'selected' : '' }}>
+                                            {{ __('messages.owner.sales_report.september') }}
                                         </option>
-                                        <option value="10" {{ ($filters['month_from'] ?? 1) == 10 ? 'selected' : '' }}>Oktober
+                                        <option value="10" {{ ($filters['month_from'] ?? 1) == 10 ? 'selected' : '' }}>
+                                            {{ __('messages.owner.sales_report.october') }}
                                         </option>
                                         <option value="11" {{ ($filters['month_from'] ?? 1) == 11 ? 'selected' : '' }}>
-                                            November</option>
+                                            {{ __('messages.owner.sales_report.november') }}
+                                        </option>
                                         <option value="12" {{ ($filters['month_from'] ?? 1) == 12 ? 'selected' : '' }}>
-                                            Desember</option>
+                                            {{ __('messages.owner.sales_report.december') }}
+                                        </option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">To Month</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.owner.sales_report.to_month') }}</label>
                                     <select name="month_to" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
                                         <option value="1" {{ ($filters['month_to'] ?? date('n')) == 1 ? 'selected' : '' }}>
-                                            Januari</option>
+                                            {{ __('messages.owner.sales_report.january') }}
+                                        </option>
                                         <option value="2" {{ ($filters['month_to'] ?? date('n')) == 2 ? 'selected' : '' }}>
-                                            Februari</option>
+                                            {{ __('messages.owner.sales_report.february') }}
+                                        </option>
                                         <option value="3" {{ ($filters['month_to'] ?? date('n')) == 3 ? 'selected' : '' }}>
-                                            Maret</option>
+                                            {{ __('messages.owner.sales_report.march') }}
+                                        </option>
                                         <option value="4" {{ ($filters['month_to'] ?? date('n')) == 4 ? 'selected' : '' }}>
-                                            April</option>
-                                        <option value="5" {{ ($filters['month_to'] ?? date('n')) == 5 ? 'selected' : '' }}>Mei
+                                            {{ __('messages.owner.sales_report.april') }}
+                                        </option>
+                                        <option value="5" {{ ($filters['month_to'] ?? date('n')) == 5 ? 'selected' : '' }}>
+                                            {{ __('messages.owner.sales_report.may') }}
                                         </option>
                                         <option value="6" {{ ($filters['month_to'] ?? date('n')) == 6 ? 'selected' : '' }}>
-                                            Juni</option>
+                                            {{ __('messages.owner.sales_report.june') }}
+                                        </option>
                                         <option value="7" {{ ($filters['month_to'] ?? date('n')) == 7 ? 'selected' : '' }}>
-                                            Juli</option>
+                                            {{ __('messages.owner.sales_report.july') }}
+                                        </option>
                                         <option value="8" {{ ($filters['month_to'] ?? date('n')) == 8 ? 'selected' : '' }}>
-                                            Agustus</option>
+                                            {{ __('messages.owner.sales_report.august') }}
+                                        </option>
                                         <option value="9" {{ ($filters['month_to'] ?? date('n')) == 9 ? 'selected' : '' }}>
-                                            September</option>
+                                            {{ __('messages.owner.sales_report.september') }}
+                                        </option>
                                         <option value="10" {{ ($filters['month_to'] ?? date('n')) == 10 ? 'selected' : '' }}>
-                                            Oktober</option>
+                                            {{ __('messages.owner.sales_report.october') }}
+                                        </option>
                                         <option value="11" {{ ($filters['month_to'] ?? date('n')) == 11 ? 'selected' : '' }}>
-                                            November</option>
+                                            {{ __('messages.owner.sales_report.november') }}
+                                        </option>
                                         <option value="12" {{ ($filters['month_to'] ?? date('n')) == 12 ? 'selected' : '' }}>
-                                            Desember</option>
+                                            {{ __('messages.owner.sales_report.december') }}
+                                        </option>
                                     </select>
                                 </div>
                                 <div class="flex justify-start">
                                     <button type="submit" name="period" value="monthly"
-                                        class="px-4 py-2 bg-choco text-white text-sm font-medium rounded-lg hover:bg-indigo-700">Apply
-                                        Filters</button>
+                                        class="px-4 py-2 bg-choco text-white text-sm font-medium rounded-lg hover:bg-indigo-700">
+                                        {{ __('messages.owner.sales_report.apply_filter') }}
+                                    </button>
                                 </div>
                             </div>
 
                             <div id="global-daily-filter"
                                 class="period-filter hidden grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">From Date</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.owner.sales_report.from_date') }}</label>
                                     <input type="date" name="from" value="{{ $filters['from'] ?? '' }}"
                                         class="w-full px-3 py-2 border border-gray-300 rounded-lg">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">To Date</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('messages.owner.sales_report.to_date') }}</label>
                                     <input type="date" name="to" value="{{ $filters['to'] ?? '' }}"
                                         class="w-full px-3 py-2 border border-gray-300 rounded-lg">
                                 </div>
                                 <div class="flex justify-start">
                                     <button type="submit" name="period" value="daily"
-                                        class="px-4 py-2 bg-choco text-white text-sm font-medium rounded-lg hover:bg-indigo-700">Apply
-                                        Filters</button>
+                                        class="px-4 py-2 bg-choco text-white text-sm font-medium rounded-lg hover:bg-indigo-700">
+                                        {{ __('messages.owner.sales_report.apply_filter') }}
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -234,18 +263,18 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 <div class="bg-white rounded-xl shadow-md p-6">
-                    <p class="text-sm font-medium text-gray-500 uppercase">Total Revenue</p>
+                    <p class="text-sm font-medium text-gray-500 uppercase">{{ __('messages.owner.sales_report.total_sales') }}</p>
                     <p class="text-2xl font-bold text-gray-900 mt-1">Rp {{ number_format($totalRevenue ?? 0, 0, ',', '.') }}
                     </p>
                 </div>
 
                 <div class="bg-white rounded-xl shadow-md p-6">
-                    <p class="text-sm font-medium text-gray-500 uppercase">Total Menu Sold</p>
+                    <p class="text-sm font-medium text-gray-500 uppercase">{{ __('messages.owner.sales_report.total_menu_sold') }}</p>
                     <p class="text-2xl font-bold text-gray-900 mt-1">{{ number_format($totalOrders ?? 0, 0, ',', '.') }}</p>
                 </div>
 
                 <div class="bg-white rounded-xl shadow-md p-6">
-                    <p class="text-sm font-medium text-gray-500 uppercase">Total Booking order</p>
+                    <p class="text-sm font-medium text-gray-500 uppercase">{{ __('messages.owner.sales_report.total_booking_orders') }}</p>
                     <p class="text-2xl font-bold text-gray-900 mt-1">
                         {{ number_format($totalBookingOrders ?? 0, 0, ',', '.') }}
                     </p>
@@ -255,7 +284,7 @@
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
                 <div class="bg-white rounded-xl shadow-md p-6 xl:col-span-2">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-bold text-gray-800">Revenue Trend Analysis</h3>
+                        <h3 class="text-lg font-bold text-gray-800">{{ __('messages.owner.sales_report.sales_trend_analysis') }}</h3>
                         <div class="text-sm text-gray-500" id="chart-period-indicator">
                             {{ $indicatorText ?? 'Tampilan Data' }}
                         </div>
@@ -263,7 +292,7 @@
                     <div class="h-80"><canvas id="revenueTrendChart"></canvas></div>
                 </div>
                 <div class="bg-white rounded-xl shadow-md p-6 xl:col-span-1">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4">Revenue by Category</h3>
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">{{ __('messages.owner.sales_report.sales_by_category') }}</h3>
                     <div class="h-80"><canvas id="categoryChart"></canvas></div>
                 </div>
             </div>
@@ -271,17 +300,17 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div class="bg-white rounded-xl shadow-md overflow-hidden">
                     <div class="px-6 py-4 bg-choco flex justify-between items-center">
-                        <h3 class="text-lg font-semibold text-white mb-0">Products by Quantity</h3>
+                        <h3 class="text-lg font-semibold text-white mb-0">{{ __('messages.owner.sales_report.products_by_quantity') }}</h3>
                         <div class="flex items-center gap-2">
                             <div class="relative inline-block">
                                 <select id="sort-products-filter"
                                     class="px-2 py-1 w-24 text-sm border border-white rounded-lg bg-choco text-white focus:outline-none focus:ring-2 focus:ring-white/50  pr-8"
                                     style="-webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: none;">
                                     <option value="desc" {{ ($filters['sort_products'] ?? 'desc') == 'desc' ? 'selected' : '' }}>
-                                        Highest
+                                        {{ __('messages.owner.sales_report.highest') }}
                                     </option>
                                     <option value="asc" {{ ($filters['sort_products'] ?? 'desc') == 'asc' ? 'selected' : '' }}>
-                                        Lowest
+                                        {{ __('messages.owner.sales_report.lowest') }}
                                     </option>
                                 </select>
 
@@ -300,13 +329,13 @@
                                 <div class="flex justify-between items-center p-2 m-0 hover:bg-gray-50 rounded-xl">
                                     <div>
                                         <p class="font-medium text-gray-800 m-0">{{ $product->name }}</p>
-                                        <p class="text-sm text-gray-500 m-0">{{ $product->total_quantity }} Sold</p>
+                                        <p class="text-sm text-gray-500 m-0">{{ $product->total_quantity }} {{ __('messages.owner.sales_report.sold') }}</p>
                                     </div>
                                     <span class="font-bold text-green-600">Rp
                                         {{ number_format($product->total_sales, 0, ',', '.') }}</span>
                                 </div>
                             @empty
-                                <p class="text-gray-500 text-center">Tidak ada data produk.</p>
+                                <p class="text-gray-500 text-center">{{ __('messages.owner.sales_report.no_product_data_found') }}</p>
                             @endforelse
                         </div>
                     </div>
@@ -314,7 +343,7 @@
 
                 <div class="bg-white rounded-xl shadow-md overflow-hidden">
                     <div class="px-6 py-4 bg-choco flex justify-between items-center">
-                        <h3 class="text-lg font-semibold text-white mb-0">Recent Transactions</h3>
+                        <h3 class="text-lg font-semibold text-white mb-0">{{ __('messages.owner.sales_report.recent_sales_transactions') }}</h3>
                     </div>
                     <div class="p-6 max-h-[48rem] overflow-y-auto">
                         <div class="space-y-4" id="recent-transactions-list">
@@ -332,7 +361,7 @@
                                         {{ number_format($transaction->total_order_value, 0, ',', '.') }}</span>
                                 </div>
                             @empty
-                                <p class="text-gray-500 text-center">Tidak ada transaksi terkini.</p>
+                                <p class="text-gray-500 text-center">{{ __('messages.owner.sales_report.no_recent_sales_transactions_found') }}</p>
                             @endforelse
                         </div>
                     </div>
@@ -346,17 +375,17 @@
         <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
             <div class="mt-3">
                 <div class="flex justify-between items-center mb-4 border-b pb-3">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Detail Pesanan</h3>
+                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">{{ __('messages.owner.sales_report.order_details') }}</h3>
                     <button id="closeModalXBtn"
                         class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
                 </div>
                 <div id="modal-body" class="mt-2 px-2 py-3 text-sm text-gray-700" style="min-height: 100px;">
-                    <p class="text-center">Memuat detail...</p>
+                    <p class="text-center">{{ __('messages.owner.sales_report.loading_detail') }}</p>
                 </div>
                 <div class="items-center px-4 py-3 border-t mt-4">
                     <button id="closeModalBtn"
                         class="px-4 py-2 bg-choco text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-soft-choco focus:outline-none focus:ring-2 focus:ring-gray-300">
-                        Tutup
+                        {{ __('messages.owner.sales_report.close') }}
                     </button>
                 </div>
             </div>
@@ -365,6 +394,9 @@
 @endsection
 
 @push('scripts')
+    @vite(['resources/js/app.js'])
+    <script src="{{ asset('js/owner/reports/sales.js') }}"></script>
+
     {{-- Melewatkan data dari PHP ke JavaScript untuk Chart --}}
     <script>
         const revenueChartData = @json($revenueChartData ?? ['labels' => [], 'data' => []]);
@@ -409,7 +441,7 @@
                         const orderCode = this.querySelector('.font-medium').textContent;
 
                         modalTitle.textContent = `Detail ${orderCode}`;
-                        modalBody.innerHTML = '<p class="text-center">Memuat detail...</p>';
+                        modalBody.innerHTML = '<p class="text-center">{{ __('messages.owner.sales_report.loading_detail') }}</p>';
                         modal.classList.remove('hidden');
 
                         try {
@@ -448,7 +480,7 @@
                                 html += '</ul>';
                                 modalBody.innerHTML = html;
                             } else {
-                                modalBody.innerHTML = '<p class="text-center">Tidak ada detail produk untuk pesanan ini.</p>';
+                                modalBody.innerHTML = '<p class="text-center">{{ __('messages.owner.sales_report.no_product_detail_found') }}</p>';
                             }
                         } catch (error) {
                             console.error(error);
@@ -482,7 +514,7 @@
                         // Fetch sorted data
                         const response = await fetch(`{{ route('owner.user-owner.report.sales.products') }}?${urlParams.toString()}`);
 
-                        if (!response.ok) throw new Error('Gagal mengambil data produk');
+                        if (!response.ok) throw new Error('{{ __('messages.owner.sales_report.failed_load_product_data') }}');
 
                         const products = await response.json();
 
@@ -502,7 +534,7 @@
                             });
                             productsList.innerHTML = html;
                         } else {
-                            productsList.innerHTML = '<p class="text-gray-500 text-center">Tidak ada data produk.</p>';
+                            productsList.innerHTML = '<p class="text-gray-500 text-center">{{ __('messages.owner.sales_report.no_data_found') }}</p>';
                         }
 
                         // Update URL without refresh
@@ -511,7 +543,7 @@
 
                     } catch (error) {
                         console.error(error);
-                        productsList.innerHTML = '<p class="text-red-500 text-center">Gagal memuat data produk</p>';
+                        productsList.innerHTML = '<p class="text-red-500 text-center">{{ __('messages.owner.sales_report.failed_load_data') }}</p>';
                     }
                 });
             }

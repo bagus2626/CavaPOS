@@ -4,6 +4,8 @@
 @section('page_title', __('messages.partner.product.all_product.all_products'))
 
 @section('content')
+@vite(['resources/css/app.css'])
+
 <section class="content product-index">
   <div class="container-fluid">
 
@@ -12,15 +14,25 @@
     </a> --}}
 
     <div class="filter-group mb-3">
-      <button class="btn btn-outline-choco btn-sm filter-btn rounded-pill active" data-category="all">{{ __('messages.partner.product.all_product.all') }}</button>
+      {{-- tombol "Semua" --}}
+      <a
+        href="{{ route('partner.products.index') }}"
+        class="btn btn-outline-choco btn-sm filter-btn rounded-pill {{ !$categoryId ? 'active' : '' }}"
+      >
+        {{ __('messages.partner.product.all_product.all') }}
+      </a>
+
       @foreach($categories as $category)
-        <button
-          class="btn btn-outline-choco btn-sm filter-btn rounded-pill"
-          data-category="{{ $category->id }}">
+        <a
+          href="{{ route('partner.products.index', ['category' => $category->id]) }}"
+          class="btn btn-outline-choco btn-sm filter-btn rounded-pill
+                {{ (string)$categoryId === (string)$category->id ? 'active' : '' }}"
+        >
           {{ $category->category_name }}
-        </button>
+        </a>
       @endforeach
     </div>
+
 
     @if(session('success'))
       <div class="alert alert-success">{{ session('success') }}</div>
@@ -31,6 +43,14 @@
         @include('pages.partner.products.display')
       </div>
     </div>
+
+    {{-- pagination --}}
+    @if($products->hasPages())
+      <div class="mt-3">
+        {{ $products->links() }}
+      </div>
+    @endif
+
   </div>
 </section>
 
@@ -107,10 +127,51 @@
 /* util */
 .rounded-pill{ border-radius: 999px; }
 
+/* === Custom Choco Pagination === */
+.pagination {
+    display: flex;
+    gap: 6px;
+}
+
+.pagination .page-item .page-link {
+    border-radius: 8px;
+    padding: 6px 12px;
+    color: var(--choco) !important;
+    border: 1px solid var(--choco);
+    background: transparent;
+    font-weight: 600;
+    transition: .15s ease;
+}
+
+.pagination .page-item .page-link:hover {
+    background: var(--choco);
+    color: #fff !important;
+}
+
+.pagination .page-item.active .page-link {
+    background: var(--choco) !important;
+    border-color: var(--choco) !important;
+    color: #fff !important;
+}
+
+.pagination .page-item.disabled .page-link {
+    opacity: .4;
+    cursor: not-allowed;
+    border-color: #ddd;
+    color: #aaa !important;
+}
+
+.pagination .page-item .page-link {
+    border-radius: 999px;
+}
+
+
 </style>
 @endsection
 
 @push('scripts')
+@vite(['resources/js/app.js'])
+
   {{-- SweetAlert2 sudah ada di layout; kalau belum, tetap aman --}}
   <script>
     function deleteProduct(productId) {

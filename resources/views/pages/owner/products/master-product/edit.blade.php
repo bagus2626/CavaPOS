@@ -76,9 +76,10 @@
 
                     <!-- Quantity & Price -->
                     <div class="row">
+                        {{-- PRICE --}}
                         <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Price</label>
+                            <div class="form-group mb-2">
+                                <label>{{ __('messages.owner.products.master_products.price') }}</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">Rp.</span>
@@ -87,40 +88,72 @@
                                         value="{{ number_format($data->price,0,',','.') }}" required>
                                 </div>
                             </div>
+
+                            {{-- Checkbox: apply price to all outlets --}}
+                            <div class="form-check mt-1">
+                                {{-- hidden supaya selalu kirim false jika tidak dicentang --}}
+                                <input type="hidden" name="apply_price_all_outlets" value="0">
+                                <input type="checkbox"
+                                    class="form-check-input"
+                                    id="apply_price_all_outlets"
+                                    name="apply_price_all_outlets"
+                                    value="1"
+                                    {{ old('apply_price_all_outlets', '0') == '1' ? 'checked' : '' }}>
+                                <label class="form-check-label" for="apply_price_all_outlets">
+                                    {{-- bebas mau pakai lang key atau teks langsung --}}
+                                    {{ __('messages.owner.products.master_products.apply_price_all_outlets') ?? 'Terapkan harga untuk semua outlet' }}
+                                </label>
+                            </div>
                         </div>
+
+                        {{-- PROMOTION --}}
                         <div class="col-md-6">
-                            <div class="form-group">
+                            <div class="form-group mb-2">
                                 <label class="mb-1" for="promotion_id">{{ __('messages.owner.products.master_products.promotion') }}</label>
                                 <select id="promotion_id" name="promotion_id" class="form-control">
-                                {{-- kosong = tanpa promo --}}
-                                @php
-                                    $selectedPromoId = old('promotion_id', $data->promo_id);
-                                @endphp
-                                <option value="">{{ __('messages.owner.products.master_products.no_promotion_select') }}</option>
-                                @foreach($promotions as $promo)
-                                    <option value="{{ $promo->id }}" {{ (string)$selectedPromoId === (string)$promo->id ? 'selected' : '' }}>
-                                    {{ $promo->promotion_name }}
-                                    (
-                                    @if($promo->promotion_type === 'percentage')
-                                        {{ number_format($promo->promotion_value, 0, ',', '.') }}% Off
-                                    @else
-                                        Rp.
-                                        @if(fmod($promo->promotion_value, 1) == 0)
-                                        {{ number_format($promo->promotion_value, 0, ',', '.') }} Off
-                                        @else
-                                        {{ number_format($promo->promotion_value, 2, ',', '.') }} Off
-                                        @endif
-                                    @endif
-                                    )
-                                    </option>
-                                @endforeach
+                                    @php
+                                        $selectedPromoId = old('promotion_id', $data->promo_id);
+                                    @endphp
+                                    <option value="">{{ __('messages.owner.products.master_products.no_promotion_select') }}</option>
+                                    @foreach($promotions as $promo)
+                                        <option value="{{ $promo->id }}" {{ (string)$selectedPromoId === (string)$promo->id ? 'selected' : '' }}>
+                                            {{ $promo->promotion_name }}
+                                            (
+                                            @if($promo->promotion_type === 'percentage')
+                                                {{ number_format($promo->promotion_value, 0, ',', '.') }}% Off
+                                            @else
+                                                Rp.
+                                                @if(fmod($promo->promotion_value, 1) == 0)
+                                                    {{ number_format($promo->promotion_value, 0, ',', '.') }} Off
+                                                @else
+                                                    {{ number_format($promo->promotion_value, 2, ',', '.') }} Off
+                                                @endif
+                                            @endif
+                                            )
+                                        </option>
+                                    @endforeach
                                 </select>
                                 @error('promotion_id')
-                                <small class="text-danger d-block mt-1">{{ $message }}</small>
+                                    <small class="text-danger d-block mt-1">{{ $message }}</small>
                                 @enderror
+                            </div>
+
+                            {{-- Checkbox: apply promotion to all outlets --}}
+                            <div class="form-check mt-1">
+                                <input type="hidden" name="apply_promotion_all_outlets" value="0">
+                                <input type="checkbox"
+                                    class="form-check-input"
+                                    id="apply_promotion_all_outlets"
+                                    name="apply_promotion_all_outlets"
+                                    value="1"
+                                    {{ old('apply_promotion_all_outlets', '0') == '1' ? 'checked' : '' }}>
+                                <label class="form-check-label" for="apply_promotion_all_outlets">
+                                    {{ __('messages.owner.products.master_products.apply_promotion_all_outlets') ?? 'Terapkan promosi untuk semua outlet' }}
+                                </label>
                             </div>
                         </div>
                     </div>
+
 
                     <!-- Existing Images -->
                     <div class="row mb-3">
@@ -152,7 +185,8 @@
                     <!-- Description -->
                     <div class="form-group">
                         <label>{{ __('messages.owner.products.master_products.description') }}</label>
-                        <textarea name="description" class="form-control summernote" rows="3">{{ $data->description }}</textarea>
+                        {{-- class summernote untuk html text editor --}}
+                        <textarea name="description" class="form-control" rows="3">{{ $data->description }}</textarea>
                     </div>
 
                     <hr>

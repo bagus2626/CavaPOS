@@ -14,7 +14,10 @@
         </thead>
         <tbody>
         @forelse($data['invoices'] as $index => $item)
-            <tr>
+            <tr class="invoice-clickable-row"
+                data-invoice-id="{{ $item['id'] ?? '' }}"
+                data-business-id="{{ $item['user_id'] ?? '' }}"
+                style="cursor: pointer;">
                 <td></td>
                 <td>
                     <span class="font-weight-bold">{{ \Carbon\Carbon::parse($item['created'])->timezone('Asia/Jakarta')->format('d M Y') }}</span><br>
@@ -51,17 +54,8 @@
                         <span class="bx bx-dots-vertical-rounded font-medium-3 dropdown-toggle nav-hide-arrow cursor-pointer"
                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="menu"></span>
                         <div class="dropdown-menu dropdown-menu-right">
-                            <a class="dropdown-item" href="#">
-                                <i class="bx bx-copy-alt mr-1"></i> Copy Transaction ID
-                            </a>
-                            <a class="dropdown-item" href="#">
+                            <a class="dropdown-item copy-btn" data-copy-value="{{ $item['external_id'] ?? '' }}">
                                 <i class="bx bx-copy-alt mr-1"></i> Copy Reference
-                            </a>
-                            <a class="dropdown-item" href="#">
-                                <i class="bx bx-send mr-1"></i> Resend Webhook
-                            </a>
-                            <a class="dropdown-item" href="#">
-                                <i class="bx bx-copy-alt mr-1"></i> Copy Invoice ID
                             </a>
                         </div>
                     </div>

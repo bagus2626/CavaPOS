@@ -10,7 +10,8 @@
                         <li class="breadcrumb-item"><a href=""><i class="bx bx-home-alt"></i></a></li>
                         <li class="breadcrumb-item"><a href="{{ route('admin.owner-verification') }}">Owner Verification</a>
                         </li>
-                        <li class="breadcrumb-item active"><a href="{{ route('admin.owner-verification.show', $verification->id) }}">Detail</a></li>
+                        <li class="breadcrumb-item active"><a
+                                href="{{ route('admin.owner-verification.show', $verification->id) }}">Detail</a></li>
                     </ol>
                 </div>
             </div>
@@ -303,24 +304,39 @@
         function showApproveModal(id) {
             $('#approveConfirmModal').modal('show');
             const confirmBtn = document.getElementById('approveConfirmBtn');
+            const timerContainer = document.getElementById('approveTimer');
+            const countdownSpan = document.getElementById('approveCountdown');
 
             if (approveTimer) clearInterval(approveTimer);
 
+            // --- RESET STATE AWAL ---
             confirmBtn.disabled = true;
             let seconds = 5;
-            document.getElementById('approveCountdown').textContent = seconds;
+
+            // Setel ulang tampilan timer
+            timerContainer.className = 'alert bg-rgba-warning'; // Kembalikan kelas warna warning
+            timerContainer.innerHTML = '<p class="mb-0 text-center">Please wait <span id="approveCountdown">5</span> seconds</p>';
+            const newCountdownSpan = document.getElementById('approveCountdown');
+            newCountdownSpan.textContent = seconds;
+            // --- END RESET STATE AWAL ---
 
             approveTimer = setInterval(() => {
                 seconds--;
-                document.getElementById('approveCountdown').textContent = seconds;
+                document.getElementById('approveCountdown').textContent = seconds; // Update countdown
+                // Pastikan kita mendapatkan elemen yang baru jika DOM direplace
+                const currentCountdown = document.getElementById('approveCountdown');
 
                 if (seconds <= 0) {
                     clearInterval(approveTimer);
                     confirmBtn.disabled = false;
-                    document.getElementById('approveTimer').innerHTML = '<p class="mb-0 text-center text-success">You can now confirm</p>';
+                    // Ganti pesan setelah hitung mundur selesai
+                    timerContainer.className = 'alert bg-rgba-success'; // Ubah kelas warna menjadi success
+                    timerContainer.innerHTML = '<p class="mb-0 text-center">You can now confirm</p>';
                 }
             }, 1000);
         }
+
+        // Tidak perlu mengubah event 'hidden.bs.modal' untuk Approve karena reset dilakukan di awal show modal.
 
         function showRejectModal(id) {
             $('#rejectModal').modal('show');
@@ -345,17 +361,25 @@
         function showRejectConfirmModal(id, reason) {
             document.getElementById('confirmRejectionReason').textContent = reason;
             document.getElementById('finalRejectionReason').value = reason;
-            document.getElementById('rejectConfirmForm').action = `/admin/owner-verification/${id}/reject`;
+            document.getElementById('rejectConfirmForm').action = `{{ url('admin/owner-verification') }}/${id}/reject`; // Gunakan url() untuk menghindari masalah routing
 
             $('#rejectConfirmModal').modal('show');
 
             const confirmBtn = document.getElementById('rejectConfirmBtn');
+            const timerContainer = document.getElementById('rejectTimer');
 
             if (rejectTimer) clearInterval(rejectTimer);
 
+            // --- RESET STATE AWAL ---
             confirmBtn.disabled = true;
             let seconds = 5;
-            document.getElementById('rejectCountdown').textContent = seconds;
+
+            // Setel ulang tampilan timer
+            timerContainer.className = 'alert bg-rgba-warning'; // Kembalikan kelas warna warning
+            timerContainer.innerHTML = '<p class="mb-0 text-center">Please wait <span id="rejectCountdown">5</span> seconds</p>';
+            const newCountdownSpan = document.getElementById('rejectCountdown');
+            newCountdownSpan.textContent = seconds;
+            // --- END RESET STATE AWAL ---
 
             rejectTimer = setInterval(() => {
                 seconds--;
@@ -364,10 +388,13 @@
                 if (seconds <= 0) {
                     clearInterval(rejectTimer);
                     confirmBtn.disabled = false;
-                    document.getElementById('rejectTimer').innerHTML = '<p class="mb-0 text-center text-danger">You can now confirm</p>';
+                    // Ganti pesan setelah hitung mundur selesai
+                    timerContainer.className = 'alert bg-rgba-danger'; // Ubah kelas warna menjadi danger
+                    timerContainer.innerHTML = '<p class="mb-0 text-center">You can now confirm</p>';
                 }
             }, 1000);
         }
+        // Tidak perlu mengubah closeRejectConfirmModal karena ia sudah memanggil clearInterval
 
         function closeRejectConfirmModal() {
             $('#rejectConfirmModal').modal('hide');

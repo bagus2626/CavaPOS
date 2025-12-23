@@ -16,6 +16,12 @@ class XenditSubAccount extends Model
         'type',
         'status',
         'country',
+        'master_acc_business_id',
+        'payments_enabled',
+        'created_xendit',
+        'updated_xendit',
+        'suspended_reason',
+        'suspended_at',
         'raw_response',
     ];
 

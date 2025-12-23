@@ -1,11 +1,18 @@
 @extends('layouts.owner')
 
+@section('title', __('messages.owner.products.categories.categories_list'))
+@section('page_title', __('messages.owner.products.categories.categories'))
+
 @section('content')
-<div class="container owner-categories mt-4"> {{-- PAGE SCOPE --}}
-    <h1 class="page-title">{{ __('messages.owner.products.categories.categories') }}</h1>
+<section class="content">
+<div class="container-fluid owner-categories"> {{-- PAGE SCOPE --}}
     <a href="{{ route('owner.user-owner.categories.create') }}" class="btn btn-primary mb-3">
         + {{ __('messages.owner.products.categories.add_category') }}
     </a>
+    <button class="btn btn-warning mb-3" data-toggle="modal" data-target="#orderModal">
+      {{ __('messages.owner.products.categories.category_order') }}
+  </button>
+
 
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
@@ -63,10 +70,20 @@
       </table>
     </div>
 
-    <div class="d-flex justify-content-center">
-        {{ $categories->links() }}
+  {{-- Pagination Links --}}
+  <div class="d-flex justify-content-between align-items-center">
+    <div class="text-muted small">
+      Showing {{ $categories->firstItem() ?? 0 }} to {{ $categories->lastItem() ?? 0 }} of {{ $categories->total() }} entries
     </div>
+    <div>
+      {{ $categories->links() }}
+    </div>
+  </div>
 </div>
+
+@include('pages.owner.products.categories.category-order-modal')
+
+</section>
 
 <style>
 /* ===== Owner › Categories (page scope) ===== */
@@ -133,17 +150,35 @@
   border-radius:10px; min-width:72px; padding:.28rem .6rem;
 }
 
-/* Pagination (Laravel) */
-.owner-categories .pagination{ gap:.35rem; }
-.owner-categories .page-link{
-  color:var(--choco); border:1px solid #e5e7eb; border-radius:999px;
-}
-.owner-categories .page-item.active .page-link{
-  background:var(--choco); border-color:var(--choco); color:#fff;
-}
-.owner-categories .page-link:hover{
-  color:#fff; background:var(--choco); border-color:var(--choco);
-}
+
+/* Custom Pagination Style */
+  .pagination {
+    margin-bottom: 1rem;
+  }
+
+  .page-link {
+    color: var(--choco);
+    border-color: #dee2e6;
+  }
+
+  .page-link:hover {
+    color: #6b0d00;
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+  }
+
+  .page-item.active .page-link {
+    background-color: var(--choco);
+    border-color: var(--choco);
+    color: white;
+  }
+
+  .page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+    background-color: #fff;
+    border-color: #dee2e6;
+  }
 
 /* Support Tailwind-like width classes used in markup */
 .owner-categories .w-\[5\%\]{ width:5% !important; }
@@ -158,11 +193,20 @@
 @media (max-width: 576px){
   .owner-categories .thumb{ width:56px; height:56px; }
 }
+
+.ui-state-highlight {
+    height: 45px;
+    background: #fde6e6;
+    border: 2px dashed #c12814;
+}
 </style>
 @endsection
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('.js-delete-form').forEach(function(form){
@@ -180,13 +224,76 @@ document.addEventListener('DOMContentLoaded', function () {
         confirmButtonText: '{{ __('messages.owner.products.categories.delete_confirmation_4') }}',
         cancelButtonText: '{{ __('messages.owner.products.categories.cancel') }}',
         reverseButtons: true,
-        confirmButtonColor: '#8c1000', // choco
+        confirmButtonColor: '#8c1000',
         cancelButtonColor: '#6b7280'
       }).then((res) => {
         if (res.isConfirmed) form.submit();
       });
     });
   });
+});
+</script>
+
+<script>
+$(function() {
+
+    // Simpan HTML awal list category (urutan dari server)
+    let initialCategoryListHtml = $('#sortableCategoryList').html();
+
+    function initSortable() {
+        $("#sortableCategoryList").sortable({
+            placeholder: "ui-state-highlight",
+            axis: "y",
+            // handle: ".sort-handle", // drag dari icon bars saja
+        });
+        $("#sortableCategoryList").disableSelection();
+    }
+
+    // Inisialisasi saat modal pertama kali ditampilkan
+    $('#orderModal').on('shown.bs.modal', function () {
+        initSortable();
+    });
+
+    // RESET ke urutan awal kalau modal ditutup tanpa save
+    $('#orderModal').on('hidden.bs.modal', function () {
+        $('#sortableCategoryList').html(initialCategoryListHtml);
+    });
+
+    // Save order
+    $("#saveOrderBtn").on('click', function() {
+        let orderedIDs = [];
+
+        $("#sortableCategoryList li").each(function(index, el) {
+            orderedIDs.push({
+                id: $(el).data("id"),
+                order: index + 1
+            });
+        });
+
+        $.ajax({
+            url: "{{ route('owner.user-owner.categories.reorder') }}",
+            method: "POST",
+            data: {
+                _token: "{{ csrf_token() }}",
+                orders: orderedIDs
+            },
+            success: function(res) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Saved',
+                    text: 'Category order updated successfully',
+                    confirmButtonColor: '#8c1000'
+                }).then(() => {
+                    location.reload();
+                });
+            },
+            error: function() {
+                Swal.fire('Error', 'Failed to update category order!', 'error');
+            }
+        });
+
+    });
+
 });
 </script>
 @endpush

@@ -48,16 +48,26 @@ function deleteProduct(productId) {
 
     {{-- Toolbar atas --}}
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+      @php
+        $currentCategory = $categoryId ?? null; // dari controller
+      @endphp
+
       <div class="filter-toolbar d-flex flex-wrap gap-2">
-        <button class="btn btn-outline-choco btn-sm filter-btn rounded-pill active" data-category="all">
+        {{-- All --}}
+        <a href="{{ route('owner.user-owner.master-products.index') }}"
+          class="btn btn-outline-choco btn-sm filter-btn rounded-pill {{ empty($currentCategory) || $currentCategory === 'all' ? 'active' : '' }}">
           <i class="fas fa-list-ul me-1"></i> {{ __('messages.owner.products.master_products.all') }}
-        </button>
+        </a>
+
+        {{-- Per kategori --}}
         @foreach($categories as $category)
-          <button class="btn btn-outline-choco btn-sm filter-btn rounded-pill" data-category="{{ $category->id }}">
+          <a href="{{ route('owner.user-owner.master-products.index', ['category' => $category->id]) }}"
+            class="btn btn-outline-choco btn-sm filter-btn rounded-pill ml-1 {{ (string)$currentCategory === (string)$category->id ? 'active' : '' }}">
             {{ $category->category_name }}
-          </button>
+          </a>
         @endforeach
       </div>
+
 
       <a href="{{ route('owner.user-owner.master-products.create') }}" class="btn btn-choco">
         <i class="fas fa-plus me-2"></i>{{ __('messages.owner.products.master_products.add_product') }}
@@ -77,6 +87,17 @@ function deleteProduct(productId) {
         @include('pages.owner.products.master-product.display')
       </div>
     </div>
+    
+    {{-- Pagination Links --}}
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="text-muted small">
+        Showing {{ $products->firstItem() ?? 0 }} to {{ $products->lastItem() ?? 0 }} of {{ $products->total() }} entries
+      </div>
+      <div>
+        {{ $products->links() }}
+      </div>
+    </div>
+
 
   </div>
 </section>
@@ -177,50 +198,36 @@ function deleteProduct(productId) {
 .owner-products-index .filter-toolbar .filter-btn:focus{
   box-shadow:0 0 0 .2rem rgba(140,16,0,.15);
 }
+
+
+/* Custom Pagination Style */
+  .pagination {
+    margin-bottom: 1rem;
+  }
+
+  .page-link {
+    color: var(--choco);
+    border-color: #dee2e6;
+  }
+
+  .page-link:hover {
+    color: #6b0d00;
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+  }
+
+  .page-item.active .page-link {
+    background-color: var(--choco);
+    border-color: var(--choco);
+    color: white;
+  }
+
+  .page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+    background-color: #fff;
+    border-color: #dee2e6;
+  }
+
 </style>
 @endsection
-
-
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const filterButtons = document.querySelectorAll('.filter-btn');
-
-  filterButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      const categoryId = this.getAttribute('data-category');
-
-      // toggle active
-      filterButtons.forEach(btn => btn.classList.remove('active'));
-      this.classList.add('active');
-
-      const tableBody = document.querySelector('tbody');
-      const tableRows = document.querySelectorAll('tbody tr');
-      let visibleCount = 0;
-
-      tableRows.forEach(row => {
-        if (categoryId === 'all' || row.getAttribute('data-category') === categoryId) {
-          row.style.display = '';
-          visibleCount++;
-          const firstCell = row.querySelector('td');
-          if (firstCell) firstCell.textContent = visibleCount;
-        } else {
-          row.style.display = 'none';
-        }
-      });
-
-      // handle empty state
-      const emptyRow = tableBody.querySelector('.empty-row');
-      if (emptyRow) emptyRow.remove();
-      if (visibleCount === 0) {
-        const tr = document.createElement('tr');
-        tr.classList.add('empty-row');
-        tr.innerHTML = `<td colspan="999" class="text-center py-4 text-muted">{{ __('messages.owner.products.master_products.data_not_found') }}</td>`;
-        tableBody.appendChild(tr);
-      }
-    });
-  });
-});
-</script>
-@endpush

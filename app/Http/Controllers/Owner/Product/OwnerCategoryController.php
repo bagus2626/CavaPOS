@@ -4,17 +4,23 @@ namespace App\Http\Controllers\Owner\Product;
 
 use App\Http\Controllers\Controller;
 use App\Models\Admin\Product\Category;
+use App\Models\Partner\Products\PartnerProduct;
+use App\Models\Product\MasterProduct;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class OwnerCategoryController extends Controller
 {
     public function index()
     {
         $owner_id = Auth::id();
-        $categories = Category::where('owner_id', $owner_id)->paginate(5);
+        $categories = Category::where('owner_id', $owner_id)
+            ->orderBy('category_order')
+            ->paginate(10);
         // dd($categories);
         return view('pages.owner.products.categories.index', compact('categories'));
     }
@@ -84,11 +90,32 @@ class OwnerCategoryController extends Controller
             'category_name' => 'required|string|max:255',
             'description'   => 'nullable|string',
             'images'        => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'keep_existing_image' => 'nullable|in:0,1',
         ]);
 
-        $imageData = $category->images; // ambil data lama dulu
+        $imageData = $category->images;
+
+        if ($request->keep_existing_image == '0' && $category->images) {
+            // Hapus file fisik dari server
+            if (is_array($category->images) && isset($category->images['path'])) {
+                $oldPath = public_path($category->images['path']);
+                if (File::exists($oldPath)) {
+                    File::delete($oldPath);
+                }
+            }
+            // Set imageData menjadi null
+            $imageData = null;
+        }
 
         if ($request->hasFile('images')) {
+
+            if (is_array($category->images) && isset($category->images['path'])) {
+                $oldPath = public_path($category->images['path']);
+                if (File::exists($oldPath)) {
+                    File::delete($oldPath);
+                }
+            }
+
             $file = $request->file('images');
             $filename = time() . '.' . $file->getClientOriginalExtension();
             $destinationPath = public_path('uploads/categories');
@@ -97,7 +124,6 @@ class OwnerCategoryController extends Controller
                 mkdir($destinationPath, 0777, true);
             }
 
-            // resize & compress
             $img = Image::make($file->getRealPath());
             $img->resize(800, null, function ($constraint) {
                 $constraint->aspectRatio();
@@ -124,10 +150,66 @@ class OwnerCategoryController extends Controller
             ->with('success', 'Category updated successfully.');
     }
 
+    public function reorder(Request $request)
+    {
+        $owner_id = Auth::id();
+
+        foreach ($request->orders as $item) {
+            Category::where('id', $item['id'])
+                ->where('owner_id', $owner_id)
+                ->update([
+                    'category_order' => $item['order']
+                ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Category order updated'
+        ]);
+    }
+
+
     public function destroy(Category $category)
     {
+        $isUsedByMaster  = MasterProduct::where('category_id', $category->id)->exists();
+        $isUsedByPartner = PartnerProduct::where('category_id', $category->id)->exists();
+
+        if ($isUsedByMaster || $isUsedByPartner) {
+            return redirect()
+                ->route('owner.user-owner.categories.index')
+                ->with('swal_error', [
+                    'title' => __('messages.owner.products.categories.cannot_delete_title'),
+                    'text'  => __('messages.owner.products.categories.cannot_delete_used_text', [
+                        'name' => $category->category_name
+                    ]),
+                ]);
+        }
+
+        $images = is_string($category->images)
+            ? json_decode($category->images, true)
+            : $category->images;
+
+        if (is_array($images)) {
+            $paths = isset($images['path'])
+                ? [$images['path']]
+                : array_column($images, 'path');
+
+            foreach ($paths as $relativePath) {
+                if (!$relativePath) continue;
+
+                $relativePath = ltrim(preg_replace('#^public/#', '', $relativePath), '/');
+                $fullPath = public_path($relativePath);
+
+                if (File::exists($fullPath)) {
+                    File::delete($fullPath);
+                }
+            }
+        }
+
         $category->delete();
 
-        return redirect()->route('owner.user-owner.categories.index')->with('success', 'Category deleted successfully.');
+        return redirect()
+            ->route('owner.user-owner.categories.index')
+            ->with('success', 'Category deleted successfully.');
     }
 }

@@ -15,6 +15,10 @@ class OwnerAuthController extends Controller
 {
     public function create()
     {
+        if (Auth::guard('owner')->check()) {
+            return redirect()->route('owner.user-owner.dashboard');
+        }
+
         return view('pages.owner.auth.register');
     }
 
@@ -57,6 +61,10 @@ class OwnerAuthController extends Controller
 
     public function login()
     {
+        if (Auth::guard('owner')->check()) {
+            return redirect()->route('owner.user-owner.dashboard');
+        }
+
         return view('pages.owner.auth.login');
     }
 
@@ -70,7 +78,7 @@ class OwnerAuthController extends Controller
 
         // Tambahkan constraint is_active=1 agar sekalian tervalidasi di query
         $ok = Auth::guard('owner')->attempt(
-            ['email' => $credentials['email'], 'password' => $credentials['password'], 'is_active' => 1],
+            ['email' => $credentials['email'], 'password' => $credentials['password']],
             $request->boolean('remember')
         );
 

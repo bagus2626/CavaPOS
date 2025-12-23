@@ -12,8 +12,11 @@
     @stack('head')
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
+    @vite('resources/js/echo.js')
+
+
 </head>
-<body class="bg-gray-100 min-h-screen font-sans text-gray-800">
+<body class="bg-gray-100 min-h-screen font-sans text-gray-800 overflow-x-hidden">
     {{-- <pre class="pt-96">{{ print_r(session()->all(), true) }}</pre> --}}
 
     {{-- Header --}}
@@ -24,16 +27,17 @@
     @include('partials.employee-cashier-navbar')
 
     {{-- Main Content --}}
-    <main class="flex-1 flex flex-col justify-center items-center pt-16">
+    <main class="flex-1 flex flex-col pt-16">
         @yield('content')
     </main>
 
     {{-- Footer --}}
     <footer class="bg-white w-full">
-        <div class="max-w-screen-xl mx-auto px-4 py-3 text-center text-sm text-gray-500">
-        &copy; {{ date('Y') }} {{ config('app.name', 'FoodBee') }}. All rights reserved.
+        <div class="max-w-7xl mx-auto px-4 py-3 text-center text-sm text-gray-500">
+            &copy; {{ date('Y') }} {{ config('app.name', 'FoodBee') }}. All rights reserved.
         </div>
     </footer>
+
 
     @auth('employee')
         <script>

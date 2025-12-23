@@ -84,10 +84,10 @@
 
                     {{-- Header Card Login --}}
                     <div class="px-6 sm:px-8 pt-6 sm:pt-10 pb-4 sm:pb-8 text-center relative">
-                        <h1 class="text-xl sm:text-2xl font-bold text-[#991b1b]">Selamat Datang Partner!</h1>
+                        <h1 class="text-xl sm:text-2xl font-bold text-[#991b1b]">{{ __('messages.partner.auth.login.title') }}</h1>
                         <p class="mt-2 sm:mt-3 text-xs sm:text-sm text-gray-600">
-                            Masuk untuk melanjutkan ke
-                            <span class="font-semibold text-[#b91c1c]">Dashboard Partner</span>
+                            {{ __('messages.partner.auth.login.subtitle') }}
+                            <span class="font-semibold text-[#b91c1c]">{{ __('messages.partner.auth.login.partner_dashboard') }}</span>
                         </p>
                     </div>
 
@@ -104,7 +104,7 @@
                         <div class="mt-2">
                             <label for="username"
                                 class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
-                                Username
+                                {{ __('messages.partner.auth.login.username') }}
                             </label>
                             <div class="relative">
                                 <span class="absolute inset-y-0 left-3 sm:left-4 flex items-center text-[#b91c1c]">
@@ -115,7 +115,7 @@
                                     </svg>
                                 </span>
                                 <input id="username" name="username" type="text" value="{{ old('username') }}"
-                                    placeholder="Masukkan username" required autofocus autocomplete="username"
+                                    placeholder="{{ __('messages.partner.auth.login.username_placeholder') }}" required autofocus autocomplete="username"
                                     class="block w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg sm:rounded-xl border-2 border-red-100 bg-red-50/30
                                            focus:border-[#dc2626] focus:bg-white focus:ring-4 focus:ring-[#dc2626]/10 transition-all duration-300
                                            placeholder:text-gray-400 text-gray-800" />
@@ -127,12 +127,12 @@
                         <div class="mt-4 sm:mt-5">
                             <div class="flex items-center justify-between mb-1.5 sm:mb-2">
                                 <label for="password" class="block text-xs sm:text-sm font-semibold text-gray-700">
-                                    Password
+                                    {{ __('messages.partner.auth.login.password') }}
                                 </label>
                                 @if (Route::has('password.request'))
                                     <a href="{{ route('password.request') }}"
                                         class="text-xs sm:text-sm text-[#dc2626] hover:text-[#991b1b] transition-colors font-semibold">
-                                        Lupa password?
+                                        {{ __('messages.partner.auth.login.forgot_password') }}
                                     </a>
                                 @endif
                             </div>
@@ -144,7 +144,7 @@
                                             d="M17 9h-1V7a4 4 0 10-8 0v2H7a2 2 0 00-2 2v8a2 2 0 002 2h10a2 2 0 002-2v-8a2 2 0 00-2-2Zm-6 7.732V17a1 1 0 112 0v-.268a2 2 0 10-2 0ZM9 7a3 3 0 116 0v2H9V7Z" />
                                     </svg>
                                 </span>
-                                <input id="password" name="password" type="password" placeholder="Masukkan password"
+                                <input id="password" name="password" type="password" placeholder="{{ __('messages.partner.auth.login.password_placeholder') }}"
                                     required autocomplete="current-password"
                                     class="block w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg sm:rounded-xl border-2 border-red-100 bg-red-50/30
                                            focus:border-[#dc2626] focus:bg-white focus:ring-4 focus:ring-[#dc2626]/10 transition-all duration-300
@@ -166,7 +166,7 @@
                             <label for="remember_me" class="inline-flex items-center select-none cursor-pointer">
                                 <input id="remember_me" type="checkbox" name="remember"
                                     class="rounded border-red-200 text-[#dc2626] shadow-sm focus:ring-[#dc2626] transition-all cursor-pointer w-4 h-4">
-                                <span class="ms-2 text-xs sm:text-sm text-gray-700 font-medium">Ingat saya</span>
+                                <span class="ms-2 text-xs sm:text-sm text-gray-700 font-medium">{{ __('messages.partner.auth.login.remember_me') }}</span>
                             </label>
                         </div>
 
@@ -177,7 +177,7 @@
                                            hover:from-[#b91c1c] hover:via-[#991b1b] hover:to-[#7f1d1d]
                                            shadow-lg hover:shadow-xl active:scale-[0.98]
                                            transition-all duration-300 font-bold text-white uppercase tracking-wide text-xs sm:text-sm">
-                                Masuk
+                                {{ __('messages.partner.auth.login.login_button') }}
                             </button>
                         </div>
 

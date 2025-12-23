@@ -1,124 +1,296 @@
+<div class="d-flex flex-wrap align-items-center justify-content-between mb-2">
+
+  <div class="filter-tabs-container">
+    <ul class="nav nav-tabs" id="stockFilterTabs">
+      <li class="nav-item">
+        <a class="nav-link active" href="#" data-filter-type="all">{{ __('messages.owner.products.stocks.all_stock') }}</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#" data-filter-type="linked">{{ __('messages.owner.products.stocks.raw_materials') }}</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#" data-filter-type="direct">{{ __('messages.owner.products.stocks.products') }}</a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="ms-auto pt-2 pt-md-0">
+    <a href="{{ route('owner.user-owner.stocks.movements.index') }}" class="btn btn-outline-primary btn-movements">
+      <i class="fas fa-history me-1"></i>
+      {{ __('messages.owner.products.stocks.movement_history') }}
+    </a>
+  </div>
+</div>
+
+<div class="sub-filter-container mb-3 ms-3" id="stockPartnerFilterContainer" style="display: none;">
+  <ul class="nav nav-tabs" id="stockPartnerFilterTabs">
+    <li class="nav-item">
+      <a class="nav-link font-weight-normal active" id="filter-partner-product-tab" href="#"
+        data-filter-partner-type="product">{{ __('messages.owner.products.stocks.main_product') }}</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link font-weight-normal" id="filter-partner-option-tab" href="#"
+        data-filter-partner-type="option">{{ __('messages.owner.products.stocks.product_opt') }}</a>
+    </li>
+  </ul>
+</div>
+
 <div class="table-responsive owner-stocks-table">
   <table class="table table-hover align-middle">
     <thead>
       <tr>
         <th>#</th>
-        <th>Stock Code</th>
-        <th>Stock Name</th>
-        <th>Stock/Quantity</th>
-        <th>Unit</th>
-        <th>Last Price/Unit</th>
-        <th>Description</th>
-        <th class="text-nowrap">Actions</th>
+        <th>{{ __('messages.owner.products.stocks.stock_code') }}</th>
+        <th>{{ __('messages.owner.products.stocks.stock_name') }}</th>
+        <th>{{ __('messages.owner.products.stocks.stock_quantity') }}</th>
+        <th>{{ __('messages.owner.products.stocks.unit') }}</th>
+        <th>{{ __('messages.owner.products.stocks.last_price_unit') }}</th>
+        <th class="text-nowrap">{{ __('messages.owner.products.stocks.actions') }}</th>
       </tr>
     </thead>
     <tbody>
-      @foreach ($stocks as $index => $stock)
-
-        <tr data-category="{{ $stock->type }}">
-          <td class="text-muted">{{ $index + 1 }}</td>
+      @forelse ($stocks as $index => $stock)
+        <tr data-type="{{ $stock->type }}"
+          data-stock_type="{{ $stock->stock_type }}"
+          data-partner-type="{{ $stock->partner_product_id && !$stock->partner_product_option_id ? 'product' : ($stock->partner_product_id && $stock->partner_product_option_id ? 'option' : 'none') }}">
+          <td class="text-muted">{{ $stocks->firstItem() + $index }}</td>
           <td class="mono">{{ $stock->stock_code }}</td>
           <td class="fw-600">{{ $stock->stock_name }}</td>
-          <td>{{ $stock->quantity }}</td>
-          <td>{{ $stock->unit }}</td>
+          <td>{{ number_format($stock->display_quantity, 2, ',', '.') }}</td>
+
+          <td>
+            @if($stock->displayUnit)
+              {{ $stock->displayUnit->unit_name }}
+            @else
+              <span class="text-muted small">({{ __('messages.owner.products.stocks.base_unit') }})</span>
+            @endif
+          </td>
+
           <td>{{ $stock->last_price_per_unit }}</td>
-          <td>{{ $stock->description ?? '-' }}</td>
           <td class="text-nowrap">
-            <a href="{{ route('owner.user-owner.stocks.show', $stock->id) }}" class="btn btn-sm btn-outline-choco me-1">Detail</a>
-            <a href="{{ route('owner.user-owner.stocks.edit', $stock->id) }}" class="btn btn-sm btn-outline-choco me-1">Edit</a>
-            <button onclick="deleteStock({{ $stock->id }})" class="btn btn-sm btn-soft-danger">Delete</button>
+            @if($stock->type === 'master')
+              <button onclick="deleteStock({{ $stock->id }})" class="btn btn-sm btn-soft-danger">{{ __('messages.owner.products.stocks.delete') }}</button>
+            @endif
           </td>
         </tr>
-      @endforeach
+      @empty
+        <tr>
+          <td colspan="7" class="text-center text-muted py-4">
+            {{ __('messages.owner.products.stocks.no_stock_found') }}
+          </td>
+        </tr>
+      @endforelse
     </tbody>
   </table>
 </div>
 
+{{-- Pagination Links --}}
+<div class="d-flex justify-content-between align-items-center mt-3">
+  <div class="text-muted small">
+    Showing {{ $stocks->firstItem() ?? 0 }} to {{ $stocks->lastItem() ?? 0 }} of {{ $stocks->total() }} entries
+  </div>
+  <div>
+    {{ $stocks->links() }}
+  </div>
+</div>
+
 <style>
-/* ===== Promotions table (scoped to the parent page .owner-promotions) ===== */
-.owner-stocks .owner-stocks-table{
-  border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,.08); overflow-y:hidden; background:#fff;
-}
-.owner-stocks .table{ margin-bottom:0; background:#fff; }
-.owner-stocks thead th{
-  background:#fff; border-bottom:2px solid #eef1f4 !important;
-  color:#374151; font-weight:700; white-space:nowrap;
-}
-.owner-stocks tbody td{ vertical-align:middle; }
-.owner-stocks tbody tr{ transition: background-color .12s ease; }
-.owner-stocks tbody tr:hover{ background: rgba(140,16,0,.04); }
+  .owner-stocks .owner-stocks-table {
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, .08);
+    overflow-y: hidden;
+    background: #fff;
+  }
 
-/* text utils */
-.owner-stocks .fw-600{ font-weight:600; }
-.owner-stocks .mono{
-  font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
-  color:#374151;
-}
+  .owner-stocks .btn-soft-danger:hover {
+    background: #fecaca;
+    color: #7f1d1d;
+    border-color: #fca5a5;
+  }
 
-/* Type badge */
-.owner-stocks .badge.badge-type{
-  background:#eff6ff; color:#1d4ed8; border:1px solid #dbeafe;
-  border-radius:999px; padding:.28rem .55rem; font-weight:600;
-}
+  .owner-stocks .nav-tabs {
+    border-bottom: 2px solid #eef1f4;
+  }
 
-/* Soft status badges (override bs contextual badges, only inside scope) */
-.owner-stocks .badge-success{
-  background:#ecfdf5 !important; color:#065f46 !important; border:1px solid #a7f3d0; border-radius:999px;
-}
-.owner-stocks .badge-secondary{
-  background:#f3f4f6 !important; color:#374151 !important; border:1px solid #e5e7eb; border-radius:999px;
-}
-.owner-stocks .badge-warning{
-  background:#fef3c7 !important; color:#92400e !important; border:1px solid #fde68a; border-radius:999px;
-}
-.owner-stocks .badge-danger{
-  background:#fee2e2 !important; color:#991b1b !important; border:1px solid #fecaca; border-radius:999px;
-}
+  .owner-stocks .nav-tabs .nav-link {
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: #6b7280;
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+  }
 
-/* Action buttons */
-.owner-stocks .btn-outline-choco{
-  color:#8c1000; border:1px solid #8c1000; background:#fff;
-}
-.owner-stocks .btn-outline-choco:hover{
-  color:#fff; background:#8c1000; border-color:#8c1000;
-}
-.owner-stocks .btn-soft-danger{
-  background:#fee2e2; color:#991b1b; border:1px solid #fecaca;
-}
-.owner-stocks .btn-soft-danger:hover{
-  background:#fecaca; color:#7f1d1d; border-color:#fca5a5;
-}
+  .owner-stocks .nav-tabs .nav-link.active {
+    border-color: #8c1000;
+    color: #8c1000;
+    background-color: transparent;
+  }
+
+  .owner-stocks .nav-tabs .nav-link:hover {
+    border-color: #e5e7eb;
+  }
+
+  /* Custom Pagination Style */
+  .pagination {
+    margin-bottom: 1rem;
+  }
+
+  .page-link {
+    color: #8c1000;
+    border-color: #dee2e6;
+  }
+
+  .page-link:hover {
+    color: #6b0d00;
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+  }
+
+  .page-item.active .page-link {
+    background-color: #8c1000;
+    border-color: #8c1000;
+    color: white;
+  }
+
+  .page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+    background-color: #fff;
+    border-color: #dee2e6;
+  }
 </style>
+
 <script>
   function deleteStock(stockId) {
-  Swal.fire({
-    title: '{{ __('messages.owner.products.promotions.delete_confirmation_1') }}',
-    text: "{{ __('messages.owner.products.promotions.delete_confirmation_2') }}",
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#8c1000', // brand choco
-    cancelButtonColor: '#6b7280',
-    confirmButtonText: '{{ __('messages.owner.products.promotions.delete_confirmation_3') }}',
-    cancelButtonText: '{{ __('messages.owner.products.promotions.cancel') }}',
-    reverseButtons: true
-  }).then((result) => {
-    if (result.isConfirmed) {
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = `/owner/user-owner/stocks/${stockId}`;
-      form.style.display = 'none';
+    Swal.fire({
+      title: '{{ __('messages.owner.products.promotions.delete_confirmation_1') }}',
+      text: "{{ __('messages.owner.products.promotions.delete_confirmation_2') }}",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#8c1000',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: '{{ __('messages.owner.products.promotions.delete_confirmation_3') }}',
+      cancelButtonText: '{{ __('messages.owner.products.promotions.cancel') }}',
+      reverseButtons: true
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/owner/user-owner/stocks/delete-stock/${stockId}`;
+        form.style.display = 'none';
 
-      const csrf = document.createElement('input');
-      csrf.type = 'hidden'; csrf.name = '_token'; csrf.value = '{{ csrf_token() }}';
-      form.appendChild(csrf);
+        const csrf = document.createElement('input');
+        csrf.type = 'hidden'; csrf.name = '_token'; csrf.value = '{{ csrf_token() }}';
+        form.appendChild(csrf);
 
-      const method = document.createElement('input');
-      method.type = 'hidden'; method.name = '_method'; method.value = 'DELETE';
-      form.appendChild(method);
+        const method = document.createElement('input');
+        method.type = 'hidden'; method.name = '_method'; method.value = 'DELETE';
+        form.appendChild(method);
 
-      document.body.appendChild(form);
-      form.submit();
+        document.body.appendChild(form);
+        form.submit();
+      }
+    });
+  }
+</script>
+
+{{-- Script untuk Tab Filter --}}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const mainFilterTabs = document.querySelectorAll('#stockFilterTabs .nav-link');
+    const partnerFilterTabs = document.querySelectorAll('#stockPartnerFilterTabs .nav-link');
+    const partnerFilterContainer = document.getElementById('stockPartnerFilterContainer');
+    const tableRows = document.querySelectorAll('.owner-stocks-table tbody tr');
+
+    let currentMainFilter = 'all';
+    let currentPartnerFilter = 'product';
+
+    function applyFilters() {
+      let visibleCount = 0;
+      
+      tableRows.forEach(row => {
+        // Skip empty state row
+        if (row.querySelector('td[colspan]')) {
+          return;
+        }
+
+        const rowType = row.getAttribute('data-type');
+        const stockType = row.getAttribute('data-stock_type');
+        const rowPartnerType = row.getAttribute('data-partner-type');
+
+        let show = false;
+
+        if (currentMainFilter === 'all') {
+          show = true;
+        } else if (currentMainFilter === 'linked') {
+          show = (stockType === 'linked');
+        } else if (currentMainFilter === 'direct') {
+          if (stockType === 'direct') {
+            if (currentPartnerFilter === 'product') {
+              show = (rowPartnerType === 'product');
+            } else if (currentPartnerFilter === 'option') {
+              show = (rowPartnerType === 'option');
+            }
+          } else {
+            show = false;
+          }
+        }
+        
+        row.style.display = show ? '' : 'none';
+        if (show) visibleCount++;
+      });
+
+      // Show/hide empty state if no visible rows
+      const emptyRow = document.querySelector('.owner-stocks-table tbody tr td[colspan]');
+      if (emptyRow && emptyRow.parentElement) {
+        emptyRow.parentElement.style.display = visibleCount === 0 ? '' : 'none';
+      }
     }
+
+    // Event listener untuk tab filter utama
+    mainFilterTabs.forEach(tab => {
+      tab.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        mainFilterTabs.forEach(t => {
+          t.classList.remove('active');
+        });
+        this.classList.add('active');
+
+        currentMainFilter = this.getAttribute('data-filter-type');
+
+        if (currentMainFilter === 'direct') {
+          partnerFilterContainer.style.display = '';
+          currentPartnerFilter = 'product';
+
+          partnerFilterTabs.forEach(t => {
+            t.classList.remove('active');
+          });
+          document.getElementById('filter-partner-product-tab').classList.add('active');
+
+        } else {
+          partnerFilterContainer.style.display = 'none';
+        }
+
+        applyFilters();
+      });
+    });
+
+    // Event listener untuk tab filter sekunder (partner)
+    partnerFilterTabs.forEach(tab => {
+      tab.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        partnerFilterTabs.forEach(t => {
+          t.classList.remove('active');
+        });
+        this.classList.add('active');
+
+        currentPartnerFilter = this.getAttribute('data-filter-partner-type');
+        applyFilters();
+      });
+    });
+
+    applyFilters();
   });
-}
 </script>

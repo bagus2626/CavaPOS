@@ -28,6 +28,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth' => \App\Http\Middleware\Authenticate::class,
             'setlocale' => \App\Http\Middleware\SetLocale::class,
             'owner.verification.access' => \App\Http\Middleware\OwnerVerification::class,
+            'owner.access' => \App\Http\Middleware\OwnerAccess::class,
+            'partner.access' => \App\Http\Middleware\PartnerAccess::class,
+            'customer.access' => \App\Http\Middleware\CustomerAccess::class,
+            'employee.access' => \App\Http\Middleware\EmployeeAccess::class,
+            'check.table.status' => \App\Http\Middleware\CheckTableStatus::class,
 
         ]);
 

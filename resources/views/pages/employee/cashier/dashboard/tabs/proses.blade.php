@@ -15,65 +15,113 @@
             @else
                 <ul class="space-y-3">
                     @foreach ($items as $i)
-                        <li class="rounded-xl border border-choco/10 p-3 hover:bg-soft-choco/5" id="order-item-{{ $i->id }}">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm font-semibold text-gray-900">
-                                        {{ $i->booking_order_code }} &middot; Meja {{ $i->table->table_no }} . {{ $i->payment_method }}
-                                        .
+                        <li class="rounded-xl border border-choco/10 p-3 hover:bg-soft-choco/5"
+                            id="order-item-{{ $i->id }}">
+
+                            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+                                {{-- 🔹 INFO ORDER --}}
+                                <div class="flex-1">
+                                    <p class="text-sm font-semibold text-gray-900 leading-tight">
+                                        {{ $i->booking_order_code }}
+                                        &middot; Meja {{ $i->table->table_no ?? '-' }}
+                                        &middot; {{ $i->payment_method }}
+
                                         @if ($i->order_status === 'PROCESSED')
-                                        <span class="text-blue-500">{{ $i->order_status }}</span>
+                                            <span class="ml-1 text-blue-500">{{ $i->order_status }}</span>
                                         @elseif ($i->order_status === 'PAID')
-                                        <span class="text-choco">{{ $i->order_status }}</span>
+                                            <span class="ml-1 text-choco">{{ $i->order_status }}</span>
                                         @else
-                                        {{ $i->order_status }}
+                                            <span class="ml-1">{{ $i->order_status }}</span>
                                         @endif
-                                        
                                     </p>
-                                    <p class="text-xs text-gray-500">
+
+                                    <p class="text-xs text-gray-500 mt-1">
                                         Rp {{ number_format($i->total_order_value, 0, ',', '.') }}
                                         &middot; {{ $i->created_at?->format('H:i') }}
-                                        . <span class="font-bold">{{ $i->customer_name }}</span>
+                                        · <span class="font-bold">{{ $i->customer_name }}</span>
                                     </p>
                                 </div>
-                                <div class="flex items-center gap-2">
+
+                                {{-- 🔹 ACTION BUTTONS --}}
+                                <div
+                                    class="flex items-center gap-2
+                                        w-full sm:w-auto
+                                        justify-between sm:justify-end">
+
+                                    {{-- Detail --}}
                                     <a href="{{ route('employee.cashier.order-detail', $i->id) }}"
-                                        data-detail-btn
-                                        data-order-id="{{ $i->id }}"
-                                        class="text-sm px-3 py-1.5 rounded-lg border border-choco/20 text-choco hover:bg-soft-choco/10 focus:ring-2 focus:ring-soft-choco/30">
+                                    data-detail-btn
+                                    data-order-id="{{ $i->id }}"
+                                    class="h-9 flex-1 sm:flex-none flex items-center justify-center
+                                            text-sm px-3 rounded-lg
+                                            border border-choco/20 text-choco
+                                            hover:bg-soft-choco/10
+                                            focus:ring-2 focus:ring-soft-choco/30">
                                         Detail
                                     </a>
+
+                                    {{-- Struk --}}
                                     <button type="button"
-                                            class="px-4 py-1 rounded-lg border border-choco/20 text-choco hover:bg-soft-choco/20 focus:ring-2 focus:ring-choco/30"
-                                            data-print-receipt-process
-                                            data-order-id="{{ $i->id }}">
+                                        data-print-receipt-process
+                                        data-order-id="{{ $i->id }}"
+                                        class="h-9 flex-1 sm:flex-none flex items-center justify-center
+                                            text-sm px-3 rounded-lg
+                                            border border-choco/20 text-choco
+                                            hover:bg-soft-choco/20
+                                            focus:ring-2 focus:ring-choco/30">
                                         Struk
                                     </button>
+
+                                    {{-- Status-dependent button --}}
                                     @if ($i->order_status === 'PAID')
-                                    <button type="button"
-                                            class="text-sm px-3 py-1.5 rounded-lg bg-blue-500 text-white hover:bg-blue-500/90 focus:ring-2 focus:ring-soft-choco/40"
+                                        <button type="button"
                                             data-turn-to-process-btn
                                             data-order-id="{{ $i->id }}"
-                                            data-order-name ="{{ $i->customer_name }}"
+                                            data-order-name="{{ $i->customer_name }}"
                                             data-order-code="{{ $i->booking_order_code }}"
                                             data-order-total="{{ $i->total_order_value }}"
-                                            data-order-table="{{ $i->table->table_no }}"
-                                            data-order-url="{{ route('employee.cashier.process-order', '__ID__') }}">
-                                        Proses
-                                    </button>
+                                            data-order-table="{{ $i->table->table_no ?? '-' }}"
+                                            data-order-url="{{ route('employee.cashier.process-order', '__ID__') }}"
+                                            class="h-9 flex-1 sm:flex-none flex items-center justify-center
+                                                text-sm px-3 rounded-lg
+                                                bg-blue-500 text-white
+                                                hover:bg-blue-500/90
+                                                focus:ring-2 focus:ring-blue-400/40">
+                                            Proses
+                                        </button>
                                     @elseif ($i->order_status === 'PROCESSED')
-                                    <button type="button"
-                                            class="text-sm px-3 py-1.5 rounded-lg bg-soft-choco text-white hover:bg-soft-choco/90 focus:ring-2 focus:ring-soft-choco/40"
+                                        <button type="button"
+                                            data-turn-to-paid-btn
+                                            data-order-id="{{ $i->id }}"
+                                            data-order-name="{{ $i->customer_name }}"
+                                            data-order-code="{{ $i->booking_order_code }}"
+                                            data-order-total="{{ $i->total_order_value }}"
+                                            data-order-table="{{ $i->table->table_no ?? '-' }}"
+                                            data-order-url="{{ route('employee.cashier.cancel-process-order', '__ID__') }}"
+                                            class="h-9 flex-1 sm:flex-none flex items-center justify-center
+                                                text-sm px-3 rounded-lg
+                                                bg-red-500 text-white
+                                                hover:bg-red-500/90
+                                                focus:ring-2 focus:ring-red-400/40">
+                                            Batal Proses
+                                        </button>
+                                        <button type="button"
                                             data-process-btn
                                             data-order-id="{{ $i->id }}"
-                                            data-order-name ="{{ $i->customer_name }}"
+                                            data-order-name="{{ $i->customer_name }}"
                                             data-order-code="{{ $i->booking_order_code }}"
                                             data-order-total="{{ $i->total_order_value }}"
-                                            data-order-table="{{ $i->table->table_no }}"
+                                            data-order-table="{{ $i->table->table_no ?? '-' }}"
                                             data-order-get-url="{{ route('employee.cashier.order-detail', $i->id) }}"
-                                            data-order-url="{{ route('employee.cashier.finish-order', '__ID__') }}">
-                                        Selesaikan
-                                    </button>
+                                            data-order-url="{{ route('employee.cashier.finish-order', '__ID__') }}"
+                                            class="h-9 flex-1 sm:flex-none flex items-center justify-center
+                                                text-sm px-3 rounded-lg
+                                                bg-green-500 text-white
+                                                hover:bg-green-400/90
+                                                focus:ring-2 focus:ring-green-400/40">
+                                            Selesaikan
+                                        </button>
                                     @endif
                                 </div>
                             </div>
@@ -90,7 +138,6 @@
 @include('pages.employee.cashier.dashboard.modals.detail')
 @include('pages.employee.cashier.dashboard.modals.served')
 
-<script src="{{ asset('js/employee/cashier/dashboard/detail.js') }}"></script>
 <script>
 (function () {
   // Delegasi klik untuk semua tombol yang punya data-print-receipt-process

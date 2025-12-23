@@ -67,13 +67,10 @@
                 </div>
 
                 {{-- Footer --}}
-                <div class="px-5 py-4 border-t border-choco/10 flex items-center justify-end gap-2 bg-soft-choco/10">
+                <div class="px-5 pt-4 pb-28 border-t border-choco/10 flex items-center justify-end gap-2 bg-white">
                     <button type="button"
                             class="px-4 py-2 rounded-lg border border-choco/20 text-choco hover:bg-soft-choco/20 focus:ring-2 focus:ring-choco/30"
                             data-cash-close>Batal</button>
-                    {{-- <button type="button"
-                            class="px-4 py-2 rounded-lg border border-choco/20 bg-soft-choco text-white hover:bg-soft-choco/20 focus:ring-2 focus:ring-choco/30"
-                            data-print-receipt>Nota</button> --}}
                     <button type="submit"
                             class="px-4 py-2 rounded-lg bg-choco text-white hover:bg-choco/90 focus:ring-2 focus:ring-choco/40">
                         Konfirmasi & Cetak Struk

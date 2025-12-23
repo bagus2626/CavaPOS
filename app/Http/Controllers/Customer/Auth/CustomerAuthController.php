@@ -12,6 +12,7 @@ use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
+use App\Notifications\CustomerVerifyEmail;
 
 
 class CustomerAuthController extends Controller
@@ -52,7 +53,7 @@ class CustomerAuthController extends Controller
             ]);
 
             // Kirim email verifikasi
-            $customer->sendEmailVerificationNotification();
+            $customer->notify(new CustomerVerifyEmail($partner_slug, $table_code));
 
             session()->flash('status', 'verification-link-sent');
 
@@ -60,7 +61,7 @@ class CustomerAuthController extends Controller
             return redirect()->route('customer.verification.notice', [
                 'partner_slug' => $partner_slug,
                 'table_code'   => $table_code,
-            ])->with('status', 'Link verifikasi telah dikirim ke email Anda.');
+            ])->with('status', __('messages.customer.verify_email.verification_information'));
         } catch (\Illuminate\Validation\ValidationException $e) {
             return back()->withErrors($e->validator)->withInput();
         } catch (\Exception $e) {
@@ -96,7 +97,7 @@ class CustomerAuthController extends Controller
                     'customer.table_code'   => $table_code,
                 ]);
                 // simpan intended agar balik ke menu setelah verif
-                $customer->sendEmailVerificationNotification();
+                $customer->notify(new CustomerVerifyEmail($partner_slug, $table_code));
 
                 session()->flash('status', 'verification-link-sent');
                 session(['customer.intended' => route('customer.menu.index', compact('partner_slug', 'table_code'))]);
@@ -117,27 +118,6 @@ class CustomerAuthController extends Controller
         ]);
     }
 
-    // public function login(Request $request, $partner_slug, $table_code)
-    // {
-    //     $credentials = $request->validate([
-    //         'email' => 'required|email',
-    //         'password' => 'required|string',
-    //     ]);
-
-    //     if (Auth::guard('customer')->attempt($credentials, $request->boolean('remember'))) {
-    //         $request->session()->regenerate();
-    //         return redirect()->route('customer.menu.index', compact('partner_slug', 'table_code'))
-    //             ->with('success', 'Login berhasil, selamat datang!');
-    //     }
-
-    //     throw ValidationException::withMessages([
-    //         'email' => __('auth.failed'),
-    //     ]);
-    // }
-
-    /**
-     * Handle logout
-     */
     public function logout(Request $request, $partner_slug, $table_code)
     {
         Auth::guard('customer')->logout();
@@ -161,8 +141,9 @@ class CustomerAuthController extends Controller
     public function guestLogout($partner_slug, $table_code)
     {
         session()->forget('guest_customer');
+        session()->forget('guest_orders');
         return redirect()->route('customer.menu.index', compact('partner_slug', 'table_code'))
-            ->with('success', 'Registrasi berhasil, selamat datang!');
+            ->with('success', 'Logout berhasil, selamat datang!');
     }
 
 

@@ -14,11 +14,15 @@ use App\Models\Xendit\XenditWebhookLog;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use App\Events\OrderCreated;
+use App\Models\Transaction\BookingOrder;
 
 class WebhookController extends Controller
 {
     public function invoice(Request $request)
     {
+        DB::beginTransaction();
         try {
             $payload = $request->all();
 
@@ -36,7 +40,7 @@ class WebhookController extends Controller
                 'payload'   => $payload,
             ]);
 
-            $xenditInvoice = XenditInvoice::where('xendit_invoice_id', data_get($payload, 'id'))->first();
+            $xenditInvoice = XenditInvoice::with('order')->where('xendit_invoice_id', data_get($payload, 'id'))->first();
             $xenditInvoice->update([
                 'status'         => data_get($payload, 'status'),
                 'payment_method' => data_get($payload, 'payment_method'),
@@ -45,11 +49,32 @@ class WebhookController extends Controller
             OrderPayment::where('booking_order_id', $xenditInvoice->order_id)
                 ->update(['payment_status' => data_get($payload, 'status')]);
 
+            if (data_get($payload, 'status') === 'PAID') {
+                BookingOrder::where('id', $xenditInvoice->order_id)
+                ->update([
+                    'order_status' => data_get($payload, 'status'),
+                    'payment_flag'  => true,
+                ]);
+            } else {
+                BookingOrder::where('id', $xenditInvoice->order_id)
+                ->update([
+                    'order_status' => data_get($payload, 'status'),
+                ]);
+            }
+
+            $bookingOrder = $xenditInvoice->order;
+
+            DB::commit();
+            DB::afterCommit(function () use ($bookingOrder) {
+                event(new OrderCreated($bookingOrder));
+            });
+
             return response()->json([
                 'success' => true,
                 'message' => "Webhook invoice processed",
             ]);
         } catch (\Throwable $e) {
+            DB::rollBack();
             Log::error('Xendit Webhook error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
@@ -214,7 +239,7 @@ class WebhookController extends Controller
         }
     }
 
-    public function subAccountCreated(Request $request)
+    public function ownedAccountCreated(Request $request)
     {
         try {
             $payload = $request->all();
@@ -235,12 +260,14 @@ class WebhookController extends Controller
                 'payload'   => $payload,
             ]);
 
-            $xenditInvoice = XenditSubAccount::where('xendit_user_id', data_get($payoutData, 'id'))->first();
-            $xenditInvoice->update([
-                'status'         => data_get($payoutData, 'status'),
+            $xenditSubAccount = XenditSubAccount::where('xendit_user_id', data_get($payoutData, 'id'))->first();
+            $xenditSubAccount->update([
+                'status'            => data_get($payoutData, 'status'),
+                'payments_enabled'  => true,
+                'updated_xendit'    => Carbon::parse(data_get($payoutData, 'created')),
             ]);
 
-            $owner = Owner::findOrFail($xenditInvoice->partner_id);
+            $owner = Owner::findOrFail($xenditSubAccount->partner_id);
             if ($owner) {
                 $owner->update([
                     'xendit_registration_status' => data_get($payoutData, 'status'),
@@ -260,4 +287,57 @@ class WebhookController extends Controller
             ], 500);
         }
     }
+
+    public function managedAccountUpdated(Request $request)
+    {
+        try {
+            $payload = $request->all();
+
+            $callbackToken = $request->header('x-callback-token');
+            $expectedToken = config('services.xendit.callback_token');
+
+            if ($expectedToken && $callbackToken !== $expectedToken) {
+                return response()->json(['success' => false, 'message' => 'Invalid token'], 403);
+            }
+
+            $payoutData = data_get($payload, 'data');
+            $accounInfoData = data_get($payoutData, 'account_info');
+            $event = data_get($payload, 'event');
+
+            XenditWebhookLog::create([
+                'xendit_id' => data_get($payoutData, 'user_id'),
+                'status'    => in_array($event, ['account.registered', 'account.activated']) ? 'REGISTERED' : null,
+                'event'     => data_get($payload, 'event'),
+                'payload'   => $payload,
+            ]);
+
+            $xenditInvoice = XenditSubAccount::where('xendit_user_id', data_get($payoutData, 'user_id'))->first();
+            $xenditInvoice->update([
+                'master_acc_business_id'   => data_get($payload, 'master_acc_business_id'),
+                'payments_enabled'         => data_get($accounInfoData, 'payments_enabled'),
+                'updated_xendit'           => Carbon::parse(data_get($payoutData, 'created')),
+
+            ]);
+
+            $owner = Owner::findOrFail($xenditInvoice->partner_id);
+            if ($owner && in_array($event, ['account.registered', 'account.activated'])) {
+                $owner->update([
+                    'xendit_registration_status' => 'REGISTERED',
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => "Webhook sub account processed",
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Xendit Webhook error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
+    }
+
 }

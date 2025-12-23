@@ -64,7 +64,7 @@ class PartnerAccountController extends Controller
             'after_id' => $request->get('after_id'),
             'email' => $request->get('email'),
             'status' => $request->get('status'),
-            'public_profile.business_name' => $request->get('business_name'),
+            'business_name' => $request->get('business_name'),
             'type' => $request->get('type'),
             'created[gte]' => $this->formatXenditDate($request->get('created_gte'), true),
             'created[lte]' => $this->formatXenditDate($request->get('created_lte'), false),
@@ -123,7 +123,7 @@ class PartnerAccountController extends Controller
             }
 
         } catch (\Exception $e) {
-            Log::error('Xendit Partner Account Error: ' . $e->getMessage(), [
+            Log::error('Xendit Owner Account Error: ' . $e->getMessage(), [
                 'request_params' => $apiParams,
             ]);
             $errorMessage = 'Gagal mengambil data akun dari Xendit. Silakan coba lagi. (' . $e->getMessage() . ')';
@@ -485,11 +485,9 @@ class PartnerAccountController extends Controller
 
         $apiParams = [
             'limit'                 => $request->input('limit', 10),
-            'statuses'              => $request->input('statuses'),
-            'client_types'          => $request->input('client_types'),
-            'payment_channels'      => $request->input('payment_channels'),
+            'types'               => $request->input('types'),
             'channel_categories'    => $request->input('channel_categories'),
-            'currency'              => $request->input('currency'),
+            'currency'              => $request->input('currency', 'IDR'),
         ];
 
         $searchKeys = ['reference_id', 'account_identifier', 'amount', 'product_id'];
@@ -550,7 +548,7 @@ class PartnerAccountController extends Controller
             }
 
             $rawTransactions = $transactionData['data']['data'];
-            $transactionsCollection = collect($rawTransactions)->whereNotIn('settlement_status', ['PENDING']);
+            $transactionsCollection = collect($rawTransactions);
 
             $hasMore = $transactionData['data']['has_more'] ?? false;
 
@@ -572,17 +570,13 @@ class PartnerAccountController extends Controller
             $tempResult = [];
 
             foreach ($transactionsCollection as $tx) {
-
-                $dateField = $tx['estimated_settlement_time'] ?? $tx['created'] ?? now()->toIso8601String();
-                $carbonDate = Carbon::parse($dateField)->setTimezone('Asia/Jakarta');
-                $isoTimestamp = $carbonDate->timestamp;
-                $formattedDate = $carbonDate->format('d M Y, H:i:s');
+                $dateCreatedField = $tx['estimated_settlement_time'] ?? $tx['created'] ?? now()->toIso8601String();
 
                 $amount = $tx['amount'] ?? 0;
                 $cashflow = $tx['cashflow'] ?? '';
 
                 try {
-                    $balanceTimestamp = Carbon::parse($dateField)->addSecond()->toIso8601String();
+                    $balanceTimestamp = Carbon::parse($dateCreatedField)->addSecond()->toIso8601String();
                     $balanceResponse = $this->xenditBalance->getBalance(
                         $accountId,
                         new Request(['at_timestamp' => $balanceTimestamp])
@@ -597,6 +591,7 @@ class PartnerAccountController extends Controller
                 $xenditFee = abs($tx['fee']['xendit_fee'] ?? 0);
                 $vatFee = abs($tx['fee']['value_added_tax'] ?? 0);
                 $totalFees = $xenditFee + $vatFee;
+                $statusFee = $tx['fee']['status'];
 
                 $isXenPlatform = ($tx['channel_category'] ?? '') === 'XENPLATFORM';
                 $isSplit = ($tx['channel_code'] ?? '') === 'SPLIT';
@@ -612,8 +607,7 @@ class PartnerAccountController extends Controller
                 }
 
                 $tempResult[] = [
-                    'created' => $formattedDate,
-                    'created_iso' => $isoTimestamp,
+                    'created' => $tx['created'],
                     'internal_sort' => $internalSort,
                     'transaction_type' => $isXenPlatform ? $tx['channel_category'] : $tx['type'],
                     'channel_code' => $tx['channel_code'] ?? '-',
@@ -621,10 +615,12 @@ class PartnerAccountController extends Controller
                     'amount' => $amount,
                     'balance' => $currentBalance,
                     'cashflow' => $cashflow ?? 'N/A',
+                    'settlement_status' => $tx['settlement_status'] ?? '-',
                     'fee_details' => [
                         'xendit_fee' => $xenditFee,
                         'vat_fee' => $vatFee,
                         'total_fees' => $totalFees,
+                        'status' => $statusFee,
                     ]
                 ];
             }
@@ -717,11 +713,20 @@ class PartnerAccountController extends Controller
 
     public function getTransactionById($accountId, $transactionId)
     {
-
         $transactionsResponse = $this->xenditTransactions->getTransactionById($accountId, $transactionId);
         $transactionData = $transactionsResponse->getData(true);
         $transactions = $transactionData['data'] ?? [];
 
-        return view('pages.admin.xen_platform.partner-account.transaction-detail', ['transaction' => $transactions]);
+        return view('pages.admin.xen_platform.partner-account.tab-panel.transaction.detail.index', ['transaction' => $transactions]);
     }
+
+    public function getInvoiceById($accountId, $invoiceId)
+    {
+        $invoiceResponse = $this->xenditInvoices->getInvoiceById($accountId, $invoiceId);
+        $invoiceData = $invoiceResponse->getData(true);
+        $invoice = $invoiceData['data'] ?? [];
+
+        return view('pages.admin.xen_platform.partner-account.tab-panel.invoice.detail.index', ['invoice' => $invoice]);
+    }
+
 }
