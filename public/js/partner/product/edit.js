@@ -1,143 +1,201 @@
-// Quantity product
+// ===== 1. PRODUCT STOCK ADJUSTMENT CALCULATION =====
 (function () {
-  const qty = document.getElementById("quantity");
-  const dec = document.getElementById("btn-qty-dec");
-  const inc = document.getElementById("btn-qty-inc");
-  const max = document.getElementById("btn-qty-max");
-  const toInt = (v) => {
-    const n = parseInt(v, 10);
-    return isNaN(n) ? 0 : n;
-  };
-  dec?.addEventListener("click", () => {
-    if (qty?.disabled) return;
-    qty.value = Math.max(0, toInt(qty.value) - 1);
-  });
-  inc?.addEventListener("click", () => {
-    if (qty?.disabled) return;
-    qty.value = toInt(qty.value) + 1;
-  });
-  max?.addEventListener("click", () => {
-    if (qty?.disabled) return;
-    qty.value = 999999999;
-  });
-})();
+  const newQtyInput = document.getElementById("new_quantity");
+  const currentQtyInput = document.getElementById("current_quantity");
+  const adjustmentInfo = document.getElementById("adjustment_info");
+  const adjustmentType = document.getElementById("adjustment_type");
+  const adjustmentAmount = document.getElementById("adjustment_amount");
 
-// +/- options
-(function () {
-  const toInt = (v) => {
-    const n = parseInt(v, 10);
-    return isNaN(n) ? 0 : n;
-  };
-  document.addEventListener("click", function (e) {
-    if (e.target.closest(".btn-opt-dec")) {
-      const target = e.target.closest(".btn-opt-dec").dataset.target;
-      const input = document.querySelector(target);
-      if (!input || input.disabled) return;
-      input.value = Math.max(0, toInt(input.value) - 1);
-    }
-    if (e.target.closest(".btn-opt-inc")) {
-      const target = e.target.closest(".btn-opt-inc").dataset.target;
-      const input = document.querySelector(target);
-      if (!input || input.disabled) return;
-      input.value = toInt(input.value) + 1;
-    }
-  });
-})();
+  function calculateAdjustment() {
+    if (!newQtyInput || !currentQtyInput) return;
 
-// Toggle Always available
-(function () {
-  function toggleQty(wrapperEl, inputEl, checked) {
-    if (!wrapperEl || !inputEl) return;
-    if (checked) {
-      if (!inputEl.dataset.prev) inputEl.dataset.prev = inputEl.value || "0";
-      wrapperEl.classList.add("d-none");
-      inputEl.disabled = true;
+    // Gunakan parseFloat jika stok bisa desimal, atau parseInt jika bulat
+    const newQty = parseFloat(newQtyInput.value) || 0;
+    const currentQty = parseFloat(currentQtyInput.value) || 0;
+    const difference = newQty - currentQty;
+
+    // Jika input kosong, disabled, ATAU difference (selisih) adalah 0 -> Sembunyikan
+    if (newQtyInput.value === "" || newQtyInput.disabled || difference === 0) {
+      adjustmentInfo.style.display = "none";
+      return; // Berhenti di sini, tidak lanjut ke bawah
+    }
+
+    const langIncreaseStock =
+      window.outletProductLang?.type_increase || "Penambahan";
+    const langDecreaseStock =
+      window.outletProductLang?.type_decrease || "Pengurangan";
+
+    // Karena kode di atas sudah me-return saat 0, maka kode di bawah hanya jalan jika ada selisih
+    adjustmentInfo.style.display = "block"; // Tampilkan box
+
+    if (difference > 0) {
+      adjustmentInfo.className = "alert alert-success py-1 px-2";
+      adjustmentType.textContent = langIncreaseStock;
+      adjustmentAmount.textContent = "+" + difference + " pcs";
     } else {
-      wrapperEl.classList.remove("d-none");
-      inputEl.disabled = false;
-      if (inputEl.dataset.prev) inputEl.value = inputEl.dataset.prev;
+      // Pasti difference < 0 karena 0 sudah di filter di atas
+      adjustmentInfo.className = "alert alert-danger py-1 px-2";
+      adjustmentType.textContent = langDecreaseStock;
+      adjustmentAmount.textContent = "-" + Math.abs(difference) + " pcs";
     }
   }
 
+  newQtyInput?.addEventListener("input", calculateAdjustment);
+  // Panggil sekali saat load untuk memastikan status awal benar
+  calculateAdjustment();
+})();
+
+// ===== 2. OPTION STOCK ADJUSTMENT CALCULATION =====
+(function () {
+  function calculateOptionAdjustment(optId) {
+    const newQtyInput = document.getElementById(`opt-new-qty-${optId}`);
+    const currentQtyInput = document.getElementById(`opt-current-qty-${optId}`);
+    const adjustmentInfo = document.getElementById(`opt-adj-info-${optId}`);
+    const adjustmentType = adjustmentInfo?.querySelector(".opt-adj-type");
+    const adjustmentAmount = adjustmentInfo?.querySelector(".opt-adj-amount");
+
+    if (!newQtyInput || !currentQtyInput || !adjustmentInfo) return;
+
+    const newQty = parseInt(newQtyInput.value) || 0;
+    const currentQty = parseInt(currentQtyInput.value) || 0;
+    const difference = newQty - currentQty;
+
+    // Jika input kosong, disabled, ATAU difference (selisih) adalah 0 -> Sembunyikan
+    if (newQtyInput.value === "" || newQtyInput.disabled || difference === 0) {
+      adjustmentInfo.style.display = "none";
+      return; // Berhenti di sini, tidak lanjut ke bawah
+    }
+    // Karena kode di atas sudah me-return saat 0, maka kode di bawah hanya jalan jika ada selisih
+    adjustmentInfo.style.display = "block"; // Tampilkan box
+
+    const langIncreaseStock = window.outletProductLang?.type_increase;
+    const langDecreaseStock = window.outletProductLang?.type_decrease;
+    const langNoChange = window.outletProductLang?.type_no_change;
+
+    if (difference > 0) {
+      adjustmentInfo.className = "alert alert-success py-1 px-2 small";
+      adjustmentType.textContent = langIncreaseStock;
+      adjustmentAmount.textContent = "+" + difference + " pcs";
+    } else {
+      adjustmentInfo.className = "alert alert-danger py-1 px-2 small";
+      adjustmentType.textContent = langDecreaseStock;
+      adjustmentAmount.textContent = "-" + Math.abs(difference) + " pcs";
+    }
+
+    adjustmentInfo.style.display = "block";
+    adjustmentInfo.style.margin = "0";
+  }
+
+  document.querySelectorAll(".opt-new-qty").forEach((input) => {
+    const optId = input.dataset.optId;
+    input.addEventListener("input", () => calculateOptionAdjustment(optId));
+    calculateOptionAdjustment(optId);
+  });
+})();
+
+// ===== 3. TOGGLE ALWAYS AVAILABLE =====
+(function () {
   // Product
   const aaProd = document.getElementById("aa_product");
   const prodWrap = document.getElementById("product_qty_group");
-  const prodQty = document.getElementById("quantity");
+  const prodQty = document.getElementById("new_quantity");
+
   function syncProd() {
-    if (prodWrap && prodQty) {
-      toggleQty(prodWrap, prodQty, aaProd?.checked);
+    if (!prodWrap || !prodQty) return;
+
+    if (aaProd?.checked) {
+      if (!prodQty.dataset.prev) prodQty.dataset.prev = prodQty.value || "0";
+      prodWrap.classList.add("d-none");
+      prodWrap.style.display = "none";
+      prodQty.disabled = true;
+
+      const adjustmentInfo = document.getElementById("adjustment_info");
+      if (adjustmentInfo) adjustmentInfo.style.display = "none";
+    } else {
+      prodWrap.classList.remove("d-none");
+      prodWrap.style.display = "block";
+      prodQty.disabled = false;
+      if (prodQty.dataset.prev) prodQty.value = prodQty.dataset.prev;
+
+      prodQty.dispatchEvent(new Event("input"));
     }
   }
+
   aaProd?.addEventListener("change", syncProd);
   syncProd();
 
   // Options
-  function syncOneOpt(tg) {
-    const qtySel = tg.getAttribute("data-qty");
-    const wrapSel = tg.getAttribute("data-wrap");
-    const qty = document.querySelector(qtySel);
-    const wrap = document.querySelector(wrapSel);
-    toggleQty(wrap, qty, tg.checked);
-  }
-  document.querySelectorAll(".opt-aa").forEach((tg) => {
-    tg.addEventListener("change", () => syncOneOpt(tg));
-    syncOneOpt(tg);
+  document.querySelectorAll(".opt-aa").forEach((checkbox) => {
+    const optId = checkbox.dataset.optId;
+    const qtyWrapper = document.getElementById(`opt-qty-wrap-${optId}`);
+    const qtyInput = document.getElementById(`opt-new-qty-${optId}`);
+    const adjInfo = document.getElementById(`opt-adj-info-${optId}`);
+
+    function syncOpt() {
+      if (!qtyWrapper || !qtyInput) return;
+
+      if (checkbox.checked) {
+        qtyWrapper.classList.add("d-none");
+        qtyWrapper.style.display = "none";
+        qtyInput.disabled = true;
+        if (adjInfo) adjInfo.style.display = "none";
+      } else {
+        qtyWrapper.classList.remove("d-none");
+        qtyWrapper.style.display = "block";
+        qtyInput.disabled = false;
+        qtyInput.dispatchEvent(new Event("input"));
+      }
+    }
+
+    checkbox.addEventListener("change", syncOpt);
+    syncOpt();
   });
 })();
 
-// Product Stock Type Toggle
+// ===== 4. PRODUCT STOCK TYPE TOGGLE =====
 (function () {
   const stockTypeSelect = document.getElementById("product_stock_type");
   const aaGroup = document.getElementById("product_aa_group");
   const qtyGroup = document.getElementById("product_qty_group");
   const linkedGroup = document.getElementById("product_linked_group");
-  const qtyInput = document.getElementById("quantity");
+  const newQtyInput = document.getElementById("new_quantity");
   const aaCheckbox = document.getElementById("aa_product");
 
   function handleProductStockType() {
     const stockType = stockTypeSelect?.value;
 
     if (stockType === "linked") {
-      // Hide AA and Quantity, show linked info + button
       if (aaGroup) aaGroup.style.display = "none";
       if (qtyGroup) qtyGroup.style.display = "none";
       if (linkedGroup) linkedGroup.style.display = "block";
 
-      // PENTING: Disable input dan set ke 0
-      if (qtyInput) {
-        qtyInput.disabled = true;
-        qtyInput.value = 0;
+      if (newQtyInput) {
+        newQtyInput.disabled = true;
+        const currentQty = document.getElementById("current_quantity");
+        if (currentQty) newQtyInput.value = currentQty.value;
       }
 
-      // Uncheck always available
-      if (aaCheckbox) {
-        aaCheckbox.checked = false;
-      }
+      if (aaCheckbox) aaCheckbox.checked = false;
     } else {
-      // Show AA and Quantity, hide linked info
       if (aaGroup) aaGroup.style.display = "block";
       if (qtyGroup) qtyGroup.style.display = "block";
       if (linkedGroup) linkedGroup.style.display = "none";
 
-      // PENTING: Enable input kembali (kecuali jika AA checked)
-      if (qtyInput && aaCheckbox) {
-        if (aaCheckbox.checked) {
-          qtyInput.disabled = true;
-          qtyInput.value = 0;
-        } else {
-          qtyInput.disabled = false;
-        }
-      } else if (qtyInput) {
-        qtyInput.disabled = false;
+      if (newQtyInput && aaCheckbox) {
+        newQtyInput.disabled = aaCheckbox.checked;
+      } else if (newQtyInput) {
+        newQtyInput.disabled = false;
       }
+
+      if (newQtyInput) newQtyInput.dispatchEvent(new Event("input"));
     }
   }
 
   stockTypeSelect?.addEventListener("change", handleProductStockType);
-  handleProductStockType(); // Initial state
+  handleProductStockType();
 })();
 
-// Stock Type Toggle Logic for Options
+// ===== 5. OPTION STOCK TYPE TOGGLE =====
 (function () {
   function handleStockTypeChange(selectEl) {
     const optId = selectEl.dataset.optId;
@@ -147,10 +205,10 @@
     const qtyWrapper = document.getElementById(`opt-qty-wrap-${optId}`);
     const linkedInfo = document.getElementById(`opt-linked-info-${optId}`);
     const aaCheckbox = document.getElementById(`opt-aa-${optId}`);
+    const newQtyInput = document.getElementById(`opt-new-qty-${optId}`);
 
     if (stockType === "linked") {
       if (aaContainer) {
-        aaContainer.classList.remove("d-inline-block");
         aaContainer.classList.add("d-none");
         aaContainer.style.display = "none";
       }
@@ -162,30 +220,32 @@
         linkedInfo.classList.remove("d-none");
         linkedInfo.style.display = "block";
       }
+      if (newQtyInput) newQtyInput.disabled = true;
     } else {
       if (aaContainer) {
         aaContainer.classList.remove("d-none");
-        aaContainer.classList.add("d-inline-block");
-        aaContainer.style.display = "";
+        aaContainer.style.display = "inline-block";
       }
       if (linkedInfo) {
         linkedInfo.classList.add("d-none");
         linkedInfo.style.display = "none";
       }
 
-      if (aaCheckbox && qtyWrapper) {
+      if (aaCheckbox && qtyWrapper && newQtyInput) {
         if (aaCheckbox.checked) {
           qtyWrapper.classList.add("d-none");
           qtyWrapper.style.display = "none";
+          newQtyInput.disabled = true;
         } else {
           qtyWrapper.classList.remove("d-none");
           qtyWrapper.style.display = "block";
+          newQtyInput.disabled = false;
+          newQtyInput.dispatchEvent(new Event("input"));
         }
       }
     }
   }
 
-  // Initialize all stock type selectors
   document.querySelectorAll(".opt-stock-type").forEach((select) => {
     handleStockTypeChange(select);
     select.addEventListener("change", function () {
@@ -193,7 +253,6 @@
     });
   });
 })();
-
 // Recipe Modal Management
 (function () {
   let cachedIngredients = [];

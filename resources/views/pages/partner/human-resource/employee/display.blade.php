@@ -166,7 +166,7 @@
 </style>
 
 
-@push('scripts')
+{{-- @push('scripts')
 <script>
 function deleteEmployee(employeeId) {
   Swal.fire({
@@ -221,5 +221,5 @@ function generateBarcode(tableId) {
   .catch(err => console.error('Gagal generate barcode:', err));
 }
 </script>
-@endpush
+@endpush --}}
 

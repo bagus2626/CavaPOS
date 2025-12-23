@@ -33,9 +33,16 @@
                     <label for="images" class="form-label">{{ __('messages.owner.products.categories.picture') }}</label>
                     <input type="file" name="images" id="images" class="form-control" accept="image/*"
                         onchange="previewImage(event)">
-                    @error('images')
-                        <div class="invalid-hint">{{ $message }}</div>
-                    @enderror
+
+                    <small class="text-muted d-block mt-1">
+                        {{ __('messages.owner.products.categories.note_image') }}
+                    </small>
+
+
+                    <div id="error-images" class="invalid-hint"> 
+                        @error('images'){{ $message }} @enderror
+                    </div>
+
 
                     <div class="mt-2" id="preview-container" style="display: none;">
                         <div class="position-relative d-inline-block">
@@ -65,14 +72,31 @@
             const input = event.target;
             const preview = document.getElementById('image-preview');
             const container = document.getElementById('preview-container');
+            const errorDisplay = document.getElementById('error-images');
+            const maxSize = 2 * 1024 * 1024; // 2MB dalam bytes
+
+            // Reset pesan error setiap kali ganti file
+            errorDisplay.textContent = '';
+            errorDisplay.style.color = '#b91c1c'; // Pastikan warna merah
 
             if (input.files && input.files[0]) {
+                const file = input.files[0];
+
+                // Validasi Ukuran File
+                if (file.size > maxSize) {
+                    errorDisplay.textContent = '{{ __('messages.owner.products.categories.error_size_image') }}';
+                    input.value = ''; // Reset input agar file besar tidak ikut terkirim saat submit
+                    removePreviewImage();
+                    return;
+                }
+
+                // Tampilkan Preview jika lolos validasi
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     preview.src = e.target.result;
-                    container.style.display = 'block'; // Tampilkan container dengan tombol delete
+                    container.style.display = 'block';
                 };
-                reader.readAsDataURL(input.files[0]);
+                reader.readAsDataURL(file);
             }
         }
 

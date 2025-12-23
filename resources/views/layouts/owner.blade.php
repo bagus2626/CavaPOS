@@ -254,9 +254,7 @@
             left: 5px;
         }
 
-        .main-sidebar {
-            
-        }
+        .main-sidebar {}
 
         .sidebar-collapse .main-sidebar:hover {
             width: 250px !important;
@@ -308,13 +306,15 @@
         .main-sidebar {
             background: #f3f3f3;
             transition: width 0.3s ease-in-out, margin-left 0.3s ease-in-out;
-            overflow-x: hidden !important; /* Tambahkan ini */
+            overflow-x: hidden !important;
+            /* Tambahkan ini */
             /* gelap netral agar choco menonjol */
         }
 
         .sidebar {
             padding-top: .5rem;
-            overflow-x: hidden !important; /* Tambahkan ini */
+            overflow-x: hidden !important;
+            /* Tambahkan ini */
         }
 
         /* item level 1 */
@@ -607,8 +607,8 @@
                     <div class="dropdown-menu dropdown-menu-right rounded-2xl soft-shadow p-0 overflow-hidden">
                         <a href="{{ route('language.set.get', ['locale' => 'id']) }}"
                             class="dropdown-item d-flex align-items-center">
-                            <img src="{{ asset('icons/icon-indonesia-96.png') }}" alt="Indonesia"
-                                class="mr-2 lang-flag" width="18" height="18" loading="lazy" decoding="async">
+                            <img src="{{ asset('icons/icon-indonesia-96.png') }}" alt="Indonesia" class="mr-2 lang-flag"
+                                width="18" height="18" loading="lazy" decoding="async">
                             Bahasa
                             @if (app()->getLocale() === 'id')
                                 <i class="fas fa-check ml-auto text-choco"></i>
@@ -628,33 +628,7 @@
 
                 </li>
 
-                <!-- Notifications Dropdown Menu -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link" data-toggle="dropdown" href="#">
-                        <i class="far fa-bell"></i>
-                        <span class="badge badge-warning navbar-badge">15</span>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right rounded-2xl soft-shadow">
-                        <span class="dropdown-item dropdown-header">15 Notifications</span>
-                        <div class="dropdown-divider"></div>
-                        <a href="#" class="dropdown-item">
-                            <i class="fas fa-envelope mr-2"></i> 4 new messages
-                            <span class="float-right text-muted text-sm">3 mins</span>
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="#" class="dropdown-item">
-                            <i class="fas fa-users mr-2"></i> 8 friend requests
-                            <span class="float-right text-muted text-sm">12 hours</span>
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="#" class="dropdown-item">
-                            <i class="fas fa-file mr-2"></i> 3 new reports
-                            <span class="float-right text-muted text-sm">2 days</span>
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
-                    </div>
-                </li>
+
 
                 <!-- Fullscreen Toggle -->
                 <li class="nav-item">
@@ -708,8 +682,8 @@
                                     User Owner
                                 @endauth
                                 <small>{{ __('messages.owner.layout.member_since') }} @auth('owner')
-                                        {{ auth('owner')->user()->created_at->format('d M. Y') }}
-                                    @else
+                                    {{ auth('owner')->user()->created_at->format('d M. Y') }}
+                                @else
                                         User Owner
                                     @endauth
                                 </small>
@@ -746,33 +720,34 @@
                 <span class="brand-text font-weight-light">{{ __('messages.owner.layout.owner_panel') }}</span>
             </a>
             <!-- Sidebar -->
-            <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+            <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center">
                 <div class="image">
                     @if (auth('owner')->check() && auth('owner')->user()->image)
-                        <img src="{{ asset('storage/' . auth('owner')->user()->image) }}"
-                            class="img-circle elevation-2"
-                            style="width:40px; height:40px; object-fit:cover; border-radius:50%;" alt="User Image">
+                        <img src="{{ asset('storage/' . auth('owner')->user()->image) }}" class="img-circle elevation-2"
+                            style="width:35px; height:35px; object-fit:cover; border-radius:50%;" alt="User Image">
                     @else
                         <div class="img-circle elevation-2 d-inline-flex align-items-center justify-content-center"
-                            style="width:40px; height:40px; background-color: #9ca3af;">
-                            <svg style="width: 22px; height: 22px; color: #ffffff;" fill="currentColor"
-                                viewBox="0 0 24 24">
+                            style="width:35px; height:35px; background-color: #9ca3af;">
+                            <svg style="width: 18px; height: 18px; color: #ffffff;" fill="currentColor" viewBox="0 0 24 24">
                                 <path
                                     d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
                             </svg>
                         </div>
                     @endif
                 </div>
-                <div class="info" style="margin-top:3px;">
-                    <a href="{{ route('owner.user-owner.settings.index') }}" class="d-block text-choco">
+
+                <div class="info">
+                    <a href="{{ route('owner.user-owner.settings.index') }}" class="d-block text-choco fw-bold"
+                        title="{{ auth('owner')->check() ? auth('owner')->user()->name : 'User Owner' }}">
                         @auth('owner')
-                            {{ auth('owner')->user()->name }}
+                            {{ \Illuminate\Support\Str::limit(auth('owner')->user()->name, 20, '') }}
                         @else
                             User Owner
                         @endauth
                     </a>
                 </div>
             </div>
+
             <!-- Sidebar Menu -->
             <nav class="mt-2">
                 @php
@@ -807,27 +782,27 @@
                         $employeeRoutes = ['owner.user-owner.employees.*'];
                     @endphp
 
-                        <li class="nav-item {{ Route::is($employeeRoutes) ? 'menu-open' : '' }}">
-                            <a href="javascript:void(0)"
-                                class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($employeeRoutes) ? 'active' : '' }}"
-                                onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                                <i class="nav-icon fas fa-users"></i>
-                                <p>
-                                    {{ __('messages.owner.layout.user_management') }}
-                                    @if ($isVerified)
-                                        <i class="fas fa-angle-left right"></i>
-                                    @endif
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
-                                <li class="nav-item">
-                                    <a href="{{ route('owner.user-owner.employees.index') }}"
-                                        class="nav-link {{ Route::is('owner.user-owner.employees.*') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>{{ __('messages.owner.layout.employees') }}</p>
-                                    </a>
-                                </li>
-                                {{-- <li class="nav-item">
+                    <li class="nav-item {{ Route::is($employeeRoutes) ? 'menu-open' : '' }}">
+                        <a href="javascript:void(0)"
+                            class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($employeeRoutes) ? 'active' : '' }}"
+                            onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
+                            <i class="nav-icon fas fa-users"></i>
+                            <p>
+                                {{ __('messages.owner.layout.user_management') }}
+                                @if ($isVerified)
+                                    <i class="fas fa-angle-left right"></i>
+                                @endif
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
+                            <li class="nav-item">
+                                <a href="{{ route('owner.user-owner.employees.index') }}"
+                                    class="nav-link {{ Route::is('owner.user-owner.employees.*') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>{{ __('messages.owner.layout.employees') }}</p>
+                                </a>
+                            </li>
+                            {{-- <li class="nav-item">
                                 <a href="#" class="nav-link">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Roles</p>
@@ -843,18 +818,19 @@
                     </li>
 
 
-                    <li class="nav-item @if (Request::segment(1) == 'owner' && Request::segment(3) == 'xen_platform') menu-open @endif">
-    <a href="javascript:void(0)"
-        class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }}"
-        onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-        <i class="nav-icon fas fa-credit-card"></i>
-        <p>
-            XenPlatform
-            @if($isVerified)
-                <i class="fas fa-angle-left right"></i>
-            @endif
-        </p>
-    </a>
+                    <li
+                        class="nav-item @if (Request::segment(1) == 'owner' && Request::segment(3) == 'xen_platform') menu-open @endif">
+                        <a href="javascript:void(0)"
+                            class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }}"
+                            onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
+                            <i class="nav-icon fas fa-credit-card"></i>
+                            <p>
+                                XenPlatform
+                                @if($isVerified)
+                                    <i class="fas fa-angle-left right"></i>
+                                @endif
+                            </p>
+                        </a>
                         <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
                             <li class="nav-item">
                                 <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.accounts.information') : 'javascript:void(0)' }}"
@@ -1065,11 +1041,11 @@
                             </li>
                             {{-- Anda bisa menambahkan menu settings lain di sini jika ada, misal 'Payment Gateway' --}}
                             {{-- <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Payment Gateway</p>
-                            </a>
-                        </li> --}}
+                                <a href="#" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Payment Gateway</p>
+                                </a>
+                            </li> --}}
                         </ul>
                     </li>
 
@@ -1121,8 +1097,7 @@
                         </div>
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
-                                <li class="breadcrumb-item"><a
-                                        href="{{ route('owner.user-owner.dashboard') }}">Home</a>
+                                <li class="breadcrumb-item"><a href="{{ route('owner.user-owner.dashboard') }}">Home</a>
                                 </li>
                                 <li class="breadcrumb-item active">@yield('page_title', 'Dashboard')</li>
                             </ol>
@@ -1140,8 +1115,7 @@
             <div class="float-right d-none d-sm-block">
                 <b>Version</b> 3.2.0
             </div>
-            <strong>Copyright &copy; 2024-{{ date('Y') }} <a
-                    href="https://vastech.co.id">Vastech.co.id</a>.</strong>
+            <strong>Copyright &copy; 2024-{{ date('Y') }} <a href="https://vastech.co.id">Vastech.co.id</a>.</strong>
             All rights reserved.
         </footer>
     </div>
@@ -1172,7 +1146,8 @@
     <!-- SweetAlert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    {{-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> --}}
+    {{--
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> --}}
 
     <!-- Cropper.js JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
@@ -1190,7 +1165,7 @@
 
 
     <script>
-        $(function() {
+        $(function () {
             // Initialize DataTable
             $('.datatable').DataTable({
                 "paging": true,
@@ -1223,11 +1198,11 @@
 
             // Toastr notification example
             // @if (session('success'))
-            //     toastr.success('{{ session('success') }}');
+                //     toastr.success('{{ session('success') }}');
             // @endif
 
             // @if (session('error'))
-            //     toastr.error('{{ session('error') }}');
+                //     toastr.error('{{ session('error') }}');
             // @endif
 
             // Example chart
@@ -1392,7 +1367,7 @@
 
     @if (session('success'))
         <script>
-            $(function() {
+            $(function () {
                 toastr.success({!! json_encode(session('success')) !!});
             });
         </script>
@@ -1400,30 +1375,30 @@
 
     @if (session('error'))
         <script>
-            $(function() {
+            $(function () {
                 toastr.error({!! json_encode(session('error')) !!});
             });
         </script>
     @endif
     @if ($errors->any())
         <script>
-            $(function() {
+            $(function () {
                 @foreach ($errors->all() as $err)
                     toastr.error({!! json_encode($err) !!});
                 @endforeach
-            });
+                    });
         </script>
     @endif
     @if(session('swal_error'))
         <script>
-        document.addEventListener('DOMContentLoaded', function () {
-        Swal.fire({
-            icon: 'warning',
-            title: @json(session('swal_error.title')),
-            text: @json(session('swal_error.text')),
-            confirmButtonColor: '#8c1000',
-        });
-        });
+            document.addEventListener('DOMContentLoaded', function () {
+                Swal.fire({
+                    icon: 'warning',
+                    title: @json(session('swal_error.title')),
+                    text: @json(session('swal_error.text')),
+                    confirmButtonColor: '#8c1000',
+                });
+            });
         </script>
     @endif
 

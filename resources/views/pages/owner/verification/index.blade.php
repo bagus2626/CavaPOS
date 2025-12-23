@@ -1,23 +1,23 @@
 @extends('layouts.owner')
-@section('page_title', 'Verifikasi Akun')
+@section('page_title', __('messages.owner.verification.page_title'))
 
 @section('content')
     @vite(['resources/css/app.css'])
     <section class="content pb-4">
         <div class="container-fluid">
 
-            <!-- Header Section -->
             <div class="mb-8">
                 <div class="relative overflow-hidden rounded-3xl shadow-sm bg-[#8c1000]">
                     <div class="relative z-10 p-8 md:p-10">
                         <div class="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6">
                             <div class="flex-1">
                                 <div class="flex items-center space-x-3 mb-3">
-                                    <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight">Verifikasi Akun Owner</h1>
+                                    <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight">
+                                        {{ __('messages.owner.verification.header_title') }}
+                                    </h1>
                                 </div>
                                 <p class="text-white text-opacity-95 leading-relaxed text-base md:text-lg max-w-4xl">
-                                    Lengkapi data diri dan informasi usaha Anda untuk mendapatkan akses penuh ke panel owner.
-                                    Verifikasi ini diperlukan untuk memastikan keamanan dan kredibilitas bisnis Anda.
+                                    {{ __('messages.owner.verification.header_desc') }}
                                 </p>
                             </div>
                         </div>
@@ -25,7 +25,6 @@
                 </div>
             </div>
 
-            <!-- Alert Alasan Penolakan -->
             @if($owner->verification_status === 'rejected' && $latestVerification && $latestVerification->rejection_reason)
             <div class="bg-yellow-50 border-l-4 border-yellow-400 rounded-xl shadow-sm mb-6 overflow-hidden">
                 <div class="p-6">
@@ -35,15 +34,15 @@
                         </div>
                         <div class="ml-4 flex-1">
                             <h3 class="text-lg font-semibold text-yellow-900 mb-2">
-                                Verifikasi Ditolak
+                                {{ __('messages.owner.verification.rejected_title') }}
                             </h3>
                             <div class="bg-white rounded-lg p-3 mb-3 border border-yellow-200">
-                                <p class="text-sm font-medium text-yellow-800 mb-1">Alasan Penolakan:</p>
+                                <p class="text-sm font-medium text-yellow-800 mb-1">{{ __('messages.owner.verification.rejection_reason') }}</p>
                                 <p class="text-gray-700 p-0 m-0">{{ $latestVerification->rejection_reason }}</p>
                             </div>
                             <p class="text-sm text-yellow-700">
                                 <i class="fas fa-info-circle mr-1"></i>
-                                Silakan perbaiki data sesuai dengan alasan penolakan di atas dan kirim ulang verifikasi.
+                                {{ __('messages.owner.verification.rejection_instruction') }}
                             </p>
                         </div>
                     </div>
@@ -51,11 +50,9 @@
             </div>
             @endif
 
-            <!-- Main Form -->
             <form action="{{ route('owner.user-owner.verification.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6" id="verificationForm">
                 @csrf
 
-                <!-- Personal Information Card -->
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     <div class="bg-[#8c1000] px-6 py-4 border-b border-gray-200">
                         <div class="flex items-center space-x-3">
@@ -63,31 +60,29 @@
                                 <i class="fas fa-user text-red-600"></i>
                             </div>
                             <div>
-                                <h2 class="text-lg font-semibold text-white m-0" style="margin-bottom: 0;">Data Pribadi Owner</h2>
-                                <p class="text-sm text-white m-0">Informasi identitas pemilik usaha</p>
+                                <h2 class="text-lg font-semibold text-white m-0" style="margin-bottom: 0;">{{ __('messages.owner.verification.personal_title') }}</h2>
+                                <p class="text-sm text-white m-0">{{ __('messages.owner.verification.personal_subtitle') }}</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="p-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Nama Owner -->
                             <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700">Nama Lengkap Owner <span class="text-red-500">*</span></label>
+                                <label class="block text-sm font-medium text-gray-700">{{ __('messages.owner.verification.owner_name') }} <span class="text-red-500">*</span></label>
                                 <input type="text" name="owner_name" required
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-200 outline-none @error('owner_name') border-red-500 @enderror"
-                                    placeholder="Masukkan nama lengkap" minlength="3" 
+                                    placeholder="{{ __('messages.owner.verification.owner_name_placeholder') }}" minlength="3" 
                                     value="{{ old('owner_name', $latestVerification->owner_name ?? $owner->name ?? '') }}">
                                 @error('owner_name')
                                     <span class="text-xs text-red-500">{{ $message }}</span>
                                 @else
-                                    <span class="text-xs text-red-500 hidden error-message" data-error="owner_name">Nama minimal 3 karakter</span>
+                                    <span class="text-xs text-red-500 hidden error-message" data-error="owner_name">{{ __('messages.owner.verification.err_name_min') }}</span>
                                 @enderror
                             </div>
 
-                            <!-- No HP Owner -->
                             <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700">Nomor HP/WhatsApp <span class="text-red-500">*</span></label>
+                                <label class="block text-sm font-medium text-gray-700">{{ __('messages.owner.verification.owner_phone') }} <span class="text-red-500">*</span></label>
                                 <input type="tel" name="owner_phone" required
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-200 outline-none @error('owner_phone') border-red-500 @enderror"
                                     placeholder="08xxxxxxxxxx" pattern="^(08|62)\d{8,12}$" minlength="10" maxlength="15"
@@ -95,14 +90,13 @@
                                 @error('owner_phone')
                                     <span class="text-xs text-red-500">{{ $message }}</span>
                                 @else
-                                    <span class="text-xs text-red-500 hidden error-message" data-error="owner_phone">Nomor HP harus dimulai dengan 08 atau 62 (10-15 digit)</span>
+                                    <span class="text-xs text-red-500 hidden error-message" data-error="owner_phone">{{ __('messages.owner.verification.err_phone_format') }}</span>
                                 @enderror
                             </div>
 
-                            <!-- Email Owner -->
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-gray-700">
-                                    Email Owner 
+                                    {{ __('messages.owner.verification.owner_email') }} 
                                 </label>
                                 <div class="relative">
                                     <input type="text" 
@@ -112,41 +106,38 @@
                                 </div>
                                 <p class="text-xs text-gray-500 flex items-center">
                                     <i class="fas fa-info-circle mr-1"></i>
-                                    Email tidak dapat diubah dan menggunakan email dari akun yang terdaftar
+                                    {{ __('messages.owner.verification.email_disabled_info') }}
                                 </p>
                             </div>
 
-                            <!-- No KTP -->
                             <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700">Nomor KTP <span class="text-red-500">*</span></label>
+                                <label class="block text-sm font-medium text-gray-700">{{ __('messages.owner.verification.ktp_number') }} <span class="text-red-500">*</span></label>
                                 <input type="text" name="ktp_number" required maxlength="16" minlength="16"
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-200 outline-none @error('ktp_number') border-red-500 @enderror"
-                                    placeholder="16 digit nomor KTP" pattern="\d{16}"
+                                    placeholder="{{ __('messages.owner.verification.ktp_number_placeholder') }}" pattern="\d{16}"
                                     value="{{ old('ktp_number', $latestVerification->ktp_number_decrypted ?? '') }}">
                                 @error('ktp_number')
                                     <span class="text-xs text-red-500">{{ $message }}</span>
                                 @else
-                                    <span class="text-xs text-red-500 hidden error-message" data-error="ktp_number">Nomor KTP harus 16 digit angka</span>
+                                    <span class="text-xs text-red-500 hidden error-message" data-error="ktp_number">{{ __('messages.owner.verification.err_ktp_format') }}</span>
                                 @enderror
                             </div>
 
-                            <!-- Foto KTP -->
                             <div class="space-y-2 md:col-span-2">
                                 <label class="block text-sm font-medium text-gray-700">
-                                    Foto KTP 
+                                    {{ __('messages.owner.verification.ktp_photo') }} 
                                     @if($latestVerification)
-                                        <span class="text-gray-500">(Opsional - kosongkan jika tidak ingin mengubah)</span>
+                                        <span class="text-gray-500">{{ __('messages.owner.verification.ktp_optional') }}</span>
                                     @else
                                         <span class="text-red-500">*</span>
                                     @endif
                                 </label>
                                 
-                                <!-- Preview Foto Lama dari Database -->
                                 @if($latestVerification && $latestVerification->ktp_photo_path)
                                     <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-xl" id="old_ktp_preview">
                                         <div class="flex items-start justify-between mb-2">
                                             <p class="text-sm font-medium text-blue-900 flex items-center">
-                                                <i class="fas fa-image mr-2"></i> Foto KTP Sebelumnya:
+                                                <i class="fas fa-image mr-2"></i> {{ __('messages.owner.verification.ktp_prev_photo') }}
                                             </p>
                                         </div>
                                         <div class="bg-white p-2 rounded-lg inline-block">
@@ -157,12 +148,11 @@
                                         </div>
                                         <p class="text-xs text-blue-700 mt-3 flex items-start">
                                             <i class="fas fa-info-circle mt-0.5 mr-2"></i>
-                                            <span>Foto ini akan tetap digunakan jika Anda tidak mengunggah foto baru. Klik tombol Hapus untuk menghapus dan upload foto baru.</span>
+                                            <span>{{ __('messages.owner.verification.ktp_keep_info') }}</span>
                                         </p>
                                     </div>
                                 @endif
                                 
-                                <!-- Upload Area -->
                                 <div class="relative" id="ktp_upload_area">
                                     <input type="file" name="ktp_photo" id="ktp_photo" 
                                         {{ $latestVerification ? '' : 'required' }}
@@ -173,12 +163,12 @@
                                         <div class="text-center">
                                             <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
                                             <p class="text-sm text-gray-600 font-medium">
-                                                {{ $latestVerification ? 'Klik untuk upload foto KTP baru' : 'Klik untuk upload foto KTP' }}
+                                                {{ $latestVerification ? __('messages.owner.verification.ktp_upload_new') : __('messages.owner.verification.ktp_upload_default') }}
                                             </p>
-                                            <p class="text-xs text-gray-500 mt-1">PNG, JPG, JPEG (Max. 1MB)</p>
+                                            <p class="text-xs text-gray-500 mt-1">{{ __('messages.owner.verification.ktp_upload_hint') }}</p>
                                             <p class="text-xs text-red-600 font-medium mt-2">
                                                 <i class="fas fa-exclamation-triangle mr-1"></i>
-                                                Pastikan foto KTP jelas & semua tulisan terbaca
+                                                {{ __('messages.owner.verification.ktp_upload_warning') }}
                                             </p>
                                         </div>
                                     </label>
@@ -187,10 +177,9 @@
                                 @error('ktp_photo')
                                     <span class="text-xs text-red-500">{{ $message }}</span>
                                 @else
-                                    <span class="text-xs text-red-500 hidden error-message" data-error="ktp_photo">File harus berupa gambar (JPG, PNG) maksimal 1MB</span>
+                                    <span class="text-xs text-red-500 hidden error-message" data-error="ktp_photo">{{ __('messages.owner.verification.err_file_image') }} (Max 1MB)</span>
                                 @enderror
                                 
-                                <!-- Preview Foto Baru yang Diupload -->
                                 <div id="ktp_preview_container" class="hidden mt-4">
                                     <div class="relative inline-block max-w-md">
                                         <img id="ktp_preview_image" src="" alt="Preview KTP"
@@ -208,7 +197,6 @@
                     </div>
                 </div>
 
-                <!-- Business Information Card -->
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     <div class="bg-[#8c1000] px-6 py-4 border-b border-gray-200">
                         <div class="flex items-center space-x-3">
@@ -216,8 +204,8 @@
                                 <i class="fas fa-store text-red-600"></i>
                             </div>
                             <div>
-                                <h2 class="text-lg font-semibold text-white" style="margin-bottom: 0;">Informasi Usaha</h2>
-                                <p class="text-sm text-white m-0">Detail bisnis dan lokasi</p>
+                                <h2 class="text-lg font-semibold text-white" style="margin-bottom: 0;">{{ __('messages.owner.verification.business_title') }}</h2>
+                                <p class="text-sm text-white m-0">{{ __('messages.owner.verification.business_subtitle') }}</p>
                             </div>
                         </div>
                     </div>
@@ -225,25 +213,25 @@
                     <div class="p-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700">Nama Usaha <span class="text-red-500">*</span></label>
+                                <label class="block text-sm font-medium text-gray-700">{{ __('messages.owner.verification.business_name') }} <span class="text-red-500">*</span></label>
                                 <input type="text" name="business_name" required minlength="3"
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-200 outline-none @error('business_name') border-red-500 @enderror"
-                                    placeholder="Contoh: Warung Nasi Padang Mak Bundo"
+                                    placeholder="{{ __('messages.owner.verification.business_name_placeholder') }}"
                                     value="{{ old('business_name', $latestVerification->business_name ?? '') }}">
                                 @error('business_name')
                                     <span class="text-xs text-red-500">{{ $message }}</span>
                                 @else
-                                    <span class="text-xs text-red-500 hidden error-message" data-error="business_name">Nama usaha minimal 3 karakter</span>
+                                    <span class="text-xs text-red-500 hidden error-message" data-error="business_name">{{ __('messages.owner.verification.err_name_min') }}</span>
                                 @enderror
                             </div>
 
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-gray-700">
-                                    Jenis Usaha <span class="text-red-500">*</span>
+                                    {{ __('messages.owner.verification.business_category') }} <span class="text-red-500">*</span>
                                 </label>
                                 <select name="business_category_id" required
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-200 outline-none @error('business_category_id') border-red-500 @enderror">
-                                    <option value="">Pilih Jenis Usaha</option>
+                                    <option value="">{{ __('messages.owner.verification.business_category_select') }}</option>
                                     @foreach($businessCategories as $category)
                                         <option value="{{ $category->id }}" 
                                             {{ old('business_category_id', $latestVerification->business_category_id ?? '') == $category->id ? 'selected' : '' }}>
@@ -253,25 +241,23 @@
                                 </select>
                                 @error('business_category_id')
                                     <span class="text-xs text-red-500">{{ $message }}</span>
-                                @else
-                                    <span class="text-xs text-red-500 hidden error-message" data-error="business_category_id">Pilih jenis usaha</span>
                                 @enderror
                             </div>
 
                             <div class="space-y-2 md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700">Alamat Lengkap Usaha <span class="text-red-500">*</span></label>
+                                <label class="block text-sm font-medium text-gray-700">{{ __('messages.owner.verification.business_address') }} <span class="text-red-500">*</span></label>
                                 <textarea name="business_address" required rows="3" minlength="10"
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-200 outline-none resize-none @error('business_address') border-red-500 @enderror"
-                                    placeholder="Jalan, nomor, RT/RW, kelurahan, kecamatan, kota/kabupaten, provinsi, kode pos">{{ old('business_address', $latestVerification->business_address ?? '') }}</textarea>
+                                    placeholder="{{ __('messages.owner.verification.business_address_placeholder') }}">{{ old('business_address', $latestVerification->business_address ?? '') }}</textarea>
                                 @error('business_address')
                                     <span class="text-xs text-red-500">{{ $message }}</span>
                                 @else
-                                    <span class="text-xs text-red-500 hidden error-message" data-error="business_address">Alamat minimal 10 karakter</span>
+                                    <span class="text-xs text-red-500 hidden error-message" data-error="business_address">{{ __('messages.owner.verification.err_address_min') }}</span>
                                 @enderror
                             </div>
 
                             <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700">No. Telepon/WhatsApp Bisnis
+                                <label class="block text-sm font-medium text-gray-700">{{ __('messages.owner.verification.business_phone') }}
                                     <span class="text-red-500">*</span></label>
                                 <input type="tel" name="business_phone" required
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-200 outline-none @error('business_phone') border-red-500 @enderror"
@@ -280,12 +266,12 @@
                                 @error('business_phone')
                                     <span class="text-xs text-red-500">{{ $message }}</span>
                                 @else
-                                    <span class="text-xs text-red-500 hidden error-message" data-error="business_phone">Nomor telepon harus dimulai dengan 08 atau 62 (10-15 digit)</span>
+                                    <span class="text-xs text-red-500 hidden error-message" data-error="business_phone">{{ __('messages.owner.verification.err_phone_format') }}</span>
                                 @enderror
                             </div>
 
                             <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700">Email Bisnis <span class="text-gray-400">(Opsional)</span></label>
+                                <label class="block text-sm font-medium text-gray-700">{{ __('messages.owner.verification.business_email') }} <span class="text-gray-400">{{ __('messages.owner.verification.business_email_optional') }}</span></label>
                                 <input type="email" name="business_email"
                                     class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-200 outline-none @error('business_email') border-red-500 @enderror"
                                     placeholder="bisnis@email.com" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
@@ -293,19 +279,18 @@
                                 @error('business_email')
                                     <span class="text-xs text-red-500">{{ $message }}</span>
                                 @else
-                                    <span class="text-xs text-red-500 hidden error-message" data-error="business_email">Format email tidak valid</span>
+                                    <span class="text-xs text-red-500 hidden error-message" data-error="business_email">{{ __('messages.owner.verification.err_email_format') }}</span>
                                 @enderror
                             </div>
 
                             <div class="space-y-2 md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700">Logo Usaha <span class="text-gray-400">(Opsional)</span></label>
+                                <label class="block text-sm font-medium text-gray-700">{{ __('messages.owner.verification.business_logo') }} <span class="text-gray-400">{{ __('messages.owner.verification.business_email_optional') }}</span></label>
                                 
-                                <!-- Preview Logo Lama dari Database -->
                                 @if($latestVerification && $latestVerification->business_logo_path)
                                     <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-xl" id="old_logo_preview">
                                         <div class="flex items-start justify-between mb-2">
                                             <p class="text-sm font-medium text-blue-900 flex items-center">
-                                                <i class="fas fa-image mr-2"></i> Logo Sebelumnya:
+                                                <i class="fas fa-image mr-2"></i> {{ __('messages.owner.verification.logo_prev') }}
                                             </p>
                                         </div>
                                         <div class="bg-white p-2 rounded-lg inline-block">
@@ -316,12 +301,11 @@
                                         </div>
                                         <p class="text-xs text-blue-700 mt-3 flex items-start">
                                             <i class="fas fa-info-circle mt-0.5 mr-2"></i>
-                                            <span>Logo ini akan tetap digunakan jika Anda tidak mengunggah logo baru. Klik tombol Hapus untuk menghapus dan upload logo baru.</span>
+                                            <span>{{ __('messages.owner.verification.logo_keep_info') }}</span>
                                         </p>
                                     </div>
                                 @endif
                                 
-                                <!-- Upload Area -->
                                 <div class="relative" id="logo_upload_area">
                                     <input type="file" name="business_logo" id="business_logo"
                                         accept="image/jpeg,image/jpg,image/png" class="hidden"
@@ -331,9 +315,9 @@
                                         <div class="text-center">
                                             <i class="fas fa-image text-4xl text-gray-400 mb-3"></i>
                                             <p class="text-sm text-gray-600 font-medium">
-                                                {{ $latestVerification && $latestVerification->business_logo_path ? 'Klik untuk upload logo baru' : 'Klik untuk upload logo usaha' }}
+                                                {{ $latestVerification && $latestVerification->business_logo_path ? __('messages.owner.verification.logo_upload_new') : __('messages.owner.verification.logo_upload_default') }}
                                             </p>
-                                            <p class="text-xs text-gray-500 mt-1">PNG, JPG, JPEG (Max. 2MB)</p>
+                                            <p class="text-xs text-gray-500 mt-1">{{ __('messages.owner.verification.logo_upload_hint') }}</p>
                                         </div>
                                     </label>
                                 </div>
@@ -341,10 +325,9 @@
                                 @error('business_logo')
                                     <span class="text-xs text-red-500">{{ $message }}</span>
                                 @else
-                                    <span class="text-xs text-red-500 hidden error-message" data-error="business_logo">File harus berupa gambar (JPG, PNG) maksimal 2MB</span>
+                                    <span class="text-xs text-red-500 hidden error-message" data-error="business_logo">{{ __('messages.owner.verification.err_file_image') }} (Max 2MB)</span>
                                 @enderror
                                 
-                                <!-- Preview Logo Baru yang Diupload -->
                                 <div id="logo_preview_container" class="hidden mt-4">
                                     <div class="relative inline-block">
                                         <img id="logo_preview_image" src="" alt="Preview Logo"
@@ -362,35 +345,33 @@
                     </div>
                 </div>
 
-                <!-- Info Box -->
                 <div class="bg-blue-50 border border-blue-200 rounded-2xl p-6">
                     <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0">
                             <i class="fas fa-info-circle text-blue-600 text-2xl"></i>
                         </div>
                         <div>
-                            <h4 class="font-semibold text-blue-900 mb-2">Informasi Penting</h4>
+                            <h4 class="font-semibold text-blue-900 mb-2">{{ __('messages.owner.verification.important_info') }}</h4>
                             <ul class="text-sm text-blue-800 space-y-2">
-                                <li class="flex items-start"><i class="fas fa-check-circle mt-0.5 mr-2 text-blue-600"></i><span>Proses verifikasi akan memakan waktu maksimal 2x24 jam kerja.</span></li>
-                                <li class="flex items-start"><i class="fas fa-check-circle mt-0.5 mr-2 text-blue-600"></i><span>Pastikan semua data yang diinput sesuai dengan dokumen asli.</span></li>
-                                <li class="flex items-start"><i class="fas fa-check-circle mt-0.5 mr-2 text-blue-600"></i><span>Foto KTP harus jelas, tidak buram, dan terbaca dengan baik.</span></li>
-                                <li class="flex items-start"><i class="fas fa-check-circle mt-0.5 mr-2 text-blue-600"></i><span>Status verifikasi akan dikirimkan melalui email dan notifikasi di panel.</span></li>
+                                <li class="flex items-start"><i class="fas fa-check-circle mt-0.5 mr-2 text-blue-600"></i><span>{{ __('messages.owner.verification.info_1') }}</span></li>
+                                <li class="flex items-start"><i class="fas fa-check-circle mt-0.5 mr-2 text-blue-600"></i><span>{{ __('messages.owner.verification.info_2') }}</span></li>
+                                <li class="flex items-start"><i class="fas fa-check-circle mt-0.5 mr-2 text-blue-600"></i><span>{{ __('messages.owner.verification.info_3') }}</span></li>
+                                <li class="flex items-start"><i class="fas fa-check-circle mt-0.5 mr-2 text-blue-600"></i><span>{{ __('messages.owner.verification.info_4') }}</span></li>
                             </ul>
                         </div>
                     </div>
                 </div>
 
-                <!-- Terms & Conditions -->
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                     <div class="flex items-start space-x-3">
                         <input type="checkbox" id="terms" name="terms" required
                             class="mt-1 h-5 w-5 text-red-600 border-gray-300 rounded focus:ring-2 focus:ring-red-200">
                         <label for="terms" class="text-sm text-gray-600 leading-relaxed">
-                            Saya menyatakan bahwa data yang saya berikan adalah benar dan dapat
-                            dipertanggungjawabkan. Saya juga menyetujui <a href="#"
-                                class="text-red-600 hover:text-red-700 font-medium">Syarat & Ketentuan</a> serta <a href="#"
-                                class="text-red-600 hover:text-red-700 font-medium">Kebijakan Privasi</a>
-                            yang berlaku.
+                            {{ __('messages.owner.verification.terms_agreement') }} 
+                            <a href="#" class="text-red-600 hover:text-red-700 font-medium">{{ __('messages.owner.verification.terms_link') }}</a> 
+                            {{ __('messages.owner.verification.agreement_suffix') }} 
+                            <a href="#" class="text-red-600 hover:text-red-700 font-medium">{{ __('messages.owner.verification.privacy_link') }}</a>
+                            {{ __('messages.owner.verification.agreement_suffix') }}
                         </label>
                     </div>
                     @error('terms')
@@ -398,19 +379,18 @@
                     @enderror
                 </div>
 
-                <!-- Submit Button -->
                 <div class="flex justify-end">
                     <button type="submit" id="submitBtn" disabled
                         class="px-8 py-3 bg-[#8c1000] text-white rounded-xl transition-all duration-300 font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none hover:from-red-700 hover:to-red-800 hover:shadow-xl hover:-translate-y-0.5">
                         <i class="fas fa-paper-plane mr-2"></i> 
-                        {{ $latestVerification ? 'Kirim Ulang Verifikasi' : 'Kirim Verifikasi' }}
+                        {{ $latestVerification ? __('messages.owner.verification.btn_resend') : __('messages.owner.verification.btn_send') }}
                     </button>
                 </div>
             </form>
         </div>
     </section>
 
-    @push('scripts')
+@push('scripts')
         @vite(['resources/js/app.js'])
         <script>
             // Fungsi untuk menghapus preview foto lama dari database
@@ -445,7 +425,8 @@
                     // Validasi ukuran dan tipe file
                     if (file.size > maxSize) {
                         if (errorSpan) {
-                            errorSpan.textContent = `Ukuran file maksimal ${input.name === 'ktp_photo' ? '1MB' : '2MB'}`;
+                            const sizeLimit = input.name === 'ktp_photo' ? '1MB' : '2MB';
+                            errorSpan.textContent = "{{ __('messages.owner.verification.err_file_image') }} (Max " + sizeLimit + ")";
                             errorSpan.classList.remove('hidden');
                         }
                         input.value = '';
@@ -457,7 +438,7 @@
 
                     if (!file.type.match('image/(jpeg|jpg|png)')) {
                         if (errorSpan) {
-                            errorSpan.textContent = 'Format file harus JPG, JPEG, atau PNG';
+                            errorSpan.textContent = "{{ __('messages.owner.verification.err_file_image') }}";
                             errorSpan.classList.remove('hidden');
                         }
                         input.value = '';
@@ -542,18 +523,18 @@
                     }
 
                     if (!isFormCompletelyValid) {
-                        toastr.error('Mohon periksa kembali, masih ada data yang tidak valid.');
+                        toastr.error("{{ __('messages.owner.verification.err_form_invalid') }}");
                         form.querySelector('.border-red-500, :invalid')?.focus();
                         return;
                     }
 
                     Swal.fire({
-                        title: 'Konfirmasi Pengiriman',
-                        text: "Apakah Anda yakin semua data yang diisi sudah benar?",
+                        title: "{{ __('messages.owner.verification.swal_confirm_title') }}",
+                        text: "{{ __('messages.owner.verification.swal_confirm_text') }}",
                         icon: 'question',
                         showCancelButton: true,
-                        confirmButtonText: 'Ya, Kirim!',
-                        cancelButtonText: 'Batal',
+                        confirmButtonText: "{{ __('messages.owner.verification.swal_confirm_btn') }}",
+                        cancelButtonText: "{{ __('messages.owner.verification.swal_cancel_btn') }}",
                         confirmButtonColor: '#8c1000',
                         cancelButtonColor: '#6c757d',
                         customClass: {
@@ -562,7 +543,7 @@
                     }).then((result) => {
                         if (result.isConfirmed) {
                             submitBtn.disabled = true;
-                            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Mengirim...';
+                            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>' + "{{ __('messages.owner.verification.btn_loading') }}";
                             form.submit();
                         }
                     });

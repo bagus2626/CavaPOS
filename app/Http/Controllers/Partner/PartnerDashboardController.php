@@ -28,17 +28,18 @@ class PartnerDashboardController extends Controller
         $total_products = PartnerProduct::where('partner_id', $partner->id)->count();
 
         // Total akun (partner + karyawan)
-        $total_accounts = $total_employees + 1;
+        $total_accounts = $total_employees;
 
         // Orders untuk outlet ini
-        $orders = BookingOrder::where('partner_id', $partner->id)
-            ->whereYear('created_at', now()->year);
+        $ordersQuery = BookingOrder::where('partner_id', $partner->id)
+            ->whereYear('created_at', now()->year)
+            ->whereIn('order_status', ['PAID', 'PROCESSED', 'SERVED']);
 
-        $total_sales = $orders->sum('total_order_value');
-        $total_orders = $orders->count();
+        $total_sales = (clone $ordersQuery)->sum('total_order_value');
+        $total_orders = (clone $ordersQuery)->count();
 
         // 10 pesanan terakhir
-        $last_orders = $orders->whereIn('order_status', ['PAID', 'PROCESSED', 'SERVED'])->latest()->take(10)->get();
+        $last_orders = (clone $ordersQuery)->latest()->take(10)->get();
 
         // Popup messages untuk partner
         $popups = Message::with(['recipients', 'attachments'])

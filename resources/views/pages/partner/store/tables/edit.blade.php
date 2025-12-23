@@ -126,49 +126,43 @@
                             </div>
 
                             {{-- Images --}}
+                            {{-- Ganti bagian col-md-6 Images dengan ini --}}
                             <div class="col-md-6 mb-3">
-                                <label for="images"
-                                    class="form-label">{{ __('messages.partner.outlet.table_management.tables.upload_images') }}</label>
-                                <input type="file" name="images[]" id="images"
-                                    class="form-control @error('images') is-invalid @enderror" accept="image/*" multiple>
-                                <small
-                                    class="text-muted d-block">{{ __('messages.partner.outlet.table_management.tables.new_upload') }}
-                                    <b>{{ __('messages.partner.outlet.table_management.tables.replace') }}</b>
-                                    {{ __('messages.partner.outlet.table_management.tables.old_picture') }}</small>
-                                @error('images')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                                @error('images.*')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <label for="images" class="form-label">{{ __('messages.partner.outlet.table_management.tables.upload_images') }}</label>
+                                
+                                {{-- Input File Tunggal (Hapus [] dan multiple) --}}
+                                <input type="file" name="images" id="images"
+                                    class="form-control @error('images') is-invalid @enderror" accept="image/*"
+                                    onchange="previewImage(event)">
+                                
+                                <small class="text-muted d-block mt-1">
+                                    * Format: JPG, PNG, WEBP. Maks: 2MB. (Mengunggah gambar baru akan mengganti gambar lama)
+                                </small>
 
-                                {{-- Preview gambar baru --}}
-                                <div id="imagesPreview" class="thumb-list mt-2"></div>
+                                <div id="error-images" class="invalid-hint text-danger" style="font-size: 0.8rem;">
+                                    @error('images') {{ $message }} @enderror
+                                </div>
 
-                                {{-- Gambar lama + checkbox hapus --}}
-                                @if ($table->images && count($table->images) > 0)
-                                    <div class="mt-3">
-                                        <label
-                                            class="form-label">{{ __('messages.partner.outlet.table_management.tables.current_images') }}</label>
-                                        <div class="thumb-list">
-                                            @foreach ($table->images as $index => $img)
-                                                @php $src = asset($img['path']); @endphp
-                                                <div class="thumb-item">
-                                                    <img src="{{ $src }}" alt="Table Image" class="thumb-img-sm">
-                                                    <div class="form-check mt-2 delete-check">
-                                                        <input class="form-check-input" type="checkbox"
-                                                            name="delete_images[]" value="{{ $img['filename'] }}"
-                                                            id="delete_image_{{ $index }}">
-                                                        <label class="form-check-label"
-                                                            for="delete_image_{{ $index }}">
-                                                            {{ __('messages.partner.outlet.table_management.tables.delete_this_picture') }}
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                            @endforeach
-                                        </div>
+                                {{-- Wadah Tunggal Gambar (Menampilkan gambar lama jika ada) --}}
+                                @php 
+                                    // Mengambil path gambar pertama karena sekarang sistem hanya mendukung 1 gambar
+                                    $existingImage = is_array($table->images) ? ($table->images[0]['path'] ?? null) : null;
+                                @endphp
+
+                                <div class="mt-2" id="image-display-container" style="{{ $existingImage ? '' : 'display: none;' }}">
+                                    <div class="position-relative d-inline-block">
+                                        <img id="main-image-preview" 
+                                            src="{{ $existingImage ? asset($existingImage) : '#' }}" 
+                                            alt="Table Image" class="thumb-img" style="max-width: 200px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                        
+                                        <button type="button" class="btn btn-danger btn-sm position-absolute"
+                                            style="top: 5px; right: 5px;" onclick="clearImage()" title="Hapus gambar">
+                                            <i class="fas fa-times"></i>
+                                        </button>
                                     </div>
-                                @endif
+                                    {{-- Hidden input untuk memberi tahu backend apakah gambar dihapus --}}
+                                    <input type="hidden" name="keep_existing_image" id="keep_existing_image" value="1">
+                                </div>
                             </div>
                         </div>
 
@@ -195,7 +189,7 @@
             </div>
         </div>
     </section>
-
+    
     <style>
         /* ==== Tables Edit (scoped) ==== */
         :root {
@@ -449,167 +443,163 @@
 
 @push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Select2 untuk status (jika sudah di-load di layout)
-            if (window.jQuery && $('.select2').length) {
-                $('.select2').select2({
-                    theme: 'bootstrap-5'
-                });
-            }
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. Inisialisasi Select2 untuk Status dan Table Class
+        if (window.jQuery && $('.select2').length) {
+            $('.select2').select2({
+                theme: 'bootstrap-5'
+            });
+        }
 
-            // Preview & validasi gambar baru
-            const input = document.getElementById('images');
-            const previewWrap = document.getElementById('imagesPreview');
-            const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'];
-            const MAX_SIZE = 2 * 1024 * 1024; // 2MB
-            const MAX_FILES = 3;
+        // 2. Logika Preview Gambar Baru (Menimpa Gambar Lama)
+        const input = document.getElementById('images');
+        const mainPreview = document.getElementById('main-image-preview');
+        const container = document.getElementById('image-display-container');
+        const errorDisplay = document.getElementById('error-images');
+        const keepInput = document.getElementById('keep_existing_image');
+        
+        const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'];
+        const MAX_SIZE = 2 * 1024 * 1024; // 2MB
 
-            if (input && previewWrap) {
-                input.addEventListener('change', () => {
-                    const files = Array.from(input.files || []);
-                    if (files.length > MAX_FILES) {
-                        alert(`Maksimal ${MAX_FILES} gambar.`);
-                        input.value = '';
-                        previewWrap.innerHTML = '';
+        if (input && mainPreview) {
+            input.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                
+                // Reset error display
+                if (errorDisplay) errorDisplay.textContent = '';
+
+                if (file) {
+                    // Validasi Tipe File
+                    if (!ALLOWED.includes(file.type)) {
+                        alert('Gunakan format gambar JPG, PNG, atau WEBP.');
+                        this.value = '';
                         return;
                     }
-                    for (const f of files) {
-                        if (!ALLOWED.includes(f.type)) {
-                            alert('Gunakan JPG, PNG, atau WEBP.');
-                            input.value = '';
-                            previewWrap.innerHTML = '';
-                            return;
-                        }
-                        if (f.size > MAX_SIZE) {
-                            alert('Ukuran file melebihi 2 MB.');
-                            input.value = '';
-                            previewWrap.innerHTML = '';
-                            return;
-                        }
-                    }
-                    previewWrap.innerHTML = '';
-                    files.forEach((file) => {
-                        const url = URL.createObjectURL(file);
-                        const el = document.createElement('div');
-                        el.className = 'thumb-item';
-                        el.innerHTML = `
-          <img src="${url}" class="thumb-img" alt="${file.name}">
-          <div class="thumb-caption">${file.name}</div>
-        `;
-                        previewWrap.appendChild(el);
-                    });
-                });
-            }
 
-            // Highlight kartu gambar lama saat checkbox di-klik
-            document.querySelectorAll('.delete-check input[type="checkbox"]').forEach(cb => {
-                cb.addEventListener('change', function() {
-                    const card = this.closest('.thumb-item');
-                    if (!card) return;
-                    card.classList.toggle('marked-delete', this.checked);
-                });
+                    // Validasi Ukuran File
+                    if (file.size > MAX_SIZE) {
+                        alert('Ukuran file tidak boleh melebihi 2 MB.');
+                        this.value = '';
+                        return;
+                    }
+
+                    // Proses Preview
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        mainPreview.src = e.target.result;
+                        container.style.display = 'block';
+                        
+                        // Set keep_existing_image ke 0 karena gambar lama akan diganti oleh upload baru
+                        if (keepInput) keepInput.value = '0';
+                    };
+                    reader.readAsDataURL(file);
+                }
             });
+        }
 
-            // === Toggle Input Mode untuk Table Class (sama seperti create) ===
-            const selectMode = document.getElementById('select_mode');
-            const inputMode = document.getElementById('input_mode');
-            const selectClass = $('#table_class');
-            const newClassInput = document.getElementById('new_table_class');
-            const btnAddNewClass = document.getElementById('btn_add_new_class');
-            const cancelBtn = document.getElementById('cancel_new_class');
-            const form = document.getElementById('tableEditForm');
+        // 3. Fungsi Global untuk Clear Image (Tombol X)
+        window.clearImage = function() {
+            const fileInput = document.getElementById('images');
+            const mainPreview = document.getElementById('main-image-preview');
+            const container = document.getElementById('image-display-container');
+            const keepInput = document.getElementById('keep_existing_image');
+            const errorDisplay = document.getElementById('error-images');
 
-            let isInputMode = false;
+            if (fileInput) fileInput.value = '';
+            if (keepInput) keepInput.value = '0'; // Beritahu backend gambar lama dihapus
+            if (container) container.style.display = 'none';
+            if (mainPreview) mainPreview.src = '#';
+            if (errorDisplay) errorDisplay.textContent = '';
+        };
 
-            // Initialize Select2 untuk table_class
-            if (selectClass.length) {
-                selectClass.select2({
-                    theme: 'bootstrap-5',
-                    placeholder: '{{ __('messages.partner.outlet.table_management.tables.placeholder_1') }}',
-                    allowClear: true
-                });
-            }
+        // 4. Logika Toggle Table Class (Select vs Input Manual)
+        const selectMode = document.getElementById('select_mode');
+        const inputMode = document.getElementById('input_mode');
+        const selectClass = $('#table_class');
+        const newClassInput = document.getElementById('new_table_class');
+        const btnAddNewClass = document.getElementById('btn_add_new_class');
+        const cancelBtn = document.getElementById('cancel_new_class');
+        const form = document.getElementById('tableEditForm');
 
-            // Handle klik tombol "Tambah Kelas Baru"
-            if (btnAddNewClass) {
-                btnAddNewClass.addEventListener('click', function() {
-                    switchToInputMode();
-                });
-            }
+        let isInputMode = false;
 
-            // Fungsi untuk switch ke input mode
-            function switchToInputMode() {
-                isInputMode = true;
-                selectMode.style.display = 'none';
-                inputMode.style.display = 'block';
+        // Re-inisialisasi Select2 khusus Table Class agar mendukung placeholder
+        if (selectClass.length) {
+            selectClass.select2({
+                theme: 'bootstrap-5',
+                placeholder: '{{ __('messages.partner.outlet.table_management.tables.placeholder_1') }}',
+                allowClear: true
+            });
+        }
 
-                // Disable select dan set required ke input
-                selectClass.prop('required', false);
-                newClassInput.required = true;
+        function switchToInputMode() {
+            isInputMode = true;
+            selectMode.style.display = 'none';
+            inputMode.style.display = 'block';
 
-                // Focus ke input dengan smooth animation
-                setTimeout(() => {
-                    newClassInput.focus();
-                    inputMode.style.opacity = '1';
-                }, 50);
+            // Nonaktifkan select, aktifkan input manual
+            selectClass.prop('required', false);
+            newClassInput.required = true;
 
-                inputMode.style.opacity = '0';
-                inputMode.style.transition = 'opacity 0.2s ease';
-            }
+            setTimeout(() => {
+                newClassInput.focus();
+                inputMode.style.opacity = '1';
+            }, 50);
+            inputMode.style.opacity = '0';
+            inputMode.style.transition = 'opacity 0.2s ease';
+        }
 
-            // Fungsi untuk kembali ke select mode
-            function switchToSelectMode() {
-                isInputMode = false;
-                inputMode.style.display = 'none';
-                selectMode.style.display = 'block';
+        function switchToSelectMode() {
+            isInputMode = false;
+            inputMode.style.display = 'none';
+            selectMode.style.display = 'block';
 
-                // Enable select dan remove required dari input
-                selectClass.prop('required', true);
-                newClassInput.required = false;
-                newClassInput.value = '';
+            // Aktifkan select kembali, matikan input manual
+            selectClass.prop('required', true);
+            newClassInput.required = false;
+            newClassInput.value = '';
 
-                // Restore nilai original dari database
-                selectClass.val('{{ old('table_class', $table->table_class) }}').trigger('change');
-            }
+            // Kembalikan ke nilai lama dari database
+            selectClass.val('{{ old('table_class', $table->table_class) }}').trigger('change');
+        }
 
-            // Handle tombol batal
-            if (cancelBtn) {
-                cancelBtn.addEventListener('click', switchToSelectMode);
-            }
+        if (btnAddNewClass) {
+            btnAddNewClass.addEventListener('click', switchToInputMode);
+        }
 
-            // Handle form submit
-            if (form) {
-                form.addEventListener('submit', function(e) {
-                    if (isInputMode) {
-                        const newClassName = newClassInput.value.trim();
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', switchToSelectMode);
+        }
 
-                        if (!newClassName) {
-                            e.preventDefault();
-                            alert(
-                                'Silakan masukkan nama kelas baru atau klik "Batal" untuk memilih kelas yang ada');
-                            newClassInput.focus();
-                            return false;
-                        }
+        // 5. Handle Form Submit
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                if (isInputMode) {
+                    const newClassName = newClassInput.value.trim();
 
-                        // Buat option baru dan set sebagai selected
-                        const newOption = new Option(newClassName, newClassName, true, true);
-                        selectClass.append(newOption).trigger('change');
-
-                        // Re-enable select sebelum submit
-                        selectClass.prop('required', true);
-                        newClassInput.required = false;
-
-                        console.log('New class created:', newClassName);
+                    if (!newClassName) {
+                        e.preventDefault();
+                        alert('Silakan masukkan nama kelas baru atau klik "Batal"');
+                        newClassInput.focus();
+                        return false;
                     }
-                });
-            }
 
-            // Handle initial state jika ada error dan old() value
-            const oldNewClass = '{{ old('new_table_class') }}';
-            if (oldNewClass) {
-                switchToInputMode();
-                newClassInput.value = oldNewClass;
-            }
-        });
-    </script>
+                    // Inject nilai baru ke Select2 agar ditangkap backend sebagai 'table_class'
+                    const newOption = new Option(newClassName, newClassName, true, true);
+                    selectClass.append(newOption).trigger('change');
+
+                    selectClass.prop('required', true);
+                    newClassInput.required = false;
+                }
+            });
+        }
+
+        // 6. Handle Initial State (jika ada error validasi atau old value)
+        const oldNewClass = '{{ old('new_table_class') }}';
+        if (oldNewClass) {
+            switchToInputMode();
+            newClassInput.value = oldNewClass;
+        }
+    });
+</script>
 @endpush

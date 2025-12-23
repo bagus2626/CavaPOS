@@ -107,7 +107,7 @@ class OwnerAuthController extends Controller
     public function logout(Request $request)
     {
         Auth::guard('owner')->logout();   // ← bukan Auth::logout() umum
-        $request->session()->invalidate();
+        // $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect()->route('owner.login');
     }

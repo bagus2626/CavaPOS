@@ -320,6 +320,133 @@ return [
                 'copyright' => 'All rights reserved.',
             ],
         ],
+        'verification' => [
+            'page_title' => 'Account Verification',
+            'header_title' => 'Owner Account Verification',
+            'header_desc' => 'Complete your personal and business information to get full access to the owner panel. This verification is required to ensure the security and credibility of your business.',
+
+            // Rejection Alert
+            'rejected_title' => 'Verification Rejected',
+            'rejection_reason' => 'Rejection Reason:',
+            'rejection_instruction' => 'Please correct the data according to the rejection reason above and resubmit.',
+
+            // Personal Data Section
+            'personal_title' => 'Owner Personal Data',
+            'personal_subtitle' => 'Identity information of the business owner',
+            'owner_name' => 'Owner Full Name',
+            'owner_name_placeholder' => 'Enter full name',
+            'owner_phone' => 'Phone/WhatsApp Number',
+            'owner_email' => 'Owner Email',
+            'email_disabled_info' => 'Email cannot be changed as it is linked to your registered account',
+            'ktp_number' => 'ID Card (KTP) Number',
+            'ktp_number_placeholder' => '16 digit ID card number',
+
+            // ID Card Photo
+            'ktp_photo' => 'ID Card Photo',
+            'ktp_optional' => '(Optional - leave blank if you do not want to change)',
+            'ktp_prev_photo' => 'Previous ID Card Photo:',
+            'ktp_keep_info' => 'This photo will still be used if you do not upload a new one. Click Remove to delete and upload a new photo.',
+            'ktp_upload_new' => 'Click to upload new ID card photo',
+            'ktp_upload_default' => 'Click to upload ID card photo',
+            'ktp_upload_hint' => 'PNG, JPG, JPEG (Max. 1MB)',
+            'ktp_upload_warning' => 'Ensure the ID photo is clear & all text is readable',
+
+            // Business Information Section
+            'business_title' => 'Business Information',
+            'business_subtitle' => 'Business details and location',
+            'business_name' => 'Business Name',
+            'business_name_placeholder' => 'Example: Mak Bundo Padang Restaurant',
+            'business_category' => 'Business Category',
+            'business_category_select' => 'Select Business Category',
+            'business_address' => 'Full Business Address',
+            'business_address_placeholder' => 'Street, number, RT/RW, village, sub-district, city, province, postal code',
+            'business_phone' => 'Business Phone/WhatsApp',
+            'business_email' => 'Business Email',
+            'business_email_optional' => '(Optional)',
+
+            // Business Logo
+            'business_logo' => 'Business Logo',
+            'logo_prev' => 'Previous Logo:',
+            'logo_keep_info' => 'This logo will still be used if you do not upload a new one.',
+            'logo_upload_new' => 'Click to upload new logo',
+            'logo_upload_default' => 'Click to upload business logo',
+            'logo_upload_hint' => 'PNG, JPG, JPEG (Max. 2MB)',
+
+            // Important Info
+            'important_info' => 'Important Information',
+            'info_1' => 'The verification process will take a maximum of 2x24 working hours.',
+            'info_2' => 'Ensure all entered data matches the original documents.',
+            'info_3' => 'ID card photo must be clear, not blurry, and easily readable.',
+            'info_4' => 'Verification status will be sent via email and panel notification.',
+
+            // Terms & Conditions
+            'terms_agreement' => 'I declare that the data I provide is true and accountable. I also agree to the',
+            'terms_link' => 'Terms & Conditions',
+            'privacy_link' => 'Privacy Policy',
+            'agreement_suffix' => 'that apply.',
+
+            // Buttons
+            'btn_send' => 'Send Verification',
+            'btn_resend' => 'Resubmit Verification',
+            'btn_loading' => 'Sending...',
+
+            // JS Error Messages
+            'err_name_min' => 'Name must be at least 3 characters',
+            'err_phone_format' => 'Phone number must start with 08 or 62 (10-15 digits)',
+            'err_ktp_format' => 'ID number must be 16 digits',
+            'err_address_min' => 'Address must be at least 10 characters',
+            'err_email_format' => 'Invalid email format',
+            'err_file_image' => 'File must be an image (JPG, PNG)',
+            'err_form_invalid' => 'Please check again, some data is still invalid.',
+
+            // SweetAlert
+            'swal_confirm_title' => 'Submit Confirmation',
+            'swal_confirm_text' => 'Are you sure all the information provided is correct?',
+            'swal_confirm_btn' => 'Yes, Submit!',
+            'swal_cancel_btn' => 'Cancel',
+
+            'status' => [
+                'page_title' => 'Verification Status',
+                'header_title' => 'Account Verification Status',
+                'header_desc' => 'Thank you for submitting your verification data. Here is the status of your application.',
+
+                // Status Badges
+                'pending' => 'Pending Verification',
+                'rejected' => 'Verification Rejected',
+                'submitted_at' => 'Submitted on',
+                'reviewed_at' => 'Rejected on',
+                'process_estimation' => 'Estimated Process',
+                'estimation_time' => '1-2 Working Days',
+                'max_time' => 'Max 2x24 hours',
+
+                // Rejection Section
+                'rejection_title' => 'Rejection Reason',
+                'rejection_note' => 'Note:',
+                'rejection_instruction' => 'Please correct the data according to the notes above and resubmit.',
+
+                // Info Box
+                'info_title' => 'Important Information',
+                'info_point_1' => 'The verification process takes a maximum of 2x24 working hours',
+                'info_point_2' => 'You will receive an email notification when verification is complete',
+                'info_point_3' => 'Ensure your email is active to receive notifications',
+                'info_point_4' => 'If you have any questions, please contact our support',
+
+                // Labels
+                'owner_data' => 'Owner Personal Data',
+                'business_data' => 'Business Information',
+                'ktp_hidden' => '****************',
+                'view_ktp' => 'ID Card Photo',
+                'view_logo' => 'Business Logo',
+                'btn_resubmit' => 'Resubmit Verification',
+
+                // Success Modal (SweetAlert)
+                'swal_success_title' => 'Verification Sent!',
+                'swal_success_p1' => 'Your verification data has been successfully sent. We will process it shortly (max. 2x24 working hours).',
+                'swal_success_p2' => 'Verification status will be informed via email to:',
+                'swal_success_warning' => 'Please check your email regularly, including the Spam folder.',
+                'swal_success_btn' => 'Got it, thanks',
+            ],
+        ],
         'layout' => [
             'owner_panel' => 'Owner Panel',
             'dashboard' => 'Dashboard',
@@ -918,7 +1045,7 @@ return [
                 'max_provision' => 'Required, Maximum Select',
                 'exact_provision' => 'Required, Select Exactly',
                 'min_provision' => 'Required, Minimum Select',
-                'new_stock' => 'New Stock',
+                'new_stock' => 'Stock',
                 'old_stock' => 'Previous Stock',
                 'update_stock_status' => 'Update Stock & Status',
                 'if_active_stock_hidden' => 'If enabled, the Stock field will be hidden',
@@ -941,6 +1068,23 @@ return [
                 'linked_stock_info' => 'Product will be created with 0 stock. You can configure raw material links in <strong>Stock Management</strong> page.',
                 'enter_initial_stock' => 'Enter initial stock quantity for this product',
                 'price_outlet_hint' => 'This price only applies to this outlet',
+                'stock_type' => 'Stock Type',
+                'last' => 'Last',
+                'change' => 'Change',
+                'quantity' => 'Quantity',
+                'type_no_change' => 'No Changes',
+                'type_increase' => 'Increase',
+                'type_decrease' => 'Decrease',
+                'recipe_management' => 'Recipe Management',
+                'manage_recipe' => 'Manage Recipe',
+                'manage_product_recipe' => 'Manage Product Recipe',
+                'how_it_works' => 'How It Works',
+                'add_raw_materials_info' => 'Add raw materials needed to make this product. The system will automatically calculate stock based on material availability.',
+                'add_ingredient' => 'Add Ingredient',
+                'save_recipe' => 'Save Recipe',
+                'stock_controlled_by_recipe' => 'Stock controlled by recipe',
+                'enter_new_stock' => 'Enter new stock',
+                'current_stock' => 'Current',
             ],
             'stocks' => [
                 'add_stock_item'        => 'Add Stock Item',
@@ -984,6 +1128,7 @@ return [
                 'description_placeholder'     => 'Notes about supplier, quality, size, or other details',
                 'reset_button'                => 'Reset',
                 'submit_button'               => 'Create Stock',
+                'no_stock_found'              => 'No stock found.',
                 'movements_index' => [
                     'title'                    => 'Stock Movements',
                     'page_title'               => 'Stock Movement History',
@@ -1083,7 +1228,7 @@ return [
                 'movements_adjustment' => [
                     'title' => 'Stock Adjustment',
                     'page_title' => 'Record Stock Adjustment',
-                    
+
                     // Transaction Details
                     'card_transaction_title' => 'Adjustment Transaction Details',
                     'location_from_label' => 'Source Location (From)',
@@ -1091,11 +1236,9 @@ return [
                     'category_label' => 'Adjustment Reason',
                     'notes_label' => 'Notes (Optional)',
                     'notes_placeholder' => 'e.g.: Rotten cabbage 2kg or Expired on Nov 20, 2024',
-                    'category_damaged' => 'Damaged Goods',
-                    'category_expired' => 'Expired Goods',
-                    'category_internal_use' => 'Internal Use',
-                    'category_lost' => 'Lost Items',
-                    'category_audit_adjustment' => 'Audit Adjustment',
+                    'select_category_placeholder' => 'Select Category',
+                    'new_category_placeholder' => 'Enter new category',
+                    'new_category_notes' => 'Enter a new category name for this stock adjustment.',
                     'card_items_title' => 'List of Items to be Reduced',
                     'item_stock_label' => 'Stock Item',
                     'item_stock_placeholder' => 'Select stock item...',
@@ -1112,6 +1255,17 @@ return [
                     'confirm_text' => 'Are you sure you want to save this stock adjustment? Stock will be reduced according to the input data.',
                     'confirm_button' => 'Yes, Save!',
                     'cancel_button' => 'Cancel',
+                    'type_label' => 'Type',
+                    'change' => 'Change',
+                    'quantity' => 'Quantity',
+                    'type_no_change' => 'No Changes',
+                    'type_increase' => 'Increase',
+                    'type_decrease' => 'Decrease',
+                    'category_already_exists' => 'Category already exists. Please use another category or select one from the dropdown.',
+                    'category_available' => 'Category is available',
+                    'category_invalid_characters' => 'Only letters, numbers, spaces, underscores (_), and dashes (-) are allowed.',
+                    'category_exists' => 'Category already exists',
+
                 ]
             ],
             'categories' => [
@@ -1123,6 +1277,8 @@ return [
                 'picture' => 'Picture',
                 'actions' => 'Actions',
                 'no_pictures_yet' => 'No pictures yet',
+                'error_size_image' => 'Image size exceeds the maximum limit of 2 MB.',
+                'note_image' => '* Format: JPG, JPEG, PNG (max: 2 MB)',
                 'edit' => 'Edit',
                 'delete' => 'Delete',
                 'delete_confirmation_1' => 'Delete category?',
@@ -1486,7 +1642,7 @@ return [
                     'create_new_table' => 'Create New Table',
                     're_check_input' => 'Please double-check your input:',
                     'choose_status' => '-- Select Status --',
-                    'upload_images' => 'Upload Images (max 3)',
+                    'upload_images' => 'Upload Images',
                     'muted_text_1' => 'JPG, PNG, WEBP • Max 2 MB per file • Up to 3 files.',
                     'cancel' => 'Cancel',
                     'save' => 'Save',
@@ -1515,7 +1671,6 @@ return [
                 'product_name' => 'Product Name',
                 'description' => 'Description',
                 'options' => 'Options',
-                'quantity' => 'Stock',
                 'price' => 'Price',
                 'pictures' => 'Images',
                 'actions' => 'Actions',
@@ -1536,15 +1691,28 @@ return [
                 'master_product' => 'Master Product',
                 'last' => 'Last',
                 'update_stock' => 'Update Stock',
-                'product_always_available' => 'Product is always available (no stock control)',
+                'product_always_available' => 'Product is always available',
                 'muted_text_1' => 'If enabled, the Quantity field will be hidden.',
-                'quantity_product' => 'Quantity (Product)',
+                'quantity' => 'Quantity',
                 'max' => 'Max',
                 'cancel' => 'Cancel',
                 'save_changes' => 'Save Changes',
                 'created' => 'Created',
                 'last_updated' => 'Last Updated',
-                'owner' => 'Owner'
+                'owner' => 'Owner',
+                'stock_type' => 'Stock Type',
+                'enter_new_stock' => 'Enter new stock',
+                'stock_controlled_by_recipe' => 'Stock controlled by recipe',
+                'manage_recipe' => 'Manage Recipe',
+                'manage_product_recipe' => 'Manage Product Recipe',
+                'how_it_works' => 'How It Works',
+                'add_raw_materials_info' => 'Add raw materials needed to make this product. The system will automatically calculate stock based on material availability.',
+                'add_ingredient' => 'Add Ingredient',
+                'save_recipe' => 'Save Recipe',
+                'change' => 'Change',
+                'type_no_change' => 'No Changes',
+                'type_increase' => 'Increase',
+                'type_decrease' => 'Decrease',
             ],
         ],
     ],
