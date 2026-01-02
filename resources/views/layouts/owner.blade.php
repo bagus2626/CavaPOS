@@ -1,425 +1,373 @@
 <!DOCTYPE html>
 <html lang="en">
 
+
 <head>
     <meta charset="UTF-8">
     <title>@yield('title', 'Owner Panel')</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <!-- AdminLTE CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+
+    <!-- Bootstrap 4 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <!-- Google Font: Source Sans Pro -->
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+
+    <!-- Google Font: Inter -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+
+
+    <!-- Google Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
 
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css">
 
+
     <!-- Select2 CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
-    <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.6.4/dist/select2-bootstrap4.min.css">
+
 
     <!-- Toastr CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
+
     <!-- Summernote CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs4.min.css">
 
-    <!-- Bootstrap 4 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.6.4/dist/select2-bootstrap4.min.css">
 
-    <!-- Loader Custome CSS-->
+    <!-- Loader Custom CSS-->
     <link rel="stylesheet" type="text/css" href="{{ asset('admin/assets/css/blockui-loader.css') }}">
+
 
     <!-- Cropper.js CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
 
+
     <!-- Date Picker CSS-->
-    <link rel="stylesheet" type="text/css"
-        href="{{ asset('admin/app-assets/vendors/css/pickers/pickadate/pickadate.css') }}">
-    <link rel="stylesheet" type="text/css"
-        href="{{ asset('admin/app-assets/vendors/css/pickers/daterange/daterangepicker.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('admin/app-assets/vendors/css/pickers/pickadate/pickadate.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('admin/app-assets/vendors/css/pickers/daterange/daterangepicker.css') }}">
+
 
     <style>
         :root {
-            --choco: #8c1000;
-            --soft-choco: #c12814;
-            --ink: #22272b;
-            --paper: #f7f7f8;
-
-            /* aksen UI */
-            --radius: 12px;
-            --shadow: 0 6px 20px rgba(0, 0, 0, .08);
-
-            /* bootstrap override ringan */
-            --primary: var(--choco);
-            --secondary: #6b7280;
+            --primary: #d42811;
+            --primary-dark: #b01f0c;
+            --background-light: #f8f6f6;
+            --surface-light: #ffffff;
+            --choco-text: #896661;
+            --choco-dark: #5c403c;
+            --ink: #181211;
+            --border-color: #f4f1f0;
         }
 
-        /* ===== Layout polish ===== */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+
         body {
-            background: var(--paper);
+            font-family: 'Inter', sans-serif;
+            background: var(--background-light);
+            color: var(--ink);
+            overflow-x: hidden;
         }
 
-        .card {
-            border: 0;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            overflow: hidden;
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
         }
 
-        .card-header {
-            background: #fff;
-            border-bottom: 1px solid #eef1f4;
-            padding: .85rem 1rem;
-        }
 
-        .content-header {
-            padding: 18px 0.5rem;
-        }
-
-        .wrapper {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .content-wrapper {
+        ::-webkit-scrollbar-track {
             background: transparent;
         }
 
-        /* ===== Navbar ===== */
-        .main-header.navbar {
-            background: #fff !important;
-            border-bottom: 1px solid #eef1f4 !important;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, .03);
-        }
 
-        .navbar .nav-link {
-            color: var(--ink);
-        }
-
-        .navbar .nav-link:hover {
-            color: var(--choco);
-        }
-
-        /* ===== Brand / Sidebar ===== */
-        .brand-link {
-            background: linear-gradient(135deg, var(--choco), var(--soft-choco)) !important;
-            border-bottom: 0;
-            transition: all 0.3s ease-in-out;
-            overflow: hidden !important;
-            white-space: nowrap;
-            display: flex !important;
-            align-items: center;
-            justify-content: flex-start !important;
-            padding-left: 0.5rem !important;
-            min-height: 57px;
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 3px;
         }
 
 
-        .brand-link .brand-image {
-            background: #fff;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+
+
+        /* Layout Wrapper */
+        .main-wrapper {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+
+        /* Sidebar */
+        .main-sidebar {
+            width: 280px;
+            background: var(--surface-light);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
             flex-shrink: 0;
-            padding: 2px;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
         }
 
-        .brand-image-full {
-            max-height: 40px;
-            width: auto;
-            max-width: 180px;
+
+        .main-sidebar.collapsed {
+            width: 80px;
+        }
+
+
+        /* Brand/Logo */
+        .brand-link {
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--surface-light);
+            min-height: 80px;
+        }
+
+
+        .brand-logo-wrapper {
+            background: rgba(212, 40, 17, 0.1);
+            padding: 0.5rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+
+        .brand-logo-wrapper .material-symbols-outlined {
+            color: var(--primary);
+            font-size: 2rem;
+        }
+
+
+        .brand-text-wrapper {
+            display: flex;
+            flex-direction: column;
+            transition: opacity 0.3s;
+        }
+
+
+        .main-sidebar.collapsed .brand-text-wrapper {
             opacity: 0;
-            transform: scale(0.8);
             display: none;
         }
 
-        /* Logo circular (sidebar collapse) */
-        .brand-image-collapsed {
-            max-height: 30px;
+
+        .brand-title {
+            color: var(--ink);
+            font-size: 1.25rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin: 0;
+        }
+
+
+        .brand-subtitle {
+            color: var(--choco-text);
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin: 0;
+        }
+
+
+        /* User Panel */
+        .user-panel {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+
+        .user-panel .user-image {
             width: 40px;
             height: 40px;
-            opacity: 1;
-            transform: scale(1);
-            object-fit: contain;
-            display: block;
-            transition: opacity 0.6s ease-in-out;
-        }
-
-        .brand-text {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            opacity: 0;
-            max-width: 0;
-            overflow: hidden;
-            margin-left: 0;
-            white-space: nowrap;
-            display: none;
-        }
-
-        /* ====== STATE: Sidebar Normal  ====== */
-        body:not(.sidebar-collapse) .brand-link {
-            justify-content: flex-start !important;
-            padding-left: 0.5rem !important;
-        }
-
-        body:not(.sidebar-collapse) .brand-image-full {
-            max-width: 200px;
-            width: auto;
-            opacity: 1;
-            transform: scale(1);
-            display: block;
-        }
-
-        body:not(.sidebar-collapse) .brand-image-collapsed {
-            display: none;
-        }
-
-        body:not(.sidebar-collapse) .brand-text {
-            opacity: 1;
-            max-width: 200px;
-            margin-left: 0.5rem;
-            display: inline-block;
-        }
-
-        /* Ensure profile images stay circular */
-        .user-panel .image img,
-        .user-image {
-            min-width: 40px;
-            min-height: 40px;
+            border-radius: 50%;
             object-fit: cover;
+            border: 2px solid var(--surface-light);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
-        /* Fix navbar user image */
-        .navbar .user-image {
-            width: 35px !important;
-            height: 35px !important;
-            min-width: 35px !important;
-            min-height: 35px !important;
+
+        .user-panel .user-info {
+            flex: 1;
+            transition: opacity 0.3s;
         }
 
-        /* ====== STATE: Sidebar Collapse (Default) ====== */
-        .sidebar-collapse .brand-link {
-            justify-content: center;
-            padding: 0.8125rem 0.5rem;
-        }
 
-        .sidebar-collapse .brand-image-full {
-            display: none !important;
-        }
-
-        .sidebar-collapse .brand-image-collapsed {
-            display: block !important;
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        .sidebar-collapse .brand-text {
+        .main-sidebar.collapsed .user-panel .user-info {
+            opacity: 0;
             display: none;
         }
 
-        /* ====== STATE: Sidebar Collapse + Hover ====== */
-        .sidebar-collapse .main-sidebar:hover .brand-link {
-            justify-content: flex-start;
-            padding-left: 1rem;
-            overflow: hidden !important;
+
+        .user-panel .user-info a {
+            color: var(--ink);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-decoration: none;
         }
 
-        .sidebar-collapse .main-sidebar:hover .brand-image-full {
-            display: block !important;
-            max-width: 200px;
-            width: auto;
-            opacity: 1 !important;
-            transform: scale(1) !important;
-            transition: all 0.3s ease-in-out;
-            background: #e8cfcc;
+
+        /* Sidebar Navigation */
+        .sidebar-menu {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 1rem 1rem;
         }
 
-        .sidebar-collapse .main-sidebar:hover .brand-image-collapsed {
-            display: none !important;
+
+        .nav-header {
+            padding: 0.75rem 0.75rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--choco-text);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
-        .sidebar-collapse .main-sidebar:hover .brand-text {
-            display: inline-block !important;
-            opacity: 1 !important;
-            max-width: 200px;
-            margin-left: 0.5rem;
-            left: 5px;
+
+        .main-sidebar.collapsed .nav-header {
+            opacity: 0;
+            height: 0;
+            padding: 0;
+            overflow: hidden;
         }
 
-        .main-sidebar {}
 
-        .sidebar-collapse .main-sidebar:hover {
-            width: 250px !important;
+        .nav-item {
+            margin-bottom: 0.25rem;
         }
 
-        /* Sembunyikan dropdown/submenu saat sidebar collapse */
-        .sidebar-collapse .main-sidebar:not(:hover) .nav-treeview {
-            display: none !important;
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            color: var(--ink);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            position: relative;
         }
 
-        /* Sembunyikan arrow indicator saat sidebar collapse */
-        .sidebar-collapse .main-sidebar:not(:hover) .nav-link .right {
-            display: none !important;
+
+        .nav-link:hover {
+            background: var(--border-color);
+            color: var(--primary);
         }
 
-        .sidebar-collapse .main-sidebar:not(:hover) .nav-link p {
+
+        .nav-link.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 6px 20px rgba(212, 40, 17, 0.3);
+        }
+
+
+        .nav-link .material-symbols-outlined,
+        .nav-link .fas,
+        .nav-link .far {
+            color: var(--choco-text);
+            font-size: 1.25rem;
+            transition: color 0.2s;
+            flex-shrink: 0;
+        }
+
+
+        .nav-link:hover .material-symbols-outlined,
+        .nav-link:hover .fas,
+        .nav-link:hover .far {
+            color: var(--primary);
+        }
+
+
+        .nav-link.active .material-symbols-outlined,
+        .nav-link.active .fas,
+        .nav-link.active .far {
+            color: white;
+        }
+
+
+        .nav-link span {
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+
+
+        .main-sidebar.collapsed .nav-link span {
+            opacity: 0;
             display: none;
         }
 
-        .sidebar-collapse .main-sidebar:not(:hover) .nav-icon {
-            margin-right: 0 !important;
+
+        .nav-link .right {
+            margin-left: auto;
+            font-size: 1rem;
+            transition: transform 0.3s;
         }
 
-        .sidebar-collapse .main-sidebar:hover .nav-link p {
-            display: inline-block;
+
+        .nav-item.menu-open > .nav-link .right {
+            transform: rotate(-90deg);
         }
 
-        .sidebar-collapse .main-sidebar:hover .nav-icon {
-            margin-right: 0.5rem !important;
+
+        /* Submenu */
+        .nav-treeview {
+            padding-left: 0;
+            margin-top: 0.25rem;
+            display: none;
         }
 
-        /* Sembunyikan user panel info saat sidebar collapse */
-        .sidebar-collapse .main-sidebar:not(:hover) .user-panel .info {
+
+        .nav-item.menu-open > .nav-treeview {
+            display: block;
+        }
+
+
+        .nav-treeview .nav-link {
+            padding-left: 3rem;
+            font-size: 0.875rem;
+        }
+
+
+        .main-sidebar.collapsed .nav-treeview {
             display: none !important;
         }
 
-        /* Tampilkan kembali saat hover */
-        .sidebar-collapse .main-sidebar:hover .user-panel .info {
-            display: block !important;
-        }
 
-        /* Center user image saat collapse */
-        .sidebar-collapse .main-sidebar:not(:hover) .user-panel {}
-
-        .sidebar-collapse .main-sidebar:not(:hover) .user-panel .image {
-            float: none;
-        }
-
-        .main-sidebar {
-            background: #f3f3f3;
-            transition: width 0.3s ease-in-out, margin-left 0.3s ease-in-out;
-            overflow-x: hidden !important;
-            /* Tambahkan ini */
-            /* gelap netral agar choco menonjol */
-        }
-
-        .sidebar {
-            padding-top: .5rem;
-            overflow-x: hidden !important;
-            /* Tambahkan ini */
-        }
-
-        /* item level 1 */
-        .nav-sidebar .nav-item>.nav-link {
-            border-radius: 10px;
-            margin: 4px 8px;
-            color: #ac0000;
-            transition: .2s ease;
-        }
-
-        .nav-sidebar .nav-item>.nav-link:hover {
-            background: rgba(208, 178, 178, 0.06);
-            color: #710000;
-        }
-
-        .sidebar-dark-primary .nav-sidebar>.nav-item>.nav-link.active {
-            background: linear-gradient(135deg, var(--choco), var(--soft-choco));
-            color: #fff;
-            border-left: 0;
-            box-shadow: 0 6px 16px rgba(207, 26, 2, .25);
-        }
-
-        /* tree level 2+ */
-        .nav-sidebar .nav-treeview>.nav-item>.nav-link {
-            margin: 2px 16px;
-            border-radius: 20px;
-            color: #c7cdd6;
-        }
-
-        .nav-sidebar .nav-treeview>.nav-item>.nav-link.active {
-            background: rgba(219, 70, 48, .18);
-            color: #fff;
-        }
-
-        /* user panel garis halus */
-        .user-panel {
-            border-bottom: 1px dashed rgba(255, 255, 255, .08);
-        }
-
-        /* ===== Buttons / Badges ===== */
-        .btn-primary {
-            background: var(--choco);
-            border-color: var(--choco);
-        }
-
-        .btn-primary:hover {
-            background: var(--soft-choco);
-            border-color: var(--soft-choco);
-        }
-
-        .badge-warning.navbar-badge {
-            background: var(--soft-choco);
-            color: #fff;
-        }
-
-        /* ===== Tables / DataTables ===== */
-        table.dataTable thead th {
-            border-bottom: 2px solid #eef1f4 !important;
-        }
-
-        .table thead th {
-            background: #fff;
-        }
-
-        /* ===== Select2 ===== */
-        .select2-container--bootstrap-5 .select2-selection {
-            border-radius: 10px;
-            border-color: #e5e7eb;
-        }
-
-        .select2-container--bootstrap-5 .select2-results__option--highlighted {
-            background: var(--soft-choco);
-        }
-
-        /* ===== Summernote toolbar ===== */
-        .note-toolbar {
-            border-radius: 10px;
-            border: 1px solid #eef1f4;
-        }
-
-        /* ===== Footer ===== */
-        .main-footer {
-            border-top: 1px solid #eef1f4;
-            background: #fff;
-            border-radius: var(--radius) var(--radius) 0 0;
-        }
-
-        /* ===== Utility ===== */
-        .bg-choco {
-            background: var(--choco) !important;
-        }
-
-        .text-choco {
-            color: var(--choco) !important;
-        }
-
-        .soft-shadow {
-            box-shadow: var(--shadow);
-        }
-
-        .rounded-2xl {
-            border-radius: 1rem;
-        }
-
-        /* ===== Disabled Menu State ===== */
+        /* Disabled Menu State */
         .disabled-link {
             opacity: 0.4 !important;
             cursor: not-allowed !important;
@@ -429,318 +377,485 @@
             filter: grayscale(80%);
         }
 
+
         .disabled-link:hover {
             background-color: rgba(0, 0, 0, 0.05) !important;
             color: inherit !important;
         }
 
-        .disabled-link::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: repeating-linear-gradient(45deg,
-                    transparent,
-                    transparent 10px,
-                    rgba(0, 0, 0, 0.03) 10px,
-                    rgba(0, 0, 0, 0.03) 20px);
-            pointer-events: none;
-        }
 
-        /* Disabled icon style */
-        .disabled-link .nav-icon {
-            opacity: 0.3;
-        }
-
-        /* Disabled submenu */
-        .nav-treeview.disabled {
-            display: none !important;
-        }
-
-        /* Style untuk nav-header yang disabled */
-        .nav-header.disabled-header {
+        .disabled-header {
             opacity: 0.4;
             color: #999 !important;
         }
 
-        /* Badge untuk menu yang terkunci */
-        .locked-badge {
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin-left: 280px;
+            transition: margin-left 0.3s ease;
+            height: 100vh;
+        }
+
+
+        .main-sidebar.collapsed ~ .main-content {
+            margin-left: 80px;
+        }
+
+
+        /* Header/Navbar */
+        .main-header {
+            height: 80px;
+            background: var(--surface-light);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+        }
+
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            padding: 0.5rem;
+            cursor: pointer;
+            color: var(--choco-text);
+            font-size: 1.5rem;
+            transition: color 0.2s;
+        }
+
+
+        .sidebar-toggle:hover {
+            color: var(--primary);
+        }
+
+
+        .search-box {
+            position: relative;
+            width: 400px;
+            max-width: 100%;
+        }
+
+
+        .search-box input {
+            width: 100%;
+            padding: 0.625rem 1rem 0.625rem 2.5rem;
+            border-radius: 0.75rem;
+            border: none;
+            background: var(--border-color);
+            color: var(--ink);
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+
+        .search-box input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(212, 40, 17, 0.2);
+        }
+
+
+        .search-box .material-symbols-outlined {
             position: absolute;
+            left: 0.75rem;
             top: 50%;
-            right: 10px;
             transform: translateY(-50%);
-            background: rgba(255, 193, 7, 0.2);
-            color: #ff9800;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 0.65rem;
+            color: var(--choco-text);
+            font-size: 1.25rem;
+        }
+
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+
+        .header-icon-btn {
+            position: relative;
+            padding: 0.625rem;
+            border-radius: 0.75rem;
+            background: var(--border-color);
+            border: none;
+            color: var(--ink);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+
+        .header-icon-btn:hover {
+            background: #e5e7eb;
+        }
+
+
+        .header-icon-btn .material-symbols-outlined {
+            font-size: 1.25rem;
+        }
+
+
+        .notification-badge {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.625rem;
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 2px solid var(--surface-light);
+        }
+
+
+        .user-dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.25rem 0.75rem 0.25rem 0.25rem;
+            border-radius: 9999px;
+            background: none;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+
+        .user-dropdown-toggle:hover {
+            background: var(--border-color);
+            border-color: #e5e7eb;
+        }
+
+
+        .user-dropdown-toggle .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+
+        .user-dropdown-toggle .user-info-header {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+
+        .user-dropdown-toggle .user-name {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--ink);
+            line-height: 1.2;
+        }
+
+
+        .user-dropdown-toggle .user-role {
+            font-size: 0.625rem;
+            font-weight: 500;
+            color: var(--choco-text);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+
+        /* Content Wrapper */
+        .content-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+
+        /* Breadcrumb */
+        .content-header {
+            padding: 1rem 0;
+            margin-bottom: 1.5rem;
+        }
+
+
+        .breadcrumb {
+            background: none;
+            padding: 0;
+            margin: 0;
+            font-size: 0.875rem;
+        }
+
+
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: "/";
+            color: var(--choco-text);
+        }
+
+
+        .breadcrumb-item a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+
+        .breadcrumb-item.active {
+            color: var(--choco-text);
+        }
+
+
+        /* Cards */
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            background: var(--surface-light);
+            margin-bottom: 1.5rem;
+        }
+
+
+        .card-header {
+            background: var(--surface-light);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
             font-weight: 600;
-            letter-spacing: 0.5px;
         }
 
-        /* ===== FIXED CROP MODAL SIZE ===== */
-        #cropPhotoModal .modal-dialog {
-            max-width: 650px;
-            width: 90%;
-            margin: 1.75rem auto;
-        }
 
-        #cropPhotoModal .modal-content {
-            border-radius: 15px;
-        }
-
-        #cropPhotoModal .modal-body {
+        .card-body {
             padding: 1.5rem;
         }
 
-        #cropPhotoModal .img-container {
-            width: 100%;
-            height: 450px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            overflow: hidden;
+
+        /* Buttons */
+        .btn-primary {
+            background: var(--primary);
+            border-color: var(--primary);
+            border-radius: 0.75rem;
+            padding: 0.625rem 1.25rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(212, 40, 17, 0.3);
+        }
+
+
+        /* Dropdown Menu Styling */
+        .dropdown-menu {
+            border-radius: 1rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem;
+        }
+
+
+        .dropdown-item {
+            border-radius: 0.5rem;
+            padding: 0.625rem 1rem;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+
+        .dropdown-item:hover {
+            background: var(--border-color);
+            color: var(--primary);
+        }
+
+
+        /* Language Dropdown */
+        .lang-btn {
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            background: var(--surface-light);
+            color: var(--ink);
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
         }
 
-        #cropPhotoModal .img-container img {
-            max-width: 100%;
-            max-height: 100%;
-            display: block;
+
+        .lang-btn:hover {
+            background: var(--border-color);
+            border-color: #e5e7eb;
         }
 
-        /* ===== CIRCULAR CROP AREA ===== */
-        #cropPhotoModal .cropper-view-box,
-        #cropPhotoModal .cropper-face {
-            border-radius: 50% !important;
-            outline: 0;
+
+        .lang-flag {
+            width: 18px;
+            height: 18px;
+            object-fit: cover;
+            border-radius: 2px;
         }
 
-        /* Optional: Buat crop box outline juga bulat */
-        #cropPhotoModal .cropper-view-box {
-            outline: 0;
+
+        /* Tables */
+        .table {
+            font-size: 0.875rem;
         }
 
-        /* Styling untuk area di luar crop (lebih gelap) */
-        #cropPhotoModal .cropper-modal {
-            background-color: rgba(0, 0, 0, 0.7);
+
+        .table thead th {
+            background: var(--surface-light);
+            border-bottom: 2px solid var(--border-color);
+            color: var(--ink);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
         }
 
-        #cropPhotoModal .cropper-dashed {
-            border-color: rgba(255, 255, 255, 0.3);
+
+        /* Footer */
+        .main-footer {
+            padding: 1rem 2rem;
+            background: var(--surface-light);
+            border-top: 1px solid var(--border-color);
+            font-size: 0.875rem;
+            color: var(--choco-text);
         }
 
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            #cropPhotoModal .modal-dialog {
-                margin: 0.5rem auto;
-                width: 95%;
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .main-sidebar {
+                transform: translateX(-100%);
             }
 
-            #cropPhotoModal .img-container {
-                height: 300px;
+
+            .main-sidebar.show {
+                transform: translateX(0);
             }
 
-            #cropPhotoModal .modal-body {
-                padding: 1rem;
+
+            .main-content {
+                margin-left: 0;
+            }
+
+
+            .search-box {
+                display: none;
+            }
+
+
+            .header-left .sidebar-toggle {
+                display: block;
             }
         }
 
-        @media (max-width: 576px) {
-            #cropPhotoModal .modal-dialog {
-                margin: 0.25rem auto;
-                width: 98%;
+
+        @media (min-width: 993px) {
+            .mobile-only {
+                display: none !important;
             }
+        }
+
+
+        /* Utility Classes */
+        .text-choco {
+            color: var(--choco-text) !important;
+        }
+
+
+        .text-primary-custom {
+            color: var(--primary) !important;
+        }
+
+
+        .bg-primary-custom {
+            background-color: var(--primary) !important;
+        }
+
+
+        .rounded-xl {
+            border-radius: 0.75rem !important;
+        }
+
+
+        .rounded-2xl {
+            border-radius: 1rem !important;
+        }
+
+
+        /* SweetAlert2 Custom */
+        .swal2-popup {
+            border-radius: 1rem !important;
+        }
+
+
+        .swal2-confirm {
+            background: var(--primary) !important;
+            border-radius: 0.75rem !important;
+        }
+
+
+        /* Toastr Custom */
+        #toast-container > .toast {
+            border-radius: 0.75rem;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        }
+
+
+        #toast-container > .toast-success {
+            background-color: var(--primary);
         }
     </style>
 
+
 </head>
 
-<body class="hold-transition sidebar-mini layout-fixed">
-    <div class="wrapper">
 
-        <!-- Navbar -->
-        <nav class="main-header navbar navbar-expand navbar-white navbar-light border-bottom-0">
-            <!-- Left navbar links -->
-            <ul class="navbar-nav bg-choco  rounded-2xl soft-shadow px-3">
-                <li class="nav-item">
-                    <a class="nav-link" data-widget="pushmenu" href="#" role="button">
-                        <i class="fas fa-bars text-white"></i>
-                    </a>
-                </li>
-                <li class="nav-item d-none d-sm-inline-block">
-                    <a href="{{ route('owner.user-owner.dashboard') }}"
-                        class="nav-link text-white">{{ __('messages.owner.layout.dashboard') }}</a>
-                </li>
-                <li class="nav-item d-none d-sm-inline-block">
-                    <a href="#" class="nav-link text-white">{{ __('messages.owner.layout.support') }}</a>
-                </li>
-            </ul>
-
-            <!-- Right navbar links -->
-            <ul class="navbar-nav ml-auto">
-                <!-- Language Switcher -->
-                <li class="nav-item dropdown">
-                    <button class="btn btn-sm d-inline-flex align-items-center rounded-2 lang-btn"
-                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button">
-                        <!-- Globe image -->
-                        <img src="{{ asset('icons/icon-globe-50.png') }}" alt="Language" class="mr-1 lang-globe"
-                            width="16" height="16" loading="lazy" decoding="async" />
-
-                        <span class="font-weight-medium">
-                            {{ app()->getLocale() === 'id' ? 'Bahasa' : 'English' }}
-                        </span>
-
-                        <!-- Caret -->
-                        <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" class="ml-1"
-                            style="opacity:.7">
-                            <path fill-rule="evenodd"
-                                d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.25 8.27a.75.75 0 01-.02-1.06z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </button>
-
-
-                    <div class="dropdown-menu dropdown-menu-right rounded-2xl soft-shadow p-0 overflow-hidden">
-                        <a href="{{ route('language.set.get', ['locale' => 'id']) }}"
-                            class="dropdown-item d-flex align-items-center">
-                            <img src="{{ asset('icons/icon-indonesia-96.png') }}" alt="Indonesia" class="mr-2 lang-flag"
-                                width="18" height="18" loading="lazy" decoding="async">
-                            Bahasa
-                            @if (app()->getLocale() === 'id')
-                                <i class="fas fa-check ml-auto text-choco"></i>
-                            @endif
-                        </a>
-
-                        <a href="{{ route('language.set.get', ['locale' => 'en']) }}"
-                            class="dropdown-item d-flex align-items-center">
-                            <img src="{{ asset('icons/icon-english-96.png') }}" alt="English" class="mr-2 lang-flag"
-                                width="18" height="18" loading="lazy" decoding="async">
-                            English
-                            @if (app()->getLocale() === 'en')
-                                <i class="fas fa-check ml-auto text-choco"></i>
-                            @endif
-                        </a>
-                    </div>
-
-                </li>
-
-
-
-                <!-- Fullscreen Toggle -->
-                <li class="nav-item">
-                    <a class="nav-link" data-widget="fullscreen" href="#" role="button">
-                        <i class="fas fa-expand-arrows-alt"></i>
-                    </a>
-                </li>
-
-                <!-- User Dropdown Menu -->
-                <li class="nav-item dropdown user-menu">
-                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-                        @if (auth('owner')->check() && auth('owner')->user()->image)
-                            <img src="{{ asset('storage/' . auth('owner')->user()->image) }}"
-                                class="user-image img-circle elevation-2" alt="User Image">
-                        @else
-                            <div class="user-image img-circle elevation-2 d-inline-flex align-items-center justify-content-center"
-                                style="width: 25px; height: 25px; vertical-align: middle; background-color: #9ca3af;">
-                                <svg style="width: 14px; height: 14px; color: #ffffff;" fill="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path
-                                        d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                                </svg>
-                            </div>
-                        @endif
-                        <span class="d-none d-md-inline">
-                            @auth('owner')
-                                {{ auth('owner')->user()->name }}
-                            @endauth
-                        </span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right rounded-2xl soft-shadow">
-                        <!-- User image -->
-                        <li class="user-header bg-choco text-white">
-                            @if (auth('owner')->check() && auth('owner')->user()->image)
-                                <img src="{{ asset('storage/' . auth('owner')->user()->image) }}"
-                                    class="img-circle elevation-2" alt="User Image">
-                            @else
-                                <div class="img-circle elevation-2 d-inline-flex align-items-center justify-content-center mx-auto"
-                                    style="width: 90px; height: 90px; background-color: #9ca3af;">
-                                    <svg style="width: 50px; height: 50px; color: #ffffff;" fill="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path
-                                            d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                                    </svg>
-                                </div>
-                            @endif
-                            <p>
-                                @auth('owner')
-                                    {{ auth('owner')->user()->name }}
-                                @else
-                                    User Owner
-                                @endauth
-                                <small>{{ __('messages.owner.layout.member_since') }} @auth('owner')
-                                    {{ auth('owner')->user()->created_at->format('d M. Y') }}
-                                @else
-                                        User Owner
-                                    @endauth
-                                </small>
-                            </p>
-                        </li>
-                        <!-- Menu Footer-->
-                        <li class="user-footer">
-                            <a href="{{ route('owner.user-owner.settings.index') }}"
-                                class="btn btn-default btn-flat">{{ __('messages.owner.layout.profile') }}</a>
-                            <form method="POST" action="{{ route('owner.logout') }}" class="d-inline">
-                                @csrf
-                                <button type="submit" class="btn btn-default btn-flat float-right">
-                                    {{ __('messages.owner.layout.sign_out') }}
-                                </button>
-                            </form>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </nav>
-
+<body>
+    <div class="main-wrapper">
         <!-- Sidebar -->
-        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <aside class="main-sidebar" id="mainSidebar">
             <!-- Brand Logo -->
-            <a href="{{ route('owner.user-owner.dashboard') }}" class="brand-link bg-choco">
-                <!-- Logo untuk sidebar terbuka (horizontal) -->
-                <img src="{{ asset('images/cava-logo2-gradient.png') }}" alt="Cavaa Logo"
-                    class="brand-image rounded-2xl brand-image-full" style="opacity: .8">
-
-                <!-- Logo circular untuk sidebar collapse -->
-                <img src="{{ asset('icons/cava-logo-red-gradient.png') }}" alt="Cavaa Logo"
-                    class="brand-image rounded-2xl brand-image-collapsed" style="opacity: .8">
-
-                <span class="brand-text font-weight-light">{{ __('messages.owner.layout.owner_panel') }}</span>
-            </a>
-            <!-- Sidebar -->
-            <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center">
-                <div class="image">
-                    @if (auth('owner')->check() && auth('owner')->user()->image)
-                        <img src="{{ asset('storage/' . auth('owner')->user()->image) }}" class="img-circle elevation-2"
-                            style="width:35px; height:35px; object-fit:cover; border-radius:50%;" alt="User Image">
-                    @else
-                        <div class="img-circle elevation-2 d-inline-flex align-items-center justify-content-center"
-                            style="width:35px; height:35px; background-color: #9ca3af;">
-                            <svg style="width: 18px; height: 18px; color: #ffffff;" fill="currentColor" viewBox="0 0 24 24">
-                                <path
-                                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                            </svg>
-                        </div>
-                    @endif
+            <a href="{{ route('owner.user-owner.dashboard') }}" class="brand-link">
+                <div class="brand-logo-wrapper">
+                    <span class="material-symbols-outlined">local_cafe</span>
                 </div>
+                <div class="brand-text-wrapper">
+                    <h1 class="brand-title">Owner Panel</h1>
+                    <p class="brand-subtitle">ChocoAdmin Dashboard</p>
+                </div>
+            </a>
 
-                <div class="info">
-                    <a href="{{ route('owner.user-owner.settings.index') }}" class="d-block text-choco fw-bold"
-                        title="{{ auth('owner')->check() ? auth('owner')->user()->name : 'User Owner' }}">
+
+            <!-- User Panel -->
+            <div class="user-panel">
+                @if (auth('owner')->check() && auth('owner')->user()->image)
+                    <img src="{{ asset('storage/' . auth('owner')->user()->image) }}" class="user-image" alt="User Image">
+                @else
+                    <div class="user-image" style="background-color: #9ca3af; display: flex; align-items: center; justify-content: center;">
+                        <svg style="width: 22px; height: 22px; color: #ffffff;" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                        </svg>
+                    </div>
+                @endif
+                <div class="user-info">
+                    <a href="{{ route('owner.user-owner.settings.index') }}">
                         @auth('owner')
-                            {{ \Illuminate\Support\Str::limit(auth('owner')->user()->name, 20, '') }}
+                            {{ auth('owner')->user()->name }}
                         @else
                             User Owner
                         @endauth
@@ -748,347 +863,326 @@
                 </div>
             </div>
 
+
             <!-- Sidebar Menu -->
-            <nav class="mt-2">
+            <nav class="sidebar-menu">
                 @php
                     $isVerified = auth('owner')->check() && auth('owner')->user()->verification_status === 'approved';
                     $isActive = auth('owner')->check() && auth('owner')->user()->is_active;
                 @endphp
 
-                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
-                    data-accordion="false">
 
-                    {{-- Verification Menu (commented) --}}
-                    {{-- <li class="nav-item">
-                        <a href="{{ route('owner.user-owner.verification') }}"
-                            class="nav-link @if (Route::is('owner.user-owner.verification')) active @endif">
-                            <i class="nav-icon fas fa-tachometer-alt"></i>
-                            <p>{{ __('messages.owner.layout.verification') }}</p>
+                <div class="nav-header">Main Menu</div>
+
+
+                <!-- Dashboard -->
+                <div class="nav-item">
+                    <a href="{{ $isVerified && $isActive ? route('owner.user-owner.dashboard') : 'javascript:void(0)' }}"
+                        class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is('owner.user-owner.dashboard') ? 'active' : '' }}"
+                        onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
+                        <span class="material-symbols-outlined">dashboard</span>
+                        <span>{{ __('messages.owner.layout.dashboard') }}</span>
+                    </a>
+                </div>
+
+
+                <!-- User Management -->
+                @php
+                    $employeeRoutes = ['owner.user-owner.employees.*'];
+                @endphp
+                <div class="nav-item {{ Route::is($employeeRoutes) ? 'menu-open' : '' }}">
+                    <a href="javascript:void(0)"
+                        class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($employeeRoutes) ? 'active' : '' }}"
+                        onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : 'toggleSubmenu(this)' }}">
+                        <span class="material-symbols-outlined">group</span>
+                        <span>{{ __('messages.owner.layout.user_management') }}</span>
+                        @if ($isVerified && $isActive)
+                            <i class="fas fa-angle-left right"></i>
+                        @endif
+                    </a>
+                    <div class="nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
+                        <div class="nav-item">
+                            <a href="{{ route('owner.user-owner.employees.index') }}"
+                                class="nav-link {{ Route::is('owner.user-owner.employees.*') ? 'active' : '' }}">
+                                <i class="far fa-circle"></i>
+                                <span>{{ __('messages.owner.layout.employees') }}</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- XenPlatform -->
+                <div class="nav-item {{ Request::segment(1) == 'owner' && Request::segment(3) == 'xen_platform' ? 'menu-open' : '' }}">
+                    <a href="javascript:void(0)"
+                        class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }}"
+                        onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : 'toggleSubmenu(this)' }}">
+                        <span class="material-symbols-outlined">credit_card</span>
+                        <span>XenPlatform</span>
+                        @if($isVerified && $isActive)
+                            <i class="fas fa-angle-left right"></i>
+                        @endif
+                    </a>
+                    <div class="nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
+                        <div class="nav-item">
+                            <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.accounts.information') : 'javascript:void(0)' }}"
+                                class="nav-link {{ Request::segment(4) == 'accounts' ? 'active' : '' }}">
+                                <i class="far fa-circle"></i>
+                                <span>{{ __('messages.owner.layout.accounts') }}</span>
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.split-payment.index') : 'javascript:void(0)' }}"
+                                class="nav-link {{ Request::segment(4) == 'split-payment' ? 'active' : '' }}">
+                                <i class="far fa-circle"></i>
+                                <span>{{ __('messages.owner.layout.split_payments') }}</span>
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.payout.index') : 'javascript:void(0)' }}"
+                                class="nav-link {{ Request::segment(4) == 'payout' ? 'active' : '' }}">
+                                <i class="far fa-circle"></i>
+                                <span>{{ __('messages.owner.layout.withdrawal') }}</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Outlets -->
+                @php
+                    $outletRoutes = ['owner.user-owner.outlets.*'];
+                @endphp
+                <div class="nav-item {{ Route::is($outletRoutes) ? 'menu-open' : '' }}">
+                    <a href="javascript:void(0)"
+                        class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($outletRoutes) ? 'active' : '' }}"
+                        onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : 'toggleSubmenu(this)' }}">
+                        <span class="material-symbols-outlined">storefront</span>
+                        <span>{{ __('messages.owner.layout.outlets') }}</span>
+                        @if ($isVerified && $isActive)
+                            <i class="fas fa-angle-left right"></i>
+                        @endif
+                    </a>
+                    <div class="nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
+                        <div class="nav-item">
+                            <a href="{{ route('owner.user-owner.outlets.index') }}"
+                                class="nav-link {{ Route::is('owner.user-owner.outlets.*') ? 'active' : '' }}">
+                                <i class="far fa-circle"></i>
+                                <span>{{ __('messages.owner.layout.all_outlets') }}</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Products -->
+                @php
+                    $productRoutes = ['owner.user-owner.products.*'];
+                    $categoryRoutes = ['owner.user-owner.categories.*'];
+                    $promotionRoutes = ['owner.user-owner.promotions.*'];
+                    $stockRoutes = ['owner.user-owner.stocks.*'];
+                    $masterProductRoutes = ['owner.user-owner.master-products.*'];
+                    $outletProductRoutes = ['owner.user-owner.outlet-products.*'];
+                    $allProductRoutes = array_merge($productRoutes, $categoryRoutes, $promotionRoutes, $masterProductRoutes, $outletProductRoutes, $stockRoutes);
+                @endphp
+                <div class="nav-item {{ Route::is($allProductRoutes) ? 'menu-open' : '' }}">
+<a href="javascript:void(0)"
+                     class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($allProductRoutes) ? 'active' : '' }}"
+                     onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : 'toggleSubmenu(this)' }}">
+<span class="material-symbols-outlined">inventory_2</span>
+<span>{{ __('messages.owner.layout.products') }}</span>
+@if ($isVerified && $isActive)
+<i class="fas fa-angle-left right"></i>
+@endif
+</a>
+<div class="nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
+<div class="nav-item">
+<a href="{{ route('owner.user-owner.master-products.index') }}"
+                             class="nav-link {{ Route::is('owner.user-owner.master-products.*') ? 'active' : '' }}">
+<i class="far fa-circle"></i>
+<span>{{ __('messages.owner.layout.master_products') }}</span>
+</a>
+</div>
+<div class="nav-item">
+<a href="{{ route('owner.user-owner.outlet-products.index') }}"
+                             class="nav-link {{ Route::is('owner.user-owner.outlet-products.*') ? 'active' : '' }}">
+<i class="far fa-circle"></i>
+<span>{{ __('messages.owner.layout.outlet_products') }}</span>
+</a>
+</div>
+<div class="nav-item">
+<a href="{{ route('owner.user-owner.stocks.index') }}"
+                             class="nav-link {{ Route::is('owner.user-owner.stocks.*') ? 'active' : '' }}">
+<i class="far fa-circle"></i>
+<span>{{ __('messages.owner.layout.stocks') }}</span>
+</a>
+</div>
+<div class="nav-item">
+<a href="{{ route('owner.user-owner.categories.index') }}"
+                             class="nav-link {{ Route::is('owner.user-owner.categories.*') ? 'active' : '' }}">
+<i class="far fa-circle"></i>
+<span>{{ __('messages.owner.layout.categories') }}</span>
+</a>
+</div>
+<div class="nav-item">
+<a href="{{ route('owner.user-owner.promotions.index') }}"
+                             class="nav-link {{ Route::is('owner.user-owner.promotions.*') ? 'active' : '' }}">
+<i class="far fa-circle"></i>
+<span>{{ __('messages.owner.layout.promotions') }}</span>
+</a>
+</div>
+</div>
+</div>
+            <!-- Settings -->
+            @php
+                $settingRoutes = ['owner.user-owner.settings.*'];
+            @endphp
+            <div class="nav-header">System</div>
+            <div class="nav-item {{ Route::is($settingRoutes) ? 'menu-open' : '' }}">
+                <a href="javascript:void(0)"
+                    class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($settingRoutes) ? 'active' : '' }}"
+                    onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : 'toggleSubmenu(this)' }}">
+                    <span class="material-symbols-outlined">settings</span>
+                    <span>{{ __('messages.owner.layout.settings') }}</span>
+                    @if ($isVerified && $isActive)
+                        <i class="fas fa-angle-left right"></i>
+                    @endif
+                </a>
+                <div class="nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
+                    <div class="nav-item">
+                        <a href="{{ route('owner.user-owner.settings.index') }}"
+                            class="nav-link {{ Route::is('owner.user-owner.settings.index') ? 'active' : '' }}">
+                            <i class="far fa-circle"></i>
+                            <span>{{ __('messages.owner.layout.settings') }}</span>
                         </a>
-                    </li> --}}
+                    </div>
+                </div>
+            </div>
 
-                    {{-- Dashboard --}}
-                    <li class="nav-item">
-                        <a href="{{ $isVerified && $isActive ? route('owner.user-owner.dashboard') : 'javascript:void(0)' }}"
-                            class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} @if (Route::is('owner.user-owner.dashboard')) active @endif"
-                            onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                            <i class="nav-icon fas fa-tachometer-alt"></i>
-                            <p>{{ __('messages.owner.layout.dashboard') }}</p>
+
+            <div class="nav-header {{ !$isVerified || !$isActive ? 'disabled-header' : '' }}">
+                {{ __('messages.owner.layout.reports') }}
+            </div>
+
+
+            <!-- Sales Report -->
+            <div class="nav-item">
+                <a href="{{ $isVerified && $isActive ? route('owner.user-owner.report.sales.index') : 'javascript:void(0)' }}"
+                    class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is('owner.user-owner.report.sales.*') ? 'active' : '' }}"
+                    onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
+                    <span class="material-symbols-outlined">bar_chart</span>
+                    <span>{{ __('messages.owner.layout.sales_report') }}</span>
+                </a>
+            </div>
+
+
+            <!-- Stock Report -->
+            <div class="nav-item">
+                <a href="{{ $isVerified && $isActive ? route('owner.user-owner.report.stocks.index') : 'javascript:void(0)' }}"
+                    class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is('owner.user-owner.report.stocks.*') ? 'active' : '' }}"
+                    onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
+                    <i class="fas fa-boxes-stacked"></i>
+                    <span>{{ __('messages.owner.layout.stock_report') }}</span>
+                </a>
+            </div>
+        </nav>
+    </aside>
+
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="header-left">
+                <button class="sidebar-toggle" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="search-box">
+                    <span class="material-symbols-outlined">search</span>
+                    <input type="text" placeholder="Search outlets, employees, or products...">
+                </div>
+            </div>
+
+
+            <div class="header-right">
+                <!-- Language Switcher -->
+                <div class="dropdown">
+                    <button class="lang-btn dropdown-toggle" type="button" data-toggle="dropdown">
+                        <img src="{{ asset('icons/icon-globe-50.png') }}" alt="Language" class="lang-flag" />
+                        <span>{{ app()->getLocale() === 'id' ? 'Bahasa' : 'English' }}</span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <a href="{{ route('language.set.get', ['locale' => 'id']) }}" class="dropdown-item">
+                            <img src="{{ asset('icons/icon-indonesia-96.png') }}" alt="Indonesia" class="lang-flag mr-2">
+                            Bahasa
+                            @if (app()->getLocale() === 'id')
+                                <i class="fas fa-check ml-auto text-primary-custom"></i>
+                            @endif
                         </a>
-                    </li>
-
-                    {{-- User Management --}}
-                    @php
-                        $employeeRoutes = ['owner.user-owner.employees.*'];
-                    @endphp
-
-                    <li class="nav-item {{ Route::is($employeeRoutes) ? 'menu-open' : '' }}">
-                        <a href="javascript:void(0)"
-                            class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($employeeRoutes) ? 'active' : '' }}"
-                            onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                            <i class="nav-icon fas fa-users"></i>
-                            <p>
-                                {{ __('messages.owner.layout.user_management') }}
-                                @if ($isVerified)
-                                    <i class="fas fa-angle-left right"></i>
-                                @endif
-                            </p>
+                        <a href="{{ route('language.set.get', ['locale' => 'en']) }}" class="dropdown-item">
+                            <img src="{{ asset('icons/icon-english-96.png') }}" alt="English" class="lang-flag mr-2">
+                            English
+                            @if (app()->getLocale() === 'en')
+                                <i class="fas fa-check ml-auto text-primary-custom"></i>
+                            @endif
                         </a>
-                        <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
-                            <li class="nav-item">
-                                <a href="{{ route('owner.user-owner.employees.index') }}"
-                                    class="nav-link {{ Route::is('owner.user-owner.employees.*') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>{{ __('messages.owner.layout.employees') }}</p>
-                                </a>
-                            </li>
-                            {{-- <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Roles</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Permissions</p>
-                                </a>
-                            </li> --}}
-                        </ul>
-                    </li>
+                    </div>
+                </div>
 
 
-                    <li
-                        class="nav-item @if (Request::segment(1) == 'owner' && Request::segment(3) == 'xen_platform') menu-open @endif">
-                        <a href="javascript:void(0)"
-                            class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }}"
-                            onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                            <i class="nav-icon fas fa-credit-card"></i>
-                            <p>
-                                XenPlatform
-                                @if($isVerified)
-                                    <i class="fas fa-angle-left right"></i>
-                                @endif
-                            </p>
+                <!-- Notifications -->
+                <button class="header-icon-btn">
+                    <span class="material-symbols-outlined">notifications</span>
+                    <span class="notification-badge"></span>
+                </button>
+
+
+                <!-- User Dropdown -->
+                <div class="dropdown">
+                    <button class="user-dropdown-toggle dropdown-toggle" type="button" data-toggle="dropdown">
+                        @if (auth('owner')->check() && auth('owner')->user()->image)
+                            <img src="{{ asset('storage/' . auth('owner')->user()->image) }}" class="user-avatar" alt="User">
+                        @else
+                            <div class="user-avatar" style="background-color: #9ca3af; display: flex; align-items: center; justify-content: center;">
+                                <svg style="width: 20px; height: 20px; color: #ffffff;" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                                </svg>
+                            </div>
+                        @endif
+                        <div class="user-info-header d-none d-sm-flex">
+                            <span class="user-name">
+                                @auth('owner')
+                                    {{ auth('owner')->user()->name }}
+                                @else
+                                    User Owner
+                                @endauth
+                            </span>
+                            <span class="user-role">Owner</span>
+                        </div>
+                        <span class="material-symbols-outlined">expand_more</span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <a href="{{ route('owner.user-owner.settings.index') }}" class="dropdown-item">
+                            <i class="fas fa-user mr-2"></i>
+                            {{ __('messages.owner.layout.profile') }}
                         </a>
-                        <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
-                            <li class="nav-item">
-                                <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.accounts.information') : 'javascript:void(0)' }}"
-                                    class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'accounts') active @endif">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>{{ __('messages.owner.layout.accounts') }}</p>
-                                </a>
-                            </li>
-                        </ul>
-                        <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
-                            <li class="nav-item">
-                                <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.split-payment.index') : 'javascript:void(0)' }}"
-                                    class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'split-payment') active @endif">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>{{ __('messages.owner.layout.split_payments') }}</p>
-                                </a>
-                            </li>
-                        </ul>
-                        <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
-                            <li class="nav-item">
-                                <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.payout.index') : 'javascript:void(0)' }}"
-                                    class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'payout') active @endif">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>{{ __('messages.owner.layout.withdrawal') }}</p>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
+                        <div class="dropdown-divider"></div>
+                        <form method="POST" action="{{ route('owner.logout') }}" class="d-inline w-100">
+                            @csrf
+                            <button type="submit" class="dropdown-item">
+                                <i class="fas fa-sign-out-alt mr-2"></i>
+                                {{ __('messages.owner.layout.sign_out') }}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </header>
 
-
-                    {{-- Store (commented section) --}}
-                    {{-- @php
-                    $storeRoutes = ['partner.store.*'];
-                    @endphp
-
-                    <li class="nav-item {{ Route::is($storeRoutes) ? 'menu-open' : '' }}">
-                        <a href="#" class="nav-link {{ Route::is($storeRoutes) ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-shopping-cart"></i>
-                            <p>
-                                Outlet
-                                <i class="fas fa-angle-left right"></i>
-                            </p>
-                        </a>
-
-                        <ul class="nav nav-treeview">
-
-                            <li
-                                class="nav-item {{ Route::is('partner.store.tables.*') || Route::is('partner.store.seat-layouts.*') ? 'menu-open' : '' }}">
-                                <a href="#"
-                                    class="nav-link {{ Route::is('partner.store.tables.*') || Route::is('partner.store.seat-layouts.*') ? 'active' : '' }}">
-                                    <i class="fas fa-table nav-icon"></i>
-                                    <p>
-                                        Outlet Management
-                                        <i class="fas fa-angle-left right"></i>
-                                    </p>
-                                </a>
-
-                                <ul class="nav nav-treeview">
-                                    <li class="nav-item">
-                                        <a href="{{ route('partner.store.tables.index') }}"
-                                            class="nav-link {{ Route::is('partner.store.tables.*') ? 'active' : '' }}">
-                                            <i class="far fa-dot-circle nav-icon"></i>
-                                            <p>Tables</p>
-                                        </a>
-                                    </li>
-
-                                    <li class="nav-item">
-                                        <a href="{{ route('partner.products.index') }}"
-                                            class="nav-link {{ Route::is('partner.products.*') ? 'active' : '' }}">
-                                            <i class="far fa-dot-circle nav-icon"></i>
-                                            <p>Seat Layout</p>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
-
-                        </ul>
-                    </li> --}}
-
-                    {{-- Outlets --}}
-                    @php
-                        $outletRoutes = ['owner.user-owner.outlets.*'];
-                    @endphp
-
-                    <li class="nav-item {{ Route::is($outletRoutes) ? 'menu-open' : '' }}">
-                        <a href="javascript:void(0)"
-                            class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($outletRoutes) ? 'active' : '' }}"
-                            onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                            <i class="nav-icon fas fa-store"></i>
-                            <p>
-                                {{ __('messages.owner.layout.outlets') }}
-                                @if ($isVerified)
-                                    <i class="fas fa-angle-left right"></i>
-                                @endif
-                            </p>
-                        </a>
-                        <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
-                            <li class="nav-item">
-                                <a href="{{ route('owner.user-owner.outlets.index') }}"
-                                    class="nav-link {{ Route::is('owner.user-owner.outlets.*') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>{{ __('messages.owner.layout.all_outlets') }}</p>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-
-                    {{-- Products --}}
-                    @php
-                        $productRoutes = ['owner.user-owner.products.*'];
-                        $categoryRoutes = ['owner.user-owner.categories.*'];
-                        $promotionRoutes = ['owner.user-owner.promotions.*'];
-                        $stockRoutes = ['owner.user-owner.stocks.*'];
-                        $masterProductRoutes = ['owner.user-owner.master-products.*'];
-                        $outletProductRoutes = ['owner.user-owner.outlet-products.*'];
-
-                        $allProductRoutes = array_merge(
-                            $productRoutes,
-                            $categoryRoutes,
-                            $promotionRoutes,
-                            $masterProductRoutes,
-                            $outletProductRoutes,
-                            $stockRoutes,
-                        );
-                    @endphp
-
-                    <li class="nav-item {{ Route::is($allProductRoutes) ? 'menu-open' : '' }}">
-                        <a href="javascript:void(0)"
-                            class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($allProductRoutes) ? 'active' : '' }}"
-                            onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                            <i class="nav-icon fas fa-shopping-cart"></i>
-                            <p>
-                                {{ __('messages.owner.layout.products') }}
-                                @if ($isVerified)
-                                    <i class="fas fa-angle-left right"></i>
-                                @endif
-                            </p>
-                        </a>
-                        <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
-                            <li class="nav-item">
-                                <a href="{{ route('owner.user-owner.master-products.index') }}"
-                                    class="nav-link {{ Route::is('owner.user-owner.master-products.*') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>{{ __('messages.owner.layout.master_products') }}</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('owner.user-owner.outlet-products.index') }}"
-                                    class="nav-link {{ Route::is('owner.user-owner.outlet-products.*') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>{{ __('messages.owner.layout.outlet_products') }}</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('owner.user-owner.stocks.index') }}"
-                                    class="nav-link {{ Route::is('owner.user-owner.stocks.*') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>{{ __('messages.owner.layout.stocks') }}</p>
-                                </a>
-                            </li>
-                            {{-- <li class="nav-item">
-                                <a href="{{ route('owner.user-owner.products.index') }}"
-                                    class="nav-link {{ Route::is('owner.user-owner.products.*') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>All Products</p>
-                                </a>
-                            </li> --}}
-                            <li class="nav-item">
-                                <a href="{{ route('owner.user-owner.categories.index') }}"
-                                    class="nav-link {{ Route::is('owner.user-owner.categories.*') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>{{ __('messages.owner.layout.categories') }}</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('owner.user-owner.promotions.index') }}"
-                                    class="nav-link {{ Route::is('owner.user-owner.promotions.*') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>{{ __('messages.owner.layout.promotions') }}</p>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    {{-- Settings --}}
-                    @php
-                        $settingRoutes = ['owner.user-owner.settings.*'];
-                    @endphp
-                    <li class="nav-item {{ Route::is($settingRoutes) ? 'menu-open' : '' }}">
-                        <a href="javascript:void(0)"
-                            class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($settingRoutes) ? 'active' : '' }}"
-                            onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                            <i class="nav-icon fas fa-cog"></i>
-                            <p>
-                                {{ __('messages.owner.layout.settings') }}
-                                @if ($isVerified)
-                                    <i class="fas fa-angle-left right"></i>
-                                @endif
-                            </p>
-                        </a>
-                        <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
-                            {{-- Submenu: Settings (ini adalah link ke halaman settings sebenarnya) --}}
-                            <li class="nav-item">
-                                <a href="{{ route('owner.user-owner.settings.index') }}"
-                                    class="nav-link {{ Route::is('owner.user-owner.settings.index') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>{{ __('messages.owner.layout.settings') }}</p>
-                                </a>
-                            </li>
-                            {{-- Anda bisa menambahkan menu settings lain di sini jika ada, misal 'Payment Gateway' --}}
-                            {{-- <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Payment Gateway</p>
-                                </a>
-                            </li> --}}
-                        </ul>
-                    </li>
-
-
-
-                    {{-- Reports Header --}}
-                    <li class="nav-header {{ !$isVerified || !$isActive ? 'disabled-header' : '' }}">
-                        {{ __('messages.owner.layout.reports') }}
-                    </li>
-
-                    {{-- Sales Report --}}
-                    <li class="nav-item">
-                        <a href="{{ $isVerified && $isActive ? route('owner.user-owner.report.sales.index') : 'javascript:void(0)' }}"
-                            class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is('owner.user-owner.report.sales.*') ? 'active' : '' }}"
-                            onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                            <i class="nav-icon fas fa-chart-line"></i>
-                            <p>{{ __('messages.owner.layout.sales_report') }}</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ $isVerified && $isActive ? route('owner.user-owner.report.stocks.index') : 'javascript:void(0)' }}"
-                            class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is('owner.user-owner.report.stocks.*') ? 'active' : '' }}"
-                            onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                            <i class="nav-icon fas fa-boxes-stacked"></i>
-                            <p>{{ __('messages.owner.layout.stock_report') }}</p>
-                        </a>
-                    </li>
-
-                    {{-- Traffic Report --}}
-                    {{-- <li class="nav-item">
-                        <a href="javascript:void(0)" class="nav-link {{ !$isVerified ? 'disabled-link' : '' }}"
-                            onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                            <i class="nav-icon fas fa-chart-pie"></i>
-                            <p>{{ __('messages.owner.layout.traffict_report') }}</p>
-                        </a>
-                    </li> --}}
-                </ul>
-            </nav>
-        </aside>
 
         <!-- Content Wrapper -->
         <div class="content-wrapper">
-            <!-- Content Header -->
+            <!-- Content Header (Breadcrumb) -->
             <section class="content-header">
                 <div class="container-fluid">
                     <div class="row mb-2">
@@ -1097,7 +1191,8 @@
                         </div>
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
-                                <li class="breadcrumb-item"><a href="{{ route('owner.user-owner.dashboard') }}">Home</a>
+                                <li class="breadcrumb-item">
+                                    <a href="{{ route('owner.user-owner.dashboard') }}">Home</a>
                                 </li>
                                 <li class="breadcrumb-item active">@yield('page_title', 'Dashboard')</li>
                             </ol>
@@ -1106,12 +1201,14 @@
                 </div>
             </section>
 
+
             <!-- Main Content -->
             @yield('content')
         </div>
 
+
         <!-- Footer -->
-        <footer class="main-footer bg-white">
+        <footer class="main-footer">
             <div class="float-right d-none d-sm-block">
                 <b>Version</b> 3.2.0
             </div>
@@ -1119,289 +1216,225 @@
             All rights reserved.
         </footer>
     </div>
-
-    <!-- REQUIRED SCRIPTS -->
-    <!-- jQuery -->
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-
-    <!-- Popper.js (optional jika pakai bootstrap.bundle) -->
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-
-    <!-- Bootstrap 4 (HARUS sebelum AdminLTE) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
-
-    <!-- AdminLTE -->
-    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
-
-    <!-- Plugin lain -->
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs4.min.js"></script>
-
-    <!-- ChartJS (load once only) -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-
-    <!-- SweetAlert -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    {{--
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> --}}
-
-    <!-- Cropper.js JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-
-    <!-- Moment & DatePicker -->
-    <script src="{{ asset('admin/app-assets/vendors/js/pickers/daterange/moment.min.js') }}"></script>
-    <script src="{{ asset('admin/app-assets/vendors/js/pickers/daterange/daterangepicker.js') }}"></script>
-    <script src="{{ asset('admin/app-assets/vendors/js/pickers/pickadate/picker.js') }}"></script>
-
-    <!-- blockUI (HARUS sebelum pemanggilan showPageLoader) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js"></script>
-
-    <!-- Custom loader -->
-    <script src="{{ asset('admin/assets/js/blockui-loader.js') }}"></script>
+</div>
 
 
-    <script>
-        $(function () {
-            // Initialize DataTable
-            $('.datatable').DataTable({
-                "paging": true,
-                "lengthChange": false,
-                "searching": true,
-                "ordering": true,
-                "info": true,
-                "autoWidth": false,
-                "responsive": true,
-            });
+<!-- REQUIRED SCRIPTS -->
+<!-- jQuery -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 
-            // Initialize Select2
-            $('.select2').select2({
-                theme: 'bootstrap-5'
-            });
 
-            // Initialize Summernote
-            $('.summernote').summernote({
-                height: 200,
-                toolbar: [
-                    ['style', ['style']],
-                    ['font', ['bold', 'underline', 'clear']],
-                    ['color', ['color']],
-                    ['para', ['ul', 'ol', 'paragraph']],
-                    ['table', ['table']],
-                    ['insert', ['link', 'picture', 'video']],
-                    ['view', ['fullscreen', 'codeview', 'help']]
-                ]
-            });
+<!-- Popper.js -->
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
 
-            // Toastr notification example
-            // @if (session('success'))
-                //     toastr.success('{{ session('success') }}');
-            // @endif
 
-            // @if (session('error'))
-                //     toastr.error('{{ session('error') }}');
-            // @endif
+<!-- Bootstrap 4 -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
 
-            // Example chart
-            var canvas = document.getElementById('myChart');
-            // var ctx = document.getElementById('myChart').getContext('2d');
-            if (canvas) {
-                var ctx = canvas.getContext('2d');
-                var myChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['January', 'February', 'March', 'April', 'May', 'June'],
-                        datasets: [{
-                            label: 'Sales 2023',
-                            data: [12, 19, 3, 5, 2, 3],
-                            backgroundColor: [
-                                'rgba(255, 99, 132, 0.2)',
-                                'rgba(54, 162, 235, 0.2)',
-                                'rgba(255, 206, 86, 0.2)',
-                                'rgba(75, 192, 192, 0.2)',
-                                'rgba(153, 102, 255, 0.2)',
-                                'rgba(255, 159, 64, 0.2)'
-                            ],
-                            borderColor: [
-                                'rgba(255, 99, 132, 1)',
-                                'rgba(54, 162, 235, 1)',
-                                'rgba(255, 206, 86, 1)',
-                                'rgba(75, 192, 192, 1)',
-                                'rgba(153, 102, 255, 1)',
-                                'rgba(255, 159, 64, 1)'
-                            ],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        }
-                    }
-                });
+
+<!-- DataTables -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
+
+
+<!-- Select2 -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
+<!-- Toastr -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+
+<!-- Summernote -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs4.min.js"></script>
+
+
+<!-- ChartJS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+<!-- Cropper.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+
+<!-- Moment & DatePicker -->
+<script src="{{ asset('admin/app-assets/vendors/js/pickers/daterange/moment.min.js') }}"></script>
+<script src="{{ asset('admin/app-assets/vendors/js/pickers/daterange/daterangepicker.js') }}"></script>
+<script src="{{ asset('admin/app-assets/vendors/js/pickers/pickadate/picker.js') }}"></script>
+
+
+<!-- BlockUI -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js"></script>
+
+
+<!-- Custom loader -->
+<script src="{{ asset('admin/assets/js/blockui-loader.js') }}"></script>
+
+
+<script>
+    // Toggle Sidebar
+    function toggleSidebar() {
+        document.getElementById('mainSidebar').classList.toggle('collapsed');
+    }
+
+
+    // Toggle Submenu
+    function toggleSubmenu(element) {
+        const navItem = element.closest('.nav-item');
+        const isOpen = navItem.classList.contains('menu-open');
+       
+        // Close all other open menus
+        document.querySelectorAll('.nav-item.menu-open').forEach(item => {
+            if (item !== navItem) {
+                item.classList.remove('menu-open');
             }
         });
+       
+        // Toggle current menu
+        navItem.classList.toggle('menu-open');
+    }
 
-        // Function untuk menampilkan alert verifikasi
-        function showVerificationAlert(event) {
-            event.preventDefault();
-            event.stopPropagation();
 
-            Swal.fire({
-                icon: 'warning',
-                title: '<strong>Akses Terbatas</strong>',
-                html: `
+    // Show verification alert
+    function showVerificationAlert(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+
+        Swal.fire({
+            icon: 'warning',
+            title: '<strong>Akses Terbatas</strong>',
+            html: `
                 <div style="text-align: left; padding: 10px;">
                     <p style="margin-bottom: 15px; color: #666;">
                         <strong>Akun Anda belum diverifikasi oleh admin.</strong>
                     </p>
                     <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #ffc107;">
                         <p style="margin: 0; color: #856404;">
-                            <i class="fas fa-info-circle"></i> 
+                            <i class="fas fa-info-circle"></i>
                             Anda tidak dapat mengakses fitur ini sampai proses verifikasi selesai.
                         </p>
                     </div>
-
                 </div>
             `,
+            confirmButtonColor: '#d42811',
+            allowOutsideClick: true,
+        });
 
-                customClass: {
-                    popup: 'rounded-2xl',
-                    cancelButton: 'rounded-2xl px-4'
-                },
-                allowOutsideClick: true,
-                showClass: {
-                    popup: 'animate__animated animate__fadeInDown animate__faster'
-                },
-                hideClass: {
-                    popup: 'animate__animated animate__fadeOutUp animate__faster'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = '{{ route('owner.user-owner.verification.index') }}';
-                }
-            });
 
-            return false;
-        }
+        return false;
+    }
+
+
+    // Initialize plugins
+    $(function() {
+        // DataTable
+        $('.datatable').DataTable({
+            "paging": true,
+            "lengthChange": false,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false,
+            "responsive": true,
+        });
+
+
+        // Select2
+        $('.select2').select2({
+            theme: 'bootstrap4'
+        });
+
+
+        // Summernote
+        $('.summernote').summernote({
+            height: 200,
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'underline', 'clear']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                ['insert', ['link', 'picture', 'video']],
+                ['view', ['fullscreen', 'codeview', 'help']]
+            ]
+        });
+
+
+        // Close sidebar on mobile when clicking outside
+        $(document).on('click', function(e) {
+            if (window.innerWidth <= 992) {
+                const sidebar = document.getElementById('mainSidebar');
+                const toggle = document.querySelector('.sidebar-toggle');
+               
+                if (!sidebar.contains(e.target) && !toggle.contains(e.target)) {
+                    sidebar.classList.remove('show');
+                }
+            }
+        });
+
+
+        // Mobile sidebar toggle
+        $('.sidebar-toggle').on('click', function() {
+            if (window.innerWidth <= 992) {
+                document.getElementById('mainSidebar').classList.toggle('show');
+            }
+        });
+    });
+</script>
+
+
+@yield('scripts')
+@yield('modal')
+@stack('scripts')
+
+
+@if (session('success'))
+    <script>
+        $(function() {
+            toastr.success({!! json_encode(session('success')) !!});
+        });
     </script>
-    <style>
-        .sidebar-dark-primary .nav-sidebar>.nav-header {
-            color: #8c1000;
-        }
+@endif
 
-        /* level 1 (Store) */
-        .nav-sidebar .nav-item {
-            background-color: #eae4e4;
-            color: #ffffff;
-        }
 
-        /* level 2 (Table Management) */
-        .nav-sidebar .nav-treeview>.nav-item {
-            background-color: #8c1000;
-            /* lebih terang */
-            color: #fff;
-            margin-left: 20px;
-            border-radius: 20px;
-        }
+@if (session('error'))
+    <script>
+        $(function() {
+            toastr.error({!! json_encode(session('error')) !!});
+        });
+    </script>
+@endif
 
-        /* level 3 (Tables, Seat Layout) */
-        .nav-sidebar .nav-treeview .nav-treeview>.nav-item {
-            margin-left: 10px;
-        }
 
-        /* link active */
+@if ($errors->any())
+    <script>
+        $(function() {
+            @foreach ($errors->all() as $err)
+                toastr.error({!! json_encode($err) !!});
+            @endforeach
+        });
+    </script>
+@endif
 
-        /* level 1 (Store) */
-        .nav-sidebar .nav-item>.nav-link.active {
-            background-color: #343a40;
-            /* abu tua */
-            color: #ffffff;
-        }
 
-        /* level 2 (Table Management) */
-        .nav-sidebar .nav-treeview>.nav-item>.nav-link.active {
-            background: linear-gradient(90deg, #bf0303, #620000);
-            /* lebih terang */
-            color: #ffffff;
-        }
-
-        .nav-sidebar .nav-treeview>.nav-item>.nav-link.active:hover {
-            color: #d79805;
-        }
-
-        /* level 3 (Tables, Seat Layout) */
-        .nav-sidebar .nav-treeview .nav-treeview>.nav-item>.nav-link.active {
-            background-color: #6e7d6c;
-            /* lebih cerah lagi */
-            color: #fff;
-        }
-
-        #toast-container>.toast {
-            border-radius: 10px;
-            box-shadow: var(--shadow);
-        }
-
-        #toast-container>.toast-success {
-            background-color: var(--choco);
-        }
-
-        .swal2-popup {
-            border-radius: 14px !important;
-        }
-
-        .swal2-confirm {
-            background: var(--choco) !important;
-            border: none !important;
-        }
-    </style>
-
-    @yield('scripts')
-    @yield('modal')
-    @stack('scripts')
-
-    @if (session('success'))
-        <script>
-            $(function () {
-                toastr.success({!! json_encode(session('success')) !!});
+@if(session('swal_error'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            Swal.fire({
+                icon: 'warning',
+                title: @json(session('swal_error.title')),
+                text: @json(session('swal_error.text')),
+                confirmButtonColor: '#d42811',
             });
-        </script>
-    @endif
-
-    @if (session('error'))
-        <script>
-            $(function () {
-                toastr.error({!! json_encode(session('error')) !!});
-            });
-        </script>
-    @endif
-    @if ($errors->any())
-        <script>
-            $(function () {
-                @foreach ($errors->all() as $err)
-                    toastr.error({!! json_encode($err) !!});
-                @endforeach
-                    });
-        </script>
-    @endif
-    @if(session('swal_error'))
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                Swal.fire({
-                    icon: 'warning',
-                    title: @json(session('swal_error.title')),
-                    text: @json(session('swal_error.text')),
-                    confirmButtonColor: '#8c1000',
-                });
-            });
-        </script>
-    @endif
-
+        });
+    </script>
+@endif
 </body>
-
 </html>
+
+
