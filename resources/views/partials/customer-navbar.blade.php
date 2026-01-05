@@ -48,7 +48,7 @@
             @endphp
 
             {{-- Brand dengan Logo --}}
-            <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+            {{-- <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
                 @if ($currentOutlet && $currentOutlet->logo && (auth('customer')->check() || session('guest_customer')))
                 <a href="{{ route('customer.menu.index', ['partner_slug' => $ps, 'table_code' => $tc]) }}">
                     <img src="{{ asset('storage/' . $currentOutlet->logo) }}"
@@ -60,7 +60,7 @@
                         {{ $currentOutlet->name ?? '' }}
                     </a>
                 @endif
-            </div>
+            </div> --}}
 
             @php
                 /** @var \App\Models\Customer|null $authCustomer */
