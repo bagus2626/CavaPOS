@@ -175,6 +175,7 @@ return [
             'checkout_confirmation' => 'Checkout confirmation',
             'processing_payment' => 'Processing payment…',
             'reorder_loading' => 'Reorder is being loaded',
+            'items' => 'Items',
 
 
         ],
