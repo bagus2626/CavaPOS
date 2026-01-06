@@ -400,7 +400,7 @@ return [
             ],
             'login' => [
                 'title' => 'Welcome, Owner!',
-                'subtitle' => 'Sign in to continue to the <span class="font-semibold text-[#b91c1c]">Owner Dashboard</span>',
+                'subtitle' => 'Sign in to continue to the Owner Dashboard',
                 'email_label' => 'Email',
                 'email_placeholder' => 'Enter your email',
                 'password_label' => 'Password',
@@ -416,7 +416,7 @@ return [
             ],
             'register' => [
                 'title' => 'Register as Owner',
-                'subtitle' => 'Easily manage your business through the <span class="font-semibold text-[#b91c1c]">Owner Dashboard</span>',
+                'subtitle' => 'Easily manage your business through the Owner Dashboard',
                 'name_label' => 'Full Name',
                 'name_placeholder' => 'Enter your full name',
                 'email_label' => 'Email',
