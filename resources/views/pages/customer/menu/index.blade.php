@@ -382,7 +382,7 @@
             overflow: hidden !important;
         }
 
-        /* ✅ KOMPENSASI UNTUK DESKTOP - Lebih Spesifik */
+        /* KOMPENSASI UNTUK DESKTOP - Lebih Spesifik */
         @media (min-width: 768px) {
             /* Body padding */
             body.modal-open {
@@ -446,25 +446,38 @@
             background-color: rgba(0, 0, 0, 0.4);
         }
 
-        /* Sheet modal */
+        /* Sheet modal - Scale Animation (sama seperti checkout modal) */
         #modalSheet {
-            /* awalnya di bawah layar */
-            transform: translateY(100%);
-            transition: transform 0.3s ease-out;
+            transform: scale(0.95);
+            opacity: 0;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                        opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         /* Saat modal ditampilkan */
         #parentOptionsModal.show #modalSheet {
-            transform: translateY(0);
+            transform: scale(1);
+            opacity: 1;
         }
 
         #floatingCartBar {
             padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* animasi slide-up cart manager */
+        /* Cart Manager Modal Animation - Scale */
+        #cartManagerSheet {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            opacity: 0;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         #cartManagerModal.show #cartManagerSheet {
-            transform: translateY(0);
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
         }
 
         /* Hilangkan tombol clear bawaan browser */
@@ -659,13 +672,6 @@
                     if (window.innerWidth >= 768 && __scrollbarWidth > 0) {
                         document.body.style.paddingRight = `${__scrollbarWidth}px`;
                     }
-
-                    // ✅ Kompensasi dengan ID spesifik
-                    // const navbar = document.getElementById('customer-navbar');
-                    // const floatingCart = document.getElementById('floatingCartBar');
-                    
-                    // if (navbar) navbar.style.paddingRight = `${__scrollbarWidth}px`;
-                    // if (floatingCart) floatingCart.style.paddingRight = `${__scrollbarWidth}px`;
                     
                     document.body.classList.add('modal-open');
                     // Teknik "fixed body" supaya benar2 terkunci
@@ -707,7 +713,7 @@
                 // Hitung scrollbar width saat load
                 calculateScrollbarWidth();
 
-                // ✅ Hitung ulang saat resize dengan debounce
+                // Hitung ulang saat resize dengan debounce
                 let resizeTimer;
                 window.addEventListener('resize', function() {
                     clearTimeout(resizeTimer);
@@ -969,7 +975,7 @@
                     modalNote = '';
                     selectedOptions = [];
 
-                    // ✅ RESET textarea yang sudah ada di HTML
+                    // RESET textarea yang sudah ada di HTML
                     const noteTextarea = document.getElementById('modalNote');
                     if (noteTextarea) {
                         noteTextarea.value = '';
@@ -1297,9 +1303,11 @@
 
                     calcModalTotal(productData);
 
-                    modal.classList.add('show');
-                    lockBodyScroll();
                     modal.classList.remove('hidden');
+                    lockBodyScroll();
+                    requestAnimationFrame(() => {
+                        modal.classList.add('show');
+                    });
                     
                     syncModalQtyAndStock(productData);
                 }
@@ -1381,7 +1389,7 @@
                     updateProductBadge(currentProductId);
                     updateFloatingCartBar();
 
-                    // ✅ Reset state & textarea
+                    // Reset state & textarea
                     const noteEl = document.getElementById('modalNote');
                     if (noteEl) noteEl.value = '';
 
@@ -1474,7 +1482,7 @@
                 });
 
                 function closeOptionsModal() {
-                    // ✅ Reset textarea sebelum tutup
+                    // Reset textarea sebelum tutup
                     const noteTextarea = document.getElementById('modalNote');
                     if (noteTextarea) {
                         noteTextarea.value = '';
@@ -1483,14 +1491,13 @@
                     modal.classList.remove('show');
                     setTimeout(() => {
                         modal.classList.add('hidden');
-                        unlockBodyScroll(); // kembalikan scroll body
-
+                        unlockBodyScroll();
+                        
                         // reset state modal
                         currentProductId = null;
                         selectedOptions = [];
                         modalQty = 1;
                         modalNote = '';
-                        // updateModalQtyDisplay();
                     }, 300);
                 }
 
@@ -1500,7 +1507,7 @@
                     const isRadioMode = val === 1 && (prov === 'EXACT' || prov === 'MAX' || prov === 'OPTIONAL MAX');
 
                     if (isRadioMode) {
-                        // ✅ MODE RADIO: pakai radio button (type="radio")
+                        // MODE RADIO: pakai radio button (type="radio")
                         const radios = Array.from(poDiv.querySelectorAll('input[type="radio"]:not([data-sold="1"])'));
                         
                         function updateStateRadio() {
@@ -1531,7 +1538,7 @@
                         return;
                     }
 
-                    // ✅ MODE CHECKBOX: pakai checkbox (type="checkbox") untuk multi-select
+                    // MODE CHECKBOX: pakai checkbox (type="checkbox") untuk multi-select
                     const checkboxes = Array.from(poDiv.querySelectorAll('input[type="checkbox"]:not([data-sold="1"])'));
                     
                     function updateState() {
@@ -1593,7 +1600,7 @@
                         const prov = String(group.dataset.provision || '').toUpperCase();
                         const val = Number(group.dataset.value);
                         
-                        // ✅ PENTING: Cek KEDUA jenis input (checkbox DAN radio)
+                        // PENTING: Cek KEDUA jenis input (checkbox DAN radio)
                         const allInputs = Array.from(group.querySelectorAll('input[type="checkbox"], input[type="radio"]'));
                         const checked = allInputs.filter(inp => inp.checked).length;
 
@@ -1768,10 +1775,11 @@
 
                     // render konten
                     renderCartManager();
-                    cartManagerModal.classList.add('show');
                     cartManagerModal.classList.remove('hidden');
-                    // kunci body scroll (opsional, reuse fungsi kamu)
                     if (typeof lockBodyScroll === 'function') lockBodyScroll();
+                    requestAnimationFrame(() => {
+                        cartManagerModal.classList.add('show');
+                    });
                 }
 
                 function closeCartManagerModal() {
@@ -2028,7 +2036,7 @@
                         return;
                     }
 
-                    // item cards dengan desain baru
+                    // item cards 
                     body.innerHTML = rows.map(r => {
                         const opts = (r.optionsDetail || []).map(od => {
                             const label = od.parentName ? `${od.parentName}: ${od.name}` : od.name;
@@ -2063,32 +2071,34 @@
                             </div>`;
 
                         return `
-                            <div class="flex justify-between items-start py-3 border-b border-dashed border-gray-200 last:border-0">
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-start gap-3 mb-2">
-                                        ${r.image ? `<img src="${r.image}" alt="${r.name}" class="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover border border-gray-200 flex-shrink-0">` : ''}
-
-                                        <div class="flex-1 min-w-0">
-                                            
-                                            <!-- BARIS ATAS: qty + nama + harga -->
-                                            <div class="flex items-start justify-between gap-2 mb-1">
-                                                <div class="flex items-center gap-2">
-                                                    <span class="bg-choco/10 text-choco text-xs font-bold px-2 py-0.5 rounded">${r.qty}x</span>
-                                                    <p class="text-gray-900 text-base font-medium leading-normal truncate">${r.name}</p>
-                                                </div>
-
-                                                <p class="text-gray-900 text-base font-semibold shrink-0">
-                                                    ${rupiah(r.line)}
-                                                </p>
+                            <div class="flex gap-2.5 sm:gap-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                ${r.image ? `
+                                <div class="shrink-0">
+                                    <img src="${r.image}" alt="${r.name}" 
+                                        class="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover border border-gray-200">
+                                </div>
+                                ` : ''}
+                                
+                                <div class="flex-1 min-w-0 flex flex-col">
+                                    <div class="mb-3">
+                                        <div class="flex justify-between items-start gap-2 mb-1">
+                                            <div class="flex items-center gap-2">
+                                                <span class="bg-red-50 text-[#ae1504] text-xs font-bold px-2 py-0.5 rounded">${r.qty}x</span>
+                                                <h4 class="text-gray-900 text-sm sm:text-base font-bold leading-tight">
+                                                    ${r.name}
+                                                </h4>
                                             </div>
-
-                                            <div class="space-y-0.5 pl-0">
-                                                ${baseRow}
-                                                ${opts}
-                                            </div>
-
-                                            ${note}
+                                            <span class="text-gray-900 text-base font-semibold shrink-0">
+                                                ${rupiah(r.line)}
+                                            </span>
                                         </div>
+                                        
+                                        <div class="space-y-0.5 mt-2">
+                                            ${baseRow}
+                                            ${opts}
+                                        </div>
+                                        
+                                        ${note}
                                     </div>
                                 </div>
                             </div>
@@ -2529,7 +2539,7 @@
                         const labels = [];
 
                         const alwaysProduct = Boolean(productData.always_available_flag);
-                        const remProduct    = remainingProductStock(productData); // ✅
+                        const remProduct    = remainingProductStock(productData); // 
 
                         if (!alwaysProduct && remProduct === maxAllowed) {
                             labels.push(`${productData.name || 'Produk'} (stok produk)`);
@@ -2543,7 +2553,7 @@
                             const alwaysOpt = (opt.always_available_flag === 1 || opt.always_available_flag === true);
                             if (alwaysOpt) return;
 
-                            const remOpt = remainingOptionStock(productData, opt); // ✅
+                            const remOpt = remainingOptionStock(productData, opt); 
                             if (remOpt === maxAllowed) labels.push(`${opt.name || 'Option'} (stok opsi)`);
                             });
                         });
@@ -2555,7 +2565,7 @@
                         const labels = [];
 
                         const alwaysProduct = Boolean(productData.always_available_flag);
-                        const remProduct    = remainingProductStock(productData); // ✅ sisa setelah cart
+                        const remProduct    = remainingProductStock(productData); // sisa setelah cart
 
                         if (!alwaysProduct && remProduct === maxAllowed) {
                             labels.push(`${productData.name || 'Produk'} (stok produk)`);
@@ -2566,7 +2576,7 @@
                             const alwaysOpt = (opt.always_available_flag === 1 || opt.always_available_flag === true);
                             if (alwaysOpt) return;
 
-                            const remOpt = remainingOptionStock(productData, opt); // ✅ sisa setelah cart
+                            const remOpt = remainingOptionStock(productData, opt); // sisa setelah cart
                             if (remOpt === maxAllowed) labels.push(`${opt.name || 'Option'} (stok opsi)`);
                         });
 
@@ -2588,7 +2598,7 @@
 
                             const optStock = remainingOptionStock(productData, opt);
 
-                            // ✅ tampilkan jika stok opsi tinggal 5 ke bawah
+                            // tampilkan jika stok opsi tinggal 5 ke bawah
                             if (optStock > 0 && optStock <= 5) {
                                 const div = document.createElement('div');
 
@@ -2611,7 +2621,7 @@
 
 
                     /**
-                     * ✅ SATU PINTU: sinkron qty + stok + warning + tombol + + total
+                     * SATU PINTU: sinkron qty + stok + warning + tombol + + total
                      */
                     function syncModalQtyAndStock(productData) {
                         if (!productData) return;
