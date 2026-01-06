@@ -288,6 +288,10 @@ return [
             'processing_payment' => 'Memproses pembayaran…',
             'reorder_loading' => 'Pesanan ulang sedang dimuat',
             'items' => 'Item',
+            'sold_out' => 'Habis',
+            'low_stock' => 'Stok sedikit',
+            'no_results_found' => 'Tidak ada hasil yang ditemukan',
+
         ],
         'payment' => [
             'show_order_code' => 'Tunjukkan Kode Pemesanan',

@@ -10,8 +10,8 @@
         <div class="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
             <!-- Clear Cart Button -->
             <button id="floatingCartClear" 
-                class="group flex items-center justify-center size-10 md:size-11 rounded-xl bg-gray-100 text-choco hover:bg-gray-200 transition-all border border-transparent hover:border-choco/20 shrink-0"
-                aria-label="Hapus keranjang">
+                class="group flex items-center justify-center size-10 md:size-11 rounded-xl bg-gray-100 text-[#ae1504] hover:bg-gray-200 transition-all border border-transparent hover:border-[choco/20] shrink-0"
+                aria-label="Cart">
                 <svg xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -29,7 +29,7 @@
             <!-- Cart Summary Info -->
             <div class="flex flex-col min-w-0">
                 <div class="flex items-baseline gap-1.5">
-                    <span id="floatingCartCount" class="inline-flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-choco text-xs md:text-sm font-bold px-2 py-0.5 rounded-xl whitespace-nowrap">
+                    <span id="floatingCartCount" class="inline-flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-[#ae1504] text-xs md:text-sm font-bold px-2 py-0.5 rounded-xl whitespace-nowrap">
                         0 Items
                     </span>
                 </div>
@@ -44,7 +44,7 @@
         
         <!-- Right Side: Checkout Action -->
         <button id="floatingCartPay"
-            class="flex items-center gap-2 md:gap-3 bg-choco hover:bg-[#8f1103] active:bg-[#7a0e02] text-white px-6 md:px-8 py-3 rounded-full transition-all shadow-lg shadow-choco/20 hover:shadow-choco/30 shrink-0 group disabled:opacity-50 disabled:cursor-not-allowed">
+            class="flex items-center gap-2 md:gap-3 bg-[#ae1504] hover:bg-[#8a1103] active:bg-[#7a0e02] text-white px-6 md:px-8 py-3 rounded-full transition-all shrink-0 group disabled:opacity-50 disabled:cursor-not-allowed">
             <span class="font-bold text-sm md:text-base whitespace-nowrap">
                 {{ __('messages.customer.menu.checkout') }}
             </span>
@@ -79,7 +79,7 @@
                         stroke-width="2"
                         stroke-linecap="round"
                         stroke-linejoin="round"
-                        class="h-6 w-6 sm:h-7 sm:w-7 text-choco">
+                        class="h-6 w-6 sm:h-7 sm:w-7 text-[#ae1504]">
                     <circle cx="9" cy="21" r="1" />
                     <circle cx="20" cy="21" r="1" />
                     <path d="M1 2h3l3.6 12.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6L23 6H6" />
@@ -121,8 +121,8 @@
 
             <!-- Action Button -->
             <button id="cartManagerDone"
-                class="w-full bg-choco hover:bg-[#8a1003] text-white font-bold text-sm sm:text-base py-3 sm:py-3.5 rounded-full 
-                       shadow-md transition-all transform active:scale-[0.98]">
+                class="w-full bg-[#ae1504] hover:bg-[#8a1103] text-white font-bold text-sm sm:text-base py-3 sm:py-3.5 rounded-full 
+                transition-all transform active:scale-[0.98]">
                 {{ __('messages.customer.menu.finish') }}
             </button>
         </div>
@@ -164,16 +164,16 @@
             </div>
 
             {{-- Section: Special Instructions --}}
-            <div class="p-5 sm:px-8 sm:py-6">
-                <h3 class="text-lg font-bold text-gray-900 mb-4">
+            <div class="px-5 py-2 sm:px-6 sm:py-3">
+                <h3 class="text-lg font-bold text-gray-900 mb-2">
                     {{ __('messages.customer.menu.note') }} 
-                    <span class="text-xs font-normal uppercase tracking-wider text-gray-500 bg-gray-100 dark:bg-white/10 px-2 py-1 rounded ml-0">
+                    <span class="text-xs font-normal uppercase tracking-wider text-gray-500 bg-gray-100 dark:bg-white/10 pl-0.5 pr-2 py-1 rounded">
                         ({{ __('messages.customer.menu.optional') }})
                     </span>
                 </h3>
                 <div class="relative">
                     <textarea id="modalNote"
-                        class="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:border-choco focus:ring-1 focus:ring-choco outline-none transition-all"
+                        class="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:border-[#ae1504] focus:ring-1 focus:ring-[#ae1504] outline-none transition-all"
                         placeholder="{{ __('messages.customer.menu.note_example') }}"
                         rows="3"
                         maxlength="200">
@@ -191,14 +191,14 @@
                 {{-- Quantity Stepper --}}
                 <div class="flex items-center justify-between w-full sm:w-auto rounded-full border border-gray-300 bg-white dark:bg-surface-dark p-1 transition-colors">
                     <button id="modalQtyMinus"
-                        class="flex h-10 w-10 items-center justify-center rounded-full text-gray-500 hover:bg-gray-200 hover:text-choco transition-colors disabled:opacity-50 dark:hover:bg-white/10">
+                        class="flex h-10 w-10 items-center justify-center rounded-full text-gray-500 hover:bg-gray-200 hover:text-[#ae1504] transition-colors disabled:opacity-50 dark:hover:bg-white/10">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
                         </svg>
                     </button>
                     <span id="modalQtyValue" class="w-8 text-center text-lg font-bold text-gray-900">1</span>
                     <button id="modalQtyPlus"
-                        class="flex h-10 w-10 items-center justify-center rounded-full text-gray-500 hover:bg-gray-200 hover:text-choco transition-colors dark:hover:bg-white/10">
+                        class="flex h-10 w-10 items-center justify-center rounded-full text-gray-500 hover:bg-gray-200 hover:text-[#ae1504] transition-colors dark:hover:bg-white/10">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
@@ -207,9 +207,9 @@
 
                 {{-- Add Button --}}
                 <button id="saveModalBtn"
-                    class="flex-1 w-full flex items-center justify-between rounded-full bg-choco px-6 py-3.5 text-base font-bold text-white 
-                           shadow-lg shadow-choco/20 hover:bg-soft-choco hover:shadow-xl hover:-translate-y-0.5 
-                           transition-all active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                    class="flex-1 w-full flex items-center justify-between rounded-full bg-[#ae1504] px-6 py-3.5 text-base font-bold text-white 
+                    hover:bg-[#8a1103] hover:-translate-y-0.5 
+                    transition-all active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                     disabled>
                     <span>{{ __('messages.customer.menu.simpan') }}</span>
                     <span id="modalTotalPrice" class="modalTotalPrice">Rp 0</span>
@@ -264,7 +264,7 @@
                 
                 <!-- Items Section -->
                 <div class="px-6 py-4 bg-white">
-                    <h4 class="text-sm font-semibold uppercase tracking-wider text-gray-500 mb-4">
+                    <h4 class="text-sm font-semibold uppercase tracking-wider text-gray-500 mb-2">
                         {{ __('messages.customer.menu.items') ?? 'Items' }}
                     </h4>
                     <div id="checkoutBody" class="flex flex-col gap-3">
@@ -274,10 +274,10 @@
 
                 <!-- Price Breakdown -->
                 <div class="px-6 pb-6 bg-white">
-                    <div class="bg-gray-50 rounded-lg p-5 mb-6">
+                    <div class="bg-gray-50 rounded-lg p-5 mb-4">
                         <div class="flex justify-between pt-2 border-gray-200">
                             <p class="text-gray-900 text-lg font-bold">Total</p>
-                            <p id="checkoutGrandTotal" class="text-choco text-xl font-bold">Rp 0</p>
+                            <p id="checkoutGrandTotal" class="text-[#ae1504] text-xl font-bold">Rp 0</p>
                         </div>
                     </div>
 
@@ -286,7 +286,7 @@
                         <!-- Nama Pemesan -->
                         <div class="flex flex-col gap-2">
                             <label for="orderName" class="text-gray-900 text-sm font-semibold flex items-center gap-2">
-                                <svg class="w-5 h-5 text-choco" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-[#ae1504]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.1a7.5 7.5 0 0115 0V21H4.5v-.9z"/>
                                 </svg>
                                 {{ __('messages.customer.menu.nama_pemesan') }}
@@ -318,7 +318,7 @@
                             </label>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 @if ($partner->is_cashier_active == 1)
-                                <label class="relative flex items-center justify-between cursor-pointer rounded-lg border border-gray-200 bg-white p-4 transition-all hover:border-choco/50 hover:bg-gray-50 has-[:checked]:border-choco has-[:checked]:bg-choco/5">
+                                <label class="relative flex items-center justify-between cursor-pointer rounded-lg border border-gray-200 bg-white p-4 transition-all hover:border-[#ae1504]/50 hover:bg-gray-50 has-[:checked]:border-[#ae1504] has-[:checked]:bg-[#ae1504]/5">
                                     <div class="flex items-center gap-3">
                                         <div class="flex h-5 w-5 items-center justify-center rounded-full border border-gray-300 has-[:checked]:border-choco">
                                             <div class="h-2.5 w-2.5 rounded-full bg-choco opacity-0 transition-opacity peer-checked:opacity-100"></div>
@@ -333,7 +333,7 @@
                                 @endif
                                 
                                 @if ($partner->is_qr_active === 1)
-                                <label class="relative flex items-center justify-between cursor-pointer rounded-lg border border-gray-200 bg-white p-4 transition-all hover:border-choco/50 hover:bg-gray-50 has-[:checked]:border-choco has-[:checked]:bg-choco/5">
+                                <label class="relative flex items-center justify-between cursor-pointer rounded-lg border border-gray-200 bg-white p-4 transition-all hover:border-[#ae1504]/50 hover:bg-gray-50 has-[:checked]:border-[#ae1504] has-[:checked]:bg-[#ae1504]/5">
                                     <div class="flex items-center gap-3">
                                         <div class="flex h-5 w-5 items-center justify-center rounded-full border border-gray-300 has-[:checked]:border-choco">
                                             <div class="h-2.5 w-2.5 rounded-full bg-choco opacity-0 transition-opacity peer-checked:opacity-100"></div>
@@ -360,7 +360,7 @@
                         {{ __('messages.customer.menu.cancel') }}
                     </button>
                     <button id="checkoutPayBtn" type="button"
-                        class="flex-[2] px-6 py-3.5 rounded-full bg-choco text-white font-bold shadow-lg shadow-choco/20 hover:bg-[#8a1003] transition-colors focus:ring-4 focus:ring-choco/30 focus:outline-none flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                        class="flex-[2] px-6 py-3.5 rounded-full bg-[#ae1504] text-white font-bold hover:bg-[#8a1003] transition-colors focus:ring-4 focus:ring-choco/30 focus:outline-none flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                         <span>{{ __('messages.customer.menu.payment') }}</span>
                         {{-- <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
