@@ -2,6 +2,8 @@
 
 @section('title', 'Menu ' . $partner->name)
 
+@section('main-class', 'pt-0')
+
 @section('content')
     {{-- Hero Background --}}
     <div class="relative w-full h-64 sm:h-72 overflow-hidden">
@@ -57,7 +59,7 @@
                             </div>
                             <input id="menuSearch" type="search"
                                 placeholder="{{ __('messages.customer.menu.search_placeholder') }}"
-                                class="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl leading-5 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-red-600 sm:text-sm shadow-sm transition-shadow"
+                                class="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-xl leading-5 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:border-red-600 sm:text-sm shadow-sm transition-shadow"
                                 style="--tw-ring-color: #ae1504;"
                                 autocomplete="off" />
                             <button type="button" id="menuSearchClear"
@@ -142,8 +144,10 @@
                                 <div class="aspect-[4/3] bg-gradient-to-br from-orange-50 to-orange-100 overflow-hidden relative">
                                     @if($product->quantity_available > 0 && $product->quantity_available <= 3 && $product->always_available_flag == false)
                                         <div class="absolute bottom-2 left-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md flex items-center justify-center gap-1.5 shadow-sm border border-yellow-100 z-10">
-                                            <div class="h-1.5 w-1.5 rounded-full bg-yellow-500 animate-pulse"></div>
-                                            <span class="text-[10px] font-bold text-yellow-700 uppercase tracking-wide">Low Stock: {{ $product->quantity_available }}</span>
+                                            {{-- <div class="h-1.5 w-1.5 rounded-full bg-yellow-500 animate-pulse"></div> --}}
+                                            <span class="text-[10px] font-bold text-yellow-700 uppercase tracking-wide">{{ __('messages.customer.menu.low_stock') }} 
+                                                {{-- ({{ $product->quantity_available }}) --}}
+                                            </span>
                                         </div>
                                     @endif
 
@@ -166,7 +170,9 @@
                                     
                                     @if($product->quantity_available < 1 && $product->always_available_flag == false)
                                         <div class="absolute inset-0 bg-white/40 flex items-center justify-center">
-                                            <span class="bg-gray-800 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg">Sold Out</span>
+                                            <span class="bg-gray-800 text-white px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg">
+                                                {{ __('messages.customer.menu.sold_out') }}
+                                            </span>
                                         </div>
                                     @endif
                                 </div>
@@ -191,7 +197,7 @@
                                         
                                         {{-- Quantity Controls --}}
                                         <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-                                            <button class="minus-btn hidden w-6 h-6 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl border border-choco text-choco flex items-center justify-center hover:bg-gray-100 transition-all"
+                                            <button class="minus-btn hidden w-6 h-6 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl border border-[#ae1504] text-[#ae1504] flex items-center justify-center hover:bg-gray-100 transition-all"
                                                 data-id="{{ $product->id }}">
                                                 <svg class="w-3 h-3 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
@@ -205,7 +211,7 @@
                                                     </svg>
                                                 </button>
                                             @else
-                                                <button class="plus-btn h-6 w-6 sm:h-9 sm:w-9 rounded-lg sm:rounded-xl bg-choco text-white flex items-center justify-center hover:bg-soft-choco shadow-md hover:shadow-lg hover:shadow-choco/20 transition-all active:scale-95"
+                                                <button class="plus-btn h-6 w-6 sm:h-9 sm:w-9 rounded-lg sm:rounded-xl bg-[#ae1504] text-white flex items-center justify-center hover:bg-[#8a1103] shadow-md hover:shadow-lg transition-all active:scale-95"
                                                     data-id="{{ $product->id }}">
                                                     <svg class="w-3 h-3 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -272,8 +278,10 @@
                                     <div class="aspect-[4/3] bg-gray-50 overflow-hidden relative">
                                         @if($product->quantity_available > 0 && $product->quantity_available <= 3 && $product->always_available_flag == false)
                                             <div class="absolute bottom-2 left-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md flex items-center justify-center gap-1.5 shadow-sm border border-yellow-100 z-10">
-                                                <div class="h-1.5 w-1.5 rounded-full bg-yellow-500 animate-pulse"></div>
-                                                <span class="text-[10px] font-bold text-yellow-700 uppercase tracking-wide">Low Stock: {{ $product->quantity_available }}</span>
+                                                {{-- <div class="h-1.5 w-1.5 rounded-full bg-yellow-500 animate-pulse"></div> --}}
+                                                <span class="text-[10px] font-bold text-yellow-700 uppercase tracking-wide">{{ __('messages.customer.menu.low_stock') }} 
+                                                    {{-- ({{ $product->quantity_available }}) --}}
+                                                </span>
                                             </div>
                                         @endif
 
@@ -321,7 +329,7 @@
                                             
                                             {{-- Quantity Controls --}}
                                             <div class="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-                                                <button class="minus-btn hidden w-6 h-6 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl border border-choco text-choco flex items-center justify-center hover:bg-gray-100 transition-all"
+                                                <button class="minus-btn hidden w-6 h-6 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl border border-[#ae1504] text-[#ae1504] flex items-center justify-center hover:bg-gray-100 transition-all"
                                                     data-id="{{ $product->id }}">
                                                     <svg class="w-3 h-3 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
@@ -335,7 +343,7 @@
                                                         </svg>
                                                     </button>
                                                 @else
-                                                    <button class="plus-btn h-6 w-6 sm:h-9 sm:w-9 rounded-lg sm:rounded-xl bg-choco text-white flex items-center justify-center hover:bg-soft-choco shadow-md hover:shadow-lg hover:shadow-choco/20 transition-all active:scale-95"
+                                                    <button class="plus-btn h-6 w-6 sm:h-9 sm:w-9 rounded-lg sm:rounded-xl bg-[#ae1504] text-white flex items-center justify-center hover:bg-[#8a1103] shadow-md hover:shadow-lg transition-all active:scale-95"
                                                         data-id="{{ $product->id }}">
                                                         <svg class="w-3 h-3 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -371,8 +379,25 @@
 
         /* saat modal terbuka, kunci scroll body */
         body.modal-open {
-            overflow: hidden;
-            height: 100%;
+            overflow: hidden !important;
+        }
+
+        /* ✅ KOMPENSASI UNTUK DESKTOP - Lebih Spesifik */
+        @media (min-width: 768px) {
+            /* Body padding */
+            body.modal-open {
+                padding-right: var(--scrollbar-width, 0px) !important;
+            }
+            
+            /* Floating cart bar */
+            body.modal-open #floatingCartBar {
+                right: var(--scrollbar-width, 0px);
+            }
+            
+            /* Navbar - kompensasi dengan transform */
+            body.modal-open #customer-navbar {
+                transform: translateX(calc(var(--scrollbar-width, 0px) / -2));
+            }
         }
 
         /* Hide scrollbar untuk category tabs */
@@ -457,6 +482,21 @@
             flex: 0 0 auto;
             white-space: nowrap;
         }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
     </style>
 
     @push('scripts')
@@ -537,9 +577,75 @@
                     });
                 }
 
+                // Cart persistence configuration 
+                const CART_EXPIRY_MINUTES = 2; // Ubah sesuai kebutuhan
+
+                function saveCartToStorage() {
+                    try {
+                        const cartData = {
+                            items: cart,
+                            lastKeyPerProduct: lastKeyPerProduct,
+                            timestamp: Date.now()
+                        };
+                        localStorage.setItem('menuCart', JSON.stringify(cartData));
+                    } catch (error) {
+                        console.error('Error saving cart:', error);
+                    }
+                }
+
+                function loadCartFromStorage() {
+                    try {
+                        const stored = localStorage.getItem('menuCart');
+                        if (!stored) return null;
+
+                        const cartData = JSON.parse(stored);
+                        const now = Date.now();
+                        const expiry = CART_EXPIRY_MINUTES * 60 * 1000;
+                        
+                        if (now - cartData.timestamp > expiry) {
+                            localStorage.removeItem('menuCart');
+                            return null;
+                        }
+
+                        return cartData;
+                    } catch (error) {
+                        console.error('Error loading cart:', error);
+                        localStorage.removeItem('menuCart');
+                        return null;
+                    }
+                }
+
+                function clearCartFromStorage() {
+                    try {
+                        localStorage.removeItem('menuCart');
+                    } catch (error) {
+                        console.error('Error clearing cart:', error);
+                    }
+                }
+
                 // === Body scroll lock (aman untuk iOS & tanpa animasi saat restore) ===
                 let __savedScrollY = 0;
                 let __prevScrollBehavior = '';
+                let __scrollbarWidth = 0;
+
+                // Hitung lebar scrollbar sekali saja
+                function calculateScrollbarWidth() {
+                    const outer = document.createElement('div');
+                    outer.style.visibility = 'hidden';
+                    outer.style.overflow = 'scroll';
+                    outer.style.width = '100px';
+                    document.body.appendChild(outer);
+                    
+                    const inner = document.createElement('div');
+                    inner.style.width = '100%';
+                    outer.appendChild(inner);
+                    
+                    __scrollbarWidth = outer.offsetWidth - inner.offsetWidth;
+                    document.body.removeChild(outer);
+                    
+                    // Set CSS variable untuk digunakan di style
+                    document.documentElement.style.setProperty('--scrollbar-width', `${__scrollbarWidth}px`);
+                }
 
                 function lockBodyScroll() {
                     __savedScrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
@@ -549,6 +655,18 @@
                     __prevScrollBehavior = html.style.scrollBehavior;
                     html.style.scrollBehavior = 'auto';
 
+                    // Tambahkan padding-right sebesar lebar scrollbar untuk mencegah layout shift
+                    if (window.innerWidth >= 768 && __scrollbarWidth > 0) {
+                        document.body.style.paddingRight = `${__scrollbarWidth}px`;
+                    }
+
+                    // ✅ Kompensasi dengan ID spesifik
+                    // const navbar = document.getElementById('customer-navbar');
+                    // const floatingCart = document.getElementById('floatingCartBar');
+                    
+                    // if (navbar) navbar.style.paddingRight = `${__scrollbarWidth}px`;
+                    // if (floatingCart) floatingCart.style.paddingRight = `${__scrollbarWidth}px`;
+                    
                     document.body.classList.add('modal-open');
                     // Teknik "fixed body" supaya benar2 terkunci
                     document.body.style.position = 'fixed';
@@ -567,6 +685,7 @@
                     document.body.style.left = '';
                     document.body.style.right = '';
                     document.body.style.width = '';
+                    document.body.style.paddingRight = '';
 
                     // Pastikan restore TANPA animasi
                     // Tunggu satu frame agar layout settle dulu
@@ -584,6 +703,21 @@
                         });
                     });
                 }
+
+                // Hitung scrollbar width saat load
+                calculateScrollbarWidth();
+
+                // ✅ Hitung ulang saat resize dengan debounce
+                let resizeTimer;
+                window.addEventListener('resize', function() {
+                    clearTimeout(resizeTimer);
+                    resizeTimer = setTimeout(function() {
+                        // Hanya hitung ulang jika tidak ada modal yang terbuka
+                        if (!document.body.classList.contains('modal-open')) {
+                            calculateScrollbarWidth();
+                        }
+                    }, 250);
+                });
 
                 // ===== STATE =====
                 let currentProductId = null;
@@ -633,6 +767,7 @@
                     recomputeLineTotal(key);
                     lastKeyPerProduct[productId] = key;
                     updateFloatingCartBar();
+                    saveCartToStorage();
                     return key;
                 }
 
@@ -737,6 +872,8 @@
                         recomputeLineTotal(key);
                     }
                     updateFloatingCartBar();
+                
+                    saveCartToStorage();
 
                 }
 
@@ -932,14 +1069,14 @@
 
                     parentOptions.forEach((po) => {
                         const section = document.createElement('div');
-                        section.className = 'p-5 sm:px-8 sm:py-6 border-b border-gray-200/50 dark:border-white/10';
+                        section.className = 'px-5 py-2 sm:px-6 sm:py-3 border-b border-gray-200/50 dark:border-white/10';
                         section.dataset.provision = po.provision;
                         section.dataset.value = po.provision_value;
-                        section.setAttribute('data-provision-group', ''); // ✅ PENTING
+                        section.setAttribute('data-provision-group', ''); 
 
                         // Header section
                         const headerDiv = document.createElement('div');
-                        headerDiv.className = 'flex justify-between items-baseline mb-4';
+                        headerDiv.className = 'flex justify-between items-baseline mb-2';
 
                         const title = document.createElement('h3');
                         title.className = 'text-lg font-bold text-gray-900';
@@ -975,7 +1112,7 @@
                             
                             (po.options || []).forEach(opt => {
                                 const label = document.createElement('label');
-                                label.className = 'group relative flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 cursor-pointer hover:border-choco/30 hover:bg-choco/5 transition-all has-[:checked]:border-choco has-[:checked]:bg-choco/10';
+                                label.className = 'group relative flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 cursor-pointer hover:border-[#ae1504]/30 hover:bg-[#ae1504]/5 transition-all has-[:checked]:border-[#ae1504] has-[:checked]:bg-[#ae1504]/10';
 
                                 const leftDiv = document.createElement('div');
                                 leftDiv.className = 'flex items-center gap-3';
@@ -1069,7 +1206,7 @@
 
                             (po.options || []).forEach(opt => {
                                 const label = document.createElement('label');
-                                label.className = 'group relative flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 cursor-pointer hover:border-choco/30 hover:bg-choco/5 transition-all has-[:checked]:border-choco has-[:checked]:bg-choco/10';
+                                label.className = 'group relative flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 cursor-pointer hover:border-[#ae1504]/30 hover:bg-[#ae1504]/5 transition-all has-[:checked]:border-[#ae1504] has-[:checked]:bg-[#ae1504]/10';
 
                                 const leftDiv = document.createElement('div');
                                 leftDiv.className = 'flex items-center gap-3';
@@ -1238,6 +1375,7 @@
                     const noteVal = noteTextarea ? noteTextarea.value.trim() : '';
                     if (noteVal.length > 0 && key && cart[key]) {
                         cart[key].note = noteVal;
+                        saveCartToStorage();
                     }
 
                     updateProductBadge(currentProductId);
@@ -1720,8 +1858,8 @@
                                 <div class="flex items-center justify-between mt-auto">
                                     <!-- Quantity Controls -->
                                     <div class="flex items-center gap-1.5 sm:gap-2">
-                                        <button class="cm-minus flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-xl 
-                                                    bg-white border border-gray-300 text-gray-700
+                                        <button class="cm-minus flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg 
+                                                    bg-white border border-[#ae1504] text-[#ae1504]
                                                     hover:bg-gray-100 transition-colors"
                                                 aria-label="Kurangi">
                                             <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1731,8 +1869,8 @@
                                         <span class="cm-qty text-gray-900 font-semibold w-6 sm:w-8 text-center text-sm sm:text-base">
                                             ${r.qty}
                                         </span>
-                                        <button class="cm-plus flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-xl 
-                                                    bg-choco text-white hover:bg-[#8a1003] transition-colors 
+                                        <button class="cm-plus flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg 
+                                                    bg-[#ae1504] text-white hover:bg-[#8a1103] transition-colors 
                                                     shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                                 ${reachedMax ? 'disabled' : ''}
                                                 aria-label="Tambah">
@@ -1875,7 +2013,7 @@
                     return rupiahFmt.format(n || 0);
                 }
 
-                // --- Render isi modal checkout ---
+                // --- Render isi modal checkout --- 
                 function renderCheckoutModal() {
                     const body = document.getElementById('checkoutBody');
                     const totalEl = document.getElementById('checkoutGrandTotal');
@@ -2163,6 +2301,7 @@
 
                         if (paymentMethod === 'QRIS') {
                             if (res.success) {
+                                clearCartFromStorage();
                                 return window.location.href = res.redirect_url;
                             } else {
                                 return Swal.fire({
@@ -2179,6 +2318,7 @@
 
                         // Ekspektasi terbaik: controller mengembalikan { redirect: "..." }
                         if (res?.redirect) {
+                            clearCartFromStorage();
                             window.location.assign(res.redirect);
                             return;
                         }
@@ -2264,6 +2404,29 @@
                 checkoutModal.addEventListener('click', (e) => {
                     if (e.target === checkoutModal) closeCheckoutModal();
                 });
+
+                // Restore cart dari storage 
+                function restoreCartOnLoad() {
+                    const savedCart = loadCartFromStorage();
+                    
+                    if (savedCart && savedCart.items) {
+                        cart = savedCart.items;
+                        lastKeyPerProduct = savedCart.lastKeyPerProduct || {};
+                        
+                        for (const key in cart) {
+                            const row = cart[key];
+                            if (row && row.productId) {
+                                updateProductBadge(row.productId);
+                            }
+                        }
+                        
+                        updateFloatingCartBar();
+                        console.log('Cart restored:', cart);
+                    }
+                }
+                
+                // Panggil restore cart
+                restoreCartOnLoad();
 
                 //reorder
                 (function applyReorderOnLoad() {
@@ -2585,19 +2748,51 @@
                     if (!noResEl) {
                         noResEl = document.createElement('div');
                         noResEl.id = 'noResultBanner';
-                        noResEl.className = 'p-6 text-center text-gray-500';
+                        noResEl.className = 'hidden'; 
                         noResEl.style.display = 'none';
                         const menuContainer = document.getElementById('menu-container');
                         if (menuContainer && menuContainer.parentNode) {
                             menuContainer.parentNode.insertBefore(noResEl, menuContainer);
                         }
                     }
+                    
                     if (show) {
-                        noResEl.innerHTML =
-                            `{{ __('messages.customer.menu.no_match_menu') }} <b>"${nq}"</b>${activeCategory!=='all' ? ' {{ __('messages.customer.menu.in_selected_category') }}' : ''}.`;
+                        // Buat konten dengan desain yang lebih menarik
+                        noResEl.innerHTML = `
+                            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                                <div class="p-8 sm:p-12 text-center">
+                                    <!-- Icon Search -->
+                                    <div class="flex justify-center mb-4">
+                                        <div class="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center">
+                                            <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Title -->
+                                    <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
+                                        {{ __('messages.customer.menu.no_results_found') }}
+                                    </h3>
+                                    
+                                    <!-- Message -->
+                                    <p class="text-gray-600 text-sm sm:text-base mb-2">
+                                        {{ __('messages.customer.menu.no_match_menu') }} <span class="font-bold text-[#ae1504]">"${nq}"</span>${activeCategory !== 'all' ? ' {{ __('messages.customer.menu.in_selected_category') }}' : ''}
+                                    </p>
+                                </div>
+                            </div>
+                        `;
+                        
                         noResEl.style.display = 'block';
+                        // Trigger fade in animation
+                        requestAnimationFrame(() => {
+                            noResEl.classList.remove('hidden');
+                            noResEl.classList.add('animate-fadeIn');
+                        });
                     } else {
                         noResEl.style.display = 'none';
+                        noResEl.classList.add('hidden');
+                        noResEl.classList.remove('animate-fadeIn');
                     }
                 }
 

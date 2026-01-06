@@ -167,7 +167,6 @@ return [
             'remaining_can_add' => 'Remaining addable: :qty (limited by :item)',
             'cart_empty' => 'Your cart is empty.',
             'checking_stock' => 'Checking stock availability…',
-
             'stock_not_enough_title' => 'Insufficient stock',
             'refresh_page' => 'Refresh page',
             'cancel' => 'Cancel',
@@ -176,7 +175,9 @@ return [
             'processing_payment' => 'Processing payment…',
             'reorder_loading' => 'Reorder is being loaded',
             'items' => 'Items',
-
+            'sold_out' => 'Sold out',
+            'low_stock' => 'Low stock',
+            'no_results_found' => 'No results found',
 
         ],
         'payment' => [
