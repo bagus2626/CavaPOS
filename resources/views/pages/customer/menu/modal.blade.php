@@ -55,7 +55,7 @@
     </div>
 </div>
 
-<!-- Cart Manager Modal - Enhanced Design -->
+<!-- Cart Manager Modal -->
 <div id="cartManagerModal" class="fixed inset-0 z-50 hidden">
     <!-- backdrop -->
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"></div>
@@ -400,16 +400,17 @@
     }
 
     /* Custom scrollbar for cart manager */
-    /* Animation for modal */
-    #cartManagerModal.show #cartManagerSheet {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 1;
-    }
+    * Animation for modal - Scale Only (sama seperti checkout modal) */
+#cartManagerModal.show #cartManagerSheet {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+}
 
-    /* Smooth transitions */
-    #cartManagerSheet {
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
+/* Smooth transitions */
+#cartManagerSheet {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
     /* Scrollbar untuk checkout modal */
 .scrollbar-thin::-webkit-scrollbar {
