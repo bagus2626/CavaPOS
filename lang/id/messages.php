@@ -173,7 +173,12 @@ return [
             'please_refresh_page_for_qty' => 'Silakan refresh halaman untuk melihat stok terbaru.',
             'checkout_confirmation' => 'Konfirmasi checkout',
             'processing_payment' => 'Memproses pembayaran…',
-            'reorder_loading' => 'Pesanan ulang sedang dimuat'
+            'reorder_loading' => 'Pesanan ulang sedang dimuat',
+            'items' => 'Item',
+            'sold_out' => 'Habis',
+            'low_stock' => 'Stok sedikit',
+            'no_results_found' => 'Tidak ada hasil yang ditemukan',
+
         ],
         'payment' => [
             'show_order_code' => 'Tunjukkan Kode Pemesanan',

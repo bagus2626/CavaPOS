@@ -3,7 +3,7 @@
 @section('title',__('messages.customer.forgot_password.forgot_password'))
 
 @section('content')
-<div class="w-full max-w-md bg-white shadow-lg rounded-lg p-6 md:p-8 my-20">
+<div class="w-full max-w-md bg-white shadow-lg rounded-lg p-6 md:p-8 my-10">
     <h2 class="text-2xl font-bold text-center mb-6">{{ __('messages.customer.forgot_password.forgot_password') }}</h2>
 
     @if (session('status'))
@@ -25,7 +25,7 @@
         </div>
 
         <button type="submit"
-                class="w-full bg-choco hover:bg-soft-choco text-white font-semibold py-2 px-4 rounded-md">
+                class="w-full bg-[#ae1504] hover:bg-[#8a1103] text-white font-semibold py-2 px-4 rounded-md">
             {{ __('messages.customer.forgot_password.send_reset_link') }}
         </button>
     </form>

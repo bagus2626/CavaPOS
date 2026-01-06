@@ -4,14 +4,14 @@
 
 @section('content')
 <div class="max-w-3xl mx-auto px-4 py-8">
-    <div class="bg-white rounded-2xl shadow p-6 md:p-8 border-t-4 border-choco">
+    <div class="bg-white rounded-2xl shadow p-6 md:p-8 border-t-4 border-[#ae1504]">
         {{-- Header --}}
         <div class="flex items-start justify-between gap-4">
             <div>
                 <h1 class="text-xl md:text-2xl font-semibold text-gray-900">
                     {{ __('messages.customer.orders.histories.order_history') }}
                 </h1>
-                <p class="text-sm text-gray-600 mt-1">
+                <p class="text-sm text-[#ae1504] mt-1">
                     {{ __('messages.customer.orders.histories.order_list_that_youve_made_in') }} <strong>{{ $partner->name }}</strong>.
                 </p>
                 <p class="text-xs text-gray-500 mt-1">
@@ -59,7 +59,7 @@
         {{-- Tombol kembali ke menu --}}
         <div class="mt-8">
             <a href="{{ route('customer.menu.index', [$partner_slug, $table_code]) }}"
-               class="inline-flex items-center px-4 py-2 rounded-lg border border-choco text-sm text-choco hover:bg-[#fee2e2]">
+               class="inline-flex items-center px-4 py-2 rounded-lg border border-[#ae1504] text-sm text-[#ae1504] hover:bg-[#fee2e2]">
                 {{ __('messages.customer.orders.histories.back_to_menu') }}
             </a>
         </div>
