@@ -4,383 +4,410 @@
 @section('page_title', __('messages.owner.products.promotions.create_new_promotion'))
 
 @section('content')
-<section class="content">
-    <div class="container-fluid owner-promo-create">
-        <div class="row">
-            <div class="col-12">
+    <div class="modern-container">
+        <div class="container-modern">
+            <!-- Header Section -->
+            <div class="page-header">
+                <div class="header-content">
+                    <h1 class="page-title">{{ __('messages.owner.products.promotions.create_new_promotion') }}</h1>
+                    <p class="page-subtitle">Create attractive promotions to boost sales and customer satisfaction.</p>
+                </div>
+            </div>
 
-                <a href="{{ route('owner.user-owner.promotions.index') }}" class="btn btn-secondary mb-3">
-                    <i class="fas fa-arrow-left mr-2"></i>{{ __('messages.owner.products.promotions.back_to_promotions') }}
-                </a>
-
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <strong>{{ __('messages.owner.products.promotions.re_check_input') }}</strong>
+            <!-- Error Messages -->
+            @if ($errors->any())
+                <div class="alert alert-danger alert-modern">
+                    <div class="alert-icon">
+                        <span class="material-symbols-outlined">error</span>
+                    </div>
+                    <div class="alert-content">
+                        <strong>{{ __('messages.owner.products.promotions.re_check_input') }}:</strong>
                         <ul class="mb-0 mt-2">
-                            @foreach ($errors->all() as $e)
-                                <li>{{ $e }}</li>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
                             @endforeach
                         </ul>
                     </div>
-                @endif
+                </div>
+            @endif
 
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">{{ __('messages.owner.products.promotions.promotion_information') }}</h3>
+            @if (session('success'))
+                <div class="alert alert-success alert-modern">
+                    <div class="alert-icon">
+                        <span class="material-symbols-outlined">check_circle</span>
                     </div>
+                    <div class="alert-content">
+                        {{ session('success') }}
+                    </div>
+                </div>
+            @endif
 
-                    <form action="{{ route('owner.user-owner.promotions.store') }}" method="POST" id="promotionForm" novalidate>
-                        @csrf
+            <!-- Main Card -->
+            <div class="modern-card">
+                <form action="{{ route('owner.user-owner.promotions.store') }}" method="POST" id="promotionForm">
+                    @csrf
+                    <div class="card-body-modern">
 
-                        <div class="card-body">
-                            {{-- Promotion Name --}}
-                            <div class="form-group">
-                                <label for="promotion_name" class="required">{{ __('messages.owner.products.promotions.promotion_name') }}</label>
-                                <input type="text"
-                                       class="form-control @error('promotion_name') is-invalid @enderror"
-                                       id="promotion_name"
-                                       name="promotion_name"
-                                       value="{{ old('promotion_name') }}"
-                                       placeholder="{{ __('messages.owner.products.promotions.promotion_name_placeholder') }}"
-                                       required
-                                       maxlength="150">
-                                @error('promotion_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        <!-- Promotion Information Section -->
+                        <div class="section-header">
+                            <div class="section-icon section-icon-red">
+                                <span class="material-symbols-outlined">sell</span>
+                            </div>
+                            <h3 class="section-title">
+                                {{ __('messages.owner.products.promotions.promotion_information') }}
+                            </h3>
+                        </div>
+
+                        <div class="row g-4">
+                            <!-- Promotion Name -->
+                            <div class="col-md-12">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">
+                                        {{ __('messages.owner.products.promotions.promotion_name') }}
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" name="promotion_name" id="promotion_name"
+                                        class="form-control-modern @error('promotion_name') is-invalid @enderror"
+                                        value="{{ old('promotion_name') }}"
+                                        placeholder="{{ __('messages.owner.products.promotions.promotion_name_placeholder') }}"
+                                        maxlength="150" required>
+                                    @error('promotion_name')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
 
-                            {{-- Type & Value --}}
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group mb-0">
-                                        <label for="promotion_type" class="required">{{ __('messages.owner.products.promotions.promotion_type') }}</label>
-                                        <select id="promotion_type"
-                                                name="promotion_type"
-                                                class="form-control @error('promotion_type') is-invalid @enderror"
-                                                required>
+                            <!-- Promotion Type -->
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">
+                                        {{ __('messages.owner.products.promotions.promotion_type') }}
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="select-wrapper">
+                                        <select name="promotion_type" id="promotion_type"
+                                            class="form-control-modern @error('promotion_type') is-invalid @enderror"
+                                            required>
                                             <option value="">{{ __('messages.owner.products.promotions.select_type_dropdown') }}</option>
-                                            <option value="percentage" {{ old('promotion_type') === 'percentage' ? 'selected' : '' }}>{{ __('messages.owner.products.promotions.percentage') }} (%)</option>
-                                            <option value="amount" {{ old('promotion_type') === 'amount' ? 'selected' : '' }}>{{ __('messages.owner.products.promotions.reduced_fare') }} (Rp)</option>
+                                            <option value="percentage" {{ old('promotion_type') === 'percentage' ? 'selected' : '' }}>
+                                                {{ __('messages.owner.products.promotions.percentage') }} (%)
+                                            </option>
+                                            <option value="amount" {{ old('promotion_type') === 'amount' ? 'selected' : '' }}>
+                                                {{ __('messages.owner.products.promotions.reduced_fare') }} (Rp)
+                                            </option>
                                         </select>
-                                        @error('promotion_type') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                        <span class="material-symbols-outlined select-arrow">expand_more</span>
+                                    </div>
+                                    @error('promotion_type')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Promotion Value -->
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">
+                                        {{ __('messages.owner.products.promotions.promotion_value') }}
+                                        <span class="text-danger">*</span>
+                                    </label>
+
+                                    <div class="input-wrapper" id="valueInputWrapper">
+                                        <span class="input-icon" id="prefixAmount" style="display:none;">
+                                            Rp
+                                        </span>
+
+                                        <input type="number"
+                                            class="form-control-modern @error('promotion_value') is-invalid @enderror"
+                                            id="promotion_value"
+                                            name="promotion_value"
+                                            value="{{ old('promotion_value') }}"
+                                            inputmode="numeric"
+                                            required>
+
+                                        <span class="input-icon"
+                                            id="suffixPercent"
+                                            style="display:none; left:auto; right:1rem;">
+                                            %
+                                        </span>
+                                    </div>
+
+                                    <small class="text-muted d-block mt-1" id="valueHelp">
+                                        @if(old('promotion_type') === 'amount')
+                                            {{ __('messages.owner.products.promotions.reduced_fare_example') }}
+                                        @else
+                                            {{ __('messages.owner.products.promotions.percentage_example') }}
+                                        @endif
+                                    </small>
+
+                                    @error('promotion_value')
+                                        <div class="invalid-feedback d-block">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
+                                </div>
+                            </div>
+
+
+                            <!-- Description -->
+                            <div class="col-md-12">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">
+                                        {{ __('messages.owner.products.promotions.description') }}
+                                    </label>
+                                    <textarea name="description" id="description"
+                                        class="form-control-modern @error('description') is-invalid @enderror"
+                                        rows="4"
+                                        placeholder="{{ __('messages.owner.products.promotions.description_placeholder') }}">{{ old('description') }}</textarea>
+                                    @error('description')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Divider -->
+                        <div class="section-divider"></div>
+
+                        <!-- Validity Period Section -->
+                        <div class="account-section">
+                            <div class="section-header">
+                                <div class="section-icon section-icon-red">
+                                    <span class="material-symbols-outlined">schedule</span>
+                                </div>
+                                <h3 class="section-title">Validity Period</h3>
+                            </div>
+
+                            @php $usesExpiryInit = old('uses_expiry', 0); @endphp
+
+                            <div class="row g-4">
+                                <!-- Uses Expiry Toggle -->
+                                <div class="col-md-12">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern d-block">
+                                            {{ __('messages.owner.products.promotions.is_use_expiry') }}
+                                        </label>
+
+                                        <input type="hidden" name="uses_expiry" value="0">
+
+                                        <div class="status-switch">
+                                            <label class="switch-modern">
+                                                <input type="checkbox"
+                                                    id="uses_expiry"
+                                                    name="uses_expiry"
+                                                    value="1"
+                                                    {{ $usesExpiryInit ? 'checked' : '' }}>
+                                                <span class="slider-modern"></span>
+                                            </label>
+
+                                            <span class="status-label">
+                                                {{ $usesExpiryInit ? 'Enabled' : 'Disabled' }}
+                                            </span>
+                                        </div>
+
+                                        <small class="text-muted d-block mt-1">
+                                            {{ __('messages.owner.products.promotions.activate_if_has_expiry') }}
+                                        </small>
                                     </div>
                                 </div>
 
-                                <div class="col-md-6">
-                                    <div class="form-group mb-0">
-                                        <label for="promotion_value" class="required">{{ __('messages.owner.products.promotions.promotion_value') }}</label>
+                                <!-- Start Date -->
+                                <div class="col-md-6" id="startDateGroup" style="{{ $usesExpiryInit ? '' : 'display:none;' }}">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            {{ __('messages.owner.products.promotions.start_date') }}
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="datetime-local"
+                                            class="form-control-modern @error('start_date') is-invalid @enderror"
+                                            id="start_date"
+                                            name="start_date"
+                                            value="{{ old('start_date') }}">
+                                        @error('start_date')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
 
-                                        <div class="input-group">
-                                            <div class="input-group-prepend" id="prefixAmount" style="display:none;">
-                                                <span class="input-group-text">Rp</span>
-                                            </div>
-
-                                            <input type="number"
-                                                    class="form-control text-right @error('promotion_value') is-invalid @enderror"
-                                                    id="promotion_value"
-                                                    name="promotion_value"
-                                                    value="{{ old('promotion_value') }}"
-                                                    inputmode="numeric"
-                                                    required>
-
-                                            <div class="input-group-append" id="suffixPercent" style="display:none;">
-                                                <span class="input-group-text">%</span>
-                                            </div>
-                                        </div>
-
-                                        <small class="form-text text-muted mt-1" id="valueHelp">
-                                            @if(old('promotion_type') === 'amount')
-                                                {{ __('messages.owner.products.promotions.reduced_fare_example') }}
-                                            @else
-                                                {{ __('messages.owner.products.promotions.percentage_example') }}
-                                            @endif
+                                <!-- End Date -->
+                                <div class="col-md-6" id="endDateGroup" style="{{ $usesExpiryInit ? '' : 'display:none;' }}">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            {{ __('messages.owner.products.promotions.end_date') }}
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="datetime-local"
+                                            class="form-control-modern @error('end_date') is-invalid @enderror"
+                                            id="end_date"
+                                            name="end_date"
+                                            value="{{ old('end_date') }}">
+                                        @error('end_date')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                        <small class="text-muted d-block mt-1">
+                                            {{ __('messages.owner.products.promotions.end_date_alert') }}
                                         </small>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <hr>
 
-                            {{-- Uses Expiry --}}
-                            <div class="form-group mb-1">
-                                <!-- hidden agar selalu terkirim 0 -->
-                                <input type="hidden" name="uses_expiry" value="0">
+                        <!-- Divider -->
+                        <div class="section-divider"></div>
 
-                                <div class="custom-control custom-switch">
-                                    <input type="checkbox"
-                                        class="custom-control-input"
-                                        id="uses_expiry"
-                                        name="uses_expiry"
-                                        value="1"
-                                        {{ old('uses_expiry') ? 'checked' : '' }}>
-                                    <label class="custom-control-label" for="uses_expiry">
-                                        {{ __('messages.owner.products.promotions.is_use_expiry') }}
-                                    </label>
+                        <div class="account-section">
+                            <div class="section-header">
+                                <div class="section-icon section-icon-red">
+                                    <span class="material-symbols-outlined">calendar_month</span>
                                 </div>
-                                <small class="text-muted">{{ __('messages.owner.products.promotions.activate_if_has_expiry') }}</small>
+                                <h3 class="section-title">
+                                    {{ __('messages.owner.products.promotions.active_day') }}
+                                </h3>
                             </div>
 
-                            {{-- Date Range (shown only if uses_expiry = true) --}}
-                            <div id="dateRangeWrap" class="{{ old('uses_expiry') ? '' : 'd-none' }}">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group mb-0">
-                                            <label for="start_date" class="required">{{ __('messages.owner.products.promotions.start_date') }}</label>
-                                            <input type="datetime-local"
-                                                   class="form-control @error('start_date') is-invalid @enderror"
-                                                   id="start_date"
-                                                   name="start_date"
-                                                   value="{{ old('start_date') }}">
-                                            @error('start_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            @php
+                                $daysMap = [
+                                    'sun' => __('messages.owner.products.promotions.sunday'),
+                                    'mon' => __('messages.owner.products.promotions.monday'),
+                                    'tue' => __('messages.owner.products.promotions.tuesday'),
+                                    'wed' => __('messages.owner.products.promotions.wednesday'),
+                                    'thu' => __('messages.owner.products.promotions.thursday'),
+                                    'fri' => __('messages.owner.products.promotions.friday'),
+                                    'sat' => __('messages.owner.products.promotions.saturday'),
+                                ];
+
+                                // CREATE: tidak ada $data
+                                $selectedDays = old('active_days', []);
+                                $isEveryDay = is_array($selectedDays) && count($selectedDays) === 7;
+                            @endphp
+
+                            <div class="row g-4">
+                                <div class="col-md-12">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern d-block">
+                                            {{ __('messages.owner.products.promotions.every_day') }}
+                                        </label>
+
+                                        <div class="status-switch mb-3">
+                                            <label class="switch-modern">
+                                                <input type="checkbox"
+                                                    id="every_day"
+                                                    {{ $isEveryDay ? 'checked' : '' }}>
+                                                <span class="slider-modern"></span>
+                                            </label>
+
+                                            <span class="status-label">
+                                                {{ $isEveryDay ? 'All Days Selected' : 'Custom Days' }}
+                                            </span>
                                         </div>
+
+                                        <small class="text-muted d-block mb-3">
+                                            {{ __('messages.owner.products.promotions.tick') }}
+                                            <em>"{{ __('messages.owner.products.promotions.every_day') }}"</em>
+                                            {{ __('messages.owner.products.promotions.to_activate_promo_everyday') }}
+                                        </small>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group mb-0">
-                                            <label for="end_date" class="required">{{ __('messages.owner.products.promotions.end_date') }}</label>
-                                            <input type="datetime-local"
-                                                   class="form-control @error('end_date') is-invalid @enderror"
-                                                   id="end_date"
-                                                   name="end_date"
-                                                   value="{{ old('end_date') }}">
-                                            @error('end_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                        </div>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <div id="days_grid" class="row g-3">
+                                        @foreach($daysMap as $key => $label)
+                                            <div class="col-md-3 col-6">
+                                                <div class="form-group-modern">
+                                                    <label class="form-label-modern d-block">
+                                                        {{ $label }}
+                                                    </label>
+
+                                                    <div class="status-switch">
+                                                        <label class="switch-modern">
+                                                            <input type="checkbox"
+                                                                class="day-checkbox"
+                                                                id="day_{{ $key }}"
+                                                                name="active_days[]"
+                                                                value="{{ $key }}"
+                                                                {{ in_array($key, $selectedDays, true) ? 'checked' : '' }}>
+                                                            <span class="slider-modern"></span>
+                                                        </label>
+
+                                                        <span class="status-label day-status-{{ $key }}">
+                                                            {{ in_array($key, $selectedDays, true) ? 'Active' : 'Inactive' }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
                                     </div>
-                                </div>
-                                <small class="text-muted">{{ __('messages.owner.products.promotions.end_date_alert') }}</small>
-                            </div>
 
-                            <hr>
-
-                            {{-- Is Active --}}
-                            <div class="form-group">
-                                <div class="custom-control custom-switch">
-                                    <input type="checkbox"
-                                           class="custom-control-input"
-                                           id="is_active"
-                                           name="is_active"
-                                           value="1"
-                                           {{ old('is_active', 1) ? 'checked' : '' }}>
-                                    <label class="custom-control-label" for="is_active">{{ __('messages.owner.products.promotions.activate_promotion') }}</label>
-                                </div>
-                                <small class="text-muted">{{ __('messages.owner.products.promotions.if_inactive_promo_disabled') }}</small>
-                            </div>
-
-                            {{-- Active Days --}}
-                            <hr>
-                            <div class="form-group">
-                                <label class="d-block">{{ __('messages.owner.products.promotions.active_day') }}</label>
-
-                                @php
-                                    $daysMap = [
-                                        'sun' => __('messages.owner.products.promotions.sunday'),
-                                        'mon' => __('messages.owner.products.promotions.monday'),
-                                        'tue' => __('messages.owner.products.promotions.tuesday'),
-                                        'wed' => __('messages.owner.products.promotions.wednesday'),
-                                        'thu' => __('messages.owner.products.promotions.thursday'),
-                                        'fri' => __('messages.owner.products.promotions.friday'),
-                                        'sat' => __('messages.owner.products.promotions.saturday'),
-                                    ];
-                                    $selectedDays = old('active_days', []);
-                                    $isEveryDay = count($selectedDays) === 7; // auto-detect
-                                @endphp
-
-                                <div class="custom-control custom-checkbox mb-2">
-                                    <input type="checkbox"
-                                        class="custom-control-input"
-                                        id="every_day"
-                                        {{ $isEveryDay ? 'checked' : '' }}>
-                                    <label class="custom-control-label" for="every_day">{{ __('messages.owner.products.promotions.every_day') }}</label>
-                                </div>
-
-                                <div id="days_grid" class="d-flex flex-wrap gap-2">
-                                    @foreach($daysMap as $key => $label)
-                                        <div class="custom-control custom-checkbox mr-3 mb-2">
-                                            <input type="checkbox"
-                                                class="custom-control-input day-checkbox"
-                                                id="day_{{ $key }}"
-                                                name="active_days[]"
-                                                value="{{ $key }}"
-                                                {{ in_array($key, $selectedDays, true) ? 'checked' : '' }}>
-                                            <label class="custom-control-label" for="day_{{ $key }}">{{ $label }}</label>
+                                    @error('active_days')
+                                        <div class="text-danger small mt-2">
+                                            {{ $message }}
                                         </div>
-                                    @endforeach
+                                    @enderror
                                 </div>
-
-                                <small class="text-muted d-block">
-                                    {{ __('messages.owner.products.promotions.tick') }} <em>"{{ __('messages.owner.products.promotions.every_day') }}"</em> {{ __('messages.owner.products.promotions.to_activate_promo_everyday') }}
-                                </small>
-
-                                @error('active_days') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
-                                @error('active_days.*') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
-                            </div>
-
-
-                            {{-- Description --}}
-                            <div class="form-group">
-                                <label for="description">{{ __('messages.owner.products.promotions.description') }}</label>
-                                <textarea id="description"
-                                          name="description"
-                                          class="form-control @error('description') is-invalid @enderror"
-                                          rows="3"
-                                          placeholder="{{ __('messages.owner.products.promotions.description_placeholder') }}">{{ old('description') }}</textarea>
-                                @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                         </div>
 
-                        <div class="card-footer text-right">
-                            <button type="reset" class="btn btn-outline-secondary mr-2">
-                                <i class="fas fa-undo mr-1"></i>{{ __('messages.owner.products.promotions.reset') }}
-                            </button>
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-save mr-1"></i>{{ __('messages.owner.products.promotions.create_promotion') }}
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                        <!-- Divider -->
+                        <div class="section-divider"></div>
 
+                        <!-- Activation Status Section -->
+                        <div class="account-section">
+                            <div class="section-header">
+                                <div class="section-icon section-icon-red">
+                                    <span class="material-symbols-outlined">toggle_on</span>
+                                </div>
+                                <h3 class="section-title">Status</h3>
+                            </div>
+
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern d-block">
+                                            {{ __('messages.owner.products.promotions.activate_promotion') }}
+                                        </label>
+
+                                        <input type="hidden" name="is_active" value="0">
+
+                                        <div class="status-switch">
+                                            <label class="switch-modern">
+                                                <input type="checkbox"
+                                                    id="is_active"
+                                                    name="is_active"
+                                                    value="1"
+                                                    {{ old('is_active', 1) ? 'checked' : '' }}>
+                                                <span class="slider-modern"></span>
+                                            </label>
+
+                                            <span class="status-label" id="statusLabel">
+                                                {{ old('is_active', 1) ? 'Active' : 'Inactive' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                    <!-- Card Footer -->
+                    <div class="card-footer-modern">
+                        <a href="{{ route('owner.user-owner.promotions.index') }}" class="btn-cancel-modern">
+                            {{ __('messages.owner.products.promotions.back_to_promotions') }}
+                        </a>
+                        <button type="submit" class="btn-submit-modern">
+
+                            {{ __('messages.owner.products.promotions.create_promotion') }}
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-</section>
-
-<style>
-/* ===== Owner › Promotion Create (page scope) ===== */
-.owner-promo-create{
-  --choco:#8c1000; --soft-choco:#c12814; --ink:#22272b; --paper:#fff;
-  --radius:12px; --shadow:0 6px 20px rgba(0,0,0,.08);
-}
-
-/* Card */
-.owner-promo-create .card{
-  border:0; border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; background:var(--paper);
-}
-.owner-promo-create .card-header{
-  background:#fff; border-bottom:1px solid #eef1f4;
-}
-.owner-promo-create .card-title{ color:var(--ink); font-weight:700; }
-
-/* Alerts */
-.owner-promo-create .alert{
-  border-left:4px solid var(--choco); border-radius:10px;
-}
-
-.btn-secondary{
-  background:var(--choco); border-color:var(--choco);
-}
-.btn-secondary:hover{
-  background:var(--soft-choco); border-color:var(--soft-choco);
-}
-
-/* Buttons – brand choco */
-.owner-promo-create .btn-primary,
-.owner-promo-create .btn-success{
-  background:var(--choco); border-color:var(--choco);
-}
-.owner-promo-create .btn-primary:hover,
-.owner-promo-create .btn-success:hover{
-  background:var(--soft-choco); border-color:var(--soft-choco);
-}
-.owner-promo-create .btn-outline-secondary{
-  border-color:#cbd5e1; color:#374151; background:#fff;
-}
-.owner-promo-create .btn-outline-secondary:hover{
-  color:#fff; background:#6b7280; border-color:#6b7280;
-}
-
-/* Fields */
-.owner-promo-create .form-group label{ font-weight:600; color:#374151; }
-.owner-promo-create .required::after{ content:" *"; color:#dc3545; }
-.owner-promo-create .form-control:focus{
-  border-color:var(--choco);
-  box-shadow:0 0 0 .2rem rgba(140,16,0,.15);
-}
-
-/* Input group cosmetics (Rp / %) */
-.owner-promo-create .input-group-text{
-  background:rgba(140,16,0,.08); color:var(--choco);
-  border-color:rgba(140,16,0,.25);
-}
-
-/* Switch (Bootstrap 4 custom switches) -> choco */
-.owner-promo-create .custom-control-input:focus ~ .custom-control-label::before{
-  box-shadow:0 0 0 .2rem rgba(140,16,0,.15);
-  border-color:var(--choco);
-}
-.owner-promo-create .custom-control-input:checked ~ .custom-control-label::before{
-  background-color:var(--choco); border-color:var(--choco);
-}
-/* Sedikit “iOS-ish” ukuran */
-.owner-promo-create .custom-switch .custom-control-label{
-  padding-left: 1rem;  /* harus > |left| agar switch masuk area label */
-  min-height: 1.8rem;
-}
-.owner-promo-create .custom-switch .custom-control-label::before{
-  width:2.6rem; height:1.4rem; left:-2rem; top:.12rem; border-radius:1.4rem;
-}
-.owner-promo-create .custom-switch .custom-control-label::after{
-  width:1rem; height:1rem; left:calc(-2rem + .2rem); top:.33rem; border-radius:50%;
-}
-.owner-promo-create .custom-control-input:checked ~ .custom-control-label::after{
-  transform:translateX(1.2rem); /* 2.6 - 1.4 = 1.2 */
-}
-
-
-/* Date range wrapper (saat ditampilkan) */
-.owner-promo-create #dateRangeWrap{
-  background:#fff; border:1px solid #eef1f4; border-left:4px solid var(--choco);
-  border-radius:10px; padding: .85rem; margin-top:.5rem;
-}
-
-/* Days grid (checkbox harian) */
-.owner-promo-create #days_grid .custom-control{
-  min-width: 140px;
-}
-
-/* Footer buttons radius */
-.owner-promo-create .card-footer .btn{ border-radius:10px; }
-
-/* Small text */
-.owner-promo-create .text-muted{ color:#6b7280 !important; }
-
-
-/* Kembalikan radius saat tidak ada prefix & suffix */
-.owner-promo-create .input-group:not(.has-prefix):not(.has-suffix) > .form-control{
-  border-radius: .25rem !important;
-}
-
-/* Saat HANYA prefix (Rp) yang aktif, sudut kanan input bulat lagi */
-.owner-promo-create .input-group.has-prefix:not(.has-suffix) > .form-control{
-  border-top-right-radius: .25rem !important;
-  border-bottom-right-radius: .25rem !important;
-}
-.owner-promo-create .input-group.has-prefix .input-group-prepend .input-group-text{
-  border-top-left-radius: .25rem;
-  border-bottom-left-radius: .25rem;
-}
-
-/* Saat HANYA suffix (%) yang aktif, sudut kiri input bulat lagi */
-.owner-promo-create .input-group.has-suffix:not(.has-prefix) > .form-control{
-  border-top-left-radius: .25rem !important;
-  border-bottom-left-radius: .25rem !important;
-}
-.owner-promo-create .input-group.has-suffix .input-group-append .input-group-text{
-  border-top-right-radius: .25rem;
-  border-bottom-right-radius: .25rem;
-}
-
-/* RESET untuk semua (agar checkbox/radio normal) */
-.owner-promo-create .custom-control-input:checked ~ .custom-control-label::after{
-  transform:none;
-}
-
-/* KHUSUS SWITCH: geser knob saat checked */
-.owner-promo-create .custom-switch .custom-control-input:checked ~ .custom-control-label::after{
-  transform: translateX(1.2rem);
-}
-
-</style>
 @endsection
 
-
-@section('scripts')
+@push('scripts')
 <script>
 (function () {
     const typeSel   = document.getElementById('promotion_type');
@@ -391,41 +418,34 @@
 
     function applyTypeUI() {
         const t = typeSel.value;
-        const ig = document.getElementById('promotion_value').closest('.input-group');
 
         if (t === 'percentage') {
             prefixAmt.style.display = 'none';
             suffixPct.style.display = '';
-            ig.classList.remove('has-prefix');
-            ig.classList.add('has-suffix');
-
-            valInput.min = '1'; valInput.max = '100'; valInput.step = '1';
+            valInput.min = '1';
+            valInput.max = '100';
+            valInput.step = '1';
             helpText.textContent = '{{ __('messages.owner.products.promotions.percentage_example') }}';
             if (valInput.value && (+valInput.value > 100)) valInput.value = 100;
-
         } else if (t === 'amount') {
             prefixAmt.style.display = '';
             suffixPct.style.display = 'none';
-            ig.classList.add('has-prefix');
-            ig.classList.remove('has-suffix');
-
             valInput.removeAttribute('max');
-            valInput.min = '0'; valInput.step = '1';
+            valInput.min = '0';
+            valInput.step = '1';
             helpText.textContent = '{{ __('messages.owner.products.promotions.reduced_fare_example') }}';
-
         } else {
             prefixAmt.style.display = 'none';
             suffixPct.style.display = 'none';
-            ig.classList.remove('has-prefix', 'has-suffix');
-            valInput.removeAttribute('min'); valInput.removeAttribute('max');
+            valInput.removeAttribute('min');
+            valInput.removeAttribute('max');
             helpText.textContent = '';
         }
     }
 
-
     if (typeSel) {
         typeSel.addEventListener('change', applyTypeUI);
-        applyTypeUI(); // initial
+        applyTypeUI();
     }
 
     // Uses expiry toggle
@@ -440,16 +460,15 @@
         [startDate, endDate].forEach(el => {
             if (!el) return;
             el.required = show;
-            if (!show) el.value = el.value; // no-op to keep old value when hiding
         });
     }
 
     if (usesExpiry) {
         usesExpiry.addEventListener('change', toggleDateRange);
-        toggleDateRange(); // initial
+        toggleDateRange();
     }
 
-    // Optional: client-side guard end > start
+    // Form validation
     const form = document.getElementById('promotionForm');
     if (form) {
         form.addEventListener('submit', function (e) {
@@ -465,26 +484,53 @@
         });
     }
 
-    const everyDay = document.getElementById('every_day');
-    const dayCheckboxes = Array.from(document.querySelectorAll('.day-checkbox'));
+   // Active days logic (ENHANCED)
+const everyDay = document.getElementById('every_day');
+const dayCheckboxes = Array.from(document.querySelectorAll('.day-checkbox'));
 
-    function setAllDays(checked) {
-        dayCheckboxes.forEach(cb => cb.checked = checked);
-    }
-    function syncEveryDayFromDays() {
-        const allChecked = dayCheckboxes.length > 0 && dayCheckboxes.every(cb => cb.checked);
-        everyDay.checked = allChecked;
+if (everyDay && dayCheckboxes.length) {
+    const everyDayStatusLabel = everyDay
+        .closest('.status-switch')
+        .querySelector('.status-label');
+
+    function updateDayStatuses() {
+        let checkedCount = 0;
+
+        dayCheckboxes.forEach(cb => {
+            const statusLabel = document.querySelector('.day-status-' + cb.value);
+
+            if (cb.checked) {
+                checkedCount++;
+                if (statusLabel) statusLabel.textContent = 'Active';
+            } else {
+                if (statusLabel) statusLabel.textContent = 'Inactive';
+            }
+        });
+
+        if (checkedCount === dayCheckboxes.length) {
+            everyDay.checked = true;
+            everyDayStatusLabel.textContent = 'All Days Selected';
+        } else {
+            everyDay.checked = false;
+            everyDayStatusLabel.textContent = 'Custom Days';
+        }
     }
 
-    if (everyDay) {
-        everyDay.addEventListener('change', () => setAllDays(everyDay.checked));
-    }
-    dayCheckboxes.forEach(cb => {
-        cb.addEventListener('change', syncEveryDayFromDays);
+    // Toggle Every Day → check/uncheck all
+    everyDay.addEventListener('change', function () {
+        dayCheckboxes.forEach(cb => cb.checked = everyDay.checked);
+        updateDayStatuses();
     });
 
-    // initial sync (kalau datang dari old())
-    syncEveryDayFromDays();
+    // Toggle individual day
+    dayCheckboxes.forEach(cb => {
+        cb.addEventListener('change', updateDayStatuses);
+    });
+
+    // Initial sync
+    updateDayStatuses();
+}
+
 })();
 </script>
-@endsection
+@endpush

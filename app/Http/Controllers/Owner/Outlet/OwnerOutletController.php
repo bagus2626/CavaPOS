@@ -218,9 +218,29 @@ class OwnerOutletController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(User $outlet)
     {
-        //
+        // Pastikan yang diakses adalah outlet (partner)
+        abort_if($outlet->role !== 'partner', 404);
+
+        // Pastikan outlet milik owner yang sedang login
+        abort_if($outlet->owner_id !== Auth::id(), 403);
+
+        // Tentukan qr_mode berdasarkan kombinasi is_qr_active dan is_cashier_active
+        if ($outlet->is_qr_active && $outlet->is_cashier_active) {
+            $outlet->qr_mode = 'both';
+        } elseif ($outlet->is_qr_active) {
+            $outlet->qr_mode = 'barcode_only';
+        } elseif ($outlet->is_cashier_active) {
+            $outlet->qr_mode = 'cashier_only';
+        } else {
+            $outlet->qr_mode = 'disabled';
+        }
+
+        // Load relasi profile outlet
+        $outlet->load('profileOutlet');
+
+        return view('pages.owner.outlet.show', compact('outlet'));
     }
 
     /**

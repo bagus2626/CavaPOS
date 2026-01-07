@@ -41,62 +41,43 @@ class OwnerOutletProductController extends Controller
         $this->recalculationService = $recalculationService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $owner   = Auth::user();
+        $owner = Auth::user();
 
+        // Get all outlets
         $outlets = User::where('owner_id', $owner->id)
             ->select('id', 'name')
             ->orderBy('name')
             ->get();
 
+        // Get categories
         $categories = Category::where('owner_id', $owner->id)
             ->orderBy('category_name')
             ->get();
 
-        $promotions = Promotion::where('owner_id', $owner->id)->get();
+        // Determine current outlet (default to first outlet)
+        $currentOutletId = $request->get('outlet_id') ?? $outlets->first()->id ?? null;
+
+        // Get products for current outlet
+        $products = collect();
+        if ($currentOutletId) {
+            $query = PartnerProduct::with(['category', 'promotion', 'stock.displayUnit'])
+                ->where('owner_id', $owner->id)
+                ->where('partner_id', $currentOutletId)
+                ->orderBy('name');
+
+            $products = $query->paginate(10);
+        }
 
         return view('pages.owner.products.outlet-product.index', compact(
             'outlets',
             'categories',
-            'promotions'
+            'products',
+            'currentOutletId'
         ));
     }
 
-    public function list(Request $request)
-    {
-        $owner      = Auth::user();
-        $outletId   = $request->get('outlet_id');
-        $categoryId = $request->get('category_id', 'all');
-        $perPage    = 5;
-
-        if (!$outletId) {
-            return response()->json([
-                'html' => '<tbody><tr><td colspan="8" class="text-center text-muted">Outlet tidak ditemukan.</td></tr></tbody>'
-            ]);
-        }
-
-        $query = PartnerProduct::with(['category', 'promotion', 'stock.displayUnit'])
-            ->where('owner_id', $owner->id)
-            ->where('partner_id', $outletId);
-
-        if ($categoryId !== 'all') {
-            $query->where('category_id', $categoryId);
-        }
-
-        $products = $query->orderBy('name')->paginate($perPage);
-        // dd($products->toArray());
-
-        $html = view('pages.owner.products.outlet-product._table', [
-            'products'   => $products,
-            'outletId'   => $outletId,   // ⬅️ WAJIB
-            'categoryId' => $categoryId, // ⬅️ WAJIB
-        ])->render();
-
-        return response()->json([
-            'html' => $html,
-        ]);
-    }
 
 
 
@@ -114,23 +95,26 @@ class OwnerOutletProductController extends Controller
             'outlet_id'   => 'required|integer|exists:users,id',
         ]);
 
-        $existing_outlet_products = PartnerProduct::where('partner_id', $request->outlet_id)
+        // Get existing outlet products to exclude
+        $existingProducts = PartnerProduct::where('partner_id', $request->outlet_id)
             ->whereNotNull('master_product_id')
             ->pluck('master_product_id')
             ->toArray();
 
         $ownerId = Auth::id();
 
+        // Query master products
         $list = MasterProduct::query()
             ->where('owner_id', $ownerId)
             ->when($request->category_id !== 'all', function ($query) use ($request) {
                 $query->where('category_id', $request->category_id);
             })
-            ->whereNotIn('id', $existing_outlet_products)
+            ->whereNotIn('id', $existingProducts)
             ->select('id', 'name', 'pictures')
             ->orderBy('name')
             ->get()
             ->map(function ($mp) {
+                // Process pictures
                 $pictures = is_array($mp->pictures) ? $mp->pictures : [];
                 $pictures = collect($pictures)->map(function ($pic) {
                     $path = is_array($pic) ? ($pic['path'] ?? null) : null;
@@ -145,7 +129,7 @@ class OwnerOutletProductController extends Controller
                     return $pic;
                 })->values()->all();
 
-                $mp->pictures  = $pictures;
+                $mp->pictures = $pictures;
                 $mp->thumb_url = $pictures[0]['url'] ?? null;
 
                 return $mp;
