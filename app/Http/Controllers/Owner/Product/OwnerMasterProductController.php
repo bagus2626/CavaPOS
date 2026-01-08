@@ -237,35 +237,38 @@ class OwnerMasterProductController extends Controller
             $storedImages = [];
             $existingFilenames = $request->input('existing_images', []); // filenames yang dipertahankan
 
-            foreach ((array) $product->pictures as $pic) {
-                $filename   = $pic['filename'] ?? null;
-                $pathFromDb = $pic['path'] ?? null; // e.g. "storage/uploads/master-products/xxx.jpg"
+            // PERBAIKAN: Jika tidak ada gambar baru dan tidak ada existing_images yang dicentang,
+            // pertahankan gambar lama
+            if (!$request->hasFile('images') && empty($existingFilenames) && !empty($product->pictures)) {
+                $storedImages = $product->pictures; // Pertahankan semua gambar lama
+            } else {
+                // Logic existing (loop untuk filter gambar yang dipertahankan)
+                foreach ((array) $product->pictures as $pic) {
+                    $filename   = $pic['filename'] ?? null;
+                    $pathFromDb = $pic['path'] ?? null;
 
-                // Jika user memilih untuk tetap menyimpan gambar ini → keep
-                if ($filename && in_array($filename, $existingFilenames, true)) {
-                    $storedImages[] = $pic;
-                    continue;
-                }
-
-                // Jika user menghapus gambar → hapus file-nya di storage
-                if ($pathFromDb) {
-                    // Ubah "storage/uploads/..." → "uploads/..." agar cocok dengan disk('public')
-                    $relativePath = ltrim(str_replace('storage/', '', $pathFromDb), '/');
-
-                    if (Storage::disk('public')->exists($relativePath)) {
-                        Storage::disk('public')->delete($relativePath);
+                    // Jika user memilih untuk tetap menyimpan gambar ini → keep
+                    if ($filename && in_array($filename, $existingFilenames, true)) {
+                        $storedImages[] = $pic;
+                        continue;
                     }
-                } elseif ($filename) {
-                    // Fallback kalau 'path' tidak ada: tebak dari folder standar
-                    $guess = 'uploads/master-products/' . $filename;
-                    if (Storage::disk('public')->exists($guess)) {
-                        Storage::disk('public')->delete($guess);
+
+                    // Jika user menghapus gambar → hapus file-nya di storage
+                    if ($pathFromDb) {
+                        $relativePath = ltrim(str_replace('storage/', '', $pathFromDb), '/');
+                        if (Storage::disk('public')->exists($relativePath)) {
+                            Storage::disk('public')->delete($relativePath);
+                        }
+                    } elseif ($filename) {
+                        $guess = 'uploads/master-products/' . $filename;
+                        if (Storage::disk('public')->exists($guess)) {
+                            Storage::disk('public')->delete($guess);
+                        }
                     }
                 }
             }
 
-
-            // Upload gambar baru
+            // Upload gambar baru (tetap sama)
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
@@ -413,10 +416,10 @@ class OwnerMasterProductController extends Controller
             if ($partner_products) {
                 // fungsi untuk foreach partner_product
                 $this->syncPartnerProductsFromMaster(
-                    $product, 
-                    $partner_products, 
-                    $validated['apply_price_all_outlets'], 
-                    $validated['apply_promotion_all_outlets'], 
+                    $product,
+                    $partner_products,
+                    $validated['apply_price_all_outlets'],
+                    $validated['apply_promotion_all_outlets'],
                     true
                 );
             }

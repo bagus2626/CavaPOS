@@ -1,233 +1,206 @@
 @extends('layouts.owner')
-
 @section('title', __('messages.owner.products.categories.edit_category'))
 @section('page_title', __('messages.owner.products.categories.edit_category'))
 
 @section('content')
-    <section class="content">
-        <div class="container-fluid owner-category-edit"> {{-- PAGE SCOPE --}}
-
-            <form method="POST" action="{{ route('owner.user-owner.categories.update', $category) }}"
-                enctype="multipart/form-data" class="form-card">
-                @csrf
-                @method('PUT')
-
-                {{-- Category Name --}}
-                <div class="form-group">
-                    <label for="category_name"
-                        class="form-label required">{{ __('messages.owner.products.categories.category_name') }}</label>
-                    <input type="text" name="category_name" id="category_name" class="form-control"
-                        value="{{ old('category_name', $category->category_name) }}" required>
-                    @error('category_name') <div class="invalid-hint">{{ $message }}</div> @enderror
+    <div class="modern-container">
+        <div class="container-modern">
+            <!-- Header Section -->
+            <div class="page-header">
+                <div class="header-content">
+                    <h1 class="page-title">{{ __('messages.owner.products.categories.edit_category') }}</h1>
+                    <p class="page-subtitle">Update category information and settings.</p>
                 </div>
+            </div>
 
-                {{-- Description --}}
-                <div class="form-group">
-                    <label for="description"
-                        class="form-label">{{ __('messages.owner.products.categories.description') }}</label>
-                    <textarea name="description" id="description" class="form-control"
-                        rows="3">{{ old('description', $category->description) }}</textarea>
-                    @error('description') <div class="invalid-hint">{{ $message }}</div> @enderror
-                </div>
-
-                {{-- Image Section --}}
-                <div class="form-group">
-                    <label for="images" class="form-label">{{ __('messages.owner.products.categories.picture') }}</label>
-                    <input type="file" name="images" id="images" class="form-control" accept="image/*"
-                        onchange="previewImage(event)">
-
-                    <small class="text-muted d-block mt-1">
-                        {{ __('messages.owner.products.categories.note_image') }}
-                    </small>
-
-                    <div id="error-images" class="invalid-hint">
-                        @error('images'){{ $message }} @enderror
+            <!-- Error Messages -->
+            @if ($errors->any())
+                <div class="alert alert-danger alert-modern">
+                    <div class="alert-icon">
+                        <span class="material-symbols-outlined">error</span>
                     </div>
+                    <div class="alert-content">
+                        <strong>{{ __('messages.owner.products.categories.alert_error') }}:</strong>
+                        <ul class="mb-0 mt-2">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            @endif
 
-                    {{-- Wadah Tunggal untuk Gambar --}}
-                    <div class="mt-2" id="image-display-container"
-                        style="{{ ($category->images && isset($category->images['path'])) ? '' : 'display: none;' }}">
-                        <div class="position-relative d-inline-block">
-                            <img id="main-image-preview"
-                                src="{{ ($category->images && isset($category->images['path'])) ? asset($category->images['path']) : '#' }}"
-                                alt="Preview" class="thumb">
+            @if (session('success'))
+                <div class="alert alert-success alert-modern">
+                    <div class="alert-icon">
+                        <span class="material-symbols-outlined">check_circle</span>
+                    </div>
+                    <div class="alert-content">
+                        {{ session('success') }}
+                    </div>
+                </div>
+            @endif
 
-                            <button type="button" class="btn btn-danger btn-sm position-absolute"
-                                style="top: 5px; right: 5px;" onclick="clearImage()" title="Hapus gambar">
-                                <i class="fas fa-times"></i>
-                            </button>
+            <!-- Main Card -->
+            <div class="modern-card">
+                <form method="POST" action="{{ route('owner.user-owner.categories.update', $category) }}"
+                    enctype="multipart/form-data" id="categoryForm">
+                    @csrf
+                    @method('PUT')
+
+                    <div class="card-body-modern">
+                        <!-- Profile Section -->
+                        <div class="profile-section">
+                            <!-- Category Picture Upload -->
+                            <div class="profile-picture-wrapper">
+                                <div class="profile-picture-container" id="profilePictureContainer">
+                                    <div class="upload-placeholder" id="uploadPlaceholder"
+                                        style="{{ ($category->images && isset($category->images['path'])) ? 'display: none;' : '' }}">
+                                        <span class="material-symbols-outlined">add_a_photo</span>
+                                        <span class="upload-text">Upload</span>
+                                    </div>
+                                    <img id="imagePreview"
+                                        class="profile-preview {{ ($category->images && isset($category->images['path'])) ? 'active' : '' }}"
+                                        src="{{ ($category->images && isset($category->images['path'])) ? asset($category->images['path']) : '' }}"
+                                        alt="Category Preview">
+                                </div>
+                                <input type="file" name="images" id="images" accept="image/*" style="display: none;">
+                                <input type="hidden" name="keep_existing_image" id="keep_existing_image" value="1">
+                                <small class="text-muted d-block text-center mt-2">JPG, PNG, WEBP. Max 2 MB</small>
+                                @error('images')
+                                    <div class="text-danger text-center mt-1 small">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Category Information Fields -->
+                            <div class="personal-info-fields">
+                                <div class="section-header">
+                                    <div class="section-icon section-icon-red">
+                                        <span class="material-symbols-outlined">category</span>
+                                    </div>
+                                    <h3 class="section-title">Category Information</h3>
+                                </div>
+                                <div class="row g-4">
+                                    <!-- Category Name -->
+                                    <div class="col-md-12">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                {{ __('messages.owner.products.categories.category_name') }}
+                                                <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="text" name="category_name" id="category_name"
+                                                class="form-control-modern @error('category_name') is-invalid @enderror"
+                                                value="{{ old('category_name', $category->category_name) }}"
+                                                placeholder="e.g. Beverages" required>
+                                            @error('category_name')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <!-- Description -->
+                                    <div class="col-md-12">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                {{ __('messages.owner.products.categories.description') }}
+                                            </label>
+                                            <textarea name="description" id="description"
+                                                class="form-control-modern @error('description') is-invalid @enderror"
+                                                rows="3"
+                                                placeholder="Enter category description...">{{ old('description', $category->description) }}</textarea>
+                                            @error('description')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        {{-- Hidden input untuk memberi tahu backend apakah gambar lama dihapus --}}
-                        <input type="hidden" name="keep_existing_image" id="keep_existing_image" value="1">
                     </div>
-                </div>
 
-                <div class="card-footer text-right">
-                    <a href="{{ route('owner.user-owner.categories.index') }}" class="btn btn-outline-choco mr-2">
-                        {{ __('messages.owner.products.categories.back') }}
-                    </a>
-                    <button type="submit" class="btn btn-primary mr-1">
-                        {{ __('messages.owner.products.categories.update') }}
-                    </button>
-                </div>
-            </form>
+                    <!-- Card Footer -->
+                    <div class="card-footer-modern">
+                        <a href="{{ route('owner.user-owner.categories.index') }}" class="btn-cancel-modern">
+                            {{ __('messages.owner.products.categories.back') }}
+                        </a>
+                        <button type="submit" class="btn-submit-modern">
+                            {{ __('messages.owner.products.categories.update') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </section>
+    </div>
 
-    <script>
-        function previewImage(event) {
-            const input = event.target;
-            const mainPreview = document.getElementById('main-image-preview');
-            const container = document.getElementById('image-display-container');
-            const errorDisplay = document.getElementById('error-images');
-            const keepInput = document.getElementById('keep_existing_image');
-            const maxSize = 2 * 1024 * 1024; // 2MB
-
-            errorDisplay.textContent = '';
-
-            if (input.files && input.files[0]) {
-                const file = input.files[0];
-
-                // Validasi Ukuran
-                if (file.size > maxSize) {
-                    errorDisplay.textContent = '{{ __('messages.owner.products.categories.error_size_image') }}';
-                    input.value = '';
-                    // Jika ukuran salah, jangan ganggu gambar lama dulu atau sembunyikan jika sudah telanjur ganti
-                    return;
-                }
-
-                // Baca file baru
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    mainPreview.src = e.target.result;
-                    container.style.display = 'block';
-
-                    // Jika user upload baru, kita anggap tidak lagi memakai gambar lama secara default
-                    // Tapi backend Anda menangani: jika ada file baru, gambar lama otomatis dihapus.
-                    if (keepInput) keepInput.value = '0';
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function clearImage() {
-            const fileInput = document.getElementById('images');
-            const mainPreview = document.getElementById('main-image-preview');
-            const container = document.getElementById('image-display-container');
-            const keepInput = document.getElementById('keep_existing_image');
-            const errorDisplay = document.getElementById('error-images');
-
-            // 1. Reset input file
-            if (fileInput) fileInput.value = '';
-
-            // 2. Tandai di backend bahwa gambar lama harus dihapus
-            if (keepInput) keepInput.value = '0';
-
-            // 3. Sembunyikan container dan reset src
-            if (container) container.style.display = 'none';
-            if (mainPreview) mainPreview.src = '#';
-            if (errorDisplay) errorDisplay.textContent = '';
-        }
-    </script>
-
-    <style>
-        /* ===== Owner › Category Edit (page scope) ===== */
-        .owner-category-edit {
-            --choco: #8c1000;
-            --soft-choco: #c12814;
-            --ink: #22272b;
-            --radius: 12px;
-            --shadow: 0 6px 20px rgba(0, 0, 0, .08);
-        }
-
-        /* Title */
-        .owner-category-edit .page-title {
-            color: var(--ink);
-            font-weight: 500;
-        }
-
-        /* Card-ish form */
-        .owner-category-edit .form-card {
-            background: #fff;
-            border: 0;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: 1.25rem 1.25rem 1rem;
-        }
-
-        /* Labels & required mark */
-        .owner-category-edit .form-label {
-            font-weight: 600;
-            color: #374151;
-        }
-
-        .owner-category-edit .required::after {
-            content: " *";
-            color: #dc3545;
-        }
-
-        /* Inputs focus brand */
-        .owner-category-edit .form-control:focus {
-            border-color: var(--choco);
-            box-shadow: 0 0 0 .2rem rgba(140, 16, 0, .15);
-        }
-
-        /* Validation hint */
-        .owner-category-edit .invalid-hint {
-            color: #b91c1c;
-            margin-top: .25rem;
-        }
-
-        /* Buttons */
-        .owner-category-edit .btn-primary {
-            background: var(--choco);
-            border-color: var(--choco);
-        }
-
-        .owner-category-edit .btn-primary:hover {
-            background: var(--soft-choco);
-            border-color: var(--soft-choco);
-        }
-
-        .owner-category-edit .btn-outline-choco {
-            color: var(--choco);
-            border: 1px solid var(--choco);
-            background: #fff;
-        }
-
-        .owner-category-edit .btn-outline-choco:hover {
-            color: #fff;
-            background: var(--choco);
-            border-color: var(--choco);
-        }
-
-        /* Preview thumb */
-        .owner-category-edit .thumb {
-            width: 200px;
-            height: auto;
-            max-height: 200px;
-            object-fit: cover;
-            border-radius: 12px;
-            border: 0;
-            box-shadow: var(--shadow);
-        }
-
-        /* Small gaps utility */
-        .owner-category-edit .gap-2 {
-            gap: .5rem;
-        }
-
-        /* Position relative untuk button delete */
-        .owner-category-edit .position-relative {
-            position: relative;
-        }
-
-        .owner-category-edit .position-absolute {
-            position: absolute;
-        }
-
-        .owner-category-edit .d-inline-block {
-            display: inline-block;
-        }
-    </style>
 @endsection
+
+@push('scripts')
+    script src="{{ asset('js/image-cropper.js') }}"></script>
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // Initialize Category Image Cropper (1:1 Square)
+            ImageCropper.init({
+                id: 'category',
+                inputId: 'images',
+                previewId: 'imagePreview',
+                modalId: 'cropModal',
+                imageToCropId: 'imageToCrop',
+                cropBtnId: 'cropBtn',
+                containerId: 'profilePictureContainer',
+                removeInputId: 'keep_existing_image',
+                aspectRatio: 1, // Square crop
+                outputWidth: 800,
+                outputHeight: 800
+            });
+
+            // ==== Right-click to Remove Image ====
+            const profileContainer = document.getElementById('profilePictureContainer');
+            const mainPreview = document.getElementById('imagePreview');
+            const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+            const fileInput = document.getElementById('images');
+            const keepInput = document.getElementById('keep_existing_image');
+
+            if (profileContainer) {
+                profileContainer.addEventListener('contextmenu', function (e) {
+                    e.preventDefault();
+
+                    if (mainPreview && mainPreview.classList.contains('active')) {
+                        if (confirm('Remove this image?')) {
+                            mainPreview.src = '';
+                            mainPreview.classList.remove('active');
+
+                            if (uploadPlaceholder) {
+                                uploadPlaceholder.style.display = 'flex';
+                            }
+
+                            if (fileInput) {
+                                fileInput.value = '';
+                            }
+
+                            if (keepInput) {
+                                keepInput.value = '0';
+                            }
+                        }
+                    }
+                });
+            }
+
+            // ==== Form Validation ====
+            const form = document.getElementById('categoryForm');
+            const categoryName = document.getElementById('category_name');
+
+            if (form && categoryName) {
+                form.addEventListener('submit', function (e) {
+                    if (categoryName.value.trim() === '') {
+                        e.preventDefault();
+                        alert('Category name is required.');
+                        categoryName.focus();
+                        return false;
+                    }
+                });
+            }
+        });
+    </script>
+@endpush

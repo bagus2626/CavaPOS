@@ -4,210 +4,299 @@
 @section('page_title', __('messages.owner.products.stocks.movements_create_in.page_title'))
 
 @section('content')
-    <section class="content">
-        <div class="container-fluid owner-stocks">
-            <a href="{{ route('owner.user-owner.stocks.index') }}" class="btn btn-primary mb-3">
-                <i class="fas fa-arrow-left mr-2"></i>{{ __('messages.owner.products.stocks.back_to_list') }}
-            </a>
-            <form action="{{ route('owner.user-owner.stocks.movements.store') }}" method="POST" id="stockMovementForm">
-                @csrf
-                <input type="hidden" name="movement_type" value="in">
+    <div class="modern-container">
+        <div class="container-modern">
+            <!-- Header Section -->
+            <div class="page-header">
+                {{-- <a href="{{ route('owner.user-owner.stocks.index') }}" class="back-button">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    {{ __('messages.owner.products.stocks.back_to_list') }}
+                </a> --}}
+                <div class="header-content">
+                    <h1 class="page-title">{{ __('messages.owner.products.stocks.movements_create_in.page_title') }}</h1>
+                    <p class="page-subtitle">Record incoming stock to your inventory.</p>
+                </div>
+            </div>
 
-                {{-- CARD 1: DETAIL TRANSAKSI --}}
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            {{ __('messages.owner.products.stocks.movements_create_in.card_transaction_title') }}
-                        </h3>
+            <!-- Error Messages -->
+            @if ($errors->any())
+                <div class="alert alert-danger alert-modern">
+                    <div class="alert-icon">
+                        <span class="material-symbols-outlined">error</span>
                     </div>
-                    <div class="card-body">
-                        <div class="row">
-                            {{-- Lokasi Tujuan (TO) --}}
+                    <div class="alert-content">
+                        <strong>{{ __('messages.owner.user_management.employees.recheck_input') }}:</strong>
+                        <ul class="mb-0 mt-2">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            @endif
+
+            @if (session('success'))
+                <div class="alert alert-success alert-modern">
+                    <div class="alert-icon">
+                        <span class="material-symbols-outlined">check_circle</span>
+                    </div>
+                    <div class="alert-content">
+                        {{ session('success') }}
+                    </div>
+                </div>
+            @endif
+
+            <!-- Main Card -->
+            <div class="modern-card">
+                <form action="{{ route('owner.user-owner.stocks.movements.store') }}" method="POST" id="stockMovementForm">
+                    @csrf
+                    <input type="hidden" name="movement_type" value="in">
+
+                    <div class="card-body-modern">
+                        <!-- Transaction Details Section -->
+                        <div class="section-header">
+                            <div class="section-icon section-icon-red">
+                                <span class="material-symbols-outlined">receipt_long</span>
+                            </div>
+                            <h3 class="section-title">{{ __('messages.owner.products.stocks.movements_create_in.card_transaction_title') }}</h3>
+                        </div>
+
+                        <div class="row g-4">
+                            <!-- Destination Location -->
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="location_to">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">
                                         {{ __('messages.owner.products.stocks.movements_create_in.location_to_label') }}
                                         <span class="text-danger">*</span>
                                     </label>
-                                    <select name="location_to" id="location_to" class="form-control" required>
-                                        <option value="_owner">
-                                            {{ __('messages.owner.products.stocks.movements_create_in.location_owner_option') }}
-                                        </option>
-                                        @foreach ($partners as $partner)
-                                            <option value="{{ $partner->id }}">{{ $partner->name }}</option>
-                                        @endforeach
-                                    </select>
+                                    <div class="select-wrapper">
+                                        <select name="location_to" id="location_to"
+                                            class="form-control-modern @error('location_to') is-invalid @enderror"
+                                            required>
+                                            <option value="_owner">
+                                                {{ __('messages.owner.products.stocks.movements_create_in.location_owner_option') }}
+                                            </option>
+                                            @foreach ($partners as $partner)
+                                                <option value="{{ $partner->id }}">{{ $partner->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        <span class="material-symbols-outlined select-arrow">location_on</span>
+                                    </div>
+                                    @error('location_to')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
 
-                            {{-- Kategori Transaksi --}}
+                            <!-- Transaction Category -->
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="category">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">
                                         {{ __('messages.owner.products.stocks.movements_create_in.category_label') }}
                                         <span class="text-danger">*</span>
                                     </label>
-                                    <select name="category" id="category" class="form-control" required>
-                                        <option value="purchase">
-                                            {{ __('messages.owner.products.stocks.movements_create_in.category_purchase') }}
-                                        </option>
-                                        <option value="transfer_in">
-                                            {{ __('messages.owner.products.stocks.movements_create_in.category_transfer_in') }}
-                                        </option>
-                                    </select>
+                                    <div class="select-wrapper">
+                                        <select name="category" id="category"
+                                            class="form-control-modern @error('category') is-invalid @enderror"
+                                            required>
+                                            <option value="purchase">
+                                                {{ __('messages.owner.products.stocks.movements_create_in.category_purchase') }}
+                                            </option>
+                                        </select>
+                                        <span class="material-symbols-outlined select-arrow">expand_more</span>
+                                    </div>
+                                    @error('category')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
 
-                            {{-- Catatan --}}
+                            <!-- Notes -->
                             <div class="col-md-12">
-                                <div class="form-group">
-                                    <label for="notes">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">
                                         {{ __('messages.owner.products.stocks.movements_create_in.notes_label') }}
                                     </label>
-                                    <input type="text" name="notes" id="notes" class="form-control"
+                                    <input type="text" name="notes" id="notes"
+                                        class="form-control-modern @error('notes') is-invalid @enderror"
                                         placeholder="{{ __('messages.owner.products.stocks.movements_create_in.notes_placeholder') }}">
+                                    @error('notes')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                {{-- CARD 2: ITEM TRANSAKSI --}}
-                <div class="card shadow-sm">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            {{ __('messages.owner.products.stocks.movements_create_in.card_items_title') }}
-                        </h3>
-                    </div>
-                    <div class="card-body">
+                        <!-- Divider -->
+                        <div class="section-divider"></div>
+
+                        <!-- Items Section -->
+                        <div class="section-header">
+                            <div class="section-icon section-icon-red">
+                                <span class="material-symbols-outlined">inventory_2</span>
+                            </div>
+                            <h3 class="section-title">{{ __('messages.owner.products.stocks.movements_create_in.card_items_title') }}</h3>
+                        </div>
+
                         <div id="item-repeater-container">
-                            {{-- Item pertama --}}
-                            <div class="row repeater-item align-items-end mb-3">
+                            <!-- First Item Row -->
+                            <div class="row repeater-item g-3 mb-3">
                                 <div class="col-md-4">
-                                    <label>
-                                        {{ __('messages.owner.products.stocks.movements_create_in.item_stock_label') }}
-                                        <span class="text-danger">*</span>
-                                    </label>
-                                    <select name="items[0][stock_id]" class="form-control stock-select" required>
-                                        <option value="">
-                                            {{ __('messages.owner.products.stocks.movements_create_in.item_stock_placeholder') }}
-                                        </option>
-                                        @foreach ($stocks as $stock)
-                                            <option value="{{ $stock->id }}"
-                                                data-location-id="{{ $stock->partner_id ?? '_owner' }}"
-                                                data-unit-group="{{ $stock->displayUnit->group_label ?? 'pcs' }}"
-                                                data-display-unit-id="{{ $stock->displayUnit->id ?? '' }}">
-                                                {{ $stock->stock_name }}
-                                                ({{ $stock->partner->name ?? __('messages.owner.products.stocks.movements_create_in.location_owner_option') }})
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            {{ __('messages.owner.products.stocks.movements_create_in.item_stock_label') }}
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="select-wrapper">
+                                            <select name="items[0][stock_id]" class="form-control-modern stock-select" required>
+                                                <option value="">
+                                                    {{ __('messages.owner.products.stocks.movements_create_in.item_stock_placeholder') }}
+                                                </option>
+                                                @foreach ($stocks as $stock)
+                                                    <option value="{{ $stock->id }}"
+                                                        data-location-id="{{ $stock->partner_id ?? '_owner' }}"
+                                                        data-unit-group="{{ $stock->displayUnit->group_label ?? 'pcs' }}"
+                                                        data-display-unit-id="{{ $stock->displayUnit->id ?? '' }}">
+                                                        {{ $stock->stock_name }}
+                                                        ({{ $stock->partner->name ?? __('messages.owner.products.stocks.movements_create_in.location_owner_option') }})
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <span class="material-symbols-outlined select-arrow">expand_more</span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="col-md-2">
-                                    <label>
-                                        {{ __('messages.owner.products.stocks.movements_create_in.quantity_label') }}
-                                        <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="number" name="items[0][quantity]" class="form-control quantity-input"
-                                        step="0.01"
-                                        placeholder="{{ __('messages.owner.products.stocks.movements_create_in.quantity_placeholder') }}"
-                                        required>
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            {{ __('messages.owner.products.stocks.movements_create_in.quantity_label') }}
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="number" name="items[0][quantity]" class="form-control-modern quantity-input"
+                                            step="0.01"
+                                            placeholder="{{ __('messages.owner.products.stocks.movements_create_in.quantity_placeholder') }}"
+                                            required>
+                                    </div>
                                 </div>
                                 <div class="col-md-2">
-                                    <label>
-                                        {{ __('messages.owner.products.stocks.movements_create_in.unit_label') }}
-                                        <span class="text-danger">*</span>
-                                    </label>
-                                    <select name="items[0][unit_id]" class="form-control unit-select" required>
-                                        <option value="">
-                                            {{ __('messages.owner.products.stocks.movements_create_in.unit_placeholder_no_stock') }}
-                                        </option>
-                                    </select>
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            {{ __('messages.owner.products.stocks.movements_create_in.unit_label') }}
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="select-wrapper">
+                                            <select name="items[0][unit_id]" class="form-control-modern unit-select" required>
+                                                <option value="">
+                                                    {{ __('messages.owner.products.stocks.movements_create_in.unit_placeholder_no_stock') }}
+                                                </option>
+                                            </select>
+                                            <span class="material-symbols-outlined select-arrow">expand_more</span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="col-md-3">
-                                    <label>
-                                        {{ __('messages.owner.products.stocks.movements_create_in.unit_price_label') }}
-                                    </label>
-                                    <input type="number" name="items[0][unit_price]" class="form-control" step="0.01"
-                                        placeholder="{{ __('messages.owner.products.stocks.movements_create_in.unit_price_placeholder') }}">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            {{ __('messages.owner.products.stocks.movements_create_in.unit_price_label') }}
+                                        </label>
+                                        <input type="number" name="items[0][unit_price]" class="form-control-modern" step="0.01"
+                                            placeholder="{{ __('messages.owner.products.stocks.movements_create_in.unit_price_placeholder') }}">
+                                    </div>
                                 </div>
-                                <div class="col-md-1">
-                                    {{-- Baris pertama tidak punya tombol hapus --}}
+                                <div class="col-md-1 d-flex align-items-end">
+                                    <!-- First row has no delete button -->
                                 </div>
                             </div>
                         </div>
 
-                        <button type="button" id="btn-add-item" class="btn btn-sm btn-outline-primary mt-2" disabled>
-                            <i class="fas fa-plus"></i>
+                        <button type="button" id="btn-add-item" class="btn-modern btn-sm-modern btn-secondary-modern" disabled>
+                            <span class="material-symbols-outlined">add_circle</span>
                             {{ __('messages.owner.products.stocks.movements_create_in.add_item_button') }}
                         </button>
                     </div>
-                </div>
 
-                {{-- Tombol Aksi --}}
-                <div class="mt-4 mb-4">
-                    <button type="submit" class="btn btn-success" id="btn-submit" disabled>
-                        <i class="fas fa-save"></i>
-                        {{ __('messages.owner.products.stocks.movements_create_in.submit_button') }}
-                    </button>
-
-                </div>
-            </form>
+                    <!-- Card Footer -->
+                    <div class="card-footer-modern">
+                        <a href="{{ route('owner.user-owner.stocks.index') }}" class="btn-cancel-modern">
+                            {{ __('messages.owner.user_management.employees.cancel') }}
+                        </a>
+                        <button type="submit" class="btn-submit-modern" id="btn-submit" disabled>
+                            {{ __('messages.owner.products.stocks.movements_create_in.submit_button') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </section>
+    </div>
 
+    <!-- Item Template -->
     <template id="item-repeater-template">
-        <div class="row repeater-item align-items-end mb-3">
+        <div class="row repeater-item g-3 mb-3 position-relative">
             <div class="col-md-4">
-                <label>
-                    {{ __('messages.owner.products.stocks.movements_create_in.item_stock_label') }}
-                    <span class="text-danger">*</span>
-                </label>
-                <select name="items[__INDEX__][stock_id]" class="form-control stock-select" required>
-                    <option value="">
-                        {{ __('messages.owner.products.stocks.movements_create_in.item_stock_placeholder') }}
-                    </option>
-                    @foreach ($stocks as $stock)
-                        <option value="{{ $stock->id }}" data-location-id="{{ $stock->partner_id ?? '_owner' }}"
-                            data-unit-group="{{ $stock->displayUnit->group_label ?? 'pcs' }}"
-                            data-display-unit-id="{{ $stock->displayUnit->id ?? '' }}">
-                            {{ $stock->stock_name }}
-                            ({{ $stock->partner->name ?? __('messages.owner.products.stocks.movements_create_in.location_owner_option') }})
-                        </option>
-                    @endforeach
-                </select>
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        {{ __('messages.owner.products.stocks.movements_create_in.item_stock_label') }}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <div class="select-wrapper">
+                        <select name="items[__INDEX__][stock_id]" class="form-control-modern stock-select" required>
+                            <option value="">
+                                {{ __('messages.owner.products.stocks.movements_create_in.item_stock_placeholder') }}
+                            </option>
+                            @foreach ($stocks as $stock)
+                                <option value="{{ $stock->id }}" data-location-id="{{ $stock->partner_id ?? '_owner' }}"
+                                    data-unit-group="{{ $stock->displayUnit->group_label ?? 'pcs' }}"
+                                    data-display-unit-id="{{ $stock->displayUnit->id ?? '' }}">
+                                    {{ $stock->stock_name }}
+                                    ({{ $stock->partner->name ?? __('messages.owner.products.stocks.movements_create_in.location_owner_option') }})
+                                </option>
+                            @endforeach
+                        </select>
+                        <span class="material-symbols-outlined select-arrow">expand_more</span>
+                    </div>
+                </div>
             </div>
             <div class="col-md-2">
-                <label>
-                    {{ __('messages.owner.products.stocks.movements_create_in.quantity_label') }}
-                    <span class="text-danger">*</span>
-                </label>
-                <input type="number" name="items[__INDEX__][quantity]" class="form-control quantity-input" step="0.01"
-                    placeholder="{{ __('messages.owner.products.stocks.movements_create_in.quantity_placeholder') }}"
-                    required>
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        {{ __('messages.owner.products.stocks.movements_create_in.quantity_label') }}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <input type="number" name="items[__INDEX__][quantity]" class="form-control-modern quantity-input" step="0.01"
+                        placeholder="{{ __('messages.owner.products.stocks.movements_create_in.quantity_placeholder') }}"
+                        required>
+                </div>
             </div>
             <div class="col-md-2">
-                <label>
-                    {{ __('messages.owner.products.stocks.movements_create_in.unit_label') }}
-                    <span class="text-danger">*</span>
-                </label>
-                <select name="items[__INDEX__][unit_id]" class="form-control unit-select" required>
-                    <option value="">
-                        {{ __('messages.owner.products.stocks.movements_create_in.unit_placeholder_no_stock') }}
-                    </option>
-                </select>
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        {{ __('messages.owner.products.stocks.movements_create_in.unit_label') }}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <div class="select-wrapper">
+                        <select name="items[__INDEX__][unit_id]" class="form-control-modern unit-select" required>
+                            <option value="">
+                                {{ __('messages.owner.products.stocks.movements_create_in.unit_placeholder_no_stock') }}
+                            </option>
+                        </select>
+                        <span class="material-symbols-outlined select-arrow">expand_more</span>
+                    </div>
+                </div>
             </div>
             <div class="col-md-3">
-                <label>
-                    {{ __('messages.owner.products.stocks.movements_create_in.unit_price_label_with_unit') }}
-                </label>
-                <input type="number" name="items[__INDEX__][unit_price]" class="form-control" step="0.01"
-                    placeholder="{{ __('messages.owner.products.stocks.movements_create_in.unit_price_placeholder') }}">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        {{ __('messages.owner.products.stocks.movements_create_in.unit_price_label_with_unit') }}
+                    </label>
+                    <input type="number" name="items[__INDEX__][unit_price]" class="form-control-modern" step="0.01"
+                        placeholder="{{ __('messages.owner.products.stocks.movements_create_in.unit_price_placeholder') }}">
+                </div>
             </div>
-            <div class="col-md-1">
-                <button type="button" class="btn btn-sm btn-danger btn-remove-item">
-                    <i class="fas fa-trash"></i>
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="button" class="btn-remove btn-remove-top">
+                    <span class="material-symbols-outlined">close</span>
                 </button>
+
             </div>
         </div>
     </template>
@@ -219,9 +308,12 @@
             const container = document.getElementById('item-repeater-container');
             const template = document.getElementById('item-repeater-template');
             const locationSelect = document.getElementById('location_to');
+            const form = document.getElementById('stockMovementForm');
+            const submitBtn = document.getElementById('btn-submit');
+            const addItemBtn = document.getElementById('btn-add-item');
             let itemIndex = 1;
 
-            // --- FILTER STOK BERDASARKAN LOKASI ---
+            // Filter stocks by location
             function filterStocksByLocation() {
                 const selectedLocation = locationSelect.value;
                 const stockSelects = document.querySelectorAll('.stock-select');
@@ -255,10 +347,9 @@
                 });
             }
 
-            // --- UPDATE UNIT DROPDOWN ---
+            // Update unit dropdown
             function updateUnitDropdown(stockSelectElement) {
                 const selectedOption = stockSelectElement.options[stockSelectElement.selectedIndex];
-
                 const row = stockSelectElement.closest('.repeater-item');
                 const unitSelect = row.querySelector('.unit-select');
 
@@ -286,74 +377,8 @@
                 }
             }
 
-            // --- EVENT LISTENERS ---
-
-            // 1. Saat Lokasi Tujuan Berubah
-            locationSelect.addEventListener('change', function () {
-                filterStocksByLocation();
-            });
-
-            // 2. Tambah Item (Repeater)
-            document.getElementById('btn-add-item').addEventListener('click', function () {
-                let templateHTML = template.innerHTML.replace(/__INDEX__/g, itemIndex);
-                const newRow = document.createElement('div');
-                newRow.innerHTML = templateHTML;
-                container.appendChild(newRow.firstElementChild);
-
-                filterStocksByLocation();
-
-                itemIndex++;
-            });
-
-            // 3. Hapus Item
-            container.addEventListener('click', function (e) {
-                if (e.target && (e.target.classList.contains('btn-remove-item') || e.target.closest('.btn-remove-item'))) {
-                    e.target.closest('.repeater-item').remove();
-                }
-            });
-
-            // 4. Saat Stok Dipilih (Update Unit)
-            container.addEventListener('change', function (e) {
-                if (e.target && e.target.classList.contains('stock-select')) {
-                    updateUnitDropdown(e.target);
-                }
-            });
-
-            // Filter saat halaman pertama kali dimuat
-            filterStocksByLocation();
-
-            // Update unit untuk baris pertama
-            const firstStockSelect = container.querySelector('.stock-select');
-            if (firstStockSelect && firstStockSelect.value) {
-                updateUnitDropdown(firstStockSelect);
-            }
-
-            // --- KONFIRMASI SUBMIT ---
-            const form = document.getElementById('stockMovementForm');
-            if (form) {
-                form.addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    Swal.fire({
-                        title: '{{ __('messages.owner.products.stocks.movements_create_in.confirm_title') }}',
-                        text: '{{ __('messages.owner.products.stocks.movements_create_in.confirm_text') }}',
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonColor: '#8c1000',
-                        cancelButtonColor: '#6b7280',
-                        confirmButtonText: '{{ __('messages.owner.products.stocks.movements_create_in.confirm_button') }}',
-                        reverseButtons: true
-                    }).then((result) => {
-                        if (result.isConfirmed) form.submit();
-                    });
-                });
-            }
-
-            // Aktifkan tombol tambah item dan submit
-            const submitBtn = document.getElementById('btn-submit');
-            const addItemBtn = document.getElementById('btn-add-item');
-
+            // Validate form
             function isFormValid() {
-                // lokasi tujuan wajib
                 if (!locationSelect.value) return false;
 
                 const items = document.querySelectorAll('.repeater-item');
@@ -378,32 +403,83 @@
                 return valid;
             }
 
+            // Update button states
             function updateButtons() {
                 const valid = isFormValid();
-
                 submitBtn.disabled = !valid;
                 addItemBtn.disabled = !valid;
             }
 
-            // Pantau perubahan form
-            form.addEventListener('input', updateButtons);
-            form.addEventListener('change', updateButtons);
+            // Event: Location change
+            locationSelect.addEventListener('change', function () {
+                filterStocksByLocation();
+            });
 
-            // Saat tambah item
-            addItemBtn.addEventListener('click', () => {
+            // Event: Add item
+            addItemBtn.addEventListener('click', function () {
+                let templateHTML = template.innerHTML.replace(/__INDEX__/g, itemIndex);
+                const newRow = document.createElement('div');
+                newRow.innerHTML = templateHTML;
+                container.appendChild(newRow.firstElementChild);
+
+                filterStocksByLocation();
+                itemIndex++;
                 setTimeout(updateButtons, 50);
             });
 
-            // Saat hapus item
-            container.addEventListener('click', e => {
-                if (e.target.closest('.btn-remove-item')) {
+            // Event: Remove item
+            container.addEventListener('click', function (e) {
+                if (e.target.closest('.btn-remove')) {
+                    e.target.closest('.repeater-item').remove();
                     setTimeout(updateButtons, 50);
                 }
             });
 
-            // Init awal
-            updateButtons();
+            // Event: Stock change
+            container.addEventListener('change', function (e) {
+                if (e.target && e.target.classList.contains('stock-select')) {
+                    updateUnitDropdown(e.target);
+                }
+            });
 
+            // Event: Form submit
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                Swal.fire({
+                    title: '{{ __('messages.owner.products.stocks.movements_create_in.confirm_title') }}',
+                    text: '{{ __('messages.owner.products.stocks.movements_create_in.confirm_text') }}',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#8c1000',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: '{{ __('messages.owner.products.stocks.movements_create_in.confirm_button') }}',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) form.submit();
+                });
+            });
+
+            // Monitor form changes
+            form.addEventListener('input', updateButtons);
+            form.addEventListener('change', updateButtons);
+
+            // Initialize
+            filterStocksByLocation();
+            const firstStockSelect = container.querySelector('.stock-select');
+            if (firstStockSelect && firstStockSelect.value) {
+                updateUnitDropdown(firstStockSelect);
+            }
+            updateButtons();
         });
     </script>
+
+    <style>
+
+        .repeater-item {
+            padding: 1rem;
+            background: #f9fafb;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+        }
+    </style>
 @endsection

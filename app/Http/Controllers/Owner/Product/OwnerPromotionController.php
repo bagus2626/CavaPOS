@@ -19,7 +19,9 @@ class OwnerPromotionController extends Controller
     public function index()
     {
         $owner = Auth::user();
-        $promotions = Promotion::where('owner_id', $owner->id)->get();
+        $promotions = Promotion::where('owner_id', $owner->id)
+        ->paginate(10);
+
         return view('pages.owner.products.promotion.index', compact('promotions'));
     }
 

@@ -4,24 +4,28 @@
 @section('page_title', __('messages.owner.products.stocks.movements_index.page_title'))
 
 @section('content')
-  <section class="content">
-    <div class="container-fluid owner-stock-movements">
-      <a href="{{ route('owner.user-owner.stocks.index') }}" class="btn btn-primary mb-3">
-        <i class="fas fa-arrow-left mr-2"></i>
-        {{ __('messages.owner.products.stocks.movements_index.back_to_list') }}
-      </a>
+  <div class="modern-container">
+    <div class="container-modern">
+      <!-- Header Section -->
+      <div class="page-header">
+        <div class="header-content">
+          <h1 class="page-title">{{ __('messages.owner.products.stocks.movements_index.page_title') }}</h1>
+          <p class="page-subtitle">Track and monitor all stock movements</p>
+        </div>
+      </div>
 
-      {{-- FILTER --}}
-      <div class="card mb-4">
-        <div class="card-body">
-          <form action="{{ route('owner.user-owner.stocks.movements.index')}}" method="GET">
-            <div class="row">
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label for="filter_location">
-                    {{ __('messages.owner.products.stocks.movements_index.filter_location_label') }}
-                  </label>
-                  <select class="form-control" id="filter_location" name="filter_location">
+      <!-- Filters Card -->
+      <div class="modern-card mb-4">
+        <div class="card-body-modern" style="padding: var(--spacing-lg) var(--spacing-xl);">
+          <div class="row">
+            <!-- Filter Location -->
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="filter_location" class="form-label-modern">
+                  {{ __('messages.owner.products.stocks.movements_index.filter_location_label') }}
+                </label>
+                <div class="select-wrapper">
+                  <select class="form-control-modern" id="filter_location" name="filter_location">
                     <option value="owner" {{ request('filter_location') == 'owner' ? 'selected' : '' }}>
                       {{ __('messages.owner.products.stocks.movements_index.filter_location_owner') }}
                     </option>
@@ -31,15 +35,19 @@
                       </option>
                     @endforeach
                   </select>
+                  <span class="material-symbols-outlined select-arrow">expand_more</span>
                 </div>
               </div>
+            </div>
 
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label for="filter_type">
-                    {{ __('messages.owner.products.stocks.movements_index.filter_type_label') }}
-                  </label>
-                  <select class="form-control" id="filter_type" name="filter_type">
+            <!-- Filter Type -->
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="filter_type" class="form-label-modern">
+                  {{ __('messages.owner.products.stocks.movements_index.filter_type_label') }}
+                </label>
+                <div class="select-wrapper">
+                  <select class="form-control-modern" id="filter_type" name="filter_type">
                     <option value="">
                       {{ __('messages.owner.products.stocks.movements_index.filter_type_all') }}
                     </option>
@@ -50,120 +58,143 @@
                       {{ __('messages.owner.products.stocks.movements_index.filter_type_out') }}
                     </option>
                   </select>
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <div class="form-group">
-                  <label for="filter_date">
-                    {{ __('messages.owner.products.stocks.movements_index.filter_date_label') }}
-                  </label>
-                  <input type="date" class="form-control" id="filter_date" name="filter_date"
-                    value="{{ request('filter_date') }}">
-                </div>
-              </div>
-
-              <div class="col-md-2 d-flex align-items-end">
-                <div class="form-group w-100">
-                  <button type="submit" class="btn btn-primary w-100">
-                    {{ __('messages.owner.products.stocks.movements_index.filter_button') }}
-                  </button>
-                  <a href="{{ route('owner.user-owner.stocks.movements.index')}}" class="btn btn-secondary w-100 mt-2">
-                    {{ __('messages.owner.products.stocks.movements_index.reset_button') }}
-                  </a>
+                  <span class="material-symbols-outlined select-arrow">expand_more</span>
                 </div>
               </div>
             </div>
-          </form>
-        </div>
-      </div>
-      {{-- /FILTER --}}
 
-      {{-- TABEL DATA --}}
-      <div class="card">
-        <div class="card-body px-0 py-0">
-          <div class="table-responsive owner-stock-movements-table">
-            <table class="table table-hover align-middle bg-white">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>{{ __('messages.owner.products.stocks.movements_index.table_header_date') }}</th>
-                  <th>{{ __('messages.owner.products.stocks.movements_index.table_header_type') }}</th>
-                  <th>{{ __('messages.owner.products.stocks.movements_index.table_header_category') }}</th>
-                  <th>{{ __('messages.owner.products.stocks.movements_index.table_header_location') }}</th>
-                  <th>{{ __('messages.owner.products.stocks.movements_index.table_header_notes') }}</th>
-                  <th>{{ __('messages.owner.products.stocks.movements_index.table_header_total_items') }}</th>
-                  <th class="text-nowrap">{{ __('messages.owner.products.stocks.movements_index.table_header_actions') }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                @forelse ($movements as $index => $movement)
-                  <tr>
-                    <td class="text-muted">{{ $movements->firstItem() + $index }}</td>
-                    <td>
-                      <div class="fw-600">{{ $movement->created_at->format('d M Y') }}</div>
-                      <div class="text-muted small">{{ $movement->created_at->format('H:i') }}</div>
-                    </td>
-                    <td>
-                      @if ($movement->type == 'in')
-                        <span class="badge badge-success">
-                          {{ __('messages.owner.products.stocks.movements_index.type_in') }}
-                        </span>
-                      @elseif ($movement->type == 'out')
-                        <span class="badge badge-danger">
-                          {{ __('messages.owner.products.stocks.movements_index.type_out') }}
-                        </span>
-                      @else
-                        <span class="badge badge-warning">
-                          {{ __('messages.owner.products.stocks.movements_index.type_adjustment') }}
-                        </span>
-                      @endif
-                    </td>
-                    <td>
-                      <span>
-                        {{ Str::title(str_replace('_', ' ', $movement->category)) }}
-                      </span>
-                    </td>
-                    <td class="fw-600">
-                      {{ $movement->partner->name ?? __('messages.owner.products.stocks.movements_index.filter_location_owner') }}
-                    </td>
-                    <td class="text-truncate" style="max-width: 200px;" title="{{ $movement->notes }}">
-                      {{ $movement->notes ?? '-' }}
-                    </td>
-                    <td>
-                      {{ $movement->items_count }}
-                      {{ __('messages.owner.products.stocks.movements_index.items_count_suffix') }}
-                    </td>
-                    <td class="text-nowrap">
-                      <button type="button" class="btn btn-sm btn-primary btn-show-detail roundedlg"
-                        data-toggle="modal" data-target="#detailMovementModal"
-                        data-url="{{ route('owner.user-owner.stocks.movements.items.json', $movement->id) }}">
-                        <i class="fas fa-eye"></i>
-                      </button>
-                    </td>
-                  </tr>
-                @empty
-                  <tr>
-                    <td colspan="8" class="text-center text-muted py-4">
-                      <p class="fw-bold mb-0">
-                        {{ __('messages.owner.products.stocks.movements_index.no_movements_message') }}
-                      </p>
-                    </td>
-                  </tr>
-                @endforelse
-              </tbody>
-            </table>
+            <!-- Filter Date -->
+            <div class="col-md-4">
+              <div class="form-group">
+                <label for="filter_date" class="form-label-modern">
+                  {{ __('messages.owner.products.stocks.movements_index.filter_date_label') }}
+                </label>
+                <input type="date" class="form-control-modern" id="filter_date" name="filter_date"
+                  value="{{ request('filter_date') }}">
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {{-- PAGINATION --}}
-      <div class="d-flex justify-content-center mt-4">
-        {{ $movements->links() }}
+      <!-- Table Display -->
+      <div class="modern-card">
+        <div class="data-table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="text-center" style="width: 60px;">#</th>
+                <th>{{ __('messages.owner.products.stocks.movements_index.table_header_date') }}</th>
+                <th>{{ __('messages.owner.products.stocks.movements_index.table_header_type') }}</th>
+                <th>{{ __('messages.owner.products.stocks.movements_index.table_header_category') }}</th>
+                <th>{{ __('messages.owner.products.stocks.movements_index.table_header_location') }}</th>
+                <th>{{ __('messages.owner.products.stocks.movements_index.table_header_notes') }}</th>
+                <th class="text-center">{{ __('messages.owner.products.stocks.movements_index.table_header_total_items') }}</th>
+                <th class="text-center" style="width: 120px;">
+                  {{ __('messages.owner.products.stocks.movements_index.table_header_actions') }}
+                </th>
+              </tr>
+            </thead>
+            <tbody id="movementTableBody">
+              @forelse ($movements as $index => $movement)
+                <tr class="table-row" 
+                    data-location="{{ $movement->partner_id ?? 'owner' }}"
+                    data-type="{{ $movement->type }}"
+                    data-date="{{ $movement->created_at->format('Y-m-d') }}"
+                    data-search="{{ strtolower($movement->created_at->format('d M Y') . ' ' . $movement->type . ' ' . str_replace('_', ' ', $movement->category) . ' ' . ($movement->partner->name ?? __('messages.owner.products.stocks.movements_index.filter_location_owner')) . ' ' . ($movement->notes ?? '')) }}">
+                  <!-- Number -->
+                  <td class="text-center text-muted">
+                    {{ $movements->firstItem() + $index }}
+                  </td>
+
+                  <!-- Date & Time -->
+                  <td>
+                    <div class="fw-600">{{ $movement->created_at->format('d M Y') }}</div>
+                    <div class="text-muted small">{{ $movement->created_at->format('H:i') }}</div>
+                  </td>
+
+                  <!-- Type Badge -->
+                  <td>
+                    @if ($movement->type == 'in')
+                      <span class="badge-modern badge-success">
+                        {{ __('messages.owner.products.stocks.movements_index.type_in') }}
+                      </span>
+                    @elseif ($movement->type == 'out')
+                      <span class="badge-modern badge-danger">
+                        {{ __('messages.owner.products.stocks.movements_index.type_out') }}
+                      </span>
+                    @else
+                      <span class="badge-modern badge-warning">
+                        {{ __('messages.owner.products.stocks.movements_index.type_adjustment') }}
+                      </span>
+                    @endif
+                  </td>
+
+                  <!-- Category -->
+                  <td>
+                    <span>{{ Str::title(str_replace('_', ' ', $movement->category)) }}</span>
+                  </td>
+
+                  <!-- Location -->
+                  <td class="fw-600">
+                    {{ $movement->partner->name ?? __('messages.owner.products.stocks.movements_index.filter_location_owner') }}
+                  </td>
+
+                  <!-- Notes -->
+                  <td class="text-truncate" style="max-width: 200px;" title="{{ $movement->notes }}">
+                    {{ $movement->notes ?? '-' }}
+                  </td>
+
+                  <!-- Total Items -->
+                  <td class="text-center">
+                    <span class="badge-modern badge-info">
+                      {{ $movement->items_count }} {{ __('messages.owner.products.stocks.movements_index.items_count_suffix') }}
+                    </span>
+                  </td>
+
+                  <!-- Actions -->
+                  <td class="text-center">
+                    <div class="table-actions">
+                      <button type="button" 
+                              class="btn-table-action view btn-show-detail"
+                              data-toggle="modal" 
+                              data-target="#detailMovementModal"
+                              data-url="{{ route('owner.user-owner.stocks.movements.items.json', $movement->id) }}"
+                              title="View Details">
+                        <span class="material-symbols-outlined">visibility</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              @empty
+                <tr>
+                  <td colspan="8" class="text-center">
+                    <div class="table-empty-state">
+                      <span class="material-symbols-outlined">inventory_2</span>
+                      <h4>{{ __('messages.owner.products.stocks.movements_index.no_movements_message') }}</h4>
+                      <p>No stock movements found</p>
+                    </div>
+                  </td>
+                </tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        @if($movements->hasPages())
+          <div class="table-pagination">
+            <div class="text-muted small">
+              Showing {{ $movements->firstItem() ?? 0 }} to {{ $movements->lastItem() ?? 0 }}
+              of {{ $movements->total() }} entries
+            </div>
+            {{ $movements->links() }}
+          </div>
+        @endif
       </div>
 
     </div>
-  </section>
+  </div>
 
   {{-- MODAL DETAIL --}}
   <div class="modal fade" id="detailMovementModal" tabindex="-1" aria-labelledby="detailMovementModalLabel"
@@ -248,7 +279,89 @@
 @push('scripts')
   <script>
     $(document).ready(function () {
+      // ==========================================
+      // REALTIME FILTER FUNCTION
+      // ==========================================
+      const filterLocation = $('#filter_location');
+      const filterType = $('#filter_type');
+      const filterDate = $('#filter_date');
+      const tableBody = $('#movementTableBody');
+      const rows = tableBody.find('tr.table-row');
 
+      function applyFilters() {
+        const selectedLocation = filterLocation.val();
+        const selectedType = filterType.val();
+        const selectedDate = filterDate.val();
+
+        let visibleCount = 0;
+
+        rows.each(function() {
+          const row = $(this);
+          const rowLocation = row.data('location');
+          const rowType = row.data('type');
+          const rowDate = row.data('date');
+
+          // Check all filter conditions
+          const matchesLocation = !selectedLocation || selectedLocation === '' || 
+                                  rowLocation == selectedLocation;
+          const matchesType = !selectedType || selectedType === '' || 
+                             rowType === selectedType;
+          const matchesDate = !selectedDate || selectedDate === '' || 
+                             rowDate === selectedDate;
+
+          // Show/hide row based on all conditions
+          if (matchesLocation && matchesType && matchesDate) {
+            row.show();
+            visibleCount++;
+            // Update row number
+            row.find('td:first-child').text(visibleCount);
+          } else {
+            row.hide();
+          }
+        });
+
+        // Handle empty state
+        handleEmptyState(visibleCount);
+      }
+
+      // ==========================================
+      // EMPTY STATE HANDLER
+      // ==========================================
+      function handleEmptyState(visibleCount) {
+        const existingEmptyRow = tableBody.find('.empty-filter-row');
+        existingEmptyRow.remove();
+
+        if (visibleCount === 0 && rows.length > 0) {
+          const emptyRow = `
+            <tr class="empty-filter-row">
+              <td colspan="8" class="text-center">
+                <div class="table-empty-state">
+                  <span class="material-symbols-outlined">search_off</span>
+                  <h4>No results found</h4>
+                  <p>Try adjusting your filters</p>
+                </div>
+              </td>
+            </tr>
+          `;
+          tableBody.append(emptyRow);
+        }
+      }
+
+      // ==========================================
+      // EVENT LISTENERS - Realtime Filter
+      // ==========================================
+      filterLocation.on('change', applyFilters);
+      filterType.on('change', applyFilters);
+      filterDate.on('change', applyFilters);
+
+      // Apply initial filters if any
+      if (filterLocation.val() || filterType.val() || filterDate.val()) {
+        applyFilters();
+      }
+
+      // ==========================================
+      // MODAL DETAIL HANDLER
+      // ==========================================
       $(document).on('click', '.btn-show-detail', function () {
         var detailUrl = $(this).data('url');
         var modal = $('#detailMovementModal');
