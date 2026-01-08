@@ -37,12 +37,51 @@ class OwnerMasterProductController extends Controller
             $productsQuery->where('category_id', $categoryId);
         }
 
-        $products = $productsQuery
+        // Get semua data untuk JavaScript filter
+        $allProducts = $productsQuery
             ->orderBy('id', 'desc')
-            ->paginate(10)
-            ->withQueryString();
+            ->get();
 
-        return view('pages.owner.products.master-product.index', compact('products', 'categories', 'categoryId'));
+        // Format data untuk JavaScript
+        $allProductsFormatted = $allProducts->map(function ($product) {
+            $firstPicture = null;
+            if (!empty($product->pictures) && is_array($product->pictures)) {
+                $firstPicture = $product->pictures[0]['path'] ?? null;
+            }
+
+            return [
+                'id' => $product->id,
+                'name' => $product->name,
+                'category_id' => $product->category_id,
+                'category_name' => $product->category->category_name ?? '-',
+                'quantity' => $product->quantity,
+                'price' => $product->price,
+                'promotion_name' => $product->promotion->promotion_name ?? null,
+                'parent_options' => $product->parent_options->pluck('name')->implode(', '),
+                'has_options' => $product->parent_options->isNotEmpty(),
+                'picture' => $firstPicture,
+            ];
+        });
+
+        // Simulasi pagination object untuk compatibility dengan view
+        $perPage = 10;
+        $currentPage = $request->input('page', 1);
+        $offset = ($currentPage - 1) * $perPage;
+
+        $products = new \Illuminate\Pagination\LengthAwarePaginator(
+            $allProducts->slice($offset, $perPage)->values(),
+            $allProducts->count(),
+            $perPage,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        return view('pages.owner.products.master-product.index', compact(
+            'products',
+            'categories',
+            'categoryId',
+            'allProductsFormatted'
+        ));
     }
 
     public function create()

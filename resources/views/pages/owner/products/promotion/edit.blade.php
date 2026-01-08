@@ -353,7 +353,7 @@
                             {{ __('messages.owner.products.promotions.cancel') }}
                         </a>
                         <button type="submit" class="btn-submit-modern">
-                            {{ __('messages.owner.products.promotions.update_promotion') }}
+                            {{ __('messages.owner.products.promotions.update') }}
                         </button>
                     </div>
                 </form>

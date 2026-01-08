@@ -59,28 +59,91 @@ class OwnerOutletProductController extends Controller
         // Determine current outlet (default to first outlet)
         $currentOutletId = $request->get('outlet_id') ?? $outlets->first()->id ?? null;
 
-        // Get products for current outlet
-        $products = collect();
+        // Get ALL products for current outlet (no pagination here)
+        $allProducts = collect();
         if ($currentOutletId) {
-            $query = PartnerProduct::with(['category', 'promotion', 'stock.displayUnit'])
+            $allProducts = PartnerProduct::with(['category', 'promotion', 'stock.displayUnit'])
                 ->where('owner_id', $owner->id)
                 ->where('partner_id', $currentOutletId)
-                ->orderBy('name');
-
-            $products = $query->paginate(10);
+                ->orderBy('name')
+                ->get();
         }
+
+        // Format data untuk JavaScript
+        $allProductsFormatted = $allProducts->map(function ($p) {
+            $qtyAvailable = $p->quantity_available;
+            $isQtyZero = $qtyAvailable < 1 && $qtyAvailable !== 999999999;
+
+            // Format stock display
+            $stockDisplay = '';
+            $stockValue = 0;
+
+            if ($p->stock_type == 'linked') {
+                if ($qtyAvailable === 999999999) {
+                    $stockDisplay = __('messages.owner.products.outlet_products.always_available');
+                    $stockValue = 999999999;
+                } elseif ($isQtyZero) {
+                    $stockDisplay = 'Out of Stock';
+                    $stockValue = 0;
+                } else {
+                    $stockValue = floor($qtyAvailable);
+                    $stockDisplay = number_format($stockValue, 0) . ' pcs';
+                }
+            } elseif ((int) $p->always_available_flag === 1) {
+                $stockDisplay = __('messages.owner.products.outlet_products.always_available');
+                $stockValue = 999999999;
+            } elseif ($p->stock) {
+                if ($isQtyZero) {
+                    $stockDisplay = '0';
+                    $stockValue = 0;
+                } else {
+                    $stockValue = $qtyAvailable;
+                    $unit = $p->stock->displayUnit->unit_name ?? 'unit';
+                    $stockDisplay = rtrim(rtrim(number_format($qtyAvailable, 2, ',', '.'), '0'), ',') . ' ' . $unit;
+                }
+            } else {
+                $stockDisplay = '0';
+                $stockValue = 0;
+            }
+
+            return [
+                'id' => $p->id,
+                'name' => $p->name ?? $p->product_name,
+                'category_id' => $p->category_id,
+                'category_name' => $p->category->category_name ?? '-',
+                'stock_type' => $p->stock_type,
+                'stock_display' => $stockDisplay,
+                'stock_value' => $stockValue,
+                'always_available_flag' => $p->always_available_flag,
+                'is_active' => (int) ($p->is_active ?? 1),
+                'is_hot_product' => (int) ($p->is_hot_product ?? 0),
+                'price' => $p->price,
+                'promotion_name' => $p->promotion ? $p->promotion->promotion_name : null,
+                'picture_path' => !empty($p->pictures) && isset($p->pictures[0]['path']) ? $p->pictures[0]['path'] : null,
+            ];
+        });
+
+        // Simulasi pagination untuk compatibility dengan view
+        $perPage = 10;
+        $currentPage = $request->input('page', 1);
+        $offset = ($currentPage - 1) * $perPage;
+
+        $products = new \Illuminate\Pagination\LengthAwarePaginator(
+            $allProducts->slice($offset, $perPage)->values(),
+            $allProducts->count(),
+            $perPage,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
         return view('pages.owner.products.outlet-product.index', compact(
             'outlets',
             'categories',
             'products',
-            'currentOutletId'
+            'currentOutletId',
+            'allProductsFormatted'
         ));
     }
-
-
-
-
 
     public function create()
     {

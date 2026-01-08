@@ -46,11 +46,43 @@ class OwnerStockController extends Controller
             $query->where('partner_id', $filterLocation);
         }
 
-        // Gunakan paginate() dengan 10 items per halaman
-        $stocks = $query->paginate(20)->withQueryString();
+        // Ambil SEMUA stocks (tanpa pagination di backend)
+        $allStocks = $query->get();
 
-        // Konversi quantity untuk tampilan
-        $stocks->getCollection()->transform(function ($stock) {
+        // Konversi quantity untuk tampilan dan format data untuk JavaScript
+        $allStocksFormatted = $allStocks->map(function ($stock) {
+            if ($stock->displayUnit) {
+                $displayQuantity = $this->unitConversionService->convertToDisplayUnit(
+                    $stock->quantity,
+                    $stock->display_unit_id
+                );
+            } else {
+                $displayQuantity = $stock->quantity;
+            }
+
+            return [
+                'id' => $stock->id,
+                'stock_code' => $stock->stock_code,
+                'stock_name' => $stock->stock_name,
+                'quantity' => $stock->quantity,
+                'display_quantity' => $displayQuantity,
+                'display_unit_id' => $stock->display_unit_id,
+                'display_unit_name' => $stock->displayUnit ? $stock->displayUnit->unit_name : null,
+                'last_price_per_unit' => $stock->last_price_per_unit,
+                'type' => $stock->type,
+                'stock_type' => $stock->stock_type,
+                'partner_product_id' => $stock->partner_product_id,
+                'partner_product_option_id' => $stock->partner_product_option_id,
+            ];
+        });
+
+        // Simulasi pagination untuk compatibility dengan view
+        $perPage = 10;
+        $currentPage = $request->input('page', 1);
+        $offset = ($currentPage - 1) * $perPage;
+
+        // Transform collection untuk tampilan default
+        $stocksForDisplay = $allStocks->map(function ($stock) {
             if ($stock->displayUnit) {
                 $stock->display_quantity = $this->unitConversionService->convertToDisplayUnit(
                     $stock->quantity,
@@ -62,7 +94,20 @@ class OwnerStockController extends Controller
             return $stock;
         });
 
-        return view('pages.owner.products.stock.index', compact('stocks', 'partners', 'filterLocation'));
+        $stocks = new \Illuminate\Pagination\LengthAwarePaginator(
+            $stocksForDisplay->slice($offset, $perPage)->values(),
+            $stocksForDisplay->count(),
+            $perPage,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        return view('pages.owner.products.stock.index', compact(
+            'stocks',
+            'partners',
+            'filterLocation',
+            'allStocksFormatted'
+        ));
     }
 
     public function create()

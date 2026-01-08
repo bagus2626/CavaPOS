@@ -394,7 +394,7 @@
                     <!-- Card Footer -->
                     <div class="card-footer-modern">
                         <a href="{{ route('owner.user-owner.promotions.index') }}" class="btn-cancel-modern">
-                            {{ __('messages.owner.products.promotions.back_to_promotions') }}
+                            {{ __('messages.owner.products.promotions.cancel') }}
                         </a>
                         <button type="submit" class="btn-submit-modern">
 

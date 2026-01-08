@@ -221,8 +221,9 @@
                     
                     <!-- Card Footer -->
                     <div class="card-footer-modern">
-                        <button type="reset" class="btn-cancel-modern">
-                            {{ __('messages.owner.products.master_products.reset') }}
+                        <button type="button" class="btn-cancel-modern"
+                            onclick="window.location.href='{{ route('owner.user-owner.master-products.index') }}'">
+                            {{ __('messages.owner.products.master_products.cancel') }}
                         </button>
                         <button type="submit" class="btn-submit-modern">
                             {{ __('messages.owner.products.master_products.create_product') }}

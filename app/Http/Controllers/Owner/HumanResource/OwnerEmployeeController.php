@@ -37,10 +37,36 @@ class OwnerEmployeeController extends Controller
             $employeesQuery->where('partner_id', $currentPartnerId);
         }
 
-        $employees = $employeesQuery
-            ->orderBy('id', 'desc')
-            ->paginate(10)
-            ->withQueryString();
+        // Get semua data untuk JavaScript filter
+        $allEmployees = $employeesQuery->orderBy('id', 'desc')->get();
+
+        // Format data untuk JavaScript
+        $allEmployeesFormatted = $allEmployees->map(function ($employee) {
+            return [
+                'id' => $employee->id,
+                'name' => $employee->name,
+                'user_name' => $employee->user_name,
+                'email' => $employee->email,
+                'role' => $employee->role,
+                'is_active' => $employee->is_active,
+                'image' => $employee->image,
+                'partner_id' => $employee->partner_id,
+                'partner_name' => $employee->partner->name ?? '-',
+            ];
+        });
+
+        // Simulasi pagination object untuk compatibility dengan view
+        $perPage = 10;
+        $currentPage = $request->input('page', 1);
+        $offset = ($currentPage - 1) * $perPage;
+
+        $employees = new \Illuminate\Pagination\LengthAwarePaginator(
+            $allEmployees->slice($offset, $perPage)->values(),
+            $allEmployees->count(),
+            $perPage,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
         $roles = (clone $employeesQuery)->pluck('role')->unique()->sort()->values();
 
@@ -49,6 +75,7 @@ class OwnerEmployeeController extends Controller
             'employees',
             'roles',
             'currentPartnerId',
+            'allEmployeesFormatted'
         ));
     }
 

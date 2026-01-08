@@ -39,7 +39,7 @@ class PartnerProductController extends Controller
 
         $categories = Category::where('owner_id', $ownerId)->get();
 
-        $categoryId = $request->query('category'); // bisa null / 'all' / '5'
+        $categoryId = $request->query('category');
 
         $productsQuery = PartnerProduct::with('parent_options.options', 'category', 'stock')
             ->where('partner_id', $partnerId);
@@ -48,15 +48,45 @@ class PartnerProductController extends Controller
             $productsQuery->where('category_id', $categoryId);
         }
 
-        $products = $productsQuery
-            ->orderBy('name')
-            ->paginate(10)
-            ->withQueryString();
+        // get() untuk load semua data tanpa pagination
+        $allProducts = $productsQuery->orderBy('name')->get();
 
+        // Format data untuk JavaScript dengan computed properties
+        $allProductsFormatted = $allProducts->map(function ($product) {
+            return [
+                'id' => $product->id,
+                'name' => $product->name,
+                'category_id' => $product->category_id,
+                'category' => $product->category,
+                'parent_options' => $product->parent_options,
+                'stock_type' => $product->stock_type,
+                'always_available_flag' => $product->always_available_flag,
+                'quantity_available' => $product->quantity_available, // accessor akan dipanggil
+                'price' => $product->price,
+                'pictures' => $product->pictures,
+                'stock' => $product->stock,
+            ];
+        });
+
+        // Simulasi pagination object untuk compatibility dengan view
+        $perPage = 10;
+        $currentPage = $request->input('page', 1);
+        $offset = ($currentPage - 1) * $perPage;
+
+        $products = new \Illuminate\Pagination\LengthAwarePaginator(
+            $allProducts->slice($offset, $perPage)->values(),
+            $allProducts->count(),
+            $perPage,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        // Kirim semua data untuk JavaScript filter
         return view('pages.partner.products.index', compact(
             'products',
             'categories',
-            'categoryId'
+            'categoryId',
+            'allProductsFormatted'
         ));
     }
 

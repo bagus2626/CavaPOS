@@ -257,7 +257,7 @@
 
                 <div class="nav-item">
                     <a href="{{ route('owner.user-owner.settings.index') }}"
-                        class="nav-link {{ Route::is('owner.user-owner.settings.*') ? 'active' : '' }}">
+                        class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is('owner.user-owner.settings.*') ? 'active' : '' }}">
                         <span class="material-symbols-outlined">settings</span>
                         <span>{{ __('messages.owner.layout.settings') }}</span>
                     </a>
