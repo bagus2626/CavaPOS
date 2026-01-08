@@ -57,7 +57,7 @@
                 <select id="roleFilter" class="form-control-modern">
                   <option value="">{{ __('messages.partner.user_management.employees.all_roles') }}</option>
                   @foreach($roles as $role)
-                    <option value="{{ $role }}" {{ (string)($roleFilter ?? '') === (string)$role ? 'selected' : '' }}>
+                    <option value="{{ $role }}" {{ (string) ($roleFilter ?? '') === (string) $role ? 'selected' : '' }}>
                       {{ $role }}
                     </option>
                   @endforeach
@@ -101,7 +101,7 @@
 
       // Ambil semua data dari Blade
       const allEmployeesData = @json($allEmployeesFormatted ?? []);
-      
+
       let filteredEmployees = [...allEmployeesData];
       const itemsPerPage = 10;
       let currentPage = 1;
@@ -116,12 +116,12 @@
         filteredEmployees = allEmployeesData.filter(employee => {
           // Search: cari di name, username, email, role
           const searchText = `
-            ${employee.name || ''} 
-            ${employee.user_name || ''} 
-            ${employee.email || ''} 
-            ${employee.role || ''}
-          `.toLowerCase();
-          
+              ${employee.name || ''} 
+              ${employee.user_name || ''} 
+              ${employee.email || ''} 
+              ${employee.role || ''}
+            `.toLowerCase();
+
           const matchesSearch = !searchTerm || searchText.includes(searchTerm);
 
           // Role filter
@@ -150,16 +150,16 @@
         // Render rows
         if (currentEmployees.length === 0) {
           tableBody.innerHTML = `
-            <tr class="empty-filter-row">
-              <td colspan="7" class="text-center">
-                <div class="table-empty-state">
-                  <span class="material-symbols-outlined" style="font-size: 4rem; color: #ccc; display: block; margin-bottom: 1rem;">search_off</span>
-                  <h4 style="margin: 0 0 0.5rem 0; color: #666; font-size: 1.25rem;">No results found</h4>
-                  <p style="margin: 0; color: #999;">Try adjusting your search or filter</p>
-                </div>
-              </td>
-            </tr>
-          `;
+              <tr class="empty-filter-row">
+                <td colspan="7" class="text-center">
+                  <div class="table-empty-state">
+                    <span class="material-symbols-outlined" style="font-size: 4rem; color: #ccc; display: block; margin-bottom: 1rem;">search_off</span>
+                    <h4 style="margin: 0 0 0.5rem 0; color: #666; font-size: 1.25rem;">No results found</h4>
+                    <p style="margin: 0; color: #999;">Try adjusting your search or filter</p>
+                  </div>
+                </td>
+              </tr>
+            `;
         } else {
           currentEmployees.forEach((employee, index) => {
             const rowNumber = startIndex + index + 1;
@@ -196,15 +196,15 @@
           imageHtml = `<img src="${imgSrc}" alt="${employee.name}" class="user-avatar" loading="lazy">`;
         } else {
           imageHtml = `
-            <div class="user-avatar-placeholder">
-              <span class="material-symbols-outlined">person</span>
-            </div>
-          `;
+              <div class="user-avatar-placeholder">
+                <span class="material-symbols-outlined">person</span>
+              </div>
+            `;
         }
 
         // Format status badge
         let statusBadge = '';
-        if (parseInt(employee.is_active) === 1) {
+        if (employee.is_active == 1 || employee.is_active === true || employee.is_active === "1") {
           statusBadge = '<span class="badge-modern badge-success">{{ __("messages.partner.user_management.employees.active") }}</span>';
         } else {
           statusBadge = '<span class="badge-modern badge-danger">{{ __("messages.partner.user_management.employees.non_active") }}</span>';
@@ -214,37 +214,37 @@
         const showUrl = `/partner/user-management/employees/${employee.id}`;
 
         tr.innerHTML = `
-          <td class="text-center text-muted">${rowNumber}</td>
-          <td>
-            <div class="user-info-cell">
-              ${imageHtml}
-              <span class="user-name">${employee.name || '-'}</span>
-            </div>
-          </td>
-          <td>
-            <span class="text-secondary">${employee.user_name || '-'}</span>
-          </td>
-          <td>
-            <a href="mailto:${employee.email}" class="table-link">
-              ${employee.email || '-'}
-            </a>
-          </td>
-          <td>
-            <span class="badge-modern badge-info">
-              ${employee.role || '-'}
-            </span>
-          </td>
-          <td class="text-center">
-            ${statusBadge}
-          </td>
-          <td class="text-center">
-            <div class="table-actions">
-              <a href="${showUrl}" class="btn-table-action view" title="{{ __('messages.partner.user_management.employees.view_details') ?? 'View Details' }}">
-                <span class="material-symbols-outlined">visibility</span>
+            <td class="text-center text-muted">${rowNumber}</td>
+            <td>
+              <div class="user-info-cell">
+                ${imageHtml}
+                <span class="user-name">${employee.name || '-'}</span>
+              </div>
+            </td>
+            <td>
+              <span class="text-secondary">${employee.user_name || '-'}</span>
+            </td>
+            <td>
+              <a href="mailto:${employee.email}" class="table-link">
+                ${employee.email || '-'}
               </a>
-            </div>
-          </td>
-        `;
+            </td>
+            <td>
+              <span class="badge-modern badge-info">
+                ${employee.role || '-'}
+              </span>
+            </td>
+            <td class="text-center">
+              ${statusBadge}
+            </td>
+            <td class="text-center">
+              <div class="table-actions">
+                <a href="${showUrl}" class="btn-table-action view" title="{{ __('messages.partner.user_management.employees.view_details') ?? 'View Details' }}">
+                  <span class="material-symbols-outlined">visibility</span>
+                </a>
+              </div>
+            </td>
+          `;
 
         return tr;
       }
@@ -260,30 +260,30 @@
         const nav = document.createElement('nav');
         nav.setAttribute('role', 'navigation');
         nav.setAttribute('aria-label', 'Pagination Navigation');
-        
+
         const ul = document.createElement('ul');
         ul.className = 'pagination';
 
         // Previous Button
         const prevLi = document.createElement('li');
         prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
-        
+
         if (currentPage === 1) {
           prevLi.innerHTML = `
-            <span class="page-link" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
-              </svg>
-            </span>
-          `;
+              <span class="page-link" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
+                </svg>
+              </span>
+            `;
         } else {
           prevLi.innerHTML = `
-            <a href="#" class="page-link" data-page="${currentPage - 1}" aria-label="Previous">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
-              </svg>
-            </a>
-          `;
+              <a href="#" class="page-link" data-page="${currentPage - 1}" aria-label="Previous">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
+                </svg>
+              </a>
+            `;
         }
         ul.appendChild(prevLi);
 
@@ -292,13 +292,13 @@
           if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
             const pageLi = document.createElement('li');
             pageLi.className = `page-item ${i === currentPage ? 'active' : ''}`;
-            
+
             if (i === currentPage) {
               pageLi.innerHTML = `<span class="page-link" aria-current="page">${i}</span>`;
             } else {
               pageLi.innerHTML = `<a href="#" class="page-link" data-page="${i}">${i}</a>`;
             }
-            
+
             ul.appendChild(pageLi);
           } else if (i === currentPage - 2 || i === currentPage + 2) {
             const dotsLi = document.createElement('li');
@@ -311,23 +311,23 @@
         // Next Button
         const nextLi = document.createElement('li');
         nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
-        
+
         if (currentPage === totalPages) {
           nextLi.innerHTML = `
-            <span class="page-link" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
-              </svg>
-            </span>
-          `;
+              <span class="page-link" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
+                </svg>
+              </span>
+            `;
         } else {
           nextLi.innerHTML = `
-            <a href="#" class="page-link" data-page="${currentPage + 1}" aria-label="Next">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
-              </svg>
-            </a>
-          `;
+              <a href="#" class="page-link" data-page="${currentPage + 1}" aria-label="Next">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
+                </svg>
+              </a>
+            `;
         }
         ul.appendChild(nextLi);
 
@@ -336,7 +336,7 @@
 
         // Add click handlers
         nav.querySelectorAll('a.page-link[data-page]').forEach(link => {
-          link.addEventListener('click', function(e) {
+          link.addEventListener('click', function (e) {
             e.preventDefault();
             const page = parseInt(this.dataset.page);
             if (page > 0 && page <= totalPages && page !== currentPage) {
@@ -386,9 +386,9 @@
           form.style.display = 'none';
 
           form.innerHTML = `
-            @csrf
-            <input type="hidden" name="_method" value="DELETE">
-          `;
+              @csrf
+              <input type="hidden" name="_method" value="DELETE">
+            `;
 
           document.body.appendChild(form);
           form.submit();
