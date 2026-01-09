@@ -572,11 +572,11 @@
 
                         <!-- Card Footer -->
                         <div class="card-footer-modern">
-                            <button type="button" id="cancelBtn" class="btn-cancel-modern">
+                            <a href="{{ route('owner.user-owner.outlets.index') }}" class="btn-cancel-modern">
                                 {{ __('messages.owner.outlet.all_outlets.cancel') }}
-                            </button>
+                            </a>
                             <button type="submit" id="saveBtn" class="btn-submit-modern">
-                                {{ __('messages.owner.outlet.all_outlets.save') }}
+                                {{ __('messages.owner.outlet.all_outlets.update') }}
                             </button>
                         </div>
                     </form>

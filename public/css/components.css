@@ -147,7 +147,6 @@
 /* Card Header */
 .card-header-modern {
   padding: var(--spacing-lg) var(--spacing-2xl);
-  background: var(--background);
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
@@ -599,6 +598,10 @@
    STATS CARD COMPONENTS (COMPACT & RESPONSIVE)
    ============================================ */
 
+.modern-card.stats-card {
+  margin: 0;
+}
+
 /* Stats Card Base */
 .stats-card {
   position: relative;
@@ -658,7 +661,7 @@
 .stats-value {
   font-size: 1.125rem;
   font-weight: 800;
-  color: var(--text-primary);
+  color: var(--primary);
   letter-spacing: -0.02em;
   line-height: 1.2;
   word-break: break-word;
@@ -669,20 +672,20 @@
   .stats-card {
     min-height: 4.5rem;
   }
-  
+
   .stats-icon {
     width: 2.75rem;
     height: 2.75rem;
   }
-  
+
   .stats-icon .material-symbols-outlined {
     font-size: 22px;
   }
-  
+
   .stats-value {
     font-size: 1.375rem;
   }
-  
+
   .stats-label {
     font-size: 0.75rem;
   }
@@ -695,20 +698,20 @@
     padding: var(--spacing-md);
     min-height: 4rem;
   }
-  
+
   .stats-icon {
     width: 2.5rem;
     height: 2.5rem;
   }
-  
+
   .stats-icon .material-symbols-outlined {
     font-size: 20px;
   }
-  
+
   .stats-value {
     font-size: 1.25rem;
   }
-  
+
   .stats-label {
     font-size: 0.7rem;
     line-height: 1.2;

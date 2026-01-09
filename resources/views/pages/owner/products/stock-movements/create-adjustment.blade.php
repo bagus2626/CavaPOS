@@ -95,8 +95,9 @@
                                         {{ __('messages.owner.products.stocks.movements_adjustment.category_label') }}
                                         <span class="text-danger">*</span>
                                     </label>
-                                    <div class="category-input-wrapper">
-                                        <!-- Select Dropdown -->
+                                    
+                                    <!-- Select Dropdown -->
+                                    <div id="category_select_mode">
                                         <div class="select-wrapper">
                                             <select name="category" id="categorySelect"
                                                 class="form-control-modern @error('category') is-invalid @enderror"
@@ -115,30 +116,32 @@
                                             <span class="material-symbols-outlined select-arrow">expand_more</span>
                                         </div>
 
-                                        <!-- Input Text (Hidden by default) -->
+                                        @error('category')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+
+                                        <!-- Add New Category Button -->
+                                        <button type="button" class="btn-modern btn-primary-modern btn-sm-modern mt-3" id="btn-add-category">
+                                            <span class="material-symbols-outlined">add_circle</span>
+                                            <span>Buat Kategori Baru</span>
+                                        </button>
+                                    </div>
+
+                                    <!-- Input Text Mode (Hidden by default) -->
+                                    <div id="category_input_mode" style="display: none;">
                                         <input type="text" name="category" id="categoryInput"
                                             class="form-control-modern"
                                             placeholder="{{ __('messages.owner.products.stocks.movements_adjustment.new_category_placeholder') }}"
-                                            style="display: none;" disabled>
-
-                                        <!-- Toggle Buttons -->
-                                        <div class="category-actions">
-                                            <button type="button" class="btn-category-toggle" id="btn-add-category"
-                                                title="Buat Kategori Baru">
-                                                <span class="material-symbols-outlined">add</span>
-                                            </button>
-                                            <button type="button" class="btn-category-toggle btn-cancel" id="btn-cancel-category"
-                                                title="Batal" style="display: none;">
-                                                <span class="material-symbols-outlined">close</span>
-                                            </button>
-                                        </div>
+                                            disabled>
+                                        
+                                        <button type="button" class="btn-modern btn-secondary-modern btn-sm-modern mt-3" id="btn-cancel-category">
+                                            {{ __('messages.owner.products.stocks.movements_adjustment.cancel_button') ?? 'Batal' }}
+                                        </button>
+                                        
+                                        {{-- <small class="text-muted d-block mt-2" id="categoryHelp">
+                                            Masukkan nama kategori baru
+                                        </small> --}}
                                     </div>
-                                    <small class="text-muted" id="categoryHelp" style="display: none;">
-                                        Masukkan nama kategori baru
-                                    </small>
-                                    @error('category')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
                                 </div>
                             </div>
 
@@ -353,6 +356,8 @@
             const btnAddItem = document.getElementById('btn-add-item');
 
             // Category elements
+            const categorySelectMode = document.getElementById('category_select_mode');
+            const categoryInputMode = document.getElementById('category_input_mode');
             const categorySelect = document.getElementById('categorySelect');
             const categoryInput = document.getElementById('categoryInput');
             const btnAddCategory = document.getElementById('btn-add-category');
@@ -360,6 +365,7 @@
             const categoryHelp = document.getElementById('categoryHelp');
 
             let itemIndex = 1;
+            let isCategoryInputMode = false;
 
             const translations = {
                 currentStockPrefix: "{{ __('messages.owner.products.stocks.movements_adjustment.current_stock_prefix') }}"
@@ -367,23 +373,26 @@
 
             // Category logic
             btnAddCategory.addEventListener('click', function () {
-                categorySelect.style.display = 'none';
+                isCategoryInputMode = true;
+                categorySelectMode.style.display = 'none';
+                categoryInputMode.style.display = 'block';
+                
                 categorySelect.disabled = true;
-                categorySelect.closest('.select-wrapper').style.display = 'none';
-
-                categoryInput.style.display = 'block';
+                categorySelect.required = false;
+                
                 categoryInput.disabled = false;
                 categoryInput.required = true;
                 categoryInput.focus();
-
-                btnAddCategory.style.display = 'none';
-                btnCancelCategory.style.display = 'inline-flex';
-                categoryHelp.style.display = 'block';
+                
+                checkFormValidity();
             });
 
             btnCancelCategory.addEventListener('click', function () {
+                isCategoryInputMode = false;
+                categoryInputMode.style.display = 'none';
+                categorySelectMode.style.display = 'block';
+                
                 categoryInput.value = '';
-                categoryInput.style.display = 'none';
                 categoryInput.disabled = true;
                 categoryInput.required = false;
                 categoryInput.classList.remove('is-valid', 'is-invalid');
@@ -391,14 +400,9 @@
                 const feedback = categoryInput.parentElement.querySelector('.invalid-feedback, .valid-feedback');
                 if (feedback) feedback.remove();
 
-                categorySelect.style.display = 'block';
                 categorySelect.disabled = false;
-                categorySelect.closest('.select-wrapper').style.display = 'block';
+                categorySelect.required = true;
                 categorySelect.selectedIndex = 0;
-
-                btnCancelCategory.style.display = 'none';
-                btnAddCategory.style.display = 'inline-flex';
-                categoryHelp.style.display = 'none';
 
                 checkFormValidity();
             });

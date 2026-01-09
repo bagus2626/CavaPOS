@@ -468,7 +468,7 @@
               {{ __('messages.owner.products.outlet_products.cancel') }}
             </a>
             <button type="submit" class="btn-submit-modern">
-              {{ __('messages.owner.products.outlet_products.save_changes') }}
+              {{ __('messages.owner.products.outlet_products.update') }}
             </button>
           </div>
         </form>

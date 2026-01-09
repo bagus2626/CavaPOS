@@ -31,7 +31,8 @@
                     </option>
                     @foreach ($partners as $partner)
                       <option value="{{ $partner->id }}" {{ request('filter_location') == $partner->id ? 'selected' : '' }}>
-                        {{ $partner->name }} ({{ __('messages.owner.products.stocks.movements_index.filter_location_outlet_suffix') }})
+                        {{ $partner->name }}
+                        ({{ __('messages.owner.products.stocks.movements_index.filter_location_outlet_suffix') }})
                       </option>
                     @endforeach
                   </select>
@@ -89,7 +90,8 @@
                 <th>{{ __('messages.owner.products.stocks.movements_index.table_header_category') }}</th>
                 <th>{{ __('messages.owner.products.stocks.movements_index.table_header_location') }}</th>
                 <th>{{ __('messages.owner.products.stocks.movements_index.table_header_notes') }}</th>
-                <th class="text-center">{{ __('messages.owner.products.stocks.movements_index.table_header_total_items') }}</th>
+                <th class="text-center">
+                  {{ __('messages.owner.products.stocks.movements_index.table_header_total_items') }}</th>
                 <th class="text-center" style="width: 120px;">
                   {{ __('messages.owner.products.stocks.movements_index.table_header_actions') }}
                 </th>
@@ -97,11 +99,9 @@
             </thead>
             <tbody id="movementTableBody">
               @forelse ($movements as $index => $movement)
-                <tr class="table-row" 
-                    data-location="{{ $movement->partner_id ?? 'owner' }}"
-                    data-type="{{ $movement->type }}"
-                    data-date="{{ $movement->created_at->format('Y-m-d') }}"
-                    data-search="{{ strtolower($movement->created_at->format('d M Y') . ' ' . $movement->type . ' ' . str_replace('_', ' ', $movement->category) . ' ' . ($movement->partner->name ?? __('messages.owner.products.stocks.movements_index.filter_location_owner')) . ' ' . ($movement->notes ?? '')) }}">
+                <tr class="table-row" data-location="{{ $movement->partner_id ?? 'owner' }}"
+                  data-type="{{ $movement->type }}" data-date="{{ $movement->created_at->format('Y-m-d') }}"
+                  data-search="{{ strtolower($movement->created_at->format('d M Y') . ' ' . $movement->type . ' ' . str_replace('_', ' ', $movement->category) . ' ' . ($movement->partner->name ?? __('messages.owner.products.stocks.movements_index.filter_location_owner')) . ' ' . ($movement->notes ?? '')) }}">
                   <!-- Number -->
                   <td class="text-center text-muted">
                     {{ $movements->firstItem() + $index }}
@@ -148,19 +148,18 @@
                   <!-- Total Items -->
                   <td class="text-center">
                     <span class="badge-modern badge-info">
-                      {{ $movement->items_count }} {{ __('messages.owner.products.stocks.movements_index.items_count_suffix') }}
+                      {{ $movement->items_count }}
+                      {{ __('messages.owner.products.stocks.movements_index.items_count_suffix') }}
                     </span>
                   </td>
 
                   <!-- Actions -->
                   <td class="text-center">
                     <div class="table-actions">
-                      <button type="button" 
-                              class="btn-table-action view btn-show-detail"
-                              data-toggle="modal" 
-                              data-target="#detailMovementModal"
-                              data-url="{{ route('owner.user-owner.stocks.movements.items.json', $movement->id) }}"
-                              title="View Details">
+                      <button type="button" class="btn-table-action view btn-show-detail" data-toggle="modal"
+                        data-target="#detailMovementModal"
+                        data-url="{{ route('owner.user-owner.stocks.movements.items.json', $movement->id) }}"
+                        title="View Details">
                         <span class="material-symbols-outlined">visibility</span>
                       </button>
                     </div>
@@ -295,19 +294,19 @@
 
         let visibleCount = 0;
 
-        rows.each(function() {
+        rows.each(function () {
           const row = $(this);
           const rowLocation = row.data('location');
           const rowType = row.data('type');
           const rowDate = row.data('date');
 
           // Check all filter conditions
-          const matchesLocation = !selectedLocation || selectedLocation === '' || 
-                                  rowLocation == selectedLocation;
-          const matchesType = !selectedType || selectedType === '' || 
-                             rowType === selectedType;
-          const matchesDate = !selectedDate || selectedDate === '' || 
-                             rowDate === selectedDate;
+          const matchesLocation = !selectedLocation || selectedLocation === '' ||
+            rowLocation == selectedLocation;
+          const matchesType = !selectedType || selectedType === '' ||
+            rowType === selectedType;
+          const matchesDate = !selectedDate || selectedDate === '' ||
+            rowDate === selectedDate;
 
           // Show/hide row based on all conditions
           if (matchesLocation && matchesType && matchesDate) {
@@ -333,16 +332,16 @@
 
         if (visibleCount === 0 && rows.length > 0) {
           const emptyRow = `
-            <tr class="empty-filter-row">
-              <td colspan="8" class="text-center">
-                <div class="table-empty-state">
-                  <span class="material-symbols-outlined">search_off</span>
-                  <h4>No results found</h4>
-                  <p>Try adjusting your filters</p>
-                </div>
-              </td>
-            </tr>
-          `;
+              <tr class="empty-filter-row">
+                <td colspan="8" class="text-center">
+                  <div class="table-empty-state">
+                    <span class="material-symbols-outlined">search_off</span>
+                    <h4>No results found</h4>
+                    <p>Try adjusting your filters</p>
+                  </div>
+                </td>
+              </tr>
+            `;
           tableBody.append(emptyRow);
         }
       }
@@ -369,19 +368,19 @@
 
         // Reset modal ke status loading
         tableBody.html(`
-          <tr>
-            <td colspan="4" class="text-center py-4">
-              <div class="spinner-border spinner-border-sm" role="status">
-                <span class="sr-only">
-                  {{ __('messages.owner.products.stocks.movements_index.modal_loading_aria') }}
+            <tr>
+              <td colspan="4" class="text-center py-4">
+                <div class="spinner-border spinner-border-sm" role="status">
+                  <span class="sr-only">
+                    {{ __('messages.owner.products.stocks.movements_index.modal_loading_aria') }}
+                  </span>
+                </div>
+                <span class="ml-2">
+                  {{ __('messages.owner.products.stocks.movements_index.modal_loading_text') }}
                 </span>
-              </div>
-              <span class="ml-2">
-                {{ __('messages.owner.products.stocks.movements_index.modal_loading_text') }}
-              </span>
-            </td>
-          </tr>
-        `);
+              </td>
+            </tr>
+          `);
         modal.find('#modal_notes').text('-');
         modal.find('#modal_category').text('-');
         modal.find('#modal_location').text('-');
@@ -419,36 +418,36 @@
                 }
 
                 var row = `
-                  <tr>
-                    <td>${item.stock_name}</td>
-                    <td class="text-right fw-600 ${qtyClass}">
-                      ${qtySign}${item.display_quantity}
-                    </td>
-                    <td>${item.display_unit_name}</td>
-                    <td class="text-right">${item.unit_price_formatted}</td>
-                  </tr>
-                `;
+                    <tr>
+                      <td>${item.stock_name}</td>
+                      <td class="text-right fw-600 ${qtyClass}">
+                        ${qtySign}${item.display_quantity}
+                      </td>
+                      <td>${item.display_unit_name}</td>
+                      <td class="text-right">${item.unit_price_formatted}</td>
+                    </tr>
+                  `;
                 tableBody.append(row);
               });
             } else {
               tableBody.html(`
-                <tr>
-                  <td colspan="4" class="text-center py-4 text-muted">
-                    {{ __('messages.owner.products.stocks.movements_index.modal_table_empty') }}
-                  </td>
-                </tr>
-              `);
+                  <tr>
+                    <td colspan="4" class="text-center py-4 text-muted">
+                      {{ __('messages.owner.products.stocks.movements_index.modal_table_empty') }}
+                    </td>
+                  </tr>
+                `);
             }
           },
           error: function (xhr) {
             tableBody.html(`
-              <tr>
-                <td colspan="4" class="text-center py-4 text-danger">
-                  {{ __('messages.owner.products.stocks.movements_index.ajax_error_message') }}
-                  <div class="text-muted small">${xhr.statusText || 'Error'}</div>
-                </td>
-              </tr>
-            `);
+                <tr>
+                  <td colspan="4" class="text-center py-4 text-danger">
+                    {{ __('messages.owner.products.stocks.movements_index.ajax_error_message') }}
+                    <div class="text-muted small">${xhr.statusText || 'Error'}</div>
+                  </td>
+                </tr>
+              `);
           }
         });
       });

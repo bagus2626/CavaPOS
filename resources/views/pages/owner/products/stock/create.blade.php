@@ -190,7 +190,7 @@
                     <!-- Card Footer -->
                     <div class="card-footer-modern">
                         <a href="{{ route('owner.user-owner.stocks.index') }}" class="btn-cancel-modern">
-                            {{ __('messages.owner.products.stocks.back_to_list') }}
+                            {{ __('messages.owner.products.stocks.cancel') }}
                         </a>
                         <button type="submit" class="btn-submit-modern">
                             {{ __('messages.owner.products.stocks.submit_button') }}

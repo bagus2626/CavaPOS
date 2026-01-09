@@ -114,7 +114,7 @@
                     <!-- Card Footer -->
                     <div class="card-footer-modern">
                         <a href="{{ route('owner.user-owner.categories.index') }}" class="btn-cancel-modern">
-                            {{ __('messages.owner.products.categories.back') }}
+                            {{ __('messages.owner.products.categories.cancel') }}
                         </a>
                         <button type="submit" class="btn-submit-modern">
                             {{ __('messages.owner.products.categories.create_category') }}

@@ -129,59 +129,64 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     // ==========================================
-    // STOCK INDEX - SEARCH & FILTER
+    // STOCK INDEX - SEARCH & PAGINATION
     // ==========================================
     document.addEventListener('DOMContentLoaded', function () {
       const searchInput = document.getElementById('searchInput');
       const tableBody = document.getElementById('stockTableBody');
+      const paginationWrapper = document.querySelector('.table-pagination');
 
-      if (!tableBody) return;
+      if (!tableBody) {
+        console.error('Table body not found');
+        return;
+      }
 
-      const rows = tableBody.querySelectorAll('tr.table-row');
+      // Ambil semua data dari Blade
+      const allStocksData = @json($allStocksFormatted ?? []);
+      
+      let filteredStocks = [...allStocksData];
+      const itemsPerPage = 10;
+      let currentPage = 1;
 
       // ==========================================
-      // SEARCH FUNCTION
+      // FILTER FUNCTION
       // ==========================================
-      function filterTable() {
-        const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+      function filterStocks() {
+        const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
-        let visibleCount = 0;
+        filteredStocks = allStocksData.filter(stock => {
+          // Search: cari di stock_code, stock_name
+          const searchText = `
+            ${stock.stock_code || ''} 
+            ${stock.stock_name || ''}
+          `.toLowerCase();
+          
+          const matchesSearch = !searchTerm || searchText.includes(searchTerm);
 
-        rows.forEach(row => {
-          const text = row.textContent.toLowerCase();
-          const matchesSearch = !searchTerm || text.includes(searchTerm);
-
-          if (matchesSearch) {
-            row.style.display = '';
-            visibleCount++;
-
-            // Update row number
-            const firstCell = row.querySelector('td:first-child');
-            if (firstCell) {
-              firstCell.textContent = visibleCount;
-            }
-          } else {
-            row.style.display = 'none';
-          }
+          return matchesSearch;
         });
 
-        // Handle empty state
-        handleEmptyState(visibleCount);
+        currentPage = 1; // Reset ke halaman pertama
+        renderTable();
       }
 
       // ==========================================
-      // EMPTY STATE HANDLER
+      // RENDER TABLE
       // ==========================================
-      function handleEmptyState(visibleCount) {
-        const existingEmptyRow = tableBody.querySelector('.empty-filter-row');
-        if (existingEmptyRow) {
-          existingEmptyRow.remove();
-        }
+      function renderTable() {
+        // Hitung pagination
+        const totalPages = Math.ceil(filteredStocks.length / itemsPerPage);
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const currentStocks = filteredStocks.slice(startIndex, endIndex);
 
-        if (visibleCount === 0 && rows.length > 0) {
-          const emptyRow = document.createElement('tr');
-          emptyRow.classList.add('empty-filter-row');
-          emptyRow.innerHTML = `
+        // Clear table
+        tableBody.innerHTML = '';
+
+        // Render rows
+        if (currentStocks.length === 0) {
+          tableBody.innerHTML = `
+            <tr class="empty-filter-row">
               <td colspan="7" class="text-center">
                 <div class="table-empty-state">
                   <span class="material-symbols-outlined">search_off</span>
@@ -189,17 +194,186 @@
                   <p>Try adjusting your search</p>
                 </div>
               </td>
-            `;
-          tableBody.appendChild(emptyRow);
+            </tr>
+          `;
+        } else {
+          currentStocks.forEach((stock, index) => {
+            const rowNumber = startIndex + index + 1;
+            const row = createStockRow(stock, rowNumber);
+            tableBody.appendChild(row);
+          });
         }
+
+        // Handle pagination visibility
+        if (paginationWrapper) {
+          if (filteredStocks.length <= itemsPerPage) {
+            paginationWrapper.style.display = 'none';
+          } else {
+            paginationWrapper.style.display = '';
+            renderPagination(totalPages, startIndex, endIndex);
+          }
+        }
+      }
+
+      // ==========================================
+      // CREATE STOCK ROW
+      // ==========================================
+      function createStockRow(stock, rowNumber) {
+        const tr = document.createElement('tr');
+        tr.className = 'table-row';
+        tr.setAttribute('data-type', stock.type || '');
+        tr.setAttribute('data-stock_type', stock.stock_type || '');
+        
+        const partnerType = stock.partner_product_id && !stock.partner_product_option_id 
+          ? 'product' 
+          : (stock.partner_product_id && stock.partner_product_option_id ? 'option' : 'none');
+        tr.setAttribute('data-partner-type', partnerType);
+
+        // Format quantity
+        const formattedQuantity = new Intl.NumberFormat('id-ID', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }).format(stock.display_quantity);
+
+        // Unit display
+        let unitDisplay = '';
+        if (stock.display_unit_name) {
+          unitDisplay = `<span class="badge-modern badge-info">${stock.display_unit_name}</span>`;
+        } else {
+          unitDisplay = `<span class="text-muted small">({{ __('messages.owner.products.stocks.base_unit') }})</span>`;
+        }
+
+        tr.innerHTML = `
+          <td class="text-center text-muted">${rowNumber}</td>
+          <td class="mono fw-600">${stock.stock_code}</td>
+          <td><span class="fw-600">${stock.stock_name}</span></td>
+          <td>${formattedQuantity}</td>
+          <td>${unitDisplay}</td>
+          <td><span class="fw-600">${stock.last_price_per_unit}</span></td>
+          <td class="text-center">
+            <div class="table-actions">
+              <button onclick="deleteStock(${stock.id})"
+                class="btn-table-action delete"
+                title="{{ __('messages.owner.products.stocks.delete') }}">
+                <span class="material-symbols-outlined">delete</span>
+              </button>
+            </div>
+          </td>
+        `;
+
+        return tr;
+      }
+
+      // ==========================================
+      // RENDER PAGINATION
+      // ==========================================
+      function renderPagination(totalPages, startIndex, endIndex) {
+        if (!paginationWrapper) return;
+
+        paginationWrapper.innerHTML = '';
+
+        const nav = document.createElement('nav');
+        nav.setAttribute('role', 'navigation');
+        nav.setAttribute('aria-label', 'Pagination Navigation');
+        
+        const ul = document.createElement('ul');
+        ul.className = 'pagination';
+
+        // Previous Button
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+        
+        if (currentPage === 1) {
+          prevLi.innerHTML = `
+            <span class="page-link" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
+              </svg>
+            </span>
+          `;
+        } else {
+          prevLi.innerHTML = `
+            <a href="#" class="page-link" data-page="${currentPage - 1}" aria-label="Previous">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
+              </svg>
+            </a>
+          `;
+        }
+        ul.appendChild(prevLi);
+
+        // Page Numbers
+        for (let i = 1; i <= totalPages; i++) {
+          if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+            const pageLi = document.createElement('li');
+            pageLi.className = `page-item ${i === currentPage ? 'active' : ''}`;
+            
+            if (i === currentPage) {
+              pageLi.innerHTML = `<span class="page-link" aria-current="page">${i}</span>`;
+            } else {
+              pageLi.innerHTML = `<a href="#" class="page-link" data-page="${i}">${i}</a>`;
+            }
+            
+            ul.appendChild(pageLi);
+          } else if (i === currentPage - 2 || i === currentPage + 2) {
+            const dotsLi = document.createElement('li');
+            dotsLi.className = 'page-item disabled';
+            dotsLi.innerHTML = `<span class="page-link">...</span>`;
+            ul.appendChild(dotsLi);
+          }
+        }
+
+        // Next Button
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+        
+        if (currentPage === totalPages) {
+          nextLi.innerHTML = `
+            <span class="page-link" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
+              </svg>
+            </span>
+          `;
+        } else {
+          nextLi.innerHTML = `
+            <a href="#" class="page-link" data-page="${currentPage + 1}" aria-label="Next">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
+              </svg>
+            </a>
+          `;
+        }
+        ul.appendChild(nextLi);
+
+        nav.appendChild(ul);
+        paginationWrapper.appendChild(nav);
+
+        // Add click handlers
+        nav.querySelectorAll('a.page-link[data-page]').forEach(link => {
+          link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const page = parseInt(this.dataset.page);
+            if (page > 0 && page <= totalPages && page !== currentPage) {
+              currentPage = page;
+              renderTable();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          });
+        });
       }
 
       // ==========================================
       // EVENT LISTENERS
       // ==========================================
       if (searchInput) {
-        searchInput.addEventListener('input', filterTable);
+        searchInput.addEventListener('input', filterStocks);
       }
+
+      // ==========================================
+      // INITIALIZE
+      // ==========================================
+      renderTable();
     });
 
     // ==========================================
@@ -223,9 +397,9 @@
           form.style.display = 'none';
 
           form.innerHTML = `
-              @csrf
-              <input type="hidden" name="_method" value="DELETE">
-            `;
+            @csrf
+            <input type="hidden" name="_method" value="DELETE">
+          `;
 
           document.body.appendChild(form);
           form.submit();

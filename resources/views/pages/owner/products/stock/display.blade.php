@@ -47,7 +47,7 @@
                 </tr>
             </thead>
 
-            <tbody>
+            <tbody id="stockTableBody">
                 @forelse ($stocks as $index => $stock)
                     <tr class="table-row"
                         data-type="{{ $stock->type }}"
@@ -96,14 +96,13 @@
 
                         <!-- Actions -->
                         <td class="text-center">
-                                <div class="table-actions">
-                                    <button onclick="deleteStock({{ $stock->id }})"
-                                        class="btn-table-action delete"
-                                        title="{{ __('messages.owner.products.stocks.delete') }}">
-                                        <span class="material-symbols-outlined">delete</span>
-                                    </button>
-                                </div>
-
+                            <div class="table-actions">
+                                <button onclick="deleteStock({{ $stock->id }})"
+                                    class="btn-table-action delete"
+                                    title="{{ __('messages.owner.products.stocks.delete') }}">
+                                    <span class="material-symbols-outlined">delete</span>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 @empty
@@ -124,10 +123,6 @@
     <!-- Pagination -->
     @if($stocks->hasPages())
         <div class="table-pagination">
-            <div class="text-muted small">
-                Showing {{ $stocks->firstItem() ?? 0 }} to {{ $stocks->lastItem() ?? 0 }}
-                of {{ $stocks->total() }} entries
-            </div>
             {{ $stocks->links() }}
         </div>
     @endif

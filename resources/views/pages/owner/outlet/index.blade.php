@@ -83,88 +83,292 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     // ==========================================
-    // OUTLET INDEX - SEARCH & FILTER
+    // OUTLET INDEX - SEARCH & FILTER (NO RELOAD)
     // ==========================================
     document.addEventListener('DOMContentLoaded', function () {
       const searchInput = document.getElementById('searchInput');
       const statusFilter = document.getElementById('statusFilter');
       const tableBody = document.getElementById('outletTableBody');
+      const paginationWrapper = document.querySelector('.table-pagination');
 
-      if (!tableBody) return;
+      if (!tableBody) {
+        console.error('Table body not found');
+        return;
+      }
 
-      const rows = tableBody.querySelectorAll('tr.table-row');
+      // Ambil semua data dari Blade
+      const allOutletsData = @json($allOutletsFormatted ?? []);
+      
+      let filteredOutlets = [...allOutletsData];
+      const itemsPerPage = 10;
+      let currentPage = 1;
 
       // ==========================================
       // FILTER FUNCTION
       // ==========================================
-      function filterTable() {
-        const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
-        const selectedStatus = statusFilter ? statusFilter.value : '';
+      function filterOutlets() {
+        const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        const selectedStatus = statusFilter ? statusFilter.value.trim() : '';
 
-        let visibleCount = 0;
+        filteredOutlets = allOutletsData.filter(outlet => {
+          // Search: cari di name, username, email, city
+          const searchText = `
+            ${outlet.name || ''} 
+            ${outlet.username || ''} 
+            ${outlet.email || ''} 
+            ${outlet.city || ''}
+          `.toLowerCase();
+          
+          const matchesSearch = !searchTerm || searchText.includes(searchTerm);
 
-        rows.forEach(row => {
-          const text = row.textContent.toLowerCase();
-          const status = row.dataset.status;
+          // Status filter
+          const outletStatus = outlet.is_active === 1 || outlet.is_active === '1' || outlet.is_active === true ? 'active' : 'inactive';
+          const matchesStatus = !selectedStatus || outletStatus === selectedStatus;
 
-          const matchesSearch = !searchTerm || text.includes(searchTerm);
-          const matchesStatus = !selectedStatus || status === selectedStatus;
-
-          if (matchesSearch && matchesStatus) {
-            row.style.display = '';
-            visibleCount++;
-
-            // Update row number
-            const firstCell = row.querySelector('td:first-child');
-            if (firstCell) {
-              firstCell.textContent = visibleCount;
-            }
-          } else {
-            row.style.display = 'none';
-          }
+          return matchesSearch && matchesStatus;
         });
 
-        // Handle empty state
-        handleEmptyState(visibleCount);
+        currentPage = 1; // Reset ke halaman pertama
+        renderTable();
       }
 
       // ==========================================
-      // EMPTY STATE HANDLER
+      // RENDER TABLE
       // ==========================================
-      function handleEmptyState(visibleCount) {
-        // Remove existing empty row
-        const existingEmptyRow = tableBody.querySelector('.empty-filter-row');
-        if (existingEmptyRow) {
-          existingEmptyRow.remove();
+      function renderTable() {
+        // Hitung pagination
+        const totalPages = Math.ceil(filteredOutlets.length / itemsPerPage);
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const currentOutlets = filteredOutlets.slice(startIndex, endIndex);
+
+        // Clear table
+        tableBody.innerHTML = '';
+
+        // Render rows
+        if (currentOutlets.length === 0) {
+          tableBody.innerHTML = `
+            <tr class="empty-filter-row">
+              <td colspan="7" class="text-center">
+                <div class="table-empty-state">
+                  <span class="material-symbols-outlined" style="font-size: 4rem; color: #ccc; display: block; margin-bottom: 1rem;">search_off</span>
+                  <h4 style="margin: 0 0 0.5rem 0; color: #666; font-size: 1.25rem;">No results found</h4>
+                  <p style="margin: 0; color: #999;">Try adjusting your search or filter</p>
+                </div>
+              </td>
+            </tr>
+          `;
+        } else {
+          currentOutlets.forEach((outlet, index) => {
+            const rowNumber = startIndex + index + 1;
+            const row = createOutletRow(outlet, rowNumber);
+            tableBody.appendChild(row);
+          });
         }
 
-        // Add empty row if no results
-        if (visibleCount === 0 && rows.length > 0) {
-          const emptyRow = document.createElement('tr');
-          emptyRow.classList.add('empty-filter-row');
-          emptyRow.innerHTML = `
-                  <td colspan="9" class="td-center">
-                      <div class="table-empty-state">
-                          <span class="material-symbols-outlined">search_off</span>
-                          <h4>No results found</h4>
-                          <p>Try adjusting your search or filter</p>
-                      </div>
-                  </td>
-              `;
-          tableBody.appendChild(emptyRow);
+        // Handle pagination visibility
+        if (paginationWrapper) {
+          if (filteredOutlets.length <= itemsPerPage) {
+            paginationWrapper.style.display = 'none';
+          } else {
+            paginationWrapper.style.display = '';
+            renderPagination(totalPages);
+          }
         }
+      }
+
+      // ==========================================
+      // CREATE OUTLET ROW
+      // ==========================================
+      function createOutletRow(outlet, rowNumber) {
+        const tr = document.createElement('tr');
+        tr.className = 'table-row';
+        
+        // Tentukan status
+        const isActive = outlet.is_active === 1 || outlet.is_active === '1' || outlet.is_active === true;
+        tr.setAttribute('data-status', isActive ? 'active' : 'inactive');
+
+        // Format image
+        let imageHtml = '';
+        if (outlet.logo) {
+          const imgSrc = outlet.logo.startsWith('http://') || outlet.logo.startsWith('https://')
+            ? outlet.logo
+            : `{{ asset('storage/') }}/${outlet.logo}`;
+          imageHtml = `<img src="${imgSrc}" alt="${outlet.name}" class="user-avatar" loading="lazy">`;
+        } else {
+          imageHtml = `
+            <div class="user-avatar-placeholder">
+              <span class="material-symbols-outlined">store</span>
+            </div>
+          `;
+        }
+
+        // Format status badge
+        let statusBadge = '';
+        if (isActive) {
+          statusBadge = '<span class="badge-modern badge-success badge-sm">{{ __("messages.owner.outlet.all_outlets.active") }}</span>';
+        } else {
+          statusBadge = '<span class="badge-modern badge-danger badge-sm">{{ __("messages.owner.outlet.all_outlets.inactive") }}</span>';
+        }
+
+        // URLs
+        const showUrl = `/owner/user-owner/outlets/${outlet.id}`;
+        const editUrl = `/owner/user-owner/outlets/${outlet.id}/edit`;
+
+        tr.innerHTML = `
+          <td class="text-center text-muted">${rowNumber}</td>
+          <td>
+            <div class="user-info-cell">
+              ${imageHtml}
+              <span class="user-name">${outlet.name || '-'}</span>
+            </div>
+          </td>
+          <td>
+            <span class="text-secondary">${outlet.username || '-'}</span>
+          </td>
+          <td>
+            <a href="mailto:${outlet.email}" class="table-link">
+              ${outlet.email || '-'}
+            </a>
+          </td>
+          <td>
+            <span class="text-secondary">${outlet.city || '-'}</span>
+          </td>
+          <td class="text-center">
+            ${statusBadge}
+          </td>
+          <td class="text-center">
+            <div class="table-actions">
+              <a href="${showUrl}" class="btn-table-action view" title="{{ __('messages.owner.user_management.employees.view_details') ?? 'View Details' }}">
+                <span class="material-symbols-outlined">visibility</span>
+              </a>
+              <a href="${editUrl}" class="btn-table-action edit" title="{{ __('messages.owner.outlet.all_outlets.edit') }}">
+                <span class="material-symbols-outlined">edit</span>
+              </a>
+              <button onclick="deleteOutlet(${outlet.id})" class="btn-table-action delete" title="{{ __('messages.owner.outlet.all_outlets.delete') }}">
+                <span class="material-symbols-outlined">delete</span>
+              </button>
+            </div>
+          </td>
+        `;
+
+        return tr;
+      }
+
+      // ==========================================
+      // RENDER PAGINATION
+      // ==========================================
+      function renderPagination(totalPages) {
+        if (!paginationWrapper) return;
+
+        paginationWrapper.innerHTML = '';
+
+        const nav = document.createElement('nav');
+        nav.setAttribute('role', 'navigation');
+        nav.setAttribute('aria-label', 'Pagination Navigation');
+        
+        const ul = document.createElement('ul');
+        ul.className = 'pagination';
+
+        // Previous Button
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+        
+        if (currentPage === 1) {
+          prevLi.innerHTML = `
+            <span class="page-link" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
+              </svg>
+            </span>
+          `;
+        } else {
+          prevLi.innerHTML = `
+            <a href="#" class="page-link" data-page="${currentPage - 1}" aria-label="Previous">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
+              </svg>
+            </a>
+          `;
+        }
+        ul.appendChild(prevLi);
+
+        // Page Numbers
+        for (let i = 1; i <= totalPages; i++) {
+          if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+            const pageLi = document.createElement('li');
+            pageLi.className = `page-item ${i === currentPage ? 'active' : ''}`;
+            
+            if (i === currentPage) {
+              pageLi.innerHTML = `<span class="page-link" aria-current="page">${i}</span>`;
+            } else {
+              pageLi.innerHTML = `<a href="#" class="page-link" data-page="${i}">${i}</a>`;
+            }
+            
+            ul.appendChild(pageLi);
+          } else if (i === currentPage - 2 || i === currentPage + 2) {
+            const dotsLi = document.createElement('li');
+            dotsLi.className = 'page-item disabled';
+            dotsLi.innerHTML = `<span class="page-link">...</span>`;
+            ul.appendChild(dotsLi);
+          }
+        }
+
+        // Next Button
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+        
+        if (currentPage === totalPages) {
+          nextLi.innerHTML = `
+            <span class="page-link" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
+              </svg>
+            </span>
+          `;
+        } else {
+          nextLi.innerHTML = `
+            <a href="#" class="page-link" data-page="${currentPage + 1}" aria-label="Next">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
+              </svg>
+            </a>
+          `;
+        }
+        ul.appendChild(nextLi);
+
+        nav.appendChild(ul);
+        paginationWrapper.appendChild(nav);
+
+        // Add click handlers
+        nav.querySelectorAll('a.page-link[data-page]').forEach(link => {
+          link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const page = parseInt(this.dataset.page);
+            if (page > 0 && page <= totalPages && page !== currentPage) {
+              currentPage = page;
+              renderTable();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          });
+        });
       }
 
       // ==========================================
       // EVENT LISTENERS
       // ==========================================
       if (searchInput) {
-        searchInput.addEventListener('input', filterTable);
+        searchInput.addEventListener('input', filterOutlets);
       }
 
       if (statusFilter) {
-        statusFilter.addEventListener('change', filterTable);
+        statusFilter.addEventListener('change', filterOutlets);
       }
+
+      // ==========================================
+      // INITIALIZE
+      // ==========================================
+      renderTable();
     });
 
     // ==========================================
@@ -188,9 +392,9 @@
           form.style.display = 'none';
 
           form.innerHTML = `
-                  @csrf
-                  <input type="hidden" name="_method" value="DELETE">
-              `;
+            @csrf
+            <input type="hidden" name="_method" value="DELETE">
+          `;
 
           document.body.appendChild(form);
           form.submit();

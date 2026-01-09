@@ -4,452 +4,282 @@
 @section('page_title', __('messages.partner.outlet.table_management.tables.create_new_table'))
 
 @section('content')
-    <section class="content">
-        <div class="container-fluid">
-            <a href="{{ route('partner.store.tables.index') }}" class="btn btn-outline-choco mb-3">
-                <i
-                    class="fas fa-arrow-left mr-2"></i>{{ __('messages.partner.outlet.table_management.tables.back_to_tables') }}
-            </a>
-
-            <div class="card shadow-sm">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">{{ __('messages.partner.outlet.table_management.tables.create_new_table') }}
-                    </h5>
+    <div class="modern-container">
+        <div class="container-modern">
+            <!-- Header Section -->
+            <div class="page-header">
+                <div class="header-content">
+                    <h1 class="page-title">{{ __('messages.partner.outlet.table_management.tables.create_new_table') }}</h1>
+                    <p class="page-subtitle">{{ __('messages.partner.outlet.table_management.tables.add_new_table') }}</p>
                 </div>
+            </div>
 
-                <div class="card-body">
-                    @if ($errors->any())
-                        <div class="alert alert-danger">
-                            <strong>P{{ __('messages.partner.outlet.table_management.tables.re_check_input') }}</strong>
-                            <ul class="mb-0 mt-2">
-                                @foreach ($errors->all() as $err)
-                                    <li>{{ $err }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
+            <!-- Error Messages -->
+            @if ($errors->any())
+                <div class="alert alert-danger alert-modern">
+                    <div class="alert-icon">
+                        <span class="material-symbols-outlined">error</span>
+                    </div>
+                    <div class="alert-content">
+                        <strong>{{ __('messages.partner.outlet.table_management.tables.re_check_input') }}</strong>
+                        <ul class="mb-0 mt-2">
+                            @foreach ($errors->all() as $err)
+                                <li>{{ $err }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            @endif
 
-                    <form action="{{ route('partner.store.tables.store') }}" method="POST" enctype="multipart/form-data"
-                        id="tableForm">
-                        @csrf
+            @if (session('success'))
+                <div class="alert alert-success alert-modern">
+                    <div class="alert-icon">
+                        <span class="material-symbols-outlined">check_circle</span>
+                    </div>
+                    <div class="alert-content">
+                        {{ session('success') }}
+                    </div>
+                </div>
+            @endif
 
-                        <div class="row">
-                            {{-- Table No --}}
-                            <div class="col-md-6 mb-3">
-                                <label for="table_no"
-                                    class="form-label">{{ __('messages.partner.outlet.table_management.tables.table_no') }}</label>
-                                <input type="text" name="table_no" id="table_no"
-                                    class="form-control @error('table_no') is-invalid @enderror"
-                                    value="{{ old('table_no') }}" required>
-                                @error('table_no')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+            <!-- Main Card -->
+            <div class="modern-card">
+                <form action="{{ route('partner.store.tables.store') }}" method="POST" enctype="multipart/form-data"
+                    id="tableForm">
+                    @csrf
+                    <div class="card-body-modern">
 
-                            {{-- Status --}}
-                            <div class="col-md-6 mb-3">
-                                <label for="status"
-                                    class="form-label">{{ __('messages.partner.outlet.table_management.tables.status') }}</label>
-                                <select name="status" id="status"
-                                    class="form-control select2 @error('status') is-invalid @enderror" required>
-                                    <option value="">
-                                        {{ __('messages.partner.outlet.table_management.tables.choose_status') }}
-                                    </option>
-                                    <option value="available" {{ old('status') == 'available' ? 'selected' : '' }}>
-                                        {{ __('messages.partner.outlet.table_management.tables.available') }}
-                                    </option>
-                                    <option value="occupied" {{ old('status') == 'occupied' ? 'selected' : '' }}>
-                                        {{ __('messages.partner.outlet.table_management.tables.occupied') }}
-                                    </option>
-                                    <option value="reserved" {{ old('status') == 'reserved' ? 'selected' : '' }}>
-                                        {{ __('messages.partner.outlet.table_management.tables.reserved') }}
-                                    </option>
-                                    <option value="not_available" {{ old('status') == 'not_available' ? 'selected' : '' }}>
-                                        {{ __('messages.partner.outlet.table_management.tables.not_available') }}
-                                    </option>
-                                </select>
-                                @error('status')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            {{-- Table Class with Toggle between Select and Input --}}
-                            <div class="col-md-6 mb-3">
-                                <label for="table_class" class="form-label">
-                                    {{ __('messages.partner.outlet.table_management.tables.class_type') }}
-                                </label>
-
-                                {{-- SELECT MODE (default) --}}
-                                <div id="select_mode">
-                                    <select name="table_class" id="table_class"
-                                        class="form-control select2 @error('table_class') is-invalid @enderror" required>
-                                        <option value="">
-                                            {{ __('messages.partner.outlet.table_management.tables.placeholder_1') }}
-                                        </option>
-
-                                        @if (!empty($table_classes) && $table_classes->count() > 0)
-                                            @foreach ($table_classes as $class)
-                                                <option value="{{ $class }}" {{ old('table_class') == $class ? 'selected' : '' }}>
-                                                    {{ $class }}
-                                                </option>
-                                            @endforeach
-                                        @endif
-                                    </select>
-
-                                    @error('table_class')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
-
-                                    {{-- Tombol Tambah Kelas Baru --}}
-                                    <button type="button" class="btn-add-class mt-2" id="btn_add_new_class">
-                                        <i class="fas fa-plus-circle"></i>
-                                        <span>{{ __('messages.partner.outlet.table_management.tables.add_class') }}</span>
-                                    </button>
-                                </div>
-
-                                {{-- INPUT MODE (hidden by default) --}}
-                                <div id="input_mode" style="display: none;">
-                                    <div class="new-class-input-wrapper">
-                                        <input type="text" name="new_table_class" id="new_table_class"
-                                            class="form-control new-class-input">
-                                        <button type="button" class="btn btn-cancel-new-class" id="cancel_new_class">
-                                            {{ __('messages.partner.outlet.table_management.tables.cancel') }}
-                                        </button>
+                        <!-- Table Image & Basic Info Section -->
+                        <div class="profile-section">
+                            <!-- Table Image Upload -->
+                            <div class="profile-picture-wrapper">
+                                <div class="profile-picture-container" id="tableImageContainer">
+                                    <div class="upload-placeholder" id="uploadPlaceholder">
+                                        <span class="material-symbols-outlined">image</span>
+                                        <span class="upload-text">Upload</span>
                                     </div>
-                                    <small class="text-muted d-block mt-0">
-                                        {{ __('messages.partner.outlet.table_management.tables.muted_text_2') }}
-                                    </small>
+                                    <img id="imagePreview" class="profile-preview" alt="Table Preview">
+                                </div>
+                                <input type="file" name="images" id="tableImage" accept="image/*" style="display: none;">
+                                <small class="text-muted d-block text-center mt-2">JPG, PNG, WEBP. Max 2 MB</small>
+                                @error('images')
+                                    <div class="text-danger text-center mt-1 small">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Basic Table Information -->
+                            <div class="personal-info-fields">
+                                <div class="section-header">
+                                    <div class="section-icon section-icon-red">
+                                        <span class="material-symbols-outlined">table_restaurant</span>
+                                    </div>
+                                    <h3 class="section-title">
+                                        {{ __('messages.partner.outlet.table_management.tables.table_information') }}
+                                    </h3>
+                                </div>
+                                <div class="row g-4">
+                                    <!-- Table No -->
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                {{ __('messages.partner.outlet.table_management.tables.table_no') }}
+                                                <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="text" name="table_no" id="table_no"
+                                                class="form-control-modern @error('table_no') is-invalid @enderror"
+                                                value="{{ old('table_no') }}"
+                                                placeholder="{{ __('messages.partner.outlet.table_management.tables.enter_table_number') }}"
+                                                required>
+                                            @error('table_no')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <!-- Status -->
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                {{ __('messages.partner.outlet.table_management.tables.status') }}
+                                                <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="select-wrapper">
+                                                <select name="status" id="status"
+                                                    class="form-control-modern @error('status') is-invalid @enderror" required>
+                                                    <option value="">
+                                                        {{ __('messages.partner.outlet.table_management.tables.choose_status') }}
+                                                    </option>
+                                                    <option value="available" {{ old('status') == 'available' ? 'selected' : '' }}>
+                                                        {{ __('messages.partner.outlet.table_management.tables.available') }}
+                                                    </option>
+                                                    <option value="occupied" {{ old('status') == 'occupied' ? 'selected' : '' }}>
+                                                        {{ __('messages.partner.outlet.table_management.tables.occupied') }}
+                                                    </option>
+                                                    <option value="reserved" {{ old('status') == 'reserved' ? 'selected' : '' }}>
+                                                        {{ __('messages.partner.outlet.table_management.tables.reserved') }}
+                                                    </option>
+                                                    <option value="not_available" {{ old('status') == 'not_available' ? 'selected' : '' }}>
+                                                        {{ __('messages.partner.outlet.table_management.tables.not_available') }}
+                                                    </option>
+                                                </select>
+                                                <span class="material-symbols-outlined select-arrow">expand_more</span>
+                                            </div>
+                                            @error('status')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <!-- Table Class with Toggle -->
+                                    <div class="col-md-12">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                {{ __('messages.partner.outlet.table_management.tables.class_type') }}
+                                                <span class="text-danger">*</span>
+                                            </label>
+
+                                            <!-- SELECT MODE (default) -->
+                                            <div id="select_mode">
+                                                <div class="select-wrapper">
+                                                    <select name="table_class" id="table_class"
+                                                        class="form-control-modern @error('table_class') is-invalid @enderror" required>
+                                                        <option value="">
+                                                            {{ __('messages.partner.outlet.table_management.tables.placeholder_1') }}
+                                                        </option>
+                                                        @if (!empty($table_classes) && $table_classes->count() > 0)
+                                                            @foreach ($table_classes as $class)
+                                                                <option value="{{ $class }}" {{ old('table_class') == $class ? 'selected' : '' }}>
+                                                                    {{ $class }}
+                                                                </option>
+                                                            @endforeach
+                                                        @endif
+                                                    </select>
+                                                    <span class="material-symbols-outlined select-arrow">expand_more</span>
+                                                </div>
+
+                                                @error('table_class')
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @enderror
+
+                                                <!-- Add New Class Button -->
+                                                <button type="button" class="btn-modern btn-primary-modern btn-sm-modern mt-3" id="btn_add_new_class">
+                                                    <span class="material-symbols-outlined">add_circle</span>
+                                                    <span>{{ __('messages.partner.outlet.table_management.tables.add_class') }}</span>
+                                                </button>
+                                            </div>
+
+                                            <!-- INPUT MODE (hidden by default) -->
+                                            <div id="input_mode" style="display: none;">
+                                                <input type="text" name="new_table_class" id="new_table_class"
+                                                    class="form-control-modern"
+                                                    placeholder="{{ __('messages.partner.outlet.table_management.tables.enter_new_table_class') }}">
+                                                
+                                                <button type="button" class="btn-modern btn-secondary-modern btn-sm-modern mt-3" id="cancel_new_class">
+                                                    {{ __('messages.partner.outlet.table_management.tables.cancel') }}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Description -->
+                                    <div class="col-12">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                {{ __('messages.partner.outlet.table_management.tables.description') }}
+                                            </label>
+                                            <textarea name="description" id="description"
+                                                class="form-control-modern @error('description') is-invalid @enderror"
+                                                rows="4"
+                                                placeholder="{{ __('messages.partner.outlet.table_management.tables.enter_table_description') }}">{{ old('description') }}</textarea>
+                                            @error('description')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card Footer -->
+                    <div class="card-footer-modern">
+                        <a href="{{ route('partner.store.tables.index') }}" class="btn-cancel-modern">
+                            {{ __('messages.partner.outlet.table_management.tables.cancel') }}
+                        </a>
+                        <button type="submit" class="btn-submit-modern">
+                            {{ __('messages.partner.outlet.table_management.tables.save') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-                            {{-- Images --}}
-                            <div class="col-md-6 mb-3">
-                                <label for="images"
-                                    class="form-label">{{ __('messages.partner.outlet.table_management.tables.upload_images') }}</label>
-                                <input type="file" name="images" id="images"
-                                    class="form-control @error('images') is-invalid @enderror" accept="image/*">
-                                <small class="text-muted d-block">Gunakan JPG, PNG, atau WEBP. Maksimal 2MB.</small>
-                                @error('images')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-
-                                {{-- Preview --}}
-                                <div id="imagesPreview" class="thumb-list mt-2"></div>
+        <!-- Crop Modal -->
+        <div class="modal fade" id="cropModal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                <div class="modal-content modern-modal">
+                    <div class="modal-header modern-modal-header">
+                        <h5 class="modal-title">
+                            <span class="material-symbols-outlined">crop</span>
+                            Crop Table Image
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="alert alert-info alert-modern mb-3">
+                            <div class="alert-icon">
+                                <span class="material-symbols-outlined">info</span>
+                            </div>
+                            <div class="alert-content">
+                                <small>Drag to move, scroll to zoom, or use the corners to resize the crop area.</small>
                             </div>
                         </div>
-
-                        {{-- Description --}}
-                        <div class="mb-3">
-                            <label for="description"
-                                class="form-label">{{ __('messages.partner.outlet.table_management.tables.description') }}</label>
-                            <textarea name="description" id="description" rows="3"
-                                class="form-control @error('description') is-invalid @enderror">{{ old('description') }}</textarea>
-                            @error('description')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                        <div class="img-container-crop">
+                            <img id="imageToCrop" style="max-width: 100%;" alt="Image to crop">
                         </div>
-
-                        {{-- Submit --}}
-                        <div class="d-flex justify-content-end form-actions">
-                            <a href="{{ route('partner.store.tables.index') }}"
-                                class="btn btn-outline-choco mr-2">{{ __('messages.partner.outlet.table_management.tables.cancel') }}</a>
-                            <button type="submit"
-                                class="btn btn-choco">{{ __('messages.partner.outlet.table_management.tables.save') }}</button>
-                        </div>
-                    </form>
+                    </div>
+                    <div class="modal-footer modern-modal-footer">
+                        <button type="button" class="btn-cancel-modern" data-dismiss="modal">
+                            <span class="material-symbols-outlined">close</span>
+                            Cancel
+                        </button>
+                        <button type="button" id="cropBtn" class="btn-submit-modern">
+                            <span class="material-symbols-outlined">check</span>
+                            Crop & Save
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </section>
-
-    <style>
-        /* ==== Tables Create (page scope) ==== */
-        :root {
-            --choco: #8c1000;
-            --soft-choco: #c12814;
-            --ink: #22272b;
-            --paper: #f7f7f8;
-            --radius: 12px;
-            --shadow: 0 6px 20px rgba(0, 0, 0, .08);
-        }
-
-        /* Card & headings */
-        .card.shadow-sm {
-            border: 0;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-        }
-
-        .card-header {
-            background: #fff;
-            border-bottom: 1px solid #eef1f4;
-        }
-
-        .card-title {
-            color: var(--ink);
-            font-weight: 600;
-        }
-
-        /* Labels & inputs */
-        .form-label {
-            font-weight: 600;
-            color: #374151;
-        }
-
-        .form-control:focus,
-        select.form-control:focus {
-            border-color: var(--choco);
-            box-shadow: 0 0 0 .2rem rgba(140, 16, 0, .15);
-        }
-
-        /* Select2 theme alignment */
-        .select2-container--bootstrap-5 .select2-selection {
-            border-radius: 10px;
-            border-color: #e5e7eb;
-        }
-
-        .select2-container--bootstrap-5 .select2-results__option--highlighted {
-            background: var(--soft-choco);
-        }
-
-        /* Alerts */
-        .alert {
-            border-left: 4px solid var(--choco);
-            border-radius: 10px;
-        }
-
-        .alert-danger {
-            background: #fff5f5;
-            border-color: #fde2e2;
-            color: #991b1b;
-        }
-
-        /* Actions */
-        .form-actions .btn {
-            min-width: 120px;
-        }
-
-        /* Brand buttons (fallback jika belum di theme global) */
-        .btn-choco {
-            background: var(--choco);
-            border-color: var(--choco);
-            color: #fff;
-        }
-
-        .btn-choco:hover {
-            background: var(--soft-choco);
-            border-color: var(--soft-choco);
-            color: #fff;
-        }
-
-        .btn-outline-choco {
-            color: var(--choco);
-            border-color: var(--choco);
-        }
-
-        .btn-outline-choco:hover {
-            color: #fff;
-            background: var(--choco);
-            border-color: var(--choco);
-        }
-
-        /* Thumbs (preview images) */
-        .thumb-list {
-            display: flex;
-            flex-wrap: wrap;
-            margin: -.35rem;
-        }
-
-        .thumb-item {
-            width: 100px;
-            margin: .35rem;
-            text-align: center;
-        }
-
-        .thumb-img {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 12px;
-            border: 0;
-            box-shadow: var(--shadow);
-            transition: transform .15s ease, box-shadow .15s ease;
-        }
-
-        .thumb-item:hover .thumb-img {
-            transform: scale(1.03);
-            box-shadow: 0 10px 24px rgba(0, 0, 0, .12);
-        }
-
-        .thumb-caption {
-            font-size: .72rem;
-            color: #6b7280;
-            margin-top: .35rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* Tombol Tambah Kelas Baru */
-        .btn-add-class {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: transparent;
-            border: 1.5px dashed #d1d5db;
-            border-radius: 8px;
-            color: #6b7280;
-            font-size: 0.875rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-add-class:hover {
-            background: #f9fafb;
-            border-color: var(--choco, #8c1000);
-            color: var(--choco, #8c1000);
-        }
-
-        .btn-add-class i {
-            font-size: 1rem;
-        }
-
-        /* Input Mode Wrapper */
-        .new-class-input-wrapper {
-            display: flex;
-            gap: 0.75rem;
-            align-items: stretch;
-        }
-
-        .new-class-input {
-            flex: 1;
-            border-radius: 10px;
-            border: 1.5px solid #d1d5db;
-            padding: 0.625rem 1rem;
-            font-size: 0.9375rem;
-            transition: all 0.2s ease;
-        }
-
-        .new-class-input:focus {
-            border-color: var(--choco, #8c1000);
-            box-shadow: 0 0 0 0.2rem rgba(140, 16, 0, 0.1);
-            outline: none;
-        }
-
-        .new-class-input::placeholder {
-            color: #9ca3af;
-            font-style: italic;
-        }
-
-        /* Tombol Batal */
-        .btn-cancel-new-class {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.5rem 1rem;
-            /* ini yang membuat tinggi setara input */
-            background: #fff;
-            border: 1.5px solid #d1d5db;
-            border-radius: 10px;
-            color: #6b7280;
-            font-size: 0.875rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-        }
-
-        .btn-cancel-new-class:hover {
-            background: var(--choco);
-            border-color: var(--choco);
-            color: #fff;
-        }
-
-        .btn-cancel-new-class i {
-            font-size: 0.875rem;
-        }
-
-        /* Mode transitions */
-        #select_mode,
-        #input_mode {
-            transition: opacity 0.2s ease;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 576px) {
-            .new-class-input-wrapper {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .btn-cancel-new-class {
-                width: 100%;
-                justify-content: center;
-            }
-        }
-    </style>
+    </div>
 @endsection
 
 @push('scripts')
+    <script src="{{ asset('js/image-cropper.js') }}"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            if (window.jQuery && $('.select2').length) {
-                $('.select2').select2({
-                    theme: 'bootstrap-5'
-                });
-            }
 
-            const input = document.getElementById('images');
-            const previewWrap = document.getElementById('imagesPreview');
-            const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'];
-            const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+            // Initialize Table Image Cropper (1:1 Square)
+            ImageCropper.init({
+                id: 'table',
+                inputId: 'tableImage',
+                previewId: 'imagePreview',
+                modalId: 'cropModal',
+                imageToCropId: 'imageToCrop',
+                cropBtnId: 'cropBtn',
+                containerId: 'tableImageContainer',
+                aspectRatio: 1,
+                outputWidth: 800,
+                outputHeight: 800
+            });
 
-            if (input && previewWrap) {
-                input.addEventListener('change', function () {
-                    const file = this.files[0];
-
-                    if (!file) {
-                        previewWrap.innerHTML = '';
-                        return;
-                    }
-
-                    if (!ALLOWED.includes(file.type)) {
-                        alert('Gunakan format gambar JPG, PNG, atau WEBP.');
-                        this.value = '';
-                        previewWrap.innerHTML = '';
-                        return;
-                    }
-
-                    if (file.size > MAX_SIZE) {
-                        alert('Ukuran file tidak boleh melebihi 2 MB.');
-                        this.value = '';
-                        previewWrap.innerHTML = '';
-                        return;
-                    }
-
-                    previewWrap.innerHTML = '';
-                    const url = URL.createObjectURL(file);
-                    const thumbItem = document.createElement('div');
-                    thumbItem.style.maxWidth = '250px';
-                    thumbItem.innerHTML = `
-                            <div class="card shadow-sm border-0 mt-2">
-                                <img src="${url}" class="card-img-top rounded" style="height: 150px; object-fit: cover;">
-                                <div class="card-body p-2 bg-light text-center">
-                                    <small class="text-truncate d-block" style="max-width: 230px;">${file.name}</small>
-                                </div>
-                            </div>
-                        `;
-                    previewWrap.appendChild(thumbItem);
-                });
-            }
-
+            // ==== Table Class Toggle System ====
             const selectMode = document.getElementById('select_mode');
             const inputMode = document.getElementById('input_mode');
-            const selectClass = $('#table_class');
+            const selectClass = document.getElementById('table_class');
             const newClassInput = document.getElementById('new_table_class');
             const btnAddNewClass = document.getElementById('btn_add_new_class');
             const cancelBtn = document.getElementById('cancel_new_class');
@@ -457,19 +287,11 @@
 
             let isInputMode = false;
 
-            if (selectClass.length) {
-                selectClass.select2({
-                    theme: 'bootstrap-5',
-                    placeholder: '{{ __('messages.partner.outlet.table_management.tables.placeholder_1') }}',
-                    allowClear: true
-                });
-            }
-
             function switchToInputMode() {
                 isInputMode = true;
                 selectMode.style.display = 'none';
                 inputMode.style.display = 'block';
-                selectClass.prop('required', false);
+                selectClass.required = false;
                 newClassInput.required = true;
 
                 setTimeout(() => {
@@ -485,10 +307,10 @@
                 isInputMode = false;
                 inputMode.style.display = 'none';
                 selectMode.style.display = 'block';
-                selectClass.prop('required', true);
+                selectClass.required = true;
                 newClassInput.required = false;
                 newClassInput.value = '';
-                selectClass.val('').trigger('change');
+                selectClass.value = '';
             }
 
             if (btnAddNewClass) {
@@ -511,16 +333,21 @@
                             return false;
                         }
 
-                        const newOption = new Option(newClassName, newClassName, true, true);
-                        selectClass.append(newOption).trigger('change');
+                        // Add new option to select before submit
+                        const newOption = document.createElement('option');
+                        newOption.value = newClassName;
+                        newOption.text = newClassName;
+                        newOption.selected = true;
+                        selectClass.appendChild(newOption);
 
-                        selectClass.prop('required', true);
+                        selectClass.required = true;
                         newClassInput.required = false;
                     }
                 });
             }
 
-            const initialValue = selectClass.val();
+            // Handle old input on page reload
+            const initialValue = selectClass.value;
             if (!initialValue && '{{ old('new_table_class') }}') {
                 switchToInputMode();
                 newClassInput.value = '{{ old('new_table_class') }}';

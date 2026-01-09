@@ -401,94 +401,94 @@
 
     /* Custom scrollbar for cart manager */
     * Animation for modal - Scale Only (sama seperti checkout modal) */
-#cartManagerModal.show #cartManagerSheet {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-}
+    #cartManagerModal.show #cartManagerSheet {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
 
-/* Smooth transitions */
-#cartManagerSheet {
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+    /* Smooth transitions */
+    #cartManagerSheet {
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                    opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
     /* Scrollbar untuk checkout modal */
-.scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-}
-.scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-}
-.scrollbar-thumb-gray-200::-webkit-scrollbar-thumb {
-    background-color: #e5e7eb;
-    border-radius: 20px;
-}
-
-/* Radio button dengan has-[:checked] selector */
-label:has(input[type="radio"]:checked) {
-    border-color: #ae1504 !important;
-    background-color: rgba(174, 21, 4, 0.05) !important;
-}
-
-label:has(input[type="radio"]:checked) .peer-checked\:opacity-100 {
-    opacity: 1 !important;
-}
-
-label:has(input[type="radio"]:checked) .has-\[\:checked\]\:border-choco {
-    border-color: #ae1504 !important;
-}
-
-/* Transition smooth untuk radio dot */
-label .h-2\.5.w-2\.5 {
-    transition: opacity 0.2s ease-in-out;
-}
-
-/* Animasi slide-in untuk floating cart */
-@keyframes slide-in-from-bottom {
-    from {
-        transform: translateY(100%);
-        opacity: 0;
+    .scrollbar-thin::-webkit-scrollbar {
+        width: 6px;
     }
-    to {
-        transform: translateY(0);
-        opacity: 1;
+    .scrollbar-thin::-webkit-scrollbar-track {
+        background: transparent;
     }
-}
-
-@keyframes fade-in {
-    from {
-        opacity: 0;
+    .scrollbar-thumb-gray-200::-webkit-scrollbar-thumb {
+        background-color: #e5e7eb;
+        border-radius: 20px;
     }
-    to {
-        opacity: 1;
+
+    /* Radio button dengan has-[:checked] selector */
+    label:has(input[type="radio"]:checked) {
+        border-color: #ae1504 !important;
+        background-color: rgba(174, 21, 4, 0.05) !important;
     }
-}
 
-.animate-in {
-    animation-fill-mode: both;
-}
+    label:has(input[type="radio"]:checked) .peer-checked\:opacity-100 {
+        opacity: 1 !important;
+    }
 
-.slide-in-from-bottom-5 {
-    animation: slide-in-from-bottom 0.3s ease-out;
-}
+    label:has(input[type="radio"]:checked) .has-\[\:checked\]\:border-choco {
+        border-color: #ae1504 !important;
+    }
 
-.fade-in {
-    animation: fade-in 0.3s ease-out;
-}
+    /* Transition smooth untuk radio dot */
+    label .h-2\.5.w-2\.5 {
+        transition: opacity 0.2s ease-in-out;
+    }
 
-/* Smooth transition saat muncul */
-#floatingCartBar:not(.hidden) {
-    animation: slide-in-from-bottom 0.3s ease-out, fade-in 0.3s ease-out;
-}
+    /* Animasi slide-in untuk floating cart */
+    @keyframes slide-in-from-bottom {
+        from {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
 
-/* Hover effect untuk clear button */
-#floatingCartClear:hover svg {
-    animation: shake 0.5s ease-in-out;
-}
+    @keyframes fade-in {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
 
-@keyframes shake {
-    0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(-5deg); }
-    75% { transform: rotate(5deg); }
-}
+    .animate-in {
+        animation-fill-mode: both;
+    }
+
+    .slide-in-from-bottom-5 {
+        animation: slide-in-from-bottom 0.3s ease-out;
+    }
+
+    .fade-in {
+        animation: fade-in 0.3s ease-out;
+    }
+
+    /* Smooth transition saat muncul */
+    #floatingCartBar:not(.hidden) {
+        animation: slide-in-from-bottom 0.3s ease-out, fade-in 0.3s ease-out;
+    }
+
+    /* Hover effect untuk clear button */
+    #floatingCartClear:hover svg {
+        animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(-5deg); }
+        75% { transform: rotate(5deg); }
+    }
 </style>
