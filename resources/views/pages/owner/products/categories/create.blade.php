@@ -58,6 +58,9 @@
                                         <span class="upload-text">Upload</span>
                                     </div>
                                     <img id="imagePreview" class="profile-preview" alt="Category Preview">
+                                    <button type="button" id="removeImageBtn" class="btn-remove btn-remove-top" style="display: none;">
+                                        <span class="material-symbols-outlined">close</span>
+                                    </button>
                                 </div>
                                 <input type="file" name="images" id="images" accept="image/*" style="display: none;">
                                 <small class="text-muted d-block text-center mt-2">JPG, PNG, WEBP. Max 2 MB</small>
@@ -169,9 +172,6 @@
 @push('scripts')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-
-    <script src="{{ asset('js/image-cropper.js') }}"></script>
-
     <script>
 
 
@@ -189,6 +189,15 @@
                 aspectRatio: 1, // Square crop
                 outputWidth: 800,
                 outputHeight: 800
+            });
+
+            // Initialize Remove Image Handler
+            ImageRemoveHandler.init({
+                removeBtnId: 'removeImageBtn',
+                imageInputId: 'images',
+                imagePreviewId: 'imagePreview',
+                uploadPlaceholderId: 'uploadPlaceholder',
+                confirmRemove: false // No confirmation for create page
             });
 
             // ==== Form Validation ====

@@ -221,24 +221,24 @@ Route::middleware('setlocale')->group(function () {
         Route::get('/auth/google/redirect', [OwnerAuthController::class, 'redirect'])->name('google.redirect');
 
         Route::get('email/verify/{id}/{hash}', function (Request $request, $id, $hash) {
-                $owner = Owner::findOrFail($id);
+            $owner = Owner::findOrFail($id);
 
-                if (! hash_equals(
-                    (string) $hash,
-                    sha1($owner->getEmailForVerification())
-                )) {
-                    abort(403, 'Link verifikasi tidak valid.');
-                }
+            if (! hash_equals(
+                (string) $hash,
+                sha1($owner->getEmailForVerification())
+            )) {
+                abort(403, 'Link verifikasi tidak valid.');
+            }
 
-                if (! $owner->hasVerifiedEmail()) {
-                    $owner->markEmailAsVerified();
-                    event(new Verified($owner));
-                }
+            if (! $owner->hasVerifiedEmail()) {
+                $owner->markEmailAsVerified();
+                event(new Verified($owner));
+            }
 
-                return redirect()
-                    ->route('owner.login')
-                    ->with('success', 'Email Anda berhasil diverifikasi. Silakan login.');
-            })->middleware('signed')->name('verification.verify');
+            return redirect()
+                ->route('owner.login')
+                ->with('success', 'Email Anda berhasil diverifikasi. Silakan login.');
+        })->middleware('signed')->name('verification.verify');
 
         Route::middleware('guest:owner')->group(function () {
             // minta link reset
@@ -390,11 +390,8 @@ Route::middleware('setlocale')->group(function () {
 
                 Route::prefix('settings')->name('settings.')->group(function () {
                     Route::get('/', [OwnerSettingsController::class, 'index'])->name('index');
+                    Route::get('/edit', [OwnerSettingsController::class, 'edit'])->name('edit'); // TAMBAH INI
                     Route::post('/personal-info', [OwnerSettingsController::class, 'updatePersonalInfo'])->name('update-personal-info');
-                    Route::post('/photo', [OwnerSettingsController::class, 'updatePhoto'])->name('update-photo');
-                    Route::post('/delete-photo', [OwnerSettingsController::class, 'deletePhoto'])->name('delete-photo');
-                    Route::post('/logo', [OwnerSettingsController::class, 'updateLogo'])->name('update-logo');
-                    Route::post('/change-password', [OwnerSettingsController::class, 'changePassword'])->name('change-password');
                 });
             });
 
@@ -526,14 +523,14 @@ Route::middleware('setlocale')->group(function () {
     })->middleware('signed')->name('customer.verification.verify');
 
     Route::get('customer/reset-password/{token}', [CustomerPasswordResetController::class, 'resetForm'])
-                ->name('customer.password.reset');
+        ->name('customer.password.reset');
     Route::post('customer/reset-password', [CustomerPasswordResetController::class, 'update'])
-            ->name('customer.password.update');
+        ->name('customer.password.update');
 
 
     //customer
     Route::prefix('customer')->name('customer.')->middleware('customer.access')->group(function () {
-        Route::get('{partner_slug}/table-status/{table_code}',[TableStatusController::class, 'show'])->name('table.status');
+        Route::get('{partner_slug}/table-status/{table_code}', [TableStatusController::class, 'show'])->name('table.status');
 
         Route::get('{partner_slug}/menu/{table_code}', [CustomerMenuController::class, 'index'])->name('menu.index')->middleware(['throttle:10,1', 'check.table.status']);
         Route::post('{partner_slug}/menu/{table_code}/check-stock', [CustomerMenuController::class, 'checkStockRealtime'])->name('menu.check-stock');
@@ -597,7 +594,6 @@ Route::middleware('setlocale')->group(function () {
 
                 return back()->with('status', 'verification-link-sent');
             })->middleware('throttle:6,1')->name('verification.send');
-            
         });
 
         Route::middleware('auth:customer', 'verified')->group(function () {
@@ -606,5 +602,5 @@ Route::middleware('setlocale')->group(function () {
             })->name('dashboard');
         });
     });
-require __DIR__ . '/auth.php';
+    require __DIR__ . '/auth.php';
 });

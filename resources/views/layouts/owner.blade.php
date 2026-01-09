@@ -439,6 +439,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js"></script>
     <script src="{{ asset('admin/assets/js/blockui-loader.js') }}"></script>
 
+    <script src="{{ asset('js/image-cropper.js') }}"></script>
+    <script src="{{ asset('js/remove-image.js') }}"></script>
 
     <script>
         // Toggle Sidebar (Desktop)

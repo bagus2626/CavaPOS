@@ -77,6 +77,11 @@
                     class="profile-preview {{ !empty($data->pictures) && count($data->pictures) > 0 ? 'active' : '' }}"
                     src="{{ !empty($data->pictures) && count($data->pictures) > 0 ? asset($data->pictures[0]['path']) : '' }}"
                     alt="Product Preview">
+                    <!-- Remove Image Button -->
+                    <button type="button" id="removeImageBtn" class="btn-remove btn-remove-top" 
+                        style="{{ $data->pictures ? 'display: block;' : 'display: none;' }}">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>                    
                 </div>
                 <input type="file" name="images[]" id="productImage" accept="image/*" style="display: none;">
                 <input type="hidden" name="remove_image" id="remove_image" value="0">
@@ -477,7 +482,6 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/image-cropper.js') }}"></script>
 
     <script>
       // Initialize menuIndex from existing data (set via Blade)
@@ -498,6 +502,16 @@
               aspectRatio: 1, // Square crop
               outputWidth: 800,
               outputHeight: 800
+          });
+
+          // Initialize Remove Image Handler
+          ImageRemoveHandler.init({
+              removeBtnId: 'removeImageBtn',
+              imageInputId: 'productImage',
+              imagePreviewId: 'imagePreview',
+              uploadPlaceholderId: 'uploadPlaceholder',
+              removeInputId: 'remove_image',
+              confirmRemove: false // No confirmation
           });
 
           // ==== Price Formatting ====

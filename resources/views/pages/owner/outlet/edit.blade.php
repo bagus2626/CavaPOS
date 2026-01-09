@@ -288,6 +288,11 @@
                                                 class="profile-preview {{ $outlet->logo ? 'active' : '' }}"
                                                 src="{{ $outlet->logo ? asset('storage/' . $outlet->logo) : '' }}"
                                                 alt="Logo Preview">
+                                                                                    <!-- Remove Image Button -->
+                                            <button type="button" id="removeImageBtn" class="btn-remove btn-remove-top" 
+                                                style="{{ $outlet->logo ? 'display: block;' : 'display: none;' }}">
+                                                <span class="material-symbols-outlined">close</span>
+                                            </button>
                                         </div>
                                         <input type="file" name="logo" id="logo" accept="image/*" style="display:none;">
                                         <input type="hidden" name="remove_logo" id="remove_logo" value="0">
@@ -321,6 +326,11 @@
                                                 class="profile-preview {{ $outlet->background_picture ? 'active' : '' }}"
                                                 src="{{ $outlet->background_picture ? asset('storage/' . $outlet->background_picture) : '' }}"
                                                 alt="Background Preview">
+                                                 <!-- Remove Image Button -->
+                                                <button type="button" id="removeImageBtn" class="btn-remove btn-remove-top" 
+                                                    style="{{ $outlet->background_picture ? 'display: block;' : 'display: none;' }}">
+                                                    <span class="material-symbols-outlined">close</span>
+                                                </button>
                                         </div>
 
                                         <input type="file" name="image" id="image" accept="image/*" style="display:none;">
@@ -676,7 +686,6 @@
 @push('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
-    <script src="{{ asset('js/image-cropper.js') }}"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         
@@ -708,6 +717,16 @@
             aspectRatio: 1,
             outputWidth: 800,
             outputHeight: 800
+        });
+
+        // Initialize Remove Image Handler
+        ImageRemoveHandler.init({
+            removeBtnId: 'removeImageBtn',
+            imageInputId: 'image',
+            imagePreviewId: 'imagePreview',
+            uploadPlaceholderId: 'uploadPlaceholder',
+            removeInputId: 'remove_image', // For edit page - tells server to delete
+            confirmRemove: false // No confirmation
         });
 
         // ==== Realtime Username Check ====
