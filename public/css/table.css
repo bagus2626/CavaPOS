@@ -164,9 +164,8 @@
   font-size: 20px;
 }
 
-.user-name {
+.data-name {
   font-weight: 600;
-  color: var(--text-primary);
 }
 
 /* Link Styles */
@@ -372,4 +371,26 @@
 .stock-history-wrapper {
   display: flex;
   justify-content: flex-end; /* desktop: kanan */
+}
+
+/* Style untuk sortable header */
+.sortable-header {
+  transition: background-color 0.2s ease;
+}
+
+.sortable-header:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.sort-icon {
+  color: #999;
+  transition: color 0.2s ease;
+}
+
+.sort-icon.active {
+  color: #e53935;
+}
+
+.sortable-header:hover .sort-icon {
+  color: #666;
 }

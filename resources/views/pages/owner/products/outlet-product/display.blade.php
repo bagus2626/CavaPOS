@@ -59,7 +59,7 @@
                                         </span>
                                     @endif
                                 </div>
-                                <span class="user-name">{{ $p->name ?? $p->product_name }}</span>
+                                <span class="data-name">{{ $p->name ?? $p->product_name }}</span>
                             </div>
                         </td>
 

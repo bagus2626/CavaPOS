@@ -44,7 +44,7 @@
                                         <span class="material-symbols-outlined">person</span>
                                     </div>
                                 @endif
-                                <span class="user-name">{{ $employee->name }}</span>
+                                <span class="data-name">{{ $employee->name }}</span>
                             </div>
                         </td>
 

@@ -220,7 +220,7 @@
           <td>
             <div class="user-info-cell">
               ${imageHtml}
-              <span class="user-name">${outlet.name || '-'}</span>
+              <span class="data-name">${outlet.name || '-'}</span>
             </div>
           </td>
           <td>

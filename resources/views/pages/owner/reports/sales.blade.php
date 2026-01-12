@@ -283,7 +283,7 @@
                             </div>
                             <h3 class="section-title">{{ __('messages.owner.sales_report.products_by_quantity') }}</h3>
                         </div>
-                        </div>
+                    </div>
 
                     <div class="data-table-wrapper">
                         <table class="data-table">
@@ -291,8 +291,28 @@
                                 <tr>
                                     <th class="text-center" style="width: 60px;">#</th>
                                     <th>Product Name</th>
-                                    <th class="text-center">{{ __('messages.owner.sales_report.sold') }}</th>
-                                    <th class="text-end">Total Penjualan</th>
+                                    
+                                    <!-- ✅ TAMBAHKAN onclick & data-sort di header Sold -->
+                                    <th class="text-center sortable-header" 
+                                        data-sort="quantity" 
+                                        onclick="sortProductTable('quantity')" 
+                                        style="cursor: pointer;">
+                                        <div class="d-flex align-items-center justify-content-center gap-1">
+                                            <span>{{ __('messages.owner.sales_report.sold') }}</span>
+                                            <span class="material-symbols-outlined sort-icon" style="font-size: 18px;">unfold_more</span>
+                                        </div>
+                                    </th>
+                                    
+                                    <!-- ✅ TAMBAHKAN onclick & data-sort di header Total Penjualan -->
+                                    <th class="sortable-header" 
+                                        data-sort="revenue" 
+                                        onclick="sortProductTable('revenue')" 
+                                        style="cursor: pointer; text-align: left !important;">
+                                        <div class="d-flex align-items-center gap-1">
+                                            <span>Total Penjualan</span>
+                                            <span class="material-symbols-outlined sort-icon" style="font-size: 18px;">unfold_more</span>
+                                        </div>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody id="top-products-list">
@@ -303,44 +323,18 @@
                                         </td>
 
                                         <td>
-                                            <div class="user-info-cell">
-                                                {{-- @php
-                                                    $productPictures = !empty($product->pictures) ? json_decode($product->pictures, true) : [];
-                                                    
-                                                    $imagePath = null;
-                                                    if (!empty($productPictures) && isset($productPictures[0]['path'])) {
-                                                        $imagePath = $productPictures[0]['path'];
-                                                    } 
-                                                    elseif (!empty($productPictures) && is_string($productPictures[0])) {
-                                                        $imagePath = $productPictures[0];
-                                                    }
-                                                @endphp --}}
-
-                                                {{-- <div class="position-relative" style="width:40px; height:40px;">
-                                                    @if($imagePath)
-                                                        <img src="{{ asset($imagePath) }}"
-                                                            alt="{{ $product->name }}"
-                                                            class="user-avatar"
-                                                            style="width:40px; height:40px; object-fit:cover; border-radius:6px;"
-                                                            loading="lazy">
-                                                    @else
-                                                        <div class="user-avatar-placeholder">
-                                                            <span class="material-symbols-outlined">inventory_2</span>
-                                                        </div>
-                                                    @endif
-                                                </div> --}}
-                                                
-                                                    <span class="user-name">{{ $product->name }}</span>
-                                            </div>
+                                            <span class="data-name">{{ $product->name }}</span>
                                         </td>
 
-                                        <td class="text-center">
+                                        <!-- ✅ TAMBAHKAN data-quantity attribute -->
+                                        <td class="text-center" data-quantity="{{ $product->total_quantity }}">
                                             <span>
                                                 {{ $product->total_quantity }} 
                                             </span>
                                         </td>
 
-                                        <td class="text-end">
+                                        <!-- ✅ TAMBAHKAN data-revenue attribute -->
+                                        <td data-revenue="{{ $product->total_sales }}" style="text-align: left !important;">
                                             <span class="fw-bold text-success">
                                                 Rp {{ number_format($product->total_sales, 0, ',', '.') }}
                                             </span>
@@ -403,5 +397,74 @@
         document.addEventListener('DOMContentLoaded', function() {
             toggleFilterInputs();
         });
+    </script>
+
+    <script>
+
+        // Fungsi Sort untuk Tabel Produk
+        let currentSortColumn = 'quantity';
+        let currentSortDirection = 'desc';
+
+        function sortProductTable(column) {
+            // Toggle direction jika klik column yang sama
+            if (currentSortColumn === column) {
+                currentSortDirection = currentSortDirection === 'desc' ? 'asc' : 'desc';
+            } else {
+                currentSortColumn = column;
+                currentSortDirection = 'desc';
+            }
+            
+            // Update icon pada header
+            updateSortIcons();
+            
+            // Get table body
+            const tbody = document.getElementById('top-products-list');
+            const rows = Array.from(tbody.querySelectorAll('tr.table-row'));
+            
+            // Sort rows
+            rows.sort((a, b) => {
+                let aValue, bValue;
+                
+                if (column === 'quantity') {
+                    aValue = parseInt(a.querySelector('[data-quantity]').getAttribute('data-quantity'));
+                    bValue = parseInt(b.querySelector('[data-quantity]').getAttribute('data-quantity'));
+                } else if (column === 'revenue') {
+                    aValue = parseFloat(a.querySelector('[data-revenue]').getAttribute('data-revenue'));
+                    bValue = parseFloat(b.querySelector('[data-revenue]').getAttribute('data-revenue'));
+                }
+                
+                if (currentSortDirection === 'asc') {
+                    return aValue - bValue;
+                } else {
+                    return bValue - aValue;
+                }
+            });
+            
+            // Update nomor urut dan append kembali ke tbody
+            rows.forEach((row, index) => {
+                row.querySelector('.text-center.text-muted').textContent = index + 1;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateSortIcons() {
+            // Reset semua icon
+            document.querySelectorAll('.sort-icon').forEach(icon => {
+                icon.textContent = 'unfold_more';
+                icon.classList.remove('active');
+            });
+            
+            // Set icon untuk column yang aktif
+            const activeIcon = document.querySelector(`[data-sort="${currentSortColumn}"] .sort-icon`);
+            if (activeIcon) {
+                activeIcon.textContent = currentSortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward';
+                activeIcon.classList.add('active');
+            }
+        }
+
+        // Initialize saat halaman load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateSortIcons();
+        });       
     </script>
 @endpush

@@ -226,7 +226,7 @@
           <td>
             <div class="user-info-cell">
               ${imageHtml}
-              <span class="user-name">${product.name || '-'}</span>
+              <span class="data-name">${product.name || '-'}</span>
             </div>
           </td>
           <td>

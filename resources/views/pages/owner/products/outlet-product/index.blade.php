@@ -242,7 +242,7 @@
                 ${imageHtml}
                 ${hotBadge}
               </div>
-              <span class="user-name">${product.name}</span>
+              <span class="data-name">${product.name}</span>
             </div>
           </td>
           <td>
