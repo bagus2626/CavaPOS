@@ -257,7 +257,6 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/image-cropper.js') }}"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {

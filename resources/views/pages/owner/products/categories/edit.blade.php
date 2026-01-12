@@ -63,6 +63,11 @@
                                         class="profile-preview {{ ($category->images && isset($category->images['path'])) ? 'active' : '' }}"
                                         src="{{ ($category->images && isset($category->images['path'])) ? asset($category->images['path']) : '' }}"
                                         alt="Category Preview">
+                                                                            <!-- Remove Image Button -->
+                                    <button type="button" id="removeImageBtn" class="btn-remove btn-remove-top" 
+                                        style="{{ $category->images ? 'display: block;' : 'display: none;' }}">
+                                        <span class="material-symbols-outlined">close</span>
+                                    </button>
                                 </div>
                                 <input type="file" name="images" id="images" accept="image/*" style="display: none;">
                                 <input type="hidden" name="keep_existing_image" id="keep_existing_image" value="1">
@@ -153,6 +158,16 @@
                 aspectRatio: 1, // Square crop
                 outputWidth: 800,
                 outputHeight: 800
+            });
+
+            // Initialize Remove Image Handler
+            ImageRemoveHandler.init({
+                removeBtnId: 'removeImageBtn',
+                imageInputId: 'images',
+                imagePreviewId: 'imagePreview',
+                uploadPlaceholderId: 'uploadPlaceholder',
+                removeInputId: 'remove_image', // For edit page - tells server to delete
+                confirmRemove: false // No confirmation
             });
 
             // ==== Right-click to Remove Image ====

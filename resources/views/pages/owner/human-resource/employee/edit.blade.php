@@ -78,6 +78,11 @@
                                     <img id="imagePreview" class="profile-preview {{ $employee->image ? 'active' : '' }}"
                                         src="{{ $employee->image ? asset('storage/' . $employee->image) : '' }}"
                                         alt="Profile Preview">
+                                    <!-- Remove Image Button -->
+                                    <button type="button" id="removeImageBtn" class="btn-remove btn-remove-top" 
+                                        style="{{ $employee->image ? 'display: block;' : 'display: none;' }}">
+                                        <span class="material-symbols-outlined">close</span>
+                                    </button>
                                 </div>
                                 <input type="file" name="image" id="image" accept="image/*" style="display: none;">
                                 <input type="hidden" name="remove_image" id="remove_image" value="0">
@@ -340,7 +345,6 @@
 @push('scripts')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-    <script src="{{ asset('js/image-cropper.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
 
@@ -367,6 +371,16 @@
                 aspectRatio: 1, // Square crop
                 outputWidth: 800,
                 outputHeight: 800
+            });
+
+            // Initialize Remove Image Handler
+            ImageRemoveHandler.init({
+                removeBtnId: 'removeImageBtn',
+                imageInputId: 'image',
+                imagePreviewId: 'imagePreview',
+                uploadPlaceholderId: 'uploadPlaceholder',
+                removeInputId: 'remove_image', // For edit page - tells server to delete
+                confirmRemove: false // No confirmation
             });
 
             // Password toggle handlers

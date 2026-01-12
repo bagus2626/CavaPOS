@@ -417,9 +417,12 @@
   color: var(--danger);
   cursor: pointer;
   transition: all var(--transition-fast);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  /* display: inline-flex !important; */
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 10;
+  padding: 0 !important;
+  line-height: 1;
 }
 
 .btn-remove-item {
@@ -445,13 +448,19 @@
 .btn-remove .material-symbols-outlined,
 .btn-remove.material-symbols-outlined {
   font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
 }
 
 .btn-remove-top {
   position: absolute;
-  top: 5px;
-  right: 5px;
-  z-index: 5;
+  top: -0.5rem;
+  right: -0.5rem;
+  z-index: 10;
 }
 
 /* ============================================

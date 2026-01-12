@@ -303,6 +303,10 @@
                                                 </div>
 
                                                 <img id="imagePreview2" class="profile-preview" alt="Logo Preview">
+                                                <!-- Remove Image Button -->
+                                                <button type="button" id="removeLogoBtn" class="btn-remove btn-remove-top" style="display: none;">
+                                                    <span class="material-symbols-outlined">close</span>
+                                                </button>
                                             </div>
                                         </div>
 
@@ -333,6 +337,9 @@
                                                 </div>
 
                                                 <img id="imagePreview" class="profile-preview" alt="Background Preview">
+                                                <button type="button" id="removeBackgroundBtn" class="btn-remove btn-remove-top" style="display: none;">
+                                                    <span class="material-symbols-outlined">close</span>
+                                                </button>                                                
                                             </div>
                                         </div>
 
@@ -694,7 +701,6 @@
 @push('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
-    <script src="{{ asset('js/image-cropper.js') }}"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -727,6 +733,24 @@
                 aspectRatio: 1, // Square crop
                 outputWidth: 800,
                 outputHeight: 800
+            });
+
+            // Inisialisasi untuk LOGO
+            ImageRemoveHandler.init({
+                removeBtnId: 'removeLogoBtn',
+                imageInputId: 'logo', 
+                imagePreviewId: 'imagePreview2', 
+                uploadPlaceholderId: 'uploadPlaceholderLogo', 
+                confirmRemove: false
+            });
+
+            // Inisialisasi untuk BACKGROUND
+            ImageRemoveHandler.init({
+                removeBtnId: 'removeBackgroundBtn',
+                imageInputId: 'image', 
+                imagePreviewId: 'imagePreview', 
+                uploadPlaceholderId: 'uploadPlaceholderBg', 
+                confirmRemove: false
             });
 
             // ==== Character counters ====

@@ -12,7 +12,6 @@
 /* ============================================
    PROFILE PICTURE UPLOAD
    ============================================ */
-
 /* Profile Picture Wrapper */
 .profile-picture-wrapper {
   flex-shrink: 0;
@@ -20,6 +19,8 @@
   flex-direction: column;
   align-items: center;
   position: relative;
+  /* Tambahkan padding untuk memberi ruang pada button remove */
+  padding: 0.75rem;
 }
 
 /* Profile Picture Container */
@@ -27,30 +28,39 @@
   position: relative;
   width: 10rem;
   height: 10rem;
-  border-radius: 2.5rem; /* Bisa ganti var(--radius-md) * 2 jika ada, atau biarkan custom */
+  border-radius: 2.5rem;
   background: var(--background);
   border: 4px solid var(--card-bg);
   box-shadow: 0 0 0 4px var(--border-color), var(--shadow-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  /* PENTING: Hapus overflow hidden agar button tidak terpotong */
+  overflow: visible;
   cursor: pointer;
   transition: all var(--transition-base);
+}
+
+/* Tambahkan wrapper untuk crop area */
+.profile-picture-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 2.5rem;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 /* ===== PROFILE CONTAINER VARIANT: BACKGROUND IMAGE ===== */
 .profile-picture-container.background-image {
   width: 100%;
   height: 200px;
-
   border-radius: 1rem;
-  transform: none; /* cegah scale conflict */
+  transform: none;
 }
 
 .profile-picture-container:hover {
   transform: scale(1.02);
-  /* Menggunakan primary-light untuk shadow hover agar sesuai tema merah */
   box-shadow: 0 0 0 4px var(--primary-light), var(--shadow-hover);
 }
 
@@ -89,6 +99,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 2.5rem;
 }
 
 .profile-preview.active {
@@ -112,6 +123,7 @@
   cursor: pointer;
   transition: all var(--transition-base);
   box-shadow: 0 4px 12px var(--primary-shadow);
+  z-index: 10;
 }
 
 .edit-picture-btn:hover {

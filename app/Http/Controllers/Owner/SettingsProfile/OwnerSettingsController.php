@@ -14,186 +14,123 @@ use Illuminate\Support\Str;
 class OwnerSettingsController extends Controller
 {
     /**
-     * Display the settings page
+     * Display the settings page (Detail View - Read Only)
      */
     public function index()
     {
         $owner = Auth::guard('owner')->user();
-
         return view('pages.owner.settings-profile.index', compact('owner'));
     }
 
     /**
-     * Update personal information
+     * Show edit form
+     */
+    public function edit()
+    {
+        $owner = Auth::guard('owner')->user();
+        return view('pages.owner.settings-profile.edit', compact('owner'));
+    }
+
+    /**
+     * Update personal information (name, phone, image, password - all optional)
      */
     public function updatePersonalInfo(Request $request)
     {
-        $request->validate([
+        // Validasi
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:owners,email,' . Auth::guard('owner')->id(),
             'phone_number' => 'required|string|max:20',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'remove_image' => 'nullable|boolean',
+            'current_password' => 'nullable|required_with:new_password',
+            'new_password' => 'nullable|min:8|confirmed',
         ]);
 
         $owner = Auth::guard('owner')->user();
 
-        // Update owner data menggunakan DB Query Builder
-        DB::table('owners')
-            ->where('id', $owner->id)
-            ->update([
-                'name' => $request->name,
-                'email' => $request->email,
-                'phone_number' => $request->phone_number,
-                'updated_at' => now()
-            ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Personal information updated successfully'
-        ]);
-    }
-
-    /**
-     * Update profile photo (direct upload)
-     */
-    public function updatePhoto(Request $request)
-    {
-        $request->validate([
-            'image' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'], // 5MB max
-        ]);
-
         try {
-            $owner = Auth::guard('owner')->user();
-            $file = $request->file('image');
+            DB::beginTransaction();
 
-            // Process image
-            $image = Image::make($file);
+            // Prepare update data
+            $updateData = [
+                'name' => $validated['name'],
+                'phone_number' => $validated['phone_number'],
+                'updated_at' => now()
+            ];
 
-            // Resize to optimal size
-            $image->resize(800, 800, function ($constraint) {
-                $constraint->aspectRatio();
-                $constraint->upsize();
-            });
+            // Handle password change (optional)
+            if ($request->filled('new_password')) {
+                $ownerData = DB::table('owners')->where('id', $owner->id)->first();
 
-            // Save image
-            $disk = Storage::disk('public');
-            $dir = 'owner-profiles';
-            $disk->makeDirectory($dir);
+                if (!Hash::check($request->current_password, $ownerData->password)) {
+                    return redirect()->back()
+                        ->withErrors(['current_password' => 'Current password is incorrect'])
+                        ->withInput();
+                }
 
-            $basename = Str::uuid()->toString();
-            $finalPath = "{$dir}/{$basename}.webp";
+                $updateData['password'] = Hash::make($request->new_password);
+            }
 
-            // Encode to WebP
-            $disk->put($finalPath, (string) $image->encode('webp', 80));
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                $file = $request->file('image');
 
-            // Get owner data
-            $ownerData = DB::table('owners')
-                ->where('id', $owner->id)
-                ->first();
+                $image = Image::make($file);
+                $image->resize(800, 800, function ($constraint) {
+                    $constraint->aspectRatio();
+                    $constraint->upsize();
+                });
 
-            // Delete old photo if exists
-            if ($ownerData->image && $disk->exists($ownerData->image)) {
-                $disk->delete($ownerData->image);
+                $disk = Storage::disk('public');
+                $dir = 'owner-profiles';
+                $disk->makeDirectory($dir);
+
+                $basename = Str::uuid()->toString();
+                $finalPath = "{$dir}/{$basename}.webp";
+
+                $disk->put($finalPath, (string) $image->encode('webp', 80));
+
+                $ownerData = DB::table('owners')->where('id', $owner->id)->first();
+
+                // Delete old photo
+                if ($ownerData->image && $disk->exists($ownerData->image)) {
+                    $disk->delete($ownerData->image);
+                }
+
+                $updateData['image'] = $finalPath;
+            }
+
+            // Handle image removal
+            if ($request->input('remove_image') == 1) {
+                $ownerData = DB::table('owners')->where('id', $owner->id)->first();
+
+                if ($ownerData->image && Storage::disk('public')->exists($ownerData->image)) {
+                    Storage::disk('public')->delete($ownerData->image);
+                }
+
+                $updateData['image'] = null;
             }
 
             // Update database
             DB::table('owners')
                 ->where('id', $owner->id)
-                ->update([
-                    'image' => $finalPath,
-                    'updated_at' => now()
-                ]);
+                ->update($updateData);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Profile photo updated successfully',
-                'image_url' => asset('storage/' . $finalPath) . '?v=' . time()
-            ]);
+            DB::commit();
+
+            $successMessage = 'Profile updated successfully!';
+            if ($request->filled('new_password')) {
+                $successMessage = 'Profile and password updated successfully!';
+            }
+
+            return redirect()->route('owner.user-owner.settings.index')
+                ->with('success', $successMessage);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to upload photo: ' . $e->getMessage()
-            ], 500);
+            DB::rollBack();
+
+            return redirect()->back()
+                ->withErrors(['error' => 'Failed to update profile: ' . $e->getMessage()])
+                ->withInput();
         }
-    }
-    /**
-     * Delete profile photo
-     */
-    public function deletePhoto()
-    {
-        $owner = Auth::guard('owner')->user();
-
-        // Ambil data owner dari database
-        $ownerData = DB::table('owners')
-            ->where('id', $owner->id)
-            ->first();
-
-        // Hapus foto jika ada
-        if ($ownerData->image && Storage::disk('public')->exists($ownerData->image)) {
-            Storage::disk('public')->delete($ownerData->image);
-        }
-
-        // Update database (set image to null)
-        DB::table('owners')
-            ->where('id', $owner->id)
-            ->update([
-                'image' => null,
-                'updated_at' => now()
-            ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Profile photo deleted successfully'
-        ]);
-    }
-
-    /**
-     * Update Logo
-     */
-    public function updateLogo(Request $request)
-    {
-        // Fitur ini ditunda dulu
-        return response()->json([
-            'success' => false,
-            'message' => 'Feature not available yet'
-        ], 501);
-    }
-
-    /**
-     * Change password
-     */
-    public function changePassword(Request $request)
-    {
-        $request->validate([
-            'current_password' => 'required',
-            'new_password' => 'required|min:8|confirmed',
-        ]);
-
-        $owner = Auth::guard('owner')->user();
-
-        // Ambil fresh data dari database untuk memastikan password terbaru
-        $ownerData = DB::table('owners')
-            ->where('id', $owner->id)
-            ->first();
-
-        // Verify current password 
-        if (!Hash::check($request->current_password, $ownerData->password)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Current password is incorrect'
-            ], 422);
-        }
-
-        // Update Password 
-        DB::table('owners')
-            ->where('id', $owner->id)
-            ->update([
-                'password' => Hash::make($request->new_password),
-                'updated_at' => now()
-            ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Password changed successfully'
-        ]);
     }
 }

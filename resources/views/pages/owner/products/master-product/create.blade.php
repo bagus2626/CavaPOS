@@ -64,6 +64,9 @@
                                         <span class="upload-text">Upload</span>
                                     </div>
                                     <img id="imagePreview" class="profile-preview" alt="Product Preview">
+                                    <button type="button" id="removeImageBtn" class="btn-remove btn-remove-top" style="display: none;">
+                                        <span class="material-symbols-outlined">close</span>
+                                    </button>                                    
                                 </div>
                                 <input type="file" name="images[]" id="productImage" accept="image/*" style="display: none;"
                                     required>
@@ -276,7 +279,6 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/image-cropper.js') }}"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -294,6 +296,15 @@
             outputWidth: 800,
             outputHeight: 800
         });
+
+        // Initialize Remove Image Handler
+        ImageRemoveHandler.init({
+            removeBtnId: 'removeImageBtn',
+            imageInputId: 'productImage',
+            imagePreviewId: 'imagePreview',
+            uploadPlaceholderId: 'uploadPlaceholder',
+            confirmRemove: false // No confirmation for create page
+        });        
 
         // ==== Price Formatting ====
         const priceInput = document.getElementById('price');

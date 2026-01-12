@@ -7,10 +7,6 @@
         <div class="container-modern">
             <!-- Header Section -->
             <div class="page-header">
-                {{-- <a href="{{ route('owner.user-owner.employees.index') }}" class="back-button">
-                    <span class="material-symbols-outlined">arrow_back</span>
-                    {{ __('messages.owner.user_management.employees.back_to_employees') }}
-                </a> --}}
                 <div class="header-content">
                     <h1 class="page-title">Create New Employee</h1>
                     <p class="page-subtitle">Add a new team member to your growing workforce.</p>
@@ -74,6 +70,10 @@
                                         <span class="upload-text">Upload</span>
                                     </div>
                                     <img id="imagePreview" class="profile-preview" alt="Profile Preview">
+                                    <!-- Remove Image Button -->
+                                    <button type="button" id="removeImageBtn" class="btn-remove btn-remove-top" style="display: none;">
+                                        <span class="material-symbols-outlined">close</span>
+                                    </button>
                                 </div>
                                 <input type="file" name="image" id="image" accept="image/*" style="display: none;">
                                 <small class="text-muted d-block text-center mt-2">JPG, PNG, WEBP. Max 2 MB</small>
@@ -316,12 +316,7 @@
 @push('scripts')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-    <script src="{{ asset('js/image-cropper.js') }}"></script>
     <script>
-        /**
-    * Create Employee Form Script
-    */
-
         document.addEventListener('DOMContentLoaded', function () {
 
             // Initialize Image Cropper (Square 1:1)
@@ -334,9 +329,18 @@
                 cropBtnId: 'cropBtn',
                 editBtnId: 'editPictureBtn',
                 containerId: 'profilePictureContainer',
-                aspectRatio: 1, // Square crop
+                aspectRatio: 1,
                 outputWidth: 800,
                 outputHeight: 800
+            });
+
+            // Initialize Remove Image Handler
+            ImageRemoveHandler.init({
+                removeBtnId: 'removeImageBtn',
+                imageInputId: 'image',
+                imagePreviewId: 'imagePreview',
+                uploadPlaceholderId: 'uploadPlaceholder',
+                confirmRemove: false // No confirmation for create page
             });
 
             // Password toggle handlers
@@ -389,7 +393,6 @@
 
             if (inputUsername && statusEl && urlCheck) {
 
-                // Set loading state
                 function setLoading(isLoading) {
                     if (!loadingEl) return;
 
@@ -401,7 +404,6 @@
                     }
                 }
 
-                // Show status message
                 function showStatus(ok, msg) {
                     if (ok) {
                         statusEl.innerHTML = `<span class="text-success ms-2">${msg}</span>`;
@@ -414,18 +416,15 @@
                     }
                 }
 
-                // Show neutral state
                 function showNeutral(msg) {
                     statusEl.textContent = msg || '';
                     statusEl.className = 'mt-2 text-muted';
                     inputUsername.classList.remove('is-valid', 'is-invalid');
                 }
 
-                // Check username availability
                 async function checkUsername() {
                     const val = (inputUsername.value || '').trim();
 
-                    // Basic validation
                     if (!val) {
                         setLoading(false);
                         showNeutral('');
@@ -471,7 +470,6 @@
                     }
                 }
 
-                // Event listener with debounce
                 let debounceTimer;
                 inputUsername.addEventListener('input', function () {
                     clearTimeout(debounceTimer);
