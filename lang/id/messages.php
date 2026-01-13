@@ -178,6 +178,9 @@ return [
             'sold_out' => 'Habis',
             'low_stock' => 'Stok sedikit',
             'no_results_found' => 'Tidak ada hasil yang ditemukan',
+            'promo' => [
+                'off' => 'Diskon :value',
+            ],
 
         ],
         'payment' => [
@@ -1582,6 +1585,15 @@ return [
             'amount' => 'Jumlah',
             'my_timeline' => 'Garis Waktu Saya',
             'no_orders_yet' => 'Belum ada pesanan',
+            'today_sales' => 'Penjualan Hari Ini',
+            'active_employees' => 'Pegawai Aktif',
+            'paid_orders' => 'Pesanan Dibayar',
+            'total_products' => 'Total Produk',
+            'sales_trend' => 'Trend Penjualan 7 Hari Terakhir',
+            'top_products' => 'Top 5 Produk (Bulan Ini)',
+            'performance_this_month' => 'Performa Per Kategori (Bulan Ini)',
+            'best_performing' => 'Terbaik',
+            'lowest_performing' => 'Terburuk',
         ],
         'user_management' => [
             'employees' => [
@@ -1625,6 +1637,7 @@ return [
                 'all_roles' => 'Semua Peran',
                 'personal_information' => 'Informasi Pribadi',
                 'system_information' => 'Informasi Sistem',
+                'back_to_employees' => 'Kembali ke Pegawai',
             ],
         ],
         'outlet' => [
@@ -1686,6 +1699,7 @@ return [
                     'created_at' => 'Dibuat pada',
                     'update_table_information' => 'Perbarui informasi meja',
                     'all_categories' => 'Semua Kategori',
+                    'back_to_tables' => 'Kembali ke Meja',
                 ],
             ],
         ],
@@ -1755,6 +1769,7 @@ return [
                 'product_name' => 'Nama Produk',
                 'product_information' => 'Informasi Produk',
                 'if_active' => 'Jika aktif, stok akan disembunyikan',
+                'back_to_products' => 'Kembali ke Produk',
             ],
         ],
     ],

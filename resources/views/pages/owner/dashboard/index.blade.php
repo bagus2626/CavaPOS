@@ -266,9 +266,21 @@
 
         // Top 5 Products Chart (Horizontal Bar)
         const topProductsCtx = document.getElementById('topProductsChart');
-        if (topProductsCtx && topProductsData.length > 0) {
+        if (!topProductsCtx) {
+            console.warn('Canvas topProductsChart tidak ditemukan');
+        } else if (topProductsData.length === 0) {
+            // Empty state - sembunyikan canvas dan tampilkan pesan
+            topProductsCtx.style.display = 'none';
+            const emptyDiv = document.createElement('div');
+            emptyDiv.className = 'd-flex align-items-center justify-content-center';
+            emptyDiv.style.height = '300px';
+            emptyDiv.innerHTML = '<p class="text-center" style="color: #999;">Tidak ada data produk untuk bulan ini.</p>';
+            topProductsCtx.parentElement.appendChild(emptyDiv);
+        } else {
+            topProductsCtx.style.display = 'block';
             const productLabels = topProductsData.map(p => p.product_name);
             const productQuantities = topProductsData.map(p => p.total_quantity);
+        
             
             new Chart(topProductsCtx, {
                 type: 'bar',
@@ -339,13 +351,6 @@
                     }
                 }
             });
-        } else if (topProductsCtx) {
-            // Show empty state
-            const ctx = topProductsCtx.getContext('2d');
-            ctx.font = '14px Arial';
-            ctx.fillStyle = '#999';
-            ctx.textAlign = 'center';
-            ctx.fillText('Belum ada data produk bulan ini', topProductsCtx.width / 2, topProductsCtx.height / 2);
         }
 
         // Function to update outlet chart

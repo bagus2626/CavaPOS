@@ -178,6 +178,9 @@ return [
             'sold_out' => 'Sold out',
             'low_stock' => 'Low stock',
             'no_results_found' => 'No results found',
+            'promo' => [
+                'off' => ':value OFF',
+            ],
 
         ],
         'payment' => [
@@ -1572,6 +1575,15 @@ return [
             'amount' => 'Amount',
             'my_timeline' => 'My Timeline',
             'no_orders_yet' => 'No orders yet',
+            'today_sales' => 'Today Sales',
+            'active_employees' => 'Active Employees',
+            'paid_orders' => 'Paid Orders',
+            'total_products' => 'Total Products',
+            'sales_trend' => 'Last 7 Days Sales Trend',
+            'top_products' => 'Top 5 Products (This Month)',
+            'performance_this_month' => 'Performance Per Category (This Month)',
+            'best_performing' => 'Best Performing',
+            'lowest_performing' => 'Lowest Performing',
         ],
         'user_management' => [
             'employees' => [
@@ -1614,6 +1626,7 @@ return [
                 'all_roles' => 'All Roles',
                 'personal_information' => 'Personal Information',
                 'system_information' => 'System Information',
+                'back_to_employees' => 'Back to Employees',
             ],
         ],
         'outlet' => [
@@ -1674,6 +1687,7 @@ return [
                     'table_url' => 'Table URL',
                     'created_at' => 'Created At',
                     'update_table_information' => 'Update table information',
+                    'back_to_tables' => 'Back to Tables',
                 ],
             ],
         ],
@@ -1744,6 +1758,7 @@ return [
                 'product_information' => 'Product Information',
                 'if_active' => 'If active, stock will be hidden',
                 'all_categories' => 'All Categories',
+                'back_to_products' => 'Back to Products',
             ],
         ],
     ],
