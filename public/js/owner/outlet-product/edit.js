@@ -475,35 +475,52 @@
     });
 
     const template = `
-      <div class="recipe-item mb-3 p-3 border rounded bg-light">
-        <div class="row align-items-end">
-          <div class="col-md-5">
-            <label class="mb-1 font-weight-bold small">Bahan Baku</label>
-            <select class="form-control form-control-sm recipe-stock-select" required>
-              ${stockOptionsHtml}
-            </select>
+    <div class="recipe-item" style="margin-bottom: var(--spacing-md); padding: var(--spacing-md); background: var(--card-bg); border: 2px solid var(--border-color); border-radius: var(--radius-sm); transition: all var(--transition-base); position: relative;">
+      <button type="button" class="btn-remove remove-recipe-item" style="position: absolute; top: var(--spacing-sm); right: var(--spacing-sm);">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+      
+      <div class="row align-items-end">
+        <div class="col-md-5">
+          <div class="form-group-modern">
+            <label class="form-label-modern">
+              Bahan Baku
+            </label>
+            <div class="select-wrapper">
+              <select class="form-control-modern recipe-stock-select" required>
+                ${stockOptionsHtml}
+              </select>
+              <span class="material-symbols-outlined select-arrow">expand_more</span>
+            </div>
           </div>
-          <div class="col-md-3">
-            <label class="mb-1 font-weight-bold small">Jumlah</label>
-            <input type="number" class="form-control form-control-sm recipe-quantity" 
+        </div>
+        <div class="col-md-4">
+          <div class="form-group-modern">
+            <label class="form-label-modern">
+              Jumlah
+            </label>
+            <input type="number" class="form-control-modern recipe-quantity" 
                    min="0" step="0.01" placeholder="0" value="${
                      qty || ""
                    }" required>
           </div>
-          <div class="col-md-3">
-            <label class="mb-1 font-weight-bold small">Unit</label>
-            <select class="form-control form-control-sm recipe-unit-select" required>
-              <option value="">-</option>
-            </select>
-          </div>
-          <div class="col-md-1">
-            <button type="button" class="btn btn-danger btn-sm btn-block remove-recipe-item" title="Hapus">
-              <i class="fas fa-trash"></i>
-            </button>
+        </div>
+        <div class="col-md-3">
+          <div class="form-group-modern">
+            <label class="form-label-modern">
+              Unit
+            </label>
+            <div class="select-wrapper">
+              <select class="form-control-modern recipe-unit-select" required>
+                <option value="">-</option>
+              </select>
+              <span class="material-symbols-outlined select-arrow">expand_more</span>
+            </div>
           </div>
         </div>
       </div>
-    `;
+    </div>
+  `;
 
     container.insertAdjacentHTML("beforeend", template);
 

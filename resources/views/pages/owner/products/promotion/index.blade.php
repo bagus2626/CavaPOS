@@ -6,15 +6,13 @@
 @section('content')
   <div class="modern-container">
     <div class="container-modern">
-      <!-- Header Section -->
       <div class="page-header">
         <div class="header-content">
           <h1 class="page-title">{{ __('messages.owner.products.promotions.all_promotions') }}</h1>
-          <p class="page-subtitle">Manage your promotional campaigns and discount codes</p>
+          <p class="page-subtitle">{{ __('messages.owner.products.promotions.manage_promotions_subtitle') }}</p>
         </div>
       </div>
 
-      <!-- Success/Error Messages -->
       @if(session('success'))
         <div class="alert alert-success alert-modern">
           <div class="alert-icon">
@@ -37,22 +35,18 @@
         </div>
       @endif
 
-      <!-- Filters & Actions -->
       <div class="modern-card mb-4">
         <div class="card-body-modern" style="padding: var(--spacing-lg) var(--spacing-xl);">
           <div class="table-controls">
-            <!-- Search & Filter -->
             <div class="search-filter-group">
-              <!-- Search -->
               <div class="input-wrapper" style="flex: 1; max-width: 400px;">
                 <span class="input-icon">
                   <span class="material-symbols-outlined">search</span>
                 </span>
                 <input type="text" id="searchInput" class="form-control-modern with-icon"
-                  placeholder="Search promotions...">
+                  placeholder="{{ __('messages.owner.products.promotions.search_placeholder') }}">
               </div>
 
-              <!-- Filter by Type -->
               <div class="select-wrapper" style="min-width: 200px;">
                 <select id="typeFilter" class="form-control-modern">
                   <option value="">{{ __('messages.owner.products.promotions.all') }}</option>
@@ -63,7 +57,6 @@
               </div>
             </div>
 
-            <!-- Add Promotion Button -->
             <a href="{{ route('owner.user-owner.promotions.create') }}" class="btn-modern btn-primary-modern">
               <span class="material-symbols-outlined">add</span>
               {{ __('messages.owner.products.promotions.add_promotion') }}
@@ -72,7 +65,6 @@
         </div>
       </div>
 
-      <!-- Table Display -->
       @include('pages.owner.products.promotion.display')
 
     </div>
@@ -144,13 +136,14 @@
 
         // Render rows
         if (currentPromotions.length === 0) {
+          // UPDATE: Translate Empty State
           tableBody.innerHTML = `
             <tr class="empty-filter-row">
               <td colspan="9" class="text-center">
                 <div class="table-empty-state">
                   <span class="material-symbols-outlined" style="font-size: 4rem; color: #ccc; display: block; margin-bottom: 1rem;">search_off</span>
-                  <h4 style="margin: 0 0 0.5rem 0; color: #666; font-size: 1.25rem;">No results found</h4>
-                  <p style="margin: 0; color: #999;">Try adjusting your search or filter</p>
+                  <h4 style="margin: 0 0 0.5rem 0; color: #666; font-size: 1.25rem;">{{ __('messages.owner.products.promotions.no_results_found') }}</h4>
+                  <p style="margin: 0; color: #999;">{{ __('messages.owner.products.promotions.adjust_search_filter') }}</p>
                 </div>
               </td>
             </tr>
@@ -229,6 +222,7 @@
             badgeClass = 'badge-secondary';
         }
         
+        // Note: status_label likely comes from backend translation, keeping as is
         statusBadge = `<span class="badge-modern ${badgeClass}">${promotion.status_label}</span>`;
 
         // URLs

@@ -53,8 +53,12 @@
       <div class="page-header">
         <div class="header-content">
           <h1 class="page-title">{{ __('messages.owner.products.master_products.master_product_detail') }}</h1>
-          <p class="page-subtitle">View complete information about this product.</p>
+          <p class="page-subtitle">{{ __('messages.owner.products.master_products.view_complete_info') }}</p>
         </div>
+          <a href="{{ route('owner.user-owner.master-products.index') }}" class="back-button">
+              <span class="material-symbols-outlined">arrow_back</span>
+              {{ __('messages.owner.products.master_products.back') }}
+          </a>
       </div>
 
       {{-- Success Message --}}
@@ -108,7 +112,7 @@
               @if($promo)
                 <span class="badge-modern badge-warning">
                   <span class="material-symbols-outlined">local_offer</span>
-                  {{ $promoName ?? 'Promo' }}
+                  {{ $promoName ?? __('messages.owner.products.master_products.promo_label') }}
                 </span>
               @endif
             </div>
@@ -126,7 +130,7 @@
               @endphp
               @if($src)
                 <a href="{{ $src }}" target="_blank" rel="noopener" class="gallery-item">
-                  <img src="{{ $src }}" alt="{{ $p['filename'] ?? 'Product Image' }}">
+                  <img src="{{ $src }}" alt="{{ $p['filename'] ?? __('messages.owner.products.master_products.gallery_image_alt') }}">
                 </a>
               @endif
             @endforeach
@@ -143,7 +147,7 @@
             <div class="section-icon section-icon-red">
               <span class="material-symbols-outlined">shopping_bag</span>
             </div>
-            <h3 class="section-title">Product Information</h3>
+            <h3 class="section-title">{{ __('messages.owner.products.master_products.product_information') }}</h3>
           </div>
           
           <div class="detail-info-grid">
@@ -159,7 +163,7 @@
               {{-- Product Code --}}
               <div class="detail-info-item">
                 <div class="detail-info-label">
-                  {{ __('messages.owner.products.master_products.product_code') ?? 'Product Code' }}
+                  {{ __('messages.owner.products.master_products.product_code') }}
                 </div>
                 <div class="detail-info-value">{{ $prod->product_code ?? '—' }}</div>
               </div>

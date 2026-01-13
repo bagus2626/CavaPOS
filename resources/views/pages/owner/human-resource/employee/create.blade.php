@@ -5,15 +5,17 @@
 @section('content')
     <div class="modern-container">
         <div class="container-modern">
-            <!-- Header Section -->
             <div class="page-header">
                 <div class="header-content">
-                    <h1 class="page-title">Create New Employee</h1>
-                    <p class="page-subtitle">Add a new team member to your growing workforce.</p>
+                    <h1 class="page-title">{{ __('messages.owner.user_management.employees.create_new_employee') }}</h1>
+                    <p class="page-subtitle">{{ __('messages.owner.user_management.employees.create_subtitle') }}</p>
                 </div>
+                <a href="{{ route('owner.user-owner.employees.index') }}" class="back-button">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    {{ __('messages.owner.user_management.employees.back') }}
+                </a>
             </div>
 
-            <!-- Error Messages -->
             @if ($errors->any())
                 <div class="alert alert-danger alert-modern">
                     <div class="alert-icon">
@@ -52,7 +54,6 @@
                 </div>
             @endif
 
-            <!-- Main Card -->
             <div class="modern-card">
                 <input type="hidden" id="usernameCheckUrl" value="{{ route('owner.user-owner.employees.check-username') }}">
                 <form action="{{ route('owner.user-owner.employees.store') }}" method="POST" enctype="multipart/form-data"
@@ -60,38 +61,38 @@
                     @csrf
                     <div class="card-body-modern">
 
-                        <!-- Profile Section -->
                         <div class="profile-section">
-                            <!-- Profile Picture Upload -->
                             <div class="profile-picture-wrapper">
                                 <div class="profile-picture-container" id="profilePictureContainer">
                                     <div class="upload-placeholder" id="uploadPlaceholder">
                                         <span class="material-symbols-outlined">image</span>
-                                        <span class="upload-text">Upload</span>
+                                        <span
+                                            class="upload-text">{{ __('messages.owner.user_management.employees.upload_text') }}</span>
                                     </div>
-                                    <img id="imagePreview" class="profile-preview" alt="Profile Preview">
-                                    <!-- Remove Image Button -->
-                                    <button type="button" id="removeImageBtn" class="btn-remove btn-remove-top" style="display: none;">
+                                    <img id="imagePreview" class="profile-preview"
+                                        alt="{{ __('messages.owner.user_management.employees.profile_preview_alt') }}">
+                                    <button type="button" id="removeImageBtn" class="btn-remove btn-remove-top"
+                                        style="display: none;">
                                         <span class="material-symbols-outlined">close</span>
                                     </button>
                                 </div>
                                 <input type="file" name="image" id="image" accept="image/*" style="display: none;">
-                                <small class="text-muted d-block text-center mt-2">JPG, PNG, WEBP. Max 2 MB</small>
+                                <small
+                                    class="text-muted d-block text-center mt-2">{{ __('messages.owner.user_management.employees.upload_hint') }}</small>
                                 @error('image')
                                     <div class="text-danger text-center mt-1 small">{{ $message }}</div>
                                 @enderror
                             </div>
 
-                            <!-- Personal Information Fields -->
                             <div class="personal-info-fields">
                                 <div class="section-header">
                                     <div class="section-icon section-icon-red">
                                         <span class="material-symbols-outlined">person</span>
                                     </div>
-                                    <h3 class="section-title">Personal Information</h3>
+                                    <h3 class="section-title">
+                                        {{ __('messages.owner.user_management.employees.personal_info_section') }}</h3>
                                 </div>
                                 <div class="row g-4">
-                                    <!-- Full Name -->
                                     <div class="col-md-6">
                                         <div class="form-group-modern">
                                             <label class="form-label-modern">
@@ -99,13 +100,14 @@
                                             </label>
                                             <input type="text" name="name" id="name"
                                                 class="form-control-modern @error('name') is-invalid @enderror"
-                                                value="{{ old('name') }}" placeholder="e.g. Jane Doe" required>
+                                                value="{{ old('name') }}"
+                                                placeholder="{{ __('messages.owner.user_management.employees.placeholder_name') }}"
+                                                required>
                                             @error('name')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
                                     </div>
-                                    <!-- Email -->
                                     <div class="col-md-6">
                                         <div class="form-group-modern">
                                             <label class="form-label-modern">
@@ -114,14 +116,14 @@
                                             </label>
                                             <input type="email" name="email" id="email"
                                                 class="form-control-modern @error('email') is-invalid @enderror"
-                                                value="{{ old('email') }}" placeholder="e.g. jane.doe@techcorp.com"
+                                                value="{{ old('email') }}"
+                                                placeholder="{{ __('messages.owner.user_management.employees.placeholder_email') }}"
                                                 required>
                                             @error('email')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
                                     </div>
-                                    <!-- Role -->
                                     <div class="col-md-6">
                                         <div class="form-group-modern">
                                             <label class="form-label-modern">
@@ -131,7 +133,9 @@
                                                 <select name="role" id="role"
                                                     class="form-control-modern @error('role') is-invalid @enderror"
                                                     required>
-                                                    <option value="">Select a role...</option>
+                                                    <option value="">
+                                                        {{ __('messages.owner.user_management.employees.select_role_default') }}
+                                                    </option>
                                                     <option value="CASHIER" {{ old('role') == 'CASHIER' ? 'selected' : '' }}>
                                                         {{ __('messages.owner.user_management.employees.cashier') }}
                                                     </option>
@@ -146,7 +150,6 @@
                                             @enderror
                                         </div>
                                     </div>
-                                    <!-- Outlet / Branch -->
                                     <div class="col-md-6">
                                         <div class="form-group-modern">
                                             <label class="form-label-modern">
@@ -156,7 +159,9 @@
                                                 <select name="partner" id="partner"
                                                     class="form-control-modern @error('partner') is-invalid @enderror"
                                                     required>
-                                                    <option value="">Select location...</option>
+                                                    <option value="">
+                                                        {{ __('messages.owner.user_management.employees.select_location_default') }}
+                                                    </option>
                                                     @foreach ($partners as $partner)
                                                         <option value="{{ $partner->id }}">{{ $partner->name }}</option>
                                                     @endforeach
@@ -171,18 +176,16 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Divider -->
                         <div class="section-divider"></div>
-                        <!-- Account Access Section -->
                         <div class="account-section">
                             <div class="section-header">
                                 <div class="section-icon section-icon-red">
                                     <span class="material-symbols-outlined">lock</span>
                                 </div>
-                                <h3 class="section-title">Account Access</h3>
+                                <h3 class="section-title">
+                                    {{ __('messages.owner.user_management.employees.account_access_section') }}</h3>
                             </div>
                             <div class="row g-4">
-                                <!-- Username -->
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern">
@@ -197,13 +200,15 @@
 
                                             <input type="text" name="username" id="username"
                                                 class="form-control-modern with-icon @error('username') is-invalid @enderror"
-                                                value="{{ old('username') }}" placeholder="e.g. jdoe23" autocomplete="off"
-                                                required>
+                                                value="{{ old('username') }}"
+                                                placeholder="{{ __('messages.owner.user_management.employees.placeholder_username') }}"
+                                                autocomplete="off" required>
 
                                             <div id="usernameLoading" class="position-absolute d-none"
                                                 style="right: 15px; top: 50%; transform: translateY(-50%); z-index: 5;">
                                                 <div class="spinner-modern text-secondary" role="status">
-                                                    <span class="sr-only">Loading...</span>
+                                                    <span
+                                                        class="sr-only">{{ __('messages.owner.user_management.employees.loading') }}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -216,7 +221,6 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6"></div>
-                                <!-- Password -->
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern">
@@ -225,7 +229,8 @@
                                         <div class="password-wrapper">
                                             <input type="password" name="password" id="password"
                                                 class="form-control-modern @error('password') is-invalid @enderror"
-                                                placeholder="Min. 8 characters" required>
+                                                placeholder="{{ __('messages.owner.user_management.employees.password_placeholder_1') }}"
+                                                required>
                                             <button type="button" class="password-toggle" id="togglePassword">
                                                 <span class="material-symbols-outlined">visibility</span>
                                             </button>
@@ -236,7 +241,6 @@
                                         @enderror
                                     </div>
                                 </div>
-                                <!-- Confirm Password -->
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern">
@@ -246,7 +250,8 @@
                                         <div class="password-wrapper">
                                             <input type="password" name="password_confirmation" id="password_confirmation"
                                                 class="form-control-modern @error('password_confirmation') is-invalid @enderror"
-                                                placeholder="Re-enter password" required>
+                                                placeholder="{{ __('messages.owner.user_management.employees.password_placeholder_reenter') }}"
+                                                required>
                                             <button type="button" class="password-toggle" id="togglePasswordConfirm">
                                                 <span class="material-symbols-outlined">visibility_off</span>
                                             </button>
@@ -259,27 +264,25 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Card Footer -->
                     <div class="card-footer-modern">
                         <a href="{{ route('owner.user-owner.employees.index') }}" class="btn-cancel-modern">
                             {{ __('messages.owner.user_management.employees.cancel') }}
                         </a>
                         <button type="submit" class="btn-submit-modern">
-                            Create Employee
+                            {{ __('messages.owner.user_management.employees.submit_create') }}
                         </button>
                     </div>
                 </form>
             </div>
         </div>
 
-        <!-- Crop Modal -->
         <div class="modal fade" id="cropModal" tabindex="-1" role="dialog" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
                 <div class="modal-content modern-modal">
                     <div class="modal-header modern-modal-header">
                         <h5 class="modal-title">
                             <span class="material-symbols-outlined">crop</span>
-                            Crop Employee Photo
+                            {{ __('messages.owner.user_management.employees.crop_modal_title') }}
                         </h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
@@ -291,7 +294,7 @@
                                 <span class="material-symbols-outlined">info</span>
                             </div>
                             <div class="alert-content">
-                                <small>Drag to move, scroll to zoom, or use the corners to resize the crop area.</small>
+                                <small>{{ __('messages.owner.user_management.employees.crop_instruction') }}</small>
                             </div>
                         </div>
                         <div class="img-container-crop">
@@ -301,11 +304,11 @@
                     <div class="modal-footer modern-modal-footer">
                         <button type="button" class="btn-cancel-modern" data-dismiss="modal">
                             <span class="material-symbols-outlined">close</span>
-                            Cancel
+                            {{ __('messages.owner.user_management.employees.cancel') }}
                         </button>
                         <button type="button" id="cropBtn" class="btn-submit-modern">
                             <span class="material-symbols-outlined">check</span>
-                            Crop & Save
+                            {{ __('messages.owner.user_management.employees.crop_save') }}
                         </button>
                     </div>
                 </div>
@@ -372,13 +375,13 @@
                 form.addEventListener('submit', function (e) {
                     if (pw.value.length < 8) {
                         e.preventDefault();
-                        alert('Password must be at least 8 characters.');
+                        alert('{{ __('messages.owner.user_management.employees.js_password_length') }}');
                         pw.focus();
                         return false;
                     }
                     if (pw.value !== pwc.value) {
                         e.preventDefault();
-                        alert('Password confirmation does not match.');
+                        alert('{{ __('messages.owner.user_management.employees.js_password_mismatch') }}');
                         pwc.focus();
                         return false;
                     }
@@ -433,7 +436,7 @@
 
                     if (val.length < 3 || val.length > 30 || !/^[A-Za-z0-9._-]+$/.test(val)) {
                         setLoading(false);
-                        showStatus(false, 'Invalid format. Use 3-30 characters (letters, numbers, ._-)');
+                        showStatus(false, '{{ __('messages.owner.user_management.employees.js_username_invalid_format') }}');
                         return;
                     }
 
@@ -456,12 +459,12 @@
 
                         if (data && typeof data.available !== 'undefined') {
                             if (data.available) {
-                                showStatus(true, 'Username available');
+                                showStatus(true, '{{ __('messages.owner.user_management.employees.username_available') }}');
                             } else {
-                                showStatus(false, 'Username already taken');
+                                showStatus(false, '{{ __('messages.owner.user_management.employees.username_used') }}');
                             }
                         } else {
-                            showNeutral('Unable to check availability.');
+                            showNeutral('{{ __('messages.owner.user_management.employees.js_check_error') }}');
                         }
                     } catch (e) {
                         console.error('Username check error:', e);

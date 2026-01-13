@@ -6,25 +6,24 @@
 @section('content')
     <div class="modern-container">
         <div class="container-modern">
-            <!-- Header Section -->
             <div class="page-header">
-                {{-- <a href="{{ route('owner.user-owner.stocks.index') }}" class="back-button">
-                    <span class="material-symbols-outlined">arrow_back</span>
-                    {{ __('messages.owner.products.stocks.back_to_list') }}
-                </a> --}}
                 <div class="header-content">
                     <h1 class="page-title">{{ __('messages.owner.products.stocks.movements_create_in.page_title') }}</h1>
-                    <p class="page-subtitle">Record incoming stock to your inventory.</p>
+                    <p class="page-subtitle">{{ __('messages.owner.products.stocks.movements_create_in.subtitle') }}</p>
                 </div>
+               <a href="{{ route('owner.user-owner.stocks.index') }}" class="back-button">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    {{ __('messages.owner.products.stocks.back') }}
+                </a>
             </div>
 
-            <!-- Error Messages -->
             @if ($errors->any())
                 <div class="alert alert-danger alert-modern">
                     <div class="alert-icon">
                         <span class="material-symbols-outlined">error</span>
                     </div>
                     <div class="alert-content">
+                        {{-- Pastikan key recheck_input tersedia di user_management atau buat global --}}
                         <strong>{{ __('messages.owner.user_management.employees.recheck_input') }}:</strong>
                         <ul class="mb-0 mt-2">
                             @foreach ($errors->all() as $error)
@@ -46,14 +45,12 @@
                 </div>
             @endif
 
-            <!-- Main Card -->
             <div class="modern-card">
                 <form action="{{ route('owner.user-owner.stocks.movements.store') }}" method="POST" id="stockMovementForm">
                     @csrf
                     <input type="hidden" name="movement_type" value="in">
 
                     <div class="card-body-modern">
-                        <!-- Transaction Details Section -->
                         <div class="section-header">
                             <div class="section-icon section-icon-red">
                                 <span class="material-symbols-outlined">receipt_long</span>
@@ -62,7 +59,6 @@
                         </div>
 
                         <div class="row g-4">
-                            <!-- Destination Location -->
                             <div class="col-md-6">
                                 <div class="form-group-modern">
                                     <label class="form-label-modern">
@@ -88,7 +84,6 @@
                                 </div>
                             </div>
 
-                            <!-- Transaction Category -->
                             <div class="col-md-6">
                                 <div class="form-group-modern">
                                     <label class="form-label-modern">
@@ -111,7 +106,6 @@
                                 </div>
                             </div>
 
-                            <!-- Notes -->
                             <div class="col-md-12">
                                 <div class="form-group-modern">
                                     <label class="form-label-modern">
@@ -127,10 +121,8 @@
                             </div>
                         </div>
 
-                        <!-- Divider -->
                         <div class="section-divider"></div>
 
-                        <!-- Items Section -->
                         <div class="section-header">
                             <div class="section-icon section-icon-red">
                                 <span class="material-symbols-outlined">inventory_2</span>
@@ -139,7 +131,6 @@
                         </div>
 
                         <div id="item-repeater-container">
-                            <!-- First Item Row -->
                             <div class="row repeater-item g-3 mb-3">
                                 <div class="col-md-4">
                                     <div class="form-group-modern">
@@ -204,8 +195,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-1 d-flex align-items-end">
-                                    <!-- First row has no delete button -->
-                                </div>
+                                    </div>
                             </div>
                         </div>
 
@@ -215,10 +205,9 @@
                         </button>
                     </div>
 
-                    <!-- Card Footer -->
                     <div class="card-footer-modern">
                         <a href="{{ route('owner.user-owner.stocks.index') }}" class="btn-cancel-modern">
-                            {{ __('messages.owner.user_management.employees.cancel') }}
+                            {{ __('messages.owner.products.stocks.movements_create_in.cancel') }}
                         </a>
                         <button type="submit" class="btn-submit-modern" id="btn-submit" disabled>
                             {{ __('messages.owner.products.stocks.movements_create_in.submit_button') }}
@@ -229,7 +218,6 @@
         </div>
     </div>
 
-    <!-- Item Template -->
     <template id="item-repeater-template">
         <div class="row repeater-item g-3 mb-3 position-relative">
             <div class="col-md-4">

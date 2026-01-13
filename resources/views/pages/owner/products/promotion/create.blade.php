@@ -6,15 +6,17 @@
 @section('content')
     <div class="modern-container">
         <div class="container-modern">
-            <!-- Header Section -->
             <div class="page-header">
                 <div class="header-content">
                     <h1 class="page-title">{{ __('messages.owner.products.promotions.create_new_promotion') }}</h1>
-                    <p class="page-subtitle">Create attractive promotions to boost sales and customer satisfaction.</p>
+                    <p class="page-subtitle">{{ __('messages.owner.products.promotions.create_promotion_subtitle') }}</p>
                 </div>
+                <a href="{{ route('owner.user-owner.promotions.index') }}" class="back-button">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    {{ __('messages.owner.products.promotions.back') }}
+                </a>
             </div>
 
-            <!-- Error Messages -->
             @if ($errors->any())
                 <div class="alert alert-danger alert-modern">
                     <div class="alert-icon">
@@ -42,13 +44,11 @@
                 </div>
             @endif
 
-            <!-- Main Card -->
             <div class="modern-card">
                 <form action="{{ route('owner.user-owner.promotions.store') }}" method="POST" id="promotionForm">
                     @csrf
                     <div class="card-body-modern">
 
-                        <!-- Promotion Information Section -->
                         <div class="section-header">
                             <div class="section-icon section-icon-red">
                                 <span class="material-symbols-outlined">sell</span>
@@ -59,7 +59,6 @@
                         </div>
 
                         <div class="row g-4">
-                            <!-- Promotion Name -->
                             <div class="col-md-12">
                                 <div class="form-group-modern">
                                     <label class="form-label-modern">
@@ -77,7 +76,6 @@
                                 </div>
                             </div>
 
-                            <!-- Promotion Type -->
                             <div class="col-md-6">
                                 <div class="form-group-modern">
                                     <label class="form-label-modern">
@@ -104,7 +102,6 @@
                                 </div>
                             </div>
 
-                            <!-- Promotion Value -->
                             <div class="col-md-6">
                                 <div class="form-group-modern">
                                     <label class="form-label-modern">
@@ -149,7 +146,6 @@
                             </div>
 
 
-                            <!-- Description -->
                             <div class="col-md-12">
                                 <div class="form-group-modern">
                                     <label class="form-label-modern">
@@ -166,22 +162,19 @@
                             </div>
                         </div>
 
-                        <!-- Divider -->
                         <div class="section-divider"></div>
 
-                        <!-- Validity Period Section -->
                         <div class="account-section">
                             <div class="section-header">
                                 <div class="section-icon section-icon-red">
                                     <span class="material-symbols-outlined">schedule</span>
                                 </div>
-                                <h3 class="section-title">Validity Period</h3>
+                                <h3 class="section-title">{{ __('messages.owner.products.promotions.validity_period') }}</h3>
                             </div>
 
                             @php $usesExpiryInit = old('uses_expiry', 0); @endphp
 
                             <div class="row g-4">
-                                <!-- Uses Expiry Toggle -->
                                 <div class="col-md-12">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern d-block">
@@ -201,7 +194,7 @@
                                             </label>
 
                                             <span class="status-label">
-                                                {{ $usesExpiryInit ? 'Enabled' : 'Disabled' }}
+                                                {{ $usesExpiryInit ? __('messages.owner.products.promotions.enabled') : __('messages.owner.products.promotions.disabled') }}
                                             </span>
                                         </div>
 
@@ -211,7 +204,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Start Date -->
                                 <div class="col-md-6" id="startDateGroup" style="{{ $usesExpiryInit ? '' : 'display:none;' }}">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern">
@@ -229,7 +221,6 @@
                                     </div>
                                 </div>
 
-                                <!-- End Date -->
                                 <div class="col-md-6" id="endDateGroup" style="{{ $usesExpiryInit ? '' : 'display:none;' }}">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern">
@@ -253,7 +244,6 @@
                         </div>
 
 
-                        <!-- Divider -->
                         <div class="section-divider"></div>
 
                         <div class="account-section">
@@ -298,7 +288,7 @@
                                             </label>
 
                                             <span class="status-label">
-                                                {{ $isEveryDay ? 'All Days Selected' : 'Custom Days' }}
+                                                {{ $isEveryDay ? __('messages.owner.products.promotions.all_days_selected') : __('messages.owner.products.promotions.custom_days') }}
                                             </span>
                                         </div>
 
@@ -331,7 +321,7 @@
                                                         </label>
 
                                                         <span class="status-label day-status-{{ $key }}">
-                                                            {{ in_array($key, $selectedDays, true) ? 'Active' : 'Inactive' }}
+                                                            {{ in_array($key, $selectedDays, true) ? __('messages.owner.products.promotions.active_status') : __('messages.owner.products.promotions.inactive_status') }}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -348,16 +338,14 @@
                             </div>
                         </div>
 
-                        <!-- Divider -->
                         <div class="section-divider"></div>
 
-                        <!-- Activation Status Section -->
                         <div class="account-section">
                             <div class="section-header">
                                 <div class="section-icon section-icon-red">
                                     <span class="material-symbols-outlined">toggle_on</span>
                                 </div>
-                                <h3 class="section-title">Status</h3>
+                                <h3 class="section-title">{{ __('messages.owner.products.promotions.status') }}</h3>
                             </div>
 
                             <div class="row g-4">
@@ -380,7 +368,7 @@
                                             </label>
 
                                             <span class="status-label" id="statusLabel">
-                                                {{ old('is_active', 1) ? 'Active' : 'Inactive' }}
+                                                {{ old('is_active', 1) ? __('messages.owner.products.promotions.active_status') : __('messages.owner.products.promotions.inactive_status') }}
                                             </span>
                                         </div>
                                     </div>
@@ -391,13 +379,11 @@
 
                     </div>
 
-                    <!-- Card Footer -->
                     <div class="card-footer-modern">
                         <a href="{{ route('owner.user-owner.promotions.index') }}" class="btn-cancel-modern">
                             {{ __('messages.owner.products.promotions.cancel') }}
                         </a>
                         <button type="submit" class="btn-submit-modern">
-
                             {{ __('messages.owner.products.promotions.create_promotion') }}
                         </button>
                     </div>
@@ -409,6 +395,19 @@
 
 @push('scripts')
 <script>
+// 1. Definisikan object Translation untuk JavaScript
+window.promoLang = {
+    enabled: "{{ __('messages.owner.products.promotions.enabled') }}",
+    disabled: "{{ __('messages.owner.products.promotions.disabled') }}",
+    allDaysSelected: "{{ __('messages.owner.products.promotions.all_days_selected') }}",
+    customDays: "{{ __('messages.owner.products.promotions.custom_days') }}",
+    activeStatus: "{{ __('messages.owner.products.promotions.active_status') }}",
+    inactiveStatus: "{{ __('messages.owner.products.promotions.inactive_status') }}",
+    percentageExample: "{{ __('messages.owner.products.promotions.percentage_example') }}",
+    reducedFareExample: "{{ __('messages.owner.products.promotions.reduced_fare_example') }}",
+    endDateAlert: "{{ __('messages.owner.products.promotions.end_date_alert') }}"
+};
+
 (function () {
     const typeSel   = document.getElementById('promotion_type');
     const valInput  = document.getElementById('promotion_value');
@@ -425,7 +424,7 @@
             valInput.min = '1';
             valInput.max = '100';
             valInput.step = '1';
-            helpText.textContent = '{{ __('messages.owner.products.promotions.percentage_example') }}';
+            helpText.textContent = window.promoLang.percentageExample;
             if (valInput.value && (+valInput.value > 100)) valInput.value = 100;
         } else if (t === 'amount') {
             prefixAmt.style.display = '';
@@ -433,7 +432,7 @@
             valInput.removeAttribute('max');
             valInput.min = '0';
             valInput.step = '1';
-            helpText.textContent = '{{ __('messages.owner.products.promotions.reduced_fare_example') }}';
+            helpText.textContent = window.promoLang.reducedFareExample;
         } else {
             prefixAmt.style.display = 'none';
             suffixPct.style.display = 'none';
@@ -448,15 +447,26 @@
         applyTypeUI();
     }
 
-    // Uses expiry toggle
     const usesExpiry = document.getElementById('uses_expiry');
-    const dateWrap   = document.getElementById('dateRangeWrap');
-    const startDate  = document.getElementById('start_date');
-    const endDate    = document.getElementById('end_date');
+    const startDateGroup = document.getElementById('startDateGroup');
+    const endDateGroup   = document.getElementById('endDateGroup');
+    const startDate      = document.getElementById('start_date');
+    const endDate        = document.getElementById('end_date');
 
     function toggleDateRange() {
         const show = usesExpiry.checked;
-        dateWrap.classList.toggle('d-none', !show);
+        
+        // Update visibility
+        if(startDateGroup) startDateGroup.style.display = show ? '' : 'none';
+        if(endDateGroup) endDateGroup.style.display = show ? '' : 'none';
+
+        // Update Text Status
+        const statusLabel = usesExpiry.parentElement.nextElementSibling;
+        if(statusLabel) {
+            statusLabel.textContent = show ? window.promoLang.enabled : window.promoLang.disabled;
+        }
+
+        // Update Required
         [startDate, endDate].forEach(el => {
             if (!el) return;
             el.required = show;
@@ -477,7 +487,7 @@
                 const ed = new Date(endDate.value);
                 if (ed <= s) {
                     e.preventDefault();
-                    alert('{{ __('messages.owner.products.promotions.end_date_alert') }}');
+                    alert(window.promoLang.endDateAlert);
                     endDate.focus();
                 }
             }
@@ -485,51 +495,60 @@
     }
 
    // Active days logic (ENHANCED)
-const everyDay = document.getElementById('every_day');
-const dayCheckboxes = Array.from(document.querySelectorAll('.day-checkbox'));
+    const everyDay = document.getElementById('every_day');
+    const dayCheckboxes = Array.from(document.querySelectorAll('.day-checkbox'));
 
-if (everyDay && dayCheckboxes.length) {
-    const everyDayStatusLabel = everyDay
-        .closest('.status-switch')
-        .querySelector('.status-label');
+    if (everyDay && dayCheckboxes.length) {
+        const everyDayStatusLabel = everyDay
+            .closest('.status-switch')
+            .querySelector('.status-label');
 
-    function updateDayStatuses() {
-        let checkedCount = 0;
+        function updateDayStatuses() {
+            let checkedCount = 0;
 
-        dayCheckboxes.forEach(cb => {
-            const statusLabel = document.querySelector('.day-status-' + cb.value);
+            dayCheckboxes.forEach(cb => {
+                const statusLabel = document.querySelector('.day-status-' + cb.value);
 
-            if (cb.checked) {
-                checkedCount++;
-                if (statusLabel) statusLabel.textContent = 'Active';
+                if (cb.checked) {
+                    checkedCount++;
+                    if (statusLabel) statusLabel.textContent = window.promoLang.activeStatus;
+                } else {
+                    if (statusLabel) statusLabel.textContent = window.promoLang.inactiveStatus;
+                }
+            });
+
+            if (checkedCount === dayCheckboxes.length) {
+                everyDay.checked = true;
+                everyDayStatusLabel.textContent = window.promoLang.allDaysSelected;
             } else {
-                if (statusLabel) statusLabel.textContent = 'Inactive';
+                everyDay.checked = false;
+                everyDayStatusLabel.textContent = window.promoLang.customDays;
             }
+        }
+
+        // Toggle Every Day → check/uncheck all
+        everyDay.addEventListener('change', function () {
+            dayCheckboxes.forEach(cb => cb.checked = everyDay.checked);
+            updateDayStatuses();
         });
 
-        if (checkedCount === dayCheckboxes.length) {
-            everyDay.checked = true;
-            everyDayStatusLabel.textContent = 'All Days Selected';
-        } else {
-            everyDay.checked = false;
-            everyDayStatusLabel.textContent = 'Custom Days';
-        }
+        // Toggle individual day
+        dayCheckboxes.forEach(cb => {
+            cb.addEventListener('change', updateDayStatuses);
+        });
+
+        // Initial sync
+        updateDayStatuses();
     }
 
-    // Toggle Every Day → check/uncheck all
-    everyDay.addEventListener('change', function () {
-        dayCheckboxes.forEach(cb => cb.checked = everyDay.checked);
-        updateDayStatuses();
-    });
-
-    // Toggle individual day
-    dayCheckboxes.forEach(cb => {
-        cb.addEventListener('change', updateDayStatuses);
-    });
-
-    // Initial sync
-    updateDayStatuses();
-}
+    // Main Status Toggle
+    const mainStatusCheck = document.getElementById('is_active');
+    if(mainStatusCheck) {
+        const mainStatusLabel = document.getElementById('statusLabel');
+        mainStatusCheck.addEventListener('change', function() {
+            mainStatusLabel.textContent = this.checked ? window.promoLang.activeStatus : window.promoLang.inactiveStatus;
+        });
+    }
 
 })();
 </script>

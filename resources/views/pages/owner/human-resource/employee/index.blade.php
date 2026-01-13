@@ -6,15 +6,13 @@
 @section('content')
   <div class="modern-container">
     <div class="container-modern">
-      <!-- Header Section -->
       <div class="page-header">
         <div class="header-content">
           <h1 class="page-title">{{ __('messages.owner.user_management.employees.all_employees') }}</h1>
-          <p class="page-subtitle">Manage your team members and their roles</p>
+          <p class="page-subtitle">{{ __('messages.owner.user_management.employees.manage_team_subtitle') }}</p>
         </div>
       </div>
 
-      <!-- Success/Error Messages -->
       @if (session('success'))
         <div class="alert alert-success alert-modern">
           <div class="alert-icon">
@@ -37,25 +35,21 @@
         </div>
       @endif
 
-      <!-- Filters & Actions -->
       <div class="modern-card mb-4">
         <div class="card-body-modern" style="padding: var(--spacing-lg) var(--spacing-xl);">
           <div class="table-controls">
-            <!-- Search & Filter -->
             <div class="search-filter-group">
-              <!-- Search -->
               <div class="input-wrapper" style="flex: 1; max-width: 400px;">
                 <span class="input-icon">
                   <span class="material-symbols-outlined">search</span>
                 </span>
                 <input type="text" id="searchInput" class="form-control-modern with-icon"
-                  placeholder="Search employees...">
+                  placeholder="{{ __('messages.owner.user_management.employees.search_placeholder') }}">
               </div>
 
-              <!-- Filter by Outlet -->
               <div class="select-wrapper" style="min-width: 200px;">
                 <select id="outletFilter" class="form-control-modern">
-                  <option value="">All Outlets</option>
+                  <option value="">{{ __('messages.owner.user_management.employees.all_outlets') }}</option>
                   @foreach($employees->pluck('partner')->unique('id') as $partner)
                     <option value="{{ $partner->id }}">{{ $partner->name }}</option>
                   @endforeach
@@ -64,16 +58,14 @@
               </div>
             </div>
 
-            <!-- Add Employee Button -->
             <a href="{{ route('owner.user-owner.employees.create') }}" class="btn-modern btn-primary-modern">
               <span class="material-symbols-outlined">add</span>
-              {{ __('messages.owner.user_management.employees.add_employee') ?? 'Add Employee' }}
+              {{ __('messages.owner.user_management.employees.add_employee') }}
             </a>
           </div>
         </div>
       </div>
 
-      <!-- Table Display -->
       @include('pages.owner.human-resource.employee.display')
 
     </div>
@@ -153,8 +145,8 @@
               <td colspan="8" class="text-center">
                 <div class="table-empty-state">
                   <span class="material-symbols-outlined" style="font-size: 4rem; color: #ccc; display: block; margin-bottom: 1rem;">search_off</span>
-                  <h4 style="margin: 0 0 0.5rem 0; color: #666; font-size: 1.25rem;">No results found</h4>
-                  <p style="margin: 0; color: #999;">Try adjusting your search or filter</p>
+                  <h4 style="margin: 0 0 0.5rem 0; color: #666; font-size: 1.25rem;">{{ __('messages.owner.user_management.employees.no_results') }}</h4>
+                  <p style="margin: 0; color: #999;">{{ __('messages.owner.user_management.employees.adjust_filter') }}</p>
                 </div>
               </td>
             </tr>
@@ -245,7 +237,7 @@
           </td>
           <td class="text-center">
             <div class="table-actions">
-              <a href="${showUrl}" class="btn-table-action view" title="{{ __('messages.owner.user_management.employees.view_details') ?? 'View Details' }}">
+              <a href="${showUrl}" class="btn-table-action view" title="{{ __('messages.owner.user_management.employees.view_details') }}">
                 <span class="material-symbols-outlined">visibility</span>
               </a>
               <a href="${editUrl}" class="btn-table-action edit" title="{{ __('messages.owner.user_management.employees.edit') }}">

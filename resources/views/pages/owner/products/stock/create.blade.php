@@ -5,15 +5,17 @@
 @section('content')
     <div class="modern-container">
         <div class="container-modern">
-            <!-- Header Section -->
             <div class="page-header">
                 <div class="header-content">
                     <h1 class="page-title">{{ __('messages.owner.products.stocks.create_title') }}</h1>
-                    <p class="page-subtitle">Add new stock item to your inventory.</p>
+                    <p class="page-subtitle">{{ __('messages.owner.products.stocks.create_subtitle') }}</p>
                 </div>
+                <a href="{{ route('owner.user-owner.stocks.index') }}" class="back-button">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    {{ __('messages.owner.products.stocks.back') }}
+                </a>
             </div>
 
-            <!-- Error Messages -->
             @if ($errors->any())
                 <div class="alert alert-danger alert-modern">
                     <div class="alert-icon">
@@ -41,13 +43,11 @@
                 </div>
             @endif
 
-            <!-- Main Card -->
             <div class="modern-card">
                 <form action="{{ route('owner.user-owner.stocks.store') }}" method="POST" id="stockForm">
                     @csrf
 
                     <div class="card-body-modern">
-                        <!-- Stock Information Section -->
                         <div class="account-section">
                             <div class="section-header">
                                 <div class="section-icon section-icon-red">
@@ -57,7 +57,6 @@
                             </div>
 
                             <div class="row g-4">
-                                <!-- Use Existing Product Toggle -->
                                 <div class="col-md-12">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern d-block">
@@ -74,7 +73,7 @@
                                                 <span class="slider-modern"></span>
                                             </label>
                                             <span class="status-label" id="useProductLabel">
-                                                {{ old('product_id') ? 'Enabled' : 'Disabled' }}
+                                                {{ old('product_id') ? __('messages.owner.products.stocks.enabled') : __('messages.owner.products.stocks.disabled') }}
                                             </span>
                                         </div>
                                         <small class="text-muted d-block mt-1">
@@ -83,7 +82,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Product Picker (shown when toggle is on) -->
                                 <div class="col-md-12" id="productPickerWrap" style="{{ old('product_id') ? '' : 'display:none;' }}">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern">
@@ -115,7 +113,6 @@
                                        value="{{ old('product_id') }}" 
                                        {{ old('product_id') ? '' : 'disabled' }}>
 
-                                <!-- Stock Name -->
                                 <div class="col-md-12">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern">
@@ -137,7 +134,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Display Unit -->
                                 <div class="col-md-12">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern">
@@ -167,7 +163,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Description -->
                                 <div class="col-md-12">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern">
@@ -187,7 +182,6 @@
                         </div>
                     </div>
 
-                    <!-- Card Footer -->
                     <div class="card-footer-modern">
                         <a href="{{ route('owner.user-owner.stocks.index') }}" class="btn-cancel-modern">
                             {{ __('messages.owner.products.stocks.cancel') }}
@@ -204,6 +198,12 @@
 
 @section('scripts')
 <script>
+// UPDATE: Menambahkan object translation untuk JS
+window.stockLang = {
+    enabled: "{{ __('messages.owner.products.stocks.enabled') }}",
+    disabled: "{{ __('messages.owner.products.stocks.disabled') }}"
+};
+
 (function () {
     // Elements
     const useSwitch = document.getElementById('use_product_name_switch');
@@ -236,9 +236,9 @@
             stockName.value = '';
         }
 
-        // Update label
+        // Update label using Translation Object
         if (useProductLabel) {
-            useProductLabel.textContent = on ? 'Enabled' : 'Disabled';
+            useProductLabel.textContent = on ? window.stockLang.enabled : window.stockLang.disabled;
         }
     }
 

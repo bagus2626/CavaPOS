@@ -6,15 +6,13 @@
 @section('content')
   <div class="modern-container">
     <div class="container-modern">
-      <!-- Header Section -->
       <div class="page-header">
         <div class="header-content">
           <h1 class="page-title">{{ __('messages.owner.products.master_products.master_products') }}</h1>
-          <p class="page-subtitle">Manage your product catalog and inventory</p>
+          <p class="page-subtitle">{{ __('messages.owner.products.master_products.manage_catalog_subtitle') }}</p>
         </div>
       </div>
 
-      <!-- Success/Error Messages -->
       @if (session('success'))
         <div class="alert alert-success alert-modern">
           <div class="alert-icon">
@@ -37,22 +35,18 @@
         </div>
       @endif
 
-      <!-- Filters & Actions -->
       <div class="modern-card mb-4">
         <div class="card-body-modern" style="padding: var(--spacing-lg) var(--spacing-xl);">
           <div class="table-controls">
-            <!-- Search & Filter -->
             <div class="search-filter-group">
-              <!-- Search -->
               <div class="input-wrapper" style="flex: 1; max-width: 400px;">
                 <span class="input-icon">
                   <span class="material-symbols-outlined">search</span>
                 </span>
                 <input type="text" id="searchInput" class="form-control-modern with-icon"
-                  placeholder="Search products...">
+                  placeholder="{{ __('messages.owner.products.master_products.search_placeholder') }}">
               </div>
 
-              <!-- Filter by Category -->
               <div class="select-wrapper" style="min-width: 200px;">
                 <select id="categoryFilter" class="form-control-modern">
                   <option value="">{{ __('messages.owner.products.master_products.all') }}</option>
@@ -66,7 +60,6 @@
               </div>
             </div>
 
-            <!-- Add Product Button -->
             <a href="{{ route('owner.user-owner.master-products.create') }}" class="btn-modern btn-primary-modern">
               <span class="material-symbols-outlined">add</span>
               {{ __('messages.owner.products.master_products.add_product') ?? 'Add Product' }}
@@ -75,7 +68,6 @@
         </div>
       </div>
 
-      <!-- Table Display -->
       @include('pages.owner.products.master-product.display')
 
     </div>
@@ -148,13 +140,14 @@
 
         // Render rows
         if (currentProducts.length === 0) {
+          // UPDATE: Menggunakan key no_results_found & adjust_search_filter
           tableBody.innerHTML = `
             <tr class="empty-filter-row">
               <td colspan="7" class="text-center">
                 <div class="table-empty-state">
                   <span class="material-symbols-outlined" style="font-size: 4rem; color: #ccc; display: block; margin-bottom: 1rem;">search_off</span>
-                  <h4 style="margin: 0 0 0.5rem 0; color: #666; font-size: 1.25rem;">No results found</h4>
-                  <p style="margin: 0; color: #999;">Try adjusting your search or filter</p>
+                  <h4 style="margin: 0 0 0.5rem 0; color: #666; font-size: 1.25rem;">{{ __('messages.owner.products.master_products.no_results_found') }}</h4>
+                  <p style="margin: 0; color: #999;">{{ __('messages.owner.products.master_products.adjust_search_filter') }}</p>
                 </div>
               </td>
             </tr>
@@ -269,7 +262,8 @@
 
         const nav = document.createElement('nav');
         nav.setAttribute('role', 'navigation');
-        nav.setAttribute('aria-label', 'Pagination Navigation');
+        // UPDATE: Menggunakan key pagination_navigation
+        nav.setAttribute('aria-label', '{{ __('messages.owner.products.master_products.pagination_navigation') }}');
         
         const ul = document.createElement('ul');
         ul.className = 'pagination';
@@ -278,6 +272,7 @@
         const prevLi = document.createElement('li');
         prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
         
+        // UPDATE: Menggunakan key pagination_previous
         if (currentPage === 1) {
           prevLi.innerHTML = `
             <span class="page-link" aria-hidden="true">
@@ -288,7 +283,7 @@
           `;
         } else {
           prevLi.innerHTML = `
-            <a href="#" class="page-link" data-page="${currentPage - 1}" aria-label="Previous">
+            <a href="#" class="page-link" data-page="${currentPage - 1}" aria-label="{{ __('messages.owner.products.master_products.pagination_previous') }}">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
               </svg>
@@ -322,6 +317,7 @@
         const nextLi = document.createElement('li');
         nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
         
+        // UPDATE: Menggunakan key pagination_next
         if (currentPage === totalPages) {
           nextLi.innerHTML = `
             <span class="page-link" aria-hidden="true">
@@ -332,7 +328,7 @@
           `;
         } else {
           nextLi.innerHTML = `
-            <a href="#" class="page-link" data-page="${currentPage + 1}" aria-label="Next">
+            <a href="#" class="page-link" data-page="${currentPage + 1}" aria-label="{{ __('messages.owner.products.master_products.pagination_next') }}">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
               </svg>

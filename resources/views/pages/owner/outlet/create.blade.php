@@ -8,14 +8,15 @@
         <div class="container-modern">
             {{-- Page Header --}}
             <div class="page-header">
-                {{-- <a href="{{ route('owner.user-owner.outlets.index') }}" class="back-button">
-                    <span class="material-symbols-outlined">arrow_back</span>
-                    {{ __('messages.owner.outlet.all_outlets.back_to_outlets') }}
-                </a> --}}
+
                 <div class="header-content">
-                    <h1 class="page-title">Create New Outlet</h1>
-                    <p class="page-subtitle">Add a new outlet location to your business</p>
+                    <h1 class="page-title">{{ __('messages.owner.outlet.all_outlets.create_new_outlet') }}</h1>
+                    <p class="page-subtitle">{{ __('messages.owner.outlet.all_outlets.create_subtitle') }}</p>
                 </div>
+                <a href="{{ route('owner.user-owner.outlets.index') }}" class="back-button">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    {{ __('messages.owner.outlet.all_outlets.back') }}
+                </a>
             </div>
 
             {{-- Alerts --}}
@@ -74,7 +75,7 @@
                                     </label>
                                     <input type="text" name="name" id="name"
                                         class="form-control-modern @error('name') is-invalid @enderror"
-                                        value="{{ old('name') }}" placeholder="e.g. Cava Coffee - Malioboro" required
+                                        value="{{ old('name') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_name') }}" required
                                         maxlength="255">
                                     @error('name')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -97,13 +98,13 @@
                                         <input type="text" name="username" id="username"
                                             class="form-control-modern with-icon @error('username') is-invalid @enderror"
                                             value="{{ old('username') }}" 
-                                            placeholder="budi.setiawan" 
+                                            placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_username') }}" 
                                             required
                                             minlength="3" maxlength="30" pattern="^[A-Za-z0-9._\-]+$">
 
                                         <div id="usernameLoading" class="position-absolute d-none" style="right: 15px; top: 50%; transform: translateY(-50%); z-index: 5;">
                                             <div class="spinner-modern text-secondary" role="status">
-                                                <span class="sr-only">Loading...</span>
+                                                <span class="sr-only">{{ __('messages.owner.outlet.all_outlets.loading') }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -127,13 +128,13 @@
                                             <input type="text" name="slug" id="slug"
                                                 class="form-control-modern @error('slug') is-invalid @enderror"
                                                 value="{{ old('slug') }}" 
-                                                placeholder="cava-coffee-malioboro" 
+                                                placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_slug') }}" 
                                                 required
                                                 minlength="3" maxlength="30" pattern="^[A-Za-z0-9._\-]+$">
 
                                             <div id="slugLoading" class="position-absolute d-none" style="right: 15px; top: 50%; transform: translateY(-50%); z-index: 5;">
                                                 <div class="spinner-modern text-secondary" role="status">
-                                                    <span class="sr-only">Loading...</span>
+                                                    <span class="sr-only">{{ __('messages.owner.outlet.all_outlets.loading') }}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -154,7 +155,7 @@
                                         </label>
                                         <input type="email" name="email" id="email"
                                             class="form-control-modern @error('email') is-invalid @enderror"
-                                            value="{{ old('email') }}" placeholder="email@email.com" required>
+                                            value="{{ old('email') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_email') }}" required>
                                         @error('email')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -255,7 +256,7 @@
                                         </label>
                                         <input type="text" id="address" name="address" class="form-control-modern"
                                             value="{{ old('address') }}"
-                                            placeholder="{{ __('messages.owner.outlet.all_outlets.detail_address_placeholder') }}"
+                                            placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_address') }}"
                                             maxlength="500">
                                     </div>
                                 </div>
@@ -268,7 +269,7 @@
                                         </label>
                                         <input type="url" id="gmaps_url" name="gmaps_url" class="form-control-modern"
                                             value="{{ old('gmaps_url') }}"
-                                            placeholder="https://www.google.com/maps/embed?pb=...">
+                                            placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_maps') }}">
 
                                     </div>
                                 </div>
@@ -299,11 +300,10 @@
 
                                                 <div class="upload-placeholder" id="uploadPlaceholderLogo">
                                                     <span class="material-symbols-outlined">add_business</span>
-                                                    <span class="upload-text">Upload Logo</span>
+                                                    <span class="upload-text">{{ __('messages.owner.outlet.all_outlets.upload_logo') }}</span>
                                                 </div>
 
                                                 <img id="imagePreview2" class="profile-preview" alt="Logo Preview">
-                                                <!-- Remove Image Button -->
                                                 <button type="button" id="removeLogoBtn" class="btn-remove btn-remove-top" style="display: none;">
                                                     <span class="material-symbols-outlined">close</span>
                                                 </button>
@@ -333,13 +333,13 @@
 
                                                 <div class="upload-placeholder" id="uploadPlaceholderBg">
                                                     <span class="material-symbols-outlined">image</span>
-                                                    <span class="upload-text">Upload Background</span>
+                                                    <span class="upload-text">{{ __('messages.owner.outlet.all_outlets.upload_picture') }}</span>
                                                 </div>
 
                                                 <img id="imagePreview" class="profile-preview" alt="Background Preview">
                                                 <button type="button" id="removeBackgroundBtn" class="btn-remove btn-remove-top" style="display: none;">
                                                     <span class="material-symbols-outlined">close</span>
-                                                </button>                                                
+                                                </button>                                    
                                             </div>
                                         </div>
 
@@ -385,20 +385,20 @@
                                             {{ __('messages.owner.outlet.all_outlets.phone_number') }}
                                         </label>
                                         <input type="tel" name="contact_phone" class="form-control-modern"
-                                            value="{{ old('contact_phone') }}" placeholder="08123456789">
+                                            value="{{ old('contact_phone') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_phone') }}">
                                     </div>
                                 </div>
 
                                 {{-- Instagram --}}
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
-                                        <label class="form-label-modern">Instagram</label>
+                                        <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.instagram') }}</label>
                                         <div class="input-wrapper">
                                             <span class="input-icon">
                                                 <span class="material-symbols-outlined">alternate_email</span>
                                             </span>
                                             <input type="text" name="instagram" class="form-control-modern with-icon"
-                                                value="{{ old('instagram') }}" placeholder="username">
+                                                value="{{ old('instagram') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_social') }}">
                                         </div>
                                     </div>
                                 </div>
@@ -406,13 +406,13 @@
                                 {{-- Twitter --}}
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
-                                        <label class="form-label-modern">Twitter / X</label>
+                                        <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.twitter') }}</label>
                                         <div class="input-wrapper">
                                             <span class="input-icon">
                                                 <span class="material-symbols-outlined">alternate_email</span>
                                             </span>
                                             <input type="text" name="twitter" class="form-control-modern with-icon"
-                                                value="{{ old('twitter') }}" placeholder="username">
+                                                value="{{ old('twitter') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_social') }}">
                                         </div>
                                     </div>
                                 </div>
@@ -420,16 +420,16 @@
                                 {{-- WhatsApp --}}
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
-                                        <label class="form-label-modern">WhatsApp</label>
+                                        <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.whatsapp') }}</label>
                                         <input type="tel" name="whatsapp" class="form-control-modern"
-                                            value="{{ old('whatsapp') }}" placeholder="+62 8123456789">
+                                            value="{{ old('whatsapp') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_phone') }}">
                                     </div>
                                 </div>
 
                                 {{-- Facebook --}}
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
-                                        <label class="form-label-modern">Facebook</label>
+                                        <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.facebook') }}</label>
                                         <input type="text" name="facebook" class="form-control-modern"
                                             value="{{ old('facebook') }}" placeholder="facebook.com/yourpage">
                                     </div>
@@ -438,13 +438,13 @@
                                 {{-- TikTok --}}
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
-                                        <label class="form-label-modern">TikTok</label>
+                                        <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.tiktok') }}</label>
                                         <div class="input-wrapper">
                                             <span class="input-icon">
                                                 <span class="material-symbols-outlined">alternate_email</span>
                                             </span>
                                             <input type="text" name="tiktok" class="form-control-modern with-icon"
-                                                value="{{ old('tiktok') }}" placeholder="username">
+                                                value="{{ old('tiktok') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_social') }}">
                                         </div>
                                     </div>
                                 </div>
@@ -452,9 +452,9 @@
                                 {{-- Website --}}
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
-                                        <label class="form-label-modern">Website</label>
+                                        <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.website') }}</label>
                                         <input type="url" name="website" class="form-control-modern"
-                                            value="{{ old('website') }}" placeholder="https://example.com">
+                                            value="{{ old('website') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_url') }}">
                                     </div>
                                 </div>
                             </div>
@@ -543,7 +543,7 @@
                                         </label>
                                         <div class="password-wrapper">
                                             <input type="password" name="password_confirmation" id="password_confirmation"
-                                                class="form-control-modern" placeholder="Re-enter password" required
+                                                class="form-control-modern" placeholder="{{ __('messages.owner.outlet.all_outlets.repeat_password') }}" required
                                                 minlength="8">
                                             <button type="button" class="password-toggle" id="togglePasswordConfirm">
                                                 <span class="material-symbols-outlined">visibility_off</span>
@@ -575,19 +575,19 @@
                                 <div class="col-md-6" id="wifiNameField"
                                     style="display: {{ old('is_wifi_shown') ? 'block' : 'none' }};">
                                     <div class="form-group-modern">
-                                        <label class="form-label-modern">WiFi Name (SSID)</label>
+                                        <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.wifi_name_ssid') }}</label>
                                         <input type="text" id="user_wifi" name="user_wifi" class="form-control-modern"
-                                            value="{{ old('user_wifi') }}" placeholder="WiFi Name">
+                                            value="{{ old('user_wifi') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_wifi_ssid') }}">
                                     </div>
                                 </div>
 
                                 <div class="col-md-6" id="wifiPasswordField"
                                     style="display: {{ old('is_wifi_shown') ? 'block' : 'none' }};">
                                     <div class="form-group-modern">
-                                        <label class="form-label-modern">WiFi Password</label>
+                                        <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.wifi_password_field') }}</label>
                                         <div class="password-wrapper">
                                             <input type="password" id="pass_wifi" name="pass_wifi" class="form-control-modern"
-                                                value="{{ old('pass_wifi') }}" placeholder="WiFi Password">
+                                                value="{{ old('pass_wifi') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_wifi_pass') }}">
                                             <button type="button" class="password-toggle" id="toggleWifiPassword">
                                                 <span class="material-symbols-outlined">visibility</span>
                                             </button>
@@ -620,7 +620,7 @@
                                 {{ __('messages.owner.outlet.all_outlets.crop_background_picture') }}
                             </h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
+                                <span aria-hidden="true">×</span>
                             </button>
                         </div>
 
@@ -642,11 +642,11 @@
                         <div class="modal-footer modern-modal-footer">
                             <button type="button" class="btn-cancel-modern" data-dismiss="modal">
                                 <span class="material-symbols-outlined">close</span>
-                                Cancel
+                                {{ __('messages.owner.outlet.all_outlets.cancel') }}
                             </button>
                             <button type="button" id="cropBackgroundBtn" class="btn-submit-modern">
                                 <span class="material-symbols-outlined">check</span>
-                                Crop & Save
+                                {{ __('messages.owner.outlet.all_outlets.crop_save') }}
                             </button>
                         </div>
                     </div>
@@ -659,10 +659,10 @@
                         <div class="modal-header modern-modal-header">
                             <h5 class="modal-title">
                                 <span class="material-symbols-outlined">crop</span>
-                                Crop Logo
+                                {{ __('messages.owner.outlet.all_outlets.crop_logo_title') }}
                             </h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
+                                <span aria-hidden="true">×</span>
                             </button>
                         </div>
 
@@ -684,11 +684,11 @@
                         <div class="modal-footer modern-modal-footer">
                             <button type="button" class="btn-cancel-modern" data-dismiss="modal">
                                 <span class="material-symbols-outlined">close</span>
-                                Cancel
+                                {{ __('messages.owner.outlet.all_outlets.cancel') }}
                             </button>
                             <button type="button" id="cropLogoBtn" class="btn-submit-modern">
                                 <span class="material-symbols-outlined">check</span>
-                                Crop & Save
+                                {{ __('messages.owner.outlet.all_outlets.crop_save') }}
                             </button>
                         </div>
                     </div>
@@ -790,7 +790,7 @@
                         e.stopPropagation();
                         const isPassword = input.type === 'password';
                         input.type = isPassword ? 'text' : 'password';
-                        this.textContent = isPassword ? 'Hide' : 'Show';
+                        this.textContent = isPassword ? '{{ __('messages.owner.outlet.all_outlets.hide') }}' : '{{ __('messages.owner.outlet.all_outlets.show') }}';
                     });
                 }
             }
@@ -824,7 +824,7 @@
                     colorClass = 'text-danger';
                 }
 
-                statusDiv.innerHTML = `<div class="${colorClass}">${badge}${message}</div>`;
+                statusDiv.innerHTML = `<div class="${colorClass}">${message}</div>`;
 
                 const inputId = elementId.replace('Status', '');
                 const inputEl = document.getElementById(inputId);
@@ -857,7 +857,7 @@
 
                     if (val.length < 3 || val.length > 30 || !/^[A-Za-z0-9._\-]+$/.test(val)) {
                         setSpinnerLoading('usernameLoading', 'usernameStatus', false);
-                        updateStatusMessage('usernameStatus', 'error', 'Format: 3-30 chars (huruf, angka, . _ -)');
+                        updateStatusMessage('usernameStatus', 'error', '{{ __('messages.owner.outlet.all_outlets.js_username_format') }}');
                         return;
                     }
 
@@ -875,9 +875,9 @@
                         const data = await response.json();
 
                         if (data.available) {
-                            updateStatusMessage('usernameStatus', 'success', 'Username tersedia');
+                            updateStatusMessage('usernameStatus', 'success', '{{ __('messages.owner.outlet.all_outlets.username_available') }}');
                         } else {
-                            updateStatusMessage('usernameStatus', 'error', 'Username sudah digunakan');
+                            updateStatusMessage('usernameStatus', 'error', '{{ __('messages.owner.outlet.all_outlets.username_used') }}');
                         }
                     } catch (error) {
                         console.error(error);
@@ -933,7 +933,7 @@
 
                     if (val.length < 3 || val.length > 30) {
                         setSpinnerLoading('slugLoading', 'slugStatus', false);
-                        updateStatusMessage('slugStatus', 'error', 'Slug harus 3-30 karakter');
+                        updateStatusMessage('slugStatus', 'error', '{{ __('messages.owner.outlet.all_outlets.js_slug_length') }}');
                         return;
                     }
 
@@ -951,9 +951,9 @@
                         const data = await response.json();
 
                         if (data.available) {
-                            updateStatusMessage('slugStatus', 'success', 'Slug tersedia');
+                            updateStatusMessage('slugStatus', 'success', '{{ __('messages.owner.outlet.all_outlets.slug_available') }}');
                         } else {
-                            updateStatusMessage('slugStatus', 'error', 'Slug sudah digunakan');
+                            updateStatusMessage('slugStatus', 'error', '{{ __('messages.owner.outlet.all_outlets.slug_used') }}');
                         }
                     } catch (error) {
                         console.error(error);
@@ -1032,7 +1032,7 @@
             function loadOptions(url, selectEl, spinnerEl, defaultMsg) {
                 if (!selectEl) return Promise.resolve();
 
-                setLoading(selectEl, spinnerEl, true, 'Loading...');
+                setLoading(selectEl, spinnerEl, true, '{{ __('messages.owner.outlet.all_outlets.loading') }}');
                 return fetch(url)
                     .then(r => r.json())
                     .then(list => {
@@ -1045,52 +1045,52 @@
                         });
                     })
                     .catch(() => {
-                        resetSelect(selectEl, 'Failed to load data');
+                        resetSelect(selectEl, '{{ __('messages.owner.outlet.all_outlets.failed_to_load_data') }}');
                     })
                     .finally(() => setLoading(selectEl, spinnerEl, false));
             }
 
             // Load Provinces
             if (provinceSelect) {
-                loadOptions(`${API_BASE}/provinces.json`, provinceSelect, spnProvince, 'Pilih Provinsi');
+                loadOptions(`${API_BASE}/provinces.json`, provinceSelect, spnProvince, '{{ __('messages.owner.outlet.all_outlets.choose_province') }}');
             }
 
             // Province Change Handler
             provinceSelect?.addEventListener('change', function() {
                 fillHiddenName(provinceSelect, provinceNameInput);
-                resetSelect(citySelect, 'Pilih Kota/Kabupaten');
-                resetSelect(districtSelect, 'Pilih Kecamatan');
-                resetSelect(villageSelect, 'Pilih Kelurahan');
+                resetSelect(citySelect, '{{ __('messages.owner.outlet.all_outlets.choose_city') }}');
+                resetSelect(districtSelect, '{{ __('messages.owner.outlet.all_outlets.choose_district') }}');
+                resetSelect(villageSelect, '{{ __('messages.owner.outlet.all_outlets.choose_village') }}');
                 if (citySelect) citySelect.disabled = true;
                 if (districtSelect) districtSelect.disabled = true;
                 if (villageSelect) villageSelect.disabled = true;
 
                 if (this.value) {
-                    loadOptions(`${API_BASE}/regencies/${this.value}.json`, citySelect, spnCity, 'Pilih Kota/Kabupaten');
+                    loadOptions(`${API_BASE}/regencies/${this.value}.json`, citySelect, spnCity, '{{ __('messages.owner.outlet.all_outlets.choose_city') }}');
                 }
             });
 
             // City Change Handler
             citySelect?.addEventListener('change', function() {
                 fillHiddenName(citySelect, cityNameInput);
-                resetSelect(districtSelect, 'Pilih Kecamatan');
-                resetSelect(villageSelect, 'Pilih Kelurahan');
+                resetSelect(districtSelect, '{{ __('messages.owner.outlet.all_outlets.choose_district') }}');
+                resetSelect(villageSelect, '{{ __('messages.owner.outlet.all_outlets.choose_village') }}');
                 if (districtSelect) districtSelect.disabled = true;
                 if (villageSelect) villageSelect.disabled = true;
 
                 if (this.value) {
-                    loadOptions(`${API_BASE}/districts/${this.value}.json`, districtSelect, spnDistrict, 'Pilih Kecamatan');
+                    loadOptions(`${API_BASE}/districts/${this.value}.json`, districtSelect, spnDistrict, '{{ __('messages.owner.outlet.all_outlets.choose_district') }}');
                 }
             });
 
             // District Change Handler
             districtSelect?.addEventListener('change', function() {
                 fillHiddenName(districtSelect, districtNameInput);
-                resetSelect(villageSelect, 'Pilih Kelurahan');
+                resetSelect(villageSelect, '{{ __('messages.owner.outlet.all_outlets.choose_village') }}');
                 if (villageSelect) villageSelect.disabled = true;
 
                 if (this.value) {
-                    loadOptions(`${API_BASE}/villages/${this.value}.json`, villageSelect, spnVillage, 'Pilih Kelurahan');
+                    loadOptions(`${API_BASE}/villages/${this.value}.json`, villageSelect, spnVillage, '{{ __('messages.owner.outlet.all_outlets.choose_village') }}');
                 }
             });
 
@@ -1101,14 +1101,13 @@
 
             // ==== Form Submission ====
             const outletForm = document.getElementById('outletForm');
-            const saveBtn = document.getElementById('saveBtn');
-            const cancelBtn = document.getElementById('cancelBtn');
+            const saveBtn = document.querySelector('.btn-submit-modern');
+            const cancelBtn = document.querySelector('.btn-cancel-modern');
 
             // Cancel button
             if (cancelBtn) {
                 cancelBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-
+                    
                     let hasChanges = false;
                     const keyFields = ['name', 'username', 'email'];
                     
@@ -1120,11 +1119,11 @@
                     });
 
                     const confirmMsg = hasChanges ?
-                        'You have unsaved changes. Are you sure you want to cancel?' :
-                        'Are you sure you want to cancel?';
+                        '{{ __('messages.owner.outlet.all_outlets.js_unsaved_changes') }}' :
+                        '{{ __('messages.owner.outlet.all_outlets.are_you_sure_cancel') }}';
 
-                    if (confirm(confirmMsg)) {
-                        window.location.href = cancelBtn.dataset.redirectUrl || '/';
+                    if (hasChanges && !confirm(confirmMsg)) {
+                         e.preventDefault();
                     }
                 });
             }
@@ -1141,8 +1140,15 @@
                     // Show loading state
                     saveBtn.classList.add('loading');
                     saveBtn.disabled = true;
+                    // Check if btn-label exists, otherwise change text directly
                     const btnLabel = saveBtn.querySelector('.btn-label');
-                    if (btnLabel) btnLabel.textContent = 'Saving...';
+                    const originalText = saveBtn.innerText;
+                    
+                    if (btnLabel) {
+                        btnLabel.textContent = '{{ __('messages.owner.outlet.all_outlets.js_saving') }}';
+                    } else {
+                        saveBtn.innerText = '{{ __('messages.owner.outlet.all_outlets.js_saving') }}';
+                    }
 
                     // Validate required fields
                     const requiredFields = outletForm.querySelectorAll('[required]');
@@ -1160,7 +1166,7 @@
                     const passwordConfirm = document.getElementById('password_confirmation')?.value || '';
 
                     if (password !== passwordConfirm) {
-                        alert('Password dan konfirmasi password tidak sama');
+                        alert('{{ __('messages.owner.outlet.all_outlets.js_password_mismatch') }}');
                         isValid = false;
                     }
 
@@ -1173,7 +1179,11 @@
 
                         saveBtn.classList.remove('loading');
                         saveBtn.disabled = false;
-                        if (btnLabel) btnLabel.textContent = 'Save';
+                        if (btnLabel) {
+                            btnLabel.textContent = originalText;
+                        } else {
+                            saveBtn.innerText = '{{ __('messages.owner.outlet.all_outlets.create_outlet') }}';
+                        }
 
                         e.preventDefault();
                         return;
@@ -1186,7 +1196,11 @@
                         saveBtn.classList.remove('loading');
                         saveBtn.disabled = false;
                         const btnLabel = saveBtn.querySelector('.btn-label');
-                        if (btnLabel) btnLabel.textContent = 'Save';
+                        if (btnLabel) {
+                            btnLabel.textContent = '{{ __('messages.owner.outlet.all_outlets.create_outlet') }}';
+                        } else {
+                             saveBtn.innerText = '{{ __('messages.owner.outlet.all_outlets.create_outlet') }}';
+                        }
                     }
                 });
 
@@ -1217,7 +1231,7 @@
 
                     if (hasData) {
                         e.preventDefault();
-                        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                        e.returnValue = '{{ __('messages.owner.outlet.all_outlets.js_unsaved_changes_leave') }}';
                     }
                 });
             }

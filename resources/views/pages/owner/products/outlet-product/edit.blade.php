@@ -6,22 +6,25 @@
 @section('content')
   <div class="modern-container">
     <div class="container-modern">
-      <!-- Header Section -->
       <div class="page-header">
         <div class="header-content">
           <h1 class="page-title">{{ __('messages.owner.products.outlet_products.edit_outlet_product') }}</h1>
-          <p class="page-subtitle">Update product information, stock, and settings.</p>
+          <p class="page-subtitle">{{ __('messages.owner.products.outlet_products.update_subtitle') }}</p>
         </div>
+          <a href="{{ route('owner.user-owner.outlet-products.index') }}" class="back-button">
+              <span class="material-symbols-outlined">arrow_back</span>
+              {{ __('messages.owner.products.outlet_products.back') }}
+          </a>
       </div>
 
-      <!-- Error Messages -->
       @if ($errors->any())
         <div class="alert alert-danger alert-modern">
           <div class="alert-icon">
             <span class="material-symbols-outlined">error</span>
           </div>
           <div class="alert-content">
-            <strong>{{ __('messages.owner.products.outlet_products.alert_error') }}:</strong>
+            {{-- Note: 'alert_error' harus sudah ada di file lang sebelumnya, jika belum tambahkan 'Error' --}}
+            <strong>{{ __('messages.owner.products.outlet_products.error') }}:</strong>
             <ul class="mb-0 mt-2">
               @foreach ($errors->all() as $error)
                 <li>{{ $error }}</li>
@@ -42,16 +45,13 @@
         </div>
       @endif
 
-      <!-- Main Card -->
       <div class="modern-card">
         <form action="{{ route('owner.user-owner.outlet-products.update', $data->id) }}" method="POST" id="productForm">
           @csrf
           @method('PUT')
 
           <div class="card-body-modern">
-            <!-- Product Overview Section -->
             <div class="profile-section">
-              <!-- Product Image -->
               <div class="profile-picture-wrapper">
                 <div class="profile-picture-container">
                   @php
@@ -59,33 +59,30 @@
                     $imagePath = $hasImage ? asset($data->pictures[0]['path']) : '';
                   @endphp
 
-                  <!-- Placeholder -->
                   <div class="upload-placeholder" id="uploadPlaceholder" style="{{ $hasImage ? 'display:none;' : '' }}">
                     <span class="material-symbols-outlined">image</span>
-                    <span class="upload-text">No Image</span>
+                    <span class="upload-text">{{ __('messages.owner.products.outlet_products.no_image') }}</span>
                   </div>
 
-                  <!-- Image Preview -->
                   <img id="imagePreview" class="profile-preview {{ $hasImage ? 'active' : '' }}" src="{{ $imagePath }}"
                     alt="{{ $data->name }}">
                 </div>
               </div>
 
 
-              <!-- Product Info -->
               <div class="personal-info-fields">
                 <div class="section-header">
                   <div class="section-icon section-icon-red">
                     <span class="material-symbols-outlined">inventory_2</span>
                   </div>
-                  <h3 class="section-title">Product Information</h3>
+                  <h3 class="section-title">{{ __('messages.owner.products.outlet_products.product_information') }}</h3>
                 </div>
 
                 <div class="row g-4">
                   <div class="col-md-6">
                     <div class="form-group-modern">
                       <label class="form-label-modern">
-                        Product Name
+                         {{ __('messages.owner.products.outlet_products.product_name') }}
                       </label>
                       <input type="text" class="form-control-modern" value="{{ $data->name }}" readonly>
                     </div>
@@ -97,7 +94,7 @@
                         {{ __('messages.owner.products.outlet_products.category') }}
                       </label>
                       <input type="text" class="form-control-modern"
-                        value="{{ optional($data->category)->category_name ?? 'Uncategorized' }}" readonly>
+                        value="{{ optional($data->category)->category_name ?? __('messages.owner.products.outlet_products.uncategorized') }}" readonly>
                     </div>
                   </div>
 
@@ -114,7 +111,7 @@
                     <div class="col-md-12">
                       <div class="form-group-modern">
                         <label class="form-label-modern">
-                          Description
+                           {{ __('messages.owner.products.outlet_products.description') }}
                         </label>
                         <div class="alert alert-secondary py-2 px-3 mb-0">
                           <div style="font-size: 0.9rem;">{!! $data->description !!}</div>
@@ -126,10 +123,8 @@
               </div>
             </div>
 
-            <!-- Divider -->
             <div class="section-divider"></div>
 
-            <!-- Editable Fields Section -->
             <div class="account-section">
               <div class="section-header">
                 <div class="section-icon section-icon-red">
@@ -148,7 +143,6 @@
               @endphp
 
               <div class="row g-4">
-                <!-- Price -->
                 <div class="col-md-6">
                   <div class="form-group-modern">
                     <label class="form-label-modern">
@@ -168,7 +162,6 @@
                   </div>
                 </div>
 
-                <!-- Stock Type -->
                 <div class="col-md-6">
                   <div class="form-group-modern">
                     <label class="form-label-modern">
@@ -178,10 +171,10 @@
                     <div class="select-wrapper">
                       <select name="stock_type" id="product_stock_type" class="form-control-modern">
                         <option value="direct" {{ $prodStockType === 'direct' ? 'selected' : '' }}>
-                          Direct Stock Input
+                          {{ __('messages.owner.products.outlet_products.direct_stock_input') }}
                         </option>
                         <option value="linked" {{ $prodStockType === 'linked' ? 'selected' : '' }}>
-                          Linked to Raw Materials
+                          {{ __('messages.owner.products.outlet_products.linked_stock_input') }}
                         </option>
                       </select>
                       <span class="material-symbols-outlined select-arrow">expand_more</span>
@@ -189,7 +182,6 @@
                   </div>
                 </div>
 
-                <!-- Always Available Toggle -->
                 <div class="col-md-6" id="product_aa_group">
                   <div class="form-group-modern">
                     <label class="form-label-modern d-block">
@@ -202,7 +194,7 @@
                         <span class="slider-modern"></span>
                       </label>
                       <span class="status-label" id="aaLabel">
-                        {{ $prodUnlimited ? 'Enabled' : 'Disabled' }}
+                        {{ $prodUnlimited ? __('messages.owner.products.outlet_products.enabled') : __('messages.owner.products.outlet_products.disabled') }}
                       </span>
                     </div>
                     <small class="text-muted d-block mt-1">
@@ -211,7 +203,6 @@
                   </div>
                 </div>
 
-                <!-- Quantity Input -->
                 <div class="col-md-6" id="product_qty_group">
                   <div class="form-group-modern">
                     <label class="form-label-modern">
@@ -236,7 +227,6 @@
                   </div>
                 </div>
 
-                <!-- Linked Info -->
                 <div class="col-md-12" id="product_linked_group" style="display:none;">
                   <div class="form-group-modern">
                     <button type="button" class="btn-modern btn-sm-modern btn-primary-modern"
@@ -257,13 +247,12 @@
                         <span class="material-symbols-outlined">error</span>
                       </div>
                       <div class="alert-content">
-                        Error: Unit dasar 'pcs' tidak terdefinisi di Master Units.
+                        {{ __('messages.owner.products.outlet_products.unit_error') }}
                       </div>
                     </div>
                   </div>
                 @endif
 
-                <!-- Status Active/Inactive -->
                 <div class="col-md-6">
                   <div class="form-group-modern">
                     <label class="form-label-modern d-block">
@@ -283,7 +272,6 @@
                   </div>
                 </div>
 
-                <!-- Hot Product Toggle -->
                 <div class="col-md-6">
                   <div class="form-group-modern">
                     <label class="form-label-modern d-block">
@@ -303,7 +291,6 @@
                   </div>
                 </div>
 
-                <!-- Promotion -->
                 <div class="col-md-12">
                   <div class="form-group-modern">
                     <label class="form-label-modern">
@@ -336,7 +323,6 @@
               </div>
             </div>
 
-            <!-- Product Options Section -->
             @if(($data->parent_options ?? null) && count($data->parent_options))
               <div class="section-divider"></div>
               <div class="account-section">
@@ -417,7 +403,7 @@
                                             data-opt-id="{{ $opt->id }}" {{ $optUnlimited ? 'checked' : '' }}>
                                           <span class="slider-modern"></span>
                                         </label>
-                                        <span class="status-label small">Always Available</span>
+                                        <span class="status-label small">{{ __('messages.owner.products.outlet_products.always_available') }}</span>
                                       </div>
                                     </div>
 
@@ -442,7 +428,7 @@
                                       <button type="button" class="btn-modern btn-primary-modern btn-sm-modern btn-manage-recipe"
                                         data-opt-id="{{ $opt->id }}" data-opt-name="{{ $opt->name }}"
                                         data-partner-id="{{ $data->partner_id }}">
-                                        Recipe
+                                        {{ __('messages.owner.products.outlet_products.recipe_btn') }}
                                       </button>
                                     </div>
                                   </td>
@@ -462,7 +448,6 @@
             @endif
           </div>
 
-          <!-- Card Footer -->
           <div class="card-footer-modern">
             <a href="{{ route('owner.user-owner.outlet-products.index') }}" class="btn-cancel-modern">
               {{ __('messages.owner.products.outlet_products.cancel') }}
@@ -477,66 +462,60 @@
   </div>
 
 
-  {{-- Recipe Management Modal --}}
-  <div class="modal fade" id="recipeModal" tabindex="-1" role="dialog" aria-labelledby="recipeModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-      <div class="modal-content">
-        <div class="modal-header bg-choco text-white">
-          <h5 class="modal-title" id="recipeModalLabel">
-            <i class="fas fa-clipboard-list mr-2"></i>{{ __('messages.owner.products.outlet_products.manage_recipe') }}:
-            <span id="modal-item-name"></span>
-          </h5>
-          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="alert alert-info">
-            <i class="fas fa-info-circle mr-2"></i>
-            <strong>{{ __('messages.owner.products.outlet_products.how_it_works') }}:</strong>
-            {{ __('messages.owner.products.outlet_products.add_raw_materials_info') }}
+{{-- Recipe Management Modal --}}
+<div class="modal fade" id="recipeModal" tabindex="-1" role="dialog" aria-labelledby="recipeModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content modern-modal">
+      <div class="modal-header modern-modal-header">
+        <h5 class="modal-title">
+          <span class="material-symbols-outlined">restaurant</span>
+          {{ __('messages.owner.products.outlet_products.manage_recipe') }}:
+          <span id="modal-item-name"></span>
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body" style="padding: var(--spacing-lg);">
+        <div id="recipe-items-container">
           </div>
 
-          {{-- Recipe Items List --}}
-          <div id="recipe-items-container">
-            {{-- Will be populated via JavaScript --}}
-          </div>
+        <button type="button" class="btn-modern btn-sm-modern btn-secondary-modern" id="add-recipe-item" style="margin-top: var(--spacing-md);">
+          <span class="material-symbols-outlined">add_circle</span>
+          {{ __('messages.owner.products.outlet_products.add_ingredient') }}
+        </button>
+      </div>
 
-          <button type="button" class="btn btn-outline-primary btn-sm mt-3" id="add-recipe-item">
-            <i class="fas fa-plus mr-1"></i>{{ __('messages.owner.products.outlet_products.add_ingredient') }}
-          </button>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary"
-            data-dismiss="modal">{{ __('messages.owner.products.outlet_products.cancel') }}</button>
-          <button type="button" class="btn btn-primary" id="save-recipe">
-            <i class="fas fa-save mr-1"></i>{{ __('messages.owner.products.outlet_products.save_recipe') }}
-          </button>
-        </div>
+      <div class="modal-footer modern-modal-footer">
+        <button type="button" class="btn-cancel-modern" data-dismiss="modal">
+          {{ __('messages.owner.products.outlet_products.cancel') }}
+        </button>
+        <button type="button" class="btn-submit-modern" id="save-recipe">
+          {{ __('messages.owner.products.outlet_products.save_recipe') }}
+        </button>
       </div>
     </div>
   </div>
-
-
-
+</div>
 
 @endsection
 @push('scripts')
   {{-- 1. Definisikan object Translation Global DULUAN --}}
   <script>
-      window.outletProductLang = {
-        type_increase: "{{ __('messages.owner.products.outlet_products.type_increase') }}",
-        type_decrease: "{{ __('messages.owner.products.outlet_products.type_decrease') }}",
-        type_no_change: "{{ __('messages.owner.products.outlet_products.type_no_change') }}"
-      };
-    </script>
+    window.outletProductLang = {
+      type_increase: "{{ __('messages.owner.products.outlet_products.type_increase') }}",
+      type_decrease: "{{ __('messages.owner.products.outlet_products.type_decrease') }}",
+      type_no_change: "{{ __('messages.owner.products.outlet_products.type_no_change') }}"
+    };
+  </script>
 
-    {{-- 2. Panggil file JS Eksternal setelahnya --}}
-    <script src="{{ asset('js/owner/outlet-product/edit.js') }}"></script>
+  {{-- 2. Panggil file JS Eksternal setelahnya --}}
+  <script src="{{ asset('js/owner/outlet-product/edit.js') }}"></script>
 
-    {{-- 3. Script tambahan (formatting harga) tetap di sini --}}
-    <script>
+  {{-- 3. Script tambahan (formatting harga) tetap di sini --}}
+  <script>
     (function () {
       const priceInput = document.getElementById('outlet_price');
       if (!priceInput) return;
@@ -550,5 +529,5 @@
         this.value = new Intl.NumberFormat('id-ID').format(parseInt(raw, 10));
       });
     })();
-    </script>
+  </script>
 @endpush

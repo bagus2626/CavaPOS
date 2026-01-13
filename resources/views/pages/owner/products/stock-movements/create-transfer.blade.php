@@ -8,14 +8,14 @@
         <div class="container-modern">
             <!-- Header Section -->
             <div class="page-header">
-                {{-- <a href="{{ route('owner.user-owner.stocks.index') }}" class="back-button">
-                    <span class="material-symbols-outlined">arrow_back</span>
-                    {{ __('messages.owner.products.stocks.back_to_list') }}
-                </a> --}}
                 <div class="header-content">
                     <h1 class="page-title">{{ __('messages.owner.products.stocks.movements_transfer.page_title') }}</h1>
-                    <p class="page-subtitle">Transfer stock between locations seamlessly.</p>
+                    <p class="page-subtitle">{{ __('messages.owner.products.stocks.movements_transfer.subtitle') }}</p>
                 </div>
+               <a href="{{ route('owner.user-owner.stocks.index') }}" class="back-button">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    {{ __('messages.owner.products.stocks.back') }}
+                </a>
             </div>
 
             <!-- Error Messages -->

@@ -5,15 +5,17 @@
 @section('content')
     <div class="modern-container">
         <div class="container-modern">
-            <!-- Header Section -->
             <div class="page-header">
                 <div class="header-content">
                     <h1 class="page-title">{{ __('messages.owner.products.categories.edit_category') }}</h1>
-                    <p class="page-subtitle">Update category information and settings.</p>
+                    <p class="page-subtitle">{{ __('messages.owner.products.categories.edit_subtitle') }}</p>
                 </div>
+                <a href="{{ route('owner.user-owner.categories.index') }}" class="back-button">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    {{ __('messages.owner.products.categories.back') }}
+                </a>
             </div>
 
-            <!-- Error Messages -->
             @if ($errors->any())
                 <div class="alert alert-danger alert-modern">
                     <div class="alert-icon">
@@ -41,7 +43,6 @@
                 </div>
             @endif
 
-            <!-- Main Card -->
             <div class="modern-card">
                 <form method="POST" action="{{ route('owner.user-owner.categories.update', $category) }}"
                     enctype="multipart/form-data" id="categoryForm">
@@ -49,21 +50,18 @@
                     @method('PUT')
 
                     <div class="card-body-modern">
-                        <!-- Profile Section -->
                         <div class="profile-section">
-                            <!-- Category Picture Upload -->
                             <div class="profile-picture-wrapper">
                                 <div class="profile-picture-container" id="profilePictureContainer">
                                     <div class="upload-placeholder" id="uploadPlaceholder"
                                         style="{{ ($category->images && isset($category->images['path'])) ? 'display: none;' : '' }}">
                                         <span class="material-symbols-outlined">add_a_photo</span>
-                                        <span class="upload-text">Upload</span>
+                                        <span class="upload-text">{{ __('messages.owner.products.categories.upload_text') }}</span>
                                     </div>
                                     <img id="imagePreview"
                                         class="profile-preview {{ ($category->images && isset($category->images['path'])) ? 'active' : '' }}"
                                         src="{{ ($category->images && isset($category->images['path'])) ? asset($category->images['path']) : '' }}"
                                         alt="Category Preview">
-                                                                            <!-- Remove Image Button -->
                                     <button type="button" id="removeImageBtn" class="btn-remove btn-remove-top" 
                                         style="{{ $category->images ? 'display: block;' : 'display: none;' }}">
                                         <span class="material-symbols-outlined">close</span>
@@ -71,22 +69,20 @@
                                 </div>
                                 <input type="file" name="images" id="images" accept="image/*" style="display: none;">
                                 <input type="hidden" name="keep_existing_image" id="keep_existing_image" value="1">
-                                <small class="text-muted d-block text-center mt-2">JPG, PNG, WEBP. Max 2 MB</small>
+                                <small class="text-muted d-block text-center mt-2">{{ __('messages.owner.products.categories.image_hint') }}</small>
                                 @error('images')
                                     <div class="text-danger text-center mt-1 small">{{ $message }}</div>
                                 @enderror
                             </div>
 
-                            <!-- Category Information Fields -->
                             <div class="personal-info-fields">
                                 <div class="section-header">
                                     <div class="section-icon section-icon-red">
                                         <span class="material-symbols-outlined">category</span>
                                     </div>
-                                    <h3 class="section-title">Category Information</h3>
+                                    <h3 class="section-title">{{ __('messages.owner.products.categories.category_info_title') }}</h3>
                                 </div>
                                 <div class="row g-4">
-                                    <!-- Category Name -->
                                     <div class="col-md-12">
                                         <div class="form-group-modern">
                                             <label class="form-label-modern">
@@ -96,14 +92,13 @@
                                             <input type="text" name="category_name" id="category_name"
                                                 class="form-control-modern @error('category_name') is-invalid @enderror"
                                                 value="{{ old('category_name', $category->category_name) }}"
-                                                placeholder="e.g. Beverages" required>
+                                                placeholder="{{ __('messages.owner.products.categories.placeholder_name') }}" required>
                                             @error('category_name')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
                                     </div>
 
-                                    <!-- Description -->
                                     <div class="col-md-12">
                                         <div class="form-group-modern">
                                             <label class="form-label-modern">
@@ -112,7 +107,7 @@
                                             <textarea name="description" id="description"
                                                 class="form-control-modern @error('description') is-invalid @enderror"
                                                 rows="3"
-                                                placeholder="Enter category description...">{{ old('description', $category->description) }}</textarea>
+                                                placeholder="{{ __('messages.owner.products.categories.placeholder_description') }}">{{ old('description', $category->description) }}</textarea>
                                             @error('description')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -123,7 +118,6 @@
                         </div>
                     </div>
 
-                    <!-- Card Footer -->
                     <div class="card-footer-modern">
                         <a href="{{ route('owner.user-owner.categories.index') }}" class="btn-cancel-modern">
                             {{ __('messages.owner.products.categories.cancel') }}
@@ -140,7 +134,7 @@
 @endsection
 
 @push('scripts')
-    script src="{{ asset('js/image-cropper.js') }}"></script>
+    <script src="{{ asset('js/image-cropper.js') }}"></script>
     <script>
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -182,7 +176,7 @@
                     e.preventDefault();
 
                     if (mainPreview && mainPreview.classList.contains('active')) {
-                        if (confirm('Remove this image?')) {
+                        if (confirm('{{ __('messages.owner.products.categories.js_confirm_remove_image') }}')) {
                             mainPreview.src = '';
                             mainPreview.classList.remove('active');
 
@@ -210,7 +204,7 @@
                 form.addEventListener('submit', function (e) {
                     if (categoryName.value.trim() === '') {
                         e.preventDefault();
-                        alert('Category name is required.');
+                        alert('{{ __('messages.owner.products.categories.js_name_required') }}');
                         categoryName.focus();
                         return false;
                     }

@@ -25,7 +25,10 @@
     $startLabel = optional($promo->start_date)->translatedFormat('d F Y H:i');
     $endLabel   = optional($promo->end_date)->translatedFormat('d F Y H:i');
 
-    $typeLabel = $promo->promotion_type === 'percentage' ? 'Percentage' : 'Amount';
+    $typeLabel = $promo->promotion_type === 'percentage' 
+        ? __('messages.owner.products.promotions.percentage') 
+        : __('messages.owner.products.promotions.reduced_fare');
+
     $valueLabel = $promo->promotion_type === 'percentage'
         ? ($promo->promotion_value . '%')
         : ('Rp ' . number_format((float) $promo->promotion_value, 0, ',', '.'));
@@ -38,8 +41,12 @@
         <div class="page-header">
             <div class="header-content">
                 <h1 class="page-title">{{ __('messages.owner.products.promotions.promotion_detail') }}</h1>
-                <p class="page-subtitle">View complete information about this promotion.</p>
+                <p class="page-subtitle">{{ __('messages.owner.products.promotions.view_complete_promo_info') }}</p>
             </div>
+            <a href="{{ route('owner.user-owner.promotions.index') }}" class="back-button">
+                <span class="material-symbols-outlined">arrow_back</span>
+                {{ __('messages.owner.products.promotions.back') }}
+            </a>
         </div>
 
         {{-- Success Message --}}
@@ -80,7 +87,7 @@
                 <div class="detail-hero-info">
                     <h3 class="detail-hero-name">{{ $promo->promotion_name }}</h3>
                     <p class="detail-hero-subtitle">
-                        {{ $promo->promotion_code ?? 'No code' }}
+                        {{ $promo->promotion_code ?? __('messages.owner.products.promotions.no_code') }}
                     </p>
                     <div class="detail-hero-badges">
 
@@ -107,7 +114,7 @@
                     <div class="section-icon section-icon-red">
                         <span class="material-symbols-outlined">campaign</span>
                     </div>
-                    <h3 class="section-title">Promotion Information</h3>
+                    <h3 class="section-title">{{ __('messages.owner.products.promotions.promotion_information') }}</h3>
                 </div>
                 
                 <div class="detail-info-grid">
@@ -196,7 +203,7 @@
                     <div class="section-icon section-icon-red">
                         <span class="material-symbols-outlined">schedule</span>
                     </div>
-                    <h3 class="section-title">Validity Period</h3>
+                    <h3 class="section-title">{{ __('messages.owner.products.promotions.validity_period') }}</h3>
                 </div>
                 
                 <div class="detail-info-grid">
@@ -204,7 +211,7 @@
                         {{-- Start Date --}}
                         <div class="detail-info-item">
                             <div class="detail-info-label">
-                                {{ __('messages.owner.products.promotions.start_date') ?? 'Start Date' }}
+                                {{ __('messages.owner.products.promotions.start_date') }}
                             </div>
                             <div class="detail-info-value">
                                 @if((int)($promo->uses_expiry ?? 0) === 1 && $promo->start_date)
@@ -220,7 +227,7 @@
                         {{-- End Date --}}
                         <div class="detail-info-item">
                             <div class="detail-info-label">
-                                {{ __('messages.owner.products.promotions.end_date') ?? 'End Date' }}
+                                {{ __('messages.owner.products.promotions.end_date') }}
                             </div>
                             <div class="detail-info-value">
                                 @if((int)($promo->uses_expiry ?? 0) === 1 && $promo->end_date)
