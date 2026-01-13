@@ -6,19 +6,17 @@
 @section('content')
     <div class="modern-container">
             <div class="container-modern">
-                <!-- Header Section -->
                 <div class="page-header">
-                    {{-- <a href="{{ route('owner.user-owner.outlets.index') }}" class="back-button">
-                        <span class="material-symbols-outlined">arrow_back</span>
-                        Back to Outlets
-                    </a> --}}
                     <div class="header-content">
-                        <h1 class="page-title">Edit Outlet</h1>
-                        <p class="page-subtitle">Update outlet information and settings.</p>
+                        <h1 class="page-title">{{ __('messages.owner.outlet.all_outlets.edit_outlet') }}</h1>
+                        <p class="page-subtitle">{{ __('messages.owner.outlet.all_outlets.edit_subtitle') }}</p>
                     </div>
+                <a href="{{ route('owner.user-owner.outlets.index') }}" class="back-button">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    {{ __('messages.owner.outlet.all_outlets.back') }}
+                </a>
                 </div>
 
-                <!-- Error Messages -->
                 @if ($errors->any())
                     <div class="alert alert-danger alert-modern">
                         <div class="alert-icon">
@@ -57,7 +55,6 @@
                     </div>
                 @endif
 
-                <!-- Main Card -->
                 <div class="modern-card">
                     <input type="hidden" id="usernameCheckUrl" value="{{ route('owner.user-owner.outlets.check-username') }}">
 
@@ -67,7 +64,6 @@
                         @method('PUT')
 
                         <div class="card-body-modern">
-                            <!-- SECTION 1: Basic Information -->
                             <div class="section-header">
                                 <div class="section-icon section-icon-red">
                                     <span class="material-symbols-outlined">info</span>
@@ -76,7 +72,6 @@
                             </div>
 
                             <div class="row g-4 mb-5">
-                                <!-- Outlet Name -->
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern">
@@ -117,7 +112,7 @@
 
                                             <div id="usernameLoading" class="position-absolute d-none" style="right: 15px; top: 50%; transform: translateY(-50%); z-index: 5;">
                                                 <div class="spinner-border spinner-border-sm text-secondary" role="status">
-                                                    <span class="sr-only">Loading...</span>
+                                                    <span class="sr-only">{{ __('messages.owner.outlet.all_outlets.loading') }}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -139,7 +134,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Email -->
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern">
@@ -156,10 +150,8 @@
                                 </div>
                             </div>
 
-                            <!-- Section Divider -->
                             <div class="section-divider"></div>
 
-                            <!-- SECTION 2: Address -->
                             <div class="section-header">
                                 <div class="section-icon section-icon-red">
                                     <span class="material-symbols-outlined">location_on</span>
@@ -168,7 +160,6 @@
                             </div>
 
                             <div class="row g-4 mb-5">
-                                <!-- Province -->
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.province') }}</label>
@@ -184,7 +175,6 @@
                                     </div>
                                 </div>
 
-                                <!-- City -->
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.city') }}</label>
@@ -200,7 +190,6 @@
                                     </div>
                                 </div>
 
-                                <!-- District -->
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.district') }}</label>
@@ -216,7 +205,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Village -->
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.village') }}</label>
@@ -232,7 +220,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Detail Address -->
                                 <div class="col-12">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.detail_address') }}</label>
@@ -242,21 +229,18 @@
                                     </div>
                                 </div>
 
-                                <!-- Google Maps URL -->
                                 <div class="col-12">
                                     <div class="form-group-modern">
-                                        <label class="form-label-modern">Google Maps Embed URL</label>
+                                        <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.google_maps_embed_url') }}</label>
                                         <input type="url" id="gmaps_url" name="gmaps_url" class="form-control-modern"
                                             value="{{ old('gmaps_url', $outlet->profileOutlet->gmaps_url ?? '') }}"
-                                            placeholder="https://www.google.com/maps/embed?pb=...">
+                                            placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_maps') }}">
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Section Divider -->
                             <div class="section-divider"></div>
 
-                            <!-- SECTION 3: Media/Branding -->
                             <div class="section-header">
                                 <div class="section-icon section-icon-red">
                                     <span class="material-symbols-outlined">image</span>
@@ -281,15 +265,14 @@
                                                 id="logoPlaceholder"
                                                 style="{{ $outlet->logo ? 'display:none;' : '' }}">
                                                 <span class="material-symbols-outlined">add_business</span>
-                                                <span class="upload-text">Upload Logo</span>
+                                                <span class="upload-text">{{ __('messages.owner.outlet.all_outlets.upload_logo_text') }}</span>
                                             </div>
 
                                             <img id="imagePreview2"
                                                 class="profile-preview {{ $outlet->logo ? 'active' : '' }}"
                                                 src="{{ $outlet->logo ? asset('storage/' . $outlet->logo) : '' }}"
                                                 alt="Logo Preview">
-                                                                                    <!-- Remove Image Button -->
-                                            <button type="button" id="removeImageBtn" class="btn-remove btn-remove-top" 
+                                                                                    <button type="button" id="removeImageBtn" class="btn-remove btn-remove-top" 
                                                 style="{{ $outlet->logo ? 'display: block;' : 'display: none;' }}">
                                                 <span class="material-symbols-outlined">close</span>
                                             </button>
@@ -319,15 +302,14 @@
                                                 id="backgroundPlaceholder"
                                                 style="{{ $outlet->background_picture ? 'display:none;' : '' }}">
                                                 <span class="material-symbols-outlined">add_photo_alternate</span>
-                                                <span class="upload-text">Upload Background</span>
+                                                <span class="upload-text">{{ __('messages.owner.outlet.all_outlets.upload_background_text') }}</span>
                                             </div>
 
                                             <img id="imagePreview"
                                                 class="profile-preview {{ $outlet->background_picture ? 'active' : '' }}"
                                                 src="{{ $outlet->background_picture ? asset('storage/' . $outlet->background_picture) : '' }}"
                                                 alt="Background Preview">
-                                                 <!-- Remove Image Button -->
-                                                <button type="button" id="removeImageBtn" class="btn-remove btn-remove-top" 
+                                                 <button type="button" id="removeImageBtn" class="btn-remove btn-remove-top" 
                                                     style="{{ $outlet->background_picture ? 'display: block;' : 'display: none;' }}">
                                                     <span class="material-symbols-outlined">close</span>
                                                 </button>
@@ -344,10 +326,8 @@
                             </div>
 
 
-                            <!-- Section Divider -->
                             <div class="section-divider"></div>
 
-                            <!-- SECTION 4: Contact & Social Media -->
                             <div class="section-header">
                                 <div class="section-icon section-icon-red">
                                     <span class="material-symbols-outlined">phone</span>
@@ -356,7 +336,6 @@
                             </div>
 
                             <div class="row g-4 mb-5">
-                                <!-- Contact Person -->
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.contact_name') }}</label>
@@ -366,93 +345,84 @@
                                     </div>
                                 </div>
 
-                                <!-- Phone Number -->
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.phone_number') }}</label>
                                         <input type="tel" id="contact_phone" name="contact_phone" class="form-control-modern"
                                             value="{{ old('contact_phone', $outlet->profileOutlet->contact_phone ?? '') }}"
-                                            placeholder="08123456789">
+                                            placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_phone') }}">
                                     </div>
                                 </div>
 
-                                <!-- Instagram -->
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
-                                        <label class="form-label-modern">Instagram</label>
+                                        <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.instagram') }}</label>
                                         <div class="input-wrapper">
                                             <span class="input-icon">
                                                 <span class="material-symbols-outlined">alternate_email</span>
                                             </span>
                                             <input type="text" name="instagram" class="form-control-modern with-icon"
-                                                value="{{ old('instagram') }}" placeholder="username">
+                                                value="{{ old('instagram') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_social') }}">
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Twitter / X -->
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
-                                        <label class="form-label-modern">Twitter / X</label>
+                                        <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.twitter') }}</label>
                                         <div class="input-wrapper">
                                             <span class="input-icon">
                                                 <span class="material-symbols-outlined">alternate_email</span>
                                             </span>
                                             <input type="text" name="twitter" class="form-control-modern with-icon"
-                                                value="{{ old('twitter') }}" placeholder="username">
+                                                value="{{ old('twitter') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_social') }}">
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- WhatsApp -->
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
-                                        <label class="form-label-modern">WhatsApp</label>
+                                        <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.whatsapp') }}</label>
                                         <div class="input-wrapper">
                                             <span class="input-icon" style="left: 1rem;">+62</span>
                                             <input type="tel" name="whatsapp" class="form-control-modern" style="padding-left: 3.5rem;"
-                                                value="{{ old('whatsapp') }}" placeholder="+62 8123456789">
+                                                value="{{ old('whatsapp') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_phone') }}">
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Facebook -->
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
-                                        <label class="form-label-modern">Facebook</label>
+                                        <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.facebook') }}</label>
                                         <input type="text" name="facebook" class="form-control-modern"
                                             value="{{ old('facebook') }}" placeholder="facebook.com/yourpage">
                                     </div>
                                 </div>
 
-                                <!-- TikTok -->
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
-                                        <label class="form-label-modern">TikTok</label>
+                                        <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.tiktok') }}</label>
                                         <div class="input-wrapper">
                                             <span class="input-icon">
                                                 <span class="material-symbols-outlined">alternate_email</span>
                                             </span>
                                             <input type="text" name="tiktok" class="form-control-modern with-icon"
-                                                value="{{ old('tiktok') }}" placeholder="username">
+                                                value="{{ old('tiktok') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_social') }}">
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Website -->
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
-                                        <label class="form-label-modern">Website</label>
+                                        <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.website') }}</label>
                                         <input type="url" name="website" class="form-control-modern"
-                                            value="{{ old('website') }}" placeholder="https://example.com">
+                                            value="{{ old('website') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_url') }}">
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Section Divider -->
                             <div class="section-divider"></div>
 
-                            <!-- SECTION 5: Outlet Status & Settings -->
                             <div class="section-header">
                                 <div class="section-icon section-icon-red">
                                     <span class="material-symbols-outlined">settings</span>
@@ -461,7 +431,6 @@
                             </div>
 
                             <div class="row g-4 mb-5">
-                                <!-- Outlet Active Status -->
                                 <div class="col-12">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern d-block">{{ __('messages.owner.outlet.all_outlets.activate_outlet') }}</label>
@@ -472,13 +441,12 @@
                                                 <span class="slider-modern"></span>
                                             </label>
                                             <span class="status-label">
-                                                {{ old('is_active', (int) $outlet->is_active) ? 'Active' : 'Inactive' }}
+                                                {{ old('is_active', (int) $outlet->is_active) ? __('messages.owner.outlet.all_outlets.active') : __('messages.owner.outlet.all_outlets.inactive') }}
                                             </span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- QR Mode -->
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.activate_qr') }}</label>
@@ -505,13 +473,12 @@
 
                                 <div class="col-md-6"></div>
 
-                                <!-- Password -->
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.password_optional') }}</label>
                                         <div class="password-wrapper">
                                             <input type="password" name="password" id="password" class="form-control-modern"
-                                                minlength="8" placeholder="Min. 8 characters">
+                                                minlength="8" placeholder="{{ __('messages.owner.outlet.all_outlets.min_character') }}">
                                             <button type="button" class="password-toggle" id="togglePassword">
                                                 <span class="material-symbols-outlined">visibility</span>
                                             </button>
@@ -519,13 +486,12 @@
                                     </div>
                                 </div>
 
-                                <!-- Password Confirmation -->
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.password_confirmation') }}</label>
                                         <div class="password-wrapper">
                                             <input type="password" name="password_confirmation" id="password_confirmation"
-                                                class="form-control-modern" minlength="8" placeholder="Re-enter password">
+                                                class="form-control-modern" minlength="8" placeholder="{{ __('messages.owner.outlet.all_outlets.password_optional_placeholder') }}">
                                             <button type="button" class="password-toggle" id="togglePasswordConfirm">
                                                 <span class="material-symbols-outlined">visibility_off</span>
                                             </button>
@@ -533,7 +499,6 @@
                                     </div>
                                 </div>
 
-                                <!-- WiFi Information Toggle -->
                                 <div class="col-12">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern d-block">{{ __('messages.owner.outlet.all_outlets.wifi_information') }}</label>
@@ -544,31 +509,30 @@
                                                 <span class="slider-modern"></span>
                                             </label>
                                             <span class="status-label">
-                                                {{ old('is_wifi_shown', $outlet->is_wifi_shown ?? 0) ? 'Show WiFi' : 'Hide WiFi' }}
+                                                {{ old('is_wifi_shown', $outlet->is_wifi_shown ?? 0) ? __('messages.owner.outlet.all_outlets.wifi_show') : __('messages.owner.outlet.all_outlets.wifi_hide') }}
                                             </span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- WiFi Fields (conditional) -->
                                 <div id="wifiFormFields" class="col-12" style="display: {{ old('is_wifi_shown', $outlet->is_wifi_shown ?? 0) ? 'block' : 'none' }};">
                                     <div class="row g-4">
-                                        <!-- WiFi Name -->
                                         <div class="col-md-6">
                                             <div class="form-group-modern">
-                                                <label class="form-label-modern">WiFi Name (SSID)</label>
+                                                <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.wifi_name_ssid') }}</label>
                                                 <input type="text" id="user_wifi" name="user_wifi" class="form-control-modern"
-                                                    value="{{ old('user_wifi', $outlet->user_wifi ?? '') }}">
+                                                    value="{{ old('user_wifi', $outlet->user_wifi ?? '') }}"
+                                                    placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_wifi_ssid') }}">
                                             </div>
                                         </div>
 
-                                        <!-- WiFi Password -->
                                         <div class="col-md-6">
                                             <div class="form-group-modern">
-                                                <label class="form-label-modern">WiFi Password</label>
+                                                <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.wifi_password_field') }}</label>
                                                 <div class="password-wrapper">
                                                     <input type="password" id="pass_wifi" name="pass_wifi" class="form-control-modern"
-                                                        value="{{ old('pass_wifi', $outlet->pass_wifi ?? '') }}">
+                                                        value="{{ old('pass_wifi', $outlet->pass_wifi ?? '') }}"
+                                                        placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_wifi_pass') }}">
                                                     <button type="button" class="password-toggle" id="toggleWifiPassword">
                                                         <span class="material-symbols-outlined">visibility</span>
                                                     </button>
@@ -580,7 +544,6 @@
                             </div>
                         </div>
 
-                        <!-- Card Footer -->
                         <div class="card-footer-modern">
                             <a href="{{ route('owner.user-owner.outlets.index') }}" class="btn-cancel-modern">
                                 {{ __('messages.owner.outlet.all_outlets.cancel') }}
@@ -599,10 +562,10 @@
                         <div class="modal-header modern-modal-header">
                             <h5 class="modal-title">
                                 <span class="material-symbols-outlined">crop</span>
-                                Crop Logo
+                                {{ __('messages.owner.outlet.all_outlets.crop_logo_title') }}
                             </h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
+                                <span aria-hidden="true">×</span>
                             </button>
                         </div>
 
@@ -612,7 +575,7 @@
                                     <span class="material-symbols-outlined">info</span>
                                 </div>
                                 <div class="alert-content">
-                                    <small>Drag to move, scroll to zoom, or use the corners to resize the crop area.</small>
+                                    <small>{{ __('messages.owner.outlet.all_outlets.drag_to_move_scroll_zoom') }}</small>
                                 </div>
                             </div>
 
@@ -624,11 +587,11 @@
                         <div class="modal-footer modern-modal-footer">
                             <button type="button" class="btn-cancel-modern" data-dismiss="modal">
                                 <span class="material-symbols-outlined">close</span>
-                                Cancel
+                                {{ __('messages.owner.outlet.all_outlets.cancel') }}
                             </button>
                             <button type="button" id="cropLogoBtn" class="btn-submit-modern">
                                 <span class="material-symbols-outlined">check</span>
-                                Crop & Save
+                                {{ __('messages.owner.outlet.all_outlets.crop_save') }}
                             </button>
                         </div>
                     </div>
@@ -641,10 +604,10 @@
                         <div class="modal-header modern-modal-header">
                             <h5 class="modal-title">
                                 <span class="material-symbols-outlined">crop</span>
-                                Crop Background Picture
+                                {{ __('messages.owner.outlet.all_outlets.crop_background_picture') }}
                             </h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
+                                <span aria-hidden="true">×</span>
                             </button>
                         </div>
 
@@ -654,7 +617,7 @@
                                     <span class="material-symbols-outlined">info</span>
                                 </div>
                                 <div class="alert-content">
-                                    <small>Drag to move, scroll to zoom, or use the corners to resize the crop area.</small>
+                                    <small>{{ __('messages.owner.outlet.all_outlets.drag_to_move_scroll_zoom') }}</small>
                                 </div>
                             </div>
 
@@ -666,11 +629,11 @@
                         <div class="modal-footer modern-modal-footer">
                             <button type="button" class="btn-cancel-modern" data-dismiss="modal">
                                 <span class="material-symbols-outlined">close</span>
-                                Cancel
+                                {{ __('messages.owner.outlet.all_outlets.cancel') }}
                             </button>
                             <button type="button" id="cropBackgroundBtn" class="btn-submit-modern">
                                 <span class="material-symbols-outlined">check</span>
-                                Crop & Save
+                                {{ __('messages.owner.outlet.all_outlets.crop_save') }}
                             </button>
                         </div>
                     </div>
@@ -751,11 +714,11 @@
                 if (!usernameStatus) return;
 
                 if (type === 'success') {
-                    usernameStatus.innerHTML = `<span class="badge bg-success">Available</span> <span class="text-success ms-2">${message}</span>`;
+                    usernameStatus.innerHTML = `<span class="badge bg-success">{{ __('messages.owner.outlet.all_outlets.badge_available') }}</span> <span class="text-success ms-2">${message}</span>`;
                     usernameInput.classList.remove('is-invalid');
                     usernameInput.classList.add('is-valid');
                 } else if (type === 'error') {
-                    usernameStatus.innerHTML = `<span class="badge bg-danger">Taken/Invalid</span> <span class="text-danger ms-2">${message}</span>`;
+                    usernameStatus.innerHTML = `<span class="badge bg-danger">{{ __('messages.owner.outlet.all_outlets.badge_taken') }}</span> <span class="text-danger ms-2">${message}</span>`;
                     usernameInput.classList.remove('is-valid');
                     usernameInput.classList.add('is-invalid');
                 } else {
@@ -776,7 +739,7 @@
 
                 if (val.length < 3 || val.length > 30 || !/^[A-Za-z0-9._\-]+$/.test(val)) {
                     setSpinner(false);
-                    updateStatus('error', 'Format: 3-30 chars (letters, numbers, ._-)');
+                    updateStatus('error', '{{ __('messages.owner.outlet.all_outlets.js_username_format') }}');
                     return;
                 }
 
@@ -794,9 +757,9 @@
                     const data = await response.json();
 
                     if (data.available) {
-                        updateStatus('success', 'Username available');
+                        updateStatus('success', '{{ __('messages.owner.outlet.all_outlets.username_available') }}');
                     } else {
-                        updateStatus('error', 'Username already taken');
+                        updateStatus('error', '{{ __('messages.owner.outlet.all_outlets.username_used') }}');
                     }
                 } catch (error) {
                     console.error('Check error:', error);
@@ -892,7 +855,7 @@
         function loadOptions(url, selectEl, defaultMsg, selectedId = null) {
             if (!selectEl) return Promise.resolve();
             
-            setLoading(selectEl, true, 'Loading...');
+            setLoading(selectEl, true, '{{ __('messages.owner.outlet.all_outlets.loading') }}');
             return fetch(url)
                 .then(r => r.json())
                 .then(list => {
@@ -905,65 +868,65 @@
                         selectEl.appendChild(opt);
                     });
                 })
-                .catch(() => resetSelect(selectEl, 'Failed to load'))
+                .catch(() => resetSelect(selectEl, '{{ __('messages.owner.outlet.all_outlets.failed_to_load_data') }}'))
                 .finally(() => setLoading(selectEl, false));
         }
 
         // Initial Load - Chain untuk pre-populate data yang sudah ada
         if (provinceSelect) {
-            loadOptions(`${API_BASE}/provinces.json`, provinceSelect, 'Pilih Provinsi', selectedProvince)
+            loadOptions(`${API_BASE}/provinces.json`, provinceSelect, '{{ __('messages.owner.outlet.all_outlets.choose_province') }}', selectedProvince)
                 .then(() => {
                     if (selectedProvince && citySelect) {
-                        return loadOptions(`${API_BASE}/regencies/${selectedProvince}.json`, citySelect, 'Pilih Kota', selectedCity);
+                        return loadOptions(`${API_BASE}/regencies/${selectedProvince}.json`, citySelect, '{{ __('messages.owner.outlet.all_outlets.choose_city') }}', selectedCity);
                     }
                 })
                 .then(() => {
                     if (selectedCity && districtSelect) {
-                        return loadOptions(`${API_BASE}/districts/${selectedCity}.json`, districtSelect, 'Pilih Kecamatan', selectedDistrict);
+                        return loadOptions(`${API_BASE}/districts/${selectedCity}.json`, districtSelect, '{{ __('messages.owner.outlet.all_outlets.choose_district') }}', selectedDistrict);
                     }
                 })
                 .then(() => {
                     if (selectedDistrict && villageSelect) {
-                        return loadOptions(`${API_BASE}/villages/${selectedDistrict}.json`, villageSelect, 'Pilih Kelurahan', selectedVillage);
+                        return loadOptions(`${API_BASE}/villages/${selectedDistrict}.json`, villageSelect, '{{ __('messages.owner.outlet.all_outlets.choose_village') }}', selectedVillage);
                     }
                 });
 
             // Province Change Handler
             provinceSelect.addEventListener('change', function() {
                 fillHiddenName(provinceSelect, provinceNameInput);
-                resetSelect(citySelect, 'Pilih Kota');
-                resetSelect(districtSelect, 'Pilih Kecamatan');
-                resetSelect(villageSelect, 'Pilih Kelurahan');
+                resetSelect(citySelect, '{{ __('messages.owner.outlet.all_outlets.choose_city') }}');
+                resetSelect(districtSelect, '{{ __('messages.owner.outlet.all_outlets.choose_district') }}');
+                resetSelect(villageSelect, '{{ __('messages.owner.outlet.all_outlets.choose_village') }}');
                 if (citySelect) citySelect.disabled = true;
                 if (districtSelect) districtSelect.disabled = true;
                 if (villageSelect) villageSelect.disabled = true;
 
                 if (this.value) {
-                    loadOptions(`${API_BASE}/regencies/${this.value}.json`, citySelect, 'Pilih Kota');
+                    loadOptions(`${API_BASE}/regencies/${this.value}.json`, citySelect, '{{ __('messages.owner.outlet.all_outlets.choose_city') }}');
                 }
             });
 
             // City Change Handler
             citySelect?.addEventListener('change', function() {
                 fillHiddenName(citySelect, cityNameInput);
-                resetSelect(districtSelect, 'Pilih Kecamatan');
-                resetSelect(villageSelect, 'Pilih Kelurahan');
+                resetSelect(districtSelect, '{{ __('messages.owner.outlet.all_outlets.choose_district') }}');
+                resetSelect(villageSelect, '{{ __('messages.owner.outlet.all_outlets.choose_village') }}');
                 if (districtSelect) districtSelect.disabled = true;
                 if (villageSelect) villageSelect.disabled = true;
 
                 if (this.value) {
-                    loadOptions(`${API_BASE}/districts/${this.value}.json`, districtSelect, 'Pilih Kecamatan');
+                    loadOptions(`${API_BASE}/districts/${this.value}.json`, districtSelect, '{{ __('messages.owner.outlet.all_outlets.choose_district') }}');
                 }
             });
 
             // District Change Handler
             districtSelect?.addEventListener('change', function() {
                 fillHiddenName(districtSelect, districtNameInput);
-                resetSelect(villageSelect, 'Pilih Kelurahan');
+                resetSelect(villageSelect, '{{ __('messages.owner.outlet.all_outlets.choose_village') }}');
                 if (villageSelect) villageSelect.disabled = true;
 
                 if (this.value) {
-                    loadOptions(`${API_BASE}/villages/${this.value}.json`, villageSelect, 'Pilih Kelurahan');
+                    loadOptions(`${API_BASE}/villages/${this.value}.json`, villageSelect, '{{ __('messages.owner.outlet.all_outlets.choose_village') }}');
                 }
             });
 
@@ -995,8 +958,8 @@
                 }
 
                 const confirmMsg = hasChanges ?
-                    'You have unsaved changes. Are you sure you want to cancel?' :
-                    'Are you sure you want to cancel?';
+                    '{{ __('messages.owner.outlet.all_outlets.js_unsaved_changes') }}' :
+                    '{{ __('messages.owner.outlet.all_outlets.are_you_sure_cancel') }}';
 
                 if (confirm(confirmMsg)) {
                     window.location.href = cancelBtn.dataset.redirectUrl || '/';
@@ -1016,9 +979,9 @@
                 saveBtn.disabled = true;
                 const btnLabel = saveBtn.querySelector('.btn-label');
                 if (btnLabel) {
-                    btnLabel.textContent = 'Saving...';
+                    btnLabel.textContent = '{{ __('messages.owner.outlet.all_outlets.js_saving') }}';
                 } else {
-                    saveBtn.innerHTML = '<span class="material-symbols-outlined spinner-border spinner-border-sm"></span> Saving...';
+                    saveBtn.innerHTML = '<span class="material-symbols-outlined spinner-border spinner-border-sm"></span> {{ __('messages.owner.outlet.all_outlets.js_saving') }}';
                 }
 
                 // Validate required fields
@@ -1037,7 +1000,7 @@
                 const passwordConfirm = document.getElementById('password_confirmation')?.value || '';
 
                 if (password && password !== passwordConfirm) {
-                    alert('Password dan konfirmasi password tidak sama');
+                    alert('{{ __('messages.owner.outlet.all_outlets.js_password_mismatch') }}');
                     isValid = false;
                 }
 
@@ -1054,9 +1017,9 @@
                     saveBtn.classList.remove('loading');
                     saveBtn.disabled = false;
                     if (btnLabel) {
-                        btnLabel.textContent = 'Save Changes';
+                        btnLabel.textContent = '{{ __('messages.owner.outlet.all_outlets.save_changes') }}';
                     } else {
-                        saveBtn.innerHTML = '<span class="material-symbols-outlined">save</span> Save Changes';
+                        saveBtn.innerHTML = '<span class="material-symbols-outlined">save</span> {{ __('messages.owner.outlet.all_outlets.save_changes') }}';
                     }
 
                     e.preventDefault();
@@ -1071,9 +1034,9 @@
                     saveBtn.disabled = false;
                     const btnLabel = saveBtn.querySelector('.btn-label');
                     if (btnLabel) {
-                        btnLabel.textContent = 'Save Changes';
+                        btnLabel.textContent = '{{ __('messages.owner.outlet.all_outlets.save_changes') }}';
                     } else {
-                        saveBtn.innerHTML = '<span class="material-symbols-outlined">save</span> Save Changes';
+                        saveBtn.innerHTML = '<span class="material-symbols-outlined">save</span> {{ __('messages.owner.outlet.all_outlets.save_changes') }}';
                     }
                 }
             });

@@ -62,10 +62,7 @@ function calculatePercentage(value, total) {
 
 function initRevenueTrendChart() {
   const canvas = document.getElementById("revenueTrendChart");
-  if (!canvas) {
-    console.warn("Canvas revenueTrendChart tidak ditemukan");
-    return;
-  }
+  if (!canvas) return;
 
   if (
     typeof revenueChartData === "undefined" ||
@@ -74,7 +71,9 @@ function initRevenueTrendChart() {
   ) {
     canvas.parentElement.innerHTML =
       '<div class="d-flex align-items-center justify-content-center h-100">' +
-      '<p class="text-center" style="color: #999;">Tidak ada data pendapatan untuk periode ini.</p>' +
+      '<p class="text-center" style="color: #999;">' +
+      window.salesReportLang.revenue_trend_no_data +
+      "</p>" +
       "</div>";
     return;
   }
@@ -87,7 +86,7 @@ function initRevenueTrendChart() {
       labels: revenueChartData.labels,
       datasets: [
         {
-          label: "Penjualan (Rp)",
+          label: window.salesReportLang.sales_label,
           data: revenueChartData.data.map((v) => sanitizeNumber(v)),
           borderColor: colorScheme.primary,
           backgroundColor: colorScheme.primaryLight,
@@ -106,20 +105,13 @@ function initRevenueTrendChart() {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          display: false,
-        },
+        legend: { display: false },
         tooltip: {
           backgroundColor: colorScheme.tooltipBg,
           padding: 12,
           borderRadius: 8,
-          titleFont: {
-            size: 14,
-            weight: "bold",
-          },
-          bodyFont: {
-            size: 13,
-          },
+          titleFont: { size: 14, weight: "bold" },
+          bodyFont: { size: 13 },
           callbacks: {
             label: function (context) {
               return "Rp " + context.parsed.y.toLocaleString("id-ID");
@@ -130,27 +122,17 @@ function initRevenueTrendChart() {
       scales: {
         y: {
           beginAtZero: true,
-          grid: {
-            color: colorScheme.grid,
-          },
+          grid: { color: colorScheme.grid },
           ticks: {
-            font: {
-              size: 11,
-            },
+            font: { size: 11 },
             callback: function (value) {
               return formatCompactNumber(value);
             },
           },
         },
         x: {
-          grid: {
-            display: false,
-          },
-          ticks: {
-            font: {
-              size: 11,
-            },
-          },
+          grid: { display: false },
+          ticks: { font: { size: 11 } },
         },
       },
     },
@@ -161,10 +143,7 @@ function initRevenueTrendChart() {
 
 function initCategoryChart() {
   const canvas = document.getElementById("categoryChart");
-  if (!canvas) {
-    console.warn("Canvas categoryChart tidak ditemukan");
-    return;
-  }
+  if (!canvas) return;
 
   if (
     typeof categoryChartData === "undefined" ||
@@ -173,7 +152,9 @@ function initCategoryChart() {
   ) {
     canvas.parentElement.innerHTML =
       '<div class="d-flex align-items-center justify-content-center h-100">' +
-      '<p class="text-center" style="color: #999;">Tidak ada data kategori untuk periode ini.</p>' +
+      '<p class="text-center" style="color: #999;">' +
+      window.salesReportLang.category_chart_no_data +
+      "</p>" +
       "</div>";
     return;
   }
@@ -208,10 +189,7 @@ function initCategoryChart() {
             boxWidth: 12,
             usePointStyle: true,
             pointStyle: "circle",
-            font: {
-              size: 11,
-              family: "'Inter', sans-serif",
-            },
+            font: { size: 11, family: "'Inter', sans-serif" },
             color: colorScheme.text,
             generateLabels: function (chart) {
               const data = chart.data;
@@ -240,13 +218,8 @@ function initCategoryChart() {
           backgroundColor: colorScheme.tooltipBg,
           padding: 12,
           borderRadius: 8,
-          titleFont: {
-            size: 14,
-            weight: "bold",
-          },
-          bodyFont: {
-            size: 13,
-          },
+          titleFont: { size: 14, weight: "bold" },
+          bodyFont: { size: 13 },
           callbacks: {
             label: function (context) {
               const label = context.label || "";
@@ -257,7 +230,7 @@ function initCategoryChart() {
 
               const percentage = calculatePercentage(value, total);
 
-              return `${label}: ${value} item (${percentage}%)`;
+              return `${label}: ${value} ${window.salesReportLang.items_unit} (${percentage}%)`;
             },
           },
         },
@@ -270,10 +243,7 @@ function initCategoryChart() {
 
 function initTopProductsChart() {
   const canvas = document.getElementById("topProductsChart");
-  if (!canvas) {
-    console.warn("Canvas topProductsChart tidak ditemukan");
-    return;
-  }
+  if (!canvas) return;
 
   if (
     typeof topProductsChartData === "undefined" ||
@@ -282,7 +252,9 @@ function initTopProductsChart() {
   ) {
     canvas.parentElement.innerHTML =
       '<div class="d-flex align-items-center justify-content-center h-100">' +
-      '<p class="text-center" style="color: #999;">Tidak ada data produk untuk periode ini.</p>' +
+      '<p class="text-center" style="color: #999;">' +
+      window.salesReportLang.top_products_no_data +
+      "</p>" +
       "</div>";
     return;
   }
@@ -295,68 +267,55 @@ function initTopProductsChart() {
       labels: topProductsChartData.labels,
       datasets: [
         {
-          label: "Jumlah Terjual",
+          label: window.salesReportLang.sold_label, // "Terjual:"
           data: topProductsChartData.data.map((v) => sanitizeNumber(v)),
           backgroundColor: colorScheme.primary,
-          borderRadius: 4, // Sedikit diperkecil agar rapi di horizontal
+          borderRadius: 4,
           borderSkipped: false,
-          barPercentage: 0.7, // Mengatur ketebalan batang
+          barPercentage: 0.7,
           categoryPercentage: 0.8,
         },
       ],
     },
     options: {
-      indexAxis: "y", // <--- INI KUNCI AGAR MENJADI HORIZONTAL
+      indexAxis: "y",
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          display: false,
-        },
+        legend: { display: false },
         tooltip: {
           backgroundColor: colorScheme.tooltipBg,
           padding: 12,
           borderRadius: 8,
-          titleFont: {
-            size: 14,
-            weight: "bold",
-          },
-          bodyFont: {
-            size: 13,
-          },
+          titleFont: { size: 14, weight: "bold" },
+          bodyFont: { size: 13 },
           callbacks: {
             label: function (context) {
-              // Perhatikan: kita mengambil context.parsed.x (bukan y) karena horizontal
-              return "Terjual: " + context.parsed.x + " item";
+              return (
+                window.salesReportLang.sold_label +
+                " " +
+                context.parsed.x +
+                " " +
+                window.salesReportLang.items_unit
+              );
             },
           },
         },
       },
       scales: {
         x: {
-          // Sumbu X sekarang menjadi penunjuk Nilai (Value)
           beginAtZero: true,
           grid: {
             color: colorScheme.grid,
-            borderDash: [2, 2], // Opsional: membuat grid putus-putus agar lebih ringan
+            borderDash: [2, 2],
           },
-          ticks: {
-            font: {
-              size: 11,
-            },
-          },
+          ticks: { font: { size: 11 } },
         },
         y: {
-          // Sumbu Y sekarang menjadi penunjuk Label Produk
-          grid: {
-            display: false, // Hilangkan grid pada sumbu kategori agar bersih
-          },
+          grid: { display: false },
           ticks: {
-            font: {
-              size: 11,
-              weight: "500", // Sedikit lebih tebal agar nama produk terbaca jelas
-            },
-            autoSkip: false, // Pastikan semua nama produk muncul
+            font: { size: 11, weight: "500" },
+            autoSkip: false,
           },
         },
       },
@@ -368,10 +327,7 @@ function initTopProductsChart() {
 
 function initPaymentMethodChart() {
   const canvas = document.getElementById("paymentMethodChart");
-  if (!canvas) {
-    console.warn("Canvas paymentMethodChart tidak ditemukan");
-    return;
-  }
+  if (!canvas) return;
 
   if (
     typeof paymentMethodChartData === "undefined" ||
@@ -380,14 +336,15 @@ function initPaymentMethodChart() {
   ) {
     canvas.parentElement.innerHTML =
       '<div class="d-flex align-items-center justify-content-center h-100">' +
-      '<p class="text-center" style="color: #999;">Tidak ada data metode pembayaran untuk periode ini.</p>' +
+      '<p class="text-center" style="color: #999;">' +
+      window.salesReportLang.payment_method_no_data +
+      "</p>" +
       "</div>";
     return;
   }
 
   const ctx = canvas.getContext("2d");
 
-  // Generate colors based on payment method
   const colors = paymentMethodChartData.labels.map((label) => {
     if (label === "Cash") return colorScheme.payment.cash;
     if (label === "QRIS") return colorScheme.payment.qris;
@@ -419,10 +376,7 @@ function initPaymentMethodChart() {
             boxWidth: 12,
             usePointStyle: true,
             pointStyle: "circle",
-            font: {
-              size: 11,
-              family: "'Inter', sans-serif",
-            },
+            font: { size: 11, family: "'Inter', sans-serif" },
             color: colorScheme.text,
             generateLabels: function (chart) {
               const data = chart.data;
@@ -451,13 +405,8 @@ function initPaymentMethodChart() {
           backgroundColor: colorScheme.tooltipBg,
           padding: 12,
           borderRadius: 8,
-          titleFont: {
-            size: 14,
-            weight: "bold",
-          },
-          bodyFont: {
-            size: 13,
-          },
+          titleFont: { size: 14, weight: "bold" },
+          bodyFont: { size: 13 },
           callbacks: {
             label: function (context) {
               const label = context.label || "";
@@ -468,7 +417,7 @@ function initPaymentMethodChart() {
 
               const percentage = calculatePercentage(value, total);
 
-              return `${label}: ${value} transaksi (${percentage}%)`;
+              return `${label}: ${value} ${window.salesReportLang.transactions_unit} (${percentage}%)`;
             },
           },
         },
@@ -481,10 +430,7 @@ function initPaymentMethodChart() {
 
 function initPaymentRevenueChart() {
   const canvas = document.getElementById("paymentRevenueChart");
-  if (!canvas) {
-    console.warn("Canvas paymentRevenueChart tidak ditemukan");
-    return;
-  }
+  if (!canvas) return;
 
   if (
     typeof paymentRevenueChartData === "undefined" ||
@@ -493,14 +439,15 @@ function initPaymentRevenueChart() {
   ) {
     canvas.parentElement.innerHTML =
       '<div class="d-flex align-items-center justify-content-center h-100">' +
-      '<p class="text-center" style="color: #999;">Tidak ada data pendapatan pembayaran untuk periode ini.</p>' +
+      '<p class="text-center" style="color: #999;">' +
+      window.salesReportLang.payment_revenue_no_data +
+      "</p>" +
       "</div>";
     return;
   }
 
   const ctx = canvas.getContext("2d");
 
-  // Generate colors based on payment method
   const colors = paymentRevenueChartData.labels.map((label) => {
     if (label === "Cash") return colorScheme.payment.cash;
     if (label === "QRIS") return colorScheme.payment.qris;
@@ -513,7 +460,7 @@ function initPaymentRevenueChart() {
       labels: paymentRevenueChartData.labels,
       datasets: [
         {
-          label: "Pendapatan (Rp)",
+          label: window.salesReportLang.revenue_label,
           data: paymentRevenueChartData.data.map((v) => sanitizeNumber(v)),
           backgroundColor: colors,
           borderRadius: 6,
@@ -525,20 +472,13 @@ function initPaymentRevenueChart() {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          display: false,
-        },
+        legend: { display: false },
         tooltip: {
           backgroundColor: colorScheme.tooltipBg,
           padding: 12,
           borderRadius: 8,
-          titleFont: {
-            size: 14,
-            weight: "bold",
-          },
-          bodyFont: {
-            size: 13,
-          },
+          titleFont: { size: 14, weight: "bold" },
+          bodyFont: { size: 13 },
           callbacks: {
             label: function (context) {
               return "Rp " + context.parsed.y.toLocaleString("id-ID");
@@ -549,27 +489,17 @@ function initPaymentRevenueChart() {
       scales: {
         y: {
           beginAtZero: true,
-          grid: {
-            color: colorScheme.grid,
-          },
+          grid: { color: colorScheme.grid },
           ticks: {
-            font: {
-              size: 11,
-            },
+            font: { size: 11 },
             callback: function (value) {
               return formatCompactNumber(value);
             },
           },
         },
         x: {
-          grid: {
-            display: false,
-          },
-          ticks: {
-            font: {
-              size: 11,
-            },
-          },
+          grid: { display: false },
+          ticks: { font: { size: 11 } },
         },
       },
     },
@@ -582,30 +512,26 @@ document.addEventListener("DOMContentLoaded", function () {
   try {
     initRevenueTrendChart();
   } catch (error) {
-    console.error("Error pada Revenue Trend Chart:", error);
+    console.error("Error Revenue Chart:", error);
   }
-
   try {
     initCategoryChart();
   } catch (error) {
-    console.error("Error pada Category Chart:", error);
+    console.error("Error Category Chart:", error);
   }
-
   try {
     initTopProductsChart();
   } catch (error) {
-    console.error("Error pada Top Products Chart:", error);
+    console.error("Error Top Products Chart:", error);
   }
-
   try {
     initPaymentMethodChart();
   } catch (error) {
-    console.error("Error pada Payment Method Chart:", error);
+    console.error("Error Payment Method Chart:", error);
   }
-
   try {
     initPaymentRevenueChart();
   } catch (error) {
-    console.error("Error pada Payment Revenue Chart:", error);
+    console.error("Error Payment Revenue Chart:", error);
   }
 });

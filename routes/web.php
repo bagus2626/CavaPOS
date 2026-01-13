@@ -57,6 +57,7 @@ use App\Http\Controllers\PaymentGateway\Xendit\SubAccountController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use \App\Http\Controllers\Admin\MessageNotification\MessageController;
 use App\Http\Controllers\Customer\Table\TableStatusController;
+use App\Http\Controllers\Owner\OwnerMessageController;
 use App\Http\Controllers\Owner\Report\StockReportController;
 use App\Notifications\CustomerVerifyEmail;
 use App\Models\Owner;
@@ -308,6 +309,15 @@ Route::middleware('setlocale')->group(function () {
             Route::middleware('owner.verification.access', 'owner.access')->group(function () {
                 Route::get('/', [OwnerDashboardController::class, 'index'])->name('dashboard');
                 Route::get('timeline/messages', [OwnerDashboardController::class, 'timelineMessages'])->name('timeline.messages');
+
+                Route::prefix('messages')->name('messages.')->group(function () {
+                    Route::get('/', action: [OwnerMessageController::class, 'index'])->name('index');
+                    Route::get('/{id}', [OwnerMessageController::class, 'show'])->name('show');
+                    Route::get('/notifications/list', [OwnerMessageController::class, 'getNotificationMessages'])->name('notifications');
+                    Route::post('/mark-as-read/{id}', [OwnerMessageController::class, 'markMessageAsRead'])->name('mark-read');
+                    Route::post('/mark-all-read', [OwnerMessageController::class, 'markAllMessagesAsRead'])->name('mark-all-read');
+                });
+
                 Route::get('outlets/check-username', [OwnerOutletController::class, 'checkUsername'])->name('outlets.check-username')->middleware('throttle:30,1');
                 Route::get('outlets/check-slug', [OwnerOutletController::class, 'checkSlug'])->name('outlets.check-slug')->middleware('throttle:30,1');
                 Route::resource('outlets', OwnerOutletController::class);

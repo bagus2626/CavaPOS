@@ -10,7 +10,7 @@
       <div class="page-header">
         <div class="header-content">
           <h1 class="page-title">{{ __('messages.owner.stock_report.movement.page_title') }}</h1>
-          <p class="page-subtitle">Detailed movement history for selected stock item</p>
+          <p class="page-subtitle">{{ __('messages.owner.stock_report.movement.subtitle') }}</p>
         </div>
       </div>
 

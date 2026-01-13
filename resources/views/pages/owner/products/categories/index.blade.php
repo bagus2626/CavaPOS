@@ -6,15 +6,13 @@
 @section('content')
   <div class="modern-container">
     <div class="container-modern">
-      <!-- Header Section -->
       <div class="page-header">
         <div class="header-content">
           <h1 class="page-title">{{ __('messages.owner.products.categories.categories') }}</h1>
-          <p class="page-subtitle">Manage your product categories</p>
+          <p class="page-subtitle">{{ __('messages.owner.products.categories.subtitle') }}</p>
         </div>
       </div>
 
-      <!-- Success/Error Messages -->
       @if(session('success'))
         <div class="alert alert-success alert-modern">
           <div class="alert-icon">
@@ -37,23 +35,19 @@
         </div>
       @endif
 
-      <!-- Filters & Actions -->
       <div class="modern-card mb-4">
         <div class="card-body-modern" style="padding: var(--spacing-lg) var(--spacing-xl);">
           <div class="table-controls">
-            <!-- Search & Filter -->
             <div class="search-filter-group">
-              <!-- Search -->
               <div class="input-wrapper" style="flex: 1; max-width: 400px;">
                 <span class="input-icon">
                   <span class="material-symbols-outlined">search</span>
                 </span>
                 <input type="text" id="searchInput" class="form-control-modern with-icon"
-                  placeholder="Search categories...">
+                  placeholder="{{ __('messages.owner.products.categories.search_placeholder') }}">
               </div>
             </div>
 
-            <!-- Action Buttons -->
             <div style="display: flex; gap: var(--spacing-sm);">
               <button class="btn-modern btn-secondary-modern" data-toggle="modal" data-target="#orderModal">
                 <span class="material-symbols-outlined">swap_vert</span>
@@ -69,7 +63,6 @@
         </div>
       </div>
 
-      <!-- Table Display -->
       @include('pages.owner.products.categories.display')
 
     </div>
@@ -147,8 +140,8 @@ document.addEventListener('DOMContentLoaded', function () {
           <td colspan="5" class="text-center">
             <div class="table-empty-state">
               <span class="material-symbols-outlined">search_off</span>
-              <h4>No results found</h4>
-              <p>Try adjusting your search</p>
+              <h4>{{ __('messages.owner.products.categories.no_results') }}</h4>
+              <p>{{ __('messages.owner.products.categories.adjust_search') }}</p>
             </div>
           </td>
         </tr>
@@ -346,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function () {
       form.addEventListener('submit', function(e){
         e.preventDefault();
 
-        const name = form.dataset.name || 'kategori ini';
+        const name = form.dataset.name || '{{ __('messages.owner.products.categories.categories') }}';
         if (!window.Swal) { 
           if (confirm(`Delete ${name}?`)) form.submit(); 
           return; 
@@ -427,15 +420,19 @@ $(function() {
             success: function(res) {
                 Swal.fire({
                     icon: 'success',
-                    title: 'Saved',
-                    text: 'Category order updated successfully',
+                    title: '{{ __('messages.owner.products.categories.saved') }}',
+                    text: '{{ __('messages.owner.products.categories.order_updated_success') }}',
                     confirmButtonColor: '#ae1504'
                 }).then(() => {
                     location.reload();
                 });
             },
             error: function() {
-                Swal.fire('Error', 'Failed to update category order!', 'error');
+                Swal.fire(
+                    '{{ __('messages.owner.products.categories.error_title') }}', 
+                    '{{ __('messages.owner.products.categories.order_updated_error') }}', 
+                    'error'
+                );
             }
         });
     });

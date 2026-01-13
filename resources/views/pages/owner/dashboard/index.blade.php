@@ -1,21 +1,19 @@
 @extends('layouts.owner')
 
-@section('title', 'Owner Dashboard')
+@section('title', __('messages.owner.dashboard.title'))
 
-@section('page_title', 'Dashboard Owner')
+@section('page_title', __('messages.owner.dashboard.page_title'))
 
 @section('content')
 <div class="modern-container">
     <div class="container-modern">
-        <!-- Header Section -->
         <div class="page-header">
             <div class="header-content">
-                <h1 class="page-title">Dashboard Owner</h1>
-                <p class="page-subtitle">Overview penjualan dan performa outlet hari ini</p>
+                <h1 class="page-title">{{ __('messages.owner.dashboard.page_title') }}</h1>
+                <p class="page-subtitle">{{ __('messages.owner.dashboard.subtitle') }}</p>
             </div>
         </div>
 
-        <!-- Success/Error Messages -->
         @if (session('success'))
             <div class="alert alert-success alert-modern">
                 <div class="alert-icon">
@@ -38,64 +36,57 @@
             </div>
         @endif
 
-        <!-- Stats Cards - Hari Ini -->
-         <div class="row mb-4">
-            <!-- Total Penjualan Hari Ini -->
+        <div class="row mb-4">
             <div class="col-12 col-sm-6 col-lg-3 mb-3">
                 <div class="modern-card stats-card">
                     <div class="stats-icon">
                         <span class="material-symbols-outlined">payments</span>
                     </div>
                     <div class="stats-content">
-                        <div class="stats-label">Penjualan Hari Ini</div>
+                        <div class="stats-label">{{ __('messages.owner.dashboard.stats_sales_today') }}</div>
                         <div class="stats-value">Rp {{ number_format($data['today_sales'], 0, ',', '.') }}</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Total Outlet Aktif -->
             <div class="col-12 col-sm-6 col-lg-3 mb-3">
                 <div class="modern-card stats-card">
                     <div class="stats-icon">
                         <span class="material-symbols-outlined">store</span>
                     </div>
                     <div class="stats-content">
-                        <div class="stats-label">Outlet Aktif</div>
+                        <div class="stats-label">{{ __('messages.owner.dashboard.stats_active_outlets') }}</div>
                         <div class="stats-value">{{ $data['total_outlets_active'] }}</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Pesanan Hari Ini (PAID) -->
             <div class="col-12 col-sm-6 col-lg-3 mb-3">
                 <div class="modern-card stats-card">
                     <div class="stats-icon">
                         <span class="material-symbols-outlined">receipt_long</span>
                     </div>
                     <div class="stats-content">
-                        <div class="stats-label">Pesanan Terbayar</div>
+                        <div class="stats-label">{{ __('messages.owner.dashboard.stats_paid_orders') }}</div>
                         <div class="stats-value">{{ number_format($data['today_orders_paid']) }}</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Saldo Xendit -->
             <div class="col-12 col-sm-6 col-lg-3 mb-3">
                 <div class="modern-card stats-card stats-warning">
                     <div class="stats-icon">
                         <span class="material-symbols-outlined">account_balance_wallet</span>
                     </div>
                     <div class="stats-content">
-                        <div class="stats-label">Saldo Xendit</div>
+                        <div class="stats-label">{{ __('messages.owner.dashboard.stats_xendit_balance') }}</div>
                         <div class="stats-value">Rp 100.000</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Row 1: Sales Trend & Top Products -->
         <div class="row">
-            <!-- Sales Trend Chart -->
             <div class="col-12 col-lg-7 mb-4">
                 <div class="modern-card">
                     <div class="card-header-modern">
@@ -103,7 +94,7 @@
                             <div class="section-icon section-icon-red">
                                 <span class="material-symbols-outlined">trending_up</span>
                             </div>
-                            <h3 class="section-title">Tren Penjualan 7 Hari Terakhir</h3>
+                            <h3 class="section-title">{{ __('messages.owner.dashboard.trend_sales_title') }}</h3>
                         </div>  
                     </div>
                                       
@@ -114,7 +105,6 @@
                 </div>
             </div>
 
-            <!-- Top 5 Products -->
             <div class="col-12 col-lg-5 mb-4">
                 <div class="modern-card">
                     <div class="card-header-modern">
@@ -123,7 +113,7 @@
                             <div class="section-icon section-icon-red">
                                 <span class="material-symbols-outlined">star</span>
                             </div>
-                            <h3 class="section-title">Top 5 Produk (Bulan Ini)</h3>
+                            <h3 class="section-title">{{ __('messages.owner.dashboard.top_products_title') }}</h3>
                         </div>
                     </div>
                     <div class="card-body-modern">
@@ -133,9 +123,7 @@
             </div>
         </div>
 
-        <!-- Row 2: Outlet Performance -->
         <div class="row">
-            <!-- Outlet Performance Chart -->
             <div class="col-12 mb-4">
                 <div class="modern-card">
                     <div class="card-header-modern">
@@ -144,13 +132,13 @@
                             <div class="section-icon section-icon-red">
                                 <span class="material-symbols-outlined">leaderboard</span>
                             </div>
-                            <h3 class="section-title">Performa Outlet (Bulan Ini)</h3>
+                            <h3 class="section-title">{{ __('messages.owner.dashboard.outlet_performance_title') }}</h3>
                         </div>
                         <div class="chart-filter-group">
                             <div class="select-wrapper">
                                 <select id="outletFilterType" class="form-control-modern">
-                                    <option value="top">Terbaik</option>
-                                    <option value="bottom">Terburuk</option>
+                                    <option value="top">{{ __('messages.owner.dashboard.filter_best') }}</option>
+                                    <option value="bottom">{{ __('messages.owner.dashboard.filter_worst') }}</option>
                                 </select>
                                 <span class="material-symbols-outlined select-arrow">expand_more</span>
                             </div>
@@ -190,7 +178,7 @@
                 data: {
                     labels: @json($data['last7Days']),
                     datasets: [{
-                        label: 'Penjualan (Rp)',
+                        label: '{{ __('messages.owner.dashboard.chart_sales_label') }}',
                         data: @json($data['salesLast7Days']),
                         borderColor: 'rgb(174, 21, 4)',
                         backgroundColor: 'rgba(174, 21, 4, 0.1)',
@@ -287,7 +275,7 @@
                 data: {
                     labels: productLabels,
                     datasets: [{
-                        label: 'Jumlah Terjual',
+                        label: '{{ __('messages.owner.dashboard.chart_quantity_label') }}',
                         data: productQuantities,
                         backgroundColor: '#ae1504',
                         borderRadius: 6,
@@ -319,8 +307,8 @@
                                     const quantity = topProductsData[index].total_quantity;
                                     const revenue = topProductsData[index].total_revenue;
                                     return [
-                                        'Terjual: ' + quantity.toLocaleString('id-ID') + ' item',
-                                        'Revenue: Rp ' + revenue.toLocaleString('id-ID')
+                                        '{{ __('messages.owner.dashboard.chart_tooltip_sold') }}: ' + quantity.toLocaleString('id-ID') + ' {{ __('messages.owner.dashboard.chart_item') }}',
+                                        '{{ __('messages.owner.dashboard.chart_tooltip_revenue') }}: Rp ' + revenue.toLocaleString('id-ID')
                                     ];
                                 }
                             }
@@ -391,7 +379,7 @@
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: 'Penjualan (Rp)',
+                            label: '{{ __('messages.owner.dashboard.chart_sales_label') }}',
                             data: data,
                             backgroundColor: colors,
                             borderRadius: 6,

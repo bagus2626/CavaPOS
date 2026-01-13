@@ -9,7 +9,7 @@
         <div class="page-header">
             <div class="header-content">
                 <h1 class="page-title">{{ __('messages.owner.sales_report.business_performance_dashboard') }}</h1>
-                <p class="page-subtitle">{{ $indicatorText ?? 'Laporan Penjualan' }}</p>
+                <p class="page-subtitle">{{ $indicatorText ?? __('messages.owner.sales_report.sales_report') }}</p>
             </div>
             <div class="header-actions">
                 <a href="{{ route('owner.user-owner.report.sales.export', request()->query()) }}" 
@@ -31,7 +31,7 @@
                                 </label>
                                 <div class="select-wrapper">
                                     <select name="partner_id" id="partner_id" class="form-control-modern">
-                                        <option value="">Semua Outlet</option>
+                                        <option value="">{{ __('messages.owner.sales_report.all_outlets') }}</option>
                                         @foreach($partners as $partner)
                                             <option value="{{ $partner->id }}" {{ ($filters['partner_id'] ?? '') == $partner->id ? 'selected' : '' }}>
                                                 {{ $partner->name }} ({{ $partner->partner_code }})
@@ -46,13 +46,19 @@
                         <div class="col-xl-3">
                             <div class="form-group">
                                 <label for="period-select" class="form-label-modern">
-                                    Tipe Laporan
+                                    {{ __('messages.owner.sales_report.report_type') }}
                                 </label>
                                 <div class="select-wrapper">
                                     <select name="period" id="period-select" class="form-control-modern" onchange="toggleFilterInputs()">
-                                        <option value="daily" {{ ($filters['period'] ?? 'daily') == 'daily' ? 'selected' : '' }}>Harian</option>
-                                        <option value="monthly" {{ ($filters['period'] ?? 'daily') == 'monthly' ? 'selected' : '' }}>Bulanan</option>
-                                        <option value="yearly" {{ ($filters['period'] ?? 'daily') == 'yearly' ? 'selected' : '' }}>Tahunan</option>
+                                        <option value="daily" {{ ($filters['period'] ?? 'daily') == 'daily' ? 'selected' : '' }}>
+                                            {{ __('messages.owner.sales_report.daily_report') }}
+                                        </option>
+                                        <option value="monthly" {{ ($filters['period'] ?? 'daily') == 'monthly' ? 'selected' : '' }}>
+                                            {{ __('messages.owner.sales_report.monthly_report') }}
+                                        </option>
+                                        <option value="yearly" {{ ($filters['period'] ?? 'daily') == 'yearly' ? 'selected' : '' }}>
+                                            {{ __('messages.owner.sales_report.yearly_report') }}
+                                        </option>
                                     </select>
                                     <span class="material-symbols-outlined select-arrow">expand_more</span>
                                 </div>
@@ -61,30 +67,28 @@
 
                         <div class="col-xl-4">
                             
-                            <!-- Filter Harian -->
                             <div id="filter-daily" class="filter-group {{ ($filters['period'] ?? 'daily') == 'daily' ? '' : 'd-none' }}">
                                 <div class="row g-2">
                                     <div class="col-6">
                                         <div class="form-group">
-                                            <label class="form-label-modern small">Dari Tanggal</label>
+                                            <label class="form-label-modern small">{{ __('messages.owner.sales_report.from_date') }}</label>
                                             <input type="date" name="from" value="{{ $filters['from'] ?? date('Y-m-d') }}" class="form-control-modern">
                                         </div>
                                     </div>
                                     <div class="col-6">
                                         <div class="form-group">
-                                            <label class="form-label-modern small">Sampai Tanggal</label>
+                                            <label class="form-label-modern small">{{ __('messages.owner.sales_report.to_date') }}</label>
                                             <input type="date" name="to" value="{{ $filters['to'] ?? date('Y-m-d') }}" class="form-control-modern">
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Filter Bulanan -->
                             <div id="filter-monthly" class="filter-group {{ ($filters['period'] ?? 'daily') == 'monthly' ? '' : 'd-none' }}">
                                 <div class="row g-2">
                                     <div class="col-6">
                                         <div class="form-group">
-                                            <label class="form-label-modern small">Dari Bulan</label>
+                                            <label class="form-label-modern small">{{ __('messages.owner.sales_report.from_month') }}</label>
                                             <input type="month" 
                                                 name="month_from" 
                                                 value="{{ $filters['month_from'] ?? date('Y-m') }}" 
@@ -93,7 +97,7 @@
                                     </div>
                                     <div class="col-6">
                                         <div class="form-group">
-                                            <label class="form-label-modern small">Sampai Bulan</label>
+                                            <label class="form-label-modern small">{{ __('messages.owner.sales_report.to_month') }}</label>
                                             <input type="month" 
                                                 name="month_to" 
                                                 value="{{ $filters['month_to'] ?? date('Y-m') }}" 
@@ -103,12 +107,11 @@
                                 </div>
                             </div>
 
-                            <!-- Filter Tahunan -->
                             <div id="filter-yearly" class="filter-group {{ ($filters['period'] ?? 'daily') == 'yearly' ? '' : 'd-none' }}">
                                 <div class="row g-2">
                                     <div class="col-6">
                                         <div class="form-group">
-                                            <label class="form-label-modern small">Dari Tahun</label>
+                                            <label class="form-label-modern small">{{ __('messages.owner.sales_report.from_year') }}</label>
                                             <input type="number" 
                                                 name="year_from" 
                                                 value="{{ $filters['year_from'] ?? date('Y') }}" 
@@ -119,7 +122,7 @@
                                     </div>
                                     <div class="col-6">
                                         <div class="form-group">
-                                            <label class="form-label-modern small">Sampai Tahun</label>
+                                            <label class="form-label-modern small">{{ __('messages.owner.sales_report.to_year') }}</label>
                                             <input type="number" 
                                                 name="year_to" 
                                                 value="{{ $filters['year_to'] ?? date('Y') }}" 
@@ -136,7 +139,7 @@
                         <div class="col-xl-2 d-flex align-items-end">
                             <div class="form-group">
                                 <button type="submit" class="btn-modern btn-primary-modern">
-                                    Terapkan
+                                    {{ __('messages.owner.sales_report.apply') }}
                                 </button>
                             </div>
                         </div>
@@ -165,7 +168,7 @@
                     </div>
                     <div class="stats-content">
                         <div class="stats-label">{{ __('messages.owner.sales_report.total_menu_sold') }}</div>
-                        <div class="stats-value">{{ number_format($totalOrders ?? 0, 0, ',', '.') }} Item</div>
+                        <div class="stats-value">{{ number_format($totalOrders ?? 0, 0, ',', '.') }} {{ __('messages.owner.sales_report.items_unit') }}</div>
                     </div>
                 </div>
             </div>
@@ -177,13 +180,12 @@
                     </div>
                     <div class="stats-content">
                         <div class="stats-label">{{ __('messages.owner.sales_report.total_booking_orders') }}</div>
-                        <div class="stats-value">{{ number_format($totalBookingOrders ?? 0, 0, ',', '.') }} Order</div>
+                        <div class="stats-value">{{ number_format($totalBookingOrders ?? 0, 0, ',', '.') }} {{ __('messages.owner.sales_report.orders_unit') }}</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Row 1: Revenue Trend & Category Chart -->
         <div class="row">
             <div class="col-12 col-lg-8 mb-4">
                 <div class="modern-card">
@@ -192,7 +194,7 @@
                             <div class="section-icon section-icon-red">
                                 <span class="material-symbols-outlined">trending_up</span>
                             </div>
-                            <h3 class="section-title">{{ __('messages.owner.sales_report.sales_trend_analysis') }}</h3>
+                            <h3 class="section-title">{{ __('messages.owner.sales_report.revenue_trend_chart_title') }}</h3>
                         </div>
                     </div>
                     <div class="card-body-modern" style="position: relative; height: 350px;">
@@ -208,7 +210,7 @@
                             <div class="section-icon section-icon-red">
                                 <span class="material-symbols-outlined">pie_chart</span>
                             </div>
-                            <h3 class="section-title">Kategori (Jumlah Terjual)</h3>
+                            <h3 class="section-title">{{ __('messages.owner.sales_report.category_chart_title') }}</h3>
                         </div>
                     </div>
                     <div class="card-body-modern" style="position: relative; height: 350px;">
@@ -218,7 +220,6 @@
             </div>
         </div>
 
-        <!-- Row 2: Payment Method & Payment Revenue -->
         <div class="row">
             <div class="col-12 col-lg-6 mb-4">
                 <div class="modern-card">
@@ -227,7 +228,7 @@
                             <div class="section-icon section-icon-red">
                                 <span class="material-symbols-outlined">account_balance_wallet</span>
                             </div>
-                            <h3 class="section-title">Metode Pembayaran</h3>
+                            <h3 class="section-title">{{ __('messages.owner.sales_report.payment_method_chart_title') }}</h3>
                         </div>
                     </div>
                     <div class="card-body-modern" style="position: relative; height: 350px;">
@@ -243,7 +244,7 @@
                             <div class="section-icon section-icon-red">
                                 <span class="material-symbols-outlined">monetization_on</span>
                             </div>
-                            <h3 class="section-title">Pendapatan per Metode Pembayaran</h3>
+                            <h3 class="section-title">{{ __('messages.owner.sales_report.payment_revenue_chart_title') }}</h3>
                         </div>
                     </div>
                     <div class="card-body-modern" style="position: relative; height: 350px;">
@@ -253,7 +254,6 @@
             </div>
         </div>
 
-        <!-- Row 3: Top 5 Products Chart -->
         <div class="row">
             <div class="col-12 mb-4">
                 <div class="modern-card">
@@ -262,7 +262,7 @@
                             <div class="section-icon section-icon-red">
                                 <span class="material-symbols-outlined">bar_chart</span>
                             </div>
-                            <h3 class="section-title">Top 5 Produk Terlaris</h3>
+                            <h3 class="section-title">{{ __('messages.owner.sales_report.top_products_chart_title') }}</h3>
                         </div>
                     </div>
                     <div class="card-body-modern" style="position: relative; height: 350px;">
@@ -272,7 +272,6 @@
             </div>
         </div>
 
-        <!-- Products Table -->
         <div class="row">
             <div class="col-12">
                 <div class="modern-card">
@@ -290,9 +289,8 @@
                             <thead>
                                 <tr>
                                     <th class="text-center" style="width: 60px;">#</th>
-                                    <th>Product Name</th>
+                                    <th>{{ __('messages.owner.products.master_products.product_name') }}</th>
                                     
-                                    <!-- ✅ TAMBAHKAN onclick & data-sort di header Sold -->
                                     <th class="text-center sortable-header" 
                                         data-sort="quantity" 
                                         onclick="sortProductTable('quantity')" 
@@ -303,13 +301,12 @@
                                         </div>
                                     </th>
                                     
-                                    <!-- ✅ TAMBAHKAN onclick & data-sort di header Total Penjualan -->
                                     <th class="sortable-header" 
                                         data-sort="revenue" 
                                         onclick="sortProductTable('revenue')" 
                                         style="cursor: pointer; text-align: left !important;">
                                         <div class="d-flex align-items-center gap-1">
-                                            <span>Total Penjualan</span>
+                                            <span>{{ __('messages.owner.sales_report.total_sales') }}</span>
                                             <span class="material-symbols-outlined sort-icon" style="font-size: 18px;">unfold_more</span>
                                         </div>
                                     </th>
@@ -326,14 +323,12 @@
                                             <span class="data-name">{{ $product->name }}</span>
                                         </td>
 
-                                        <!-- ✅ TAMBAHKAN data-quantity attribute -->
                                         <td class="text-center" data-quantity="{{ $product->total_quantity }}">
                                             <span>
                                                 {{ $product->total_quantity }} 
                                             </span>
                                         </td>
 
-                                        <!-- ✅ TAMBAHKAN data-revenue attribute -->
                                         <td data-revenue="{{ $product->total_sales }}" style="text-align: left !important;">
                                             <span class="fw-bold text-success">
                                                 Rp {{ number_format($product->total_sales, 0, ',', '.') }}
@@ -346,7 +341,7 @@
                                             <div class="table-empty-state">
                                                 <span class="material-symbols-outlined">inventory</span>
                                                 <h4>{{ __('messages.owner.sales_report.no_product_data_found') }}</h4>
-                                                <p>Belum ada data penjualan produk untuk periode ini.</p>
+                                                <p>{{ __('messages.owner.sales_report.no_data_found') }}</p>
                                             </div>
                                         </td>
                                     </tr>
@@ -369,6 +364,22 @@
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <script>
+        window.salesReportLang = {
+            revenue_trend_no_data: "{{ __('messages.owner.sales_report.revenue_trend_no_data') }}",
+            category_chart_no_data: "{{ __('messages.owner.sales_report.category_chart_no_data') }}",
+            top_products_no_data: "{{ __('messages.owner.sales_report.top_products_no_data') }}",
+            payment_method_no_data: "{{ __('messages.owner.sales_report.payment_method_no_data') }}",
+            payment_revenue_no_data: "{{ __('messages.owner.sales_report.payment_revenue_no_data') }}",
+            transactions_unit: "{{ __('messages.owner.sales_report.transactions_unit') }}",
+            items_unit: "{{ __('messages.owner.sales_report.items_unit') }}",
+            sold_label: "{{ __('messages.owner.sales_report.sold_label') }}",
+            revenue_label: "{{ __('messages.owner.sales_report.revenue_label') }}",
+            sales_label: "{{ __('messages.owner.sales_report.sales_label') }}"
+        };
+    </script>
+
     <script src="{{ asset('js/owner/reports/sales.js') }}"></script>
 
     <script>
@@ -400,7 +411,6 @@
     </script>
 
     <script>
-
         // Fungsi Sort untuk Tabel Produk
         let currentSortColumn = 'quantity';
         let currentSortDirection = 'desc';

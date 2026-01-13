@@ -15,9 +15,12 @@
   color: var(--text-secondary);
   text-decoration: none;
   font-weight: 600;
-  margin-bottom: var(--spacing-lg);
   transition: all var(--transition-base);
   font-size: 0.95rem;
+  -webkit-transition: all var(--transition-base);
+  -moz-transition: all var(--transition-base);
+  -ms-transition: all var(--transition-base);
+  -o-transition: all var(--transition-base);
 }
 
 .back-button:hover {
@@ -726,3 +729,5 @@
     line-height: 1.2;
   }
 }
+
+

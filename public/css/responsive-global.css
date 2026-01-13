@@ -639,7 +639,6 @@
   .back-button {
     font-size: 0.875rem;
     gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-md);
   }
 
   .back-button .material-symbols-outlined {
