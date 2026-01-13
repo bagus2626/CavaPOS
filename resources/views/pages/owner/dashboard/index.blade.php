@@ -1,581 +1,458 @@
 @extends('layouts.owner')
 
-@section('title', 'Owner Dashboard')
+@section('title', __('messages.owner.dashboard.title'))
 
-@section('page_title', 'Dashboard Owner')
+@section('page_title', __('messages.owner.dashboard.page_title'))
 
 @section('content')
-<!-- Main Content -->
-<section class="content">
-    <div class="container-fluid">
-        <!-- Info boxes -->
-        <div class="row mb-3">
-            <div class="col-12 col-sm-6 col-md-3">
-                <div class="info-box">
-                    <span class="info-box-icon bg-info elevation-1"><i class="fas fa-users"></i></span>
-                    <div class="info-box-content">
-                        <span class="info-box-text">{{ __('messages.owner.dashboard.total_users') }}</span>
-                        <span class="info-box-number">{{ $data['total_accounts'] }}</span>
+<div class="modern-container">
+    <div class="container-modern">
+        <div class="page-header">
+            <div class="header-content">
+                <h1 class="page-title">{{ __('messages.owner.dashboard.page_title') }}</h1>
+                <p class="page-subtitle">{{ __('messages.owner.dashboard.subtitle') }}</p>
+            </div>
+        </div>
+
+        @if (session('success'))
+            <div class="alert alert-success alert-modern">
+                <div class="alert-icon">
+                    <span class="material-symbols-outlined">check_circle</span>
+                </div>
+                <div class="alert-content">
+                    {{ session('success') }}
+                </div>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="alert alert-danger alert-modern">
+                <div class="alert-icon">
+                    <span class="material-symbols-outlined">error</span>
+                </div>
+                <div class="alert-content">
+                    {{ session('error') }}
+                </div>
+            </div>
+        @endif
+
+        <div class="row mb-4">
+            <div class="col-12 col-sm-6 col-lg-3 mb-3">
+                <div class="modern-card stats-card">
+                    <div class="stats-icon">
+                        <span class="material-symbols-outlined">payments</span>
+                    </div>
+                    <div class="stats-content">
+                        <div class="stats-label">{{ __('messages.owner.dashboard.stats_sales_today') }}</div>
+                        <div class="stats-value">Rp {{ number_format($data['today_sales'], 0, ',', '.') }}</div>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-sm-6 col-md-3">
-                <div class="info-box">
-                    <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-shopping-cart"></i></span>
-                    <div class="info-box-content">
-                        <span class="info-box-text">{{ __('messages.owner.dashboard.total_orders') }} ({{ now()->year }})</span>
-                        <span class="info-box-number">{{ $data['total_orders'] }}</span>
+
+            <div class="col-12 col-sm-6 col-lg-3 mb-3">
+                <div class="modern-card stats-card">
+                    <div class="stats-icon">
+                        <span class="material-symbols-outlined">store</span>
+                    </div>
+                    <div class="stats-content">
+                        <div class="stats-label">{{ __('messages.owner.dashboard.stats_active_outlets') }}</div>
+                        <div class="stats-value">{{ $data['total_outlets_active'] }}</div>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-sm-6 col-md-3">
-                <div class="info-box">
-                    <span class="info-box-icon bg-success elevation-1"><i class="fas fa-dollar-sign"></i></span>
-                    <div class="info-box-content">
-                        <span class="info-box-text">{{ __('messages.owner.dashboard.total_sales') }} ({{ now()->year }})</span>
-                        <span class="info-box-number">Rp. {{ number_format($data['orders_gross_income']) }}</span>
+
+            <div class="col-12 col-sm-6 col-lg-3 mb-3">
+                <div class="modern-card stats-card">
+                    <div class="stats-icon">
+                        <span class="material-symbols-outlined">receipt_long</span>
+                    </div>
+                    <div class="stats-content">
+                        <div class="stats-label">{{ __('messages.owner.dashboard.stats_paid_orders') }}</div>
+                        <div class="stats-value">{{ number_format($data['today_orders_paid']) }}</div>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-sm-6 col-md-3">
-                <div class="info-box">
-                    <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-star"></i></span>
-                    <div class="info-box-content">
-                        <span class="info-box-text">{{ __('messages.owner.dashboard.products') }}</span>
-                        <span class="info-box-number">{{ $data['total_products'] }}</span>
+
+            <div class="col-12 col-sm-6 col-lg-3 mb-3">
+                <div class="modern-card stats-card stats-warning">
+                    <div class="stats-icon">
+                        <span class="material-symbols-outlined">account_balance_wallet</span>
+                    </div>
+                    <div class="stats-content">
+                        <div class="stats-label">{{ __('messages.owner.dashboard.stats_xendit_balance') }}</div>
+                        <div class="stats-value">Rp 100.000</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- @yield('content') --}}
-
-        <!-- Example content -->
         <div class="row">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">{{ __('messages.owner.dashboard.recent_orders') }}</h3>
-                        <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                        </div>
+            <div class="col-12 col-lg-7 mb-4">
+                <div class="modern-card">
+                    <div class="card-header-modern">
+                        <div class="section-header mb-0">
+                            <div class="section-icon section-icon-red">
+                                <span class="material-symbols-outlined">trending_up</span>
+                            </div>
+                            <h3 class="section-title">{{ __('messages.owner.dashboard.trend_sales_title') }}</h3>
+                        </div>  
                     </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover table-modern">
-                                <thead>
-                                    <tr>
-                                        <th>{{ __('messages.owner.dashboard.order_id') }}</th>
-                                        <th>Outlet</th>
-                                        <th>{{ __('messages.owner.dashboard.customer') }}</th>
-                                        <th>Status</th>
-                                        <th>{{ __('messages.owner.dashboard.amount') }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($data['last_orders'] as $order)
-                                        <tr style="cursor: pointer;" data-toggle="modal" data-target="#orderDetailModal{{ $order->id }}">
-                                            <td><a href="#" class="order-link">{{ $order->booking_order_code ?? '-' }}</a></td>
-                                            <td>{{ $order->partner_name ?? '-' }}</td>
-                                            <td>{{ $order->customer_name ?? '-' }}</td>
-                                            <td>
-                                                <span class="badge 
-                                                    @if ($order->order_status === 'PAID') badge-primary
-                                                    @elseif ($order->order_status === 'SERVED') badge-success
-                                                    @elseif ($order->order_status === 'PENDING') badge-warning
-                                                    @elseif ($order->order_status === 'UNPAID') badge-warning
-                                                    @elseif ($order->order_status === 'PROCESSED') badge-primary
-                                                    @elseif ($order->order_status === 'CANCELLED') badge-danger
-                                                    @else badge-secondary
-                                                    @endif
-                                                ">
-                                                    {{ $order->order_status }}
-                                                </span>
-                                            </td>
-                                            <td>Rp. {{ number_format($order->total_order_value ?? 0) }}</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                                      
+                    
+                    <div class="card-body-modern">
+                        <canvas id="salesTrendChart" style="height: 300px;"></canvas>
                     </div>
-                    <!-- Modal untuk setiap order -->
-                    @include('pages.owner.dashboard.partials.recent-order-modal')
                 </div>
             </div>
 
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">{{ __('messages.owner.dashboard.my_timeline') }}</h3>
-                        <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                <i class="fas fa-minus"></i>
-                            </button>
+            <div class="col-12 col-lg-5 mb-4">
+                <div class="modern-card">
+                    <div class="card-header-modern">
+                    
+                        <div class="section-header mb-0">
+                            <div class="section-icon section-icon-red">
+                                <span class="material-symbols-outlined">star</span>
+                            </div>
+                            <h3 class="section-title">{{ __('messages.owner.dashboard.top_products_title') }}</h3>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <div class="timeline">
-                            @php
-                                use Illuminate\Support\Facades\Storage;
-                                use Illuminate\Support\Str;
-                            @endphp
+                    <div class="card-body-modern">
+                        <canvas id="topProductsChart" style="height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                            {{-- Page pertama (5 pesan pertama) --}}
-                            @include('pages.owner.dashboard.partials.timeline-items', ['messages' => $data['messages']])
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="modern-card">
+                    <div class="card-header-modern">
 
-                            {{-- Penutup timeline --}}
-                            <div class="timeline-end">
-                                <i class="fas fa-clock bg-gray"></i>
+                        <div class="section-header mb-0">
+                            <div class="section-icon section-icon-red">
+                                <span class="material-symbols-outlined">leaderboard</span>
                             </div>
-
-                            @if ($data['messages']->hasMorePages())
-                                <div class="text-center mt-2">
-                                    <button class="btn btn-sm btn-outline-primary"
-                                            id="loadMoreTimeline"
-                                            data-next-page="{{ $data['messages']->currentPage() + 1 }}"
-                                            data-last-page="{{ $data['messages']->lastPage() }}">
-                                        Load more
-                                    </button>
-                                </div>
-                            @endif
+                            <h3 class="section-title">{{ __('messages.owner.dashboard.outlet_performance_title') }}</h3>
                         </div>
+                        <div class="chart-filter-group">
+                            <div class="select-wrapper">
+                                <select id="outletFilterType" class="form-control-modern">
+                                    <option value="top">{{ __('messages.owner.dashboard.filter_best') }}</option>
+                                    <option value="bottom">{{ __('messages.owner.dashboard.filter_worst') }}</option>
+                                </select>
+                                <span class="material-symbols-outlined select-arrow">expand_more</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body-modern">
+                        <canvas id="outletPerformanceChart" style="height: 300px;"></canvas>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</section>
+</div>
+
 {{-- Popup carousel kalau ada popup messages --}}
 @includeWhen(isset($data['popups']) && $data['popups']->isNotEmpty(), 'pages.owner.dashboard.partials.popup-carousel', [
     'popups' => $data['popups'],
 ])
 
-
-<style>
-    /* ====== INFO-BOX DASHBOARD (Total Users / Orders / Sales / Products) ====== */
-    .info-box {
-        border-radius: var(--radius);
-        box-shadow: var(--shadow);
-        border: 1px solid #eef1f4;
-        background: #ffffff;
-        padding-right: 0.85rem;
-        min-height: 70px !important;
-    }
-
-    .info-box .info-box-content {
-        line-height: 1 !important;
-    }
-
-    .info-box .info-box-icon {
-        border-radius: 16px;
-        width: 54px;
-        height: 54px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, .08);
-    }
-
-    .info-box .info-box-text {
-        font-size: 0.78rem;
-        text-transform: uppercase;
-        letter-spacing: .04em;
-        color: #6b7280;
-        font-weight: 600;
-        margin-bottom: 2px;
-    }
-
-    .info-box .info-box-number {
-        font-size: 1.35rem;
-        font-weight: 700;
-        color: var(--ink);
-    }
-
-    /* warna icon pakai tone sedikit lebih lembut, tetap beda-beda */
-    .info-box-icon.bg-info {
-        background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
-        color: #fff;
-    }
-
-    .info-box-icon.bg-danger {
-        background: linear-gradient(135deg, var(--choco), var(--soft-choco)) !important;
-        color: #fff;
-    }
-
-    .info-box-icon.bg-success {
-        background: linear-gradient(135deg, #16a34a, #22c55e) !important;
-        color: #fff;
-    }
-
-    .info-box-icon.bg-warning {
-        background: linear-gradient(135deg, #f97316, #f59e0b) !important;
-        color: #fff;
-    }
-
-    /* ====== TABEL RECENT ORDERS ====== */
-    .table-modern {
-        margin-bottom: 0;
-        border-collapse: separate;
-        border-spacing: 0;
-    }
-
-    .table-modern thead th {
-        border-bottom: 1px solid #e5e7eb !important;
-        font-size: 0.78rem;
-        text-transform: uppercase;
-        letter-spacing: .04em;
-        color: #6b7280;
-        background: #ffffff;
-        font-weight: 600;
-        padding-top: 0.55rem;
-        padding-bottom: 0.55rem;
-    }
-
-    .table-modern tbody td {
-        vertical-align: middle;
-        font-size: 0.88rem;
-        color: #374151;
-        border-top: 1px solid #f3f4f6;
-    }
-
-    .table-modern tbody tr {
-        transition: background-color .15s ease, transform .08s ease, box-shadow .15s ease;
-    }
-
-    .table-modern tbody tr:hover {
-        background-color: #f9fafb;
-        transform: translateY(-1px);
-        box-shadow: 0 3px 10px rgba(0, 0, 0, .03);
-    }
-
-    .table-modern .order-link {
-        color: var(--choco);
-        font-weight: 600;
-        text-decoration: none;
-    }
-
-    .table-modern .order-link:hover {
-        text-decoration: underline;
-    }
-
-    /* ====== BADGE STATUS ORDER ====== */
-    .badge-status {
-        border-radius: 999px;
-        padding: 0.25rem 0.65rem;
-        font-size: 0.7rem;
-        letter-spacing: .04em;
-        text-transform: uppercase;
-        font-weight: 600;
-    }
-
-    .card .badge-primary {
-        background: linear-gradient(135deg, var(--choco), var(--soft-choco));
-        border: none;
-    }
-
-    .card .badge-success {
-        background: linear-gradient(135deg, #16a34a, #22c55e);
-        border: none;
-        color: #fff;
-    }
-
-    .card .badge-warning {
-        background: linear-gradient(135deg, #facc15, #f97316);
-        border: none;
-        color: #111827;
-    }
-
-    .card .badge-danger {
-        background: linear-gradient(135deg, #dc2626, #b91c1c);
-        border: none;
-        color: #fff;
-    }
-
-    .card .badge-secondary {
-        background: #e5e7eb;
-        color: #4b5563;
-        border: none;
-    }
-
-    /* ====== KARTU DASHBOARD (Recent Orders & Timeline) ====== */
-    .card {
-        border-radius: var(--radius);
-        box-shadow: var(--shadow);
-        border: 0;
-        overflow: hidden;
-    }
-
-    .card-header {
-        border-bottom: 1px solid #eef1f4;
-        background: #ffffff;
-        padding: 0.75rem 1rem;
-    }
-
-    .card-header .card-title {
-        font-weight: 600;
-        color: var(--ink);
-        font-size: 0.95rem;
-    }
-
-    .card-header .btn-tool {
-        color: #9ca3af;
-    }
-
-    .card-header .btn-tool:hover {
-        color: var(--choco);
-    }
-
-    /* ====== Timeline (yang sudah kamu pakai) – dibiarkan seperti sekarang ====== */
-    .card .timeline {
-        padding-top: 0.25rem;
-        padding-bottom: 0.25rem;
-    }
-
-    .timeline .time-label span {
-        background: linear-gradient(135deg, var(--choco), var(--soft-choco)) !important;
-        border-radius: 999px;
-        padding: 4px 12px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, .12);
-    }
-
-    .timeline .timeline-item {
-        border-radius: var(--radius);
-        border: 1px solid #eef1f4;
-        background: #ffffff;
-        box-shadow: var(--shadow);
-        margin: 0.5rem 0 0.75rem 0;
-        padding: 0.75rem 1rem;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .timeline .timeline-item::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 12px;
-        bottom: 12px;
-        width: 3px;
-        background: linear-gradient(180deg, rgba(140, 16, 0, 0.1), rgba(193, 40, 20, 0.4));
-        border-radius: 999px;
-    }
-
-    .timeline .timeline-item .time {
-        color: #6b7280;
-        font-size: 0.8rem;
-    }
-
-    .timeline .timeline-item .time i {
-        color: var(--choco);
-        margin-right: 4px;
-    }
-
-    .timeline .timeline-header {
-        font-size: 0.95rem;
-        font-weight: 600;
-        margin-top: 0.25rem;
-        color: var(--ink);
-    }
-
-    .timeline .timeline-header a {
-        color: var(--choco);
-        text-decoration: none;
-    }
-
-    .timeline .timeline-header a:hover {
-        text-decoration: underline;
-    }
-
-    .timeline .timeline-body {
-        margin-top: 0.35rem;
-        color: #4b5563;
-        font-size: 0.9rem;
-    }
-
-    .timeline > div > i {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, .12);
-    }
-
-    .timeline i.bg-blue {
-        background: linear-gradient(135deg, var(--choco), var(--soft-choco)) !important;
-        color: #fff !important;
-    }
-
-    .timeline i.bg-green {
-        background: linear-gradient(135deg, #059669, #10b981) !important;
-        color: #fff !important;
-    }
-
-    .timeline i.bg-gray {
-        background: #e5e7eb !important;
-        color: #4b5563 !important;
-    }
-
-    .timeline-end i {
-        background: #e5e7eb !important;
-        color: #6b7280 !important;
-        box-shadow: none !important;
-    }
-
-    .attachment-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 6px 10px;
-        margin: 3px;
-        border-radius: 999px;
-        font-size: 0.8rem;
-        font-weight: 500;
-        color: var(--ink);
-        background: #f9fafb;
-        border: 1px solid #e5e7eb;
-        text-decoration: none;
-        transition: all 0.15s ease-in-out;
-    }
-
-    .attachment-badge:hover {
-        background: #eef2ff;
-        border-color: #c4b5fd;
-        text-decoration: none;
-    }
-
-    .attachment-badge i {
-        margin-right: 6px;
-        font-size: 0.9rem;
-        color: var(--choco);
-    }
-
-    .attachment-image-thumb {
-        width: 120px;
-        height: 120px;
-        object-fit: cover;
-        object-position: center;
-        border-radius: 10px;
-        margin: 4px 8px 4px 0;
-        border: 1px solid #e5e7eb;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
-        transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    }
-
-    .attachment-image-thumb:hover {
-        transform: scale(1.03);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-    }
-
-    .timeline .timeline-footer {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-        margin-top: 6px;
-    }
-
-    /* ===== Gambar dari Quill di dalam timeline-body ===== */
-    .timeline .timeline-body img {
-        max-width: 100%;      /* supaya tidak melebar melewati card */
-        height: auto;         /* jaga rasio gambar */
-        display: block;       /* biar bisa dikasih margin lebih rapi */
-        border-radius: 10px;  /* selaras dengan style card & attachment */
-        margin: 6px 0;        /* jarak atas-bawah */
-    }
-
-    /* Tambahan sedikit padding di kanan-kiri konten supaya tidak mepet */
-    .timeline .timeline-item {
-        padding-left: 1rem;
-        padding-right: 1rem;
-    }
-
-    /* Support alignment bawaan Quill */
-    .timeline .timeline-body .ql-align-center img {
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .timeline .timeline-body .ql-align-right img {
-        margin-left: auto;
-        margin-right: 0;
-    }
-
-</style>
-
-
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const btn = document.getElementById('loadMoreTimeline');
-    if (!btn) return;
-
-    const timeline  = document.querySelector('.timeline');
-    const endMarker = document.querySelector('.timeline-end');
-
-    let nextPage = parseInt(btn.dataset.nextPage, 10);
-    const lastPage = parseInt(btn.dataset.lastPage, 10);
-
-    btn.addEventListener('click', function () {
-        if (nextPage > lastPage) return;
-
-        btn.disabled = true;
-        btn.innerText = 'Loading...';
-
-        const url = "{{ route('owner.user-owner.timeline.messages') }}" + "?page=" + nextPage;
-
-        fetch(url)
-            .then(res => res.text())
-            .then(html => {
-                const temp = document.createElement('div');
-                temp.innerHTML = html;
-
-                // --- Cek label tanggal terakhir yang sudah ada di timeline ---
-                const existingLabelSpans = timeline.querySelectorAll('.time-label span');
-                const lastExistingLabelText = existingLabelSpans.length
-                    ? existingLabelSpans[existingLabelSpans.length - 1].textContent.trim()
-                    : null;
-
-                // --- Cek label tanggal pertama di hasil baru ---
-                const firstNewLabelDiv  = temp.querySelector('.time-label');
-                const firstNewLabelSpan = firstNewLabelDiv ? firstNewLabelDiv.querySelector('span') : null;
-                const firstNewLabelText = firstNewLabelSpan ? firstNewLabelSpan.textContent.trim() : null;
-
-                // Kalau label terakhir di timeline == label pertama di hasil baru -> hapus label baru
-                if (lastExistingLabelText && firstNewLabelText &&
-                    lastExistingLabelText === firstNewLabelText &&
-                    firstNewLabelDiv
-                ) {
-                    firstNewLabelDiv.remove();
-                }
-
-                // Ambil semua elemen anak langsung dari partial
-                const items = Array.from(temp.children);
-
-                // Sisipkan sebelum penutup timeline-end (jam abu-abu)
-                items.forEach(el => {
-                    timeline.insertBefore(el, endMarker);
-                });
-
-                nextPage++;
-
-                if (nextPage > lastPage || items.length === 0) {
-                    // Tidak ada page berikutnya -> hapus tombol
-                    btn.remove();
-                } else {
-                    btn.dataset.nextPage = nextPage;
-                    btn.disabled = false;
-                    btn.innerText = 'Load more';
-                }
-            })
-            .catch(() => {
-                btn.disabled = false;
-                btn.innerText = 'Load more';
-            });
-    });
-});
-</script>
-
-
-
 @endsection
 
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // All outlet performance data from backend
+        const allOutletData = @json($data['outletPerformance']);
+        const topProductsData = @json($data['topProducts']);
+        
+        let outletChart = null;
 
+        // Sales Trend Chart (Line Chart)
+        const salesCtx = document.getElementById('salesTrendChart');
+        if (salesCtx) {
+            new Chart(salesCtx, {
+                type: 'line',
+                data: {
+                    labels: @json($data['last7Days']),
+                    datasets: [{
+                        label: '{{ __('messages.owner.dashboard.chart_sales_label') }}',
+                        data: @json($data['salesLast7Days']),
+                        borderColor: 'rgb(174, 21, 4)',
+                        backgroundColor: 'rgba(174, 21, 4, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: 'rgb(174, 21, 4)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            borderRadius: 8,
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Rp ' + context.parsed.y.toLocaleString('id-ID');
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11
+                                },
+                                callback: function(value) {
+                                    if (value >= 1000000) {
+                                        return 'Rp ' + (value / 1000000).toFixed(1) + 'jt';
+                                    } else if (value >= 1000) {
+                                        return 'Rp ' + (value / 1000).toFixed(0) + 'rb';
+                                    }
+                                    return 'Rp ' + value.toLocaleString('id-ID');
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Top 5 Products Chart (Horizontal Bar)
+        const topProductsCtx = document.getElementById('topProductsChart');
+        if (topProductsCtx && topProductsData.length > 0) {
+            const productLabels = topProductsData.map(p => p.product_name);
+            const productQuantities = topProductsData.map(p => p.total_quantity);
+            
+            new Chart(topProductsCtx, {
+                type: 'bar',
+                data: {
+                    labels: productLabels,
+                    datasets: [{
+                        label: '{{ __('messages.owner.dashboard.chart_quantity_label') }}',
+                        data: productQuantities,
+                        backgroundColor: '#ae1504',
+                        borderRadius: 6,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            borderRadius: 8,
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    const index = context.dataIndex;
+                                    const quantity = topProductsData[index].total_quantity;
+                                    const revenue = topProductsData[index].total_revenue;
+                                    return [
+                                        '{{ __('messages.owner.dashboard.chart_tooltip_sold') }}: ' + quantity.toLocaleString('id-ID') + ' {{ __('messages.owner.dashboard.chart_item') }}',
+                                        '{{ __('messages.owner.dashboard.chart_tooltip_revenue') }}: Rp ' + revenue.toLocaleString('id-ID')
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } else if (topProductsCtx) {
+            // Show empty state
+            const ctx = topProductsCtx.getContext('2d');
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#999';
+            ctx.textAlign = 'center';
+            ctx.fillText('{{ __('messages.owner.dashboard.chart_empty_products') }}', topProductsCtx.width / 2, topProductsCtx.height / 2);
+        }
+
+        // Function to update outlet chart
+// Function to update outlet chart
+        function updateOutletChart() {
+            const filterType = document.getElementById('outletFilterType').value;
+            const filterCount = 5; // Fixed at 5 outlets
+
+            let filteredData = [...allOutletData];
+            
+            // LOGIKA SORTING DIUBAH DI SINI
+            if (filterType === 'top') {
+                // Filter Terbaik: Urutkan dari Besar ke Kecil
+                // Index 0 (Paling Atas) = Penjualan Terbesar
+                filteredData = filteredData
+                    .sort((a, b) => b.total_sales - a.total_sales)
+                    .slice(0, filterCount);
+            } else {
+                // Filter Terburuk: Urutkan dari Kecil ke Besar
+                // Index 0 (Paling Atas) = Penjualan Terkecil
+                filteredData = filteredData
+                    .sort((a, b) => a.total_sales - b.total_sales)
+                    .slice(0, filterCount);
+                // Kita TIDAK menggunakan .reverse() disini agar yang paling kecil tetap di index 0 (paling atas)
+            }
+
+            const labels = filteredData.map(d => d.partner_name);
+            const data = filteredData.map(d => d.total_sales);
+            const colors = filteredData.map(() => 
+                filterType === 'top' ? '#10b981' : '#ef4444'
+            );
+
+            // Destroy existing chart
+            if (outletChart) {
+                outletChart.destroy();
+            }
+
+            // Create new chart
+            const outletCtx = document.getElementById('outletPerformanceChart');
+            if (outletCtx) {
+                outletChart = new Chart(outletCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: '{{ __('messages.owner.dashboard.chart_sales_label') }}',
+                            data: data,
+                            backgroundColor: colors,
+                            borderRadius: 6,
+                            borderSkipped: false
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                padding: 12,
+                                borderRadius: 8,
+                                titleFont: {
+                                    size: 14,
+                                    weight: 'bold'
+                                },
+                                bodyFont: {
+                                    size: 13
+                                },
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Rp ' + context.parsed.x.toLocaleString('id-ID');
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    },
+                                    callback: function(value) {
+                                        if (value >= 1000000) {
+                                            return 'Rp ' + (value / 1000000).toFixed(1) + 'jt';
+                                        } else if (value >= 1000) {
+                                            return 'Rp ' + (value / 1000).toFixed(0) + 'rb';
+                                        }
+                                        return 'Rp ' + value.toLocaleString('id-ID');
+                                    }
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Initial chart render
+        updateOutletChart();
+
+        // Add event listener to filter
+        document.getElementById('outletFilterType').addEventListener('change', updateOutletChart);
+    });
+</script>
+@endpush

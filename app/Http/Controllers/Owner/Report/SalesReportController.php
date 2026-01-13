@@ -41,8 +41,10 @@ class SalesReportController extends Controller
             'totalBookingOrders' => $this->calculateTotalDiscreetOrders(clone $baseQuery),
             'revenueChartData'   => $this->getRevenueChartData(clone $baseQuery, $filters['period']),
             'categoryChartData'  => $this->getCategoryChartData(clone $baseQuery),
-            'topProducts'        => $this->getTopProducts(clone $baseQuery, $filters),
-            'recentTransactions' => $this->getRecentTransactions(clone $baseQuery),
+            'topProducts'        => $this->getTopProducts(clone $baseQuery, $filters, 10),
+            'topProductsChart'   => $this->getTopProductsChartData(clone $baseQuery),
+            'paymentMethodChart' => $this->getPaymentMethodChartData(clone $baseQuery),
+            'paymentRevenueChart' => $this->getPaymentRevenueChartData(clone $baseQuery),
             'indicatorText'      => $this->getIndicatorText($filters),
             'filters'            => $filters,
         ];
@@ -58,33 +60,6 @@ class SalesReportController extends Controller
         $products = $this->getTopProducts(clone $baseQuery, $filters);
 
         return response()->json($products);
-    }
-
-    public function getOrderDetails(Request $request, $id)
-    {
-        $orderDetails = DB::table('order_details')
-            ->join('partner_products', 'order_details.partner_product_id', '=', 'partner_products.id')
-            ->where('booking_order_id', $id)
-            ->select(
-                'order_details.id as order_detail_id',
-                'partner_products.name',
-                'order_details.quantity',
-                'order_details.base_price',
-                'order_details.options_price'
-            )
-            ->get();
-
-        foreach ($orderDetails as $detail) {
-            $options = DB::table('order_detail_options')
-                ->where('order_detail_id', $detail->order_detail_id)
-                ->join('partner_product_options', 'order_detail_options.option_id', '=', 'partner_product_options.id')
-                ->select('partner_product_options.name', 'order_detail_options.price')
-                ->get();
-
-            $detail->options = $options;
-        }
-
-        return response()->json($orderDetails);
     }
 
     public function export(Request $request)
@@ -149,7 +124,7 @@ class SalesReportController extends Controller
             ->join('categories', 'partner_products.category_id', '=', 'categories.id')
             ->select(
                 'categories.category_name as label',
-                DB::raw('SUM((order_details.base_price + order_details.options_price) * order_details.quantity) as total')
+                DB::raw('SUM(order_details.quantity) as total')
             )
             ->groupBy('categories.category_name')
             ->orderBy('total', 'desc')
@@ -161,37 +136,106 @@ class SalesReportController extends Controller
         ];
     }
 
-    private function getTopProducts(Builder $query, array $filters, ?int $paginate = null)
+    private function getTopProductsChartData(Builder $query): array
     {
-        $sortDirection = $filters['sort_products'] === 'asc' ? 'asc' : 'desc';
-
-        $query = $query
+        $result = $query
             ->join('order_details', 'booking_orders.id', '=', 'order_details.booking_order_id')
             ->join('partner_products', 'order_details.partner_product_id', '=', 'partner_products.id')
             ->select(
-                'partner_products.name',
-                DB::raw('SUM((order_details.base_price + order_details.options_price) * order_details.quantity) as total_sales'),
-                DB::raw('SUM(order_details.quantity) as total_quantity')
+                'partner_products.name as label',
+                DB::raw('SUM(order_details.quantity) as total')
             )
             ->groupBy('partner_products.name')
-            ->orderBy('total_quantity', $sortDirection);
+            ->orderBy('total', 'desc')
+            ->limit(5)
+            ->get();
 
-        if ($paginate) {
-            return $query->paginate($paginate)->withQueryString();
+        return [
+            'labels' => $result->pluck('label'),
+            'data' => $result->pluck('total')
+        ];
+    }
+
+    private function getPaymentMethodChartData(Builder $query): array
+    {
+        $result = $query
+            ->select(
+                DB::raw("CASE 
+                    WHEN payment_method = 'cash' THEN 'Cash'
+                    WHEN payment_method = 'qris' THEN 'QRIS'
+                    ELSE 'Lainnya'
+                END as label"),
+                DB::raw('COUNT(*) as total')
+            )
+            ->groupBy('label')
+            ->get();
+
+        return [
+            'labels' => $result->pluck('label'),
+            'data' => $result->pluck('total')
+        ];
+    }
+
+    private function getPaymentRevenueChartData(Builder $query): array
+    {
+        $result = $query
+            ->select(
+                DB::raw("CASE 
+                    WHEN payment_method = 'cash' THEN 'Cash'
+                    WHEN payment_method = 'qris' THEN 'QRIS'
+                    ELSE 'Lainnya'
+                END as label"),
+                DB::raw('SUM(total_order_value) as total')
+            )
+            ->groupBy('label')
+            ->get();
+
+        return [
+            'labels' => $result->pluck('label'),
+            'data' => $result->pluck('total')
+        ];
+    }
+
+    private function getTopProducts(Builder $query, array $filters, ?int $paginate = null)
+    {
+        $sortDirection = $filters['sort_products'] === 'asc' ? 'asc' : 'desc';
+        $isAllOutlets = empty($filters['partner_id']);
+
+        $query = $query
+            ->join('order_details', 'booking_orders.id', '=', 'order_details.booking_order_id')
+            ->join('partner_products', 'order_details.partner_product_id', '=', 'partner_products.id');
+
+        if ($isAllOutlets) {
+            $query->select(
+                'partner_products.name',
+                DB::raw('MIN(partner_products.pictures) as pictures'),
+                DB::raw('SUM((order_details.base_price + order_details.options_price) * order_details.quantity) as total_sales'),
+                DB::raw('SUM(order_details.quantity) as total_quantity')
+            )->groupBy('partner_products.name');
+        } else {
+            $query->select(
+                'partner_products.id',
+                'partner_products.name',
+                'partner_products.pictures',
+                'partner_products.is_hot_product',
+                DB::raw('SUM((order_details.base_price + order_details.options_price) * order_details.quantity) as total_sales'),
+                DB::raw('SUM(order_details.quantity) as total_quantity')
+            )->groupBy(
+                'partner_products.id',
+                'partner_products.name',
+                'partner_products.pictures',
+                'partner_products.is_hot_product'
+            );
         }
 
-        return $query->limit(7)->get();
-    }
+        $query->orderBy('total_quantity', $sortDirection);
 
-    private function getRecentTransactions(Builder $query)
-    {
-        return $query
-            ->select('id', 'booking_order_code', 'total_order_value', 'created_at')
-            ->orderBy('created_at', 'desc')
-            ->limit(100)
-            ->get();
-    }
+        if ($paginate) {
+            return $query->paginate($paginate)->withQueryString(); // ✅ Tambahkan ini
+        }
 
+        return $query->get();
+    }
 
     public function buildFilteredQuery(array $filters): Builder
     {
@@ -217,12 +261,17 @@ class SalesReportController extends Controller
                 break;
 
             case 'monthly':
-                $year = $filters['month_year'];
-                $monthFrom = $filters['month_from'];
-                $monthTo = $filters['month_to'];
+                $startDate = Carbon::createFromDate(
+                    $filters['month_from_year'],
+                    $filters['month_from_month'],
+                    1
+                )->startOfMonth();
 
-                $startDate = Carbon::createFromDate($year, $monthFrom, 1)->startOfMonth();
-                $endDate = Carbon::createFromDate($year, $monthTo, 1)->endOfMonth();
+                $endDate = Carbon::createFromDate(
+                    $filters['month_to_year'],
+                    $filters['month_to_month'],
+                    1
+                )->endOfMonth();
 
                 $query->whereBetween('booking_orders.created_at', [$startDate, $endDate]);
                 break;
@@ -257,7 +306,7 @@ class SalesReportController extends Controller
             ->orderBy('filtered_orders.created_at', 'asc');
     }
 
- 
+
     private function getFilters(Request $request): array
     {
         $period = $request->input('period', 'daily');
@@ -272,9 +321,19 @@ class SalesReportController extends Controller
                 break;
 
             case 'monthly':
-                $filters['month_year'] = $request->input('month_year', date('Y'));
-                $filters['month_from'] = $request->input('month_from', 1);
-                $filters['month_to'] = $request->input('month_to', date('n'));
+                $monthFrom = $request->input('month_from', date('Y-m'));
+                $monthTo = $request->input('month_to', date('Y-m'));
+
+                $fromParts = explode('-', $monthFrom);
+                $toParts = explode('-', $monthTo);
+
+                $filters['month_from'] = $monthFrom;
+                $filters['month_to'] = $monthTo;
+
+                $filters['month_from_year'] = $fromParts[0] ?? date('Y');
+                $filters['month_from_month'] = $fromParts[1] ?? '01';
+                $filters['month_to_year'] = $toParts[0] ?? date('Y');
+                $filters['month_to_month'] = $toParts[1] ?? '12';
                 break;
 
             default:
@@ -327,28 +386,37 @@ class SalesReportController extends Controller
     private function getMonthlyIndicatorText(array $filters): string
     {
         $monthNames = [
-            1 => 'Januari',
-            2 => 'Februari',
-            3 => 'Maret',
-            4 => 'April',
-            5 => 'Mei',
-            6 => 'Juni',
-            7 => 'Juli',
-            8 => 'Agustus',
-            9 => 'September',
-            10 => 'Oktober',
-            11 => 'November',
-            12 => 'Desember'
+            '01' => 'Januari',
+            '02' => 'Februari',
+            '03' => 'Maret',
+            '04' => 'April',
+            '05' => 'Mei',
+            '06' => 'Juni',
+            '07' => 'Juli',
+            '08' => 'Agustus',
+            '09' => 'September',
+            '10' => 'Oktober',
+            '11' => 'November',
+            '12' => 'Desember'
         ];
 
-        $year = $filters['month_year'];
-        $monthFrom = $monthNames[$filters['month_from']] ?? 'Januari';
-        $monthTo = $monthNames[$filters['month_to']] ?? 'Desember';
+        $fromParts = explode('-', $filters['month_from']);
+        $toParts = explode('-', $filters['month_to']);
 
-        if ($filters['month_from'] == $filters['month_to']) {
-            return "Tampilan Bulanan ({$monthFrom} {$year})";
+        $yearFrom = $fromParts[0] ?? date('Y');
+        $monthFrom = $monthNames[$fromParts[1]] ?? 'Januari';
+
+        $yearTo = $toParts[0] ?? date('Y');
+        $monthTo = $monthNames[$toParts[1]] ?? 'Desember';
+
+        if ($filters['month_from'] === $filters['month_to']) {
+            return "Tampilan Bulanan ({$monthFrom} {$yearFrom})";
         }
 
-        return "Tampilan Bulanan ({$monthFrom} - {$monthTo} {$year})";
+        if ($yearFrom === $yearTo) {
+            return "Tampilan Bulanan ({$monthFrom} - {$monthTo} {$yearFrom})";
+        }
+
+        return "Tampilan Bulanan ({$monthFrom} {$yearFrom} - {$monthTo} {$yearTo})";
     }
 }

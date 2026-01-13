@@ -4,229 +4,298 @@
 @section('page_title', __('messages.owner.products.stocks.movements_transfer.page_title'))
 
 @section('content')
-    <section class="content">
-        <div class="container-fluid owner-stocks">
-            <a href="{{ route('owner.user-owner.stocks.index') }}" class="btn btn-primary mb-3">
-                <i class="fas fa-arrow-left mr-2"></i>{{ __('messages.owner.products.stocks.back_to_list') }}
-            </a>
-            <form action="{{ route('owner.user-owner.stocks.movements.store') }}" method="POST" id="stockMovementForm">
-                @csrf
-                <input type="hidden" name="movement_type" value="transfer" id="movement_type">
+    <div class="modern-container">
+        <div class="container-modern">
+            <!-- Header Section -->
+            <div class="page-header">
+                <div class="header-content">
+                    <h1 class="page-title">{{ __('messages.owner.products.stocks.movements_transfer.page_title') }}</h1>
+                    <p class="page-subtitle">{{ __('messages.owner.products.stocks.movements_transfer.subtitle') }}</p>
+                </div>
+               <a href="{{ route('owner.user-owner.stocks.index') }}" class="back-button">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    {{ __('messages.owner.products.stocks.back') }}
+                </a>
+            </div>
 
-                {{-- CARD 1: DETAIL TRANSAKSI --}}
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            {{ __('messages.owner.products.stocks.movements_transfer.card_transaction_title') }}
-                        </h3>
+            <!-- Error Messages -->
+            @if ($errors->any())
+                <div class="alert alert-danger alert-modern">
+                    <div class="alert-icon">
+                        <span class="material-symbols-outlined">error</span>
                     </div>
-                    <div class="card-body">
-                        <div class="row">
-                            {{-- Lokasi Asal (FROM) --}}
+                    <div class="alert-content">
+                        <strong>{{ __('messages.owner.user_management.employees.recheck_input') }}:</strong>
+                        <ul class="mb-0 mt-2">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            @endif
+
+            @if (session('success'))
+                <div class="alert alert-success alert-modern">
+                    <div class="alert-icon">
+                        <span class="material-symbols-outlined">check_circle</span>
+                    </div>
+                    <div class="alert-content">
+                        {{ session('success') }}
+                    </div>
+                </div>
+            @endif
+
+            <!-- Main Card -->
+            <div class="modern-card">
+                <form action="{{ route('owner.user-owner.stocks.movements.store') }}" method="POST" id="stockMovementForm">
+                    @csrf
+                    <input type="hidden" name="movement_type" value="transfer" id="movement_type">
+                    <input type="hidden" name="category" value="transfer">
+
+                    <div class="card-body-modern">
+                        <!-- Transaction Details Section -->
+                        <div class="section-header">
+                            <div class="section-icon section-icon-red">
+                                <span class="material-symbols-outlined">swap_horiz</span>
+                            </div>
+                            <h3 class="section-title">{{ __('messages.owner.products.stocks.movements_transfer.card_transaction_title') }}</h3>
+                        </div>
+
+                        <div class="row g-4">
+                            <!-- Source Location -->
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="location_from">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">
                                         {{ __('messages.owner.products.stocks.movements_transfer.location_from_label') }}
                                         <span class="text-danger">*</span>
                                     </label>
-                                    <select name="location_from" id="location_from" class="form-control" required>
-                                        <option value="_owner">
-                                            {{ __('messages.owner.products.stocks.movements_transfer.location_owner_option') }}
-                                        </option>
-                                        @foreach ($partners as $partner)
-                                            <option value="{{ $partner->id }}">{{ $partner->name }}</option>
-                                        @endforeach
-                                    </select>
+                                    <div class="select-wrapper">
+                                        <select name="location_from" id="location_from"
+                                            class="form-control-modern @error('location_from') is-invalid @enderror"
+                                            required>
+                                            <option value="_owner">
+                                                {{ __('messages.owner.products.stocks.movements_transfer.location_owner_option') }}
+                                            </option>
+                                            @foreach ($partners as $partner)
+                                                <option value="{{ $partner->id }}">{{ $partner->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        <span class="material-symbols-outlined select-arrow">expand_more</span>
+                                    </div>
+                                    @error('location_from')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
 
-                            {{-- Lokasi Tujuan (TO) --}}
+                            <!-- Destination Location -->
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="location_to">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">
                                         {{ __('messages.owner.products.stocks.movements_transfer.location_to_label') }}
                                         <span class="text-danger">*</span>
                                     </label>
-                                    <select name="location_to" id="location_to" class="form-control" required>
-                                        <option value="_owner">
-                                            {{ __('messages.owner.products.stocks.movements_transfer.location_owner_option') }}
-                                        </option>
-                                        @foreach ($partners as $partner)
-                                            <option value="{{ $partner->id }}">{{ $partner->name }}</option>
-                                        @endforeach
-                                    </select>
+                                    <div class="select-wrapper">
+                                        <select name="location_to" id="location_to"
+                                            class="form-control-modern @error('location_to') is-invalid @enderror"
+                                            required>
+                                            <option value="_owner">
+                                                {{ __('messages.owner.products.stocks.movements_transfer.location_owner_option') }}
+                                            </option>
+                                            @foreach ($partners as $partner)
+                                                <option value="{{ $partner->id }}">{{ $partner->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        <span class="material-symbols-outlined select-arrow">location_on</span>
+                                    </div>
+                                    @error('location_to')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
 
-                            {{-- Kategori (Hidden untuk transfer, selalu 'transfer') --}}
-                            <input type="hidden" name="category" value="transfer">
-
-                            {{-- Catatan --}}
+                            <!-- Notes -->
                             <div class="col-md-12">
-                                <div class="form-group">
-                                    <label for="notes">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">
                                         {{ __('messages.owner.products.stocks.movements_transfer.notes_label') }}
                                     </label>
-                                    <input type="text" name="notes" id="notes" class="form-control"
+                                    <input type="text" name="notes" id="notes"
+                                        class="form-control-modern @error('notes') is-invalid @enderror"
                                         placeholder="{{ __('messages.owner.products.stocks.movements_transfer.notes_placeholder') }}">
+                                    @error('notes')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                {{-- CARD 2: ITEM TRANSAKSI --}}
-                <div class="card shadow-sm">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            {{ __('messages.owner.products.stocks.movements_transfer.card_items_title') }}
-                        </h3>
-                    </div>
-                    <div class="card-body">
+                        <!-- Divider -->
+                        <div class="section-divider"></div>
+
+                        <!-- Items Section -->
+                        <div class="section-header">
+                            <div class="section-icon section-icon-red">
+                                <span class="material-symbols-outlined">inventory_2</span>
+                            </div>
+                            <h3 class="section-title">{{ __('messages.owner.products.stocks.movements_transfer.card_items_title') }}</h3>
+                        </div>
+
                         <div id="item-repeater-container">
-                            {{-- Item pertama --}}
-                            <div class="row repeater-item mb-3">
+                            <!-- First Item Row -->
+                            <div class="row repeater-item g-3 mb-3">
                                 <div class="col-md-5">
-                                    <label>
-                                        {{ __('messages.owner.products.stocks.movements_transfer.item_stock_label') }}
-                                        <span class="text-danger">*</span>
-                                    </label>
-                                    <select name="items[0][stock_id]" class="form-control stock-select" required>
-                                        <option value="">
-                                            {{ __('messages.owner.products.stocks.movements_transfer.item_stock_placeholder') }}
-                                        </option>
-                                        @foreach ($stocks as $stock)
-                                            <option value="{{ $stock->id }}"
-                                                data-location-id="{{ $stock->partner_id ?? '_owner' }}"
-                                                data-unit-group="{{ $stock->displayUnit->group_label ?? 'pcs' }}"
-                                                data-display-unit-id="{{ $stock->displayUnit->id ?? '' }}"
-                                                data-current-qty="{{ number_format($stock->display_quantity ?? 0, 2) }}"
-                                                data-current-unit="{{ $stock->displayUnit->unit_name ?? __('messages.owner.products.stocks.movements_transfer.current_stock_unit_default') }}">
-                                                {{ $stock->stock_name }}
-                                                ({{ $stock->partner->name ?? __('messages.owner.products.stocks.movements_transfer.location_owner_option') }})
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <div class="current-stock-info text-muted small mt-1" style="display: none;"></div>
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            {{ __('messages.owner.products.stocks.movements_transfer.item_stock_label') }}
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="select-wrapper">
+                                            <select name="items[0][stock_id]" class="form-control-modern stock-select" required>
+                                                <option value="">
+                                                    {{ __('messages.owner.products.stocks.movements_transfer.item_stock_placeholder') }}
+                                                </option>
+                                                @foreach ($stocks as $stock)
+                                                    <option value="{{ $stock->id }}"
+                                                        data-location-id="{{ $stock->partner_id ?? '_owner' }}"
+                                                        data-unit-group="{{ $stock->displayUnit->group_label ?? 'pcs' }}"
+                                                        data-display-unit-id="{{ $stock->displayUnit->id ?? '' }}"
+                                                        data-current-qty="{{ number_format($stock->display_quantity ?? 0, 2) }}"
+                                                        data-current-unit="{{ $stock->displayUnit->unit_name ?? __('messages.owner.products.stocks.movements_transfer.current_stock_unit_default') }}">
+                                                        {{ $stock->stock_name }}
+                                                        ({{ $stock->partner->name ?? __('messages.owner.products.stocks.movements_transfer.location_owner_option') }})
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <span class="material-symbols-outlined select-arrow">expand_more</span>
+                                        </div>
+                                        <div class="current-stock-info text-muted small mt-2" style="display: none;"></div>
+                                    </div>
                                 </div>
-                                <div class="col-md-2">
-                                    <label>
-                                        {{ __('messages.owner.products.stocks.movements_transfer.quantity_label') }}
-                                        <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="number" name="items[0][quantity]" class="form-control quantity-input"
-                                        step="0.01"
-                                        placeholder="{{ __('messages.owner.products.stocks.movements_transfer.quantity_placeholder') }}"
-                                        required>
-                                    <div style="height: 21px;"></div>
+                                <div class="col-md-3">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            {{ __('messages.owner.products.stocks.movements_transfer.quantity_label') }}
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="number" name="items[0][quantity]" class="form-control-modern quantity-input"
+                                            step="0.01"
+                                            placeholder="{{ __('messages.owner.products.stocks.movements_transfer.quantity_placeholder') }}"
+                                            required>
+                                    </div>
                                 </div>
-                                <div class="col-md-2">
-                                    <label>
-                                        {{ __('messages.owner.products.stocks.movements_transfer.unit_label') }}
-                                        <span class="text-danger">*</span>
-                                    </label>
-                                    <select name="items[0][unit_id]" class="form-control unit-select" required>
-                                        <option value="">
-                                            {{ __('messages.owner.products.stocks.movements_transfer.unit_placeholder_no_stock') }}
-                                        </option>
-                                    </select>
-                                    <div style="height: 21px;"></div>
+                                <div class="col-md-3">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            {{ __('messages.owner.products.stocks.movements_transfer.unit_label') }}
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="select-wrapper">
+                                            <select name="items[0][unit_id]" class="form-control-modern unit-select" required>
+                                                <option value="">
+                                                    {{ __('messages.owner.products.stocks.movements_transfer.unit_placeholder_no_stock') }}
+                                                </option>
+                                            </select>
+                                            <span class="material-symbols-outlined select-arrow">expand_more</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-md-2 unit-price-group" style="display: none;">
-                                    {{-- Kolom harga disembunyikan untuk transfer --}}
-                                </div>
-                                <div class="col-md-1 d-flex align-items-center" style="padding-top: 32px;">
-                                    {{-- Tombol Hapus tidak ada untuk item pertama --}}
+                                <div class="col-md-1 d-flex align-items-end">
+                                    <!-- First row has no delete button -->
                                 </div>
                             </div>
                         </div>
 
-                        {{-- Tombol Tambah Item --}}
-                        <button type="button" id="btn-add-item" class="btn btn-sm btn-outline-primary mt-2">
-                            <i class="fas fa-plus"></i>
+                        <button type="button" id="btn-add-item" class="btn-modern btn-sm-modern btn-secondary-modern" disabled>
+                            <span class="material-symbols-outlined">add_circle</span>
                             {{ __('messages.owner.products.stocks.movements_transfer.add_item_button') }}
                         </button>
                     </div>
-                </div>
 
-                {{-- Tombol Aksi --}}
-                <div class="mt-4 mb-4">
-                    <button type="submit" class="btn btn-info" id="btn-submit" disabled>
-                        <i class="fas fa-save"></i>
-                        {{ __('messages.owner.products.stocks.movements_transfer.submit_button') }}
-                    </button>
-
-                </div>
-            </form>
+                    <!-- Card Footer -->
+                    <div class="card-footer-modern">
+                        <a href="{{ route('owner.user-owner.stocks.index') }}" class="btn-cancel-modern">
+                            {{ __('messages.owner.user_management.employees.cancel') }}
+                        </a>
+                        <button type="submit" class="btn-submit-modern" id="btn-submit" disabled>
+                            {{ __('messages.owner.products.stocks.movements_transfer.submit_button') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </section>
+    </div>
 
-    {{-- TEMPLATE --}}
+    <!-- Item Template -->
     <template id="item-repeater-template">
-        <div class="row repeater-item mb-3">
+        <div class="row repeater-item g-3 mb-3 position-relative">
             <div class="col-md-5">
-                <label>
-                    {{ __('messages.owner.products.stocks.movements_transfer.item_stock_label') }}
-                    <span class="text-danger">*</span>
-                </label>
-                <select name="items[__INDEX__][stock_id]" class="form-control stock-select" required>
-                    <option value="">
-                        {{ __('messages.owner.products.stocks.movements_transfer.item_stock_placeholder') }}
-                    </option>
-                    @foreach ($stocks as $stock)
-                        <option value="{{ $stock->id }}" data-location-id="{{ $stock->partner_id ?? '_owner' }}"
-                            data-unit-group="{{ $stock->displayUnit->group_label ?? 'pcs' }}"
-                            data-display-unit-id="{{ $stock->displayUnit->id ?? '' }}"
-                            data-current-qty="{{ number_format($stock->display_quantity ?? 0, 2) }}"
-                            data-current-unit="{{ $stock->displayUnit->unit_name ?? __('messages.owner.products.stocks.movements_transfer.current_stock_unit_default') }}">
-                            {{ $stock->stock_name }}
-                            ({{ $stock->partner->name ?? __('messages.owner.products.stocks.movements_transfer.location_owner_option') }})
-                        </option>
-                    @endforeach
-                </select>
-                <div class="current-stock-info text-muted small mt-1" style="display: none;"></div>
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        {{ __('messages.owner.products.stocks.movements_transfer.item_stock_label') }}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <div class="select-wrapper">
+                        <select name="items[__INDEX__][stock_id]" class="form-control-modern stock-select" required>
+                            <option value="">
+                                {{ __('messages.owner.products.stocks.movements_transfer.item_stock_placeholder') }}
+                            </option>
+                            @foreach ($stocks as $stock)
+                                <option value="{{ $stock->id }}" 
+                                    data-location-id="{{ $stock->partner_id ?? '_owner' }}"
+                                    data-unit-group="{{ $stock->displayUnit->group_label ?? 'pcs' }}"
+                                    data-display-unit-id="{{ $stock->displayUnit->id ?? '' }}"
+                                    data-current-qty="{{ number_format($stock->display_quantity ?? 0, 2) }}"
+                                    data-current-unit="{{ $stock->displayUnit->unit_name ?? __('messages.owner.products.stocks.movements_transfer.current_stock_unit_default') }}">
+                                    {{ $stock->stock_name }}
+                                    ({{ $stock->partner->name ?? __('messages.owner.products.stocks.movements_transfer.location_owner_option') }})
+                                </option>
+                            @endforeach
+                        </select>
+                        <span class="material-symbols-outlined select-arrow">expand_more</span>
+                    </div>
+                    <div class="current-stock-info text-muted small mt-2" style="display: none;"></div>
+                </div>
             </div>
-            <div class="col-md-2">
-                <label>
-                    {{ __('messages.owner.products.stocks.movements_transfer.quantity_label') }}
-                    <span class="text-danger">*</span>
-                </label>
-                <input type="number" name="items[__INDEX__][quantity]" class="form-control quantity-input" step="0.01"
-                    placeholder="{{ __('messages.owner.products.stocks.movements_transfer.quantity_placeholder') }}"
-                    required>
-                <div style="height: 21px;"></div>
+            <div class="col-md-3">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        {{ __('messages.owner.products.stocks.movements_transfer.quantity_label') }}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <input type="number" name="items[__INDEX__][quantity]" class="form-control-modern quantity-input" step="0.01"
+                        placeholder="{{ __('messages.owner.products.stocks.movements_transfer.quantity_placeholder') }}"
+                        required>
+                </div>
             </div>
-            <div class="col-md-2">
-                <label>
-                    {{ __('messages.owner.products.stocks.movements_transfer.unit_label') }}
-                    <span class="text-danger">*</span>
-                </label>
-                <select name="items[__INDEX__][unit_id]" class="form-control unit-select" required>
-                    <option value="">
-                        {{ __('messages.owner.products.stocks.movements_transfer.unit_placeholder_no_stock') }}
-                    </option>
-                </select>
-                <div style="height: 21px;"></div>
+            <div class="col-md-3">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        {{ __('messages.owner.products.stocks.movements_transfer.unit_label') }}
+                        <span class="text-danger">*</span>
+                    </label>
+                    <div class="select-wrapper">
+                        <select name="items[__INDEX__][unit_id]" class="form-control-modern unit-select" required>
+                            <option value="">
+                                {{ __('messages.owner.products.stocks.movements_transfer.unit_placeholder_no_stock') }}
+                            </option>
+                        </select>
+                        <span class="material-symbols-outlined select-arrow">expand_more</span>
+                    </div>
+                </div>
             </div>
-            <div class="col-md-2 unit-price-group" style="display: none;">
-                {{-- Kolom harga disembunyikan untuk transfer --}}
-            </div>
-            <div class="col-md-1 d-flex align-items-center" style="padding-top: 32px;">
-                <button type="button" class="btn btn-sm btn-danger btn-remove-item">
-                    <i class="fas fa-trash"></i>
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="button" class="btn-remove btn-remove-top">
+                    <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
         </div>
     </template>
-@endsection
 
-@push('scripts')
-    {{-- Kirim data unit dari PHP ke JavaScript --}}
     <script>
         const allUnits = @json($allUnits);
-    </script>
 
-    <script>
         document.addEventListener('DOMContentLoaded', function () {
             const container = document.getElementById('item-repeater-container');
             const template = document.getElementById('item-repeater-template');
@@ -234,6 +303,8 @@
             const locationFrom = document.getElementById('location_from');
             const locationTo = document.getElementById('location_to');
             const form = document.getElementById('stockMovementForm');
+            const submitBtn = document.getElementById('btn-submit');
+            let itemIndex = 1;
 
             if (!container || !template || !btnAddItem || !locationFrom || !locationTo) return;
             if (typeof allUnits === 'undefined') {
@@ -241,9 +312,7 @@
                 return;
             }
 
-            let itemIndex = 1;
-
-            // Filter stok berdasarkan lokasi asal
+            // Filter stocks by source location
             function filterStocksBySourceLocation() {
                 const selectedSource = locationFrom.value;
                 const stockSelects = document.querySelectorAll('.stock-select');
@@ -274,7 +343,7 @@
                 });
             }
 
-            // Update unit dropdown & info stok
+            // Update row info (units and current stock)
             function updateRowInfo(stockSelectElement) {
                 const selectedOption = stockSelectElement.options[stockSelectElement.selectedIndex];
                 const row = stockSelectElement.closest('.repeater-item');
@@ -318,11 +387,10 @@
                 }
             }
 
-            // Update opsi lokasi tujuan (tidak boleh sama dengan asal)
+            // Update destination options (cannot be same as source)
             function updateToOptions() {
                 const selectedFrom = locationFrom.value;
                 const currentTo = locationTo.value;
-
                 let firstValidValue = null;
 
                 Array.from(locationTo.options).forEach(opt => {
@@ -348,83 +416,8 @@
                 }
             }
 
-            // Saat lokasi asal berubah
-            locationFrom.addEventListener('change', function () {
-                updateToOptions();
-                filterStocksBySourceLocation();
-            });
-
-            // Tombol tambah item
-            btnAddItem.addEventListener('click', function () {
-                let templateHTML = template.innerHTML.replace(/__INDEX__/g, itemIndex);
-                const newRow = document.createElement('div');
-                newRow.innerHTML = templateHTML;
-                container.appendChild(newRow.firstElementChild);
-
-                filterStocksBySourceLocation();
-                itemIndex++;
-            });
-
-            // Hapus item
-            container.addEventListener('click', function (e) {
-                if (e.target && (e.target.classList.contains('btn-remove-item') || e.target.closest('.btn-remove-item'))) {
-                    e.target.closest('.repeater-item').remove();
-                }
-            });
-
-            // Saat stok dipilih
-            container.addEventListener('change', function (e) {
-                if (e.target && e.target.classList.contains('stock-select')) {
-                    updateRowInfo(e.target);
-                }
-            });
-
-            // Inisialisasi awal
-            updateToOptions();
-            filterStocksBySourceLocation();
-
-            const firstStockSelect = container.querySelector('.stock-select');
-            if (firstStockSelect && firstStockSelect.value) {
-                updateRowInfo(firstStockSelect);
-            }
-
-            // Konfirmasi submit
-            if (form) {
-                form.addEventListener('submit', function (e) {
-                    e.preventDefault();
-
-                    if (locationFrom.value === locationTo.value) {
-                        Swal.fire(
-                            '{{ __('messages.owner.products.stocks.movements_transfer.validation_same_location_title') }}',
-                            '{{ __('messages.owner.products.stocks.movements_transfer.validation_same_location_text') }}',
-                            'error'
-                        );
-                        return false;
-                    }
-
-                    Swal.fire({
-                        title: '{{ __('messages.owner.products.stocks.movements_transfer.confirm_title') }}',
-                        text: '{{ __('messages.owner.products.stocks.movements_transfer.confirm_text') }}',
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonColor: '#8c1000',
-                        cancelButtonColor: '#6b7280',
-                        confirmButtonText: '{{ __('messages.owner.products.stocks.movements_transfer.confirm_button') }}',
-                        cancelButtonText: '{{ __('messages.owner.products.stocks.movements_transfer.cancel_button') }}',
-                        reverseButtons: true
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            form.submit();
-                        }
-                    });
-                });
-            }
-
-            // Aktifkan tombol submit jika ada perubahan pada form
-            const submitBtn = document.getElementById('btn-submit');
-
+            // Validate form
             function isFormValid() {
-                // lokasi harus beda
                 if (!locationFrom.value || !locationTo.value) return false;
                 if (locationFrom.value === locationTo.value) return false;
 
@@ -450,28 +443,105 @@
                 return valid;
             }
 
-            function updateSubmitButton() {
-                submitBtn.disabled = !isFormValid();
+            // Update button states
+            function updateButtons() {
+                const valid = isFormValid();
+                submitBtn.disabled = !valid;
+                btnAddItem.disabled = !valid;
             }
 
-            // 🔁 Pantau perubahan form
-            form.addEventListener('input', updateSubmitButton);
-            form.addEventListener('change', updateSubmitButton);
-
-            // Saat tambah / hapus item
-            btnAddItem.addEventListener('click', () => {
-                setTimeout(updateSubmitButton, 50);
+            // Event: Source location change
+            locationFrom.addEventListener('change', function () {
+                updateToOptions();
+                filterStocksBySourceLocation();
+                updateButtons();
             });
 
-            container.addEventListener('click', e => {
-                if (e.target.closest('.btn-remove-item')) {
-                    setTimeout(updateSubmitButton, 50);
+            // Event: Destination location change
+            locationTo.addEventListener('change', updateButtons);
+
+            // Event: Add item
+            btnAddItem.addEventListener('click', function () {
+                let templateHTML = template.innerHTML.replace(/__INDEX__/g, itemIndex);
+                const newRow = document.createElement('div');
+                newRow.innerHTML = templateHTML;
+                container.appendChild(newRow.firstElementChild);
+
+                filterStocksBySourceLocation();
+                itemIndex++;
+                setTimeout(updateButtons, 50);
+            });
+
+            // Event: Remove item
+            container.addEventListener('click', function (e) {
+                if (e.target.closest('.btn-remove')) {
+                    e.target.closest('.repeater-item').remove();
+                    setTimeout(updateButtons, 50);
                 }
             });
 
-            // Inisialisasi awal
-            updateSubmitButton();
+            // Event: Stock change
+            container.addEventListener('change', function (e) {
+                if (e.target && e.target.classList.contains('stock-select')) {
+                    updateRowInfo(e.target);
+                }
+            });
 
+            // Event: Form submit
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                if (locationFrom.value === locationTo.value) {
+                    Swal.fire(
+                        '{{ __('messages.owner.products.stocks.movements_transfer.validation_same_location_title') }}',
+                        '{{ __('messages.owner.products.stocks.movements_transfer.validation_same_location_text') }}',
+                        'error'
+                    );
+                    return false;
+                }
+
+                Swal.fire({
+                    title: '{{ __('messages.owner.products.stocks.movements_transfer.confirm_title') }}',
+                    text: '{{ __('messages.owner.products.stocks.movements_transfer.confirm_text') }}',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#8c1000',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: '{{ __('messages.owner.products.stocks.movements_transfer.confirm_button') }}',
+                    cancelButtonText: '{{ __('messages.owner.products.stocks.movements_transfer.cancel_button') }}',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+
+            // Monitor form changes
+            form.addEventListener('input', updateButtons);
+            form.addEventListener('change', updateButtons);
+
+            // Initialize
+            updateToOptions();
+            filterStocksBySourceLocation();
+            const firstStockSelect = container.querySelector('.stock-select');
+            if (firstStockSelect && firstStockSelect.value) {
+                updateRowInfo(firstStockSelect);
+            }
+            updateButtons();
         });
     </script>
-@endpush
+
+    <style>
+        
+
+        .repeater-item {
+            padding: 1rem;
+            background: #f9fafb;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+        }
+
+
+    </style>
+@endsection

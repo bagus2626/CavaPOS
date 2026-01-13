@@ -4,171 +4,371 @@
 @section('page_title', __('messages.partner.outlet.table_management.tables.table_list'))
 
 @section('content')
-@vite(['resources/css/app.css'])
-
-<section class="content">
-  <div class="container-fluid tables-index">
-    <a href="{{ route('partner.store.tables.create') }}" class="btn btn-choco mb-3">
-      <i class="fas fa-plus mr-1"></i> {{ __('messages.partner.outlet.table_management.tables.add_table') }}
-    </a>
-
-    @php
-      $currentClass = request('table_class'); // dari query ?table_class=...
-    @endphp
-
-    <div class="mb-3">
-      {{-- ALL --}}
-      <a href="{{ route('partner.store.tables.index') }}"
-        class="btn btn-outline-choco btn-sm rounded-pill filter-btn {{ $currentClass ? '' : 'active' }}">
-          {{ __('messages.partner.outlet.table_management.tables.all') }}
-      </a>
-
-      {{-- PER CLASS --}}
-      @foreach($table_classes as $table_class)
-        <a href="{{ route('partner.store.tables.index', ['table_class' => $table_class]) }}"
-          class="btn btn-outline-choco btn-sm rounded-pill filter-btn {{ $currentClass === $table_class ? 'active' : '' }}">
-          {{ $table_class }}
-        </a>
-      @endforeach
+<div class="modern-container">
+  <div class="container-modern">
+    <!-- Header Section -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1 class="page-title">{{ __('messages.partner.outlet.table_management.tables.table_list') }}</h1>
+        <p class="page-subtitle">Manage your restaurant tables and seating</p>
+      </div>
     </div>
 
+    <!-- Success Message -->
     @if(session('success'))
-      <div class="alert alert-success">{{ session('success') }}</div>
+      <div class="alert alert-success alert-modern">
+        <div class="alert-icon">
+          <span class="material-symbols-outlined">check_circle</span>
+        </div>
+        <div class="alert-content">
+          {{ session('success') }}
+        </div>
+      </div>
     @endif
 
-    {{-- bungkus display biar CSS page-scope --}}
-    <div class="tables-index__table">
-      @include('pages.partner.store.tables.display')
-    </div>
-    {{-- Pagination --}}
-    <div class="tables-index__pagination mt-3">
-        <div class="d-flex justify-content-end">
-            {{ $tables->withQueryString()->links() }}
+    <!-- Filters & Actions -->
+    <div class="modern-card mb-4">
+      <div class="card-body-modern" style="padding: var(--spacing-lg) var(--spacing-xl);">
+        <div class="table-controls">
+          <!-- Search & Filter -->
+          <div class="search-filter-group">
+            <!-- Search -->
+            <div class="input-wrapper" style="flex: 1; max-width: 400px;">
+              <span class="input-icon">
+                <span class="material-symbols-outlined">search</span>
+              </span>
+              <input type="text" id="searchInput" class="form-control-modern with-icon"
+                placeholder="{{ __('messages.partner.outlet.table_management.tables.search_tables') }}">
+            </div>
+
+            <!-- Filter by Table Class -->
+            <div class="select-wrapper" style="min-width: 200px;">
+              <select id="tableClassFilter" class="form-control-modern">
+                <option value="">{{ __('messages.partner.outlet.table_management.tables.all_table_classes') }}</option>
+                @foreach($table_classes as $table_class)
+                  <option value="{{ $table_class }}" {{ (string)($tableClass ?? '') === (string)$table_class ? 'selected' : '' }}>
+                    {{ $table_class }}
+                  </option>
+                @endforeach
+              </select>
+              <span class="material-symbols-outlined select-arrow">expand_more</span>
+            </div>
+          </div>
+
+          <!-- Add Table Button -->
+          <a href="{{ route('partner.store.tables.create') }}" class="btn-modern btn-primary-modern">
+            <span class="material-symbols-outlined">add</span>
+            {{ __('messages.partner.outlet.table_management.tables.add_table') }}
+          </a>
         </div>
+      </div>
     </div>
+
+    <!-- Table Display -->
+    @include('pages.partner.store.tables.display')
+
   </div>
-</section>
-
-<style>
-    /* ==== Tables Index (page scope) ==== */
-:root{
-  /* fallback kalau theme belum ke-load */
-  --choco:#8c1000; --soft-choco:#c12814; --ink:#22272b; --paper:#f7f7f8;
-  --radius:12px; --shadow:0 6px 20px rgba(0,0,0,.08);
-}
-
-/* tombol filter (outline brand) */
-.tables-index .filter-btn{
-  border-width:1.5px; letter-spacing:.2px; transition:.15s ease;
-}
-.tables-index .filter-btn.active{
-  background:var(--choco); border-color:var(--choco); color:#fff;
-  box-shadow:0 6px 14px rgba(140,16,0,.18);
-}
-.tables-index .filter-btn:not(.active){
-  color:var(--choco); border-color:var(--choco); background:transparent;
-}
-.tables-index .filter-btn:not(.active):hover{
-  background: rgba(140,16,0,.08);
-}
-
-/* tabel tampil rapi dan nyambung tema */
-.tables-index__table .table{
-  background:#fff; border-color:#eef1f4;
-  border-radius: var(--radius); overflow:hidden;
-}
-.tables-index__table .table thead th{
-  background:#fff; border-bottom:2px solid #eef1f4;
-  color:#374151; font-weight:600;
-}
-.tables-index__table .table-hover tbody tr:hover{
-  background: rgba(193,40,20,.06); /* soft-choco 6% */
-}
-.tables-index__table .text-muted{ color:#6b7280 !important; }
-
-/* badge status seragam */
-.badge-status{
-  display:inline-flex; align-items:center; gap:.35rem;
-  padding:.35rem .55rem; border-radius:999px;
-  font-weight:600; font-size:.78rem;
-}
-.badge-status--active{ background:var(--choco); color:#fff; }
-.badge-status--inactive{ background:#e5e7eb; color:#374151; }
-
-/* thumbnail gambar (kalau ada foto meja) */
-.tables-index__table .thumb-img{
-  width:56px; height:56px; object-fit:cover;
-  border-radius:12px; border:0; box-shadow:var(--shadow);
-  transition: transform .15s ease, box-shadow .15s ease;
-}
-.tables-index__table a:hover .thumb-img{
-  transform: scale(1.03); box-shadow:0 10px 24px rgba(0,0,0,.12);
-}
-
-/* empty row state */
-.tables-index__table tr.empty-row td{
-  color:#6b7280; background: #fafafa;
-}
-
-/* buttons brand (fallback kalau belum ada di theme) */
-.btn-choco{ background:var(--choco); border-color:var(--choco); color:#fff; }
-.btn-choco:hover{ background:var(--soft-choco); border-color:var(--soft-choco); color:#fff; }
-.btn-outline-choco{ color:var(--choco); border-color:var(--choco); background:#fff; }
-.btn-outline-choco:hover{ color:#fff; background:var(--choco); border-color:var(--choco); }
-
-/* Danger lembut utk delete */
-.btn-soft-danger{
-  background:#fee2e2; color:#991b1b; border-color:#fecaca;
-}
-.btn-soft-danger:hover{
-  background:#fecaca; color:#7f1d1d; border-color:#fca5a5;
-}
-
-/* ===== Pagination Choco Style (Tables Index) ===== */
-.tables-index__pagination .pagination {
-    margin-bottom: 0;
-    gap: .25rem;
-}
-
-.tables-index__pagination .page-item .page-link {
-    color: var(--choco);
-    border-radius: 999px;
-    padding: .35rem .75rem;
-    font-weight: 600;
-    font-size: .85rem;
-    border: 1px solid #e5e7eb;
-    background-color: #fff;
-    transition: all .15s ease;
-}
-
-.tables-index__pagination .page-item .page-link:hover {
-    background-color: var(--choco);
-    color: #fff;
-    border-color: var(--choco);
-    box-shadow: 0 6px 14px rgba(140,16,0,.18);
-}
-
-.tables-index__pagination .page-item.active .page-link {
-    background-color: var(--choco);
-    border-color: var(--choco);
-    color: #fff;
-    box-shadow: 0 6px 14px rgba(140,16,0,.18);
-}
-
-.tables-index__pagination .page-item.disabled .page-link {
-    color: #9ca3af;
-    background-color: #f3f4f6;
-    border-color: #e5e7eb;
-    box-shadow: none;
-    cursor: not-allowed;
-}
-
-
-</style>
+</div>
 @endsection
 
 @push('scripts')
-@vite(['resources/js/app.js'])
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  // ==========================================
+  // TABLE INDEX - SEARCH & FILTER (NO RELOAD)
+  // ==========================================
+  document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('searchInput');
+    const tableClassFilter = document.getElementById('tableClassFilter');
+    const tableBody = document.getElementById('tableTableBody');
+    const paginationWrapper = document.querySelector('.table-pagination');
+
+    if (!tableBody) {
+      console.error('Table body not found');
+      return;
+    }
+
+    // Ambil semua data dari Blade
+    const allTablesData = @json($allTablesFormatted ?? []);
+    
+    let filteredTables = [...allTablesData];
+    const itemsPerPage = 10;
+    let currentPage = 1;
+
+    // ==========================================
+    // FILTER FUNCTION
+    // ==========================================
+    function filterTables() {
+      const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+      const selectedClass = tableClassFilter ? tableClassFilter.value.trim() : '';
+
+      filteredTables = allTablesData.filter(table => {
+        // Search: cari di table_no, table_class, description
+        const searchText = `
+          ${table.table_no || ''} 
+          ${table.table_class || ''} 
+          ${table.description || ''}
+        `.toLowerCase();
+        
+        const matchesSearch = !searchTerm || searchText.includes(searchTerm);
+
+        // Table class filter
+        const matchesClass = !selectedClass || table.table_class === selectedClass;
+
+        return matchesSearch && matchesClass;
+      });
+
+      currentPage = 1; // Reset ke halaman pertama
+      renderTable();
+    }
+
+    // ==========================================
+    // RENDER TABLE
+    // ==========================================
+    function renderTable() {
+      // Hitung pagination
+      const totalPages = Math.ceil(filteredTables.length / itemsPerPage);
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const currentTables = filteredTables.slice(startIndex, endIndex);
+
+      // Clear table
+      tableBody.innerHTML = '';
+
+      // Render rows
+      if (currentTables.length === 0) {
+        tableBody.innerHTML = `
+          <tr class="empty-filter-row">
+            <td colspan="8" style="text-align: center; padding: 3rem;">
+              <div class="table-empty-state">
+                <span class="material-symbols-outlined" style="font-size: 4rem; color: #ccc; display: block; margin-bottom: 1rem;">search_off</span>
+                <h4 style="margin: 0 0 0.5rem 0; color: #666; font-size: 1.25rem;">No results found</h4>
+                <p style="margin: 0; color: #999;">Try adjusting your search or filter</p>
+              </div>
+            </td>
+          </tr>
+        `;
+      } else {
+        currentTables.forEach((table, index) => {
+          const rowNumber = startIndex + index + 1;
+          const row = createTableRow(table, rowNumber);
+          tableBody.appendChild(row);
+        });
+      }
+
+      // Handle pagination visibility
+      if (paginationWrapper) {
+        if (filteredTables.length <= itemsPerPage) {
+          paginationWrapper.style.display = 'none';
+        } else {
+          paginationWrapper.style.display = '';
+          renderPagination(totalPages);
+        }
+      }
+    }
+
+    // ==========================================
+    // CREATE TABLE ROW
+    // ==========================================
+    function createTableRow(table, rowNumber) {
+      const tr = document.createElement('tr');
+      tr.className = 'table-row';
+      tr.setAttribute('data-category', table.table_class || '');
+
+      // Format status badge
+      let statusBadge = '<span class="text-muted">-</span>';
+      if (table.status === 'available') {
+        statusBadge = '<span class="badge-modern badge-success">{{ __("messages.partner.outlet.table_management.tables.available") }}</span>';
+      } else if (table.status === 'occupied') {
+        statusBadge = '<span class="badge-modern badge-warning">{{ __("messages.partner.outlet.table_management.tables.occupied") }}</span>';
+      } else if (table.status === 'reserved') {
+        statusBadge = '<span class="badge-modern badge-info">{{ __("messages.partner.outlet.table_management.tables.reserved") }}</span>';
+      } else if (table.status === 'not_available') {
+        statusBadge = '<span class="badge-modern badge-danger">{{ __("messages.partner.outlet.table_management.tables.not_available") }}</span>';
+      }
+
+      // Format images
+      let imagesHtml = '<span class="text-muted">{{ __("messages.partner.outlet.table_management.tables.no_images") }}</span>';
+      if (table.images && Array.isArray(table.images) && table.images.length > 0) {
+        const validImages = table.images.filter(img => img && img.path);
+        if (validImages.length > 0) {
+          imagesHtml = '<div class="table-images-cell">';
+          validImages.forEach(image => {
+            const src = `{{ asset('') }}${image.path}`;
+            imagesHtml += `
+              <a href="${src}" target="_blank" rel="noopener" class="table-image-link">
+                <img src="${src}" alt="${image.filename || 'Table'}" class="table-thumbnail" loading="lazy">
+              </a>
+            `;
+          });
+          imagesHtml += '</div>';
+        }
+      }
+
+      // URLs
+      const showUrl = `/partner/store/tables/${table.id}`;
+      const editUrl = `/partner/store/tables/${table.id}/edit`;
+
+      tr.innerHTML = `
+        <td class="text-center text-muted">${rowNumber}</td>
+        <td>
+          <div class="cell-with-icon">
+            <span class="fw-600">${table.table_no || '-'}</span>
+          </div>
+        </td>
+        <td>
+          <span class="text-secondary">${table.table_class || '-'}</span>
+        </td>
+        <td>
+          <span class="text-secondary">${table.description || '-'}</span>
+        </td>
+        <td class="text-center">
+          ${statusBadge}
+        </td>
+        <td class="text-center">
+          ${imagesHtml}
+        </td>
+        <td class="text-center">
+          <button onclick="generateBarcode(${table.id})" 
+            class="btn-table-action primary" 
+            title="{{ __('messages.partner.outlet.table_management.tables.table_barcode') }}">
+            <span class="material-symbols-outlined">qr_code</span>
+          </button>
+        </td>
+        <td class="text-center">
+          <div class="table-actions">
+            <a href="${showUrl}" class="btn-table-action view" title="Detail">
+              <span class="material-symbols-outlined">visibility</span>
+            </a>
+            <a href="${editUrl}" class="btn-table-action edit" title="{{ __('messages.partner.outlet.table_management.tables.edit') }}">
+              <span class="material-symbols-outlined">edit</span>
+            </a>
+            <button onclick="deleteTable(${table.id})" 
+              class="btn-table-action delete"
+              title="{{ __('messages.partner.outlet.table_management.tables.delete') }}">
+              <span class="material-symbols-outlined">delete</span>
+            </button>
+          </div>
+        </td>
+      `;
+
+      return tr;
+    }
+
+    // ==========================================
+    // RENDER PAGINATION
+    // ==========================================
+    function renderPagination(totalPages) {
+      if (!paginationWrapper) return;
+
+      paginationWrapper.innerHTML = '';
+
+      const nav = document.createElement('nav');
+      nav.setAttribute('role', 'navigation');
+      nav.setAttribute('aria-label', 'Pagination Navigation');
+      
+      const ul = document.createElement('ul');
+      ul.className = 'pagination';
+
+      // Previous Button
+      const prevLi = document.createElement('li');
+      prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+      
+      if (currentPage === 1) {
+        prevLi.innerHTML = `
+          <span class="page-link" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
+            </svg>
+          </span>
+        `;
+      } else {
+        prevLi.innerHTML = `
+          <a href="#" class="page-link" data-page="${currentPage - 1}" aria-label="Previous">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
+            </svg>
+          </a>
+        `;
+      }
+      ul.appendChild(prevLi);
+
+      // Page Numbers
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+          const pageLi = document.createElement('li');
+          pageLi.className = `page-item ${i === currentPage ? 'active' : ''}`;
+          
+          if (i === currentPage) {
+            pageLi.innerHTML = `<span class="page-link" aria-current="page">${i}</span>`;
+          } else {
+            pageLi.innerHTML = `<a href="#" class="page-link" data-page="${i}">${i}</a>`;
+          }
+          
+          ul.appendChild(pageLi);
+        } else if (i === currentPage - 2 || i === currentPage + 2) {
+          const dotsLi = document.createElement('li');
+          dotsLi.className = 'page-item disabled';
+          dotsLi.innerHTML = `<span class="page-link">...</span>`;
+          ul.appendChild(dotsLi);
+        }
+      }
+
+      // Next Button
+      const nextLi = document.createElement('li');
+      nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+      
+      if (currentPage === totalPages) {
+        nextLi.innerHTML = `
+          <span class="page-link" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
+            </svg>
+          </span>
+        `;
+      } else {
+        nextLi.innerHTML = `
+          <a href="#" class="page-link" data-page="${currentPage + 1}" aria-label="Next">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
+            </svg>
+          </a>
+        `;
+      }
+      ul.appendChild(nextLi);
+
+      nav.appendChild(ul);
+      paginationWrapper.appendChild(nav);
+
+      // Add click handlers
+      nav.querySelectorAll('a.page-link[data-page]').forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const page = parseInt(this.dataset.page);
+          if (page > 0 && page <= totalPages && page !== currentPage) {
+            currentPage = page;
+            renderTable();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        });
+      });
+    }
+
+    // ==========================================
+    // EVENT LISTENERS
+    // ==========================================
+    if (searchInput) {
+      searchInput.addEventListener('input', filterTables);
+    }
+
+    if (tableClassFilter) {
+      tableClassFilter.addEventListener('change', filterTables);
+    }
+
+    // ==========================================
+    // INITIALIZE
+    // ==========================================
+    renderTable();
+  });
+</script>
 @endpush
