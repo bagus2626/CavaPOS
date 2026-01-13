@@ -632,3 +632,12 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    // Hapus cart dari localStorage jika order sudah dibayar
+    @if($order->order_status !== 'UNPAID')
+        localStorage.removeItem('menuCart');
+    @endif
+</script>
+@endpush
