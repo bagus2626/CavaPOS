@@ -337,22 +337,27 @@
         }
 
         // Function to update outlet chart
+// Function to update outlet chart
         function updateOutletChart() {
             const filterType = document.getElementById('outletFilterType').value;
             const filterCount = 5; // Fixed at 5 outlets
 
             let filteredData = [...allOutletData];
             
-            // Sort and filter based on type
+            // LOGIKA SORTING DIUBAH DI SINI
             if (filterType === 'top') {
+                // Filter Terbaik: Urutkan dari Besar ke Kecil
+                // Index 0 (Paling Atas) = Penjualan Terbesar
                 filteredData = filteredData
                     .sort((a, b) => b.total_sales - a.total_sales)
                     .slice(0, filterCount);
             } else {
+                // Filter Terburuk: Urutkan dari Kecil ke Besar
+                // Index 0 (Paling Atas) = Penjualan Terkecil
                 filteredData = filteredData
                     .sort((a, b) => a.total_sales - b.total_sales)
-                    .slice(0, filterCount)
-                    .reverse(); // Reverse to show smallest at bottom
+                    .slice(0, filterCount);
+                // Kita TIDAK menggunakan .reverse() disini agar yang paling kecil tetap di index 0 (paling atas)
             }
 
             const labels = filteredData.map(d => d.partner_name);
