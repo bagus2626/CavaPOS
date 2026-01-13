@@ -477,6 +477,7 @@ Route::middleware('setlocale')->group(function () {
             Route::get('metrics', [CashierDashboardController::class, 'metrics'])->name('metrics');
             Route::get('tab/{tab}', [CashierDashboardController::class, 'show'])->name('tab');
             Route::get('/open-order/{id}', [CashierDashboardController::class, 'openOrder'])->name('open-order');
+            Route::get('/cashier/activity', [CashierDashboardController::class, 'activity'])->name('activity');
 
             Route::post('cash-payment/{id}', [CashierTransactionController::class, 'cashPayment'])->name('cash-payment');
             Route::get('order-detail/{id}', [CashierTransactionController::class, 'orderDetail'])->name('order-detail');
