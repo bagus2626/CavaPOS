@@ -6,15 +6,13 @@
 @section('content')
   <div class="modern-container">
     <div class="container-modern">
-      <!-- Header Section -->
       <div class="page-header">
         <div class="header-content">
           <h1 class="page-title">{{ __('messages.owner.products.outlet_products.outlet_products') }}</h1>
-          <p class="page-subtitle">Manage products across all your outlets</p>
+          <p class="page-subtitle">{{ __('messages.owner.products.outlet_products.manage_products_subtitle') }}</p>
         </div>
       </div>
 
-      <!-- Success/Error Messages -->
       @if(session('success'))
         <div class="alert alert-success alert-modern">
           <div class="alert-icon">
@@ -37,13 +35,10 @@
         </div>
       @endif
 
-      <!-- Filters & Actions -->
       <div class="modern-card mb-4">
         <div class="card-body-modern" style="padding: var(--spacing-lg) var(--spacing-xl);">
           <div class="table-controls">
-            <!-- Search & Filter -->
             <div class="search-filter-group">
-              <!-- Filter by Outlet -->
               <div class="select-wrapper" style="min-width: 200px;">
                 <select id="outletFilter" class="form-control-modern" onchange="window.location.href=this.value">
                   @foreach($outlets as $outlet)
@@ -56,10 +51,9 @@
                 <span class="material-symbols-outlined select-arrow">expand_more</span>
               </div>
 
-              <!-- Filter by Category -->
               <div class="select-wrapper" style="min-width: 200px;">
                 <select id="categoryFilter" class="form-control-modern">
-                  <option value="">All Categories</option>
+                  <option value="">{{ __('messages.owner.products.outlet_products.all_category_dropdown') }}</option>
                   @foreach($categories as $category)
                     <option value="{{ $category->id }}">{{ $category->category_name }}</option>
                   @endforeach
@@ -68,7 +62,6 @@
               </div>
             </div>
 
-            <!-- Add Product Button -->
             <button class="btn-modern btn-primary-modern btn-add-product" 
                     data-toggle="modal" 
                     data-target="#addProductModal"
@@ -80,7 +73,6 @@
         </div>
       </div>
 
-      <!-- Table Display -->
       @include('pages.owner.products.outlet-product.display')
 
     </div>
@@ -143,13 +135,14 @@
 
         // Render rows
         if (currentProducts.length === 0) {
+          // UPDATE: Translate Empty State
           tableBody.innerHTML = `
             <tr class="empty-filter-row">
               <td colspan="8" class="text-center">
                 <div class="table-empty-state">
                   <span class="material-symbols-outlined">search_off</span>
-                  <h4>No results found</h4>
-                  <p>Try adjusting your filter</p>
+                  <h4>{{ __('messages.owner.products.outlet_products.data_not_found') }}</h4>
+                  <p>{{ __('messages.owner.products.outlet_products.adjust_filter') }}</p>
                 </div>
               </td>
             </tr>
@@ -202,6 +195,7 @@
         // Hot product badge
         let hotBadge = '';
         if (product.is_hot_product) {
+          // UPDATE: Translate HOT badge tooltip/text if needed (Keeping HOT as universal term)
           hotBadge = `
             <span style="
               position:absolute;
@@ -221,10 +215,11 @@
         }
 
         // Status badge
+        // UPDATE: Translate Active/Inactive
         const statusBadgeClass = product.is_active ? 'badge-success' : 'badge-danger';
         const statusText = product.is_active 
-          ? '{{ __("messages.owner.products.outlet_products.active") }}'
-          : '{{ __("messages.owner.products.outlet_products.inactive") }}';
+          ? '{{ __('messages.owner.products.outlet_products.active') }}'
+          : '{{ __('messages.owner.products.outlet_products.inactive') }}';
 
         // Promotion
         const promoText = product.promotion_name 
@@ -242,7 +237,7 @@
                 ${imageHtml}
                 ${hotBadge}
               </div>
-              <span class="user-name">${product.name}</span>
+              <span class="data-name">${product.name}</span>
             </div>
           </td>
           <td>
@@ -399,6 +394,7 @@
   {{-- DELETE PRODUCT SCRIPT --}}
   <script>
     async function deleteProduct(id) {
+      // UPDATE: Translate Delete Confirmation
       const result = await Swal.fire({
         title: '{{ __('messages.owner.products.outlet_products.delete_confirmation_1') }}',
         text: "{{ __('messages.owner.products.outlet_products.delete_confirmation_2') }}",
@@ -427,6 +423,7 @@
         });
 
         if (res.ok) {
+          // UPDATE: Translate Success Message
           await Swal.fire({
             title: '{{ __('messages.owner.products.outlet_products.success') }}',
             text: '{{ __('messages.owner.products.outlet_products.delete_success') }}',
@@ -436,6 +433,7 @@
           location.reload();
         } else {
           const data = await res.json();
+          // UPDATE: Translate Failed Message
           Swal.fire({
             title: '{{ __('messages.owner.products.outlet_products.failed') }}',
             text: data.message || res.statusText,
@@ -445,6 +443,7 @@
         }
       } catch (err) {
         console.error(err);
+        // UPDATE: Translate Error Message
         Swal.fire({
           title: '{{ __('messages.owner.products.outlet_products.error') }}',
           text: '{{ __('messages.owner.products.outlet_products.delete_error') }}',
@@ -474,7 +473,8 @@
       function hardResetFields(keepOutlet = true) {
         form.reset();
         categorySelect.value = '';
-        mpBox.innerHTML = '<div class="text-muted small text-center" style="padding: 2rem 1rem;"><span class="material-symbols-outlined" style="font-size: 2rem; opacity: 0.3; display: block; margin-bottom: 0.5rem;">inventory_2</span>Select category first</div>';
+        // UPDATE: Translate Select Category First
+        mpBox.innerHTML = '<div class="text-muted small text-center" style="padding: 2rem 1rem;"><span class="material-symbols-outlined" style="font-size: 2rem; opacity: 0.3; display: block; margin-bottom: 0.5rem;">inventory_2</span>{{ __('messages.owner.products.outlet_products.select_category_first') }}</div>';
         mpSelectAll.disabled = true;
         mpSelectAll.checked = false;
         mpError.style.display = 'none';
@@ -497,7 +497,8 @@
         mpSelectAll.checked = false;
 
         if (!Array.isArray(items) || items.length === 0) {
-          mpBox.innerHTML = '<div class="text-muted small text-center" style="padding: 2rem 1rem;">No master products available</div>';
+          // UPDATE: Translate No Master Product
+          mpBox.innerHTML = '<div class="text-muted small text-center" style="padding: 2rem 1rem;">{{ __('messages.owner.products.outlet_products.no_master_product_filter') }}</div>';
           return;
         }
 
@@ -561,7 +562,8 @@
       }
 
       async function loadMasterProducts(categoryId, outletId) {
-        mpBox.innerHTML = '<div class="text-muted small text-center" style="padding: 2rem 1rem;">Loading...</div>';
+        // UPDATE: Translate Loading
+        mpBox.innerHTML = '<div class="text-muted small text-center" style="padding: 2rem 1rem;">{{ __('messages.owner.products.outlet_products.loading') }}</div>';
         mpSelectAll.disabled = true;
         mpSelectAll.checked = false;
         mpError.style.display = 'none';
@@ -577,7 +579,8 @@
           const data = await res.json();
           renderMasterProductCheckboxes(data);
         } catch {
-          mpBox.innerHTML = '<div class="text-danger small text-center" style="padding: 2rem 1rem;">Failed to load master products</div>';
+          // UPDATE: Translate Failed Load
+          mpBox.innerHTML = '<div class="text-danger small text-center" style="padding: 2rem 1rem;">{{ __('messages.owner.products.outlet_products.failed_load_master_products') }}</div>';
         }
       }
 

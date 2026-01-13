@@ -6,15 +6,13 @@
 @section('content')
   <div class="modern-container">
     <div class="container-modern">
-      <!-- Header Section -->
       <div class="page-header">
         <div class="header-content">
           <h1 class="page-title">{{ __('messages.owner.products.stocks.all_stock') }}</h1>
-          <p class="page-subtitle">Manage your inventory and stock levels</p>
+          <p class="page-subtitle">{{ __('messages.owner.products.stocks.manage_inventory_subtitle') }}</p>
         </div>
       </div>
 
-      <!-- Success/Error Messages -->
       @if (session('success'))
         <div class="alert alert-success alert-modern">
           <div class="alert-icon">
@@ -37,21 +35,18 @@
         </div>
       @endif
 
-      <!-- Filters & Actions -->
       <div class="modern-card mb-4">
         <div class="card-body-modern" style="padding: var(--spacing-lg) var(--spacing-xl);">
           <div class="table-controls">
-            <!-- Search & Filter -->
             <div class="search-filter-group">
-              <!-- Search -->
               <div class="input-wrapper" style="flex: 1; max-width: 400px;">
                 <span class="input-icon">
                   <span class="material-symbols-outlined">search</span>
                 </span>
-                <input type="text" id="searchInput" class="form-control-modern with-icon" placeholder="Search stocks...">
+                <input type="text" id="searchInput" class="form-control-modern with-icon" 
+                       placeholder="{{ __('messages.owner.products.stocks.search_placeholder') }}">
               </div>
 
-              <!-- Filter by Location -->
               <div class="select-wrapper" style="min-width: 200px;">
                 <form action="{{ route('owner.user-owner.stocks.index') }}" method="GET" id="locationFilterForm">
                   <select id="locationFilter" name="filter_location" class="form-control-modern"
@@ -70,7 +65,6 @@
               </div>
             </div>
 
-            <!-- Add Stock Button -->
             <a href="{{ route('owner.user-owner.stocks.create') }}" class="btn-modern btn-primary-modern">
               <span class="material-symbols-outlined">add</span>
               {{ __('messages.owner.products.stocks.add_stock_item') }}
@@ -79,13 +73,11 @@
         </div>
       </div>
 
-      <!-- Stock Actions Card -->
       <div class="modern-card mb-4">
         <div class="card-body-modern" style="padding: var(--spacing-lg) var(--spacing-xl);">
 
           <div class="stock-actions-container">
 
-            <!-- ROW 1 : ACTION BUTTONS -->
             <div class="stock-actions-group">
               <a href="{{ route('owner.user-owner.stocks.movements.create-stock-in') }}"
                 class="btn-modern btn-sm-modern btn-secondary-modern">
@@ -103,7 +95,6 @@
               </a>
             </div>
 
-            <!-- ROW 2 : HISTORY -->
             <div class="stock-history-wrapper">
               <a href="{{ route('owner.user-owner.stocks.movements.index') }}"
                 class="btn-modern btn-sm-modern btn-secondary-modern">
@@ -118,7 +109,6 @@
       </div>
 
 
-      <!-- Table Display -->
       @include('pages.owner.products.stock.display')
 
     </div>
@@ -185,13 +175,14 @@
 
         // Render rows
         if (currentStocks.length === 0) {
+          // UPDATE: Translate Empty State
           tableBody.innerHTML = `
             <tr class="empty-filter-row">
               <td colspan="7" class="text-center">
                 <div class="table-empty-state">
                   <span class="material-symbols-outlined">search_off</span>
-                  <h4>No results found</h4>
-                  <p>Try adjusting your search</p>
+                  <h4>{{ __('messages.owner.products.stocks.no_results_found') }}</h4>
+                  <p>{{ __('messages.owner.products.stocks.adjust_search_filter') }}</p>
                 </div>
               </td>
             </tr>
@@ -380,15 +371,16 @@
     // DELETE STOCK FUNCTION
     // ==========================================
     function deleteStock(stockId) {
+      // UPDATE: Translate Delete Confirm
       Swal.fire({
-        title: '{{ __('messages.owner.products.promotions.delete_confirmation_1') }}',
-        text: '{{ __('messages.owner.products.promotions.delete_confirmation_2') }}',
+        title: '{{ __('messages.owner.products.stocks.delete_confirmation_1') }}',
+        text: '{{ __('messages.owner.products.stocks.delete_confirmation_2') }}',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#ae1504',
         cancelButtonColor: '#6c757d',
-        confirmButtonText: '{{ __('messages.owner.products.promotions.delete_confirmation_3') }}',
-        cancelButtonText: '{{ __('messages.owner.products.promotions.cancel') }}'
+        confirmButtonText: '{{ __('messages.owner.products.stocks.delete_confirmation_3') }}',
+        cancelButtonText: '{{ __('messages.owner.products.stocks.cancel') }}'
       }).then((result) => {
         if (result.isConfirmed) {
           const form = document.createElement('form');

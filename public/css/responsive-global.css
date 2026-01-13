@@ -421,7 +421,7 @@
     font-size: 16px;
   }
 
-  .user-name {
+  .data-name {
     font-size: 0.8125rem;
   }
 
@@ -639,7 +639,6 @@
   .back-button {
     font-size: 0.875rem;
     gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-md);
   }
 
   .back-button .material-symbols-outlined {
@@ -794,7 +793,7 @@
     font-size: 14px;
   }
 
-  .user-name {
+  .data-name {
     font-size: 0.75rem;
   }
 

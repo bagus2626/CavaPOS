@@ -25,14 +25,14 @@
     
     {{-- Page Header with Back Button --}}
     <div class="page-header">
-      {{-- <a href="{{ route('owner.user-owner.employees.index') }}" class="back-button">
-        <span class="material-symbols-outlined">arrow_back</span>
-        {{ __('messages.owner.user_management.employees.back_to_employees') }}
-      </a> --}}
       <div class="header-content">
         <h1 class="page-title">{{ __('messages.owner.user_management.employees.employee_detail') }}</h1>
         <p class="page-subtitle">View complete information about this employee.</p>
       </div>
+      <a href="{{ route('owner.user-owner.employees.index') }}" class="back-button">
+        <span class="material-symbols-outlined">arrow_back</span>
+        {{ __('messages.owner.user_management.employees.back') }}
+      </a>
     </div>
 
     {{-- Success Message --}}

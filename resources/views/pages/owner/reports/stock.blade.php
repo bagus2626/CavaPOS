@@ -10,7 +10,7 @@
       <div class="page-header">
         <div class="header-content">
           <h1 class="page-title">{{ __('messages.owner.stock_report.page_title') }}</h1>
-          <p class="page-subtitle">Monitor and analyze stock movements and inventory levels</p>
+          <p class="page-subtitle">{{ __('messages.owner.stock_report.subtitle') }}</p>
         </div>
       </div>
 

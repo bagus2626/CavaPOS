@@ -6,15 +6,13 @@
 @section('content')
   <div class="modern-container">
     <div class="container-modern">
-      <!-- Header Section -->
       <div class="page-header">
         <div class="header-content">
           <h1 class="page-title">{{ __('messages.owner.outlet.all_outlets.all_outlets') }}</h1>
-          <p class="page-subtitle">Manage your outlets and their configurations</p>
+          <p class="page-subtitle">{{ __('messages.owner.outlet.all_outlets.subtitle') }}</p>
         </div>
       </div>
 
-      <!-- Success/Error Messages -->
       @if (session('success'))
         <div class="alert alert-success alert-modern">
           <div class="alert-icon">
@@ -37,42 +35,36 @@
         </div>
       @endif
 
-      <!-- Filters & Actions -->
       <div class="modern-card mb-4">
         <div class="card-body-modern" style="padding: var(--spacing-lg) var(--spacing-xl);">
           <div class="table-controls">
-            <!-- Search & Filter -->
             <div class="search-filter-group">
-              <!-- Search -->
               <div class="input-wrapper" style="flex: 1; max-width: 400px;">
                 <span class="input-icon">
                   <span class="material-symbols-outlined">search</span>
                 </span>
                 <input type="text" id="searchInput" class="form-control-modern with-icon"
-                  placeholder="Search outlets...">
+                  placeholder="{{ __('messages.owner.outlet.all_outlets.search_placeholder') }}">
               </div>
 
-              <!-- Filter by Status -->
               <div class="select-wrapper" style="min-width: 200px;">
                 <select id="statusFilter" class="form-control-modern">
-                  <option value="">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
+                  <option value="">{{ __('messages.owner.outlet.all_outlets.filter_all_status') }}</option>
+                  <option value="active">{{ __('messages.owner.outlet.all_outlets.active') }}</option>
+                  <option value="inactive">{{ __('messages.owner.outlet.all_outlets.inactive') }}</option>
                 </select>
                 <span class="material-symbols-outlined select-arrow">expand_more</span>
               </div>
             </div>
 
-            <!-- Add Outlet Button -->
             <a href="{{ route('owner.user-owner.outlets.create') }}" class="btn-modern btn-primary-modern">
               <span class="material-symbols-outlined">add</span>
-              {{ __('messages.owner.outlet.all_outlets.add_outlet') ?? 'Add Outlet' }}
+              {{ __('messages.owner.outlet.all_outlets.add_outlet') }}
             </a>
           </div>
         </div>
       </div>
 
-      <!-- Table Display -->
       @include('pages.owner.outlet.display')
 
     </div>
@@ -152,8 +144,8 @@
               <td colspan="7" class="text-center">
                 <div class="table-empty-state">
                   <span class="material-symbols-outlined" style="font-size: 4rem; color: #ccc; display: block; margin-bottom: 1rem;">search_off</span>
-                  <h4 style="margin: 0 0 0.5rem 0; color: #666; font-size: 1.25rem;">No results found</h4>
-                  <p style="margin: 0; color: #999;">Try adjusting your search or filter</p>
+                  <h4 style="margin: 0 0 0.5rem 0; color: #666; font-size: 1.25rem;">{{ __('messages.owner.outlet.all_outlets.no_results_title') }}</h4>
+                  <p style="margin: 0; color: #999;">{{ __('messages.owner.outlet.all_outlets.no_results_subtitle') }}</p>
                 </div>
               </td>
             </tr>
@@ -220,7 +212,7 @@
           <td>
             <div class="user-info-cell">
               ${imageHtml}
-              <span class="user-name">${outlet.name || '-'}</span>
+              <span class="data-name">${outlet.name || '-'}</span>
             </div>
           </td>
           <td>
@@ -239,7 +231,7 @@
           </td>
           <td class="text-center">
             <div class="table-actions">
-              <a href="${showUrl}" class="btn-table-action view" title="{{ __('messages.owner.user_management.employees.view_details') ?? 'View Details' }}">
+              <a href="${showUrl}" class="btn-table-action view" title="{{ __('messages.owner.outlet.all_outlets.view_details') }}">
                 <span class="material-symbols-outlined">visibility</span>
               </a>
               <a href="${editUrl}" class="btn-table-action edit" title="{{ __('messages.owner.outlet.all_outlets.edit') }}">

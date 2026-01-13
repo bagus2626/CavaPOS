@@ -129,9 +129,13 @@
 
                                 $promoBadge = null;
                                 if ($promo) {
-                                    $promoBadge = $promo->promotion_type === 'percentage'
-                                        ? '-' . rtrim(rtrim(number_format($promo->promotion_value, 2, ',', '.'), '0'), ',') . '%'
-                                        : '-Rp ' . number_format($promo->promotion_value, 0, ',', '.');
+                                    if ($promo->promotion_type === 'percentage') {
+                                        $value = rtrim(rtrim(number_format($promo->promotion_value, 2, ',', '.'), '0'), ',') . '%';
+                                    } else {
+                                        $value = 'Rp' . number_format($promo->promotion_value, 0, ',', '.');
+                                    }
+
+                                    $promoBadge = __('messages.customer.menu.promo.off', ['value' => $value]);
                                 }
                             @endphp
 
@@ -152,7 +156,7 @@
                                     @endif
 
                                     @if($hasPromo && $promoBadge)
-                                        <div class="absolute top-3 left-3 z-10 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-md" style="background-color: #ae1504;">
+                                        <div class="promo-badge">
                                             {{ $promoBadge }}
                                         </div>
                                     @endif
@@ -263,9 +267,13 @@
 
                                     $promoBadge = null;
                                     if ($promo) {
-                                        $promoBadge = $promo->promotion_type === 'percentage'
-                                            ? '-' . rtrim(rtrim(number_format($promo->promotion_value, 2, ',', '.'), '0'), ',') . '%'
-                                            : '-Rp ' . number_format($promo->promotion_value, 0, ',', '.');
+                                        if ($promo->promotion_type === 'percentage') {
+                                            $value = rtrim(rtrim(number_format($promo->promotion_value, 2, ',', '.'), '0'), ',') . '%';
+                                        } else {
+                                            $value = 'Rp' . number_format($promo->promotion_value, 0, ',', '.');
+                                        }
+
+                                        $promoBadge = __('messages.customer.menu.promo.off', ['value' => $value]);
                                     }
                                 @endphp
 
@@ -286,7 +294,7 @@
                                         @endif
 
                                         @if($hasPromo && $promoBadge)
-                                            <div class="absolute top-3 left-3 z-10 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-md" style="background-color: #ae1504;">
+                                            <div class="promo-badge">
                                                 {{ $promoBadge }}
                                             </div>
                                         @endif
@@ -510,6 +518,62 @@
         .animate-fadeIn {
             animation: fadeIn 0.3s ease-out forwards;
         }
+
+       /* Promo Badge - Enhanced Design with Rounded Style */
+        .promo-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 10;
+            
+            /* Gradient background untuk lebih eye-catching */
+            background: linear-gradient(135deg, #ae1504 0%, #d41f0a 100%);
+            
+            /* Shadow yang lebih kuat untuk standout dari gambar */
+            box-shadow: 
+                0 2px 8px rgba(174, 21, 4, 0.4),
+                0 0 0 2px rgba(255, 255, 255, 0.3);
+            
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 6px 10px;
+            border-radius: 20px; /* Changed from 8px to 20px untuk rounded penuh */
+            
+            /* Border putih untuk kontras */
+            border: 1.5px solid rgba(255, 255, 255, 0.9);
+            
+            /* Backdrop blur untuk keterbacaan */
+            backdrop-filter: blur(4px);
+            
+            /* Animation */
+            animation: promo-pulse 2s ease-in-out infinite;
+        }
+
+        /* Pulse animation untuk menarik perhatian */
+        @keyframes promo-pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 
+                    0 2px 8px rgba(174, 21, 4, 0.4),
+                    0 0 0 2px rgba(255, 255, 255, 0.3);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 
+                    0 4px 12px rgba(174, 21, 4, 0.6),
+                    0 0 0 2px rgba(255, 255, 255, 0.5);
+            }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .promo-badge,{
+                font-size: 9px;
+                padding: 5px 8px;
+            }
+        }
+
     </style>
 
     @push('scripts')
@@ -591,7 +655,7 @@
                 }
 
                 // Cart persistence configuration 
-                const CART_EXPIRY_MINUTES = 2; // Ubah sesuai kebutuhan
+                const CART_EXPIRY_MINUTES = {{ config('session.lifetime', 120) }}; // Ubah sesuai kebutuhan
 
                 function saveCartToStorage() {
                     try {
@@ -2342,6 +2406,8 @@
                             timer: 1400,
                             showConfirmButton: false
                         });
+                        clearCartFromStorage(); // Clear cart
+                        
                     } catch (err) {
                         Swal.close();
                         const msg = (err?.message || '').toLowerCase().includes('csrf') ?
@@ -2441,6 +2507,13 @@
                 //reorder
                 (function applyReorderOnLoad() {
                     const items = window.__REORDER_ITEMS__ || [];
+                    
+                    // HAPUS PARAMETER REORDER DARI URL SEGERA SETELAH DATA DIBACA
+                    const url = new URL(window.location.href);
+                    if (url.searchParams.has('reorder_order_id')) {
+                        url.searchParams.delete('reorder_order_id');
+                        window.history.replaceState({}, '', url.toString());
+                    }
 
                     if (Array.isArray(items) && items.length > 0) {
                         items.forEach(item => {
@@ -2463,6 +2536,13 @@
                         });
 
                         updateFloatingCartBar();
+
+                        // HAPUS PARAMETER REORDER DARI URL SETELAH BERHASIL DIMUAT
+                        const url = new URL(window.location.href);
+                        if (url.searchParams.has('reorder_order_id')) {
+                            url.searchParams.delete('reorder_order_id');
+                            window.history.replaceState({}, '', url.toString());
+                        }
                     }
 
                     const msgs = window.__REORDER_MESSAGES__ || [];

@@ -43,7 +43,7 @@
                                         <span class="material-symbols-outlined">store</span>
                                     </div>
                                 @endif
-                                <span class="user-name">{{ $outlet->name }}</span>
+                                <span class="data-name">{{ $outlet->name }}</span>
                             </div>
                         </td>
 
