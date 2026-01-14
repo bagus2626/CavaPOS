@@ -1,396 +1,334 @@
 @extends('layouts.owner')
-@section('page_title', 'Status Verifikasi')
+@section('page_title', __('messages.owner.verification.status.page_title'))
 
 @section('content')
-    @vite(['resources/css/app.css'])
-    <section class="content">
-        <div class="container-fluid">
+@php
+  $isPending = $verification->status === 'pending';
+  $isRejected = $verification->status === 'rejected';
+@endphp
 
-            <div class="space-y-8">
-
-                <div class="bg-[#8c1000] relative overflow-hidden rounded-3xl shadow-md mb-4">
-                    <div class="relative z-10 p-8 md:p-10">
-                        <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight">
-                            Status Verifikasi Akun
-                        </h1>
-                        <p class="mt-2 text-white text-opacity-90 leading-relaxed text-base md:text-lg max-w-4xl">
-                            Terima kasih telah mengirimkan data verifikasi. Berikut adalah status pengajuan Anda.
-                        </p>
-                    </div>
-                    <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -mr-32 -mt-32"></div>
-                    <div class="absolute bottom-0 left-0 w-80 h-80 bg-white opacity-5 rounded-full -ml-40 -mb-40"></div>
-                </div>
-
-
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    @if($verification->status === 'pending')
-                        <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-md hover:shadow-md transition-all duration-300 h-full">
-                            <div class="flex flex-col items-center text-center">
-                                <div class="w-12 h-12 rounded-full flex items-center justify-center mb-3">
-                                    <i class="fas fa-clock text-[#8c1000] text-xl"></i>
-                                </div>
-                                <div>
-                                    <p class="text-gray-500 text-xs font-medium mb-0.5 uppercase tracking-wide">Status</p>
-                                    <h3 class="text-gray-900 text-base font-bold">Menunggu Verifikasi</h3>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-md hover:shadow-md transition-all duration-300 h-full">
-                            <div class="flex flex-col items-center text-center">
-                                <div class="w-12 h-12 rounded-full flex items-center justify-center mb-3">
-                                    <i class="far fa-calendar text-[#8c1000] text-xl"></i>
-                                </div>
-                                <div>
-                                    <p class="text-gray-500 text-xs font-medium mb-0.5 uppercase tracking-wide">Diajukan pada</p>
-                                    <h3 class="text-gray-900 text-base font-bold">{{ $verification->created_at->format('d M Y') }}</h3>
-                                    <p class="text-gray-500 text-xs">{{ $verification->created_at->format('H:i') }} WIB</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-md hover:shadow-md transition-all duration-300 h-full">
-                            <div class="flex flex-col items-center text-center">
-                                <div class="w-12 h-12 rounded-full flex items-center justify-center mb-3">
-                                    <i class="fas fa-hourglass-half text-[#8c1000] text-xl"></i>
-                                </div>
-                                <div>
-                                    <p class="text-gray-500 text-xs font-medium mb-0.5 uppercase tracking-wide">Estimasi Proses</p>
-                                    <h3 class="text-gray-900 text-base font-bold">1-2 Hari Kerja</h3>
-                                    <p class="text-gray-500 text-xs">Maks 2x24 jam</p>
-                                </div>
-                            </div>
-                        </div>
-                    @elseif($verification->status === 'rejected')
-                        <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-md hover:shadow-md transition-all duration-300 h-full">
-                            <div class="flex flex-col items-center text-center">
-                                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-3">
-                                    <i class="fas fa-times-circle text-red-600 text-xl"></i>
-                                </div>
-                                <div>
-                                    <p class="text-gray-500 text-xs font-medium mb-0.5 uppercase tracking-wide">Status</p>
-                                    <h3 class="text-gray-900 text-base font-bold">Verifikasi Ditolak</h3>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-md hover:shadow-md transition-all duration-300 h-full">
-                            <div class="flex flex-col items-center text-center">
-                                <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-                                    <i class="far fa-calendar text-gray-600 text-xl"></i>
-                                </div>
-                                <div>
-                                    <p class="text-gray-500 text-xs font-medium mb-0.5 uppercase tracking-wide">Diajukan pada</p>
-                                    <h3 class="text-gray-900 text-base font-bold">{{ $verification->created_at->format('d M Y') }}</h3>
-                                    <p class="text-gray-500 text-xs">{{ $verification->created_at->format('H:i') }} WIB</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-md hover:shadow-md transition-all duration-300 h-full">
-                            <div class="flex flex-col items-center text-center">
-                                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-3">
-                                    <i class="far fa-calendar-times text-red-600 text-xl"></i>
-                                </div>
-                                <div>
-                                    <p class="text-gray-500 text-xs font-medium mb-0.5 uppercase tracking-wide">Ditolak pada</p>
-                                    <h3 class="text-gray-900 text-base font-bold">{{ $verification->reviewed_at ? $verification->reviewed_at->format('d M Y') : '-' }}</h3>
-                                    <p class="text-gray-500 text-xs">{{ $verification->reviewed_at ? $verification->reviewed_at->format('H:i') . ' WIB' : '' }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
-                </div>
-
-                @if($verification->status === 'rejected' && $verification->rejection_reason)
-                <div class="bg-red-50 rounded-2xl shadow-md overflow-hidden animate-fadeIn">
-                    <div class="p-6">
-                        <div class="flex items-start space-x-4">
-                            <div class="flex-shrink-0">
-                                <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center shadow-md">
-                                    <i class="fas fa-exclamation-triangle text-red-700 text-xl"></i>
-                                </div>
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="text-xl font-bold text-red-900 mb-3 flex items-center">
-                                    <span>Alasan Penolakan</span>
-                                </h3>
-                                <p class="text-red-800 leading-relaxed text-base">{{ $verification->rejection_reason }}</p>
-                                <div class="mt-4">
-                                    <p class="text-sm text-red-700 mb-0">
-                                        <i class="fas fa-info-circle mr-2"></i>
-                                        <strong>Catatan:</strong> Silakan perbaiki data sesuai catatan di atas dan ajukan verifikasi ulang.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                @endif
-
-                @if($verification->status === 'pending')
-                <div class="bg-red-50 border border-red-200 rounded-2xl p-6 shadow-md">
-                    <div class="flex items-start space-x-4">
-                        <div class="flex-shrink-0">
-                            <div class="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center shadow-md">
-                                <i class="fas fa-info-circle text-white text-xl"></i>
-                            </div>
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-red-900 mb-3 text-lg">Informasi Penting</h4>
-                            <ul class="text-sm text-red-800 space-y-3">
-                                <li class="flex items-start">
-                                    <i class="fas fa-check-circle mt-0.5 mr-3 text-red-600 text-lg"></i>
-                                    <span>Proses verifikasi memakan waktu maksimal <strong>2x24 jam kerja</strong></span>
-                                </li>
-                                <li class="flex items-start">
-                                    <i class="fas fa-check-circle mt-0.5 mr-3 text-red-600 text-lg"></i>
-                                    <span>Anda akan menerima notifikasi email ketika verifikasi selesai</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <i class="fas fa-check-circle mt-0.5 mr-3 text-red-600 text-lg"></i>
-                                    <span>Pastikan email Anda aktif untuk menerima notifikasi</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <i class="fas fa-check-circle mt-0.5 mr-3 text-red-600 text-lg"></i>
-                                    <span>Jika ada pertanyaan, hubungi support kami</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                @endif
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-                    <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-300">
-                        <div class="px-6 py-4 border-b border-gray-200 bg-[#8c1000]">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center shadow-md">
-                                    <i class="fas fa-user text-[#8c1000]"></i>
-                                </div>
-                                <div>
-                                    <h2 class="text-lg font-semibold text-white m-0">Data Pribadi Owner</h2>
-                                    <p class="text-sm text-white m-0">Informasi identitas pemilik usaha</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="p-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div class="space-y-2">
-                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Nama Lengkap Owner</label>
-                                    <p class="text-gray-900 font-semibold text-base">{{ $verification->owner_name }}</p>
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Nomor HP/WhatsApp</label>
-                                    <p class="text-gray-900 font-semibold text-base">{{ $verification->owner_phone }}</p>
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Email Owner</label>
-                                    <p class="text-gray-900 font-semibold text-base">{{ $verification->owner_email }}</p>
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Nomor KTP</label>
-                                    <p class="text-gray-900 font-semibold text-base font-mono">{{ $verification->ktp_number_decrypted ?? '****************' }}</p>
-                                </div>
-                                <div class="space-y-2 md:col-span-2">
-                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Foto KTP</label>
-                                    <div class="relative group inline-block">
-                                        <img src="{{ route('owner.user-owner.verification.ktp-image') }}" 
-                                             alt="Foto KTP" 
-                                             class="max-w-md w-full rounded-2xl shadow-md border-2 border-gray-200 cursor-pointer hover:shadow-md transition-all duration-300 hover:scale-[1.02]"
-                                             onclick="openImageModal(this.src, 'Foto KTP')">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-300">
-                        <div class="px-6 py-4 border-b border-gray-200 bg-[#8c1000]">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center shadow-md">
-                                    <i class="fas fa-store text-[#8c1000]"></i>
-                                </div>
-                                <div>
-                                    <h2 class="text-lg font-semibold text-white m-0">Informasi Usaha</h2>
-                                    <p class="text-sm text-white m-0">Detail bisnis dan lokasi</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="p-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div class="space-y-2">
-                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Nama Usaha</label>
-                                    <p class="text-gray-900 font-semibold text-base">{{ $verification->business_name }}</p>
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Jenis Usaha</label>
-                                    <p class="text-gray-900 font-semibold text-base">{{ ($verification->businessCategory)->name ?? '-' }}</p>
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider">No. Telepon/WhatsApp Bisnis</label>
-                                    <p class="text-gray-900 font-semibold text-base">{{ $verification->business_phone }}</p>
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Email Bisnis</label>
-                                    <p class="text-gray-900 font-semibold text-base">{{ $verification->business_email ?: '-' }}</p>
-                                </div>
-                                <div class="space-y-2 md:col-span-2">
-                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Alamat Lengkap Usaha</label>
-                                    <p class="text-gray-900 font-medium text-base leading-relaxed">{{ $verification->business_address }}</p>
-                                </div>
-                                @if($verification->business_logo_path)
-                                    <div class="space-y-2 md:col-span-2">
-                                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Logo Usaha</label>
-                                        <div class="relative group inline-block">
-                                             <img src="{{ asset('storage/' . $verification->business_logo_path) }}" 
-                                                 alt="Logo Usaha" 
-                                                 class="max-w-md w-full rounded-2xl shadow-md border-2 border-gray-200 cursor-pointer hover:shadow-md transition-all duration-300 hover:scale-[1.02]"
-                                                 onclick="openImageModal(this.src, 'Logo Usaha')">
-                                        </div>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                @if($verification->status === 'rejected')
-                <div class="flex justify-center py-10 mt-0">
-                    <a href="{{ route('owner.user-owner.verification.index') }}" 
-                       class="px-8 py-4 bg-[#8c1000] text-white rounded-2xl transition-all duration-300 font-bold text-lg shadow-md hover:bg-[#a11b0b] hover:shadow-md hover:-translate-y-1 inline-flex items-center group">
-                        <i class="fas fa-redo mr-3 group-hover:rotate-180 transition-transform duration-500"></i>
-                        Ajukan Verifikasi Ulang
-                    </a>
-                </div>
-                @endif
-
-            </div> </div>
-    </section>
-
-    <div id="imageModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-transparent bg-opacity-90 backdrop-blur-sm" onclick="closeImageModal()">
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="relative max-w-5xl w-full animate-zoomIn" onclick="event.stopPropagation()">
-                <button onclick="closeImageModal()" class="absolute -top-16 right-0 text-white hover:text-gray-300 transition-colors bg-[#8c1000] backdrop-blur-md rounded-full w-12 h-12 flex items-center justify-center hover:bg-opacity-20">
-                    <i class="fas fa-times text-2xl"></i>
-                </button>
-                <img id="modalImage" src="" alt="" class="w-full h-auto rounded-2xl shadow-md">
-                <p id="modalCaption" class="text-white text-center mt-6 text-xl font-bold"></p>
-            </div>
-        </div>
-    </div>
+<div class="modern-container">
+  <div class="container-modern">
     
+    {{-- Page Header --}}
+    <div class="page-header">
+      <div class="header-content">
+        <h1 class="page-title">{{ __('messages.owner.verification.status.header_title') }}</h1>
+        <p class="page-subtitle">{{ __('messages.owner.verification.status.header_desc') }}</p>
+      </div>
+    </div>
 
-    @push('styles')
-    <style>
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+    {{-- Success Message --}}
+    @if (session('success'))
+      <div class="alert alert-success alert-modern">
+        <div class="alert-icon">
+          <span class="material-symbols-outlined">check_circle</span>
+        </div>
+        <div class="alert-content">
+          <p>{{ __('messages.owner.verification.status.swal_success_p1') }}</p>
+          <p>
+            {{ __('messages.owner.verification.status.swal_success_p2') }}
+            <strong>{{ auth()->guard('owner')->user()->email }}</strong>
+          </p>
+          <p>
+            <span class="material-symbols-outlined">warning</span>
+            {{ __('messages.owner.verification.status.swal_success_warning') }}
+          </p>
+        </div>
+      </div>
+    @endif
 
-        @keyframes zoomIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
+    {{-- Status Cards --}}
+    <div class="row mb-4">
+      @if($isPending)
+        {{-- Pending Status Card --}}
+        <div class="col-12 col-sm-6 col-lg-4 mb-3">
+          <div class="modern-card stats-card">
+            <div class="stats-icon">
+              <span class="material-symbols-outlined">schedule</span>
+            </div>
+            <div class="stats-content">
+              <div class="stats-label">Status</div>
+              <div class="stats-value">{{ __('messages.owner.verification.status.pending') }}</div>
+            </div>
+          </div>
+        </div>
 
-        .animate-fadeIn {
-            animation: fadeIn 0.5s ease-out;
-        }
+        {{-- Submitted Date Card --}}
+        <div class="col-12 col-sm-6 col-lg-4 mb-3">
+          <div class="modern-card stats-card">
+            <div class="stats-icon">
+              <span class="material-symbols-outlined">calendar_today</span>
+            </div>
+            <div class="stats-content">
+              <div class="stats-label">{{ __('messages.owner.verification.status.submitted_at') }}</div>
+              <div class="stats-value">{{ $verification->created_at->format('d M Y') }}</div>
+            </div>
+          </div>
+        </div>
 
-        .animate-zoomIn {
-            animation: zoomIn 0.3s ease-out;
-        }
-    </style>
-    @endpush
+        {{-- Estimation Card --}}
+        <div class="col-12 col-sm-6 col-lg-4 mb-3">
+          <div class="modern-card stats-card">
+            <div class="stats-icon">
+              <span class="material-symbols-outlined">hourglass_empty</span>
+            </div>
+            <div class="stats-content">
+              <div class="stats-label">{{ __('messages.owner.verification.status.process_estimation') }}</div>
+              <div class="stats-value">{{ __('messages.owner.verification.status.estimation_time') }}</div>
+            </div>
+          </div>
+        </div>
 
-    @push('scripts')
-        @vite(['resources/js/app.js'])
-        <script>
-        function openImageModal(src, caption) {
-            document.getElementById('modalImage').src = src;
-            document.getElementById('modalCaption').textContent = caption;
-            document.getElementById('imageModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
+      @elseif($isRejected)
+        {{-- Rejected Status Card --}}
+        <div class="col-12 col-sm-6 col-lg-4 mb-3">
+          <div class="modern-card stats-card">
+            <div class="stats-icon">
+              <span class="material-symbols-outlined">cancel</span>
+            </div>
+            <div class="stats-content">
+              <div class="stats-label">Status</div>
+              <div class="stats-value">{{ __('messages.owner.verification.status.rejected') }}</div>
+            </div>
+          </div>
+        </div>
 
-        function closeImageModal() {
-            document.getElementById('imageModal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
+        {{-- Submitted Date Card --}}
+        <div class="col-12 col-sm-6 col-lg-4 mb-3">
+          <div class="modern-card stats-card">
+            <div class="stats-icon">
+              <span class="material-symbols-outlined">calendar_today</span>
+            </div>
+            <div class="stats-content">
+              <div class="stats-label">{{ __('messages.owner.verification.status.submitted_at') }}</div>
+              <div class="stats-value">{{ $verification->created_at->format('d M Y') }}</div>
+            </div>
+          </div>
+        </div>
 
-        // Auto refresh every 30 seconds if status is pending
-        @if($verification->status === 'pending')
-        let refreshInterval = setInterval(function() {
-            fetch(window.location.href, {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status && data.status !== 'pending') {
-                    clearInterval(refreshInterval);
-                    location.reload();
-                }
-            })
-            .catch(error => {
-                console.log('Auto refresh error:', error);
-            });
-        }, 30000); // 30 seconds
-        @endif
+        {{-- Reviewed Date Card --}}
+        <div class="col-12 col-sm-6 col-lg-4 mb-3">
+          <div class="modern-card stats-card">
+            <div class="stats-icon">
+              <span class="material-symbols-outlined">event_busy</span>
+            </div>
+            <div class="stats-content">
+              <div class="stats-label">{{ __('messages.owner.verification.status.reviewed_at') }}</div>
+              <div class="stats-value">
+                {{ $verification->reviewed_at->format('d M Y')}}
+              </div>
+            </div>
+          </div>
+        </div>
+      @endif
+    </div>
 
-        document.addEventListener('DOMContentLoaded', function () {
-        // Cek apakah ada flash message 'success' dari controller
-        @if (session('success'))
-            Swal.fire({
-                title: 'Verifikasi Terkirim!',
-                icon: 'success',
-                html: `
-                            <div class="text-left text-gray-700 leading-relaxed px-4">
-                                <p class="mb-3">
-                                    Data verifikasi Anda telah berhasil dikirim.
-                                    Kami akan segera memprosesnya (maks. 2x24 jam kerja).
-                                </p>
-                                <p class="font-medium">
-                                    Status verifikasi akan kami informasikan melalui email ke:
-                                    <strong class="text-gray-900">{{ auth()->guard('owner')->user()->email }}</strong>
-                                </p>
-                                <br>
-                                <p class="bg-yellow-50 border border-yellow-200 text-yellow-800 p-3 rounded-lg">
-                                    <i class="fas fa-exclamation-triangle mr-2"></i>
-                                    Harap <strong>periksa email Anda secara berkala</strong>,
-                                    termasuk folder <strong>Spam</strong>.
-                                </p>
-                            </div>
-                        `,
-                confirmButtonText: 'Baik, Mengerti',
-                confirmButtonColor: '#8c1000', // Sesuai tema warna Anda
-                customClass: {
-                    popup: 'rounded-2xl',
-                }
-            });
+    {{-- Rejection Reason Alert --}}
+    @if($isRejected && $verification->rejection_reason)
+      <div class="alert alert-danger alert-modern">
+        <div class="alert-icon">
+          <span class="material-symbols-outlined">warning</span>
+        </div>
+        <div class="alert-content">
+          <p class="fw-bold">
+            {{ __('messages.owner.verification.status.rejection_title') }}
+          </p>
+          <p>{{ $verification->rejection_reason }}</p>
+        </div>
+      </div>
+    @endif
 
-        @endif
-        });
-    </script>
-    @endpush
+
+    {{-- Owner Data Card --}}
+    <div class="modern-card">
+      <div class="card-body-modern">
+        
+        {{-- Section Header --}}
+        <div class="section-header">
+          <div class="section-icon section-icon-red">
+            <span class="material-symbols-outlined">person</span>
+          </div>
+          <h3 class="section-title">{{ __('messages.owner.verification.status.owner_data') }}</h3>
+        </div>
+        
+        {{-- Owner Info Grid --}}
+        <div class="detail-info-grid">
+          <div class="detail-info-group">
+            {{-- Owner Name --}}
+            <div class="detail-info-item">
+              <div class="detail-info-label">
+                {{ __('messages.owner.verification.owner_name') }}
+              </div>
+              <div class="detail-info-value">{{ $verification->owner_name }}</div>
+            </div>
+
+            {{-- Owner Phone --}}
+            <div class="detail-info-item">
+              <div class="detail-info-label">
+                {{ __('messages.owner.verification.owner_phone') }}
+              </div>
+              <div class="detail-info-value">{{ $verification->owner_phone }}</div>
+            </div>
+
+            {{-- KTP Image --}}
+            <div class="detail-info-item">
+              <div class="detail-info-label">
+                {{ __('messages.owner.verification.status.view_ktp') }}
+              </div>
+              <div class="detail-info-value">
+                <img src="{{ route('owner.user-owner.verification.ktp-image') }}" 
+                    alt="{{ __('messages.owner.verification.status.view_ktp') }}" 
+                    style="max-width: 100%; border-radius: var(--radius-sm); box-shadow: var(--shadow-soft); border: 2px solid var(--border-color); display: block;">
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-info-group">
+            {{-- Owner Email --}}
+            <div class="detail-info-item">
+              <div class="detail-info-label">
+                {{ __('messages.owner.verification.owner_email') }}
+              </div>
+              <div class="detail-info-value">
+                <a href="mailto:{{ $verification->owner_email }}">{{ $verification->owner_email }}</a>
+              </div>
+            </div>
+
+            {{-- KTP Number --}}
+            <div class="detail-info-item">
+              <div class="detail-info-label">
+                {{ __('messages.owner.verification.ktp_number') }}
+              </div>
+              <div class="detail-info-value">
+                {{ $verification->ktp_number_decrypted ?? __('messages.owner.verification.status.ktp_hidden') }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {{-- Section Divider --}}
+        <div class="section-divider"></div>
+
+        {{-- Business Information Section --}}
+        <div class="section-header">
+          <div class="section-icon section-icon-red">
+            <span class="material-symbols-outlined">storefront</span>
+          </div>
+          <h3 class="section-title">{{ __('messages.owner.verification.status.business_data') }}</h3>
+        </div>
+
+        {{-- Business Info Grid --}}
+        <div class="detail-info-grid">
+          <div class="detail-info-group">
+            {{-- Business Name --}}
+            <div class="detail-info-item">
+              <div class="detail-info-label">
+                {{ __('messages.owner.verification.business_name') }}
+              </div>
+              <div class="detail-info-value">{{ $verification->business_name }}</div>
+            </div>
+
+            {{-- Business Category --}}
+            <div class="detail-info-item">
+              <div class="detail-info-label">
+                {{ __('messages.owner.verification.business_category') }}
+              </div>
+              <div class="detail-info-value">
+                {{ optional($verification->businessCategory)->name ?? '—' }}
+              </div>
+            </div>
+
+            {{-- Business Phone --}}
+            <div class="detail-info-item">
+              <div class="detail-info-label">
+                {{ __('messages.owner.verification.business_phone') }}
+              </div>
+              <div class="detail-info-value">{{ $verification->business_phone }}</div>
+            </div>
+
+            {{-- Business Logo --}}
+            @if($verification->business_logo_path)
+              <div class="detail-info-item">
+                <div class="detail-info-label">
+                  {{ __('messages.owner.verification.status.view_logo') }}
+                </div>
+                <div class="detail-info-value">
+                  <img src="{{ asset('storage/' . $verification->business_logo_path) }}" 
+                      alt="{{ __('messages.owner.verification.status.view_logo') }}" 
+                      style="max-width: 100%; border-radius: var(--radius-sm); box-shadow: var(--shadow-soft); border: 2px solid var(--border-color); display: block;">
+                </div>
+              </div>
+            @endif
+          </div>
+
+          <div class="detail-info-group">
+            {{-- Business Email --}}
+            <div class="detail-info-item">
+              <div class="detail-info-label">
+                {{ __('messages.owner.verification.business_email') }}
+              </div>
+              <div class="detail-info-value">
+                @if($verification->business_email)
+                  <a href="mailto:{{ $verification->business_email }}">{{ $verification->business_email }}</a>
+                @else
+                  —
+                @endif
+              </div>
+            </div>
+
+            {{-- Business Address --}}
+            <div class="detail-info-item">
+              <div class="detail-info-label">
+                {{ __('messages.owner.verification.business_address') }}
+              </div>
+              <div class="detail-info-value">{{ $verification->business_address }}</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Card Footer -->
+      @if($isRejected)
+        <div class="card-footer-modern">
+          {{-- Resubmit Button --}}
+          <a href="{{ route('owner.user-owner.verification.index') }}" 
+            class="btn-modern btn-primary-modern btn-lg-modern">
+            {{ __('messages.owner.verification.status.btn_resubmit') }}
+          </a>
+        </div>
+      @endif
+
+    </div>
+
+  </div>
+</div>
+
+@push('scripts')
+<script>
+// Auto refresh for pending status
+@if($isPending)
+let refreshInterval = setInterval(function() {
+  fetch(window.location.href, {
+    method: 'GET',
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+      'Accept': 'application/json'
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.status && data.status !== 'pending') {
+      clearInterval(refreshInterval);
+      location.reload();
+    }
+  })
+  .catch(error => {
+    console.log('Auto refresh error:', error);
+  });
+}, 30000);
+@endif
+</script>
+@endpush
 @endsection
-

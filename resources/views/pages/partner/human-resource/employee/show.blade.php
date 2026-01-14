@@ -4,356 +4,241 @@
 @section('page_title', __('messages.partner.user_management.employees.employee_detail'))
 
 @section('content')
-  @php
-    use Illuminate\Support\Str;
+@php
+  use Illuminate\Support\Str;
 
-    // siapkan URL gambar (relatif → storage url)
-    $img = $data->image
-      ? (Str::startsWith($data->image, ['http://', 'https://'])
-        ? $data->image
-        : asset('storage/' . $data->image))
+  // Fleksibel: dukung $data atau $employee dari controller
+  $emp = $data ?? $employee ?? null;
+
+  // Gambar (relatif → storage)
+  $img = $emp && $emp->image
+      ? (Str::startsWith($emp->image, ['http://','https://'])
+          ? $emp->image
+          : asset('storage/'.$emp->image))
       : null;
 
-    $isActive = (int) $data->is_active === 1;
-  @endphp
+  $isActive = (int) ($emp->is_active ?? 0) === 1;
+@endphp
 
-  <section class="content">
+<div class="modern-container">
+  <div class="container-modern">
+    
+    {{-- Page Header --}}
+    <div class="page-header">
+      <div class="header-content">
+        <h1 class="page-title">{{ __('messages.partner.user_management.employees.employee_detail') }}</h1>
+        <p class="page-subtitle">View complete information about this employee.</p>
+      </div>
+    </div>
 
-    <div class="container-fluid employee-show-page"> {{-- tambahkan class page scope --}}
-
-      <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
-        <a href="{{ route('partner.user-management.employees.index') }}" class="btn btn-outline-choco">
-          <i class="fas fa-arrow-left mr-2"></i> {{ __('messages.partner.user_management.employees.back_to_employees') }}
-        </a>
-
-        <div class="btn-group">
-          {{-- rafi --}}
-          {{-- <a href="{{ route('partner.user-management.employees.edit', $data->id) }}" class="btn btn-choco">
-            <i class="fas fa-pen mr-1"></i> Edit
-          </a>
-          <button class="btn btn-soft-danger"
-            onclick="confirmDeletion(`{{ route('partner.user-management.employees.destroy', $data->id) }}`)">
-            <i class="fas fa-trash-alt mr-1"></i> Delete
-          </button> --}}
+    {{-- Success Message --}}
+    @if (session('success'))
+      <div class="alert alert-success alert-modern">
+        <div class="alert-icon">
+          <span class="material-symbols-outlined">check_circle</span>
+        </div>
+        <div class="alert-content">
+          {{ session('success') }}
         </div>
       </div>
+    @endif
 
-      <div class="card employee-show shadow-sm">
-        <!-- Hero -->
-        <div class="employee-hero">
-          <div class="employee-avatar">
-            @if($img)
-              <img src="{{ $img }}" alt="{{ $data->name }}">
-            @else
-              <div class="employee-avatar__placeholder">
-                {{ Str::upper(Str::substr($data->name ?? 'U', 0, 1)) }}
-              </div>
-            @endif
-          </div>
+    {{-- Error Message --}}
+    @if (session('error'))
+      <div class="alert alert-danger alert-modern">
+        <div class="alert-icon">
+          <span class="material-symbols-outlined">error</span>
+        </div>
+        <div class="alert-content">
+          {{ session('error') }}
+        </div>
+      </div>
+    @endif
 
-          <div class="employee-hero__meta">
-            <h3 class="employee-name mb-1">{{ $data->name }}</h3>
+    {{-- Hero Card --}}
+    <div class="modern-card">
+      <div class="detail-hero-header">
+        {{-- Avatar --}}
+        <div class="detail-avatar">
+          @if($img)
+            <img src="{{ $img }}" alt="{{ $emp->name }}" class="detail-avatar-image">
+          @else
+            <div class="detail-avatar-placeholder">
+              {{ Str::upper(Str::substr($emp->name ?? 'U', 0, 1)) }}
+            </div>
+          @endif
+        </div>
+
+        {{-- Hero Info --}}
+        <div class="detail-hero-info">
+          <h3 class="detail-hero-name">{{ $emp->name }}</h3>
+          <p class="detail-hero-subtitle">
+            {{ $emp->role ?? '—' }}
+          </p>
+          <div class="detail-hero-badges">
+            <span class="badge-modern badge-info">
+              {{ $emp->role ?? '—' }}
+            </span>
             @if($isActive)
-              <span class="badge badge-status badge-status--active"><i class="fas fa-check-circle mr-1"></i>
+              <span class="badge-modern badge-success">
                 {{ __('messages.partner.user_management.employees.active') }}
               </span>
             @else
-              <span class="badge badge-status badge-status--inactive"><i
-                  class="fas fa-minus-circle mr-1"></i>
+              <span class="badge-modern badge-danger">
                 {{ __('messages.partner.user_management.employees.non_active') }}
               </span>
             @endif
           </div>
         </div>
+      </div>
+    </div>
 
-        <!-- Body -->
-        <div class="card-body">
-          <div class="row">
-            <div class="col-md-6">
-              <dl class="meta-list">
-                <dt>{{ __('messages.partner.user_management.employees.username') }}</dt>
-                <dd>{{ $data->user_name }}</dd>
-
-                <dt>{{ __('messages.partner.user_management.employees.email') }}</dt>
-                <dd><a class="link-ink" href="mailto:{{ $data->email }}">{{ $data->email }}</a></dd>
-
-                <dt>{{ __('messages.partner.user_management.employees.role') }}</dt>
-                <dd>{{ $data->role }}</dd>
-              </dl>
+    {{-- Body Card --}}
+    <div class="modern-card">
+      <div class="card-body-modern">
+        
+        {{-- Personal Information Section --}}
+        <div class="section-header">
+          <div class="section-icon section-icon-red">
+            <span class="material-symbols-outlined">person</span>
+          </div>
+          <h3 class="section-title">{{ __('messages.partner.user_management.employees.personal_information') }}</h3>
+        </div>
+        
+        <div class="detail-info-grid">
+          <div class="detail-info-group">
+            {{-- Full Name --}}
+            <div class="detail-info-item">
+              <div class="detail-info-label">
+                {{ __('messages.partner.user_management.employees.employee_name') }}
+              </div>
+              <div class="detail-info-value">{{ $emp->name ?? '—' }}</div>
             </div>
-            <div class="col-md-6">
-              <dl class="meta-list">
-                <dt>{{ __('messages.partner.user_management.employees.status') }}</dt>
-                <dd>
-                  @if($isActive)
-                    <span class="badge badge-status badge-status--active">
-                      {{ __('messages.partner.user_management.employees.active') }}
-                    </span>
-                  @else
-                    <span class="badge badge-status badge-status--inactive">
-                      {{ __('messages.partner.user_management.employees.non_active') }}
-                    </span>
-                  @endif
-                </dd>
 
-                <dt>{{ __('messages.partner.user_management.employees.created') }}</dt>
-                <dd>{{ optional($data->created_at)->format('d M Y, H:i') ?? '—' }}</dd>
+            {{-- Email --}}
+            <div class="detail-info-item">
+              <div class="detail-info-label">
+                {{ __('messages.partner.user_management.employees.email') }}
+              </div>
+              <div class="detail-info-value">
+                @if(!empty($emp->email))
+                  <a href="mailto:{{ $emp->email }}">{{ $emp->email }}</a>
+                @else
+                  —
+                @endif
+              </div>
+            </div>
+          </div>
 
-                <dt>{{ __('messages.partner.user_management.employees.updated') }}</dt>
-                <dd>{{ optional($data->updated_at)->format('d M Y, H:i') ?? '—' }}</dd>
-              </dl>
+          <div class="detail-info-group">
+            {{-- Username --}}
+            <div class="detail-info-item">
+              <div class="detail-info-label">
+                {{ __('messages.partner.user_management.employees.username') }}
+              </div>
+              <div class="detail-info-value">{{ $emp->user_name ?? '—' }}</div>
+            </div>
+
+            {{-- Role --}}
+            <div class="detail-info-item">
+              <div class="detail-info-label">
+                {{ __('messages.partner.user_management.employees.role') }}
+              </div>
+              <div class="detail-info-value">{{ $emp->role ?? '—' }}</div>
             </div>
           </div>
         </div>
+
+        {{-- Section Divider --}}
+        <div class="section-divider"></div>
+
+        {{-- System Information Section --}}
+        <div class="section-header">
+          <div class="section-icon section-icon-red">
+            <span class="material-symbols-outlined">info</span>
+          </div>
+          <h3 class="section-title">{{ __('messages.partner.user_management.employees.system_information') }}</h3>
+        </div>
+        
+        <div class="detail-info-grid">
+          <div class="detail-info-group">
+            {{-- Created At --}}
+            <div class="detail-info-item">
+              <div class="detail-info-label">
+                {{ __('messages.partner.user_management.employees.created') }}
+              </div>
+              <div class="detail-info-value">
+                {{ optional($emp->created_at)->format('d M Y, H:i') ?? '—' }}
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-info-group">
+            {{-- Updated At --}}
+            <div class="detail-info-item">
+              <div class="detail-info-label">
+                {{ __('messages.partner.user_management.employees.updated') }}
+              </div>
+              <div class="detail-info-value">
+                {{ optional($emp->updated_at)->format('d M Y, H:i') ?? '—' }}
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
-  </section>
 
-  <style>
-    /* ===== Partner › Employee Show (page scope) ===== */
-    .employee-show-page {
-      --choco: #8c1000;
-      --soft-choco: #c12814;
-      --ink: #22272b;
-      --muted: #6b7280;
-      --paper: #fff;
-      --radius: 14px;
-      --shadow: 0 6px 20px rgba(0, 0, 0, .08);
-    }
+    {{-- Action Buttons (Uncomment jika diperlukan) --}}
+    {{-- <div class="d-flex justify-content-between align-items-center mt-4 gap-2 flex-wrap">
+      <a href="{{ route('partner.user-management.employees.index') }}" class="btn-modern btn-secondary-modern">
+        <span class="material-symbols-outlined">arrow_back</span>
+        {{ __('messages.partner.user_management.employees.back_to_employees') }}
+      </a>
 
-    /* Card */
-    .employee-show-page .employee-show.card {
-      border: 0;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      background: var(--paper);
-    }
+      <div class="d-flex gap-2">
+        <a href="{{ route('partner.user-management.employees.edit', $emp->id) }}" class="btn-modern btn-primary-modern">
+          <span class="material-symbols-outlined">edit</span>
+          {{ __('messages.partner.user_management.employees.edit') }}
+        </a>
+        <button class="btn-modern btn-danger-modern" onclick="confirmDeletion('{{ route('partner.user-management.employees.destroy', $emp->id) }}')">
+          <span class="material-symbols-outlined">delete</span>
+          {{ __('messages.partner.user_management.employees.delete') }}
+        </button>
+      </div>
+    </div> --}}
 
-    /* Hero */
-    .employee-show-page .employee-hero {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 1.1rem 1.25rem;
-      background: linear-gradient(90deg, rgba(140, 16, 0, .05), rgba(140, 16, 0, .02));
-      border-bottom: 1px solid #eef1f4;
-    }
-
-    .employee-show-page .employee-avatar {
-      --avatar-size: 200px;
-      /* default desktop */
-      width: var(--avatar-size);
-      height: var(--avatar-size);
-      border-radius: 999px;
-      overflow: hidden;
-      flex: 0 0 auto;
-      position: relative;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, .08);
-      border: 4px solid #fff;
-    }
-
-    .employee-show-page .employee-avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .employee-show-page .employee-avatar__placeholder {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #f3f4f6;
-      color: #111827;
-      font-weight: 800;
-      font-size: 3rem;
-    }
-
-    .employee-show-page .employee-hero__meta {
-      min-width: 0;
-    }
-
-    .employee-show-page .employee-name {
-      margin: 0;
-      font-weight: 700;
-      color: var(--ink);
-      font-size: 1.35rem;
-      line-height: 1.2;
-    }
-
-    /* Badges */
-    .employee-show-page .badge-status {
-      border-radius: 999px;
-      padding: .42rem .7rem;
-      font-weight: 600;
-      font-size: .85rem;
-      vertical-align: middle;
-    }
-
-    .employee-show-page .badge-status--active {
-      background: #ecfdf5;
-      color: #065f46;
-      border: 1px solid #a7f3d0;
-    }
-
-    .employee-show-page .badge-status--inactive {
-      background: #f3f4f6;
-      color: #374151;
-      border: 1px solid #e5e7eb;
-    }
-
-    /* Buttons (brand) */
-    .employee-show-page .btn-choco {
-      background: var(--choco);
-      border-color: var(--choco);
-      color: #fff;
-    }
-
-    .employee-show-page .btn-choco:hover {
-      background: var(--soft-choco);
-      border-color: var(--soft-choco);
-      color: #fff;
-    }
-
-    .employee-show-page .btn-outline-choco {
-      color: var(--choco);
-      border: 1px solid var(--choco);
-      background: transparent;
-    }
-
-    .employee-show-page .btn-outline-choco:hover {
-      color: #fff;
-      background: var(--choco);
-      border-color: var(--choco);
-    }
-
-    .employee-show-page .btn-soft-danger {
-      background: #fee2e2;
-      color: #991b1b;
-      border: 1px solid #fecaca;
-    }
-
-    .employee-show-page .btn-soft-danger:hover {
-      background: #fecaca;
-      color: #7f1d1d;
-      border-color: #fca5a5;
-    }
-
-    /* Meta list */
-    .employee-show-page .meta-list {
-      margin: 0 0 .5rem 0;
-    }
-
-    .employee-show-page .meta-list dt {
-      color: #374151;
-      font-weight: 600;
-      width: 40%;
-      float: left;
-      clear: left;
-      padding: .45rem 0;
-      border-bottom: 1px dashed #eef1f4;
-    }
-
-    .employee-show-page .meta-list dd {
-      margin-left: 40%;
-      color: #111827;
-      padding: .45rem 0;
-      border-bottom: 1px dashed #eef1f4;
-    }
-
-    .employee-show-page .meta-list dt:last-of-type,
-    .employee-show-page .meta-list dd:last-of-type {
-      border-bottom: 0;
-    }
-
-    /* Links */
-    .employee-show-page .link-ink {
-      color: var(--choco);
-      text-decoration: none;
-    }
-
-    .employee-show-page .link-ink:hover {
-      color: var(--soft-choco);
-      text-decoration: underline;
-    }
-
-    /* Alerts */
-    .employee-show-page .alert {
-      border-left: 4px solid var(--choco);
-      border-radius: 10px;
-    }
-
-    /* Responsiveness */
-    @media (max-width: 992px) {
-      .employee-show-page .employee-avatar {
-        --avatar-size: 170px;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .employee-show-page .employee-hero {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-      }
-
-      .employee-show-page .employee-avatar {
-        --avatar-size: 150px;
-      }
-
-      .employee-show-page .meta-list dt {
-        width: 48%;
-      }
-
-      .employee-show-page .meta-list dd {
-        margin-left: 48%;
-      }
-    }
-
-    @media (max-width: 576px) {
-      .employee-show-page .employee-avatar {
-        --avatar-size: 120px;
-      }
-
-      .employee-show-page .employee-name {
-        font-size: 1.15rem;
-      }
-
-      .employee-show-page .btn-group {
-        width: 100%;
-      }
-
-      .employee-show-page .btn-group .btn {
-        width: 50%;
-      }
-    }
-  </style>
-
+  </div>
+</div>
 @endsection
 
-@push('scripts')
+{{-- Uncomment jika delete function diperlukan --}}
+{{-- @push('scripts')
   <script>
-    // Helper hapus global: gunakan $swal kalau sudah di-layout, fallback ke Swal
+    // Helper hapus global: gunakan Swal kalau sudah tersedia
     function confirmDeletion(url, opts = {}) {
       const base = {
-        title: 'Apakah Anda yakin?',
-        text: 'Anda tidak dapat mengembalikan data tersebut!',
+        title: '{{ __('messages.partner.user_management.employees.delete_confirmation_1') ?? 'Are you sure?' }}',
+        text: '{{ __('messages.partner.user_management.employees.delete_confirmation_2') ?? 'You won\'t be able to revert this!' }}',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: 'Ya, Hapus!',
-        cancelButtonText: 'Batalkan'
+        confirmButtonColor: '#ae1504',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '{{ __('messages.partner.user_management.employees.delete_confirmation_3') ?? 'Yes, delete it!' }}',
+        cancelButtonText: '{{ __('messages.partner.user_management.employees.cancel') ?? 'Cancel' }}'
       };
-      const swal = window.$swal || window.Swal;
-      if (!swal) { // fallback paling sederhana
+      
+      const swal = window.Swal;
+      if (!swal) {
         if (confirm(base.title + '\n' + base.text)) {
           postDelete(url);
         }
         return;
       }
-      swal.fire(Object.assign(base, opts)).then(r => { if (r.isConfirmed) postDelete(url); });
+      
+      swal.fire(Object.assign(base, opts)).then(r => { 
+        if (r.isConfirmed) postDelete(url); 
+      });
     }
 
     function postDelete(url) {
@@ -369,4 +254,4 @@
       form.submit();
     }
   </script>
-@endpush
+@endpush --}}

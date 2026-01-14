@@ -1,617 +1,779 @@
 @extends('layouts.owner')
-@section('page_title', 'Verifikasi Akun')
+@section('page_title', __('messages.owner.verification.page_title'))
 
 @section('content')
-    @vite(['resources/css/app.css'])
-    <section class="content pb-4">
-        <div class="container-fluid">
-
+    <div class="modern-container">
+        <div class="container-modern">
             <!-- Header Section -->
-            <div class="mb-8">
-                <div class="relative overflow-hidden rounded-3xl shadow-sm bg-[#8c1000]">
-                    <div class="relative z-10 p-8 md:p-10">
-                        <div class="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6">
-                            <div class="flex-1">
-                                <div class="flex items-center space-x-3 mb-3">
-                                    <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight">Verifikasi Akun Owner</h1>
-                                </div>
-                                <p class="text-white text-opacity-95 leading-relaxed text-base md:text-lg max-w-4xl">
-                                    Lengkapi data diri dan informasi usaha Anda untuk mendapatkan akses penuh ke panel owner.
-                                    Verifikasi ini diperlukan untuk memastikan keamanan dan kredibilitas bisnis Anda.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+            <div class="page-header">
+                <div class="header-content">
+                    <h1 class="page-title">{{ __('messages.owner.verification.header_title') }}</h1>
+                    <p class="page-subtitle">{{ __('messages.owner.verification.header_desc') }}</p>
                 </div>
             </div>
 
-            <!-- Alert Alasan Penolakan -->
+            <!-- Rejection Alert -->
             @if($owner->verification_status === 'rejected' && $latestVerification && $latestVerification->rejection_reason)
-            <div class="bg-yellow-50 border-l-4 border-yellow-400 rounded-xl shadow-sm mb-6 overflow-hidden">
-                <div class="p-6">
-                    <div class="flex items-start">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-exclamation-triangle text-yellow-600 text-2xl"></i>
-                        </div>
-                        <div class="ml-4 flex-1">
-                            <h3 class="text-lg font-semibold text-yellow-900 mb-2">
-                                Verifikasi Ditolak
-                            </h3>
-                            <div class="bg-white rounded-lg p-3 mb-3 border border-yellow-200">
-                                <p class="text-sm font-medium text-yellow-800 mb-1">Alasan Penolakan:</p>
-                                <p class="text-gray-700 p-0 m-0">{{ $latestVerification->rejection_reason }}</p>
-                            </div>
-                            <p class="text-sm text-yellow-700">
-                                <i class="fas fa-info-circle mr-1"></i>
-                                Silakan perbaiki data sesuai dengan alasan penolakan di atas dan kirim ulang verifikasi.
-                            </p>
-                        </div>
+            <div class="alert-danger alert-modern">
+                <div class="alert-icon">
+                    <span class="material-symbols-outlined">warning</span>
+                </div>
+                <div class="alert-content">
+                    <h4 class="fw-bold">
+                        {{ __('messages.owner.verification.rejected_title') }}
+                    </h4>
+                    <div>
+                        <p class="fw-bold">
+                            {{ __('messages.owner.verification.rejection_reason') }}
+                        </p>
+                        <p>{{ $latestVerification->rejection_reason }}</p>
                     </div>
                 </div>
             </div>
             @endif
 
-            <!-- Main Form -->
-            <form action="{{ route('owner.user-owner.verification.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6" id="verificationForm">
-                @csrf
-
-                <!-- Personal Information Card -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="bg-[#8c1000] px-6 py-4 border-b border-gray-200">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                                <i class="fas fa-user text-red-600"></i>
+            <!-- Main Form Card -->
+            <div class="modern-card">
+                <form action="{{ route('owner.user-owner.verification.store') }}" method="POST" enctype="multipart/form-data" id="verificationForm">
+                    @csrf
+                    <div class="card-body-modern">
+                        
+                        <!-- Personal Information Section -->
+                        <div class="section-header">
+                            <div class="section-icon section-icon-red">
+                                <span class="material-symbols-outlined">person</span>
                             </div>
                             <div>
-                                <h2 class="text-lg font-semibold text-white m-0" style="margin-bottom: 0;">Data Pribadi Owner</h2>
-                                <p class="text-sm text-white m-0">Informasi identitas pemilik usaha</p>
+                                <h3 class="section-title mb-1">{{ __('messages.owner.verification.personal_title') }}</h3>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="p-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Nama Owner -->
-                            <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700">Nama Lengkap Owner <span class="text-red-500">*</span></label>
-                                <input type="text" name="owner_name" required
-                                    class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-200 outline-none @error('owner_name') border-red-500 @enderror"
-                                    placeholder="Masukkan nama lengkap" minlength="3" 
-                                    value="{{ old('owner_name', $latestVerification->owner_name ?? $owner->name ?? '') }}">
-                                @error('owner_name')
-                                    <span class="text-xs text-red-500">{{ $message }}</span>
-                                @else
-                                    <span class="text-xs text-red-500 hidden error-message" data-error="owner_name">Nama minimal 3 karakter</span>
-                                @enderror
+                        <div class="row g-4 mt-2">
+                            <!-- Owner Name -->
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">
+                                        {{ __('messages.owner.verification.owner_name') }}
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" name="owner_name" required
+                                        class="form-control-modern @error('owner_name') is-invalid @enderror"
+                                        placeholder="{{ __('messages.owner.verification.owner_name_placeholder') }}" 
+                                        minlength="3"
+                                        value="{{ old('owner_name', $latestVerification->owner_name ?? $owner->name ?? '') }}">
+                                    @error('owner_name')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @else
+                                        <div class="invalid-feedback">{{ __('messages.owner.verification.err_name_min') }}</div>
+                                    @enderror
+                                </div>
                             </div>
 
-                            <!-- No HP Owner -->
-                            <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700">Nomor HP/WhatsApp <span class="text-red-500">*</span></label>
-                                <input type="tel" name="owner_phone" required
-                                    class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-200 outline-none @error('owner_phone') border-red-500 @enderror"
-                                    placeholder="08xxxxxxxxxx" pattern="^(08|62)\d{8,12}$" minlength="10" maxlength="15"
-                                    value="{{ old('owner_phone', $latestVerification->owner_phone ?? $owner->phone_number ?? '') }}">
-                                @error('owner_phone')
-                                    <span class="text-xs text-red-500">{{ $message }}</span>
-                                @else
-                                    <span class="text-xs text-red-500 hidden error-message" data-error="owner_phone">Nomor HP harus dimulai dengan 08 atau 62 (10-15 digit)</span>
-                                @enderror
+                            <!-- Owner Phone -->
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">
+                                        {{ __('messages.owner.verification.owner_phone') }}
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="tel" name="owner_phone" required
+                                        class="form-control-modern @error('owner_phone') is-invalid @enderror"
+                                        placeholder="08xxxxxxxxxx" 
+                                        pattern="^(08|62)\d{8,12}$" 
+                                        minlength="10" 
+                                        maxlength="15"
+                                        value="{{ old('owner_phone', $latestVerification->owner_phone ?? $owner->phone_number ?? '') }}">
+                                    @error('owner_phone')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @else
+                                        <div class="invalid-feedback">{{ __('messages.owner.verification.err_phone_format') }}</div>
+                                    @enderror
+                                </div>
                             </div>
 
-                            <!-- Email Owner -->
-                            <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700">
-                                    Email Owner 
-                                </label>
-                                <div class="relative">
+                            <!-- Owner Email (Disabled) -->
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">
+                                        {{ __('messages.owner.verification.owner_email') }}
+                                    </label>
                                     <input type="text" 
                                         value="{{ $owner->email }}" 
                                         disabled
-                                        class="w-full px-4 py-3 pr-10 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 cursor-not-allowed">
+                                        class="form-control-modern bg-light text-muted">
                                 </div>
-                                <p class="text-xs text-gray-500 flex items-center">
-                                    <i class="fas fa-info-circle mr-1"></i>
-                                    Email tidak dapat diubah dan menggunakan email dari akun yang terdaftar
-                                </p>
                             </div>
 
-                            <!-- No KTP -->
-                            <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700">Nomor KTP <span class="text-red-500">*</span></label>
-                                <input type="text" name="ktp_number" required maxlength="16" minlength="16"
-                                    class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-200 outline-none @error('ktp_number') border-red-500 @enderror"
-                                    placeholder="16 digit nomor KTP" pattern="\d{16}"
-                                    value="{{ old('ktp_number', $latestVerification->ktp_number_decrypted ?? '') }}">
-                                @error('ktp_number')
-                                    <span class="text-xs text-red-500">{{ $message }}</span>
-                                @else
-                                    <span class="text-xs text-red-500 hidden error-message" data-error="ktp_number">Nomor KTP harus 16 digit angka</span>
-                                @enderror
-                            </div>
-
-                            <!-- Foto KTP -->
-                            <div class="space-y-2 md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700">
-                                    Foto KTP 
-                                    @if($latestVerification)
-                                        <span class="text-gray-500">(Opsional - kosongkan jika tidak ingin mengubah)</span>
+                            <!-- KTP Number -->
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">
+                                        {{ __('messages.owner.verification.ktp_number') }}
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" name="ktp_number" required 
+                                        maxlength="16" 
+                                        minlength="16"
+                                        class="form-control-modern @error('ktp_number') is-invalid @enderror"
+                                        placeholder="{{ __('messages.owner.verification.ktp_number_placeholder') }}" 
+                                        pattern="\d{16}"
+                                        value="{{ old('ktp_number', $latestVerification->ktp_number_decrypted ?? '') }}">
+                                    @error('ktp_number')
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @else
-                                        <span class="text-red-500">*</span>
-                                    @endif
-                                </label>
-                                
-                                <!-- Preview Foto Lama dari Database -->
-                                @if($latestVerification && $latestVerification->ktp_photo_path)
-                                    <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-xl" id="old_ktp_preview">
-                                        <div class="flex items-start justify-between mb-2">
-                                            <p class="text-sm font-medium text-blue-900 flex items-center">
-                                                <i class="fas fa-image mr-2"></i> Foto KTP Sebelumnya:
-                                            </p>
+                                        <div class="invalid-feedback">{{ __('messages.owner.verification.err_ktp_format') }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                          <!-- KTP Photo Upload -->
+                            <div class="col-12">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">
+                                        {{ __('messages.owner.verification.ktp_photo') }}
+                                        @if($latestVerification)
+                                            <span class="text-muted">{{ __('messages.owner.verification.ktp_optional') }}</span>
+                                        @else
+                                            <span class="text-danger">*</span>
+                                        @endif
+                                    </label>
+
+                                    <div class="profile-picture-wrapper" style="display: inline-block;">
+                                        <div class="profile-picture-container" id="ktpPictureContainer">
+                                            @if($latestVerification && $latestVerification->ktp_photo_path)
+                                                <!-- Show existing KTP image -->
+                                                <img src="{{ route('owner.user-owner.verification.ktp-image') }}" 
+                                                    class="profile-preview" 
+                                                    alt="KTP Current"
+                                                    id="currentKtpImage"
+                                                    style="display: block;">
+                                                <!-- Overlay for hover effect -->
+                                                <div class="upload-overlay">
+                                                    <span class="material-symbols-outlined">edit</span>
+                                                    <span class="upload-text">Ganti Foto</span>
+                                                </div>
+                                            @else
+                                                <!-- Show upload placeholder for first time -->
+                                                <div class="upload-placeholder" id="uploadPlaceholderKTP">
+                                                    <span class="material-symbols-outlined">badge</span>
+                                                    <span class="upload-text">Upload KTP</span>
+                                                </div>
+                                            @endif
+                                            <!-- New preview will be shown here when user selects new image -->
+                                            <img id="imagePreviewKTP" class="profile-preview" alt="KTP Preview" style="display: none;">
                                         </div>
-                                        <div class="bg-white p-2 rounded-lg inline-block">
-                                            <img src="{{ route('owner.user-owner.verification.ktp-image') }}" 
-                                                alt="KTP Preview" 
-                                                class="max-w-md rounded-lg shadow-sm border border-gray-200"
-                                                style="max-height: 250px; object-fit: contain;">
-                                        </div>
-                                        <p class="text-xs text-blue-700 mt-3 flex items-start">
-                                            <i class="fas fa-info-circle mt-0.5 mr-2"></i>
-                                            <span>Foto ini akan tetap digunakan jika Anda tidak mengunggah foto baru. Klik tombol Hapus untuk menghapus dan upload foto baru.</span>
-                                        </p>
                                     </div>
-                                @endif
-                                
-                                <!-- Upload Area -->
-                                <div class="relative" id="ktp_upload_area">
                                     <input type="file" name="ktp_photo" id="ktp_photo" 
                                         {{ $latestVerification ? '' : 'required' }}
-                                        accept="image/jpeg,image/jpg,image/png" class="hidden"
-                                        onchange="previewImageWithRemove(this, 'ktp_preview_container', 'ktp_upload_area')">
-                                    <label for="ktp_photo"
-                                        class="flex items-center justify-center w-full px-4 py-8 border-2 border-dashed border-gray-300 rounded-xl hover:border-red-400 transition-all duration-200 cursor-pointer bg-gray-50 hover:bg-red-50 @error('ktp_photo') border-red-500 @enderror">
-                                        <div class="text-center">
-                                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
-                                            <p class="text-sm text-gray-600 font-medium">
-                                                {{ $latestVerification ? 'Klik untuk upload foto KTP baru' : 'Klik untuk upload foto KTP' }}
-                                            </p>
-                                            <p class="text-xs text-gray-500 mt-1">PNG, JPG, JPEG (Max. 1MB)</p>
-                                            <p class="text-xs text-red-600 font-medium mt-2">
-                                                <i class="fas fa-exclamation-triangle mr-1"></i>
-                                                Pastikan foto KTP jelas & semua tulisan terbaca
-                                            </p>
-                                        </div>
-                                    </label>
-                                </div>
-                                
-                                @error('ktp_photo')
-                                    <span class="text-xs text-red-500">{{ $message }}</span>
-                                @else
-                                    <span class="text-xs text-red-500 hidden error-message" data-error="ktp_photo">File harus berupa gambar (JPG, PNG) maksimal 1MB</span>
-                                @enderror
-                                
-                                <!-- Preview Foto Baru yang Diupload -->
-                                <div id="ktp_preview_container" class="hidden mt-4">
-                                    <div class="relative inline-block max-w-md">
-                                        <img id="ktp_preview_image" src="" alt="Preview KTP"
-                                            class="w-full rounded-xl shadow-sm border border-gray-200">
-                                        <button type="button" 
-                                            onclick="removeNewPreview('ktp_photo', 'ktp_preview_container', 'ktp_upload_area')"
-                                            class="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110"
-                                            title="Hapus foto">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    </div>
+                                        accept="image/jpeg,image/jpg,image/png" hidden>
+                                    <small class="text-muted d-block mt-2">
+                                        {{ __('messages.owner.verification.ktp_upload_hint') }}
+                                    </small>
+                                    @error('ktp_photo')
+                                        <div class="text-danger small text-center mt-1">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <!-- Business Information Card -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="bg-[#8c1000] px-6 py-4 border-b border-gray-200">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                                <i class="fas fa-store text-red-600"></i>
+                        <!-- Divider -->
+                        <div class="section-divider"></div>
+
+                        <!-- Business Information Section -->
+                        <div class="section-header">
+                            <div class="section-icon section-icon-red">
+                                <span class="material-symbols-outlined">store</span>
                             </div>
                             <div>
-                                <h2 class="text-lg font-semibold text-white" style="margin-bottom: 0;">Informasi Usaha</h2>
-                                <p class="text-sm text-white m-0">Detail bisnis dan lokasi</p>
+                                <h3 class="section-title mb-1">{{ __('messages.owner.verification.business_title') }}</h3>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="p-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700">Nama Usaha <span class="text-red-500">*</span></label>
-                                <input type="text" name="business_name" required minlength="3"
-                                    class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-200 outline-none @error('business_name') border-red-500 @enderror"
-                                    placeholder="Contoh: Warung Nasi Padang Mak Bundo"
-                                    value="{{ old('business_name', $latestVerification->business_name ?? '') }}">
-                                @error('business_name')
-                                    <span class="text-xs text-red-500">{{ $message }}</span>
-                                @else
-                                    <span class="text-xs text-red-500 hidden error-message" data-error="business_name">Nama usaha minimal 3 karakter</span>
-                                @enderror
-                            </div>
-
-                            <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700">
-                                    Jenis Usaha <span class="text-red-500">*</span>
-                                </label>
-                                <select name="business_category_id" required
-                                    class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-200 outline-none @error('business_category_id') border-red-500 @enderror">
-                                    <option value="">Pilih Jenis Usaha</option>
-                                    @foreach($businessCategories as $category)
-                                        <option value="{{ $category->id }}" 
-                                            {{ old('business_category_id', $latestVerification->business_category_id ?? '') == $category->id ? 'selected' : '' }}>
-                                            {{ $category->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('business_category_id')
-                                    <span class="text-xs text-red-500">{{ $message }}</span>
-                                @else
-                                    <span class="text-xs text-red-500 hidden error-message" data-error="business_category_id">Pilih jenis usaha</span>
-                                @enderror
-                            </div>
-
-                            <div class="space-y-2 md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700">Alamat Lengkap Usaha <span class="text-red-500">*</span></label>
-                                <textarea name="business_address" required rows="3" minlength="10"
-                                    class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-200 outline-none resize-none @error('business_address') border-red-500 @enderror"
-                                    placeholder="Jalan, nomor, RT/RW, kelurahan, kecamatan, kota/kabupaten, provinsi, kode pos">{{ old('business_address', $latestVerification->business_address ?? '') }}</textarea>
-                                @error('business_address')
-                                    <span class="text-xs text-red-500">{{ $message }}</span>
-                                @else
-                                    <span class="text-xs text-red-500 hidden error-message" data-error="business_address">Alamat minimal 10 karakter</span>
-                                @enderror
-                            </div>
-
-                            <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700">No. Telepon/WhatsApp Bisnis
-                                    <span class="text-red-500">*</span></label>
-                                <input type="tel" name="business_phone" required
-                                    class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-200 outline-none @error('business_phone') border-red-500 @enderror"
-                                    placeholder="08xxxxxxxxxx" pattern="^(08|62)\d{8,12}$" minlength="10" maxlength="15"
-                                    value="{{ old('business_phone', $latestVerification->business_phone ?? '') }}">
-                                @error('business_phone')
-                                    <span class="text-xs text-red-500">{{ $message }}</span>
-                                @else
-                                    <span class="text-xs text-red-500 hidden error-message" data-error="business_phone">Nomor telepon harus dimulai dengan 08 atau 62 (10-15 digit)</span>
-                                @enderror
-                            </div>
-
-                            <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700">Email Bisnis <span class="text-gray-400">(Opsional)</span></label>
-                                <input type="email" name="business_email"
-                                    class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-200 outline-none @error('business_email') border-red-500 @enderror"
-                                    placeholder="bisnis@email.com" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-                                    value="{{ old('business_email', $latestVerification->business_email ?? '') }}">
-                                @error('business_email')
-                                    <span class="text-xs text-red-500">{{ $message }}</span>
-                                @else
-                                    <span class="text-xs text-red-500 hidden error-message" data-error="business_email">Format email tidak valid</span>
-                                @enderror
-                            </div>
-
-                            <div class="space-y-2 md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700">Logo Usaha <span class="text-gray-400">(Opsional)</span></label>
-                                
-                                <!-- Preview Logo Lama dari Database -->
-                                @if($latestVerification && $latestVerification->business_logo_path)
-                                    <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-xl" id="old_logo_preview">
-                                        <div class="flex items-start justify-between mb-2">
-                                            <p class="text-sm font-medium text-blue-900 flex items-center">
-                                                <i class="fas fa-image mr-2"></i> Logo Sebelumnya:
-                                            </p>
-                                        </div>
-                                        <div class="bg-white p-2 rounded-lg inline-block">
-                                            <img src="{{ Storage::url($latestVerification->business_logo_path) }}" 
-                                                alt="Business Logo Preview" 
-                                                class="rounded-lg shadow-sm border border-gray-200"
-                                                style="width: 200px; height: 150px; object-fit: contain;">
-                                        </div>
-                                        <p class="text-xs text-blue-700 mt-3 flex items-start">
-                                            <i class="fas fa-info-circle mt-0.5 mr-2"></i>
-                                            <span>Logo ini akan tetap digunakan jika Anda tidak mengunggah logo baru. Klik tombol Hapus untuk menghapus dan upload logo baru.</span>
-                                        </p>
-                                    </div>
-                                @endif
-                                
-                                <!-- Upload Area -->
-                                <div class="relative" id="logo_upload_area">
-                                    <input type="file" name="business_logo" id="business_logo"
-                                        accept="image/jpeg,image/jpg,image/png" class="hidden"
-                                        onchange="previewImageWithRemove(this, 'logo_preview_container', 'logo_upload_area')">
-                                    <label for="business_logo"
-                                        class="flex items-center justify-center w-full px-4 py-8 border-2 border-dashed border-gray-300 rounded-xl hover:border-red-400 transition-all duration-200 cursor-pointer bg-gray-50 hover:bg-red-50 @error('business_logo') border-red-500 @enderror">
-                                        <div class="text-center">
-                                            <i class="fas fa-image text-4xl text-gray-400 mb-3"></i>
-                                            <p class="text-sm text-gray-600 font-medium">
-                                                {{ $latestVerification && $latestVerification->business_logo_path ? 'Klik untuk upload logo baru' : 'Klik untuk upload logo usaha' }}
-                                            </p>
-                                            <p class="text-xs text-gray-500 mt-1">PNG, JPG, JPEG (Max. 2MB)</p>
-                                        </div>
+                        <div class="row g-4 mt-2">
+                            <!-- Business Name -->
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">
+                                        {{ __('messages.owner.verification.business_name') }}
+                                        <span class="text-danger">*</span>
                                     </label>
+                                    <input type="text" name="business_name" required minlength="3"
+                                        class="form-control-modern @error('business_name') is-invalid @enderror"
+                                        placeholder="{{ __('messages.owner.verification.business_name_placeholder') }}"
+                                        value="{{ old('business_name', $latestVerification->business_name ?? '') }}">
+                                    @error('business_name')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @else
+                                        <div class="invalid-feedback">{{ __('messages.owner.verification.err_name_min') }}</div>
+                                    @enderror
                                 </div>
-                                
-                                @error('business_logo')
-                                    <span class="text-xs text-red-500">{{ $message }}</span>
-                                @else
-                                    <span class="text-xs text-red-500 hidden error-message" data-error="business_logo">File harus berupa gambar (JPG, PNG) maksimal 2MB</span>
-                                @enderror
-                                
-                                <!-- Preview Logo Baru yang Diupload -->
-                                <div id="logo_preview_container" class="hidden mt-4">
-                                    <div class="relative inline-block">
-                                        <img id="logo_preview_image" src="" alt="Preview Logo"
-                                            class="w-48 h-48 object-cover rounded-xl shadow-sm border border-gray-200">
-                                        <button type="button" 
-                                            onclick="removeNewPreview('business_logo', 'logo_preview_container', 'logo_upload_area')"
-                                            class="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110"
-                                            title="Hapus logo">
-                                            <i class="fas fa-times"></i>
-                                        </button>
+                            </div>
+
+                            <!-- Business Category -->
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">
+                                        {{ __('messages.owner.verification.business_category') }}
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="select-wrapper">
+                                        <select name="business_category_id" required
+                                            class="form-control-modern @error('business_category_id') is-invalid @enderror">
+                                            <option value="">{{ __('messages.owner.verification.business_category_select') }}</option>
+                                            @foreach($businessCategories as $category)
+                                                <option value="{{ $category->id }}" 
+                                                    {{ old('business_category_id', $latestVerification->business_category_id ?? '') == $category->id ? 'selected' : '' }}>
+                                                    {{ $category->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <span class="material-symbols-outlined select-arrow">expand_more</span>
                                     </div>
+                                    @error('business_category_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Business Address -->
+                            <div class="col-12">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">
+                                        {{ __('messages.owner.verification.business_address') }}
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <textarea name="business_address" required rows="3" minlength="10"
+                                        class="form-control-modern @error('business_address') is-invalid @enderror"
+                                        placeholder="{{ __('messages.owner.verification.business_address_placeholder') }}">{{ old('business_address', $latestVerification->business_address ?? '') }}</textarea>
+                                    @error('business_address')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @else
+                                        <div class="invalid-feedback">{{ __('messages.owner.verification.err_address_min') }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Business Phone -->
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">
+                                        {{ __('messages.owner.verification.business_phone') }}
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="tel" name="business_phone" required
+                                        class="form-control-modern @error('business_phone') is-invalid @enderror"
+                                        placeholder="08xxxxxxxxxx" 
+                                        pattern="^(08|62)\d{8,12}$" 
+                                        minlength="10" 
+                                        maxlength="15"
+                                        value="{{ old('business_phone', $latestVerification->business_phone ?? '') }}">
+                                    @error('business_phone')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @else
+                                        <div class="invalid-feedback">{{ __('messages.owner.verification.err_phone_format') }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Business Email -->
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">
+                                        {{ __('messages.owner.verification.business_email') }}
+                                        <span class="text-muted">{{ __('messages.owner.verification.business_email_optional') }}</span>
+                                    </label>
+                                    <input type="email" name="business_email"
+                                        class="form-control-modern @error('business_email') is-invalid @enderror"
+                                        placeholder="bisnis@email.com" 
+                                        pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                                        value="{{ old('business_email', $latestVerification->business_email ?? '') }}">
+                                    @error('business_email')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @else
+                                        <div class="invalid-feedback">{{ __('messages.owner.verification.err_email_format') }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Business Logo Upload -->
+                            <div class="col-12">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">
+                                        {{ __('messages.owner.verification.business_logo') }}
+                                        <span class="text-muted">{{ __('messages.owner.verification.business_email_optional') }}</span>
+                                    </label>
+
+                                    <div class="profile-picture-wrapper" style="display: inline-block;">
+                                        <div class="profile-picture-container" id="logoPictureContainer">
+                                            @if($latestVerification && $latestVerification->business_logo_path)
+                                                <!-- Show existing Logo -->
+                                                <img src="{{ Storage::url($latestVerification->business_logo_path) }}" 
+                                                    class="profile-preview" 
+                                                    alt="Logo Current"
+                                                    id="currentLogoImage"
+                                                    style="display: block;">
+                                                <!-- Overlay for hover effect -->
+                                                <div class="upload-overlay">
+                                                    <span class="material-symbols-outlined">edit</span>
+                                                    <span class="upload-text">Ganti Logo</span>
+                                                </div>
+                                            @else
+                                                <!-- Show upload placeholder for first time -->
+                                                <div class="upload-placeholder" id="uploadPlaceholderLogo">
+                                                    <span class="material-symbols-outlined">add_business</span>
+                                                    <span class="upload-text">Upload Logo</span>
+                                                </div>
+                                            @endif
+                                            <!-- New preview will be shown here when user selects new image -->
+                                            <img id="imagePreviewLogo" class="profile-preview" alt="Logo Preview" style="display: none;">
+                                        </div>
+                                    </div>
+                                    <input type="file" name="business_logo" id="business_logo"
+                                        accept="image/jpeg,image/jpg,image/png" hidden>
+                                    <small class="text-muted d-block mt-2">
+                                        {{ __('messages.owner.verification.logo_upload_hint') }}
+                                    </small>
+                                    @error('business_logo')
+                                        <div class="text-danger small text-center mt-1">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <!-- Info Box -->
-                <div class="bg-blue-50 border border-blue-200 rounded-2xl p-6">
-                    <div class="flex items-start space-x-4">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-info-circle text-blue-600 text-2xl"></i>
+                        <!-- Divider -->
+                        <div class="section-divider"></div>
+
+                        <!-- Important Information Box -->
+                        <div class="alert-info alert-modern">
+                            <div class="alert-icon">
+                                <span class="material-symbols-outlined">info</span>
+                            </div>
+                            <div class="alert-content">
+                                <h4 style="margin: 0 0 0.75rem 0; font-size: 1.125rem; font-weight: 700;">
+                                    {{ __('messages.owner.verification.important_info') }}
+                                </h4>
+                                <ul style="margin: 0; padding-left: 1.25rem; font-size: 0.875rem; line-height: 1.7;">
+                                    <li style="margin-bottom: 0.375rem;">{{ __('messages.owner.verification.info_1') }}</li>
+                                    <li style="margin-bottom: 0.375rem;">{{ __('messages.owner.verification.info_2') }}</li>
+                                    <li style="margin-bottom: 0.375rem;">{{ __('messages.owner.verification.info_3') }}</li>
+                                    <li>{{ __('messages.owner.verification.info_4') }}</li>
+                                </ul>
+                            </div>
                         </div>
-                        <div>
-                            <h4 class="font-semibold text-blue-900 mb-2">Informasi Penting</h4>
-                            <ul class="text-sm text-blue-800 space-y-2">
-                                <li class="flex items-start"><i class="fas fa-check-circle mt-0.5 mr-2 text-blue-600"></i><span>Proses verifikasi akan memakan waktu maksimal 2x24 jam kerja.</span></li>
-                                <li class="flex items-start"><i class="fas fa-check-circle mt-0.5 mr-2 text-blue-600"></i><span>Pastikan semua data yang diinput sesuai dengan dokumen asli.</span></li>
-                                <li class="flex items-start"><i class="fas fa-check-circle mt-0.5 mr-2 text-blue-600"></i><span>Foto KTP harus jelas, tidak buram, dan terbaca dengan baik.</span></li>
-                                <li class="flex items-start"><i class="fas fa-check-circle mt-0.5 mr-2 text-blue-600"></i><span>Status verifikasi akan dikirimkan melalui email dan notifikasi di panel.</span></li>
-                            </ul>
+
+                        <!-- Terms & Conditions -->
+                        <div class="form-check-modern mt-4">
+                            <input type="checkbox" id="terms" name="terms" required class="form-check-input-modern">
+                            <label for="terms" class="form-check-label-modern">
+                                {{ __('messages.owner.verification.terms_agreement') }} 
+                                <a href="#" class="text-danger">{{ __('messages.owner.verification.terms_link') }}</a> 
+                                {{ __('messages.owner.verification.agreement_suffix') }} 
+                                <a href="#" class="text-danger">{{ __('messages.owner.verification.privacy_link') }}</a>
+                            </label>
                         </div>
+                        @error('terms')
+                            <div class="text-danger small mt-1">{{ $message }}</div>
+                        @enderror
                     </div>
-                </div>
 
-                <!-- Terms & Conditions -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                    <div class="flex items-start space-x-3">
-                        <input type="checkbox" id="terms" name="terms" required
-                            class="mt-1 h-5 w-5 text-red-600 border-gray-300 rounded focus:ring-2 focus:ring-red-200">
-                        <label for="terms" class="text-sm text-gray-600 leading-relaxed">
-                            Saya menyatakan bahwa data yang saya berikan adalah benar dan dapat
-                            dipertanggungjawabkan. Saya juga menyetujui <a href="#"
-                                class="text-red-600 hover:text-red-700 font-medium">Syarat & Ketentuan</a> serta <a href="#"
-                                class="text-red-600 hover:text-red-700 font-medium">Kebijakan Privasi</a>
-                            yang berlaku.
-                        </label>
+                    <!-- Card Footer -->
+                    <div class="card-footer-modern">
+                        <button type="button" class="btn-cancel-modern" onclick="window.history.back()">
+                            Batal
+                        </button>
+                        <button type="submit" id="submitBtn" class="btn-submit-modern" disabled>
+                            {{ $latestVerification ? __('messages.owner.verification.btn_resend') : __('messages.owner.verification.btn_send') }}
+                        </button>
                     </div>
-                    @error('terms')
-                        <span class="text-xs text-red-500 ml-8 mt-1 block">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <!-- Submit Button -->
-                <div class="flex justify-end">
-                    <button type="submit" id="submitBtn" disabled
-                        class="px-8 py-3 bg-[#8c1000] text-white rounded-xl transition-all duration-300 font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none hover:from-red-700 hover:to-red-800 hover:shadow-xl hover:-translate-y-0.5">
-                        <i class="fas fa-paper-plane mr-2"></i> 
-                        {{ $latestVerification ? 'Kirim Ulang Verifikasi' : 'Kirim Verifikasi' }}
-                    </button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
-    </section>
+    </div>
+@endsection
 
-    @push('scripts')
-        @vite(['resources/js/app.js'])
-        <script>
-            // Fungsi untuk menghapus preview foto lama dari database
-            function removeOldPreview(previewId, inputId) {
-                const preview = document.getElementById(previewId);
-                const input = document.getElementById(inputId);
-                
-                if (preview) {
-                    preview.remove();
-                }
-                
-                // Set input menjadi required jika foto lama dihapus
-                if (input && !input.hasAttribute('required')) {
-                    input.setAttribute('required', 'required');
-                }
-                
-                // Trigger form validity check
-                checkFormValidity();
-            }
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('verificationForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const termsCheckbox = document.getElementById('terms');
 
-            // Fungsi untuk preview gambar dengan tombol hapus
-            function previewImageWithRemove(input, previewContainerId, uploadAreaId) {
-                const previewContainer = document.getElementById(previewContainerId);
-                const previewImage = document.getElementById(previewContainerId.replace('_container', '_image'));
-                const uploadArea = document.getElementById(uploadAreaId);
-                const errorSpan = document.querySelector(`[data-error="${input.name}"]`);
+            // Image preview handler for KTP
+            const ktpInput = document.getElementById('ktp_photo');
+            const ktpPreview = document.getElementById('imagePreviewKTP');
+            const ktpPlaceholder = document.getElementById('uploadPlaceholderKTP');
+            const ktpContainer = document.getElementById('ktpPictureContainer');
 
-                if (input.files && input.files[0]) {
-                    const file = input.files[0];
-                    const maxSize = input.name === 'ktp_photo' ? 1 * 1024 * 1024 : 2 * 1024 * 1024;
+            // Image preview handler for Logo
+            const logoInput = document.getElementById('business_logo');
+            const logoPreview = document.getElementById('imagePreviewLogo');
+            const logoPlaceholder = document.getElementById('uploadPlaceholderLogo');
+            const logoContainer = document.getElementById('logoPictureContainer');
 
-                    // Validasi ukuran dan tipe file
-                    if (file.size > maxSize) {
-                        if (errorSpan) {
-                            errorSpan.textContent = `Ukuran file maksimal ${input.name === 'ktp_photo' ? '1MB' : '2MB'}`;
-                            errorSpan.classList.remove('hidden');
-                        }
-                        input.value = '';
-                        previewContainer.classList.add('hidden');
-                        uploadArea.classList.remove('hidden');
-                        checkFormValidity();
-                        return;
-                    }
-
-                    if (!file.type.match('image/(jpeg|jpg|png)')) {
-                        if (errorSpan) {
-                            errorSpan.textContent = 'Format file harus JPG, JPEG, atau PNG';
-                            errorSpan.classList.remove('hidden');
-                        }
-                        input.value = '';
-                        previewContainer.classList.add('hidden');
-                        uploadArea.classList.remove('hidden');
-                        checkFormValidity();
-                        return;
-                    }
-
-                    // Sembunyikan error jika validasi berhasil
-                    if (errorSpan) errorSpan.classList.add('hidden');
-
-                    // Preview gambar
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        previewImage.src = e.target.result;
-                        previewContainer.classList.remove('hidden');
-                        uploadArea.classList.add('hidden');
-                        checkFormValidity();
-                    }
-                    reader.readAsDataURL(file);
-                } else {
-                    previewContainer.classList.add('hidden');
-                    uploadArea.classList.remove('hidden');
-                    previewImage.src = '';
-                    checkFormValidity();
-                }
-            }
-
-            // Fungsi untuk menghapus preview foto baru yang baru diupload
-            function removeNewPreview(inputId, previewContainerId, uploadAreaId) {
-                const input = document.getElementById(inputId);
-                const previewContainer = document.getElementById(previewContainerId);
-                const previewImage = document.getElementById(previewContainerId.replace('_container', '_image'));
-                const uploadArea = document.getElementById(uploadAreaId);
-                
-                // Reset input file
-                input.value = '';
-                
-                // Sembunyikan preview dan tampilkan upload area
-                previewContainer.classList.add('hidden');
-                uploadArea.classList.remove('hidden');
-                previewImage.src = '';
-                
-                // Trigger form validity check
-                checkFormValidity();
-            }
-
-            document.addEventListener('DOMContentLoaded', function () {
-                const form = document.getElementById('verificationForm');
-                const submitBtn = document.getElementById('submitBtn');
-                const termsCheckbox = document.getElementById('terms');
-                const requiredInputs = form.querySelectorAll('input[required], select[required], textarea[required]');
-
-                requiredInputs.forEach(input => {
-                    input.addEventListener('input', () => {
-                        validateField(input);
-                        checkFormValidity();
-                    });
-                    input.addEventListener('blur', () => validateField(input));
-                });
-                
-                const businessEmailInput = document.querySelector('input[name="business_email"]');
-                businessEmailInput.addEventListener('input', () => validateField(businessEmailInput));
-                businessEmailInput.addEventListener('blur', () => validateField(businessEmailInput));
-
-                termsCheckbox.addEventListener('change', checkFormValidity);
-                checkFormValidity();
-
-                form.addEventListener('submit', function (e) {
+            // Setup KTP upload
+            if (ktpContainer && ktpInput) {
+                ktpContainer.addEventListener('click', function(e) {
                     e.preventDefault();
+                    ktpInput.click();
+                });
 
-                    let isFormCompletelyValid = true;
-                    form.querySelectorAll('input, select, textarea').forEach(input => {
-                        if (!validateField(input)) {
-                            isFormCompletelyValid = false;
-                        }
-                    });
+                ktpInput.addEventListener('change', function(e) {
+                    handleImageUpload(this, ktpPreview, ktpPlaceholder, 1 * 1024 * 1024); // 1MB max
+                });
+            }
 
-                    if (!termsCheckbox.checked) {
-                        isFormCompletelyValid = false;
-                    }
+            // Setup Logo upload
+            if (logoContainer && logoInput) {
+                logoContainer.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    logoInput.click();
+                });
 
-                    if (!isFormCompletelyValid) {
-                        toastr.error('Mohon periksa kembali, masih ada data yang tidak valid.');
-                        form.querySelector('.border-red-500, :invalid')?.focus();
-                        return;
-                    }
+                logoInput.addEventListener('change', function(e) {
+                    handleImageUpload(this, logoPreview, logoPlaceholder, 2 * 1024 * 1024); // 2MB max
+                });
+            }
 
-                    Swal.fire({
-                        title: 'Konfirmasi Pengiriman',
-                        text: "Apakah Anda yakin semua data yang diisi sudah benar?",
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonText: 'Ya, Kirim!',
-                        cancelButtonText: 'Batal',
-                        confirmButtonColor: '#8c1000',
-                        cancelButtonColor: '#6c757d',
-                        customClass: {
-                            popup: 'rounded-2xl',
-                        }
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            submitBtn.disabled = true;
-                            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Mengirim...';
-                            form.submit();
-                        }
-                    });
+            // Handle image upload
+            function handleImageUpload(input, preview, placeholder, maxSize) {
+                const file = input.files[0];
+                
+                if (!file) {
+                    checkFormValidity();
+                    return;
+                }
+
+                // Validate file size
+                if (file.size > maxSize) {
+                    const sizeLimit = maxSize === 1048576 ? '1MB' : '2MB';
+                    alert(`{{ __('messages.owner.verification.err_file_image') }} (Max ${sizeLimit})`);
+                    input.value = '';
+                    input.classList.add('is-invalid');
+                    checkFormValidity();
+                    return;
+                }
+
+                // Validate file type
+                if (!file.type.match('image/(jpeg|jpg|png)')) {
+                    alert('{{ __('messages.owner.verification.err_file_image') }}');
+                    input.value = '';
+                    input.classList.add('is-invalid');
+                    checkFormValidity();
+                    return;
+                }
+
+                // Preview image
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    placeholder.style.display = 'none';
+                    input.classList.remove('is-invalid');
+                    input.classList.add('is-valid');
+                    checkFormValidity();
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // Get all required inputs
+            const requiredInputs = form.querySelectorAll('input[required], select[required], textarea[required]');
+
+            // Add input listeners for real-time validation
+            requiredInputs.forEach(input => {
+                // Validate on input
+                input.addEventListener('input', function() {
+                    validateField(this);
+                    checkFormValidity();
+                });
+
+                // Validate on blur
+                input.addEventListener('blur', function() {
+                    validateField(this);
+                    checkFormValidity();
+                });
+
+                // Validate on change (for select and file inputs)
+                input.addEventListener('change', function() {
+                    validateField(this);
+                    checkFormValidity();
                 });
             });
 
-            function validateField(field) {
-                const errorSpan = document.querySelector(`[data-error="${field.name}"]`);
-                if (!errorSpan) return true;
+            // Terms checkbox listener
+            termsCheckbox.addEventListener('change', checkFormValidity);
 
-                // Jika field tidak wajib diisi dan kosong, maka selalu valid
+            // Validate optional fields (business email and logo)
+            const businessEmailInput = document.querySelector('input[name="business_email"]');
+            if (businessEmailInput) {
+                businessEmailInput.addEventListener('input', function() {
+                    validateField(this);
+                    checkFormValidity();
+                });
+                businessEmailInput.addEventListener('blur', function() {
+                    validateField(this);
+                    checkFormValidity();
+                });
+            }
+
+            // Validate business logo if uploaded
+            if (logoInput) {
+                logoInput.addEventListener('change', function() {
+                    checkFormValidity();
+                });
+            }
+
+            // Initial check
+            checkFormValidity();
+
+            // Validate individual field
+            function validateField(field) {
+                // For optional fields that are empty, skip validation but remove classes
                 if (!field.hasAttribute('required') && field.value.trim() === '') {
-                    errorSpan.classList.add('hidden');
-                    field.classList.remove('border-red-500');
+                    field.classList.remove('is-invalid', 'is-valid');
                     return true;
                 }
 
-                let isValid = field.checkValidity();
+                let isValid = true;
 
-                if (!isValid) {
-                    errorSpan.classList.remove('hidden');
-                    field.classList.add('border-red-500');
-                } else {
-                    errorSpan.classList.add('hidden');
-                    field.classList.remove('border-red-500');
+                // Check basic HTML5 validity
+                if (!field.checkValidity()) {
+                    isValid = false;
                 }
+
+                // Additional custom validations
+                if (field.name === 'owner_name' || field.name === 'business_name') {
+                    if (field.value.trim().length < 3) {
+                        isValid = false;
+                    }
+                }
+
+                if (field.name === 'owner_phone' || field.name === 'business_phone') {
+                    const phonePattern = /^(08|62)\d{8,12}$/;
+                    if (!phonePattern.test(field.value.trim())) {
+                        isValid = false;
+                    }
+                }
+
+                if (field.name === 'ktp_number') {
+                    if (field.value.length !== 16 || !/^\d{16}$/.test(field.value)) {
+                        isValid = false;
+                    }
+                }
+
+                if (field.name === 'business_address') {
+                    if (field.value.trim().length < 10) {
+                        isValid = false;
+                    }
+                }
+
+                // Validate business email if filled (optional but must be valid if filled)
+                if (field.name === 'business_email' && field.value.trim() !== '') {
+                    const emailPattern = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
+                    if (!emailPattern.test(field.value.trim())) {
+                        isValid = false;
+                    }
+                }
+
+                // Apply validation classes
+                if (isValid) {
+                    field.classList.remove('is-invalid');
+                    field.classList.add('is-valid');
+                } else {
+                    field.classList.remove('is-valid');
+                    field.classList.add('is-invalid');
+                }
+
                 return isValid;
             }
 
+            // Check overall form validity
             function checkFormValidity() {
-                const form = document.getElementById('verificationForm');
-                const submitBtn = document.getElementById('submitBtn');
-                const termsCheckbox = document.getElementById('terms');
+                let isFormValid = true;
 
-                let isFormValid = form.checkValidity();
+                // Check all required fields
+                requiredInputs.forEach(input => {
+                    if (!input.checkValidity()) {
+                        isFormValid = false;
+                    }
 
-                submitBtn.disabled = !isFormValid || !termsCheckbox.checked;
+                    // Additional validations
+                    if (input.name === 'owner_name' || input.name === 'business_name') {
+                        if (input.value.trim().length < 3) {
+                            isFormValid = false;
+                        }
+                    }
+
+                    if (input.name === 'owner_phone' || input.name === 'business_phone') {
+                        const phonePattern = /^(08|62)\d{8,12}$/;
+                        if (!phonePattern.test(input.value.trim())) {
+                            isFormValid = false;
+                        }
+                    }
+
+                    if (input.name === 'ktp_number') {
+                        if (input.value.length !== 16 || !/^\d{16}$/.test(input.value)) {
+                            isFormValid = false;
+                        }
+                    }
+
+                    if (input.name === 'business_address') {
+                        if (input.value.trim().length < 10) {
+                            isFormValid = false;
+                        }
+                    }
+                });
+
+                // Check optional business email if filled
+                if (businessEmailInput && businessEmailInput.value.trim() !== '') {
+                    const emailPattern = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
+                    if (!emailPattern.test(businessEmailInput.value.trim())) {
+                        isFormValid = false;
+                    }
+                }
+
+                // Check optional business logo if uploaded
+                if (logoInput && logoInput.files.length > 0) {
+                    const file = logoInput.files[0];
+                    // Check file size (max 2MB)
+                    if (file.size > 2 * 1024 * 1024) {
+                        isFormValid = false;
+                    }
+                    // Check file type
+                    if (!file.type.match('image/(jpeg|jpg|png)')) {
+                        isFormValid = false;
+                    }
+                }
+
+                // Check required KTP photo if no previous verification
+                const hasOldKtp = document.getElementById('old_ktp_preview');
+                if (!hasOldKtp && ktpInput && ktpInput.files.length === 0) {
+                    isFormValid = false;
+                }
+
+                // Check KTP photo if uploaded
+                if (ktpInput && ktpInput.files.length > 0) {
+                    const file = ktpInput.files[0];
+                    // Check file size (max 1MB)
+                    if (file.size > 1 * 1024 * 1024) {
+                        isFormValid = false;
+                    }
+                    // Check file type
+                    if (!file.type.match('image/(jpeg|jpg|png)')) {
+                        isFormValid = false;
+                    }
+                }
+
+                // Check terms checkbox
+                if (!termsCheckbox.checked) {
+                    isFormValid = false;
+                }
+
+                // Enable/disable submit button
+                submitBtn.disabled = !isFormValid;
+
+                return isFormValid;
             }
 
-            document.querySelector('input[name="ktp_number"]').addEventListener('input', function (e) {
-                this.value = this.value.replace(/\D/g, '').substring(0, 16);
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // Final validation before submit
+                let isFormCompletelyValid = true;
+                
+                requiredInputs.forEach(input => {
+                    if (!validateField(input)) {
+                        isFormCompletelyValid = false;
+                    }
+                });
+
+                // Validate optional business email if filled
+                if (businessEmailInput && businessEmailInput.value.trim() !== '') {
+                    if (!validateField(businessEmailInput)) {
+                        isFormCompletelyValid = false;
+                    }
+                }
+
+                // Validate business logo if uploaded
+                if (logoInput && logoInput.files.length > 0) {
+                    const file = logoInput.files[0];
+                    if (file.size > 2 * 1024 * 1024 || !file.type.match('image/(jpeg|jpg|png)')) {
+                        isFormCompletelyValid = false;
+                        alert('Logo bisnis tidak valid. Pastikan format JPG/PNG dan ukuran max 2MB.');
+                        return;
+                    }
+                }
+
+                // Validate KTP photo
+                if (ktpInput && ktpInput.files.length > 0) {
+                    const file = ktpInput.files[0];
+                    if (file.size > 1 * 1024 * 1024 || !file.type.match('image/(jpeg|jpg|png)')) {
+                        isFormCompletelyValid = false;
+                        alert('Foto KTP tidak valid. Pastikan format JPG/PNG dan ukuran max 1MB.');
+                        return;
+                    }
+                }
+
+                if (!termsCheckbox.checked) {
+                    isFormCompletelyValid = false;
+                }
+
+                if (!isFormCompletelyValid) {
+                    alert('{{ __('messages.owner.verification.err_form_invalid') }}');
+                    // Focus on first invalid field
+                    const firstInvalid = form.querySelector('.is-invalid');
+                    if (firstInvalid) {
+                        firstInvalid.focus();
+                    }
+                    return;
+                }
+
+                // SweetAlert confirmation (if you have SweetAlert2)
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: "{{ __('messages.owner.verification.swal_confirm_title') }}",
+                        text: "{{ __('messages.owner.verification.swal_confirm_text') }}",
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: "{{ __('messages.owner.verification.swal_confirm_btn') }}",
+                        cancelButtonText: "{{ __('messages.owner.verification.swal_cancel_btn') }}",
+                        confirmButtonColor: '#8c1000',
+                        cancelButtonColor: '#6c757d',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            submitBtn.disabled = true;
+                            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{{ __('messages.owner.verification.btn_loading') }}';
+                            form.submit();
+                        }
+                    });
+                } else {
+                    // Fallback without SweetAlert
+                    if (confirm("{{ __('messages.owner.verification.swal_confirm_text') }}")) {
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{{ __('messages.owner.verification.btn_loading') }}';
+                        form.submit();
+                    }
+                }
             });
 
-            document.querySelectorAll('input[type="tel"]').forEach(function (input) {
-                input.addEventListener('input', function (e) {
+            // KTP number - only digits
+            const ktpNumberInput = document.querySelector('input[name="ktp_number"]');
+            if (ktpNumberInput) {
+                ktpNumberInput.addEventListener('input', function(e) {
+                    this.value = this.value.replace(/\D/g, '').substring(0, 16);
+                    validateField(this);
+                    checkFormValidity();
+                });
+            }
+
+            // Phone numbers - only digits
+            document.querySelectorAll('input[type="tel"]').forEach(function(input) {
+                input.addEventListener('input', function(e) {
                     this.value = this.value.replace(/\D/g, '');
+                    validateField(this);
+                    checkFormValidity();
                 });
             });
-        </script>
-    @endpush
-@endsection
-                
+        });
+    </script>
+@endpush

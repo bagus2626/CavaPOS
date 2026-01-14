@@ -4,332 +4,440 @@
 @section('page_title', __('messages.partner.product.all_product.update_product'))
 
 @section('content')
-  <section class="content product-stock">
-    <div class="container-fluid">
+  <div class="modern-container">
+    <div class="container-modern">
+      <!-- Header Section -->
+      <div class="page-header">
+        <div class="header-content">
+          <h1 class="page-title">{{ __('messages.partner.product.all_product.edit_stock') }}</h1>
+          <p class="page-subtitle">{{ __('messages.partner.product.all_product.update_stock') }}</p>
+        </div>
+      </div>
 
-      <a href="{{ route('partner.products.index') }}" class="btn btn-outline-choco mb-3 btn-pill">
-        <i class="fas fa-arrow-left mr-2"></i> {{ __('messages.partner.product.all_product.back_to_products') }}
-      </a>
-
+      <!-- Error Messages -->
       @if ($errors->any())
-        <div class="alert alert-danger brand-alert">
-          <ul class="mb-0">
-            @foreach ($errors->all() as $error)
-              <li>{{ $error }}</li>
-            @endforeach
-          </ul>
+        <div class="alert alert-danger alert-modern">
+          <div class="alert-icon">
+            <span class="material-symbols-outlined">error</span>
+          </div>
+          <div class="alert-content">
+            <strong>{{ __('messages.partner.product.all_product.alert_error') }}:</strong>
+            <ul class="mb-0 mt-2">
+              @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+              @endforeach
+            </ul>
+          </div>
         </div>
       @endif
 
-      <div class="card card-shell border-0 shadow-sm">
-        <div class="card-header brand-header">
-          <h3 class="card-title mb-0">{{ __('messages.partner.product.all_product.edit_stock') }}</h3>
+      @if (session('success'))
+        <div class="alert alert-success alert-modern">
+          <div class="alert-icon">
+            <span class="material-symbols-outlined">check_circle</span>
+          </div>
+          <div class="alert-content">
+            {{ session('success') }}
+          </div>
         </div>
+      @endif
 
-        <form action="{{ route('partner.products.update', $data->id) }}" method="POST">
+      <!-- Main Card -->
+      <div class="modern-card">
+        <form action="{{ route('partner.products.update', $data->id) }}" method="POST" id="productForm">
           @csrf
           @method('PUT')
 
-          <div class="card-body">
-            <div class="row g-3">
-              {{-- LEFT: Ringkasan readonly --}}
-              <div class="col-lg-7">
-                <div class="card border-0 mb-3 inner-card">
-                  <div class="card-body">
-                    <div class="d-flex align-items-start">
-                      <div class="me-3">
-                        @php
-                          $firstPic = is_array($data->pictures ?? null) && count($data->pictures) ? $data->pictures[0]['path'] : null;
-                        @endphp
-                        <img
-                          src="{{ $firstPic ? asset($firstPic) : 'https://via.placeholder.com/120x120?text=No+Image' }}"
-                          alt="{{ $data->name }}" class="thumb-120">
-                      </div>
+          <div class="card-body-modern">
+            <!-- Product Overview Section -->
+            <div class="profile-section">
+              <!-- Product Image -->
+              <div class="profile-picture-wrapper">
+                <div class="profile-picture-container">
+                  @php
+                    $firstPic = is_array($data->pictures ?? null) && count($data->pictures) ? $data->pictures[0]['path'] : null;
+                    $hasImage = !empty($firstPic);
+                    $imagePath = $hasImage ? asset($firstPic) : '';
+                  @endphp
 
-                      <div class="flex-fill">
-                        <h4 class="mb-1 fw-600">{{ $data->name }}</h4>
+                  <!-- Placeholder -->
+                  <div class="upload-placeholder" id="uploadPlaceholder" style="{{ $hasImage ? 'display:none;' : '' }}">
+                    <span class="material-symbols-outlined">image</span>
+                    <span class="upload-text">No Image</span>
+                  </div>
 
-                        <div class="badges-row mb-2">
-                          <span class="badge badge-soft-info">
-                            {{ optional($data->category)->category_name ?? 'Uncategorized' }}
+                  <!-- Image Preview -->
+                  <img id="imagePreview" class="profile-preview {{ $hasImage ? 'active' : '' }}" src="{{ $imagePath }}"
+                    alt="{{ $data->name }}">
+                </div>
+              </div>
+
+              <!-- Product Info -->
+              <div class="personal-info-fields">
+                <div class="section-header">
+                  <div class="section-icon section-icon-red">
+                    <span class="material-symbols-outlined">inventory_2</span>
+                  </div>
+                  <h3 class="section-title">{{ __('messages.partner.product.all_product.product_information') }}</h3>
+                </div>
+
+                <div class="row g-4">
+                  <div class="col-md-6">
+                    <div class="form-group-modern">
+                      <label class="form-label-modern">
+                        {{ __('messages.partner.product.all_product.product_name') }}
+                      </label>
+                      <input type="text" class="form-control-modern" value="{{ $data->name }}" readonly>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <div class="form-group-modern">
+                      <label class="form-label-modern">
+                        {{ __('messages.partner.product.all_product.category') }}
+                      </label>
+                      <input type="text" class="form-control-modern"
+                        value="{{ optional($data->category)->category_name ?? 'Uncategorized' }}" readonly>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <div class="form-group-modern">
+                      <label class="form-label-modern">
+                        {{ __('messages.partner.product.all_product.code') }}
+                      </label>
+                      <input type="text" class="form-control-modern" value="{{ $data->product_code ?? '-' }}" readonly>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <div class="form-group-modern">
+                      <label class="form-label-modern">
+                        {{ __('messages.partner.product.all_product.price') }}
+                      </label>
+                      <input type="text" class="form-control-modern"
+                        value="Rp {{ number_format((float) ($data->price ?? 0), 0, ',', '.') }}" readonly>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <div class="form-group-modern">
+                      <label class="form-label-modern">
+                        {{ __('messages.partner.product.all_product.promotion') }}
+                      </label>
+                      @if($data->promotion)
+                        <div class="alert alert-secondary py-2 px-3 mb-0">
+                          <strong>{{ $data->promotion->promotion_name ?? '-' }}</strong>
+                          <span class="ms-2">
+                            (@if($data->promotion->promotion_type === 'percentage')
+                              {{ __('messages.partner.product.all_product.discount') }}
+                              {{ intval($data->promotion->promotion_value ?? 0) }}%
+                            @elseif($data->promotion->promotion_type === 'amount')
+                              {{ __('messages.partner.product.all_product.reduced_fare') }} Rp
+                              {{ number_format((float) ($data->promotion->promotion_value ?? 0), 0, ',', '.') }}
+                            @endif)
                           </span>
-                          <span class="badge badge-soft-neutral">{{ __('messages.partner.product.all_product.code') }}:
-                            {{ $data->product_code ?? '-' }}</span>
                         </div>
+                      @else
+                        <input type="text" class="form-control-modern" value="—" readonly>
+                      @endif
+                    </div>
+                  </div>
 
-                        <div class="meta small text-muted">
-                          <div class="mb-1"><i class="fas fa-tags mr-1"></i>
-                            {{ __('messages.partner.product.all_product.price') }}:
-                            <strong>Rp {{ number_format((float) ($data->price ?? 0), 0, ',', '.') }}</strong>
-                          </div>
-
-                          <div class="mb-1 d-flex flex-wrap align-items-center">
-                            <span class="mr-1"><i
-                                class="fas fa-percentage mr-1"></i>{{ __('messages.partner.product.all_product.promotion') }}:</span>
-                            <strong class="mr-2">{{ $data->promotion ? 'Applied' : '—' }}</strong>
-                            @if($data->promotion)
-                              <span class="badge badge-soft-neutral">
-                                {{ $data->promotion->promotion_name ?? '-' }}
-                                (@if($data->promotion->promotion_type === 'percentage')
-                                  {{ __('messages.partner.product.all_product.discount') }}
-                                  {{ intval($data->promotion->promotion_value ?? 0) }}%
-                                @elseif($data->promotion->promotion_type === 'amount')
-                                  {{ __('messages.partner.product.all_product.reduced_fare') }} Rp
-                                  {{ number_format((float) ($data->promotion->promotion_value ?? 0), 0, ',', '.') }}
-                                @endif)
-                              </span>
-                            @endif
-                          </div>
+                  @if(!empty($data->description))
+                    <div class="col-md-12">
+                      <div class="form-group-modern">
+                        <label class="form-label-modern">
+                          {{ __('messages.partner.product.all_product.description') }}
+                        </label>
+                        <div class="alert alert-secondary py-2 px-3 mb-0">
+                          <div style="font-size: 0.9rem;">{!! $data->description !!}</div>
                         </div>
                       </div>
                     </div>
+                  @endif
+                </div>
+              </div>
+            </div>
 
-                    @if(!empty($data->description))
-                      <hr>
-                      <div>
-                        <div class="text-muted mb-1 fw-600"><i
-                            class="far fa-file-alt mr-1"></i>{{ __('messages.partner.product.all_product.description') }}
-                        </div>
-                        <div class="desc-box">
-                          {!! $data->description !!}
-                        </div>
-                      </div>
-                    @endif
+            <!-- Divider -->
+            <div class="section-divider"></div>
 
-                    @if(($data->parent_options ?? null) && count($data->parent_options))
-                      <hr>
-                      <div class="text-muted mb-2 fw-600"><i
-                          class="fas fa-list-ul mr-1"></i>{{ __('messages.partner.product.all_product.options') }}</div>
+            <!-- Editable Fields Section -->
+            <div class="account-section">
+              <div class="section-header">
+                <div class="section-icon section-icon-red">
+                  <span class="material-symbols-outlined">edit</span>
+                </div>
+                <h3 class="section-title">{{ __('messages.partner.product.all_product.update_stock') }}</h3>
+              </div>
 
-                      @foreach($data->parent_options as $parent)
-                        <div class="mb-3 p-2 border rounded-3 option-group">
-                          <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div class="fw-600">
-                              {{ $parent->name }}
-                              @if($parent->provision)
-                                <span class="badge badge-soft-neutral ms-1">
-                                  {{ $parent->provision }}
-                                  {{ $parent->provision_value ? ' : ' . $parent->provision_value : '' }}
-                                </span>
-                              @endif
-                            </div>
-                            @if($parent->description)
-                              <div class="text-muted small ms-3">{{ $parent->description }}</div>
-                            @endif
-                          </div>
+              @php
+                $prodUnlimited = old('always_available', $data->always_available_flag ?? 0);
+                $prodStockType = old('stock_type', $data->stock_type ?? 'direct');
+                $currentQuantity = 0;
+                if ($data->stock_type === 'direct' && $data->stock) {
+                  $currentQuantity = (int) $data->quantity_available;
+                }
+              @endphp
 
-                          @if($parent->options && count($parent->options))
-                            <div class="table-responsive rounded-3">
-                              <table class="table table-sm table-hover align-middle options-table mb-0">
-                                <thead>
-                                  <tr>
-                                    <th style="">{{ __('messages.partner.product.all_product.options') }}</th>
-                                    <th class="text-end" style="">
-                                      {{ __('messages.partner.product.all_product.price') }}
-                                    </th>
-                                    <th class="text-center" style="">
-                                      {{ __('messages.partner.product.all_product.stock_type') }}
-                                    </th>
-                                    <th class="text-center" style="">
-                                      {{ __('messages.partner.product.all_product.quantity') }}
-                                    </th>
-                                    <th class="text-center" style="">
-                                      {{ __('messages.partner.product.all_product.last') }}
-                                    </th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  @foreach($parent->options as $opt)
-                                    @php
-                                      $optStockType = old("options.{$opt->id}.stock_type", $opt->stock_type ?? 'direct');
-                                      $optUnlimited = old("options.{$opt->id}.always_available", $opt->always_available_flag ?? 0);
-                                      $optCurrentQty = (int) ($opt->quantity_available ?? 0);
-                                    @endphp
-                                    <tr>
-                                      <td class="fw-500">{{ $opt->name }}</td>
+              <div class="row g-4">
+                <!-- Stock Type -->
+                <div class="col-md-6">
+                  <div class="form-group-modern">
+                    <label class="form-label-modern">
+                      {{ __('messages.partner.product.all_product.stock_type') }}
+                      <span class="text-danger">*</span>
+                    </label>
+                    <div class="select-wrapper">
+                      <select name="stock_type" id="product_stock_type" class="form-control-modern">
+                        <option value="direct" {{ $prodStockType === 'direct' ? 'selected' : '' }}>
+                          Direct Stock Input
+                        </option>
+                        <option value="linked" {{ $prodStockType === 'linked' ? 'selected' : '' }}>
+                          Linked to Raw Materials
+                        </option>
+                      </select>
+                      <span class="material-symbols-outlined select-arrow">expand_more</span>
+                    </div>
+                  </div>
+                </div>
 
-                                      <td class="text-end">
-                                        Rp {{ number_format((float) ($opt->price ?? 0), 0, ',', '.') }}
-                                      </td>
+                <!-- Always Available Toggle -->
+                <div class="col-md-6" id="product_aa_group">
+                  <div class="form-group-modern">
+                    <label class="form-label-modern d-block">
+                      {{ __('messages.partner.product.all_product.always_available') }}
+                    </label>
+                    <input type="hidden" name="always_available" value="0">
+                    <div class="status-switch">
+                      <label class="switch-modern">
+                        <input type="checkbox" id="aa_product" name="always_available" value="1"
+                          {{ $prodUnlimited ? 'checked' : '' }}>
+                        <span class="slider-modern"></span>
+                      </label>
+                      <span class="status-label" id="aaLabel">
+                        {{ $prodUnlimited ? 'Enabled' : 'Disabled' }}
+                      </span>
+                    </div>
+                    <small class="text-muted d-block mt-1">
+                      {{ __('messages.partner.product.all_product.if_active') }}
+                    </small>
+                  </div>
+                </div>
 
-                                      <td class="text-center">
-                                        <select name="options[{{ $opt->id }}][stock_type]"
-                                          class="form-control form-control-sm opt-stock-type" data-opt-id="{{ $opt->id }}">
-                                          <option value="direct" {{ $optStockType === 'direct' ? 'selected' : '' }}>Direct</option>
-                                          <option value="linked" {{ $optStockType === 'linked' ? 'selected' : '' }}>Linked</option>
-                                        </select>
-                                      </td>
+                <!-- Quantity Input -->
+                <div class="col-md-6" id="product_qty_group">
+                  <div class="form-group-modern">
+                    <label class="form-label-modern">
+                      {{ __('messages.partner.product.all_product.quantity') }}
+                      <span class="text-danger">*</span>
+                    </label>
+                    <input type="number" id="new_quantity" name="new_quantity"
+                      class="form-control-modern text-center @error('new_quantity') is-invalid @enderror" min="0"
+                      step="1" value="{{ old('new_quantity', $currentQuantity) }}"
+                      placeholder="{{ __('messages.partner.product.all_product.enter_new_stock') }}">
 
-                                      <td>
-                                        {{-- Always Available --}}
-                                        <div class="opt-aa-container-{{ $opt->id }} mb-2" style="display:inline-block;">
-                                          <div class="custom-control custom-switch custom-control-sm">
-                                            <input type="hidden" name="options[{{ $opt->id }}][always_available]" value="0">
-                                            <input type="checkbox" class="custom-control-input opt-aa" id="opt-aa-{{ $opt->id }}"
-                                              name="options[{{ $opt->id }}][always_available]" value="1"
-                                              data-opt-id="{{ $opt->id }}" {{ $optUnlimited ? 'checked' : '' }}>
-                                            <label class="custom-control-label" for="opt-aa-{{ $opt->id }}">
-                                              <small>{{ __('messages.partner.product.all_product.always_available') }}</small>
-                                            </label>
-                                          </div>
-                                        </div>
+                    <input type="hidden" id="current_quantity" name="current_quantity" value="{{ $currentQuantity }}">
 
-                                        {{-- Direct Stock (Adjustment Style) --}}
-                                        <div id="opt-qty-wrap-{{ $opt->id }}" class="opt-qty-wrapper">
-                                          {{-- New Stock Input --}}
-                                          <input type="number" id="opt-new-qty-{{ $opt->id }}"
-                                            name="options[{{ $opt->id }}][new_quantity]"
-                                            class="form-control form-control-sm text-center mb-1 opt-new-qty" min="0" step="1"
-                                            value="{{ old("options.{$opt->id}.new_quantity", $optCurrentQty) }}"
-                                            placeholder="{{ __('messages.partner.product.all_product.enter_new_stock') }}"
-                                            data-opt-id="{{ $opt->id }}">
+                    <div id="adjustment_info" class="alert alert-info py-2 px-3 mt-2 small" style="display: none;">
+                      <strong><span id="adjustment_type">-</span>:</strong>
+                      <span id="adjustment_amount">-</span>
+                    </div>
 
-                                          {{-- Hidden: Current Quantity --}}
-                                          <input type="hidden" id="opt-current-qty-{{ $opt->id }}"
-                                            name="options[{{ $opt->id }}][current_quantity]" value="{{ $optCurrentQty }}">
+                    @error('new_quantity')
+                      <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
+                  </div>
+                </div>
 
-                                          {{-- Adjustment Info --}}
-                                          <div id="opt-adj-info-{{ $opt->id }}" class="alert alert-secondary py-1 px-2 small"
-                                            style="display: none; margin: 0;">
-                                            <strong><span class="opt-adj-type">-</span>:</strong>
-                                            <span class="opt-adj-amount">-</span>
-                                          </div>
-                                        </div>
+                <!-- Linked Info -->
+                <div class="col-md-12" id="product_linked_group" style="display:none;">
+                  <div class="form-group-modern">
+                    {{-- <label class="form-label-modern">
+                      {{ __('messages.partner.product.all_product.quantity_product') }}
+                    </label>
+                    <div class="alert alert-info py-2 px-3 mb-2">
+                      <i class="fas fa-link mr-2"></i>
+                      <span>{{ __('messages.partner.product.all_product.stock_controlled_by_recipe') }}</span>
+                    </div> --}}
+                    <button type="button" class="btn-modern btn-primary-modern btn-sm-modern"
+                      id="btn-manage-product-recipe" data-product-id="{{ $data->id }}"
+                      data-product-name="{{ $data->name }}">
+                      {{ __('messages.partner.product.all_product.manage_product_recipe') }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-                                        {{-- Linked Info --}}
-                                        <div id="opt-linked-info-{{ $opt->id }}" class="opt-linked-info" style="display:none;">
-                                          <div class="alert alert-info py-2 px-2 mb-1 small">
-                                            <i
-                                              class="fas fa-link mr-2"></i>{{ __('messages.partner.product.all_product.stock_controlled_by_recipe') }}
-                                          </div>
-                                          <button type="button" class="btn btn-sm btn-outline-choco btn-block btn-manage-recipe"
-                                            data-opt-id="{{ $opt->id }}" data-opt-name="{{ $opt->name }}">
-                                            {{ __('messages.partner.product.all_product.manage_recipe') }}
-                                          </button>
-                                        </div>
-                                      </td>
+            <!-- Product Options Section -->
+            @if(($data->parent_options ?? null) && count($data->parent_options))
+              <div class="section-divider"></div>
+              <div class="account-section">
+                <div class="section-header">
+                  <div class="section-icon section-icon-red">
+                    <span class="material-symbols-outlined">tune</span>
+                  </div>
+                  <h3 class="section-title">{{ __('messages.partner.product.all_product.options') }}</h3>
+                </div>
 
-                                      <td class="text-center">
-                                        <span class="text-muted small">{{ $optCurrentQty }}</span>
-                                      </td>
-                                    </tr>
-                                  @endforeach
-                                </tbody>
-                              </table>
-                            </div>
+                @foreach($data->parent_options as $parent)
+                  <div class="modern-card mb-3" style="border: 1px solid #e5e7eb;">
+                    <div class="card-body-modern" style="padding: 1.5rem;">
+                      <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                          <h5 class="mb-1">{{ $parent->name }}</h5>
+                          @if($parent->provision)
+                            <span class="body-sm text-secondary">
+                              {{ $parent->provision }}
+                              {{ $parent->provision_value ? ' : ' . $parent->provision_value : '' }}
+                            </span>
                           @endif
                         </div>
-                      @endforeach
-                    @endif
+                        @if($parent->description)
+                          <small class="text-muted">{{ $parent->description }}</small>
+                        @endif
+                      </div>
+
+                      @if($parent->options && count($parent->options))
+                        <div class="data-table-wrapper">
+                          <table class="data-table">
+                            <thead>
+                              <tr>
+                                <th>{{ __('messages.partner.product.all_product.options') }}</th>
+                                <th>{{ __('messages.partner.product.all_product.price') }}</th>
+                                <th class="text-center">{{ __('messages.partner.product.all_product.stock_type') }}</th>
+                                <th class="text-center">{{ __('messages.partner.product.all_product.quantity') }}</th>
+                                <th class="text-center">{{ __('messages.partner.product.all_product.last') }}</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              @foreach($parent->options as $opt)
+                                @php
+                                  $optStockType = old("options.{$opt->id}.stock_type", $opt->stock_type ?? 'direct');
+                                  $optUnlimited = old("options.{$opt->id}.always_available", $opt->always_available_flag ?? 0);
+                                  $optCurrentQty = (int) ($opt->quantity_available ?? 0);
+                                @endphp
+                                <tr>
+                                  <td class="fw-600">{{ $opt->name }}</td>
+                                  <td>Rp {{ number_format((float) ($opt->price ?? 0), 0, ',', '.') }}</td>
+                                  <td class="text-center">
+                                    <div class="select-wrapper" style="max-width: 150px; margin: 0 auto;">
+                                      <select name="options[{{ $opt->id }}][stock_type]"
+                                        class="form-control-modern opt-stock-type" data-opt-id="{{ $opt->id }}">
+                                        <option value="direct" {{ $optStockType === 'direct' ? 'selected' : '' }}>
+                                          Direct
+                                        </option>
+                                        <option value="linked" {{ $optStockType === 'linked' ? 'selected' : '' }}>
+                                          Linked
+                                        </option>
+                                      </select>
+                                      <span class="material-symbols-outlined select-arrow">expand_more</span>
+                                    </div>
+                                  </td>
+                                  <td class="text-center">
+                                    <div class="opt-aa-container-{{ $opt->id }} mb-2">
+                                      <div class="status-switch" style="justify-content: center;">
+                                        <input type="hidden" name="options[{{ $opt->id }}][always_available]"
+                                          value="0">
+                                        <label class="switch-modern" style="transform: scale(0.8);">
+                                          <input type="checkbox" id="opt-aa-{{ $opt->id }}" class="opt-aa"
+                                            name="options[{{ $opt->id }}][always_available]" value="1"
+                                            data-opt-id="{{ $opt->id }}" {{ $optUnlimited ? 'checked' : '' }}>
+                                          <span class="slider-modern"></span>
+                                        </label>
+                                        <span class="status-label small">Always Available</span>
+                                      </div>
+                                    </div>
+
+                                    <div id="opt-qty-wrap-{{ $opt->id }}" class="opt-qty-wrapper">
+                                      <input type="number" id="opt-new-qty-{{ $opt->id }}"
+                                        name="options[{{ $opt->id }}][new_quantity]"
+                                        class="form-control-modern text-center opt-new-qty" min="0" step="1"
+                                        value="{{ old("options.{$opt->id}.new_quantity", $optCurrentQty) }}"
+                                        data-opt-id="{{ $opt->id }}" style="max-width: 120px; margin: 0 auto;">
+
+                                      <input type="hidden" id="opt-current-qty-{{ $opt->id }}"
+                                        name="options[{{ $opt->id }}][current_quantity]" value="{{ $optCurrentQty }}">
+
+                                      <div id="opt-adj-info-{{ $opt->id }}" class="alert alert-info py-1 px-2 small mt-2"
+                                        style="display: none;">
+                                        <strong><span class="opt-adj-type">-</span>:</strong>
+                                        <span class="opt-adj-amount">-</span>
+                                      </div>
+                                    </div>
+
+                                    <div id="opt-linked-info-{{ $opt->id }}" class="opt-linked-info"
+                                      style="display:none;">
+                                      <button type="button"
+                                        class="btn-modern btn-primary-modern btn-sm-modern btn-manage-recipe"
+                                        data-opt-id="{{ $opt->id }}" data-opt-name="{{ $opt->name }}">
+                                        {{ __('messages.partner.product.all_product.manage_recipe') }}
+                                      </button>
+                                    </div>
+                                  </td>
+                                  <td class="text-center">
+                                    <span class="text-muted">{{ $optCurrentQty }}</span>
+                                  </td>
+                                </tr>
+                              @endforeach
+                            </tbody>
+                          </table>
+                        </div>
+                      @endif
+                    </div>
+                  </div>
+                @endforeach
+              </div>
+            @endif
+
+            {{-- <!-- Product Metadata Section -->
+            <div class="section-divider"></div>
+            <div class="account-section">
+              <div class="section-header">
+                <div class="section-icon section-icon-red">
+                  <span class="material-symbols-outlined">info</span>
+                </div>
+                <h3 class="section-title">Product Information</h3>
+              </div>
+
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <div class="info-item">
+                    <span class="info-label">{{ __('messages.partner.product.all_product.created') }}</span>
+                    <span class="info-value">{{ optional($data->created_at)->format('d M Y, H:i') ?? '-' }}</span>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="info-item">
+                    <span class="info-label">{{ __('messages.partner.product.all_product.last_updated') }}</span>
+                    <span class="info-value">{{ optional($data->updated_at)->format('d M Y, H:i') ?? '-' }}</span>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="info-item">
+                    <span class="info-label">{{ __('messages.partner.product.all_product.owner') }}</span>
+                    <span class="info-value">{{ $data->owner->name ?? '-' }}</span>
                   </div>
                 </div>
               </div>
+            </div> --}}
+          </div>
 
-              {{-- RIGHT: Quantity produk --}}
-              <div class="col-lg-5">
-                <div class="card border-0 inner-card">
-                  <div class="card-body">
-                    <h5 class="mb-3 fw-600">{{ __('messages.partner.product.all_product.update_stock') }}</h5>
-
-                    @php
-                      $prodUnlimited = old('always_available', $data->always_available_flag ?? 0);
-                      $prodStockType = old('stock_type', $data->stock_type ?? 'direct');
-                      $currentQuantity = 0;
-                      if ($data->stock_type === 'direct' && $data->stock) {
-                        $currentQuantity = (int) $data->quantity_available;
-                      }
-                    @endphp
-
-                    {{-- Stock Type Product --}}
-                    <div class="form-group mb-3">
-                      <label class="mb-2 fw-600">{{ __('messages.partner.product.all_product.stock_type') }}</label>
-                      <select name="stock_type" id="product_stock_type" class="form-control">
-                        <option value="direct" {{ $prodStockType === 'direct' ? 'selected' : '' }}>Direct</option>
-                        <option value="linked" {{ $prodStockType === 'linked' ? 'selected' : '' }}>Linked</option>
-                      </select>
-                    </div>
-
-                    {{-- Always Available --}}
-                    <div class="form-group mb-3" id="product_aa_group">
-                      <div class="custom-control custom-switch">
-                        <input type="hidden" name="always_available" value="0">
-                        <input type="checkbox" class="custom-control-input" id="aa_product" name="always_available"
-                          value="1" {{ $prodUnlimited ? 'checked' : '' }}>
-                        <label class="custom-control-label" for="aa_product">
-                          {{ __('messages.partner.product.all_product.product_always_available') }}
-                        </label>
-                      </div>
-                    </div>
-
-                    {{-- ===== ADJUSTMENT STYLE QUANTITY INPUT ===== --}}
-                    <div class="form-group mb-3" id="product_qty_group">
-                      <label class="mb-1 fw-600">{{ __('messages.partner.product.all_product.quantity') }}</label>
-
-                      {{-- New Quantity Input --}}
-                      <input type="number" id="new_quantity" name="new_quantity" class="form-control text-center mb-2"
-                        min="0" step="1" value="{{ old('new_quantity', $currentQuantity) }}"
-                        placeholder="{{ __('messages.partner.product.all_product.enter_new_stock') }}">
-
-                      {{-- Hidden: Current Stock --}}
-                      <input type="hidden" id="current_quantity" name="current_quantity" value="{{ $currentQuantity }}">
-
-                      {{-- Adjustment Info --}}
-                      <div id="adjustment_info" class="alert alert-secondary py-2" style="display: none;">
-                        <small>
-                          <strong><span id="adjustment_type">-</span> :</strong>
-                          <span id="adjustment_amount">-</span>
-                        </small>
-                      </div>
-
-                      @error('new_quantity')
-                        <small class="text-danger d-block mt-1">{{ $message }}</small>
-                      @enderror
-                    </div>
-
-                    {{-- Linked Info + Button --}}
-                    <div class="form-group mb-3" id="product_linked_group" style="display:none;">
-                      <label class="mb-2 fw-600">{{ __('messages.partner.product.all_product.quantity_product') }}</label>
-                      <div class="alert alert-info py-2 mb-2">
-                        <i class="fas fa-link mr-2"></i>
-                        <span>{{ __('messages.partner.product.all_product.stock_controlled_by_recipe') }}</span>
-                      </div>
-                      <button type="button" class="btn btn-outline-choco btn-block" id="btn-manage-product-recipe"
-                        data-product-id="{{ $data->id }}" data-product-name="{{ $data->name }}">
-                        {{ __('messages.partner.product.all_product.manage_product_recipe') }}
-                      </button>
-                    </div>
-
-                    <hr>
-                    <div class="d-flex justify-content-end">
-                      <a href="{{ route('partner.products.index') }}"
-                        class="btn btn-outline-choco me-2">{{ __('messages.partner.product.all_product.cancel') }}</a>
-                      <button type="submit"
-                        class="btn btn-choco">{{ __('messages.partner.product.all_product.save_changes') }}</button>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="card border-0 inner-card mt-3">
-                  <div class="card-body small text-muted">
-                    <div class="d-flex justify-content-between">
-                      <span>{{ __('messages.partner.product.all_product.created') }}</span><strong>{{ optional($data->created_at)->format('d M Y, H:i') ?? '-' }}</strong>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                      <span>{{ __('messages.partner.product.all_product.last_updated') }}</span><strong>{{ optional($data->updated_at)->format('d M Y, H:i') ?? '-' }}</strong>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                      <span>{{ __('messages.partner.product.all_product.owner') }}</span><strong>{{ $data->owner->name ?? '-' }}</strong>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-            </div>{{-- /row --}}
-          </div>{{-- /card-body --}}
+          <!-- Card Footer -->
+          <div class="card-footer-modern">
+            <a href="{{ route('partner.products.index') }}" class="btn-cancel-modern">
+              {{ __('messages.partner.product.all_product.cancel') }}
+            </a>
+            <button type="submit" class="btn-submit-modern">
+              {{ __('messages.partner.product.all_product.save_changes') }}
+            </button>
+          </div>
         </form>
       </div>
     </div>
-  </section>
+  </div>
 
   {{-- Recipe Management Modal --}}
   <div class="modal fade" id="recipeModal" tabindex="-1" role="dialog" aria-labelledby="recipeModalLabel"
@@ -341,10 +449,13 @@
             <i class="fas fa-clipboard-list mr-2"></i>{{ __('messages.partner.product.all_product.manage_recipe') }}:
             <span id="modal-item-name"></span>
           </h5>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
         </div>
         <div class="modal-body">
           <div class="alert alert-info">
-            <i class="fas fa-info-circle me-2"></i>
+            <i class="fas fa-info-circle mr-2"></i>
             <strong>{{ __('messages.partner.product.all_product.how_it_works') }}:</strong>
             {{ __('messages.partner.product.all_product.add_raw_materials_info') }}
           </div>
@@ -354,258 +465,20 @@
             {{-- Will be populated via JavaScript --}}
           </div>
 
-          <button type="button" class="btn btn-outline-choco btn-sm mt-3" id="add-recipe-item">
+          <button type="button" class="btn btn-outline-primary btn-sm mt-3" id="add-recipe-item">
             <i class="fas fa-plus mr-1"></i>{{ __('messages.partner.product.all_product.add_ingredient') }}
           </button>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-outline-secondary"
             data-dismiss="modal">{{ __('messages.partner.product.all_product.cancel') }}</button>
-          <button type="button" class="btn btn-choco" id="save-recipe">
+          <button type="button" class="btn btn-primary" id="save-recipe">
             <i class="fas fa-save mr-1"></i>{{ __('messages.partner.product.all_product.save_recipe') }}
           </button>
         </div>
       </div>
     </div>
   </div>
-
-  <style>
-    /* ==== Update Product Stock (page scope) ==== */
-    :root {
-      --choco: #8c1000;
-      --soft-choco: #c12814;
-      --ink: #22272b;
-      --paper: #f7f7f8;
-      --radius: 12px;
-      --shadow: 0 6px 20px rgba(0, 0, 0, .08);
-    }
-
-    .product-stock .card-shell {
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-
-    .product-stock .brand-header {
-      background: linear-gradient(135deg, var(--choco), var(--soft-choco));
-      color: #fff;
-      border-bottom: 0;
-      border-radius: var(--radius) var(--radius) 0 0;
-    }
-
-    .product-stock .inner-card {
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-
-    .product-stock .fw-600 {
-      font-weight: 600;
-    }
-
-    .product-stock .fw-500 {
-      font-weight: 500;
-    }
-
-    .btn-pill {
-      border-radius: 999px;
-    }
-
-    .btn-choco {
-      background: var(--choco);
-      border-color: var(--choco);
-      color: #fff;
-    }
-
-    .btn-choco:hover {
-      background: var(--soft-choco);
-      border-color: var(--soft-choco);
-    }
-
-    .btn-outline-choco {
-      color: var(--choco);
-      border-color: var(--choco);
-    }
-
-    .btn-outline-choco:hover {
-      color: #fff;
-      background: var(--choco);
-      border-color: var(--choco);
-    }
-
-    .brand-alert {
-      border-left: 4px solid var(--choco);
-      border-radius: 10px;
-    }
-
-    .thumb-120 {
-      width: 120px;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 12px;
-      border: 0;
-      box-shadow: var(--shadow);
-      margin-right: 1rem;
-      /* Tambahkan ini */
-    }
-
-    /* Badges soft */
-    .badges-row .badge {
-      margin-right: .35rem;
-    }
-
-    .badge-soft-info {
-      background: #eef2ff;
-      color: #3730a3;
-      border: 1px solid #c7d2fe;
-      border-radius: 999px;
-      font-weight: 600;
-    }
-
-    .badge-soft-neutral {
-      background: #f3f4f6;
-      color: #374151;
-      border: 1px solid #e5e7eb;
-      border-radius: 999px;
-      font-weight: 600;
-    }
-
-    .badge-soft-success {
-      background: #ecfdf5;
-      color: #065f46;
-      border: 1px solid #a7f3d0;
-      border-radius: 999px;
-      font-weight: 600;
-    }
-
-    /* Description box */
-    .desc-box {
-      background: #fcfcfc;
-      border: 1px solid #eef1f4;
-      border-radius: 10px;
-      padding: .75rem;
-    }
-
-    /* Table options */
-    .options-table thead th {
-      background: #fff;
-      border-bottom: 2px solid #eef1f4 !important;
-      color: #374151;
-      font-weight: 700;
-    }
-
-    .options-table tbody tr {
-      transition: background-color .12s ease;
-    }
-
-    .options-table tbody tr:hover {
-      background: rgba(140, 16, 0, .04);
-    }
-
-    /* Quantity group */
-    .qty-group {
-      max-width: 360px;
-      gap: .5rem;
-    }
-
-    .qty-input {
-      max-width: 140px;
-      border-color: #e5e7eb;
-    }
-
-    .qty-input:focus {
-      border-color: var(--choco);
-      box-shadow: 0 0 0 .2rem rgba(140, 16, 0, .15);
-    }
-
-    .btn-qty {
-      min-width: 40px;
-    }
-
-    /* Switch color (Bootstrap 4 custom-switch) */
-    .custom-control-input:checked~.custom-control-label::before {
-      background-color: var(--choco);
-      border-color: var(--choco);
-    }
-
-    .custom-control-input:focus~.custom-control-label::before {
-      box-shadow: 0 0 0 .2rem rgba(140, 16, 0, .18);
-      border-color: var(--soft-choco);
-    }
-
-    /* Small polish */
-    .option-group {
-      border-color: #eef1f4 !important;
-      background: #fff;
-    }
-
-    .meta i {
-      color: #9ca3af;
-    }
-
-    /* Modal */
-    .bg-choco {
-      background: linear-gradient(135deg, var(--choco), var(--soft-choco));
-    }
-
-    .recipe-item {
-      background: #fafbfc;
-      transition: all .2s ease;
-      border: 1px solid #e5e7eb;
-    }
-
-    .recipe-item:hover {
-      background: #f3f4f6;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
-    }
-
-    /* Spacing untuk button group di mobile */
-    .product-stock .d-flex.justify-content-end {
-      gap: 0.5rem;
-    }
-
-    /* Atau jika menggunakan margin */
-    .product-stock .d-flex.justify-content-end .btn {
-      margin-left: 0.5rem;
-    }
-
-    .product-stock .d-flex.justify-content-end .btn:first-child {
-      margin-left: 0;
-    }
-
-    /* Responsive spacing */
-    @media (max-width: 576px) {
-      .product-stock .d-flex.justify-content-end {
-        gap: 0.75rem;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .table-responsive {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-      }
-
-      .table-responsive table {
-        min-width: 600px;
-        font-size: 12px;
-      }
-
-      .table-responsive th,
-      .table-responsive td {
-        padding: 8px 4px;
-        font-size: 12px;
-      }
-
-      .form-control-sm {
-        font-size: 12px;
-        padding: 4px 6px;
-      }
-
-      .btn-sm {
-        font-size: 11px;
-        padding: 4px 8px;
-      }
-    }
-  </style>
 @endsection
 
 @push('scripts')

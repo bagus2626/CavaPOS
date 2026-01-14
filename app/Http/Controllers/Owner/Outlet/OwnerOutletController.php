@@ -25,11 +25,39 @@ class OwnerOutletController extends Controller
     public function index()
     {
         $owner = Auth::user();
-        $outlets = User::where('owner_id', Auth::id())
-            ->orderBy('created_at', 'asc')
-            ->paginate(10);
 
-        return view('pages.owner.outlet.index', compact('owner', 'outlets'));
+        // Get semua data untuk JavaScript filter
+        $allOutlets = User::where('owner_id', Auth::id())
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        // Format data untuk JavaScript
+        $allOutletsFormatted = $allOutlets->map(function ($outlet) {
+            return [
+                'id' => $outlet->id,
+                'name' => $outlet->name,
+                'username' => $outlet->username,
+                'email' => $outlet->email,
+                'city' => $outlet->city,
+                'is_active' => (int) $outlet->is_active,
+                'logo' => $outlet->logo,
+            ];
+        });
+
+        // Simulasi pagination object untuk compatibility dengan view
+        $perPage = 10;
+        $currentPage = request()->input('page', 1);
+        $offset = ($currentPage - 1) * $perPage;
+
+        $outlets = new \Illuminate\Pagination\LengthAwarePaginator(
+            $allOutlets->slice($offset, $perPage)->values(),
+            $allOutlets->count(),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+
+        return view('pages.owner.outlet.index', compact('owner', 'outlets', 'allOutletsFormatted'));
     }
 
     /**
@@ -218,9 +246,29 @@ class OwnerOutletController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(User $outlet)
     {
-        //
+        // Pastikan yang diakses adalah outlet (partner)
+        abort_if($outlet->role !== 'partner', 404);
+
+        // Pastikan outlet milik owner yang sedang login
+        abort_if($outlet->owner_id !== Auth::id(), 403);
+
+        // Tentukan qr_mode berdasarkan kombinasi is_qr_active dan is_cashier_active
+        if ($outlet->is_qr_active && $outlet->is_cashier_active) {
+            $outlet->qr_mode = 'both';
+        } elseif ($outlet->is_qr_active) {
+            $outlet->qr_mode = 'barcode_only';
+        } elseif ($outlet->is_cashier_active) {
+            $outlet->qr_mode = 'cashier_only';
+        } else {
+            $outlet->qr_mode = 'disabled';
+        }
+
+        // Load relasi profile outlet
+        $outlet->load('profileOutlet');
+
+        return view('pages.owner.outlet.show', compact('outlet'));
     }
 
     /**

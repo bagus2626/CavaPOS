@@ -1,21 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 
+
 <head>
     <meta charset="UTF-8">
     <title>@yield('title', 'Owner Panel')</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <!-- AdminLTE CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+
+    <!-- Bootstrap 4 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <!-- Google Font: Source Sans Pro -->
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Google Font: Inter -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
 
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css">
@@ -23,21 +28,13 @@
     <!-- Select2 CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
     <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css">
+        href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.6.4/dist/select2-bootstrap4.min.css">
 
     <!-- Toastr CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
     <!-- Summernote CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs4.min.css">
-
-    <!-- Bootstrap 4 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.6.4/dist/select2-bootstrap4.min.css">
-
-    <!-- Loader Custome CSS-->
-    <link rel="stylesheet" type="text/css" href="{{ asset('admin/assets/css/blockui-loader.css') }}">
 
     <!-- Cropper.js CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
@@ -48,1150 +45,495 @@
     <link rel="stylesheet" type="text/css"
         href="{{ asset('admin/app-assets/vendors/css/pickers/daterange/daterangepicker.css') }}">
 
-    <style>
-        :root {
-            --choco: #8c1000;
-            --soft-choco: #c12814;
-            --ink: #22272b;
-            --paper: #f7f7f8;
-
-            /* aksen UI */
-            --radius: 12px;
-            --shadow: 0 6px 20px rgba(0, 0, 0, .08);
-
-            /* bootstrap override ringan */
-            --primary: var(--choco);
-            --secondary: #6b7280;
-        }
-
-        /* ===== Layout polish ===== */
-        body {
-            background: var(--paper);
-        }
-
-        .card {
-            border: 0;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-
-        .card-header {
-            background: #fff;
-            border-bottom: 1px solid #eef1f4;
-            padding: .85rem 1rem;
-        }
-
-        .content-header {
-            padding: 18px 0.5rem;
-        }
-
-        .wrapper {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .content-wrapper {
-            background: transparent;
-        }
-
-        /* ===== Navbar ===== */
-        .main-header.navbar {
-            background: #fff !important;
-            border-bottom: 1px solid #eef1f4 !important;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, .03);
-        }
-
-        .navbar .nav-link {
-            color: var(--ink);
-        }
-
-        .navbar .nav-link:hover {
-            color: var(--choco);
-        }
-
-        /* ===== Brand / Sidebar ===== */
-        .brand-link {
-            background: linear-gradient(135deg, var(--choco), var(--soft-choco)) !important;
-            border-bottom: 0;
-            transition: all 0.3s ease-in-out;
-            overflow: hidden !important;
-            white-space: nowrap;
-            display: flex !important;
-            align-items: center;
-            justify-content: flex-start !important;
-            padding-left: 0.5rem !important;
-            min-height: 57px;
-        }
-
-
-        .brand-link .brand-image {
-            background: #fff;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            flex-shrink: 0;
-            padding: 2px;
-        }
-
-        .brand-image-full {
-            max-height: 40px;
-            width: auto;
-            max-width: 180px;
-            opacity: 0;
-            transform: scale(0.8);
-            display: none;
-        }
-
-        /* Logo circular (sidebar collapse) */
-        .brand-image-collapsed {
-            max-height: 30px;
-            width: 40px;
-            height: 40px;
-            opacity: 1;
-            transform: scale(1);
-            object-fit: contain;
-            display: block;
-            transition: opacity 0.6s ease-in-out;
-        }
-
-        .brand-text {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            opacity: 0;
-            max-width: 0;
-            overflow: hidden;
-            margin-left: 0;
-            white-space: nowrap;
-            display: none;
-        }
-
-        /* ====== STATE: Sidebar Normal  ====== */
-        body:not(.sidebar-collapse) .brand-link {
-            justify-content: flex-start !important;
-            padding-left: 0.5rem !important;
-        }
-
-        body:not(.sidebar-collapse) .brand-image-full {
-            max-width: 200px;
-            width: auto;
-            opacity: 1;
-            transform: scale(1);
-            display: block;
-        }
-
-        body:not(.sidebar-collapse) .brand-image-collapsed {
-            display: none;
-        }
-
-        body:not(.sidebar-collapse) .brand-text {
-            opacity: 1;
-            max-width: 200px;
-            margin-left: 0.5rem;
-            display: inline-block;
-        }
-
-        /* Ensure profile images stay circular */
-        .user-panel .image img,
-        .user-image {
-            min-width: 40px;
-            min-height: 40px;
-            object-fit: cover;
-        }
-
-        /* Fix navbar user image */
-        .navbar .user-image {
-            width: 35px !important;
-            height: 35px !important;
-            min-width: 35px !important;
-            min-height: 35px !important;
-        }
-
-        /* ====== STATE: Sidebar Collapse (Default) ====== */
-        .sidebar-collapse .brand-link {
-            justify-content: center;
-            padding: 0.8125rem 0.5rem;
-        }
-
-        .sidebar-collapse .brand-image-full {
-            display: none !important;
-        }
-
-        .sidebar-collapse .brand-image-collapsed {
-            display: block !important;
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        .sidebar-collapse .brand-text {
-            display: none;
-        }
-
-        /* ====== STATE: Sidebar Collapse + Hover ====== */
-        .sidebar-collapse .main-sidebar:hover .brand-link {
-            justify-content: flex-start;
-            padding-left: 1rem;
-            overflow: hidden !important;
-        }
-
-        .sidebar-collapse .main-sidebar:hover .brand-image-full {
-            display: block !important;
-            max-width: 200px;
-            width: auto;
-            opacity: 1 !important;
-            transform: scale(1) !important;
-            transition: all 0.3s ease-in-out;
-            background: #e8cfcc;
-        }
-
-        .sidebar-collapse .main-sidebar:hover .brand-image-collapsed {
-            display: none !important;
-        }
-
-        .sidebar-collapse .main-sidebar:hover .brand-text {
-            display: inline-block !important;
-            opacity: 1 !important;
-            max-width: 200px;
-            margin-left: 0.5rem;
-            left: 5px;
-        }
-
-        .main-sidebar {
-            
-        }
-
-        .sidebar-collapse .main-sidebar:hover {
-            width: 250px !important;
-        }
-
-        /* Sembunyikan dropdown/submenu saat sidebar collapse */
-        .sidebar-collapse .main-sidebar:not(:hover) .nav-treeview {
-            display: none !important;
-        }
-
-        /* Sembunyikan arrow indicator saat sidebar collapse */
-        .sidebar-collapse .main-sidebar:not(:hover) .nav-link .right {
-            display: none !important;
-        }
-
-        .sidebar-collapse .main-sidebar:not(:hover) .nav-link p {
-            display: none;
-        }
-
-        .sidebar-collapse .main-sidebar:not(:hover) .nav-icon {
-            margin-right: 0 !important;
-        }
-
-        .sidebar-collapse .main-sidebar:hover .nav-link p {
-            display: inline-block;
-        }
-
-        .sidebar-collapse .main-sidebar:hover .nav-icon {
-            margin-right: 0.5rem !important;
-        }
-
-        /* Sembunyikan user panel info saat sidebar collapse */
-        .sidebar-collapse .main-sidebar:not(:hover) .user-panel .info {
-            display: none !important;
-        }
-
-        /* Tampilkan kembali saat hover */
-        .sidebar-collapse .main-sidebar:hover .user-panel .info {
-            display: block !important;
-        }
-
-        /* Center user image saat collapse */
-        .sidebar-collapse .main-sidebar:not(:hover) .user-panel {}
-
-        .sidebar-collapse .main-sidebar:not(:hover) .user-panel .image {
-            float: none;
-        }
-
-        .main-sidebar {
-            background: #f3f3f3;
-            transition: width 0.3s ease-in-out, margin-left 0.3s ease-in-out;
-            overflow-x: hidden !important; /* Tambahkan ini */
-            /* gelap netral agar choco menonjol */
-        }
-
-        .sidebar {
-            padding-top: .5rem;
-            overflow-x: hidden !important; /* Tambahkan ini */
-        }
-
-        /* item level 1 */
-        .nav-sidebar .nav-item>.nav-link {
-            border-radius: 10px;
-            margin: 4px 8px;
-            color: #ac0000;
-            transition: .2s ease;
-        }
-
-        .nav-sidebar .nav-item>.nav-link:hover {
-            background: rgba(208, 178, 178, 0.06);
-            color: #710000;
-        }
-
-        .sidebar-dark-primary .nav-sidebar>.nav-item>.nav-link.active {
-            background: linear-gradient(135deg, var(--choco), var(--soft-choco));
-            color: #fff;
-            border-left: 0;
-            box-shadow: 0 6px 16px rgba(207, 26, 2, .25);
-        }
-
-        /* tree level 2+ */
-        .nav-sidebar .nav-treeview>.nav-item>.nav-link {
-            margin: 2px 16px;
-            border-radius: 20px;
-            color: #c7cdd6;
-        }
-
-        .nav-sidebar .nav-treeview>.nav-item>.nav-link.active {
-            background: rgba(219, 70, 48, .18);
-            color: #fff;
-        }
-
-        /* user panel garis halus */
-        .user-panel {
-            border-bottom: 1px dashed rgba(255, 255, 255, .08);
-        }
-
-        /* ===== Buttons / Badges ===== */
-        .btn-primary {
-            background: var(--choco);
-            border-color: var(--choco);
-        }
-
-        .btn-primary:hover {
-            background: var(--soft-choco);
-            border-color: var(--soft-choco);
-        }
-
-        .badge-warning.navbar-badge {
-            background: var(--soft-choco);
-            color: #fff;
-        }
-
-        /* ===== Tables / DataTables ===== */
-        table.dataTable thead th {
-            border-bottom: 2px solid #eef1f4 !important;
-        }
-
-        .table thead th {
-            background: #fff;
-        }
-
-        /* ===== Select2 ===== */
-        .select2-container--bootstrap-5 .select2-selection {
-            border-radius: 10px;
-            border-color: #e5e7eb;
-        }
-
-        .select2-container--bootstrap-5 .select2-results__option--highlighted {
-            background: var(--soft-choco);
-        }
-
-        /* ===== Summernote toolbar ===== */
-        .note-toolbar {
-            border-radius: 10px;
-            border: 1px solid #eef1f4;
-        }
-
-        /* ===== Footer ===== */
-        .main-footer {
-            border-top: 1px solid #eef1f4;
-            background: #fff;
-            border-radius: var(--radius) var(--radius) 0 0;
-        }
-
-        /* ===== Utility ===== */
-        .bg-choco {
-            background: var(--choco) !important;
-        }
-
-        .text-choco {
-            color: var(--choco) !important;
-        }
-
-        .soft-shadow {
-            box-shadow: var(--shadow);
-        }
-
-        .rounded-2xl {
-            border-radius: 1rem;
-        }
-
-        /* ===== Disabled Menu State ===== */
-        .disabled-link {
-            opacity: 0.4 !important;
-            cursor: not-allowed !important;
-            pointer-events: auto !important;
-            position: relative;
-            background-color: rgba(0, 0, 0, 0.02) !important;
-            filter: grayscale(80%);
-        }
-
-        .disabled-link:hover {
-            background-color: rgba(0, 0, 0, 0.05) !important;
-            color: inherit !important;
-        }
-
-        .disabled-link::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: repeating-linear-gradient(45deg,
-                    transparent,
-                    transparent 10px,
-                    rgba(0, 0, 0, 0.03) 10px,
-                    rgba(0, 0, 0, 0.03) 20px);
-            pointer-events: none;
-        }
-
-        /* Disabled icon style */
-        .disabled-link .nav-icon {
-            opacity: 0.3;
-        }
-
-        /* Disabled submenu */
-        .nav-treeview.disabled {
-            display: none !important;
-        }
-
-        /* Style untuk nav-header yang disabled */
-        .nav-header.disabled-header {
-            opacity: 0.4;
-            color: #999 !important;
-        }
-
-        /* Badge untuk menu yang terkunci */
-        .locked-badge {
-            position: absolute;
-            top: 50%;
-            right: 10px;
-            transform: translateY(-50%);
-            background: rgba(255, 193, 7, 0.2);
-            color: #ff9800;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 0.65rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        /* ===== FIXED CROP MODAL SIZE ===== */
-        #cropPhotoModal .modal-dialog {
-            max-width: 650px;
-            width: 90%;
-            margin: 1.75rem auto;
-        }
-
-        #cropPhotoModal .modal-content {
-            border-radius: 15px;
-        }
-
-        #cropPhotoModal .modal-body {
-            padding: 1.5rem;
-        }
-
-        #cropPhotoModal .img-container {
-            width: 100%;
-            height: 450px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #cropPhotoModal .img-container img {
-            max-width: 100%;
-            max-height: 100%;
-            display: block;
-        }
-
-        /* ===== CIRCULAR CROP AREA ===== */
-        #cropPhotoModal .cropper-view-box,
-        #cropPhotoModal .cropper-face {
-            border-radius: 50% !important;
-            outline: 0;
-        }
-
-        /* Optional: Buat crop box outline juga bulat */
-        #cropPhotoModal .cropper-view-box {
-            outline: 0;
-        }
-
-        /* Styling untuk area di luar crop (lebih gelap) */
-        #cropPhotoModal .cropper-modal {
-            background-color: rgba(0, 0, 0, 0.7);
-        }
-
-        #cropPhotoModal .cropper-dashed {
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            #cropPhotoModal .modal-dialog {
-                margin: 0.5rem auto;
-                width: 95%;
-            }
-
-            #cropPhotoModal .img-container {
-                height: 300px;
-            }
-
-            #cropPhotoModal .modal-body {
-                padding: 1rem;
-            }
-        }
-
-        @media (max-width: 576px) {
-            #cropPhotoModal .modal-dialog {
-                margin: 0.25rem auto;
-                width: 98%;
-            }
-        }
-    </style>
+    <!-- Loader Custom CSS-->
+    <link rel="stylesheet" type="text/css" href="{{ asset('admin/assets/css/blockui-loader.css') }}">
+
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ asset('css/base.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/components.css') }}">
+
+    <link rel="stylesheet" href="{{ asset('css/message.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/sidebar.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/forms.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/add-product-options.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/table.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/show.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/responsive-global.css') }}">
 
 </head>
 
-<body class="hold-transition sidebar-mini layout-fixed">
+
+<body>
     <div class="wrapper">
+        <!-- Sidebar Overlay (Mobile) -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-        <!-- Navbar -->
-        <nav class="main-header navbar navbar-expand navbar-white navbar-light border-bottom-0">
-            <!-- Left navbar links -->
-            <ul class="navbar-nav bg-choco  rounded-2xl soft-shadow px-3">
-                <li class="nav-item">
-                    <a class="nav-link" data-widget="pushmenu" href="#" role="button">
-                        <i class="fas fa-bars text-white"></i>
-                    </a>
-                </li>
-                <li class="nav-item d-none d-sm-inline-block">
-                    <a href="{{ route('owner.user-owner.dashboard') }}"
-                        class="nav-link text-white">{{ __('messages.owner.layout.dashboard') }}</a>
-                </li>
-                <li class="nav-item d-none d-sm-inline-block">
-                    <a href="#" class="nav-link text-white">{{ __('messages.owner.layout.support') }}</a>
-                </li>
-            </ul>
-
-            <!-- Right navbar links -->
-            <ul class="navbar-nav ml-auto">
-                <!-- Language Switcher -->
-                <li class="nav-item dropdown">
-                    <button class="btn btn-sm d-inline-flex align-items-center rounded-2 lang-btn"
-                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" type="button">
-                        <!-- Globe image -->
-                        <img src="{{ asset('icons/icon-globe-50.png') }}" alt="Language" class="mr-1 lang-globe"
-                            width="16" height="16" loading="lazy" decoding="async" />
-
-                        <span class="font-weight-medium">
-                            {{ app()->getLocale() === 'id' ? 'Bahasa' : 'English' }}
-                        </span>
-
-                        <!-- Caret -->
-                        <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" class="ml-1"
-                            style="opacity:.7">
-                            <path fill-rule="evenodd"
-                                d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.25a.75.75 0 01-1.06 0L5.25 8.27a.75.75 0 01-.02-1.06z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </button>
-
-
-                    <div class="dropdown-menu dropdown-menu-right rounded-2xl soft-shadow p-0 overflow-hidden">
-                        <a href="{{ route('language.set.get', ['locale' => 'id']) }}"
-                            class="dropdown-item d-flex align-items-center">
-                            <img src="{{ asset('icons/icon-indonesia-96.png') }}" alt="Indonesia"
-                                class="mr-2 lang-flag" width="18" height="18" loading="lazy" decoding="async">
-                            Bahasa
-                            @if (app()->getLocale() === 'id')
-                                <i class="fas fa-check ml-auto text-choco"></i>
-                            @endif
-                        </a>
-
-                        <a href="{{ route('language.set.get', ['locale' => 'en']) }}"
-                            class="dropdown-item d-flex align-items-center">
-                            <img src="{{ asset('icons/icon-english-96.png') }}" alt="English" class="mr-2 lang-flag"
-                                width="18" height="18" loading="lazy" decoding="async">
-                            English
-                            @if (app()->getLocale() === 'en')
-                                <i class="fas fa-check ml-auto text-choco"></i>
-                            @endif
-                        </a>
-                    </div>
-
-                </li>
-
-                <!-- Notifications Dropdown Menu -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link" data-toggle="dropdown" href="#">
-                        <i class="far fa-bell"></i>
-                        <span class="badge badge-warning navbar-badge">15</span>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right rounded-2xl soft-shadow">
-                        <span class="dropdown-item dropdown-header">15 Notifications</span>
-                        <div class="dropdown-divider"></div>
-                        <a href="#" class="dropdown-item">
-                            <i class="fas fa-envelope mr-2"></i> 4 new messages
-                            <span class="float-right text-muted text-sm">3 mins</span>
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="#" class="dropdown-item">
-                            <i class="fas fa-users mr-2"></i> 8 friend requests
-                            <span class="float-right text-muted text-sm">12 hours</span>
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="#" class="dropdown-item">
-                            <i class="fas fa-file mr-2"></i> 3 new reports
-                            <span class="float-right text-muted text-sm">2 days</span>
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
-                    </div>
-                </li>
-
-                <!-- Fullscreen Toggle -->
-                <li class="nav-item">
-                    <a class="nav-link" data-widget="fullscreen" href="#" role="button">
-                        <i class="fas fa-expand-arrows-alt"></i>
-                    </a>
-                </li>
-
-                <!-- User Dropdown Menu -->
-                <li class="nav-item dropdown user-menu">
-                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-                        @if (auth('owner')->check() && auth('owner')->user()->image)
-                            <img src="{{ asset('storage/' . auth('owner')->user()->image) }}"
-                                class="user-image img-circle elevation-2" alt="User Image">
-                        @else
-                            <div class="user-image img-circle elevation-2 d-inline-flex align-items-center justify-content-center"
-                                style="width: 25px; height: 25px; vertical-align: middle; background-color: #9ca3af;">
-                                <svg style="width: 14px; height: 14px; color: #ffffff;" fill="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path
-                                        d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                                </svg>
-                            </div>
-                        @endif
-                        <span class="d-none d-md-inline">
-                            @auth('owner')
-                                {{ auth('owner')->user()->name }}
-                            @endauth
-                        </span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right rounded-2xl soft-shadow">
-                        <!-- User image -->
-                        <li class="user-header bg-choco text-white">
-                            @if (auth('owner')->check() && auth('owner')->user()->image)
-                                <img src="{{ asset('storage/' . auth('owner')->user()->image) }}"
-                                    class="img-circle elevation-2" alt="User Image">
-                            @else
-                                <div class="img-circle elevation-2 d-inline-flex align-items-center justify-content-center mx-auto"
-                                    style="width: 90px; height: 90px; background-color: #9ca3af;">
-                                    <svg style="width: 50px; height: 50px; color: #ffffff;" fill="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path
-                                            d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                                    </svg>
-                                </div>
-                            @endif
-                            <p>
-                                @auth('owner')
-                                    {{ auth('owner')->user()->name }}
-                                @else
-                                    User Owner
-                                @endauth
-                                <small>{{ __('messages.owner.layout.member_since') }} @auth('owner')
-                                        {{ auth('owner')->user()->created_at->format('d M. Y') }}
-                                    @else
-                                        User Owner
-                                    @endauth
-                                </small>
-                            </p>
-                        </li>
-                        <!-- Menu Footer-->
-                        <li class="user-footer">
-                            <a href="{{ route('owner.user-owner.settings.index') }}"
-                                class="btn btn-default btn-flat">{{ __('messages.owner.layout.profile') }}</a>
-                            <form method="POST" action="{{ route('owner.logout') }}" class="d-inline">
-                                @csrf
-                                <button type="submit" class="btn btn-default btn-flat float-right">
-                                    {{ __('messages.owner.layout.sign_out') }}
-                                </button>
-                            </form>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </nav>
 
         <!-- Sidebar -->
-        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <aside class="main-sidebar" id="mainSidebar">
             <!-- Brand Logo -->
-            <a href="{{ route('owner.user-owner.dashboard') }}" class="brand-link bg-choco">
+            <!-- Brand Logo -->
+            <a href="{{ route('owner.user-owner.dashboard') }}" class="brand-link">
                 <!-- Logo untuk sidebar terbuka (horizontal) -->
                 <img src="{{ asset('images/cava-logo2-gradient.png') }}" alt="Cavaa Logo"
-                    class="brand-image rounded-2xl brand-image-full" style="opacity: .8">
+                    class="brand-image brand-image-full">
 
                 <!-- Logo circular untuk sidebar collapse -->
                 <img src="{{ asset('icons/cava-logo-red-gradient.png') }}" alt="Cavaa Logo"
-                    class="brand-image rounded-2xl brand-image-collapsed" style="opacity: .8">
-
-                <span class="brand-text font-weight-light">{{ __('messages.owner.layout.owner_panel') }}</span>
+                    class="brand-image brand-image-collapsed">
             </a>
-            <!-- Sidebar -->
-            <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-                <div class="image">
-                    @if (auth('owner')->check() && auth('owner')->user()->image)
-                        <img src="{{ asset('storage/' . auth('owner')->user()->image) }}"
-                            class="img-circle elevation-2"
-                            style="width:40px; height:40px; object-fit:cover; border-radius:50%;" alt="User Image">
-                    @else
-                        <div class="img-circle elevation-2 d-inline-flex align-items-center justify-content-center"
-                            style="width:40px; height:40px; background-color: #9ca3af;">
-                            <svg style="width: 22px; height: 22px; color: #ffffff;" fill="currentColor"
-                                viewBox="0 0 24 24">
-                                <path
-                                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                            </svg>
-                        </div>
-                    @endif
-                </div>
-                <div class="info" style="margin-top:3px;">
-                    <a href="{{ route('owner.user-owner.settings.index') }}" class="d-block text-choco">
-                        @auth('owner')
-                            {{ auth('owner')->user()->name }}
-                        @else
-                            User Owner
-                        @endauth
-                    </a>
-                </div>
-            </div>
-            <!-- Sidebar Menu -->
-            <nav class="mt-2">
+
+            <!-- Sidebar Navigation -->
+            <nav class="sidebar-nav">
                 @php
                     $isVerified = auth('owner')->check() && auth('owner')->user()->verification_status === 'approved';
                     $isActive = auth('owner')->check() && auth('owner')->user()->is_active;
                 @endphp
 
-                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
-                    data-accordion="false">
 
-                    {{-- Verification Menu (commented) --}}
-                    {{-- <li class="nav-item">
-                        <a href="{{ route('owner.user-owner.verification') }}"
-                            class="nav-link @if (Route::is('owner.user-owner.verification')) active @endif">
-                            <i class="nav-icon fas fa-tachometer-alt"></i>
-                            <p>{{ __('messages.owner.layout.verification') }}</p>
-                        </a>
-                    </li> --}}
+                <!-- Main Section -->
+                <div class="nav-section-title">{{ __('messages.owner.layout.dashboard') }}</div>
 
-                    {{-- Dashboard --}}
-                    <li class="nav-item">
-                        <a href="{{ $isVerified && $isActive ? route('owner.user-owner.dashboard') : 'javascript:void(0)' }}"
-                            class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} @if (Route::is('owner.user-owner.dashboard')) active @endif"
-                            onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                            <i class="nav-icon fas fa-tachometer-alt"></i>
-                            <p>{{ __('messages.owner.layout.dashboard') }}</p>
-                        </a>
-                    </li>
+                <div class="nav-item">
+                    <a href="{{ $isVerified && $isActive ? route('owner.user-owner.dashboard') : 'javascript:void(0)' }}"
+                        class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} @if(Route::is('owner.user-owner.dashboard')) active @endif"
+                        onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
+                        <span class="material-symbols-outlined">dashboard</span>
+                        <span>{{ __('messages.owner.layout.dashboard') }}</span>
+                    </a>
+                </div>
 
-                    {{-- User Management --}}
-                    @php
-                        $employeeRoutes = ['owner.user-owner.employees.*'];
-                    @endphp
 
-                        <li class="nav-item {{ Route::is($employeeRoutes) ? 'menu-open' : '' }}">
-                            <a href="javascript:void(0)"
-                                class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($employeeRoutes) ? 'active' : '' }}"
-                                onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                                <i class="nav-icon fas fa-users"></i>
-                                <p>
-                                    {{ __('messages.owner.layout.user_management') }}
-                                    @if ($isVerified)
-                                        <i class="fas fa-angle-left right"></i>
-                                    @endif  
-                                </p>
+
+
+                <!-- Management Section -->
+                <div class="nav-section-title">{{ __('messages.owner.layout.user_management') }}</div>
+
+
+                @php
+                    $employeeRoutes = ['owner.user-owner.employees.*'];
+                @endphp
+
+
+                <div class="nav-item {{ Route::is($employeeRoutes) ? 'menu-open' : '' }}">
+                    <a href="javascript:void(0)"
+                        class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($employeeRoutes) ? 'active' : '' }}"
+                        onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : 'toggleSubmenu(this)' }}">
+                        <span class="material-symbols-outlined">group</span>
+                        <span>{{ __('messages.owner.layout.user_management') }}</span>
+                        @if($isVerified)
+                            <span class="material-symbols-outlined expand-icon">expand_more</span>
+                        @endif
+                    </a>
+                    <div class="nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
+                        <div class="nav-item">
+                            <a href="{{ route('owner.user-owner.employees.index') }}"
+                                class="nav-link {{ Route::is('owner.user-owner.employees.*') ? 'active' : '' }}">
+                                <span>{{ __('messages.owner.layout.employees') }}</span>
                             </a>
-                            <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
-                                <li class="nav-item">
-                                    <a href="{{ route('owner.user-owner.employees.index') }}"
-                                        class="nav-link {{ Route::is('owner.user-owner.employees.*') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>{{ __('messages.owner.layout.employees') }}</p>
-                                    </a>
-                                </li>
-                                {{-- <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Roles</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Permissions</p>
-                                </a>
-                            </li> --}}
-                        </ul>
-                    </li>
-
-
-                    <li class="nav-item @if (Request::segment(1) == 'owner' && Request::segment(3) == 'xen_platform') menu-open @endif">
-    <a href="javascript:void(0)"
-        class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }}"
-        onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-        <i class="nav-icon fas fa-credit-card"></i>
-        <p>
-            XenPlatform
-            @if($isVerified)
-                <i class="fas fa-angle-left right"></i>
-            @endif
-        </p>
-    </a>
-                        <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
-                            <li class="nav-item">
-                                <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.accounts.information') : 'javascript:void(0)' }}"
-                                    class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'accounts') active @endif">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>{{ __('messages.owner.layout.accounts') }}</p>
-                                </a>
-                            </li>
-                        </ul>
-                        <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
-                            <li class="nav-item">
-                                <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.split-payment.index') : 'javascript:void(0)' }}"
-                                    class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'split-payment') active @endif">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>{{ __('messages.owner.layout.split_payments') }}</p>
-                                </a>
-                            </li>
-                        </ul>
-                        <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
-                            <li class="nav-item">
-                                <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.payout.index') : 'javascript:void(0)' }}"
-                                    class="nav-link @if (Request::segment(1) == 'owner' && Request::segment(4) == 'payout') active @endif">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>{{ __('messages.owner.layout.withdrawal') }}</p>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-
-
-                    {{-- Store (commented section) --}}
-                    {{-- @php
-                    $storeRoutes = ['partner.store.*'];
-                    @endphp
-
-                    <li class="nav-item {{ Route::is($storeRoutes) ? 'menu-open' : '' }}">
-                        <a href="#" class="nav-link {{ Route::is($storeRoutes) ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-shopping-cart"></i>
-                            <p>
-                                Outlet
-                                <i class="fas fa-angle-left right"></i>
-                            </p>
-                        </a>
-
-                        <ul class="nav nav-treeview">
-
-                            <li
-                                class="nav-item {{ Route::is('partner.store.tables.*') || Route::is('partner.store.seat-layouts.*') ? 'menu-open' : '' }}">
-                                <a href="#"
-                                    class="nav-link {{ Route::is('partner.store.tables.*') || Route::is('partner.store.seat-layouts.*') ? 'active' : '' }}">
-                                    <i class="fas fa-table nav-icon"></i>
-                                    <p>
-                                        Outlet Management
-                                        <i class="fas fa-angle-left right"></i>
-                                    </p>
-                                </a>
-
-                                <ul class="nav nav-treeview">
-                                    <li class="nav-item">
-                                        <a href="{{ route('partner.store.tables.index') }}"
-                                            class="nav-link {{ Route::is('partner.store.tables.*') ? 'active' : '' }}">
-                                            <i class="far fa-dot-circle nav-icon"></i>
-                                            <p>Tables</p>
-                                        </a>
-                                    </li>
-
-                                    <li class="nav-item">
-                                        <a href="{{ route('partner.products.index') }}"
-                                            class="nav-link {{ Route::is('partner.products.*') ? 'active' : '' }}">
-                                            <i class="far fa-dot-circle nav-icon"></i>
-                                            <p>Seat Layout</p>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
-
-                        </ul>
-                    </li> --}}
-
-                    {{-- Outlets --}}
-                    @php
-                        $outletRoutes = ['owner.user-owner.outlets.*'];
-                    @endphp
-
-                    <li class="nav-item {{ Route::is($outletRoutes) ? 'menu-open' : '' }}">
-                        <a href="javascript:void(0)"
-                            class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($outletRoutes) ? 'active' : '' }}"
-                            onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                            <i class="nav-icon fas fa-store"></i>
-                            <p>
-                                {{ __('messages.owner.layout.outlets') }}
-                                @if ($isVerified)
-                                    <i class="fas fa-angle-left right"></i>
-                                @endif
-                            </p>
-                        </a>
-                        <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
-                            <li class="nav-item">
-                                <a href="{{ route('owner.user-owner.outlets.index') }}"
-                                    class="nav-link {{ Route::is('owner.user-owner.outlets.*') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>{{ __('messages.owner.layout.all_outlets') }}</p>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-
-                    {{-- Products --}}
-                    @php
-                        $productRoutes = ['owner.user-owner.products.*'];
-                        $categoryRoutes = ['owner.user-owner.categories.*'];
-                        $promotionRoutes = ['owner.user-owner.promotions.*'];
-                        $stockRoutes = ['owner.user-owner.stocks.*'];
-                        $masterProductRoutes = ['owner.user-owner.master-products.*'];
-                        $outletProductRoutes = ['owner.user-owner.outlet-products.*'];
-
-                        $allProductRoutes = array_merge(
-                            $productRoutes,
-                            $categoryRoutes,
-                            $promotionRoutes,
-                            $masterProductRoutes,
-                            $outletProductRoutes,
-                            $stockRoutes,
-                        );
-                    @endphp
-
-                    <li class="nav-item {{ Route::is($allProductRoutes) ? 'menu-open' : '' }}">
-                        <a href="javascript:void(0)"
-                            class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($allProductRoutes) ? 'active' : '' }}"
-                            onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                            <i class="nav-icon fas fa-shopping-cart"></i>
-                            <p>
-                                {{ __('messages.owner.layout.products') }}
-                                @if ($isVerified)
-                                    <i class="fas fa-angle-left right"></i>
-                                @endif
-                            </p>
-                        </a>
-                        <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
-                            <li class="nav-item">
-                                <a href="{{ route('owner.user-owner.master-products.index') }}"
-                                    class="nav-link {{ Route::is('owner.user-owner.master-products.*') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>{{ __('messages.owner.layout.master_products') }}</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('owner.user-owner.outlet-products.index') }}"
-                                    class="nav-link {{ Route::is('owner.user-owner.outlet-products.*') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>{{ __('messages.owner.layout.outlet_products') }}</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('owner.user-owner.stocks.index') }}"
-                                    class="nav-link {{ Route::is('owner.user-owner.stocks.*') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>{{ __('messages.owner.layout.stocks') }}</p>
-                                </a>
-                            </li>
-                            {{-- <li class="nav-item">
-                                <a href="{{ route('owner.user-owner.products.index') }}"
-                                    class="nav-link {{ Route::is('owner.user-owner.products.*') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>All Products</p>
-                                </a>
-                            </li> --}}
-                            <li class="nav-item">
-                                <a href="{{ route('owner.user-owner.categories.index') }}"
-                                    class="nav-link {{ Route::is('owner.user-owner.categories.*') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>{{ __('messages.owner.layout.categories') }}</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('owner.user-owner.promotions.index') }}"
-                                    class="nav-link {{ Route::is('owner.user-owner.promotions.*') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>{{ __('messages.owner.layout.promotions') }}</p>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    {{-- Settings --}}
-                    @php
-                        $settingRoutes = ['owner.user-owner.settings.*'];
-                    @endphp
-                    <li class="nav-item {{ Route::is($settingRoutes) ? 'menu-open' : '' }}">
-                        <a href="javascript:void(0)"
-                            class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($settingRoutes) ? 'active' : '' }}"
-                            onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                            <i class="nav-icon fas fa-cog"></i>
-                            <p>
-                                {{ __('messages.owner.layout.settings') }}
-                                @if ($isVerified)
-                                    <i class="fas fa-angle-left right"></i>
-                                @endif
-                            </p>
-                        </a>
-                        <ul class="nav nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
-                            {{-- Submenu: Settings (ini adalah link ke halaman settings sebenarnya) --}}
-                            <li class="nav-item">
-                                <a href="{{ route('owner.user-owner.settings.index') }}"
-                                    class="nav-link {{ Route::is('owner.user-owner.settings.index') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>{{ __('messages.owner.layout.settings') }}</p>
-                                </a>
-                            </li>
-                            {{-- Anda bisa menambahkan menu settings lain di sini jika ada, misal 'Payment Gateway' --}}
-                            {{-- <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Payment Gateway</p>
-                            </a>
-                        </li> --}}
-                        </ul>
-                    </li>
-
-
-
-                    {{-- Reports Header --}}
-                    <li class="nav-header {{ !$isVerified || !$isActive ? 'disabled-header' : '' }}">
-                        {{ __('messages.owner.layout.reports') }}
-                    </li>
-
-                    {{-- Sales Report --}}
-                    <li class="nav-item">
-                        <a href="{{ $isVerified && $isActive ? route('owner.user-owner.report.sales.index') : 'javascript:void(0)' }}"
-                            class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is('owner.user-owner.report.sales.*') ? 'active' : '' }}"
-                            onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                            <i class="nav-icon fas fa-chart-line"></i>
-                            <p>{{ __('messages.owner.layout.sales_report') }}</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ $isVerified && $isActive ? route('owner.user-owner.report.stocks.index') : 'javascript:void(0)' }}"
-                            class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is('owner.user-owner.report.stocks.*') ? 'active' : '' }}"
-                            onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                            <i class="nav-icon fas fa-boxes-stacked"></i>
-                            <p>{{ __('messages.owner.layout.stock_report') }}</p>
-                        </a>
-                    </li>
-
-                    {{-- Traffic Report --}}
-                    {{-- <li class="nav-item">
-                        <a href="javascript:void(0)" class="nav-link {{ !$isVerified ? 'disabled-link' : '' }}"
-                            onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
-                            <i class="nav-icon fas fa-chart-pie"></i>
-                            <p>{{ __('messages.owner.layout.traffict_report') }}</p>
-                        </a>
-                    </li> --}}
-                </ul>
-            </nav>
-        </aside>
-
-        <!-- Content Wrapper -->
-        <div class="content-wrapper">
-            <!-- Content Header -->
-            <section class="content-header">
-                <div class="container-fluid">
-                    <div class="row mb-2">
-                        <div class="col-sm-6">
-                            <h1>@yield('page_title', 'Dashboard')</h1>
-                        </div>
-                        <div class="col-sm-6">
-                            <ol class="breadcrumb float-sm-right">
-                                <li class="breadcrumb-item"><a
-                                        href="{{ route('owner.user-owner.dashboard') }}">Home</a>
-                                </li>
-                                <li class="breadcrumb-item active">@yield('page_title', 'Dashboard')</li>
-                            </ol>
                         </div>
                     </div>
                 </div>
-            </section>
+
+
+                <div class="nav-item {{ Request::segment(3) == 'xen_platform' ? 'menu-open' : '' }}">
+                    <a href="javascript:void(0)"
+                        class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }}"
+                        onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : 'toggleSubmenu(this)' }}">
+                        <span class="material-symbols-outlined">dns</span>
+                        <span>XenPlatform</span>
+                        @if($isVerified)
+                            <span class="material-symbols-outlined expand-icon">expand_more</span>
+                        @endif
+                    </a>
+                    <div class="nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
+                        <div class="nav-item">
+                            <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.accounts.information') : 'javascript:void(0)' }}"
+                                class="nav-link {{ Request::segment(4) == 'accounts' ? 'active' : '' }}">
+                                <span>{{ __('messages.owner.layout.accounts') }}</span>
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.split-payment.index') : 'javascript:void(0)' }}"
+                                class="nav-link {{ Request::segment(4) == 'split-payment' ? 'active' : '' }}">
+                                <span>{{ __('messages.owner.layout.split_payments') }}</span>
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a href="{{ $isVerified ? route('owner.user-owner.xen_platform.payout.index') : 'javascript:void(0)' }}"
+                                class="nav-link {{ Request::segment(4) == 'payout' ? 'active' : '' }}">
+                                <span>{{ __('messages.owner.layout.withdrawal') }}</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+
+                @php
+                    $outletRoutes = ['owner.user-owner.outlets.*'];
+                @endphp
+
+
+                <div class="nav-item {{ Route::is($outletRoutes) ? 'menu-open' : '' }}">
+                    <a href="javascript:void(0)"
+                        class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($outletRoutes) ? 'active' : '' }}"
+                        onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : 'toggleSubmenu(this)' }}">
+                        <span class="material-symbols-outlined">storefront</span>
+                        <span>{{ __('messages.owner.layout.outlets') }}</span>
+                        @if($isVerified)
+                            <span class="material-symbols-outlined expand-icon">expand_more</span>
+                        @endif
+                    </a>
+                    <div class="nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
+                        <div class="nav-item">
+                            <a href="{{ route('owner.user-owner.outlets.index') }}"
+                                class="nav-link {{ Route::is('owner.user-owner.outlets.*') ? 'active' : '' }}">
+                                <span>{{ __('messages.owner.layout.all_outlets') }}</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                @php
+                    $allProductRoutes = [
+                        'owner.user-owner.products.*',
+                        'owner.user-owner.categories.*',
+                        'owner.user-owner.promotions.*',
+                        'owner.user-owner.stocks.*',
+                        'owner.user-owner.master-products.*',
+                        'owner.user-owner.outlet-products.*'
+                    ];
+                @endphp
+
+
+                <div class="nav-item {{ Route::is($allProductRoutes) ? 'menu-open' : '' }}">
+                    <a href="javascript:void(0)"
+                        class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($allProductRoutes) ? 'active' : '' }}"
+                        onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : 'toggleSubmenu(this)' }}">
+                        <span class="material-symbols-outlined">inventory_2</span>
+                        <span>{{ __('messages.owner.layout.products') }}</span>
+                        @if($isVerified)
+                            <span class="material-symbols-outlined expand-icon">expand_more</span>
+                        @endif
+                    </a>
+                    <div class="nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
+                        <div class="nav-item">
+                            <a href="{{ route('owner.user-owner.master-products.index') }}"
+                                class="nav-link {{ Route::is('owner.user-owner.master-products.*') ? 'active' : '' }}">
+                                <span>{{ __('messages.owner.layout.master_products') }}</span>
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a href="{{ route('owner.user-owner.outlet-products.index') }}"
+                                class="nav-link {{ Route::is('owner.user-owner.outlet-products.*') ? 'active' : '' }}">
+                                <span>{{ __('messages.owner.layout.outlet_products') }}</span>
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a href="{{ route('owner.user-owner.stocks.index') }}"
+                                class="nav-link {{ Route::is('owner.user-owner.stocks.*') ? 'active' : '' }}">
+                                <span>{{ __('messages.owner.layout.stocks') }}</span>
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a href="{{ route('owner.user-owner.categories.index') }}"
+                                class="nav-link {{ Route::is('owner.user-owner.categories.*') ? 'active' : '' }}">
+                                <span>{{ __('messages.owner.layout.categories') }}</span>
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a href="{{ route('owner.user-owner.promotions.index') }}"
+                                class="nav-link {{ Route::is('owner.user-owner.promotions.*') ? 'active' : '' }}">
+                                <span>{{ __('messages.owner.layout.promotions') }}</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+
+                @php
+                    $settingRoutes = ['owner.user-owner.settings.*'];
+                @endphp
+
+
+                <div class="nav-item">
+                    <a href="{{ route('owner.user-owner.settings.index') }}"
+                        class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is('owner.user-owner.settings.*') ? 'active' : '' }}">
+                        <span class="material-symbols-outlined">settings</span>
+                        <span>{{ __('messages.owner.layout.settings') }}</span>
+                    </a>
+                </div>
+
+
+                {{-- <div class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="material-symbols-outlined">help</span>
+                        <span>{{ __('messages.owner.layout.support') }}</span>
+                    </a>
+                </div> --}}
+
+
+                <!-- Reports Section -->
+                <div class="nav-section-title">{{ __('messages.owner.layout.reports') }}</div>
+
+
+                <div class="nav-item">
+                    <a href="{{ $isVerified && $isActive ? route('owner.user-owner.report.sales.index') : 'javascript:void(0)' }}"
+                        class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is('owner.user-owner.report.sales.*') ? 'active' : '' }}"
+                        onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
+                        <span class="material-symbols-outlined">payments</span>
+                        <span>{{ __('messages.owner.layout.sales_report') }}</span>
+                    </a>
+                </div>
+
+
+                <div class="nav-item">
+                    <a href="{{ $isVerified && $isActive ? route('owner.user-owner.report.stocks.index') : 'javascript:void(0)' }}"
+                        class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is('owner.user-owner.report.stocks.*') ? 'active' : '' }}"
+                        onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : '' }}">
+                        <span class="material-symbols-outlined">receipt_long</span>
+                        <span>{{ __('messages.owner.layout.stock_report') }}</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+
+        <!-- Content Wrapper -->
+        <div class="content-wrapper">
+            <!-- Top Navbar -->
+            <!-- Top Navbar -->
+            <!-- Top Navbar -->
+            <header class="main-header">
+                <div class="navbar-left">
+                    <!-- Mobile Sidebar Toggle Button - TAMBAHKAN INI -->
+                    <button class="sidebar-toggle-btn d-md-none" onclick="toggleSidebar()"
+                        style="color: var(--primary); display: none;">
+                        <span class="material-symbols-outlined">menu</span>
+                    </button>
+
+                    {{-- SEARCH - Uncomment jika diperlukan
+                    <div class="search-wrapper">
+                        <span class="material-symbols-outlined">search</span>
+                        <input type="text" class="search-input" placeholder="Search orders, products, or customers...">
+                    </div>
+                    --}}
+                </div>
+
+                <div class="navbar-right">
+                    <!-- Language Switcher -->
+                    <div class="dropdown">
+                        <button class="lang-btn dropdown-toggle" type="button" data-toggle="dropdown">
+                            <img src="{{ asset('icons/icon-globe-50.png') }}" alt="Language" class="lang-globe">
+                            <span>{{ app()->getLocale() === 'id' ? 'Bahasa' : 'English' }}</span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="{{ route('language.set.get', ['locale' => 'id']) }}">
+                                <img src="{{ asset('icons/icon-indonesia-96.png') }}" alt="Indonesia"
+                                    class="lang-flag mr-2">
+                                Bahasa
+                                @if(app()->getLocale() === 'id')
+                                    <i class="fas fa-check ml-auto" style="color: var(--primary)"></i>
+                                @endif
+                            </a>
+                            <a class="dropdown-item" href="{{ route('language.set.get', ['locale' => 'en']) }}">
+                                <img src="{{ asset('icons/icon-english-96.png') }}" alt="English"
+                                    class="lang-flag mr-2">
+                                English
+                                @if(app()->getLocale() === 'en')
+                                    <i class="fas fa-check ml-auto" style="color: var(--primary)"></i>
+                                @endif
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Notifications -->
+                    <div class="dropdown">
+                        <button class="navbar-icon-btn" type="button" data-toggle="dropdown" id="notificationBtn">
+                            <span class="material-symbols-outlined">notifications</span>
+                            <span class="badge" id="notificationBadge" style="display: none;"></span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right notification-dropdown" style="min-width: 380px; max-height: 500px; overflow-y: auto;">
+                            <div class="dropdown-header d-flex justify-content-between align-items-center">
+                                <span id="notificationTitle">{{ __('messages.owner.layout.notifications') }}</span>
+                                <button class="btn btn-sm btn-link text-primary p-0" id="markAllReadBtn" style="display: none;">
+                                    Tandain telah dibaca
+                                </button>
+                            </div>
+                            <div class="dropdown-divider m-0"></div>
+                            
+                            <div id="notificationContent">
+                                <!-- Loading state -->
+                                <div class="text-center py-4" id="notificationLoading">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                        <span class="sr-only">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="dropdown-divider m-0" id="notificationDivider" style="display: none;"></div>
+                            <div class="dropdown-footer text-center" id="notificationFooter" style="display: none;">
+                                <a href="{{ route('owner.user-owner.messages.index') }}" class="btn btn-sm btn-link text-primary">
+                                    Lihat semua
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="navbar-divider"></div>
+
+                    <!-- User Dropdown -->
+                    <div class="dropdown">
+                        <button class="user-dropdown-btn" type="button" data-toggle="dropdown">
+                            <div class="user-avatar">
+                                @if(auth('owner')->check() && auth('owner')->user()->image)
+                                    <img src="{{ asset('storage/' . auth('owner')->user()->image) }}" alt="User">
+                                @else
+                                    OP
+                                @endif
+                            </div>
+                            <span class="user-name">
+                                @auth('owner')
+                                    {{ auth('owner')->user()->name }}
+                                @else
+                                    Owner Panel
+                                @endauth
+                            </span>
+                            <span class="material-symbols-outlined" style="font-size: 16px">expand_more</span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="{{ route('owner.user-owner.settings.index') }}">
+                                <i class="fas fa-user mr-2"></i>
+                                {{ __('messages.owner.layout.profile') }}
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <form method="POST" action="{{ route('owner.logout') }}">
+                                @csrf
+                                <button type="submit" class="dropdown-item">
+                                    <i class="fas fa-sign-out-alt mr-2"></i>
+                                    {{ __('messages.owner.layout.sign_out') }}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
 
             <!-- Main Content -->
-            @yield('content')
-        </div>
+            <section class="content">
+                @yield('content')
+            </section>
 
-        <!-- Footer -->
-        <footer class="main-footer bg-white">
-            <div class="float-right d-none d-sm-block">
-                <b>Version</b> 3.2.0
-            </div>
-            <strong>Copyright &copy; 2024-{{ date('Y') }} <a
-                    href="https://vastech.co.id">Vastech.co.id</a>.</strong>
-            All rights reserved.
-        </footer>
+
+            <!-- Footer -->
+            <footer class="main-footer">
+                <div class="float-right d-none d-sm-block">
+                    <b>Version</b> 3.2.0
+                </div>
+                <strong>Copyright &copy; 2024-{{ date('Y') }} <a
+                        href="https://vastech.co.id">Vastech.co.id</a>.</strong>
+                All rights reserved.
+            </footer>
+        </div>
     </div>
 
+
     <!-- REQUIRED SCRIPTS -->
-    <!-- jQuery -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-
-    <!-- Popper.js (optional jika pakai bootstrap.bundle) -->
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-
-    <!-- Bootstrap 4 (HARUS sebelum AdminLTE) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
-
-    <!-- AdminLTE -->
-    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
-
-    <!-- Plugin lain -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs4.min.js"></script>
-
-    <!-- ChartJS (load once only) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-
-    <!-- SweetAlert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    {{-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> --}}
-
-    <!-- Cropper.js JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-
-    <!-- Moment & DatePicker -->
     <script src="{{ asset('admin/app-assets/vendors/js/pickers/daterange/moment.min.js') }}"></script>
     <script src="{{ asset('admin/app-assets/vendors/js/pickers/daterange/daterangepicker.js') }}"></script>
     <script src="{{ asset('admin/app-assets/vendors/js/pickers/pickadate/picker.js') }}"></script>
-
-    <!-- blockUI (HARUS sebelum pemanggilan showPageLoader) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.70/jquery.blockUI.min.js"></script>
-
-    <!-- Custom loader -->
     <script src="{{ asset('admin/assets/js/blockui-loader.js') }}"></script>
 
+    <script src="{{ asset('js/image-cropper.js') }}"></script>
+    <script src="{{ asset('js/remove-image.js') }}"></script>
 
     <script>
-        $(function() {
-            // Initialize DataTable
+        // Toggle Sidebar (Desktop)
+        function toggleSidebarCollapse() {
+            document.getElementById('mainSidebar').classList.toggle('collapsed');
+        }
+
+
+        // Toggle Sidebar (Mobile)
+        function toggleSidebar() {
+            const sidebar = document.getElementById('mainSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+
+
+        // Close sidebar when clicking overlay
+        document.getElementById('sidebarOverlay').addEventListener('click', function () {
+            toggleSidebar();
+        });
+
+
+        // Toggle Submenu
+        function toggleSubmenu(element) {
+            const navItem = element.closest('.nav-item');
+            navItem.classList.toggle('menu-open');
+            event.preventDefault();
+        }
+
+
+        // Fullscreen Toggle
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+
+        // Verification Alert
+        function showVerificationAlert(event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+
+            Swal.fire({
+                icon: 'warning',
+                title: '<strong>Akses Terbatas</strong>',
+                html: `
+                <div style="text-align: left; padding: 10px;">
+                    <p style="margin-bottom: 15px; color: #666;">
+                        <strong>Akun Anda belum diverifikasi oleh admin.</strong>
+                    </p>
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #ffc107;">
+                        <p style="margin: 0; color: #856404;">
+                            <i class="fas fa-info-circle"></i>
+                            Anda tidak dapat mengakses fitur ini sampai proses verifikasi selesai.
+                        </p>
+                    </div>
+                </div>
+            `,
+                confirmButtonColor: '#ae1504',
+                allowOutsideClick: true,
+            });
+
+
+            return false;
+        }
+
+
+        // Initialize plugins
+        $(function () {
+            // DataTables
             $('.datatable').DataTable({
                 "paging": true,
                 "lengthChange": false,
@@ -1202,12 +544,14 @@
                 "responsive": true,
             });
 
-            // Initialize Select2
+
+            // Select2
             $('.select2').select2({
-                theme: 'bootstrap-5'
+                theme: 'bootstrap4'
             });
 
-            // Initialize Summernote
+
+            // Summernote
             $('.summernote').summernote({
                 height: 200,
                 toolbar: [
@@ -1221,212 +565,243 @@
                 ]
             });
 
-            // Toastr notification example
-            // @if (session('success'))
-            //     toastr.success('{{ session('success') }}');
-            // @endif
 
-            // @if (session('error'))
-            //     toastr.error('{{ session('error') }}');
-            // @endif
+            // Toastr notifications
+            @if(session('success'))
+                toastr.success({!! json_encode(session('success')) !!});
+            @endif
 
-            // Example chart
-            var canvas = document.getElementById('myChart');
-            // var ctx = document.getElementById('myChart').getContext('2d');
-            if (canvas) {
-                var ctx = canvas.getContext('2d');
-                var myChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['January', 'February', 'March', 'April', 'May', 'June'],
-                        datasets: [{
-                            label: 'Sales 2023',
-                            data: [12, 19, 3, 5, 2, 3],
-                            backgroundColor: [
-                                'rgba(255, 99, 132, 0.2)',
-                                'rgba(54, 162, 235, 0.2)',
-                                'rgba(255, 206, 86, 0.2)',
-                                'rgba(75, 192, 192, 0.2)',
-                                'rgba(153, 102, 255, 0.2)',
-                                'rgba(255, 159, 64, 0.2)'
-                            ],
-                            borderColor: [
-                                'rgba(255, 99, 132, 1)',
-                                'rgba(54, 162, 235, 1)',
-                                'rgba(255, 206, 86, 1)',
-                                'rgba(75, 192, 192, 1)',
-                                'rgba(153, 102, 255, 1)',
-                                'rgba(255, 159, 64, 1)'
-                            ],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        }
-                    }
+
+            @if(session('error'))
+                toastr.error({!! json_encode(session('error')) !!});
+            @endif
+
+
+            @if($errors->any())
+                @foreach($errors->all() as $err)
+                    toastr.error({!! json_encode($err) !!});
+                @endforeach
+            @endif
+
+
+            @if(session('swal_error'))
+                Swal.fire({
+                    icon: 'warning',
+                    title: @json(session('swal_error.title')),
+                    text: @json(session('swal_error.text')),
+                    confirmButtonColor: '#ae1504',
                 });
+            @endif
+    });
+    </script>
+
+    <script>
+    $(document).ready(function() {
+    let currentPage = 1;
+    let lastPage = 1;
+    let isLoading = false;
+
+    // Load notifications on dropdown open
+    $('#notificationBtn').on('click', function() {
+        if ($('#notificationContent').children('.notification-item').length === 0) {
+            loadNotifications(1);
+        }
+    });
+
+    // Load notifications function
+    function loadNotifications(page = 1) {
+        if (isLoading) return;
+        
+        isLoading = true;
+        $('#notificationLoading').show();
+
+        $.ajax({
+            url: '{{ route("owner.user-owner.messages.notifications") }}',
+            method: 'GET',
+            data: { page: page },
+            success: function(response) {
+                if (response.success) {
+                    currentPage = response.pagination.current_page;
+                    lastPage = response.pagination.last_page;
+
+                    // Update badge
+                    updateBadge(response.unread_count);
+
+                    // Clear loading
+                    $('#notificationLoading').hide();
+
+                    if (response.messages.length === 0 && page === 1) {
+                        showEmptyState();
+                    } else {
+                        if (page === 1) {
+                            $('#notificationContent').empty();
+                        }
+                        renderNotifications(response.messages);
+                        
+                        // Show footer if there are messages
+                        $('#notificationDivider').show();
+                        $('#notificationFooter').show();
+                    }
+                }
+            },
+            error: function() {
+                $('#notificationLoading').hide();
+                toastr.error('Failed to load notifications');
+            },
+            complete: function() {
+                isLoading = false;
             }
         });
+    }
 
-        // Function untuk menampilkan alert verifikasi
-        function showVerificationAlert(event) {
-            event.preventDefault();
-            event.stopPropagation();
-
-            Swal.fire({
-                icon: 'warning',
-                title: '<strong>Akses Terbatas</strong>',
-                html: `
-                <div style="text-align: left; padding: 10px;">
-                    <p style="margin-bottom: 15px; color: #666;">
-                        <strong>Akun Anda belum diverifikasi oleh admin.</strong>
-                    </p>
-                    <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #ffc107;">
-                        <p style="margin: 0; color: #856404;">
-                            <i class="fas fa-info-circle"></i> 
-                            Anda tidak dapat mengakses fitur ini sampai proses verifikasi selesai.
-                        </p>
+    // Render notifications
+    function renderNotifications(messages) {
+        messages.forEach(function(message) {
+            const isRead = message.recipients && message.recipients.length > 0 && message.recipients[0].is_read;
+            const timeAgo = formatTimeAgo(message.created_at);
+            const messageUrl = '{{ route("owner.user-owner.messages.show", ":id") }}'.replace(':id', message.id);
+            
+            const notificationHtml = `
+                <a href="${messageUrl}" class="notification-item ${!isRead ? 'unread' : ''}" data-id="${message.id}" style="text-decoration: none; color: inherit; display: block;">
+                    <div class="d-flex">
+                        <div class="notification-icon mr-3">
+                            <span class="material-symbols-outlined">mail</span>
+                        </div>
+                        <div class="notification-content">
+                            <div class="notification-title">${message.title || 'No Title'}</div>
+                            <div class="notification-time">${timeAgo}</div>
+                        </div>
                     </div>
+                </a>
+            `;
+            
+            $('#notificationContent').append(notificationHtml);
+        });
+    }
 
-                </div>
-            `,
+    // Show empty state
+    function showEmptyState() {
+        const emptyHtml = `
+            <div class="notification-empty">
+                <span class="material-symbols-outlined">notifications_off</span>
+                <div style="font-size: 14px; font-weight: 500;">No notifications</div>
+                <div style="font-size: 12px; margin-top: 4px;">You're all caught up!</div>
+            </div>
+        `;
+        $('#notificationContent').html(emptyHtml);
+        $('#notificationDivider').hide();
+        $('#notificationFooter').hide();
+    }
 
-                customClass: {
-                    popup: 'rounded-2xl',
-                    cancelButton: 'rounded-2xl px-4'
+    // Update badge
+    function updateBadge(count) {
+        if (count > 0) {
+            $('#notificationBadge').text(count > 99 ? '99+' : count).show();
+            $('#markAllReadBtn').show();
+            $('#notificationTitle').text(`${count} Pesan belum terbaca`);
+        } else {
+            $('#notificationBadge').hide();
+            $('#markAllReadBtn').hide();
+            $('#notificationTitle').text('Pesan');
+        }
+    }
+
+    // Mark as read on click (sebelum redirect)
+    $(document).on('click', '.notification-item', function(e) {
+        const id = $(this).data('id');
+        const $item = $(this);
+        const url = $(this).attr('href');
+
+        if ($item.hasClass('unread')) {
+            e.preventDefault(); // Prevent immediate redirect
+            
+            $.ajax({
+                url: '{{ route("owner.user-owner.messages.mark-read", ":id") }}'.replace(':id', id),
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}'
                 },
-                allowOutsideClick: true,
-                showClass: {
-                    popup: 'animate__animated animate__fadeInDown animate__faster'
+                success: function(response) {
+                    if (response.success) {
+                        $item.removeClass('unread');
+                        updateBadge(response.unread_count);
+                        // Redirect after marking as read
+                        window.location.href = url;
+                    }
                 },
-                hideClass: {
-                    popup: 'animate__animated animate__fadeOutUp animate__faster'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = '{{ route('owner.user-owner.verification.index') }}';
+                error: function() {
+                    // Redirect even if marking failed
+                    window.location.href = url;
                 }
             });
-
-            return false;
         }
+        // If already read, let the link work normally
+    });
+
+    // Mark all as read
+    $('#markAllReadBtn').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        $.ajax({
+            url: '{{ route("owner.user-owner.messages.mark-all-read") }}',
+            method: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    $('.notification-item').removeClass('unread');
+                    updateBadge(0);
+                    toastr.success('All messages marked as read');
+                }
+            },
+            error: function() {
+                toastr.error('Failed to mark messages as read');
+            }
+        });
+    });
+
+    // Infinite scroll
+    $('.notification-dropdown').on('scroll', function() {
+        if (isLoading || currentPage >= lastPage) return;
+
+        const scrollTop = $(this).scrollTop();
+        const scrollHeight = $(this)[0].scrollHeight;
+        const clientHeight = $(this).height();
+
+        if (scrollTop + clientHeight >= scrollHeight - 50) {
+            loadNotifications(currentPage + 1);
+        }
+    });
+
+    // Helper function to format time ago
+    function formatTimeAgo(datetime) {
+        const now = new Date();
+        const past = new Date(datetime);
+        const diffInSeconds = Math.floor((now - past) / 1000);
+
+        if (diffInSeconds < 60) return 'Just now';
+        if (diffInSeconds < 3600) return Math.floor(diffInSeconds / 60) + ' minutes ago';
+        if (diffInSeconds < 86400) return Math.floor(diffInSeconds / 3600) + ' hours ago';
+        if (diffInSeconds < 604800) return Math.floor(diffInSeconds / 86400) + ' days ago';
+        
+        return past.toLocaleDateString();
+    }
+
+    // Helper function to strip HTML tags
+    function stripHtml(html) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        return tmp.textContent || tmp.innerText || '';
+    }
+
+    // Initial load badge count (on page load)
+    loadNotifications(1);
+});
     </script>
-    <style>
-        .sidebar-dark-primary .nav-sidebar>.nav-header {
-            color: #8c1000;
-        }
 
-        /* level 1 (Store) */
-        .nav-sidebar .nav-item {
-            background-color: #eae4e4;
-            color: #ffffff;
-        }
-
-        /* level 2 (Table Management) */
-        .nav-sidebar .nav-treeview>.nav-item {
-            background-color: #8c1000;
-            /* lebih terang */
-            color: #fff;
-            margin-left: 20px;
-            border-radius: 20px;
-        }
-
-        /* level 3 (Tables, Seat Layout) */
-        .nav-sidebar .nav-treeview .nav-treeview>.nav-item {
-            margin-left: 10px;
-        }
-
-        /* link active */
-
-        /* level 1 (Store) */
-        .nav-sidebar .nav-item>.nav-link.active {
-            background-color: #343a40;
-            /* abu tua */
-            color: #ffffff;
-        }
-
-        /* level 2 (Table Management) */
-        .nav-sidebar .nav-treeview>.nav-item>.nav-link.active {
-            background: linear-gradient(90deg, #bf0303, #620000);
-            /* lebih terang */
-            color: #ffffff;
-        }
-
-        .nav-sidebar .nav-treeview>.nav-item>.nav-link.active:hover {
-            color: #d79805;
-        }
-
-        /* level 3 (Tables, Seat Layout) */
-        .nav-sidebar .nav-treeview .nav-treeview>.nav-item>.nav-link.active {
-            background-color: #6e7d6c;
-            /* lebih cerah lagi */
-            color: #fff;
-        }
-
-        #toast-container>.toast {
-            border-radius: 10px;
-            box-shadow: var(--shadow);
-        }
-
-        #toast-container>.toast-success {
-            background-color: var(--choco);
-        }
-
-        .swal2-popup {
-            border-radius: 14px !important;
-        }
-
-        .swal2-confirm {
-            background: var(--choco) !important;
-            border: none !important;
-        }
-    </style>
 
     @yield('scripts')
     @yield('modal')
     @stack('scripts')
-
-    @if (session('success'))
-        <script>
-            $(function() {
-                toastr.success({!! json_encode(session('success')) !!});
-            });
-        </script>
-    @endif
-
-    @if (session('error'))
-        <script>
-            $(function() {
-                toastr.error({!! json_encode(session('error')) !!});
-            });
-        </script>
-    @endif
-    @if ($errors->any())
-        <script>
-            $(function() {
-                @foreach ($errors->all() as $err)
-                    toastr.error({!! json_encode($err) !!});
-                @endforeach
-            });
-        </script>
-    @endif
-    @if(session('swal_error'))
-        <script>
-        document.addEventListener('DOMContentLoaded', function () {
-        Swal.fire({
-            icon: 'warning',
-            title: @json(session('swal_error.title')),
-            text: @json(session('swal_error.text')),
-            confirmButtonColor: '#8c1000',
-        });
-        });
-        </script>
-    @endif
-
-</body>
-
-</html>

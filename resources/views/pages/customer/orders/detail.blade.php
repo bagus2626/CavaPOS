@@ -7,7 +7,7 @@
     $payment = $order->payment ?? null;
 @endphp
 <div class="max-w-3xl mx-auto px-4 py-8">
-    <div class="bg-white rounded-2xl shadow p-6 md:p-8 border-t-4 border-choco">
+    <div class="bg-white rounded-2xl shadow p-6 md:p-8 border-t-4 border-[#ae1504]">
         {{-- Header --}}
         <div class="flex items-start justify-between gap-4">
             <div>
@@ -186,7 +186,7 @@
                                 {{ __('messages.customer.orders.detail.please_continue_payment') }}
                             </p>
                             <a href="{{ $order->last_xendit_invoice->invoice_url }}"
-                                class="inline-flex items-center px-4 py-2 rounded-lg bg-choco text-sm text-white hover:bg-soft-choco">
+                                class="inline-flex items-center px-4 py-2 rounded-lg bg-[#ae1504] text-sm text-white hover:bg-[#8a1103]">
                                     {{ __('messages.customer.orders.detail.continue_payment') }}
                             </a>
                         </div>
@@ -294,7 +294,7 @@
                 <div class="relative">
                     <div class="absolute left-0 right-0 top-4 h-1 bg-gray-200 rounded-full z-0"></div>
 
-                    <div class="absolute left-0 top-4 h-1 bg-choco rounded-full z-0"
+                    <div class="absolute left-0 top-4 h-1 bg-[#ae1504] rounded-full z-0"
                         style="width: {{ $progressPercent }}%;"></div>
                     <div class="relative flex justify-between z-10">
                         @foreach ($steps as $index => $step)
@@ -307,7 +307,7 @@
                                 {{-- BULLET --}}
                                 <div class="w-8 h-8 rounded-full border-2 flex items-center justify-center overflow-hidden
                                     @if($isDone || $isActive)
-                                        bg-choco border-choco
+                                        bg-[#ae1504] border-[#ae1504]
                                     @else
                                         bg-white border-gray-300
                                     @endif
@@ -318,7 +318,7 @@
                                 </div>
                                 <p class="mt-2 text-[11px] font-semibold
                                     @if($isActive)
-                                        text-choco
+                                        text-[#ae1504]
                                     @elseif($isDone)
                                         text-gray-700
                                     @else
@@ -615,7 +615,7 @@
                             'table_code'         => $table_code,
                             'reorder_order_id'   => $order->id,
                         ]) }}"
-                class="inline-flex items-center px-4 py-2 rounded-lg border border-choco text-sm text-choco hover:bg-[#fee2e2]">
+                class="inline-flex items-center px-4 py-2 rounded-lg border border-[#ae1504] text-sm text-[#ae1504] hover:bg-[#fee2e2]">
                     {{ __('messages.customer.orders.detail.order_again') }}
             </a>
             @endif
@@ -632,3 +632,12 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    // Hapus cart dari localStorage jika order sudah dibayar
+    @if($order->order_status !== 'UNPAID')
+        localStorage.removeItem('menuCart');
+    @endif
+</script>
+@endpush

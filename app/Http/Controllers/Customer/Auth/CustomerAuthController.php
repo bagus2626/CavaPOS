@@ -122,7 +122,7 @@ class CustomerAuthController extends Controller
     {
         Auth::guard('customer')->logout();
 
-        $request->session()->invalidate();
+        // $request->session()->invalidate();
         $request->session()->regenerateToken();
 
         return redirect()->route('customer.login', compact('partner_slug', 'table_code'));
@@ -131,7 +131,7 @@ class CustomerAuthController extends Controller
     public function logoutSimple(Request $request)
     {
         Auth::guard('customer')->logout();
-        $request->session()->invalidate();
+        // $request->session()->invalidate();
         $request->session()->regenerateToken();
 
         // aman diarahkan ke home (atau halaman login customer umum jika ada)

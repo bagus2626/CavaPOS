@@ -18,11 +18,37 @@ class OwnerCategoryController extends Controller
     public function index()
     {
         $owner_id = Auth::id();
-        $categories = Category::where('owner_id', $owner_id)
+
+        // Ambil SEMUA categories (tanpa pagination di backend)
+        $allCategories = Category::where('owner_id', $owner_id)
             ->orderBy('category_order')
-            ->paginate(10);
-        // dd($categories);
-        return view('pages.owner.products.categories.index', compact('categories'));
+            ->get();
+
+        // Format data untuk JavaScript
+        $allCategoriesFormatted = $allCategories->map(function ($category) {
+            return [
+                'id' => $category->id,
+                'category_name' => $category->category_name,
+                'description' => $category->description,
+                'has_image' => $category->images && isset($category->images['path']),
+                'image_path' => $category->images && isset($category->images['path']) ? $category->images['path'] : null,
+            ];
+        });
+
+        // Simulasi pagination untuk compatibility dengan view
+        $perPage = 10;
+        $currentPage = request()->input('page', 1);
+        $offset = ($currentPage - 1) * $perPage;
+
+        $categories = new \Illuminate\Pagination\LengthAwarePaginator(
+            $allCategories->slice($offset, $perPage)->values(),
+            $allCategories->count(),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+
+        return view('pages.owner.products.categories.index', compact('categories', 'allCategoriesFormatted'));
     }
 
     public function create()
