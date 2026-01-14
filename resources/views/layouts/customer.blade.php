@@ -13,12 +13,12 @@
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
 </head>
-<body class="bg-gray-100 min-h-screen font-sans text-gray-800">
+<body class="bg-gray-100 font-sans text-gray-800 flex flex-col min-h-screen">
 
     {{-- Header --}}
-    <header class="bg-white shadow-md w-full relative">
+    {{-- <header class="bg-white shadow-md w-full relative">
 
-    </header>
+    </header> --}}
     {{-- Navbar --}}
     {{-- @include('partials.customer-navbar') --}}
     @include('partials.customer-navbar', [
@@ -27,16 +27,25 @@
     ])
 
     {{-- Main Content --}}
-    <main class="flex-1 flex flex-col justify-center items-center pt-16">
+    <main class="flex-1 flex flex-col @yield('main-justify', 'justify-center') items-center @yield('main-class', 'pt-[64px]')">
         @yield('content')
     </main>
 
     {{-- Footer --}}
-    <footer class="w-full bg-white  pt-8">
-        <div class="max-w-2xl mx-auto px-4 py-3 text-center text-sm text-gray-500">
-            &copy; {{ date('Y') }} {{ config('app.name', 'FoodBee') }}. All rights reserved.
+    <footer class="w-full bg-white border-t border-gray-200 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center">
+                <p class="text-sm text-gray-600 font-medium">
+                    &copy; {{ date('Y') }} 
+                    <span class="font-bold text-[#ae1504]">
+                        {{ config('app.name', 'FoodBee') }}.
+                    </span>
+                    <span class="text-sm text-gray-600 font-medium">All rights reserved.</span>
+                </p>
+            </div>
         </div>
     </footer>
+
 
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}"></script>

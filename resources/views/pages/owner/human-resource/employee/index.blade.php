@@ -4,432 +4,400 @@
 @section('page_title', __('messages.owner.user_management.employees.all_employees'))
 
 @section('content')
-  <section class="content owner-emp">
-    <div class="container-fluid">
-      @php
-        $currentPartnerId = $currentPartnerId ?? request('partner_id');
-      @endphp
-
-      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <a href="{{ route('owner.user-owner.employees.create') }}" class="btn btn-choco btn-pill">
-          <i class="fas fa-user-plus mr-2"></i> {{ __('messages.owner.user_management.employees.add_employee') }}
-        </a>
-
-        <div class="filter-bar mb-3">
-          {{-- ALL --}}
-          <a href="{{ route('owner.user-owner.employees.index') }}"
-            class="btn filter-btn rounded-pill {{ $currentPartnerId ? '' : 'active' }}">
-            {{ __('messages.owner.user_management.employees.all') }}
-          </a>
-
-          {{-- PER OUTLET --}}
-          @foreach($partners as $partner)
-            <a href="{{ route('owner.user-owner.employees.index', ['partner_id' => $partner->id]) }}"
-              class="btn filter-btn rounded-pill {{ (int) $currentPartnerId === (int) $partner->id ? 'active' : '' }}">
-              {{ $partner->name }}
-            </a>
-          @endforeach
+  <div class="modern-container">
+    <div class="container-modern">
+      <div class="page-header">
+        <div class="header-content">
+          <h1 class="page-title">{{ __('messages.owner.user_management.employees.all_employees') }}</h1>
+          <p class="page-subtitle">{{ __('messages.owner.user_management.employees.manage_team_subtitle') }}</p>
         </div>
       </div>
 
-
-      @if(session('success'))
-        <div class="alert alert-success brand-alert">{{ session('success') }}</div>
+      @if (session('success'))
+        <div class="alert alert-success alert-modern">
+          <div class="alert-icon">
+            <span class="material-symbols-outlined">check_circle</span>
+          </div>
+          <div class="alert-content">
+            {{ session('success') }}
+          </div>
+        </div>
       @endif
 
-      {{-- tabel karyawan --}}
-      <div class="owner-emp-table">
-        @include('pages.owner.human-resource.employee.display')
+      @if (session('error'))
+        <div class="alert alert-danger alert-modern">
+          <div class="alert-icon">
+            <span class="material-symbols-outlined">error</span>
+          </div>
+          <div class="alert-content">
+            {{ session('error') }}
+          </div>
+        </div>
+      @endif
+
+      <div class="modern-card mb-4">
+        <div class="card-body-modern" style="padding: var(--spacing-lg) var(--spacing-xl);">
+          <div class="table-controls">
+            <div class="search-filter-group">
+              <div class="input-wrapper" style="flex: 1; max-width: 400px;">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">search</span>
+                </span>
+                <input type="text" id="searchInput" class="form-control-modern with-icon"
+                  placeholder="{{ __('messages.owner.user_management.employees.search_placeholder') }}">
+              </div>
+
+              <div class="select-wrapper" style="min-width: 200px;">
+                <select id="outletFilter" class="form-control-modern">
+                  <option value="">{{ __('messages.owner.user_management.employees.all_outlets') }}</option>
+                  @foreach($employees->pluck('partner')->unique('id') as $partner)
+                    <option value="{{ $partner->id }}">{{ $partner->name }}</option>
+                  @endforeach
+                </select>
+                <span class="material-symbols-outlined select-arrow">expand_more</span>
+              </div>
+            </div>
+
+            <a href="{{ route('owner.user-owner.employees.create') }}" class="btn-modern btn-primary-modern">
+              <span class="material-symbols-outlined">add</span>
+              {{ __('messages.owner.user_management.employees.add_employee') }}
+            </a>
+          </div>
+        </div>
       </div>
 
-      {{-- Pagination Links --}}
-      <div class="d-flex justify-content-between align-items-center">
-        <div class="text-muted small">
-          Showing {{ $employees->firstItem() ?? 0 }} to {{ $employees->lastItem() ?? 0 }} of {{ $employees->total() }}
-          entries
-        </div>
-        <div>
-          {{ $employees->links() }}
-        </div>
-      </div>
+      @include('pages.owner.human-resource.employee.display')
+
     </div>
-  </section>
-
-  <style>
-    /* ==== Owner › Employee Index (page scope) ==== */
-    :root {
-      /* fallback jika layout belum define */
-      --choco: #8c1000;
-      --soft-choco: #c12814;
-      --ink: #22272b;
-      --paper: #f7f7f8;
-      --radius: 12px;
-      --shadow: 0 6px 20px rgba(0, 0, 0, .08);
-    }
-
-    /* Util */
-    .btn-pill {
-      border-radius: 999px;
-    }
-
-    .fw-600 {
-      font-weight: 600;
-    }
-
-    /* Brand buttons (fallback) */
-    .btn-choco {
-      background: var(--choco);
-      border-color: var(--choco);
-      color: #fff;
-    }
-
-    .btn-choco:hover {
-      background: var(--soft-choco);
-      border-color: var(--soft-choco);
-      color: #fff;
-    }
-
-    .btn-outline-choco {
-      color: var(--choco);
-      border-color: var(--choco);
-      background: #fff;
-    }
-
-    .btn-outline-choco:hover {
-      color: #fff;
-      background: var(--choco);
-      border-color: var(--choco);
-    }
-
-    /* Alert yang selaras tema */
-    .brand-alert {
-      border-left: 4px solid var(--choco);
-      border-radius: 10px;
-    }
-
-    /* ===== Filter bar ===== */
-    .owner-emp .filter-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: .4rem;
-    }
-
-    .owner-emp .filter-btn {
-      border: 1px solid #e5e7eb;
-      color: #374151;
-      background: #fff;
-      padding: .35rem .8rem;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
-      transition: .15s ease;
-    }
-
-    .owner-emp .filter-btn:hover {
-      transform: translateY(-1px);
-    }
-
-    .owner-emp .filter-btn.active {
-      background: var(--choco);
-      color: #fff;
-      border-color: var(--choco);
-      box-shadow: 0 8px 24px rgba(140, 16, 0, .20);
-    }
-
-    /* ===== Table polish (scoped) ===== */
-    .owner-emp-table .table {
-      border-collapse: separate;
-      border-spacing: 0;
-      background: #fff;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: var(--shadow);
-    }
-
-    .owner-emp-table thead th {
-      background: #fff;
-      border-bottom: 2px solid #eef1f4 !important;
-      color: #374151;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .owner-emp-table tbody td {
-      vertical-align: middle;
-    }
-
-    .owner-emp-table tbody tr {
-      transition: background-color .12s ease;
-    }
-
-    .owner-emp-table tbody tr:hover {
-      background: rgba(140, 16, 0, .04);
-    }
-
-    /* Avatar/picture kecil dalam tabel (jika ada) */
-    .owner-emp-table td img {
-      width: 42px;
-      height: 42px;
-      object-fit: cover;
-      border-radius: 10px;
-      border: 0;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, .08);
-    }
-
-    /* Status badge yang lembut (optional, kalau pakai badge default tetap bagus) */
-    .badge-soft-success {
-      background: #ecfdf5;
-      color: #065f46;
-      border: 1px solid #a7f3d0;
-      border-radius: 999px;
-      font-weight: 600;
-    }
-
-    .badge-soft-secondary {
-      background: #f3f4f6;
-      color: #374151;
-      border: 1px solid #e5e7eb;
-      border-radius: 999px;
-      font-weight: 600;
-    }
-
-    /* Action buttons kecil di tabel */
-    .owner-emp-table .btn-group-sm .btn {
-      border-radius: 10px;
-      padding: .25rem .55rem;
-    }
-
-    .owner-emp-table .btn-soft-danger {
-      background: #fee2e2;
-      color: #991b1b;
-      border-color: #fecaca;
-    }
-
-    .owner-emp-table .btn-soft-danger:hover {
-      background: #fecaca;
-      color: #7f1d1d;
-      border-color: #fca5a5;
-    }
-
-    /* Empty state row */
-    .owner-emp-table .empty-row td {
-      background: #fff;
-      color: #6b7280;
-    }
-
-    /* ==== Spacing antara filter bar dan tabel ==== */
-    .owner-emp .filter-bar {
-      margin-bottom: 1.5rem !important;
-    }
-
-    /* ==== Desktop Layout Fix ==== */
-    @media (min-width: 769px) {
-      .owner-emp .d-flex.justify-content-between {
-        align-items: flex-start !important;
-        gap: 1.5rem;
-        margin-bottom: 1.5rem;
-      }
-
-      /* Tombol Add Employee tetap di kiri */
-      .owner-emp .btn-choco.btn-pill {
-        flex-shrink: 0;
-        white-space: nowrap;
-      }
-
-      /* Filter bar di kanan dengan wrap */
-      .owner-emp .filter-bar {
-        flex: 1;
-        justify-content: flex-end;
-        margin-bottom: 1.5rem !important;
-      }
-    }
-
-    /* ==== Responsive Mobile Fix ==== */
-    @media (max-width: 768px) {
-
-      /* Container utama */
-      .owner-emp .d-flex.justify-content-between {
-        flex-direction: column;
-        gap: 1rem;
-        margin-bottom: 1rem;
-      }
-
-      /* Tombol Add Employee */
-      .owner-emp .btn-choco.btn-pill {
-        width: 100%;
-        justify-content: center;
-        margin-bottom: 0.5rem;
-      }
-
-      /* Filter bar wrapper */
-      .owner-emp .filter-bar {
-        width: 100%;
-        gap: 0.5rem;
-        margin-bottom: 1.5rem !important;
-      }
-
-      /* Filter buttons */
-      .owner-emp .filter-btn {
-        flex: 1 1 auto;
-        min-width: fit-content;
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
-        text-align: center;
-      }
-
-      /* Table responsive */
-      .owner-emp-table {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-      }
-
-      .owner-emp-table .table {
-        min-width: 600px;
-      }
-
-      /* Pagination mobile */
-      .owner-emp__pagination .pagination {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 0.25rem;
-      }
-
-      .owner-emp__pagination .page-item .page-link {
-        padding: 0.4rem 0.65rem;
-        font-size: 0.8rem;
-      }
-    }
-
-    /* ==== Extra small devices ==== */
-    @media (max-width: 576px) {
-      .owner-emp .filter-btn {
-        font-size: 0.8rem;
-        padding: 0.45rem 0.85rem;
-      }
-
-      .owner-emp-table thead th {
-        font-size: 0.85rem;
-        padding: 0.75rem 0.5rem;
-      }
-
-      .owner-emp-table tbody td {
-        font-size: 0.85rem;
-        padding: 0.75rem 0.5rem;
-      }
-    }
-
-    :root {
-      --choco: #8c1000;
-      --soft-choco: #c12814;
-      --ink: #22272b;
-      --paper: #f7f7f8;
-      --radius: 12px;
-      --shadow: 0 6px 20px rgba(0, 0, 0, .08);
-    }
-
-    /* ==== Filter buttons (choco style) ==== */
-    .owner-emp .filter-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: .4rem;
-    }
-
-    .owner-emp .filter-btn {
-      border: 1px solid #e5e7eb;
-      color: #374151;
-      background: #fff;
-      padding: .35rem .85rem;
-      font-weight: 600;
-      font-size: .85rem;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
-      transition: .15s ease;
-    }
-
-    .owner-emp .filter-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, .08);
-    }
-
-    .owner-emp .filter-btn.active {
-      background: var(--choco);
-      color: #fff;
-      border-color: var(--choco);
-      box-shadow: 0 8px 24px rgba(140, 16, 0, .20);
-    }
-
-    /* Custom Pagination Style */
-    .pagination {
-      margin-bottom: 1rem;
-    }
-
-    .page-link {
-      color: var(--choco);
-      border-color: #dee2e6;
-    }
-
-    .page-link:hover {
-      color: #6b0d00;
-      background-color: #f8f9fa;
-      border-color: #dee2e6;
-    }
-
-    .page-item.active .page-link {
-      background-color: var(--choco);
-      border-color: var(--choco);
-      color: white;
-    }
-
-    .page-item.disabled .page-link {
-      color: #6c757d;
-      pointer-events: none;
-      background-color: #fff;
-      border-color: #dee2e6;
-    }
-  </style>
-
-
-  </style>
+  </div>
 @endsection
 
 @push('scripts')
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
+    // ==========================================
+    // EMPLOYEE INDEX - SEARCH & FILTER (NO RELOAD)
+    // ==========================================
     document.addEventListener('DOMContentLoaded', function () {
-      const filterButtons = document.querySelectorAll('.filter-btn');
+      const searchInput = document.getElementById('searchInput');
+      const outletFilter = document.getElementById('outletFilter');
+      const tableBody = document.getElementById('employeeTableBody');
+      const paginationWrapper = document.querySelector('.table-pagination');
 
-      filterButtons.forEach(button => {
-        button.addEventListener('click', function () {
-          const categoryId = this.getAttribute('data-category');
+      if (!tableBody) {
+        console.error('Table body not found');
+        return;
+      }
 
-          // toggle active
-          filterButtons.forEach(btn => btn.classList.remove('active'));
-          this.classList.add('active');
+      // Ambil semua data dari Blade
+      const allEmployeesData = @json($allEmployeesFormatted ?? []);
+      
+      let filteredEmployees = [...allEmployeesData];
+      const itemsPerPage = 10;
+      let currentPage = 1;
 
-          const tableBody = document.querySelector('tbody');
-          const tableRows = document.querySelectorAll('tbody tr');
-          let visibleCount = 0;
+      // ==========================================
+      // FILTER FUNCTION
+      // ==========================================
+      function filterEmployees() {
+        const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        const selectedOutlet = outletFilter ? outletFilter.value.trim() : '';
 
-          tableRows.forEach(row => {
-            if (categoryId === 'all' || row.getAttribute('data-category') === categoryId) {
-              row.style.display = '';
-              visibleCount++;
-              const firstCell = row.querySelector('td');
-              if (firstCell) firstCell.textContent = visibleCount;
+        filteredEmployees = allEmployeesData.filter(employee => {
+          // Search: cari di name, username, email, role, partner
+          const searchText = `
+            ${employee.name || ''} 
+            ${employee.user_name || ''} 
+            ${employee.email || ''} 
+            ${employee.role || ''}
+            ${employee.partner_name || ''}
+          `.toLowerCase();
+          
+          const matchesSearch = !searchTerm || searchText.includes(searchTerm);
+
+          // Outlet filter
+          const matchesOutlet = !selectedOutlet || employee.partner_id == selectedOutlet;
+
+          return matchesSearch && matchesOutlet;
+        });
+
+        currentPage = 1; // Reset ke halaman pertama
+        renderTable();
+      }
+
+      // ==========================================
+      // RENDER TABLE
+      // ==========================================
+      function renderTable() {
+        // Hitung pagination
+        const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const currentEmployees = filteredEmployees.slice(startIndex, endIndex);
+
+        // Clear table
+        tableBody.innerHTML = '';
+
+        // Render rows
+        if (currentEmployees.length === 0) {
+          tableBody.innerHTML = `
+            <tr class="empty-filter-row">
+              <td colspan="8" class="text-center">
+                <div class="table-empty-state">
+                  <span class="material-symbols-outlined" style="font-size: 4rem; color: #ccc; display: block; margin-bottom: 1rem;">search_off</span>
+                  <h4 style="margin: 0 0 0.5rem 0; color: #666; font-size: 1.25rem;">{{ __('messages.owner.user_management.employees.no_results') }}</h4>
+                  <p style="margin: 0; color: #999;">{{ __('messages.owner.user_management.employees.adjust_filter') }}</p>
+                </div>
+              </td>
+            </tr>
+          `;
+        } else {
+          currentEmployees.forEach((employee, index) => {
+            const rowNumber = startIndex + index + 1;
+            const row = createEmployeeRow(employee, rowNumber);
+            tableBody.appendChild(row);
+          });
+        }
+
+        // Handle pagination visibility
+        if (paginationWrapper) {
+          if (filteredEmployees.length <= itemsPerPage) {
+            paginationWrapper.style.display = 'none';
+          } else {
+            paginationWrapper.style.display = '';
+            renderPagination(totalPages);
+          }
+        }
+      }
+
+      // ==========================================
+      // CREATE EMPLOYEE ROW
+      // ==========================================
+      function createEmployeeRow(employee, rowNumber) {
+        const tr = document.createElement('tr');
+        tr.className = 'table-row';
+        tr.setAttribute('data-outlet', employee.partner_id || '');
+
+        // Format image
+        let imageHtml = '';
+        if (employee.image) {
+          const imgSrc = employee.image.startsWith('http://') || employee.image.startsWith('https://')
+            ? employee.image
+            : `{{ asset('storage/') }}/${employee.image}`;
+          imageHtml = `<img src="${imgSrc}" alt="${employee.name}" class="user-avatar" loading="lazy">`;
+        } else {
+          imageHtml = `
+            <div class="user-avatar-placeholder">
+              <span class="material-symbols-outlined">person</span>
+            </div>
+          `;
+        }
+
+        // Format status badge
+        let statusBadge = '';
+        // Check berbagai format nilai is_active (boolean, int, string)
+        if (employee.is_active === 1 || employee.is_active === '1' || employee.is_active === true) {
+          statusBadge = '<span class="badge-modern badge-success">{{ __("messages.owner.user_management.employees.active") }}</span>';
+        } else {
+          statusBadge = '<span class="badge-modern badge-danger">{{ __("messages.owner.user_management.employees.non_active") }}</span>';
+        }
+
+        // URLs
+        const showUrl = `/owner/user-owner/employees/${employee.id}`;
+        const editUrl = `/owner/user-owner/employees/${employee.id}/edit`;
+
+        tr.innerHTML = `
+          <td class="text-center text-muted">${rowNumber}</td>
+          <td>
+            <div class="user-info-cell">
+              ${imageHtml}
+              <span class="data-name">${employee.name || '-'}</span>
+            </div>
+          </td>
+          <td>
+            <div class="cell-with-icon">
+              <span class="fw-600">${employee.partner_name || '-'}</span>
+            </div>
+          </td>
+          <td>
+            <span class="text-secondary">${employee.user_name || '-'}</span>
+          </td>
+          <td>
+            <a href="mailto:${employee.email}" class="table-link">
+              ${employee.email || '-'}
+            </a>
+          </td>
+          <td>
+            <span class="badge-modern badge-info">
+              ${employee.role || '-'}
+            </span>
+          </td>
+          <td class="text-center">
+            ${statusBadge}
+          </td>
+          <td class="text-center">
+            <div class="table-actions">
+              <a href="${showUrl}" class="btn-table-action view" title="{{ __('messages.owner.user_management.employees.view_details') }}">
+                <span class="material-symbols-outlined">visibility</span>
+              </a>
+              <a href="${editUrl}" class="btn-table-action edit" title="{{ __('messages.owner.user_management.employees.edit') }}">
+                <span class="material-symbols-outlined">edit</span>
+              </a>
+              <button onclick="deleteEmployee(${employee.id})" class="btn-table-action delete" title="{{ __('messages.owner.user_management.employees.delete') }}">
+                <span class="material-symbols-outlined">delete</span>
+              </button>
+            </div>
+          </td>
+        `;
+
+        return tr;
+      }
+
+      // ==========================================
+      // RENDER PAGINATION
+      // ==========================================
+      function renderPagination(totalPages) {
+        if (!paginationWrapper) return;
+
+        paginationWrapper.innerHTML = '';
+
+        const nav = document.createElement('nav');
+        nav.setAttribute('role', 'navigation');
+        nav.setAttribute('aria-label', 'Pagination Navigation');
+        
+        const ul = document.createElement('ul');
+        ul.className = 'pagination';
+
+        // Previous Button
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+        
+        if (currentPage === 1) {
+          prevLi.innerHTML = `
+            <span class="page-link" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
+              </svg>
+            </span>
+          `;
+        } else {
+          prevLi.innerHTML = `
+            <a href="#" class="page-link" data-page="${currentPage - 1}" aria-label="Previous">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
+              </svg>
+            </a>
+          `;
+        }
+        ul.appendChild(prevLi);
+
+        // Page Numbers
+        for (let i = 1; i <= totalPages; i++) {
+          if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+            const pageLi = document.createElement('li');
+            pageLi.className = `page-item ${i === currentPage ? 'active' : ''}`;
+            
+            if (i === currentPage) {
+              pageLi.innerHTML = `<span class="page-link" aria-current="page">${i}</span>`;
             } else {
-              row.style.display = 'none';
+              pageLi.innerHTML = `<a href="#" class="page-link" data-page="${i}">${i}</a>`;
+            }
+            
+            ul.appendChild(pageLi);
+          } else if (i === currentPage - 2 || i === currentPage + 2) {
+            const dotsLi = document.createElement('li');
+            dotsLi.className = 'page-item disabled';
+            dotsLi.innerHTML = `<span class="page-link">...</span>`;
+            ul.appendChild(dotsLi);
+          }
+        }
+
+        // Next Button
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+        
+        if (currentPage === totalPages) {
+          nextLi.innerHTML = `
+            <span class="page-link" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
+              </svg>
+            </span>
+          `;
+        } else {
+          nextLi.innerHTML = `
+            <a href="#" class="page-link" data-page="${currentPage + 1}" aria-label="Next">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
+              </svg>
+            </a>
+          `;
+        }
+        ul.appendChild(nextLi);
+
+        nav.appendChild(ul);
+        paginationWrapper.appendChild(nav);
+
+        // Add click handlers
+        nav.querySelectorAll('a.page-link[data-page]').forEach(link => {
+          link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const page = parseInt(this.dataset.page);
+            if (page > 0 && page <= totalPages && page !== currentPage) {
+              currentPage = page;
+              renderTable();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
             }
           });
-
-          // bersihkan row kosong lama
-          const emptyRow = tableBody.querySelector('.empty-row');
-          if (emptyRow) emptyRow.remove();
-
-          if (visibleCount === 0) {
-            const tr = document.createElement('tr');
-            tr.classList.add('empty-row');
-            tr.innerHTML = `<td colspan="9" class="text-center text-muted py-4">Data tidak ditemukan</td>`;
-            tableBody.appendChild(tr);
-          }
         });
-      });
+      }
+
+      // ==========================================
+      // EVENT LISTENERS
+      // ==========================================
+      if (searchInput) {
+        searchInput.addEventListener('input', filterEmployees);
+      }
+
+      if (outletFilter) {
+        outletFilter.addEventListener('change', filterEmployees);
+      }
+
+      // ==========================================
+      // INITIALIZE
+      // ==========================================
+      renderTable();
     });
+
+    // ==========================================
+    // DELETE EMPLOYEE FUNCTION
+    // ==========================================
+    function deleteEmployee(employeeId) {
+      Swal.fire({
+        title: '{{ __('messages.owner.user_management.employees.delete_confirmation_1') }}',
+        text: '{{ __('messages.owner.user_management.employees.delete_confirmation_2') }}',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ae1504',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '{{ __('messages.owner.user_management.employees.delete_confirmation_3') }}',
+        cancelButtonText: '{{ __('messages.owner.user_management.employees.cancel') }}'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = `/owner/user-owner/employees/${employeeId}`;
+          form.style.display = 'none';
+
+          form.innerHTML = `
+            @csrf
+            <input type="hidden" name="_method" value="DELETE">
+          `;
+
+          document.body.appendChild(form);
+          form.submit();
+        }
+      });
+    }
   </script>
 @endpush

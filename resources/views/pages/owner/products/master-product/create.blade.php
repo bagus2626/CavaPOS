@@ -4,363 +4,479 @@
 @section('page_title', __('messages.owner.products.master_products.create_new_master_product'))
 
 @section('content')
-<section class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <a href="{{ route('owner.user-owner.master-products.index') }}" class="btn bg-choco text-white mb-3">
-                    <i class="fas fa-arrow-left mr-2"></i>{{ __('messages.owner.products.master_products.back_to_products') }}
+    <div class="modern-container">
+        <div class="container-modern">
+            <div class="page-header">
+
+                <div class="header-content">
+                    <h1 class="page-title">{{ __('messages.owner.products.master_products.create_new_master_product') }}
+                    </h1>
+                    <p class="page-subtitle">{{ __('messages.owner.products.master_products.add_product_subtitle') }}</p>
+                </div>
+                <a href="{{ route('owner.user-owner.master-products.index') }}" class="back-button">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    {{ __('messages.owner.products.master_products.back') }}
                 </a>
+            </div>
 
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">{{ __('messages.owner.products.master_products.product_information') }}</h3>
-                        <div class="card-tools">
+            @if ($errors->any())
+                <div class="alert alert-danger alert-modern">
+                    <div class="alert-icon">
+                        <span class="material-symbols-outlined">error</span>
+                    </div>
+                    <div class="alert-content">
+                        <strong>{{ __('messages.owner.user_management.employees.recheck_input') }}:</strong>
+                        <ul class="mb-0 mt-2">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            @endif
 
+            @if (session('success'))
+                <div class="alert alert-success alert-modern">
+                    <div class="alert-icon">
+                        <span class="material-symbols-outlined">check_circle</span>
+                    </div>
+                    <div class="alert-content">
+                        {{ session('success') }}
+                    </div>
+                </div>
+            @endif
+
+            <div class="modern-card">
+                <form action="{{ route('owner.user-owner.master-products.store') }}" method="POST"
+                    enctype="multipart/form-data" id="productForm">
+                    @csrf
+                    <div class="card-body-modern">
+
+                        <div class="profile-section">
+                            <div class="profile-picture-wrapper">
+                                <div class="profile-picture-container" id="productImageContainer">
+                                    <div class="upload-placeholder" id="uploadPlaceholder">
+                                        <span class="material-symbols-outlined">image</span>
+                                        <span class="upload-text">{{ __('messages.owner.products.master_products.upload_text') }}</span>
+                                    </div>
+                                    <img id="imagePreview" class="profile-preview" alt="Product Preview">
+                                    <button type="button" id="removeImageBtn" class="btn-remove btn-remove-top" style="display: none;">
+                                        <span class="material-symbols-outlined">close</span>
+                                    </button>                                    
+                                </div>
+                                <input type="file" name="images[]" id="productImage" accept="image/*" style="display: none;"
+                                    required>
+                                <small class="text-muted d-block text-center mt-2">{{ __('messages.owner.products.master_products.image_upload_help') }}</small>
+                                @error('images')
+                                    <div class="text-danger text-center mt-1 small">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="personal-info-fields">
+                                <div class="section-header">
+                                    <div class="section-icon section-icon-red">
+                                        <span class="material-symbols-outlined">inventory_2</span>
+                                    </div>
+                                    <h3 class="section-title">
+                                        {{ __('messages.owner.products.master_products.product_information') }}
+                                    </h3>
+                                </div>
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                {{ __('messages.owner.products.master_products.product_name') }}
+                                                <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="text" name="name" id="name"
+                                                class="form-control-modern @error('name') is-invalid @enderror"
+                                                value="{{ old('name') }}"
+                                                placeholder="{{ __('messages.owner.products.master_products.product_name_placeholder') }}"
+                                                required>
+                                            @error('name')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                {{ __('messages.owner.products.master_products.category') }}
+                                                <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="select-wrapper">
+                                                <select name="product_category" id="product_category"
+                                                    class="form-control-modern @error('product_category') is-invalid @enderror"
+                                                    required>
+                                                    <option value="">
+                                                        {{ __('messages.owner.products.master_products.select_category') }}
+                                                    </option>
+                                                    @foreach($categories as $category)
+                                                        <option value="{{ $category->id }}" {{ old('product_category') == $category->id ? 'selected' : '' }}>
+                                                            {{ $category->category_name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                <span class="material-symbols-outlined select-arrow">expand_more</span>
+                                            </div>
+                                            @error('product_category')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                {{ __('messages.owner.products.master_products.price') }}
+                                                <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="input-wrapper">
+                                                <p class="input-icon">Rp</p>
+                                                <input type="text" name="price" id="price"
+                                                    class="form-control-modern with-icon @error('price') is-invalid @enderror"
+                                                    value="{{ old('price') }}"
+                                                    placeholder="{{ __('messages.owner.products.master_products.product_price_placeholder') }}"
+                                                    required>
+                                            </div>
+                                            @error('price')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                {{ __('messages.owner.products.master_products.promo') }}
+                                            </label>
+                                            <div class="select-wrapper">
+                                                <select name="promotion_id" id="promotion_id"
+                                                    class="form-control-modern @error('promotion_id') is-invalid @enderror">
+                                                    <option value="">
+                                                        {{ __('messages.owner.products.master_products.select_promotion') }}
+                                                    </option>
+                                                    @foreach($promotions as $promotion)
+                                                        <option value="{{ $promotion->id }}" {{ old('promotion_id') == $promotion->id ? 'selected' : '' }}>
+                                                            {{ $promotion->promotion_name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                <span class="material-symbols-outlined select-arrow">expand_more</span>
+                                            </div>
+                                            @error('promotion_id')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                {{ __('messages.owner.products.master_products.description') }}
+                                            </label>
+                                            <textarea name="description" id="description"
+                                                class="form-control-modern @error('description') is-invalid @enderror"
+                                                rows="4"
+                                                placeholder="{{ __('messages.owner.products.master_products.product_description_placeholder') }}">{{ old('description') }}</textarea>
+                                            @error('description')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-divider"></div>
+
+                        <div class="section-header-with-action">
+                            <div class="section-header">
+                                <div class="section-icon section-icon-red">
+                                    <span class="material-symbols-outlined">restaurant_menu</span>
+                                </div>
+                                <h3 class="section-title">{{ __('messages.owner.products.master_products.options') }}</h3>
+                            </div>
+                            <button type="button" class="btn-modern btn-secondary-modern btn-sm-modern"
+                                onclick="addMenuOption()">
+                                <span class="material-symbols-outlined">add</span>
+                                {{ __('messages.owner.products.master_products.add_menu_option') }}
+                            </button>
+                        </div>
+
+                        <div id="menu-options-container" class="menu-options-container">
+                            </div>
+                    </div>
+                    
+                    <div class="card-footer-modern">
+                        <button type="button" class="btn-cancel-modern"
+                            onclick="window.location.href='{{ route('owner.user-owner.master-products.index') }}'">
+                            {{ __('messages.owner.products.master_products.cancel') }}
+                        </button>
+                        <button type="submit" class="btn-submit-modern">
+                            {{ __('messages.owner.products.master_products.create_product') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="modal fade" id="cropModal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                <div class="modal-content modern-modal">
+                    <div class="modal-header modern-modal-header">
+                        <h5 class="modal-title">
+                            <span class="material-symbols-outlined">crop</span>
+                            {{ __('messages.owner.products.master_products.crop_modal_title') }}
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="alert alert-info alert-modern mb-3">
+                            <div class="alert-icon">
+                                <span class="material-symbols-outlined">info</span>
+                            </div>
+                            <div class="alert-content">
+                                <small>{{ __('messages.owner.products.master_products.crop_modal_instruction') }}</small>
+                            </div>
+                        </div>
+                        <div class="img-container-crop">
+                            <img id="imageToCrop" style="max-width: 100%;" alt="Image to crop">
                         </div>
                     </div>
-
-                    <form action="{{ route('owner.user-owner.master-products.store') }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <div class="card-body">
-                            <!-- Basic Product Info -->
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>{{ __('messages.owner.products.master_products.product_name') }}</label>
-                                        <input type="text" name="name" class="form-control" placeholder="{{ __('messages.owner.products.master_products.product_name_placeholder') }}" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>{{ __('messages.owner.products.master_products.category') }}</label>
-                                        <select class="form-control" name="product_category" id="product_category" required>
-                                            <option value="">{{ __('messages.owner.products.master_products.select_category') }}</option>
-                                            @foreach($categories as $category)
-                                                <option value="{{ $category->id }}">{{ $category->category_name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                {{-- <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>Quantity</label>
-                                        <div class="input-group">
-                                            <input type="number" id="quantity" name="quantity" class="form-control text-center" value="0" min="0" required>
-                                            <button type="button" class="btn btn-outline-secondary ml-1" onclick="decreaseQuantity()">-</button>
-                                            <button type="button" class="btn btn-outline-secondary ml-1" onclick="increaseQuantity()">+</button>
-                                            <button type="button" class="btn btn-outline-secondary ml-1" onclick="maxQuantity('quantity')">Max</button>
-                                        </div>
-                                    </div>
-                                </div> --}}
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>{{ __('messages.owner.products.master_products.price') }}</label>
-                                        <div class="input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text">Rp.</span>
-                                            </div>
-                                            <input type="text" id="price" name="price" class="form-control" placeholder="{{ __('messages.owner.products.master_products.product_price_placeholder') }}" required>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>{{ __('messages.owner.products.master_products.promo') }}</label>
-                                        <select class="form-control" name="promotion_id" id="promotion_id">
-                                            <option value="">{{ __('messages.owner.products.master_products.select_promotion') }}</option>
-                                            @foreach($promotions as $promotion)
-                                                <option value="{{ $promotion->id }}">{{ $promotion->promotion_name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>{{ __('messages.owner.products.master_products.product_images_max') }}</label>
-                                        <input type="file" id="images" name="images[]" class="form-control" accept="image/*" multiple required>
-                                        <small class="text-muted">{{ __('messages.owner.products.master_products.can_upload_to_5') }}</small>
-                                    </div>
-
-                                    <!-- Preview -->
-                                    <div id="image-preview" class="d-flex flex-wrap mt-2"></div>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label>{{ __('messages.owner.products.master_products.description') }}</label>
-                                {{-- class summernote untuk html text editor --}}
-                                <textarea name="description" class="form-control" rows="3" placeholder="{{ __('messages.owner.products.master_products.product_description_placeholder') }}"></textarea>
-                            </div>
-
-                            <hr>
-
-                            <div class="row" id="menu-options-container">
-                                <!-- Dynamic option forms will be added here -->
-                            </div>
-
-                            <!-- Options -->
-                            <h4 class="mb-3 d-flex justify-content-between align-items-center">
-                                {{ __('messages.owner.products.master_products.options') }}
-                                <button type="button" class="btn btn-sm btn-primary" onclick="addMenuOption()">
-                                    + {{ __('messages.owner.products.master_products.add_menu_option') }}
-                                </button>
-                            </h4>
-
-
-                        </div>
-
-                        <div class="card-footer text-right">
-                            <button type="reset" class="btn btn-outline-secondary mr-2">
-                                <i class="fas fa-undo mr-1"></i>{{ __('messages.owner.products.master_products.reset') }}
-                            </button>
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-save mr-1"></i>{{ __('messages.owner.products.master_products.create_product') }}
-                            </button>
-                        </div>
-                    </form>
+                    <div class="modal-footer modern-modal-footer">
+                        <button type="button" class="btn-cancel-modern" data-dismiss="modal">
+                            <span class="material-symbols-outlined">close</span>
+                            {{ __('messages.owner.products.master_products.cancel') }}
+                        </button>
+                        <button type="button" id="cropBtn" class="btn-submit-modern">
+                            <span class="material-symbols-outlined">check</span>
+                            {{ __('messages.owner.products.master_products.crop_save_btn') }}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</section>
 @endsection
 
-@section('scripts')
+@push('scripts')
+
 <script>
-    function decreaseQuantity() {
-        let input = document.getElementById("quantity");
-        let value = parseInt(input.value) || 0;
-        if (value > 0) {
-            input.value = value - 1;
-        }
-    }
+    document.addEventListener('DOMContentLoaded', function () {
 
-    function increaseQuantity() {
-        let input = document.getElementById("quantity");
-        let value = parseInt(input.value) || 0;
-        input.value = value + 1;
-    }
+        // Initialize Product Image Cropper (1:1 Square)
+        ImageCropper.init({
+            id: 'product',
+            inputId: 'productImage',
+            previewId: 'imagePreview',
+            modalId: 'cropModal',
+            imageToCropId: 'imageToCrop',
+            cropBtnId: 'cropBtn',
+            containerId: 'productImageContainer',
+            aspectRatio: 1, // Square crop
+            outputWidth: 800,
+            outputHeight: 800
+        });
 
-    function maxQuantity(elementId) {
-        let input = document.getElementById(elementId);
-        let value = parseInt(input.value) || 0;
-        input.value = 999999999;
-    }
-</script>
-<script>
-    const priceInput = document.getElementById('price');
+        // Initialize Remove Image Handler
+        ImageRemoveHandler.init({
+            removeBtnId: 'removeImageBtn',
+            imageInputId: 'productImage',
+            imagePreviewId: 'imagePreview',
+            uploadPlaceholderId: 'uploadPlaceholder',
+            confirmRemove: false // No confirmation for create page
+        });        
 
-    priceInput.addEventListener('input', function (e) {
-        // Hapus semua non-digit
-        let value = this.value.replace(/[^,\d]/g, '');
-        // Ubah ke format ribuan
-        this.value = new Intl.NumberFormat('id-ID').format(value);
-    });
-</script>
-<script>
-    const imageInput = document.getElementById('images');
-    const previewContainer = document.getElementById('image-preview');
-
-    imageInput.addEventListener('change', function() {
-        previewContainer.innerHTML = "";
-
-        // Validasi maksimal 5 gambar
-        if (this.files.length > 5) {
-            alert("You can only upload up to 5 images.");
-            this.value = "";
-            return;
+        // ==== Price Formatting ====
+        const priceInput = document.getElementById('price');
+        if (priceInput) {
+            priceInput.addEventListener('input', function (e) {
+                let value = this.value.replace(/[^,\d]/g, '');
+                this.value = new Intl.NumberFormat('id-ID').format(value);
+            });
         }
 
-        // Preview gambar
-        Array.from(this.files).forEach(file => {
-            if (file.type.startsWith("image/")) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.createElement("img");
-                    img.src = e.target.result;
-                    img.classList.add("img-thumbnail", "m-1");
-                    img.style.width = "120px";
-                    img.style.height = "120px";
-                    previewContainer.appendChild(img);
+        // ==== Menu Options System ====
+        let menuIndex = 0;
+
+        window.addMenuOption = function () {
+            menuIndex++;
+            const container = document.getElementById('menu-options-container');
+
+            // UPDATE: Di dalam template string ini, kita menyisipkan key blade untuk terjemahan
+            const html = `
+            <div class="menu-option-card" data-menu-index="${menuIndex}">
+                <div class="menu-option-header">
+                    <div class="menu-option-title">
+                        <span class="material-symbols-outlined">tune</span>
+                        <h4>{{ __('messages.owner.products.master_products.category_option_header') }} ${menuIndex}</h4>
+                    </div>
+                    <button type="button" class="btn-remove" onclick="removeMenuOption(this)">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">{{ __('messages.owner.products.master_products.menu_name_label') }}</label>
+                            <input type="text" name="menu_options[${menuIndex}][name]" 
+                                class="form-control-modern" 
+                                placeholder="{{ __('messages.owner.products.master_products.menu_name_placeholder') }}" 
+                                required>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">{{ __('messages.owner.products.master_products.menu_description_label') }}</label>
+                            <input type="text" name="menu_options[${menuIndex}][description]" 
+                                class="form-control-modern" 
+                                placeholder="{{ __('messages.owner.products.master_products.menu_description_placeholder') }}">
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">{{ __('messages.owner.products.master_products.provision_type_label') }}</label>
+                            <div class="select-wrapper">
+                                <select name="menu_options[${menuIndex}][provision]" 
+                                    class="form-control-modern provision-select" 
+                                    data-index="${menuIndex}"
+                                    required>
+                                    <option value="">{{ __('messages.owner.products.master_products.select_provision_placeholder') }}</option>
+                                    <option value="OPTIONAL">{{ __('messages.owner.products.master_products.provision_optional') }}</option>
+                                    <option value="OPTIONAL MAX">{{ __('messages.owner.products.master_products.provision_optional_max') }}</option>
+                                    <option value="MAX">{{ __('messages.owner.products.master_products.provision_max') }}</option>
+                                    <option value="EXACT">{{ __('messages.owner.products.master_products.provision_exact') }}</option>
+                                    <option value="MIN">{{ __('messages.owner.products.master_products.provision_min') }}</option>
+                                </select>
+                                <span class="material-symbols-outlined select-arrow">expand_more</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2 provision-value-col" id="provision-value-${menuIndex}">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">{{ __('messages.owner.products.master_products.amount_label') }}</label>
+                            <input type="number" 
+                                name="menu_options[${menuIndex}][provision_value]" 
+                                class="form-control-modern" 
+                                min="0" 
+                                value="0" 
+                                required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="options-list" id="options-container-${menuIndex}"></div>
+
+                <button type="button" class="btn-modern btn-secondary-modern btn-sm-modern" onclick="addOption(${menuIndex})">
+                    <span class="material-symbols-outlined">add</span>
+                    {{ __('messages.owner.products.master_products.add_option_btn') }}
+                </button>
+            </div>
+        `;
+
+            container.insertAdjacentHTML('beforeend', html);
+        };
+
+        window.removeMenuOption = function (button) {
+            button.closest('.menu-option-card').remove();
+        };
+
+        window.addOption = function (menuIndex) {
+            const container = document.getElementById('options-container-' + menuIndex);
+            const optionIndex = container.children.length + 1;
+
+            const html = `
+            <div class="option-item">
+                <div class="option-item-header">
+                    <span class="option-number">{{ __('messages.owner.products.master_products.option_number') }} ${optionIndex}</span>
+                    <button type="button" class="btn-remove" onclick="removeOption(this)">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-5">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">{{ __('messages.owner.products.master_products.option_name_label') }}</label>
+                            <input type="text" 
+                                name="menu_options[${menuIndex}][options][${optionIndex}][name]" 
+                                class="form-control-modern" 
+                                placeholder="{{ __('messages.owner.products.master_products.option_name_placeholder') }}" 
+                                required>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">{{ __('messages.owner.products.master_products.option_price_label') }}</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">Rp</span>
+                                <input type="number" 
+                                    name="menu_options[${menuIndex}][options][${optionIndex}][price]" 
+                                    class="form-control-modern with-icon" 
+                                    min="0" 
+                                    placeholder="0" 
+                                    required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group-modern">
+                            <label class="form-label-modern">{{ __('messages.owner.products.master_products.option_description_label') }}</label>
+                            <input type="text" 
+                                name="menu_options[${menuIndex}][options][${optionIndex}][description]" 
+                                class="form-control-modern" 
+                                placeholder="{{ __('messages.owner.products.master_products.option_description_placeholder') }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+            container.insertAdjacentHTML('beforeend', html);
+        };
+
+        window.removeOption = function (button) {
+            button.closest('.option-item').remove();
+        };
+
+        // ==== Provision Toggle Logic ====
+        function toggleProvisionValue(index, provisionValue) {
+            const valueCol = document.getElementById(`provision-value-${index}`);
+            if (!valueCol) return;
+
+            const input = valueCol.querySelector('input[name$="[provision_value]"]');
+            const hide = (provisionValue === 'OPTIONAL');
+
+            if (hide) {
+                valueCol.style.display = 'none';
+                if (input) {
+                    input.disabled = true;
+                    input.required = false;
+                    input.value = 0;
                 }
-                reader.readAsDataURL(file);
+            } else {
+                valueCol.style.display = '';
+                if (input) {
+                    input.disabled = false;
+                    input.required = true;
+                }
+            }
+        }
+
+        // Event delegation for dynamically added provisions
+        document.getElementById('menu-options-container')?.addEventListener('change', function (e) {
+            if (e.target.matches('.provision-select')) {
+                const index = e.target.dataset.index;
+                toggleProvisionValue(index, e.target.value);
             }
         });
     });
 </script>
-<script>
-let menuIndex = 0;
-
-function addMenuOption() {
-    menuIndex++;
-    let container = document.getElementById('menu-options-container');
-
-    let html = `
-        <div class="col-12 menu-option mb-3" data-menu-index="${menuIndex}">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between mb-2">
-                        <h5 class="card-title">{{ __('messages.owner.products.master_products.category_option') }} ${menuIndex}</h5>
-                        <button type="button" class="btn btn-sm btn-danger" onclick="removeMenuOption(this)">X</button>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>{{ __('messages.owner.products.master_products.menu_name') }}</label>
-                                <input type="text" name="menu_options[${menuIndex}][name]" class="form-control" placeholder="{{ __('messages.owner.products.master_products.enter_menu_name') }}" required>
-                            </div>
-                        </div>
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label>{{ __('messages.owner.products.master_products.menu_description') }}</label>
-                                <input name="menu_options[${menuIndex}][description]" class="form-control" rows="2"></input>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="form-group">
-                                <label>Pilihan</label>
-                                <select class="form-control" name="menu_options[${menuIndex}][provision]" id="menu_options[${menuIndex}][provision]" required>
-                                    <option value="">{{ __('messages.owner.products.master_products.select_provision') }}</option>
-                                    <option value="OPTIONAL">{{ __('messages.owner.products.master_products.optional') }}</option>
-                                    <option value="OPTIONAL MAX">{{ __('messages.owner.products.master_products.optional_max') }}</option>
-                                    <option value="MAX">{{ __('messages.owner.products.master_products.max_provision') }}</option>
-                                    <option value="EXACT">{{ __('messages.owner.products.master_products.exact_provision') }}</option>
-                                    <option value="MIN">{{ __('messages.owner.products.master_products.min_provision') }}</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-2 jumlah-pilihan">
-                            <div class="form-group">
-                                <label>{{ __('messages.owner.products.master_products.amount') }}</label>
-                                <div class="input-group">
-                                    <input type="number"
-                                        id="menu_options[${menuIndex}][provision_value]"
-                                        name="menu_options[${menuIndex}][provision_value]"
-                                        class="form-control" min="0" value="0"
-                                        required>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <div class="options-container" id="options-container-${menuIndex}"></div>
-
-                    <button type="button" class="btn btn-sm btn-success mt-2" onclick="addOption(${menuIndex})">
-                        + {{ __('messages.owner.products.master_products.add_option') }}
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-    container.insertAdjacentHTML('beforeend', html);
-}
-
-function removeMenuOption(button) {
-    button.closest('.menu-option').remove();
-}
-
-function addOption(menuIndex) {
-    let container = document.getElementById('options-container-' + menuIndex);
-    let optionIndex = container.children.length + 1;
-
-    let html = `
-        <div class="card mb-2 option-item">
-            <div class="card-body">
-                <div class="d-flex justify-content-between mb-2">
-                    <h6>Option ${optionIndex}</h6>
-                    <button type="button" class="btn btn-sm btn-danger" onclick="removeOption(this)">{{ __('messages.owner.products.master_products.remove') }}</button>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>{{ __('messages.owner.products.master_products.option_name') }}</label>
-                            <input type="text" name="menu_options[${menuIndex}][options][${optionIndex}][name]" class="form-control" required>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>{{ __('messages.owner.products.master_products.price') }}</label>
-                            <input type="number" name="menu_options[${menuIndex}][options][${optionIndex}][price]" class="form-control" min="0" required>
-                        </div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label>{{ __('messages.owner.products.master_products.description') }}</label>
-                            <textarea name="menu_options[${menuIndex}][options][${optionIndex}][description]" class="form-control" rows="2"></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-
-    container.insertAdjacentHTML('beforeend', html);
-}
-
-function removeOption(button) {
-    button.closest('.option-item').remove();
-}
-
-function previewImage(event, menuIndex, optionIndex) {
-    let file = event.target.files[0];
-    let preview = document.getElementById(`preview-${menuIndex}-${optionIndex}`);
-    if (file) {
-        let reader = new FileReader();
-        reader.onload = function(e) {
-            preview.src = e.target.result;
-            preview.style.display = 'block';
-        }
-        reader.readAsDataURL(file);
-    } else {
-        preview.src = "";
-        preview.style.display = "none";
-    }
-}
-
-//hide element saat optional
-function provisionOption(selectEl) {
-  const root = selectEl.closest('.menu-option');       // bungkus 1 card
-  if (!root) return;
-  const jumlahCol = root.querySelector('.jumlah-pilihan');
-  if (!jumlahCol) return;
-
-  const jumlahInput = jumlahCol.querySelector('input[name$="[provision_value]"]');
-
-  if (selectEl.value === 'OPTIONAL') {
-    // sembunyikan & disable agar tidak ikut form-validation/submit
-    jumlahCol.classList.add('d-none');   // Bootstrap utility
-    if (jumlahInput) {
-      jumlahInput.disabled = true;
-      jumlahInput.required = false;
-      jumlahInput.value = 0; // opsional: set 0 saat disembunyikan
-    }
-  } else {
-    // tampilkan & aktifkan lagi
-    jumlahCol.classList.remove('d-none');
-    if (jumlahInput) {
-      jumlahInput.disabled = false;
-      jumlahInput.required = true;
-    }
-  }
-}
-
-// Inisialisasi untuk elemen yang sudah dirender Blade
-document.addEventListener('DOMContentLoaded', () => {
-  document
-    .querySelectorAll('#menu-options-container select[name^="menu_options"][name$="[provision]"]')
-    .forEach(provisionOption);
-});
-
-// Event delegation agar elemen baru dari JS juga ikut
-document.getElementById('menu-options-container')
-  .addEventListener('change', (e) => {
-    if (e.target.matches('select[name^="menu_options"][name$="[provision]"]')) {
-      provisionOption(e.target);
-    }
-  });
-</script>
-@endsection
+@endpush

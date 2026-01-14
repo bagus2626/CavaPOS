@@ -174,7 +174,7 @@ class SalesReportExcelService
             $currentRowNum++;
 
             if ($currentRowNum % 5000 === 0) {
-                gc_collect_cycles(); 
+                gc_collect_cycles();
             }
         }
 
@@ -479,6 +479,7 @@ class SalesReportExcelService
         $zip->addFromString($sheetFileName, $sheetDom->saveXML());
     }
 
+
     private function generateFileName(array $filters): string
     {
         $baseName = 'laporan-penjualan';
@@ -498,14 +499,27 @@ class SalesReportExcelService
                 return "{$baseName}-tahunan-{$filters['year_from']}-{$filters['year_to']}.xlsx";
 
             case 'monthly':
-                $year = $filters['month_year'];
-                $monthFrom = str_pad($filters['month_from'], 2, '0', STR_PAD_LEFT);
-                $monthTo = str_pad($filters['month_to'], 2, '0', STR_PAD_LEFT);
+                // Parse dari format "YYYY-MM"
+                $fromParts = explode('-', $filters['month_from']);
+                $toParts = explode('-', $filters['month_to']);
 
+                $yearFrom = $fromParts[0] ?? date('Y');
+                $monthFrom = $fromParts[1] ?? '01';
+                $yearTo = $toParts[0] ?? date('Y');
+                $monthTo = $toParts[1] ?? '12';
+
+                // Jika bulan dan tahun sama
                 if ($filters['month_from'] == $filters['month_to']) {
-                    return "{$baseName}-bulanan-{$year}-{$monthFrom}.xlsx";
+                    return "{$baseName}-bulanan-{$yearFrom}-{$monthFrom}.xlsx";
                 }
-                return "{$baseName}-bulanan-{$year}-{$monthFrom}_sampai_{$monthTo}.xlsx";
+
+                // Jika tahun sama
+                if ($yearFrom == $yearTo) {
+                    return "{$baseName}-bulanan-{$yearFrom}-{$monthFrom}_sampai_{$monthTo}.xlsx";
+                }
+
+                // Jika tahun berbeda
+                return "{$baseName}-bulanan-{$yearFrom}-{$monthFrom}_sampai_{$yearTo}-{$monthTo}.xlsx";
 
             default:
                 $from = Carbon::parse($filters['from'])->format('d-m-Y');
@@ -521,27 +535,61 @@ class SalesReportExcelService
     private function getPeriodTextForExport(array $filters): string
     {
         $periodText = "Periode: ";
+
         switch ($filters['period']) {
             case 'yearly':
-                $periodText .= $filters['year_from'] == $filters['year_to'] ? $filters['year_from'] : "{$filters['year_from']} - {$filters['year_to']}";
+                $periodText .= $filters['year_from'] == $filters['year_to']
+                    ? $filters['year_from']
+                    : "{$filters['year_from']} - {$filters['year_to']}";
                 break;
+
             case 'monthly':
-                $monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-                $year = $filters['month_year'];
-                $monthFrom = $monthNames[$filters['month_from'] - 1] ?? '';
-                $monthTo = $monthNames[$filters['month_to'] - 1] ?? '';
-                if ($monthFrom == $monthTo) {
-                    $periodText .= "{$monthFrom} {$year}";
-                } else {
-                    $periodText .= "{$monthFrom} - {$monthTo} {$year}";
+                $monthNames = [
+                    '01' => 'Januari',
+                    '02' => 'Februari',
+                    '03' => 'Maret',
+                    '04' => 'April',
+                    '05' => 'Mei',
+                    '06' => 'Juni',
+                    '07' => 'Juli',
+                    '08' => 'Agustus',
+                    '09' => 'September',
+                    '10' => 'Oktober',
+                    '11' => 'November',
+                    '12' => 'Desember'
+                ];
+
+                // Parse dari format "YYYY-MM"
+                $fromParts = explode('-', $filters['month_from']);
+                $toParts = explode('-', $filters['month_to']);
+
+                $yearFrom = $fromParts[0] ?? date('Y');
+                $monthFrom = $monthNames[$fromParts[1]] ?? 'Januari';
+
+                $yearTo = $toParts[0] ?? date('Y');
+                $monthTo = $monthNames[$toParts[1]] ?? 'Desember';
+
+                // Jika bulan dan tahun sama
+                if ($filters['month_from'] === $filters['month_to']) {
+                    $periodText .= "{$monthFrom} {$yearFrom}";
+                }
+                // Jika tahun sama tapi bulan berbeda
+                else if ($yearFrom === $yearTo) {
+                    $periodText .= "{$monthFrom} - {$monthTo} {$yearFrom}";
+                }
+                // Jika tahun berbeda
+                else {
+                    $periodText .= "{$monthFrom} {$yearFrom} - {$monthTo} {$yearTo}";
                 }
                 break;
+
             default:
                 $from = Carbon::parse($filters['from'])->format('d M Y');
                 $to = Carbon::parse($filters['to'])->format('d M Y');
                 $periodText .= $from == $to ? $from : "{$from} - {$to}";
                 break;
         }
+
         return $periodText;
     }
 }

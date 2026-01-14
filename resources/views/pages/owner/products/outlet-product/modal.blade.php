@@ -2,13 +2,15 @@
 <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <form id="outletProductQuickAddForm" method="POST" action="{{ route('owner.user-owner.outlet-products.store') }}"
-      class="modal-content">
+      class="modal-content modern-modal">
       @csrf
 
       <input type="hidden" name="outlet_id" id="qp_outlet_id" value="">
 
-      <div class="modal-header">
+      {{-- Modern Modal Header --}}
+      <div class="modal-header modern-modal-header">
         <h5 class="modal-title" id="addProductModalLabel">
+          <span class="material-symbols-outlined">add_circle</span>
           {{ __('messages.owner.products.outlet_products.add_outlet_product') }}
         </h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -16,34 +18,45 @@
         </button>
       </div>
 
-      <div class="modal-body">
+      <div class="modal-body" style="padding: var(--spacing-lg);">
         {{-- Category --}}
-        <div class="mb-3">
-          <label for="qp_category_id" class="form-label">{{ __('messages.owner.products.outlet_products.category') }}
-            <span class="text-danger">*</span></label>
-          <select id="qp_category_id" name="category_id" class="form-control" required>
-            <option value="all">{{ __('messages.owner.products.outlet_products.all_category_dropdown') }}</option>
-            @foreach($categories as $cat)
-              <option value="{{ $cat->id }}">{{ $cat->category_name }}</option>
-            @endforeach
-          </select>
+        <div class="form-group-modern">
+          <label for="qp_category_id" class="form-label-modern">
+            <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle; margin-right: 4px;">category</span>
+            {{ __('messages.owner.products.outlet_products.category') }}
+            <span style="color: var(--danger);">*</span>
+          </label>
+          <div class="select-wrapper">
+            <select id="qp_category_id" name="category_id" class="form-control-modern" required>
+              <option value="all">{{ __('messages.owner.products.outlet_products.all_category_dropdown') }}</option>
+              @foreach($categories as $cat)
+                <option value="{{ $cat->id }}">{{ $cat->category_name }}</option>
+              @endforeach
+            </select>
+            <span class="material-symbols-outlined select-arrow">expand_more</span>
+          </div>
           <div class="invalid-feedback">{{ __('messages.owner.products.outlet_products.select_category_first') }}</div>
         </div>
 
         {{-- Master Product (multi select via checkbox) --}}
-        <div class="mb-3">
-          <label class="form-label">{{ __('messages.owner.products.outlet_products.master_products') }} <span
-              class="text-danger">*</span></label>
+        <div class="form-group-modern">
+          <label class="form-label-modern">
+            <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle; margin-right: 4px;">inventory</span>
+            {{ __('messages.owner.products.outlet_products.master_products') }}
+            <span style="color: var(--danger);">*</span>
+          </label>
 
           {{-- select all --}}
-          <div class="form-check mt-2 ml-2">
-            <input class="form-check-input" type="checkbox" id="qp_check_all" disabled>
-            <label class="form-check-label"
-              for="qp_check_all">{{ __('messages.owner.products.outlet_products.select_all') }}</label>
+          <div class="checkbox-modern" style="margin-bottom: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); background: var(--input-bg); border-radius: var(--radius-sm);">
+            <input class="form-check-input" type="checkbox" id="qp_check_all" disabled style="width: 1.25rem; height: 1.25rem; cursor: pointer;">
+            <label class="form-check-label" for="qp_check_all" style="cursor: pointer; font-weight: 600;">
+              {{ __('messages.owner.products.outlet_products.select_all') }}
+            </label>
           </div>
 
-          <div id="qp_master_product_box" class="border rounded p-2" style="max-height: 280px; overflow:auto;">
-            <div class="text-muted small">{{ __('messages.owner.products.outlet_products.select_category_first') }}
+          <div id="qp_master_product_box" style="max-height: 280px; overflow: auto; padding: var(--spacing-md); background: var(--card-bg); border: 2px solid var(--border-color); border-radius: var(--radius-sm);">
+            <div style="color: var(--text-muted); font-size: 0.875rem;">
+              {{ __('messages.owner.products.outlet_products.select_category_first') }}
             </div>
           </div>
 
@@ -52,66 +65,86 @@
           </div>
         </div>
 
-        {{-- ========== STOCK TYPE SELECTION (Bootstrap Style) ========== --}}
-        <div class="mb-3">
-          <label class="form-label">{{ __('messages.owner.products.outlet_products.stock_management') }}<span class="text-danger">*</span></label>
+        {{-- ========== STOCK TYPE SELECTION ========== --}}
+        <div class="form-group-modern">
+          <label class="form-label-modern">
+            <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle; margin-right: 4px;">settings</span>
+            {{ __('messages.owner.products.outlet_products.stock_management') }}
+            <span style="color: var(--danger);">*</span>
+          </label>
 
-          <div class="form-check p-3 border rounded" style="transition: all 0.2s ease;">
-            <input class="form-check-input" type="radio" name="stock_type" id="stock_type_direct" value="direct" checked
-              required style="cursor: pointer; margin-top: 0.5rem;">
-            <label class="form-check-label w-100" for="stock_type_direct" style="cursor: pointer; margin-left: 0.5rem;">
-              <div class="d-flex align-items-center" style="gap: 8px; margin-bottom: 6px;">
-                <i class="fas fa-box"></i>
-                <strong>{{ __('messages.owner.products.outlet_products.direct_stock_input') }}</strong>
+          {{-- Direct Stock Option --}}
+          <div class="radio-modern" style="padding: var(--spacing-md); background: var(--card-bg); border: 2px solid var(--border-color); border-radius: var(--radius-sm); transition: all var(--transition-base); cursor: pointer;" onclick="document.getElementById('stock_type_direct').click()">
+            <input type="radio" name="stock_type" id="stock_type_direct" value="direct" checked required style="width: 1.25rem; height: 1.25rem; cursor: pointer;">
+            <label for="stock_type_direct" style="cursor: pointer; flex: 1; margin: 0;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <strong style="color: var(--text-primary);">{{ __('messages.owner.products.outlet_products.direct_stock_input') }}</strong>
               </div>
-              <small class="text-muted d-block">{{ __('messages.owner.products.outlet_products.enter_quantity_directly') }}</small>
             </label>
           </div>
 
-          <div class="form-check p-3 border rounded mt-2" style="transition: all 0.2s ease;">
-            <input class="form-check-input" type="radio" name="stock_type" id="stock_type_linked" value="linked"
-              required style="cursor: pointer; margin-top: 0.5rem;">
-            <label class="form-check-label w-100" for="stock_type_linked" style="cursor: pointer; margin-left: 0.5rem;">
-              <div class="d-flex align-items-center" style="gap: 8px; margin-bottom: 6px;">
-                <i class="fas fa-link"></i>
-                <strong>{{ __('messages.owner.products.outlet_products.link_to_raw_materials') }}</strong>
+          {{-- Linked Stock Option --}}
+          <div class="radio-modern" style="padding: var(--spacing-md); background: var(--card-bg); border: 2px solid var(--border-color); border-radius: var(--radius-sm); margin-top: var(--spacing-sm); transition: all var(--transition-base); cursor: pointer;" onclick="document.getElementById('stock_type_linked').click()">
+            <input type="radio" name="stock_type" id="stock_type_linked" value="linked" required style="width: 1.25rem; height: 1.25rem; cursor: pointer;">
+            <label for="stock_type_linked" style="cursor: pointer; flex: 1; margin: 0;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <strong style="color: var(--text-primary);">{{ __('messages.owner.products.outlet_products.link_to_raw_materials') }}</strong>
               </div>
-              <small class="text-muted d-block">{{ __('messages.owner.products.outlet_products.connect_product_to_raw_materials') }}</small>
             </label>
           </div>
         </div>
 
         {{-- Quantity (only shown for direct stock) --}}
-        <div class="mb-3" id="qp_quantity_group">
-          <label for="qp_quantity" class="form-label">{{ __('messages.owner.products.outlet_products.stock') }} <span
-              class="text-danger">*</span></label>
-          <input type="number" min="0" step="1" id="qp_quantity" name="quantity" class="form-control" value="0"
-            required>
-          <small class="form-text text-muted">{{ __('messages.owner.products.outlet_products.enter_initial_stock') }}</small>
+        <div class="form-group-modern" id="qp_quantity_group">
+          <label for="qp_quantity" class="form-label-modern">
+            <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle; margin-right: 4px;">package</span>
+            {{ __('messages.owner.products.outlet_products.stock') }}
+            <span style="color: var(--danger);">*</span>
+          </label>
+          <input type="number" min="0" step="1" id="qp_quantity" name="quantity" class="form-control-modern" value="0" placeholder="0" required>
+          <small style="color: var(--text-muted); font-size: 0.875rem; display: block; margin-top: 0.25rem; margin-left: var(--spacing-xs);">
+            {{ __('messages.owner.products.outlet_products.enter_initial_stock') }}
+          </small>
         </div>
 
         {{-- Info message for linked stock --}}
-        <div class="alert alert-info d-none" id="linked_stock_info" style="font-size: 0.9rem;">
-          <i class="fas fa-info-circle mr-1"></i>
-          <strong>{{ __('messages.owner.products.outlet_products.note_linked_stock') }}</strong>{{ __('messages.owner.products.outlet_products.linked_stock_info') }}
+        <div class="d-none" id="linked_stock_info" style="display: flex; align-items: flex-start; gap: var(--spacing-md); padding: var(--spacing-md); background: var(--info-light, #e3f2fd); border-left: 4px solid var(--info, #2196F3); border-radius: var(--radius-sm); margin-top: var(--spacing-md);">
+          <span class="material-symbols-outlined" style="color: var(--info, #2196F3); flex-shrink: 0; font-size: 20px;">info</span>
+          <div style="font-size: 0.9rem;">
+            <strong style="color: var(--info, #2196F3); display: block; margin-bottom: 0.25rem;">
+              {{ __('messages.owner.products.outlet_products.note_linked_stock') }}
+            </strong>
+            <span style="color: var(--text-secondary);">
+              {{ __('messages.owner.products.outlet_products.linked_stock_info') }}
+            </span>
+          </div>
         </div>
 
         {{-- Status --}}
-        <div class="mb-3">
-          <label for="qp_is_active"
-            class="form-label">{{ __('messages.owner.products.outlet_products.status') }}</label>
-          <select id="qp_is_active" name="is_active" class="form-control">
-            <option value="1">{{ __('messages.owner.products.outlet_products.active') }}</option>
-            <option value="0">{{ __('messages.owner.products.outlet_products.inactive') }}</option>
-          </select>
+        <div class="form-group-modern">
+          <label for="qp_is_active" class="form-label-modern">
+            <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle; margin-right: 4px;">toggle_on</span>
+            {{ __('messages.owner.products.outlet_products.status') }}
+          </label>
+          <div class="select-wrapper">
+            <select id="qp_is_active" name="is_active" class="form-control-modern">
+              <option value="1">{{ __('messages.owner.products.outlet_products.active') }}</option>
+              <option value="0">{{ __('messages.owner.products.outlet_products.inactive') }}</option>
+            </select>
+            <span class="material-symbols-outlined select-arrow">expand_more</span>
+          </div>
         </div>
       </div>
 
-      <div class="modal-footer">
-        <button type="button" class="btn btn-light border"
-          data-dismiss="modal">{{ __('messages.owner.products.outlet_products.cancel') }}</button>
-        <button type="submit" class="btn btn-primary">
-          <span class="label">{{ __('messages.owner.products.outlet_products.save') }}</span>
+      {{-- Modern Modal Footer --}}
+      <div class="modal-footer modern-modal-footer">
+        <button type="button" class="btn-cancel-modern" data-dismiss="modal">
+          {{ __('messages.owner.products.outlet_products.cancel') }}
+        </button>
+        <button type="submit" class="btn-submit-modern">
+          <span class="label">
+            {{ __('messages.owner.products.outlet_products.save') }}
+          </span>
           <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
         </button>
       </div>
@@ -119,20 +152,34 @@
   </div>
 </div>
 
-{{-- Stock Type Styles (Sedikit CSS untuk highlight) --}}
+{{-- Stock Type Styles --}}
 <style>
-  /* Sedikit CSS untuk highlight border saat di-check */
-  .form-check:has(input[type="radio"]:checked) {
-    border-color: #007bff !important;
-    background-color: #f0f8ff;
+  /* Highlight border saat radio button di-check */
+  .radio-modern:has(input[type="radio"]:checked) {
+    border-color: var(--primary) !important;
+    background-color: var(--primary-light, rgba(174, 21, 4, 0.05)) !important;
+    box-shadow: 0 0 0 3px rgba(174, 21, 4, 0.1);
   }
 
-  .form-check:hover {
-    border-color: #007bff;
+  .radio-modern:hover {
+    border-color: var(--primary);
+    background-color: var(--input-bg-hover);
+  }
+
+  /* Checkbox dalam master product box */
+  #qp_master_product_box .checkbox-modern {
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+    border-radius: var(--radius-sm);
+    transition: background var(--transition-fast);
+  }
+
+  #qp_master_product_box .checkbox-modern:hover {
+    background: var(--input-bg-hover);
   }
 </style>
 
-{{-- Stock Type Toggle Logic (Tidak perlu diubah) --}}
+{{-- Stock Type Toggle Logic --}}
 <script>
   (function () {
     const directRadio = document.getElementById('stock_type_direct');

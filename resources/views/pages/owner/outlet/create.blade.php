@@ -4,23 +4,30 @@
 @section('page_title', __('messages.owner.outlet.all_outlets.create_new_outlet'))
 
 @section('content')
-    <div class="modern-outlet-editor">
-        {{-- Header --}}
-        <div class="editor-header">
-            <a href="{{ route('owner.user-owner.outlets.index') }}" class="btn-back">
-                <i class="fas fa-arrow-left"></i>
-            </a>
-        </div>
+    <div class="modern-container modern-outlet-create">
+        <div class="container-modern">
+            {{-- Page Header --}}
+            <div class="page-header">
 
-        {{-- Main Content --}}
-        <div class="editor-content">
+                <div class="header-content">
+                    <h1 class="page-title">{{ __('messages.owner.outlet.all_outlets.create_new_outlet') }}</h1>
+                    <p class="page-subtitle">{{ __('messages.owner.outlet.all_outlets.create_subtitle') }}</p>
+                </div>
+                <a href="{{ route('owner.user-owner.outlets.index') }}" class="back-button">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    {{ __('messages.owner.outlet.all_outlets.back') }}
+                </a>
+            </div>
+
             {{-- Alerts --}}
             @if ($errors->any())
-                <div class="alert alert-danger">
-                    <i class="fas fa-circle-exclamation"></i>
-                    <div>
-                        <strong>{{ __('messages.owner.outlet.all_outlets.re_check_input') }}</strong>
-                        <ul>
+                <div class="alert alert-danger alert-modern">
+                    <div class="alert-icon">
+                        <span class="material-symbols-outlined">error</span>
+                    </div>
+                    <div class="alert-content">
+                        <strong>{{ __('messages.owner.outlet.all_outlets.re_check_input') }}:</strong>
+                        <ul class="mb-0 mt-2">
                             @foreach ($errors->all() as $error)
                                 <li>{{ $error }}</li>
                             @endforeach
@@ -30,1294 +37,721 @@
             @endif
 
             @if (session('success'))
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle"></i>
-                    <span>{{ session('success') }}</span>
+                <div class="alert alert-success alert-modern">
+                    <div class="alert-icon">
+                        <span class="material-symbols-outlined">check_circle</span>
+                    </div>
+                    <div class="alert-content">
+                        {{ session('success') }}
+                    </div>
                 </div>
             @endif
 
-            @if (session('status'))
-                <div class="alert alert-info">
-                    <i class="fas fa-circle-info"></i>
-                    <span>{{ session('status') }}</span>
-                </div>
-            @endif
-
-            <form action="{{ route('owner.user-owner.outlets.store') }}" method="POST" enctype="multipart/form-data"
-                id="outletForm">
-                @csrf
-
-                {{-- Hidden Inputs --}}
+            {{-- Main Form Card --}}
+            <div class="modern-card">
                 <input type="hidden" id="usernameCheckUrl" value="{{ route('owner.user-owner.outlets.check-username') }}">
                 <input type="hidden" id="slugCheckUrl" value="{{ route('owner.user-owner.outlets.check-slug') }}">
 
-                {{-- Form Sections Container --}}
-                <div class="sections-container">
+                <form action="{{ route('owner.user-owner.outlets.store') }}" method="POST" enctype="multipart/form-data"
+                    id="outletForm">
+                    @csrf
 
-                    {{-- SECTION 1: Basic Info --}}
-                    <div class="section-item" >
+                    <div class="card-body-modern">
+                        {{-- SECTION 1: Basic Information --}}
                         <div class="section-header">
-                            <div class="section-header-content">
-                                <i class="fas fa-info-circle"></i>
-                                <span
-                                    class="section-title">{{ __('messages.owner.outlet.all_outlets.base_information') }}</span>
+                            <div class="section-icon section-icon-red">
+                                <span class="material-symbols-outlined">info</span>
                             </div>
+                            <h3 class="section-title">{{ __('messages.owner.outlet.all_outlets.base_information') }}</h3>
                         </div>
-                        <div class="section-body">
-                            <div class="form-grid form-grid-2x2">
-                                <label class="form-group">
-                                    <span
-                                        class="form-label required">{{ __('messages.owner.outlet.all_outlets.outlet_name') }}</span>
+
+                        <div class="row g-4 mb-4">
+                            {{-- Outlet Name --}}
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">
+                                        {{ __('messages.owner.outlet.all_outlets.outlet_name') }}
+                                        <span class="text-danger">*</span>
+                                    </label>
                                     <input type="text" name="name" id="name"
-                                        class="form-input @error('name') is-invalid @enderror" value="{{ old('name') }}"
-                                        required maxlength="255" placeholder="ex: Cava Coffee - Malioboro">
+                                        class="form-control-modern @error('name') is-invalid @enderror"
+                                        value="{{ old('name') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_name') }}" required
+                                        maxlength="255">
                                     @error('name')
-                                        <span class="form-error">{{ $message }}</span>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                    <small class="char-counter" id="name-counter">0/255</small>
-                                </label>
+                                </div>
+                            </div>
 
-                                <label class="form-group">
-                                    <span
-                                        class="form-label required">{{ __('messages.owner.outlet.all_outlets.username') }}</span>
-                                    <div class="input-with-button">
-                                        <div class="input-prefix">@</div>
+                            {{-- Username Field --}}
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">
+                                        {{ __('messages.owner.outlet.all_outlets.username') }}
+                                        <span class="text-danger">*</span>
+                                    </label>
+
+                                    <div class="input-wrapper position-relative">
+                                        <span class="input-icon">
+                                            <span class="material-symbols-outlined">alternate_email</span>
+                                        </span>
                                         <input type="text" name="username" id="username"
-                                            class="form-input @error('username') is-invalid @enderror"
-                                            value="{{ old('username') }}" required minlength="3" maxlength="30"
-                                            pattern="^[A-Za-z0-9._\-]+$" placeholder="budi.setiawan">
-                                        <button type="button" id="btnCheckUsername" class="input-button">
-                                            <span class="label">Check</span>
-                                            <span class="spinner-border spinner-border-sm d-none"></span>
-                                        </button>
+                                            class="form-control-modern with-icon @error('username') is-invalid @enderror"
+                                            value="{{ old('username') }}" 
+                                            placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_username') }}" 
+                                            required
+                                            minlength="3" maxlength="30" pattern="^[A-Za-z0-9._\-]+$">
+
+                                        <div id="usernameLoading" class="position-absolute d-none" style="right: 15px; top: 50%; transform: translateY(-50%); z-index: 5;">
+                                            <div class="spinner-modern text-secondary" role="status">
+                                                <span class="sr-only">{{ __('messages.owner.outlet.all_outlets.loading') }}</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <small
-                                        class="form-hint">{{ __('messages.owner.outlet.all_outlets.muted_text_1') }}</small>
-                                    <div id="usernameStatus" class="status-message"></div>
+
+                                    <div id="usernameStatus" class="mt-2"></div>
+
                                     @error('username')
-                                        <span class="form-error">{{ $message }}</span>
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
-                                </label>
-
-                                <label class="form-group">
-                                    <span class="form-label required">Slug</span>
-                                    <div class="input-with-button">
-                                        <input type="text" name="slug" id="slug"
-                                            class="form-input @error('slug') is-invalid @enderror"
-                                            value="{{ old('slug') }}" required minlength="3" maxlength="30"
-                                            pattern="^[A-Za-z0-9._\-]+$" placeholder="cava-coffee-malioboro">
-                                        <button type="button" id="btnCheckSlug" class="input-button">
-                                            <span class="label">Check</span>
-                                            <span class="spinner-border spinner-border-sm d-none"></span>
-                                        </button>
-                                    </div>
-                                    <small
-                                        class="form-hint">{{ __('messages.owner.outlet.all_outlets.muted_text_1') }}</small>
-                                    <div id="slugStatus" class="status-message"></div>
-                                    @error('slug')
-                                        <span class="form-error">{{ $message }}</span>
-                                    @enderror
-                                </label>
-
-                                <label class="form-group">
-                                    <span
-                                        class="form-label required">{{ __('messages.owner.outlet.all_outlets.email_outlet') }}</span>
-                                    <input type="email" name="email" id="email"
-                                        class="form-input @error('email') is-invalid @enderror" value="{{ old('email') }}"
-                                        required placeholder="email@email.com">
-                                    @error('email')
-                                        <span class="form-error">{{ $message }}</span>
-                                    @enderror
-                                </label>
+                                </div>
                             </div>
-                        </div>
-                    </div>
 
-                    {{-- SECTION 2: Address --}}
-                    <div class="section-item" >
-                        <div class="section-header">
-                            <div class="section-header-content">
-                                <i class="fas fa-location-dot"></i>
-                                <span
-                                    class="section-title">{{ __('messages.owner.outlet.all_outlets.outlet_address') }}</span>
+                                {{-- Slug Field --}}
+                                <div class="col-md-6">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            Slug <span class="text-danger">*</span>
+                                        </label>
+                                        
+                                        <div class="input-wrapper position-relative">
+                                            <input type="text" name="slug" id="slug"
+                                                class="form-control-modern @error('slug') is-invalid @enderror"
+                                                value="{{ old('slug') }}" 
+                                                placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_slug') }}" 
+                                                required
+                                                minlength="3" maxlength="30" pattern="^[A-Za-z0-9._\-]+$">
+
+                                            <div id="slugLoading" class="position-absolute d-none" style="right: 15px; top: 50%; transform: translateY(-50%); z-index: 5;">
+                                                <div class="spinner-modern text-secondary" role="status">
+                                                    <span class="sr-only">{{ __('messages.owner.outlet.all_outlets.loading') }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="slugStatus" class="mt-2"></div>
+                                        
+                                        @error('slug')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                {{-- Email --}}
+                                <div class="col-md-6">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            {{ __('messages.owner.outlet.all_outlets.email_outlet') }}
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="email" name="email" id="email"
+                                            class="form-control-modern @error('email') is-invalid @enderror"
+                                            value="{{ old('email') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_email') }}" required>
+                                        @error('email')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="section-body">
-                            <div class="form-grid form-grid-2x2">
-                                <label class="form-group">
-                                    <span class="form-label">{{ __('messages.owner.outlet.all_outlets.province') }}</span>
-                                    <div class="select-wrapper">
-                                        <select id="province" name="province" class="form-input" disabled>
-                                            <option value="">
-                                                {{ __('messages.owner.outlet.all_outlets.load_province') }}</option>
-                                        </select>
-                                        <span class="loading-spinner d-none" id="spnProvince"></span>
-                                    </div>
-                                    <input type="hidden" id="province_name" name="province_name"
-                                        value="{{ old('province_name') }}">
-                                </label>
 
-                                <label class="form-group">
-                                    <span class="form-label">{{ __('messages.owner.outlet.all_outlets.city') }}</span>
-                                    <div class="select-wrapper">
-                                        <select id="city" name="city" class="form-input" disabled>
-                                            <option value="">
-                                                {{ __('messages.owner.outlet.all_outlets.select_province_first') }}
-                                            </option>
-                                        </select>
-                                        <span class="loading-spinner d-none" id="spnCity"></span>
-                                    </div>
-                                    <input type="hidden" id="city_name" name="city_name"
-                                        value="{{ old('city_name') }}">
-                                </label>
+                            {{-- Section Divider --}}
+                            <div class="section-divider"></div>
 
-                                <label class="form-group">
-                                    <span class="form-label">{{ __('messages.owner.outlet.all_outlets.district') }}</span>
-                                    <div class="select-wrapper">
-                                        <select id="district" name="district" class="form-input" disabled>
-                                            <option value="">
-                                                {{ __('messages.owner.outlet.all_outlets.select_city_first') }}
-                                            </option>
-                                        </select>
-                                        <span class="loading-spinner d-none" id="spnDistrict"></span>
-                                    </div>
-                                    <input type="hidden" id="district_name" name="district_name"
-                                        value="{{ old('district_name') }}">
-                                </label>
+                            {{-- SECTION 2: Address --}}
+                            <div class="section-header">
+                                <div class="section-icon section-icon-red">
+                                    <span class="material-symbols-outlined">location_on</span>
+                                </div>
+                                <h3 class="section-title">{{ __('messages.owner.outlet.all_outlets.outlet_address') }}</h3>
+                            </div>
 
-                                <label class="form-group">
-                                    <span class="form-label">{{ __('messages.owner.outlet.all_outlets.village') }}</span>
-                                    <div class="select-wrapper">
-                                        <select id="village" name="village" class="form-input" disabled>
-                                            <option value="">
-                                                {{ __('messages.owner.outlet.all_outlets.select_district_first') }}
-                                            </option>
-                                        </select>
-                                        <span class="loading-spinner d-none" id="spnVillage"></span>
+                            <div class="row g-4 mb-4">
+                                {{-- Province --}}
+                                <div class="col-md-6">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            {{ __('messages.owner.outlet.all_outlets.province') }}
+                                        </label>
+                                        <div class="select-wrapper">
+                                            <select id="province" name="province" class="form-control-modern" disabled>
+                                                <option value="">{{ __('messages.owner.outlet.all_outlets.load_province') }}
+                                                </option>
+                                            </select>
+                                            <span class="material-symbols-outlined select-arrow">expand_more</span>
+                                        </div>
+                                        <input type="hidden" id="province_name" name="province_name"
+                                            value="{{ old('province_name') }}">
                                     </div>
-                                    <input type="hidden" id="village_name" name="village_name"
-                                        value="{{ old('village_name') }}">
-                                </label>
+                                </div>
 
-                                <label class="form-group form-group-full">
-                                    <span
-                                        class="form-label">{{ __('messages.owner.outlet.all_outlets.detail_address') }}</span>
-                                    <div class="input-with-icon">
-                                        <i class="fas fa-road input-icon"></i>
-                                        <input type="text" id="address" name="address" class="form-input"
-                                            value="{{ old('address') }}" maxlength="500"
-                                            placeholder="{{ __('messages.owner.outlet.all_outlets.detail_address_placeholder') }}">
+                                {{-- City --}}
+                                <div class="col-md-6">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            {{ __('messages.owner.outlet.all_outlets.city') }}
+                                        </label>
+                                        <div class="select-wrapper">
+                                            <select id="city" name="city" class="form-control-modern" disabled>
+                                                <option value="">
+                                                    {{ __('messages.owner.outlet.all_outlets.select_province_first') }}
+                                                </option>
+                                            </select>
+                                            <span class="material-symbols-outlined select-arrow">expand_more</span>
+                                        </div>
+                                        <input type="hidden" id="city_name" name="city_name" value="{{ old('city_name') }}">
                                     </div>
-                                    <small class="char-counter" id="address-counter">0/500</small>
-                                </label>
+                                </div>
 
-                                <label class="form-group form-group-full">
-                                    <span class="form-label">{{ __('messages.owner.outlet.all_outlets.google_maps_embed_url') }}</span>
-                                    <div class="input-with-icon">
-                                        <i class="fas fa-map-marked-alt input-icon"></i>
-                                        <input type="url" id="gmaps_url" name="gmaps_url" class="form-input"
+                                {{-- District --}}
+                                <div class="col-md-6">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            {{ __('messages.owner.outlet.all_outlets.district') }}
+                                        </label>
+                                        <div class="select-wrapper">
+                                            <select id="district" name="district" class="form-control-modern" disabled>
+                                                <option value="">{{ __('messages.owner.outlet.all_outlets.select_city_first') }}
+                                                </option>
+                                            </select>
+                                            <span class="material-symbols-outlined select-arrow">expand_more</span>
+                                        </div>
+                                        <input type="hidden" id="district_name" name="district_name"
+                                            value="{{ old('district_name') }}">
+                                    </div>
+                                </div>
+
+                                {{-- Village --}}
+                                <div class="col-md-6">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            {{ __('messages.owner.outlet.all_outlets.village') }}
+                                        </label>
+                                        <div class="select-wrapper">
+                                            <select id="village" name="village" class="form-control-modern" disabled>
+                                                <option value="">
+                                                    {{ __('messages.owner.outlet.all_outlets.select_district_first') }}
+                                                </option>
+                                            </select>
+                                            <span class="material-symbols-outlined select-arrow">expand_more</span>
+                                        </div>
+                                        <input type="hidden" id="village_name" name="village_name"
+                                            value="{{ old('village_name') }}">
+                                    </div>
+                                </div>
+
+                                {{-- Detail Address --}}
+                                <div class="col-12">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            {{ __('messages.owner.outlet.all_outlets.detail_address') }}
+                                        </label>
+                                        <input type="text" id="address" name="address" class="form-control-modern"
+                                            value="{{ old('address') }}"
+                                            placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_address') }}"
+                                            maxlength="500">
+                                    </div>
+                                </div>
+
+                                {{-- Google Maps URL --}}
+                                <div class="col-12">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            {{ __('messages.owner.outlet.all_outlets.google_maps_embed_url') }}
+                                        </label>
+                                        <input type="url" id="gmaps_url" name="gmaps_url" class="form-control-modern"
                                             value="{{ old('gmaps_url') }}"
-                                            placeholder="https://www.google.com/maps/embed?pb=...">
-                                    </div>
-                                    <small class="form-hint">
-                                        <i class="fas fa-info-circle"></i>{{ __('messages.owner.outlet.all_outlets.copy_embed_url_from_google_maps') }}
-                                    </small>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
+                                            placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_maps') }}">
 
-                    {{-- SECTION 4: Media/Branding --}}
-                    <div class="section-item" >
-                        <div class="section-header">
-                            <div class="section-header-content">
-                                <i class="fas fa-image"></i>
-                                <span
-                                    class="section-title">{{ __('messages.owner.outlet.all_outlets.contact_picture') }}</span>
-                            </div>
-                        </div>
-                        <div class="section-body">
-                            <div class="form-grid form-grid-2">
-                                {{-- Background Picture --}}
-                                <div class="form-group">
-                                    <span
-                                        class="form-label">{{ __('messages.owner.outlet.all_outlets.upload_picture_optional') }}</span>
-                                    <div class="media-upload-group">
-                                        <div class="media-preview d-none" id="imagePreviewWrapper">
-                                            <img id="imagePreview" src="" alt="Background Preview"
-                                                class="media-image media-image-cover">
-                                            <button type="button" id="clearImageBtn"
-                                                class="media-remove-btn">&times;</button>
-                                        </div>
-                                        <button type="button" class="btn-upload"
-                                            onclick="document.getElementById('image').click()">
-                                           {{ __('messages.owner.outlet.all_outlets.change_photo') }}
-                                        </button>
-                                        <input type="file" name="image" id="image" class="d-none"
-                                            accept="image/*">
-                                        <small
-                                            class="form-hint">{{ __('messages.owner.outlet.all_outlets.muted_text_2') }}</small>
                                     </div>
                                 </div>
+                            </div>
 
+                            {{-- Section Divider --}}
+                            <div class="section-divider"></div>
+
+                            {{-- SECTION 3: Media Upload --}}
+                            <div class="section-header">
+                                <div class="section-icon section-icon-red">
+                                    <span class="material-symbols-outlined">image</span>
+                                </div>
+                                <h3 class="section-title">{{ __('messages.owner.outlet.all_outlets.contact_picture') }}</h3>
+                            </div>
+
+                            <div class="row g-4 mb-4">
                                 {{-- Logo --}}
-                                <div class="form-group">
-                                    <span
-                                        class="form-label">{{ __('messages.owner.outlet.all_outlets.upload_logo_optional') }}</span>
-                                    <div class="media-upload-group">
-                                        <div class="media-preview media-preview-logo d-none" id="imagePreviewWrapper2">
-                                            <img id="imagePreview2" src="" alt="Logo Preview"
-                                                class="media-image media-image-logo">
-                                            <button type="button" id="clearImageBtn2"
-                                                class="media-remove-btn">&times;</button>
+                                <div class="col-md-6">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern text-center">
+                                            {{ __('messages.owner.outlet.all_outlets.upload_logo_optional') }}
+                                        </label>
+
+                                        <div class="profile-picture-wrapper">
+                                            <div class="profile-picture-container" id="logoPictureContainer"
+                                                onclick="document.getElementById('logo').click()">
+
+                                                <div class="upload-placeholder" id="uploadPlaceholderLogo">
+                                                    <span class="material-symbols-outlined">add_business</span>
+                                                    <span class="upload-text">{{ __('messages.owner.outlet.all_outlets.upload_logo') }}</span>
+                                                </div>
+
+                                                <img id="imagePreview2" class="profile-preview" alt="Logo Preview">
+                                                <button type="button" id="removeLogoBtn" class="btn-remove btn-remove-top" style="display: none;">
+                                                    <span class="material-symbols-outlined">close</span>
+                                                </button>
+                                            </div>
                                         </div>
-                                        <button type="button" class="btn-upload"
-                                            onclick="document.getElementById('logo').click()">
-                                            {{ __('messages.owner.outlet.all_outlets.change_logo') }}
-                                        </button>
-                                        <input type="file" name="logo" id="logo" class="d-none"
-                                            accept="image/*">
-                                        <small
-                                            class="form-hint">{{ __('messages.owner.outlet.all_outlets.muted_text_2') }}</small>
+
+                                        <input type="file" name="logo" id="logo" accept="image/*" hidden>
+
+                                        <small class="text-muted d-block text-center mt-2">
+                                            {{ __('messages.owner.outlet.all_outlets.muted_text_2') }}
+                                        </small>
                                     </div>
+
                                 </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    {{-- SECTION 3: Contact --}}
-                    <div class="section-item">
-                        <div class="section-header">
-                            <div class="section-header-content">
-                                <i class="fas fa-phone"></i>
-                                <span class="section-title">{{ __('messages.owner.outlet.all_outlets.contact_and_social_media') }}</span>
-                            </div>
-                        </div>
-                        <div class="section-body">
-                            <div class="form-grid form-grid-2">
-                                <label class="form-group">
-                                    <span class="form-label">{{ __('messages.owner.outlet.all_outlets.contact_name') }}</span>
-                                    <div class="input-with-icon">
-                                        <i class="fas fa-user input-icon"></i>
-                                        <input type="text" id="contact_person" name="contact_person"
-                                            class="form-input" value="{{ old('contact_person') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.contact_name') }}">
-                                    </div>
-                                </label>
+                                {{-- Background Picture --}}
+                                <div class="col-md-6">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern text-center">
+                                            {{ __('messages.owner.outlet.all_outlets.upload_picture_optional') }}
+                                        </label>
 
-                                <label class="form-group">
-                                    <span class="form-label">{{ __('messages.owner.outlet.all_outlets.phone_number') }}</span>
-                                    <div class="input-with-icon">
-                                        <i class="fas fa-phone input-icon"></i>
-                                        <input type="tel" id="contact_phone" name="contact_phone" class="form-input"
-                                            value="{{ old('contact_phone') }}" placeholder="08123456789">
-                                    </div>
-                                </label>
+                                        <div class="profile-picture-wrapper">
+                                            <div class="profile-picture-container background-image"
+                                                id="backgroundPictureContainer"
+                                                onclick="document.getElementById('image').click()">
 
-                                <label class="form-group">
-                                    <span class="form-label">Instagram</span>
-                                    <div class="input-with-prefix">
-                                        <span class="input-prefix">@</span>
-                                        <input type="text" name="instagram" class="form-input"
-                                            value="{{ old('instagram') }}" placeholder="username">
-                                    </div>
-                                </label>
+                                                <div class="upload-placeholder" id="uploadPlaceholderBg">
+                                                    <span class="material-symbols-outlined">image</span>
+                                                    <span class="upload-text">{{ __('messages.owner.outlet.all_outlets.upload_picture') }}</span>
+                                                </div>
 
-                                <label class="form-group">
-                                    <span class="form-label">Twitter / X</span>
-                                    <div class="input-with-prefix">
-                                        <span class="input-prefix">@</span>
-                                        <input type="text" name="twitter" class="form-input"
-                                            value="{{ old('twitter') }}" placeholder="username">
-                                    </div>
-                                </label>
-
-                                <label class="form-group">
-                                    <span class="form-label">WhatsApp</span>
-                                    <div class="input-with-prefix">
-                                        <span class="input-prefix">+62</span>
-                                        <input type="tel" name="whatsapp" class="form-input"
-                                            value="{{ old('whatsapp') }}" placeholder="8123456789">
-                                    </div>
-                                </label>
-
-                                <label class="form-group">
-                                    <span class="form-label">Facebook</span>
-                                    <input type="text" name="facebook" class="form-input"
-                                        value="{{ old('facebook') }}" placeholder="facebook.com/yourpage">
-                                </label>
-
-                                <label class="form-group">
-                                    <span class="form-label">TikTok</span>
-                                    <div class="input-with-prefix">
-                                        <span class="input-prefix">@</span>
-                                        <input type="text" name="tiktok" class="form-input"
-                                            value="{{ old('tiktok') }}" placeholder="username">
-                                    </div>
-                                </label>
-
-                                <label class="form-group">
-                                    <span class="form-label">Website</span>
-                                    <input type="url" name="website" class="form-input"
-                                        value="{{ old('website') }}" placeholder="https://example.com">
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- SECTION 5: Status --}}
-                    <div class="section-item" >
-                        <div class="section-header">
-                            <div class="section-header-content">
-                                <i class="fas fa-toggle-on"></i>
-                                <span
-                                    class="section-title">{{ __('messages.owner.outlet.all_outlets.outlet_status') }}</span>
-                            </div>
-                        </div>
-                        <div class="section-body">
-                            {{-- Outlet Status --}}
-                            <div class="toggle-group">
-                                <div>
-                                    <p class="toggle-label">
-                                        {{ __('messages.owner.outlet.all_outlets.activate_outlet') }}</p>
-                                    <p class="toggle-description">
-                                        {{ __('messages.owner.outlet.all_outlets.muted_text_3') }}</p>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="hidden" name="is_active" value="0">
-                                    <input type="checkbox" id="is_active" name="is_active" value="1"
-                                        {{ old('is_active') ? 'checked' : '' }}>
-                                    <span class="toggle-slider"></span>
-                                </label>
-                            </div>
-
-                            {{-- QR Mode --}}
-                            <div class="form-group mt-4">
-                                <span class="form-label">{{ __('messages.owner.outlet.all_outlets.activate_qr') }}</span>
-                                <select id="qr_mode" name="qr_mode" class="form-input">
-                                    <option value="disabled"
-                                        {{ old('qr_mode', 'disabled') == 'disabled' ? 'selected' : '' }}>
-                                        {{ __('messages.owner.outlet.all_outlets.inactive') }}
-                                    </option>
-                                    <option value="barcode_only" {{ old('qr_mode') == 'barcode_only' ? 'selected' : '' }}>
-                                        {{ __('messages.owner.outlet.all_outlets.qr_only') }}
-                                    </option>
-                                    <option value="cashier_only" {{ old('qr_mode') == 'cashier_only' ? 'selected' : '' }}>
-                                        {{ __('messages.owner.outlet.all_outlets.cashier_only') }}
-                                    </option>
-                                    <option value="both" {{ old('qr_mode') == 'both' ? 'selected' : '' }}>
-                                        {{ __('messages.owner.outlet.all_outlets.all_methods') }}
-                                    </option>
-                                </select>
-                                <small
-                                    class="form-hint">{{ __('messages.owner.outlet.all_outlets.muted_text_4') }}</small>
-                            </div>
-
-                            {{-- Password --}}
-                            <div class="form-grid form-grid-2 mt-4">
-                                <label class="form-group">
-                                    <span
-                                        class="form-label required">{{ __('messages.owner.outlet.all_outlets.password') }}</span>
-                                    <div class="input-with-button">
-                                        <input type="password" name="password" id="password" class="form-input"
-                                            minlength="8" required
-                                            placeholder="{{ __('messages.owner.outlet.all_outlets.min_character') }}">
-                                        <button type="button" id="togglePassword" class="input-button">
-                                            {{ __('messages.owner.outlet.all_outlets.show') }}
-                                        </button>
-                                    </div>
-                                </label>
-
-                                <label class="form-group">
-                                    <span
-                                        class="form-label required">{{ __('messages.owner.outlet.all_outlets.password_confirmation') }}</span>
-                                    <div class="input-with-button">
-                                        <input type="password" name="password_confirmation" id="password_confirmation"
-                                            class="form-input" minlength="8" required
-                                            placeholder="{{ __('messages.owner.outlet.all_outlets.repeat_password') }}">
-                                        <button type="button" id="togglePasswordConfirm" class="input-button">
-                                            {{ __('messages.owner.outlet.all_outlets.show') }}
-                                        </button>
-                                    </div>
-                                </label>
-                            </div>
-
-                            {{-- WiFi --}}
-                            <div class="toggle-group mt-4">
-                                <div>
-                                    <p class="toggle-label">
-                                        {{ __('messages.owner.outlet.all_outlets.wifi_information') }}</p>
-                                    <p class="toggle-description">
-                                        {{ __('messages.owner.outlet.all_outlets.wifi_description') }}</p>
-                                </div>
-                                <label class="toggle-switch">
-                                    <input type="hidden" name="is_wifi_shown" value="0">
-                                    <input type="checkbox" id="is_wifi_shown" name="is_wifi_shown" value="1"
-                                        {{ old('is_wifi_shown') ? 'checked' : '' }}>
-                                    <span class="toggle-slider"></span>
-                                </label>
-                            </div>
-
-                            <div id="wifiFormFields" class="form-grid form-grid-2 mt-4"
-                                style="display: {{ old('is_wifi_shown') ? 'grid' : 'none' }};">
-                                <label class="form-group">
-                                    <span class="form-label">{{ __('WiFi Name (SSID)') }}</span>
-                                    <div class="input-with-icon">
-                                        <i class="fas fa-wifi input-icon"></i>
-                                        <input type="text" id="user_wifi" name="user_wifi" class="form-input"
-                                            value="{{ old('user_wifi') }}" placeholder="WiFi Name">
-                                    </div>
-                                </label>
-
-                                <label class="form-group">
-                                    <span class="form-label">{{ __('WiFi Password') }}</span>
-                                    <div class="input-with-button">
-                                        <div class="input-with-icon">
-                                            <i class="fas fa-key input-icon"></i>
-                                            <input type="password" id="pass_wifi" name="pass_wifi" class="form-input"
-                                                value="{{ old('pass_wifi') }}" placeholder="WiFi Password">
+                                                <img id="imagePreview" class="profile-preview" alt="Background Preview">
+                                                <button type="button" id="removeBackgroundBtn" class="btn-remove btn-remove-top" style="display: none;">
+                                                    <span class="material-symbols-outlined">close</span>
+                                                </button>                                    
+                                            </div>
                                         </div>
-                                        <button type="button" id="toggleWifiPassword" class="input-button">
-                                            {{ __('Show') }}
-                                        </button>
+
+                                        <input type="file" name="image" id="image" accept="image/*" hidden>
+
+                                        <small class="text-muted d-block text-center mt-2">
+                                            {{ __('messages.owner.outlet.all_outlets.muted_text_2') }}
+                                        </small>
                                     </div>
-                                </label>
+
+                                </div>
+                            </div>
+
+                            {{-- Section Divider --}}
+                            <div class="section-divider"></div>
+
+                            {{-- SECTION 4: Contact & Social Media --}}
+                            <div class="section-header">
+                                <div class="section-icon section-icon-red">
+                                    <span class="material-symbols-outlined">phone</span>
+                                </div>
+                                <h3 class="section-title">{{ __('messages.owner.outlet.all_outlets.contact_and_social_media') }}
+                                </h3>
+                            </div>
+
+                            <div class="row g-4 mb-4">
+                                {{-- Contact Person --}}
+                                <div class="col-md-6">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            {{ __('messages.owner.outlet.all_outlets.contact_name') }}
+                                        </label>
+                                        <input type="text" name="contact_person" class="form-control-modern"
+                                            value="{{ old('contact_person') }}"
+                                            placeholder="{{ __('messages.owner.outlet.all_outlets.contact_name') }}">
+                                    </div>
+                                </div>
+
+                                {{-- Phone Number --}}
+                                <div class="col-md-6">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            {{ __('messages.owner.outlet.all_outlets.phone_number') }}
+                                        </label>
+                                        <input type="tel" name="contact_phone" class="form-control-modern"
+                                            value="{{ old('contact_phone') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_phone') }}">
+                                    </div>
+                                </div>
+
+                                {{-- Instagram --}}
+                                <div class="col-md-6">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.instagram') }}</label>
+                                        <div class="input-wrapper">
+                                            <span class="input-icon">
+                                                <span class="material-symbols-outlined">alternate_email</span>
+                                            </span>
+                                            <input type="text" name="instagram" class="form-control-modern with-icon"
+                                                value="{{ old('instagram') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_social') }}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Twitter --}}
+                                <div class="col-md-6">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.twitter') }}</label>
+                                        <div class="input-wrapper">
+                                            <span class="input-icon">
+                                                <span class="material-symbols-outlined">alternate_email</span>
+                                            </span>
+                                            <input type="text" name="twitter" class="form-control-modern with-icon"
+                                                value="{{ old('twitter') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_social') }}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- WhatsApp --}}
+                                <div class="col-md-6">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.whatsapp') }}</label>
+                                        <input type="tel" name="whatsapp" class="form-control-modern"
+                                            value="{{ old('whatsapp') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_phone') }}">
+                                    </div>
+                                </div>
+
+                                {{-- Facebook --}}
+                                <div class="col-md-6">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.facebook') }}</label>
+                                        <input type="text" name="facebook" class="form-control-modern"
+                                            value="{{ old('facebook') }}" placeholder="facebook.com/yourpage">
+                                    </div>
+                                </div>
+
+                                {{-- TikTok --}}
+                                <div class="col-md-6">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.tiktok') }}</label>
+                                        <div class="input-wrapper">
+                                            <span class="input-icon">
+                                                <span class="material-symbols-outlined">alternate_email</span>
+                                            </span>
+                                            <input type="text" name="tiktok" class="form-control-modern with-icon"
+                                                value="{{ old('tiktok') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_social') }}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Website --}}
+                                <div class="col-md-6">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.website') }}</label>
+                                        <input type="url" name="website" class="form-control-modern"
+                                            value="{{ old('website') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_url') }}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Section Divider --}}
+                            <div class="section-divider"></div>
+
+                            {{-- SECTION 5: Status & Settings --}}
+                            <div class="section-header">
+                                <div class="section-icon section-icon-red">
+                                    <span class="material-symbols-outlined">settings</span>
+                                </div>
+                                <h3 class="section-title">{{ __('messages.owner.outlet.all_outlets.outlet_status') }}</h3>
+                            </div>
+
+                            <div class="row g-4 mb-4">
+                                {{-- Outlet Active Status --}}
+                                <div class="col-12">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern d-block">
+                                            {{ __('messages.owner.outlet.all_outlets.activate_outlet') }}
+                                        </label>
+                                        <input type="hidden" name="is_active" value="0">
+                                        <div class="status-switch">
+                                            <label class="switch-modern">
+                                                <input type="checkbox" id="is_active" name="is_active" value="1" {{ old('is_active') ? 'checked' : '' }}>
+                                                <span class="slider-modern"></span>
+                                            </label>
+                                            <span class="status-label">
+                                                {{ __('messages.owner.outlet.all_outlets.muted_text_3') }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- QR Mode --}}
+                                <div class="col-12">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            {{ __('messages.owner.outlet.all_outlets.activate_qr') }}
+                                        </label>
+                                        <div class="select-wrapper">
+                                            <select id="qr_mode" name="qr_mode" class="form-control-modern">
+                                                <option value="disabled" {{ old('qr_mode', 'disabled') == 'disabled' ? 'selected' : '' }}>
+                                                    {{ __('messages.owner.outlet.all_outlets.inactive') }}
+                                                </option>
+                                                <option value="barcode_only" {{ old('qr_mode') == 'barcode_only' ? 'selected' : '' }}>
+                                                    {{ __('messages.owner.outlet.all_outlets.qr_only') }}
+                                                </option>
+                                                <option value="cashier_only" {{ old('qr_mode') == 'cashier_only' ? 'selected' : '' }}>
+                                                    {{ __('messages.owner.outlet.all_outlets.cashier_only') }}
+                                                </option>
+                                                <option value="both" {{ old('qr_mode') == 'both' ? 'selected' : '' }}>
+                                                    {{ __('messages.owner.outlet.all_outlets.all_methods') }}
+                                                </option>
+                                            </select>
+                                            <span class="material-symbols-outlined select-arrow">expand_more</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Password --}}
+                                <div class="col-md-6">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            {{ __('messages.owner.outlet.all_outlets.password') }}
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="password-wrapper">
+                                            <input type="password" name="password" id="password" class="form-control-modern"
+                                                placeholder="{{ __('messages.owner.outlet.all_outlets.min_character') }}"
+                                                required minlength="8">
+                                            <button type="button" class="password-toggle" id="togglePassword">
+                                                <span class="material-symbols-outlined">visibility</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Password Confirmation --}}
+                                <div class="col-md-6">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">
+                                            {{ __('messages.owner.outlet.all_outlets.password_confirmation') }}
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="password-wrapper">
+                                            <input type="password" name="password_confirmation" id="password_confirmation"
+                                                class="form-control-modern" placeholder="{{ __('messages.owner.outlet.all_outlets.repeat_password') }}" required
+                                                minlength="8">
+                                            <button type="button" class="password-toggle" id="togglePasswordConfirm">
+                                                <span class="material-symbols-outlined">visibility_off</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- WiFi Status --}}
+                                <div class="col-12">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern d-block">
+                                            {{ __('messages.owner.outlet.all_outlets.wifi_information') }}
+                                        </label>
+                                        <input type="hidden" name="is_wifi_shown" value="0">
+                                        <div class="status-switch">
+                                            <label class="switch-modern">
+                                                <input type="checkbox" id="is_wifi_shown" name="is_wifi_shown" value="1" {{ old('is_wifi_shown') ? 'checked' : '' }}>
+                                                <span class="slider-modern"></span>
+                                            </label>
+                                            <span class="status-label">
+                                                {{ __('messages.owner.outlet.all_outlets.wifi_description') }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- WiFi Fields --}}
+                                <div class="col-md-6" id="wifiNameField"
+                                    style="display: {{ old('is_wifi_shown') ? 'block' : 'none' }};">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.wifi_name_ssid') }}</label>
+                                        <input type="text" id="user_wifi" name="user_wifi" class="form-control-modern"
+                                            value="{{ old('user_wifi') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_wifi_ssid') }}">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6" id="wifiPasswordField"
+                                    style="display: {{ old('is_wifi_shown') ? 'block' : 'none' }};">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">{{ __('messages.owner.outlet.all_outlets.wifi_password_field') }}</label>
+                                        <div class="password-wrapper">
+                                            <input type="password" id="pass_wifi" name="pass_wifi" class="form-control-modern"
+                                                value="{{ old('pass_wifi') }}" placeholder="{{ __('messages.owner.outlet.all_outlets.placeholder_wifi_pass') }}">
+                                            <button type="button" class="password-toggle" id="toggleWifiPassword">
+                                                <span class="material-symbols-outlined">visibility</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
+                        {{-- Card Footer --}}
+                        <div class="card-footer-modern">
+                            <a href="{{ route('owner.user-owner.outlets.index') }}" class="btn-cancel-modern">
+                                {{ __('messages.owner.outlet.all_outlets.cancel') }}
+                            </a>
+                            <button type="submit" class="btn-submit-modern">
+                                {{ __('messages.owner.outlet.all_outlets.create_outlet') }}
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                {{-- End sections-container --}}
+            </div>
 
-                {{-- Action Buttons --}}
-                <div class="form-actions">
-                    <button type="button" id="cancelBtn" class="btn-cancel">
-                        <i class="fas fa-times"></i>
-                        {{ __('messages.owner.outlet.all_outlets.cancel') }}
-                    </button>
-                    <button type="submit" id="saveBtn" class="btn-save">
-                        <i class="fas fa-save"></i>
-                        <span class="btn-label">{{ __('messages.owner.outlet.all_outlets.save') }}</span>
-                        <span class="spinner-border spinner-border-sm d-none"></span>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
+            {{-- Crop Modals --}}
+            <div class="modal fade" id="cropBackgroundModal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="max-width: 650px;">
+                    <div class="modal-content modern-modal">
+                        <div class="modal-header modern-modal-header">
+                            <h5 class="modal-title">
+                                <span class="material-symbols-outlined">crop</span>
+                                {{ __('messages.owner.outlet.all_outlets.crop_background_picture') }}
+                            </h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
 
-    {{-- Crop Modals --}}
-    <div class="modal fade" id="cropBackgroundModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="max-width: 650px">
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header bg-choco text-white border-0" style="background: #8a1000 !important;">
-                    <h5 class="modal-title font-weight-bold">
-                        <i class="fas fa-crop mr-2"></i>{{ __('messages.owner.outlet.all_outlets.crop_background_picture') }}
-                    </h5>
-                    <button type="button" class="close text-white" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="alert alert-info border-0 mb-3"
-                        style="background: #eff6ff; border: 1px solid #dbeafe !important; color: #1d4ed8;">
-                        <i class="fas fa-info-circle mr-2"></i>
-                        <small>{{ __('messages.owner.outlet.all_outlets.drag_to_move_scroll_zoom') }}</small>
+                        <div class="modal-body p-4">
+                            <div class="alert alert-info alert-modern mb-3">
+                                <div class="alert-icon">
+                                    <span class="material-symbols-outlined">info</span>
+                                </div>
+                                <div class="alert-content">
+                                    <small>{{ __('messages.owner.outlet.all_outlets.drag_to_move_scroll_zoom') }}</small>
+                                </div>
+                            </div>
+
+                            <div class="img-container-crop">
+                                <img id="imageToCropBackground" style="max-width: 100%;" alt="Background to crop">
+                            </div>
+                        </div>
+
+                        <div class="modal-footer modern-modal-footer">
+                            <button type="button" class="btn-cancel-modern" data-dismiss="modal">
+                                <span class="material-symbols-outlined">close</span>
+                                {{ __('messages.owner.outlet.all_outlets.cancel') }}
+                            </button>
+                            <button type="button" id="cropBackgroundBtn" class="btn-submit-modern">
+                                <span class="material-symbols-outlined">check</span>
+                                {{ __('messages.owner.outlet.all_outlets.crop_save') }}
+                            </button>
+                        </div>
                     </div>
-                    <div class="img-container-crop">
-                        <img id="imageToCropBackground" style="max-width: 100%;">
-                    </div>
                 </div>
-                <div class="modal-footer border-0 bg-light">
-                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
-                        <i class="fas fa-times mr-2"></i>Cancel
-                    </button>
-                    <button type="button" id="cropBackgroundBtn" class="btn btn-md px-4"
-                        style="background: #8a1000; color: white; border: none;">
-                        <i class="fas fa-check mr-2"></i>Crop
-                    </button>
+            </div>
+
+            <div class="modal fade" id="cropLogoModal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="max-width: 650px;">
+                    <div class="modal-content modern-modal">
+                        <div class="modal-header modern-modal-header">
+                            <h5 class="modal-title">
+                                <span class="material-symbols-outlined">crop</span>
+                                {{ __('messages.owner.outlet.all_outlets.crop_logo_title') }}
+                            </h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+
+                        <div class="modal-body p-4">
+                            <div class="alert alert-info alert-modern mb-3">
+                                <div class="alert-icon">
+                                    <span class="material-symbols-outlined">info</span>
+                                </div>
+                                <div class="alert-content">
+                                    <small>{{ __('messages.owner.outlet.all_outlets.drag_to_move_scroll_zoom') }}</small>
+                                </div>
+                            </div>
+
+                            <div class="img-container-crop">
+                                <img id="imageToCropLogo" style="max-width: 100%;" alt="Logo to crop">
+                            </div>
+                        </div>
+
+                        <div class="modal-footer modern-modal-footer">
+                            <button type="button" class="btn-cancel-modern" data-dismiss="modal">
+                                <span class="material-symbols-outlined">close</span>
+                                {{ __('messages.owner.outlet.all_outlets.cancel') }}
+                            </button>
+                            <button type="button" id="cropLogoBtn" class="btn-submit-modern">
+                                <span class="material-symbols-outlined">check</span>
+                                {{ __('messages.owner.outlet.all_outlets.crop_save') }}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="modal fade" id="cropLogoModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-lg modal-dialog-centered" role="document" style="max-width: 650px">
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header bg-choco text-white border-0" style="background: #8a1000 !important;">
-                    <h5 class="modal-title font-weight-bold">
-                        <i class="fas fa-crop mr-2"></i>Crop Logo
-                    </h5>
-                    <button type="button" class="close text-white" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="alert alert-info border-0 mb-3"
-                        style="background: #eff6ff; border: 1px solid #dbeafe !important; color: #1d4ed8;">
-                        <i class="fas fa-info-circle mr-2"></i>
-                        <small>{{ __('messages.owner.outlet.all_outlets.drag_to_move_scroll_zoom') }}</small>
-                    </div>
-                    <div class="img-container-crop">
-                        <img id="imageToCropLogo" style="max-width: 100%;">
-                    </div>
-                </div>
-                <div class="modal-footer border-0 bg-light">
-                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
-                        <i class="fas fa-times mr-2"></i>Cancel
-                    </button>
-                    <button type="button" id="cropLogoBtn" class="btn btn-md px-4"
-                        style="background: #8a1000; color: white; border: none;">
-                        <i class="fas fa-check mr-2"></i>Crop
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <style>
-        /* ===== Modern Outlet Editor ===== */
-        .modern-outlet-editor {
-            --primary: #8a1000;
-            --primary-dark: #6b0c00;
-            --bg-light: #f8f6f5;
-            --text-dark: #1d0e0c;
-            --border-color: rgba(138, 16, 0, 0.2);
-            --radius: 0.75rem;
-            --radius-lg: 1.5rem;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background: var(--bg-light);
-        }
-
-        .editor-toolbar {
-            padding: 0.75rem 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            background: white;
-        }
-
-        .btn-back {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-dark);
-            background: transparent;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        .btn-back:hover {
-            background: rgba(138, 16, 0, 0.1);
-            color: var(--primary);
-            transform: scale(1.05);
-        }
-
-        .editor-content {
-            flex: 1;
-            padding: 2rem 1.5rem 100px;
-            overflow-y: auto;
-        }
-
-        .editor-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .page-heading {
-            margin-bottom: 2rem;
-        }
-
-        .page-title {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin: 0;
-        }
-
-        /* ===== Alerts ===== */
-        .alert {
-            padding: 1rem 1.25rem;
-            border-radius: var(--radius);
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            border: none;
-        }
-
-        .alert i {
-            font-size: 1.25rem;
-            flex-shrink: 0;
-            margin-top: 0.125rem;
-        }
-
-        .alert-danger {
-            background: #fee;
-            color: #c00;
-        }
-
-        .alert-success {
-            background: #efe;
-            color: #0a0;
-        }
-
-        .alert-info {
-            background: #eff6ff;
-            color: #1d4ed8;
-        }
-
-        .alert ul {
-            margin: 0.5rem 0 0 0;
-            padding-left: 1.25rem;
-        }
-
-        .alert li {
-            margin: 0.25rem 0;
-        }
-
-        /* ===== Sections Container ===== */
-        .sections-container {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .section-item {
-            background: white;
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border-color);
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .section-item:hover {
-            box-shadow: 0 4px 12px rgba(138, 16, 0, 0.08);
-        }
-
-        .section-item[open] {
-            border-color: var(--primary);
-        }
-
-        .section-header {
-            padding: 1.25rem 1.5rem;
-            background: linear-gradient(135deg, rgba(138, 16, 0, 0.03) 0%, rgba(138, 16, 0, 0.01) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            user-select: none;
-            list-style: none;
-        }
-
-        .section-header::-webkit-details-marker {
-            display: none;
-        }
-
-        .section-header-content {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .section-header-content i {
-            color: var(--primary);
-            font-size: 1.25rem;
-        }
-
-        .section-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        .section-body {
-            padding: 1.5rem;
-            border-top: 1px solid rgba(138, 16, 0, 0.1);
-        }
-
-        /* ===== Form Grid ===== */
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .form-grid-2 {
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        }
-
-        /* ===== Form Grid 2x2 (Fixed 2 columns) ===== */
-        .form-grid-2x2 {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.5rem;
-        }
-
-        /* Responsive untuk mobile tetap 1 kolom */
-        @media (max-width: 768px) {
-            .form-grid-2x2 {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .form-group-full {
-            grid-column: 1 / -1;
-        }
-
-        .form-label {
-            font-size: 0.9375rem;
-            font-weight: 600;
-            color: var(--text-dark);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .form-label.required::after {
-            content: '*';
-            color: #dc2626;
-            margin-left: 0.25rem;
-        }
-
-        .form-input {
-            padding: 0.75rem 1rem;
-            border: 1.5px solid rgba(138, 16, 0, 0.2);
-            border-radius: var(--radius);
-            font-size: 0.9375rem;
-            transition: all 0.3s ease;
-            background: white;
-            width: 100%;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(138, 16, 0, 0.1);
-        }
-
-        .form-input:disabled {
-            background: rgba(138, 16, 0, 0.05);
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
-
-        .form-input.is-invalid {
-            border-color: #dc2626;
-        }
-
-        .form-error {
-            color: #dc2626;
-            font-size: 0.875rem;
-            display: flex;
-            align-items: center;
-            gap: 0.375rem;
-        }
-
-        .form-hint {
-            color: #6b7280;
-            font-size: 0.8125rem;
-            display: flex;
-            align-items: center;
-            gap: 0.375rem;
-        }
-
-        .char-counter {
-            display: block;
-            text-align: right;
-            color: #6c757d;
-            font-size: 0.8rem;
-            margin-top: 0.25rem;
-        }
-
-        /* ===== Input Variations ===== */
-        .input-with-button {
-            display: flex;
-            position: relative;
-        }
-
-        .input-prefix {
-            position: absolute;
-            left: 0.875rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6b7280;
-            font-weight: 500;
-            pointer-events: none;
-            z-index: 1;
-            font-size: 0.9375rem;
-        }
-
-        /* DEFAULT: Input dengan button TANPA prefix = padding normal */
-        .input-with-button .form-input {
-            flex: 1;
-            border-top-right-radius: 0;
-            border-bottom-right-radius: 0;
-            padding-left: 1rem;
-            /* TAMBAHKAN INI - padding normal seperti input biasa */
-        }
-
-        /* KHUSUS: Hanya yang punya prefix dapat padding ekstra */
-        .input-with-button:has(.input-prefix) .form-input {
-            padding-left: 2.25rem;
-        }
-
-        .input-button {
-            padding: 0 1.5rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-top-right-radius: var(--radius);
-            border-bottom-right-radius: var(--radius);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-        }
-
-        .input-button:hover {
-            background: var(--primary-dark);
-        }
-
-        .input-with-icon {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 0.875rem;
-            color: #9ca3af;
-            pointer-events: none;
-            z-index: 1;
-            font-size: 0.9375rem;
-        }
-
-        .input-with-icon .form-input {
-            padding-left: 2.5rem;
-        }
-
-        .input-with-prefix {
-            position: relative;
-        }
-
-        .input-with-prefix .input-prefix {
-            left: 0.875rem;
-        }
-
-        .input-with-prefix .form-input {
-            padding-left: 2.75rem;
-        }
-
-        .input-button-inline {
-            position: absolute;
-            right: 0.5rem;
-            top: 50%;
-            transform: translateY(-50%);
-            padding: 0.375rem 0.875rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 0.375rem;
-            font-weight: 600;
-            font-size: 0.8125rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            z-index: 2;
-        }
-
-        .input-button-inline:hover {
-            background: var(--primary-dark);
-        }
-
-        .input-with-icon:has(.input-button-inline) .form-input {
-            padding-right: 5.5rem;
-        }
-
-        /* Fix untuk password wifi yang ada icon DAN button */
-        .input-with-button .input-with-icon {
-            flex: 1;
-            position: relative;
-        }
-
-        .input-with-button .input-with-icon .form-input {
-            width: 100%;
-            border-top-right-radius: 0;
-            border-bottom-right-radius: 0;
-            padding-left: 2.5rem;
-        }
-
-        .input-with-button .input-button {
-            border-top-left-radius: 0;
-            border-bottom-left-radius: 0;
-        }
-
-        .select-wrapper {
-            position: relative;
-        }
-
-        .loading-spinner {
-            position: absolute;
-            right: 2.5rem;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 1rem;
-            height: 1rem;
-            border: 2px solid var(--primary);
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: translateY(-50%) rotate(360deg);
-            }
-        }
-
-        /* ===== Status Messages ===== */
-        .status-message {
-            margin-top: 0.5rem;
-            padding: 0.5rem 0.75rem;
-            border-radius: var(--radius);
-            font-size: 0.85rem;
-            font-weight: 500;
-            display: none;
-        }
-
-        .status-message.show {
-            display: block;
-        }
-
-        .status-message.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .status-message.error {
-            background: #ffe5e5;
-            color: #cc0000;
-            border: 1px solid #ff9999;
-        }
-
-        /* ===== Toggle Switch ===== */
-        .toggle-group {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1.25rem;
-            background: rgba(138, 16, 0, 0.02);
-            border-radius: var(--radius);
-            border: 1px solid rgba(138, 16, 0, 0.1);
-        }
-
-        .toggle-label {
-            font-weight: 600;
-            color: var(--text-dark);
-            margin: 0 0 0.25rem 0;
-        }
-
-        .toggle-description {
-            font-size: 0.875rem;
-            color: #6b7280;
-            margin: 0;
-        }
-
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 52px;
-            height: 28px;
-            flex-shrink: 0;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #d1d5db;
-            transition: 0.3s;
-            border-radius: 34px;
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: 0.3s;
-            border-radius: 50%;
-        }
-
-        .toggle-switch input:checked+.toggle-slider {
-            background-color: var(--primary);
-        }
-
-        .toggle-switch input:checked+.toggle-slider:before {
-            transform: translateX(24px);
-        }
-
-        /* ===== Media Upload ===== */
-        .media-upload-group {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .media-preview {
-            position: relative;
-            width: 100%;
-            max-width: 400px;
-            border-radius: var(--radius);
-            overflow: hidden;
-            border: 2px solid rgba(138, 16, 0, 0.2);
-        }
-
-        .media-preview-logo {
-            max-width: 200px;
-            aspect-ratio: 1;
-        }
-
-        .media-image {
-            width: 100%;
-            display: block;
-        }
-
-        .media-image-cover {
-            aspect-ratio: 16/9;
-            object-fit: cover;
-        }
-
-        .media-image-logo {
-            aspect-ratio: 1;
-            object-fit: contain;
-            background: #f9fafb;
-            padding: 1rem;
-        }
-
-        .media-remove-btn {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: rgba(220, 38, 38, 0.9);
-            color: white;
-            border: none;
-            font-size: 1.5rem;
-            line-height: 1;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-
-        .media-remove-btn:hover {
-            background: #dc2626;
-            transform: scale(1.1);
-        }
-
-        .btn-upload {
-            padding: 0.75rem 1.5rem;
-            background: white;
-            border: 2px dashed rgba(138, 16, 0, 0.3);
-            border-radius: var(--radius);
-            color: var(--primary);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-
-        .btn-upload:hover {
-            border-color: var(--primary);
-            background: rgba(138, 16, 0, 0.05);
-        }
-
-        /* ===== Form Actions (Small buttons, after content) ===== */
-        .form-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 0.75rem;
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid rgba(138, 16, 0, 0.1);
-        }
-
-        .btn-cancel,
-        .btn-save {
-            padding: 0.625rem 1.5rem;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            height: 40px;
-            min-width: 120px;
-            border: none;
-        }
-
-        .btn-cancel {
-            background: #f9fafb;
-            color: #6b7280;
-            border: 1px solid #d1d5db;
-        }
-
-        .btn-cancel:hover {
-            background: #f3f4f6;
-            border-color: #9ca3af;
-            color: #374151;
-        }
-
-        .btn-save {
-            background: var(--primary);
-            color: white;
-            position: relative;
-        }
-
-        .btn-save:hover:not(:disabled) {
-            background: var(--primary-dark);
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(138, 16, 0, 0.15);
-        }
-
-        .btn-save:active:not(:disabled) {
-            transform: translateY(0);
-            box-shadow: 0 1px 4px rgba(138, 16, 0, 0.1);
-        }
-
-        .btn-save:disabled {
-            background: #9ca3af;
-            cursor: not-allowed;
-            opacity: 0.6;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .btn-save .spinner-border {
-            width: 0.875rem;
-            height: 0.875rem;
-            border-width: 2px;
-            border-color: currentColor transparent currentColor transparent;
-            margin-left: 0.5rem;
-        }
-
-        /* Loading state */
-        .btn-save.loading .btn-label {
-            opacity: 0.8;
-        }
-
-        .btn-save.loading .spinner-border {
-            display: inline-block !important;
-        }
-
-        /* ===== Responsive ===== */
-        @media (max-width: 768px) {
-            .editor-content {
-                padding: 1rem 1rem 100px;
-            }
-
-            .page-title {
-                font-size: 1.5rem;
-            }
-
-            .form-grid,
-            .form-grid-2 {
-                grid-template-columns: 1fr;
-            }
-
-            .section-header {
-                padding: 1rem;
-            }
-
-            .section-body {
-                padding: 1rem;
-            }
-
-            .form-actions {
-                flex-direction: column;
-                gap: 0.75rem;
-                margin-top: 1.5rem;
-                padding-top: 1rem;
-            }
-
-            .btn-cancel,
-            .btn-save {
-                width: 100%;
-                min-width: unset;
-                height: 42px;
-                font-size: 0.9375rem;
-            }
-        }
-
-        /* ===== Cropper Modal Adjustments ===== */
-        .img-container-crop {
-            max-height: 400px;
-            overflow: hidden;
-        }
-
-        .modal-content {
-            border-radius: var(--radius-lg);
-        }
-
-        .editor-header {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .btn-back {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 6px;
-        }
-
-        .page-title {
-            margin: 0;
-        }
-    </style>
 @endsection
 @push('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // ==== Cropper variables ====
-            let cropperBackground = null;
-            let cropperLogo = null;
-            let currentBackgroundFile = null;
-            let currentLogoFile = null;
-            const MAX_SIZE = 2 * 1024 * 1024;
-            const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'];
+            
+            // Initialize Background Image Cropper (16:9 Landscape)
+            ImageCropper.init({
+                id: 'background',
+                inputId: 'image',
+                previewId: 'imagePreview',
+                previewWrapperId: 'imagePreviewWrapper',
+                modalId: 'cropBackgroundModal',
+                imageToCropId: 'imageToCropBackground',
+                cropBtnId: 'cropBackgroundBtn',
+                clearBtnId: 'clearImageBtn',
+                aspectRatio: 16 / 9, // Landscape crop
+                outputWidth: 1920,
+                outputHeight: 1080
+            });
+
+            // Initialize Logo Cropper (1:1 Square)
+            ImageCropper.init({
+                id: 'logo',
+                inputId: 'logo',
+                previewId: 'imagePreview2',
+                previewWrapperId: 'imagePreviewWrapper2',
+                modalId: 'cropLogoModal',
+                imageToCropId: 'imageToCropLogo',
+                cropBtnId: 'cropLogoBtn',
+                clearBtnId: 'clearImageBtn2',
+                aspectRatio: 1, // Square crop
+                outputWidth: 800,
+                outputHeight: 800
+            });
+
+            // Inisialisasi untuk LOGO
+            ImageRemoveHandler.init({
+                removeBtnId: 'removeLogoBtn',
+                imageInputId: 'logo', 
+                imagePreviewId: 'imagePreview2', 
+                uploadPlaceholderId: 'uploadPlaceholderLogo', 
+                confirmRemove: false
+            });
+
+            // Inisialisasi untuk BACKGROUND
+            ImageRemoveHandler.init({
+                removeBtnId: 'removeBackgroundBtn',
+                imageInputId: 'image', 
+                imagePreviewId: 'imagePreview', 
+                uploadPlaceholderId: 'uploadPlaceholderBg', 
+                confirmRemove: false
+            });
 
             // ==== Character counters ====
             function updateCharCounter(input, counterId) {
@@ -1343,7 +777,6 @@
                 wifiToggle.addEventListener('change', function() {
                     wifiFields.style.display = this.checked ? 'grid' : 'none';
                 });
-                // Set initial state
                 wifiFields.style.display = wifiToggle.checked ? 'grid' : 'none';
             }
 
@@ -1357,106 +790,124 @@
                         e.stopPropagation();
                         const isPassword = input.type === 'password';
                         input.type = isPassword ? 'text' : 'password';
-                        this.textContent = isPassword ? 'Hide' : 'Show';
+                        this.textContent = isPassword ? '{{ __('messages.owner.outlet.all_outlets.hide') }}' : '{{ __('messages.owner.outlet.all_outlets.show') }}';
                     });
                 }
             }
 
             setupPasswordToggle('togglePassword', 'password');
             setupPasswordToggle('togglePasswordConfirm', 'password_confirmation');
-            setupPasswordToggle('toggleWifiPassword',
-                'pass_wifi');
+            setupPasswordToggle('toggleWifiPassword', 'pass_wifi');
 
-            // ==== Username check ====
-            const btnCheck = document.getElementById('btnCheckUsername');
-            const usernameInput = document.getElementById('username');
-            const statusDiv = document.getElementById('usernameStatus');
-            const checkUrl = document.getElementById('usernameCheckUrl')?.value;
+            // ==== Helper Functions ====
+            function setSpinnerLoading(spinnerId, statusId, isLoading) {
+                const spinner = document.getElementById(spinnerId);
+                const statusDiv = document.getElementById(statusId);
 
-            if (btnCheck && usernameInput && checkUrl) {
-                async function checkUsername() {
-                    const username = usernameInput.value.trim();
-
-                    if (!username) {
-                        showStatus('error', 'Username tidak boleh kosong');
-                        return;
-                    }
-
-                    if (username.length < 3 || username.length > 30) {
-                        showStatus('error', 'Username harus 3-30 karakter');
-                        return;
-                    }
-
-                    if (!/^[A-Za-z0-9._\-]+$/.test(username)) {
-                        showStatus('error', 'Format username tidak valid');
-                        return;
-                    }
-
-                    btnCheck.disabled = true;
-                    const label = btnCheck.querySelector('.label');
-                    const spinner = btnCheck.querySelector('.spinner-border');
-                    if (label) label.style.display = 'none';
+                if (isLoading) {
                     if (spinner) spinner.classList.remove('d-none');
+                    if (statusDiv) statusDiv.innerHTML = '';
+                } else {
+                    if (spinner) spinner.classList.add('d-none');
+                }
+            }
+
+            function updateStatusMessage(elementId, type, message) {
+                const statusDiv = document.getElementById(elementId);
+                if (!statusDiv) return;
+
+                let colorClass = 'text-muted';
+
+                if (type === 'success') {
+                    colorClass = 'text-success';
+                } else if (type === 'error') {
+                    colorClass = 'text-danger';
+                }
+
+                statusDiv.innerHTML = `<div class="${colorClass}">${message}</div>`;
+
+                const inputId = elementId.replace('Status', '');
+                const inputEl = document.getElementById(inputId);
+                if (inputEl) {
+                    if (type === 'success') {
+                        inputEl.classList.remove('is-invalid');
+                        inputEl.classList.add('is-valid');
+                    } else if (type === 'error') {
+                        inputEl.classList.remove('is-valid');
+                        inputEl.classList.add('is-invalid');
+                    } else {
+                        inputEl.classList.remove('is-valid', 'is-invalid');
+                    }
+                }
+            }
+
+            // ==== Username Check Logic ====
+            const usernameInput = document.getElementById('username');
+            const usernameCheckUrl = document.getElementById('usernameCheckUrl')?.value;
+
+            if (usernameInput && usernameCheckUrl) {
+                async function checkUsername() {
+                    const val = usernameInput.value.trim();
+
+                    if (!val) {
+                        setSpinnerLoading('usernameLoading', 'usernameStatus', false);
+                        updateStatusMessage('usernameStatus', 'neutral', '');
+                        return;
+                    }
+
+                    if (val.length < 3 || val.length > 30 || !/^[A-Za-z0-9._\-]+$/.test(val)) {
+                        setSpinnerLoading('usernameLoading', 'usernameStatus', false);
+                        updateStatusMessage('usernameStatus', 'error', '{{ __('messages.owner.outlet.all_outlets.js_username_format') }}');
+                        return;
+                    }
 
                     try {
-                        const response = await fetch(`${checkUrl}?username=${encodeURIComponent(username)}`, {
+                        const response = await fetch(`${usernameCheckUrl}?username=${encodeURIComponent(val)}`, {
                             method: 'GET',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
-                                    ?.content ||
-                                    document.querySelector('[name="_token"]')?.value || ''
+                                'Accept': 'application/json'
                             }
                         });
 
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
+                        if (!response.ok) throw new Error('Network error');
 
                         const data = await response.json();
 
                         if (data.available) {
-                            showStatus('success', 'Username tersedia');
+                            updateStatusMessage('usernameStatus', 'success', '{{ __('messages.owner.outlet.all_outlets.username_available') }}');
                         } else {
-                            showStatus('error', 'Username sudah digunakan');
+                            updateStatusMessage('usernameStatus', 'error', '{{ __('messages.owner.outlet.all_outlets.username_used') }}');
                         }
                     } catch (error) {
-                        showStatus('error', 'Terjadi kesalahan saat memeriksa username');
+                        console.error(error);
                     } finally {
-                        btnCheck.disabled = false;
-                        if (label) label.style.display = 'inline';
-                        if (spinner) spinner.classList.add('d-none');
+                        setSpinnerLoading('usernameLoading', 'usernameStatus', false);
                     }
                 }
 
-                function showStatus(type, message) {
-                    if (statusDiv) {
-                        statusDiv.className = `status-message show ${type}`;
-                        statusDiv.textContent = message;
-                    }
-                }
-
-                btnCheck.addEventListener('click', checkUsername);
-
-                let debounceTimer;
+                let userDebounce;
                 usernameInput.addEventListener('input', function() {
-                    clearTimeout(debounceTimer);
-                    if (statusDiv) statusDiv.className = 'status-message';
-                    debounceTimer = setTimeout(() => {
-                        if (usernameInput.value.trim().length >= 3) {
-                            checkUsername();
-                        }
-                    }, 800);
+                    clearTimeout(userDebounce);
+                    const val = this.value.trim();
+
+                    if (val.length > 0) {
+                        setSpinnerLoading('usernameLoading', 'usernameStatus', true);
+                    } else {
+                        setSpinnerLoading('usernameLoading', 'usernameStatus', false);
+                        updateStatusMessage('usernameStatus', 'neutral', '');
+                    }
+
+                    userDebounce = setTimeout(checkUsername, 800);
                 });
             }
 
-            // ==== Slug check ====
-            const btnCheckSlug = document.getElementById('btnCheckSlug');
+            // ==== Slug Check Logic ====
             const slugInput = document.getElementById('slug');
-            const slugStatusDiv = document.getElementById('slugStatus');
             const slugCheckUrl = document.getElementById('slugCheckUrl')?.value;
+            const nameInput = document.getElementById('name');
 
-            if (btnCheckSlug && slugInput && slugCheckUrl) {
+            if (slugInput && slugCheckUrl) {
                 function normalizeSlug(s) {
                     return s.toLowerCase().trim()
                         .replace(/[\s]+/g, '-')
@@ -1466,322 +917,76 @@
                 }
 
                 async function checkSlug() {
-                    const raw = slugInput.value.trim();
-                    const val = normalizeSlug(raw);
+                    let val = slugInput.value;
+                    const normalized = normalizeSlug(val);
 
-                    if (raw !== val) {
-                        slugInput.value = val;
+                    if (val !== normalized) {
+                        slugInput.value = normalized;
+                        val = normalized;
                     }
 
                     if (!val) {
-                        showSlugStatus('neutral', '');
+                        setSpinnerLoading('slugLoading', 'slugStatus', false);
+                        updateStatusMessage('slugStatus', 'neutral', '');
                         return;
                     }
 
                     if (val.length < 3 || val.length > 30) {
-                        showSlugStatus('error', 'Slug harus 3-30 karakter');
+                        setSpinnerLoading('slugLoading', 'slugStatus', false);
+                        updateStatusMessage('slugStatus', 'error', '{{ __('messages.owner.outlet.all_outlets.js_slug_length') }}');
                         return;
                     }
-
-                    btnCheckSlug.disabled = true;
-                    const label = btnCheckSlug.querySelector('.label');
-                    const spinner = btnCheckSlug.querySelector('.spinner-border');
-                    if (label) label.style.display = 'none';
-                    if (spinner) spinner.classList.remove('d-none');
 
                     try {
                         const response = await fetch(`${slugCheckUrl}?slug=${encodeURIComponent(val)}`, {
                             method: 'GET',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
-                                    ?.content || ''
+                                'Accept': 'application/json'
                             }
                         });
 
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
+                        if (!response.ok) throw new Error('Network error');
 
                         const data = await response.json();
 
                         if (data.available) {
-                            showSlugStatus('success', 'Slug tersedia');
+                            updateStatusMessage('slugStatus', 'success', '{{ __('messages.owner.outlet.all_outlets.slug_available') }}');
                         } else {
-                            showSlugStatus('error', 'Slug sudah digunakan');
+                            updateStatusMessage('slugStatus', 'error', '{{ __('messages.owner.outlet.all_outlets.slug_used') }}');
                         }
                     } catch (error) {
-                        showSlugStatus('error', 'Terjadi kesalahan saat memeriksa slug');
+                        console.error(error);
                     } finally {
-                        btnCheckSlug.disabled = false;
-                        if (label) label.style.display = 'inline';
-                        if (spinner) spinner.classList.add('d-none');
+                        setSpinnerLoading('slugLoading', 'slugStatus', false);
                     }
                 }
 
-                function showSlugStatus(type, message) {
-                    if (slugStatusDiv) {
-                        if (type === 'neutral') {
-                            slugStatusDiv.className = 'status-message';
-                            slugStatusDiv.textContent = '';
-                        } else {
-                            slugStatusDiv.className = `status-message show ${type}`;
-                            slugStatusDiv.textContent = message;
-                        }
-                    }
-                }
-
-                btnCheckSlug.addEventListener('click', checkSlug);
-
-                let debounceTimer;
+                let slugDebounce;
                 slugInput.addEventListener('input', function() {
-                    clearTimeout(debounceTimer);
-                    showSlugStatus('neutral', '');
-                    debounceTimer = setTimeout(() => {
-                        if (slugInput.value.trim().length >= 3) {
-                            checkSlug();
-                        }
-                    }, 800);
+                    clearTimeout(slugDebounce);
+                    const val = this.value.trim();
+
+                    if (val.length > 0) {
+                        setSpinnerLoading('slugLoading', 'slugStatus', true);
+                    } else {
+                        setSpinnerLoading('slugLoading', 'slugStatus', false);
+                        updateStatusMessage('slugStatus', 'neutral', '');
+                    }
+
+                    slugDebounce = setTimeout(checkSlug, 800);
                 });
 
-                // Auto-generate dari name
-                const nameInput = document.getElementById('name');
+                // Auto-generate Slug from Name
                 if (nameInput) {
                     nameInput.addEventListener('blur', () => {
                         if (!slugInput.value.trim() && nameInput.value.trim()) {
                             slugInput.value = normalizeSlug(nameInput.value);
-                            setTimeout(checkSlug, 300);
+                            slugInput.dispatchEvent(new Event('input'));
                         }
                     });
                 }
             }
-
-            // ==== Background Image Upload Handler ====
-            const inputBackground = document.getElementById('image');
-            if (inputBackground) {
-                inputBackground.addEventListener('change', function(e) {
-                    const file = e.target.files[0];
-                    if (!file) return;
-
-                    if (!ALLOWED.includes(file.type)) {
-                        alert('Tipe file tidak didukung. Gunakan JPG, PNG, atau WEBP.');
-                        this.value = '';
-                        return;
-                    }
-
-                    if (file.size > MAX_SIZE) {
-                        alert('Ukuran file lebih dari 2 MB.');
-                        this.value = '';
-                        return;
-                    }
-
-                    currentBackgroundFile = file;
-
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        document.getElementById('imageToCropBackground').src = event.target.result;
-                        $('#cropBackgroundModal').modal('show');
-                    };
-                    reader.readAsDataURL(file);
-                });
-            }
-
-            // ==== Logo Upload Handler ====
-            const inputLogo = document.getElementById('logo');
-            if (inputLogo) {
-                inputLogo.addEventListener('change', function(e) {
-                    const file = e.target.files[0];
-                    if (!file) return;
-
-                    if (!ALLOWED.includes(file.type)) {
-                        alert('Tipe file tidak didukung. Gunakan JPG, PNG, atau WEBP.');
-                        this.value = '';
-                        return;
-                    }
-
-                    if (file.size > MAX_SIZE) {
-                        alert('Ukuran file lebih dari 2 MB.');
-                        this.value = '';
-                        return;
-                    }
-
-                    currentLogoFile = file;
-
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        document.getElementById('imageToCropLogo').src = event.target.result;
-                        $('#cropLogoModal').modal('show');
-                    };
-                    reader.readAsDataURL(file);
-                });
-            }
-
-            // ==== Initialize Cropper Background ====
-            $('#cropBackgroundModal').on('shown.bs.modal', function() {
-                if (cropperBackground) cropperBackground.destroy();
-                const imageElement = document.getElementById('imageToCropBackground');
-                setTimeout(function() {
-                    cropperBackground = new Cropper(imageElement, {
-                        aspectRatio: 16 / 9,
-                        viewMode: 2,
-                        dragMode: 'move',
-                        autoCropArea: 0.9,
-                        guides: true,
-                        center: true,
-                        cropBoxMovable: true,
-                        cropBoxResizable: true,
-                        responsive: true
-                    });
-                }, 300);
-            });
-
-            $('#cropBackgroundModal').on('hidden.bs.modal', function() {
-                if (cropperBackground) {
-                    cropperBackground.destroy();
-                    cropperBackground = null;
-                }
-                currentBackgroundFile = null;
-            });
-            // ==== Crop Background Button ====
-            document.getElementById('cropBackgroundBtn')?.addEventListener('click', function() {
-                if (!cropperBackground) return;
-
-                const btn = this;
-                const originalText = btn.innerHTML;
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
-
-                const isTransparent = currentBackgroundFile.type === 'image/png' || currentBackgroundFile
-                    .type ===
-                    'image/webp';
-                const outputType = isTransparent ? currentBackgroundFile.type : 'image/jpeg';
-                const quality = isTransparent ? 1 : 0.92;
-
-                const canvas = cropperBackground.getCroppedCanvas({
-                    width: 1920,
-                    height: 1080,
-                    imageSmoothingEnabled: true,
-                    imageSmoothingQuality: 'high'
-                });
-
-                canvas.toBlob(function(blob) {
-                    const croppedFile = new File([blob], currentBackgroundFile.name, {
-                        type: outputType,
-                        lastModified: Date.now()
-                    });
-
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(croppedFile);
-                    inputBackground.files = dataTransfer.files;
-
-                    const url = URL.createObjectURL(blob);
-                    const preview = document.getElementById('imagePreview');
-                    if (preview) {
-                        preview.src = url;
-                        preview.style.display = 'block';
-                        const wrapper = document.getElementById('imagePreviewWrapper');
-                        if (wrapper) wrapper.classList.remove('d-none');
-                    }
-
-                    $('#cropBackgroundModal').modal('hide');
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
-                }, outputType, quality);
-            });
-
-            // ==== Initialize Cropper Logo ====
-            $('#cropLogoModal').on('shown.bs.modal', function() {
-                if (cropperLogo) cropperLogo.destroy();
-                const imageElement = document.getElementById('imageToCropLogo');
-                setTimeout(function() {
-                    cropperLogo = new Cropper(imageElement, {
-                        aspectRatio: 1,
-                        viewMode: 2,
-                        dragMode: 'move',
-                        autoCropArea: 0.9,
-                        guides: true,
-                        center: true,
-                        cropBoxMovable: true,
-                        cropBoxResizable: true,
-                        responsive: true
-                    });
-                }, 300);
-            });
-
-            $('#cropLogoModal').on('hidden.bs.modal', function() {
-                if (cropperLogo) {
-                    cropperLogo.destroy();
-                    cropperLogo = null;
-                }
-                currentLogoFile = null;
-            });
-
-            // ==== Crop Logo Button ====
-            document.getElementById('cropLogoBtn')?.addEventListener('click', function() {
-                if (!cropperLogo) return;
-
-                const btn = this;
-                const originalText = btn.innerHTML;
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
-
-                const isTransparent = currentLogoFile.type === 'image/png' || currentLogoFile.type ===
-                    'image/webp';
-                const outputType = isTransparent ? currentLogoFile.type : 'image/jpeg';
-                const quality = isTransparent ? 1 : 0.92;
-                const canvas = cropperLogo.getCroppedCanvas({
-                    width: 800,
-                    height: 800,
-                    imageSmoothingEnabled: true,
-                    imageSmoothingQuality: 'high'
-                });
-
-                canvas.toBlob(function(blob) {
-                    const croppedFile = new File([blob], currentLogoFile.name, {
-                        type: outputType,
-                        lastModified: Date.now()
-                    });
-
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(croppedFile);
-                    inputLogo.files = dataTransfer.files;
-
-                    const url = URL.createObjectURL(blob);
-                    const preview = document.getElementById('imagePreview2');
-                    if (preview) {
-                        preview.src = url;
-                        preview.style.display = 'block';
-                        const wrapper = document.getElementById('imagePreviewWrapper2');
-                        if (wrapper) wrapper.classList.remove('d-none');
-                    }
-
-                    $('#cropLogoModal').modal('hide');
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
-                }, outputType, quality);
-            });
-
-            // ==== Delete Background Handler ====
-            document.getElementById('clearImageBtn')?.addEventListener('click', function() {
-                if (confirm('Apakah Anda yakin ingin menghapus background picture?')) {
-                    const wrapper = document.getElementById('imagePreviewWrapper');
-                    const preview = document.getElementById('imagePreview');
-                    if (wrapper) wrapper.classList.add('d-none');
-                    if (preview) preview.src = '';
-                    if (inputBackground) inputBackground.value = '';
-                }
-            });
-
-            // ==== Delete Logo Handler ====
-            document.getElementById('clearImageBtn2')?.addEventListener('click', function() {
-                if (confirm('Apakah Anda yakin ingin menghapus logo?')) {
-                    const wrapper = document.getElementById('imagePreviewWrapper2');
-                    const preview = document.getElementById('imagePreview2');
-                    if (wrapper) wrapper.classList.add('d-none');
-                    if (preview) preview.src = '';
-                    if (inputLogo) inputLogo.value = '';
-                }
-            });
 
             // ==== Region Selector (Indonesia) ====
             const API_BASE = "https://www.emsifa.com/api-wilayah-indonesia/api";
@@ -1799,17 +1004,6 @@
             const spnCity = document.getElementById('spnCity');
             const spnDistrict = document.getElementById('spnDistrict');
             const spnVillage = document.getElementById('spnVillage');
-
-            // Ambil translated text dari Blade
-        const translations = {
-            chooseProvince: '{{ __("messages.owner.outlet.all_outlets.choose_province") }}',
-            chooseCity: '{{ __("messages.owner.outlet.all_outlets.choose_city") }}',
-            chooseDistrict: '{{ __("messages.owner.outlet.all_outlets.choose_district") }}',
-            chooseVillage: '{{ __("messages.owner.outlet.all_outlets.choose_village") }}',
-            selectProvinceFirst: '{{ __("messages.owner.outlet.all_outlets.select_province_first") }}',
-            selectCityFirst: '{{ __("messages.owner.outlet.all_outlets.select_city_first") }}',
-            selectDistrictFirst: '{{ __("messages.owner.outlet.all_outlets.select_district_first") }}',
-        };
 
             function setLoading(selectEl, spinnerEl, isLoading, placeholder) {
                 if (!selectEl) return;
@@ -1838,7 +1032,7 @@
             function loadOptions(url, selectEl, spinnerEl, defaultMsg) {
                 if (!selectEl) return Promise.resolve();
 
-                setLoading(selectEl, spinnerEl, true, 'Loading...');
+                setLoading(selectEl, spinnerEl, true, '{{ __('messages.owner.outlet.all_outlets.loading') }}');
                 return fetch(url)
                     .then(r => r.json())
                     .then(list => {
@@ -1851,210 +1045,196 @@
                         });
                     })
                     .catch(() => {
-                        resetSelect(selectEl, 'Failed to load data');
+                        resetSelect(selectEl, '{{ __('messages.owner.outlet.all_outlets.failed_to_load_data') }}');
                     })
                     .finally(() => setLoading(selectEl, spinnerEl, false));
             }
 
-            // Load Provinces on page load
-if (provinceSelect) {
-    loadOptions(
-        `${API_BASE}/provinces.json`,
-        provinceSelect,
-        spnProvince,
-        translations.chooseProvince
-    );
-}
+            // Load Provinces
+            if (provinceSelect) {
+                loadOptions(`${API_BASE}/provinces.json`, provinceSelect, spnProvince, '{{ __('messages.owner.outlet.all_outlets.choose_province') }}');
+            }
 
-// Province Change Handler
-provinceSelect?.addEventListener('change', function() {
-    fillHiddenName(provinceSelect, provinceNameInput);
-    resetSelect(citySelect, translations.chooseCity);
-    resetSelect(districtSelect, translations.chooseDistrict);
-    resetSelect(villageSelect, translations.chooseVillage);
-    if (citySelect) citySelect.disabled = true;
-    if (districtSelect) districtSelect.disabled = true;
-    if (villageSelect) villageSelect.disabled = true;
+            // Province Change Handler
+            provinceSelect?.addEventListener('change', function() {
+                fillHiddenName(provinceSelect, provinceNameInput);
+                resetSelect(citySelect, '{{ __('messages.owner.outlet.all_outlets.choose_city') }}');
+                resetSelect(districtSelect, '{{ __('messages.owner.outlet.all_outlets.choose_district') }}');
+                resetSelect(villageSelect, '{{ __('messages.owner.outlet.all_outlets.choose_village') }}');
+                if (citySelect) citySelect.disabled = true;
+                if (districtSelect) districtSelect.disabled = true;
+                if (villageSelect) villageSelect.disabled = true;
 
-    if (this.value) {
-        loadOptions(
-            `${API_BASE}/regencies/${this.value}.json`,
-            citySelect,
-            spnCity,
-            translations.chooseCity
-        );
-    }
-});
+                if (this.value) {
+                    loadOptions(`${API_BASE}/regencies/${this.value}.json`, citySelect, spnCity, '{{ __('messages.owner.outlet.all_outlets.choose_city') }}');
+                }
+            });
 
-// City Change Handler
-citySelect?.addEventListener('change', function() {
-    fillHiddenName(citySelect, cityNameInput);
-    resetSelect(districtSelect, translations.chooseDistrict);
-    resetSelect(villageSelect, translations.chooseVillage);
-    if (districtSelect) districtSelect.disabled = true;
-    if (villageSelect) villageSelect.disabled = true;
+            // City Change Handler
+            citySelect?.addEventListener('change', function() {
+                fillHiddenName(citySelect, cityNameInput);
+                resetSelect(districtSelect, '{{ __('messages.owner.outlet.all_outlets.choose_district') }}');
+                resetSelect(villageSelect, '{{ __('messages.owner.outlet.all_outlets.choose_village') }}');
+                if (districtSelect) districtSelect.disabled = true;
+                if (villageSelect) villageSelect.disabled = true;
 
-    if (this.value) {
-        loadOptions(
-            `${API_BASE}/districts/${this.value}.json`,
-            districtSelect,
-            spnDistrict,
-            translations.chooseDistrict
-        );
-    }
-});
+                if (this.value) {
+                    loadOptions(`${API_BASE}/districts/${this.value}.json`, districtSelect, spnDistrict, '{{ __('messages.owner.outlet.all_outlets.choose_district') }}');
+                }
+            });
 
-// District Change Handler
-districtSelect?.addEventListener('change', function() {
-    fillHiddenName(districtSelect, districtNameInput);
-    resetSelect(villageSelect, translations.chooseVillage);
-    if (villageSelect) villageSelect.disabled = true;
+            // District Change Handler
+            districtSelect?.addEventListener('change', function() {
+                fillHiddenName(districtSelect, districtNameInput);
+                resetSelect(villageSelect, '{{ __('messages.owner.outlet.all_outlets.choose_village') }}');
+                if (villageSelect) villageSelect.disabled = true;
 
-    if (this.value) {
-        loadOptions(
-            `${API_BASE}/villages/${this.value}.json`,
-            villageSelect,
-            spnVillage,
-            translations.chooseVillage
-        );
-    }
-});
+                if (this.value) {
+                    loadOptions(`${API_BASE}/villages/${this.value}.json`, villageSelect, spnVillage, '{{ __('messages.owner.outlet.all_outlets.choose_village') }}');
+                }
+            });
 
             // Village Change Handler
             villageSelect?.addEventListener('change', function() {
                 fillHiddenName(villageSelect, villageNameInput);
             });
 
-            // Form submission handling
+            // ==== Form Submission ====
             const outletForm = document.getElementById('outletForm');
-            const saveBtn = document.getElementById('saveBtn');
-            const cancelBtn = document.getElementById('cancelBtn');
+            const saveBtn = document.querySelector('.btn-submit-modern');
+            const cancelBtn = document.querySelector('.btn-cancel-modern');
 
             // Cancel button
-            cancelBtn.addEventListener('click', function(e) {
-                e.preventDefault();
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', function(e) {
+                    
+                    let hasChanges = false;
+                    const keyFields = ['name', 'username', 'email'];
+                    
+                    keyFields.forEach(fieldName => {
+                        const field = document.querySelector(`input[name="${fieldName}"]`);
+                        if (field && field.value.trim()) {
+                            hasChanges = true;
+                        }
+                    });
 
-                // Simple check for changes
-                let hasChanges = false;
+                    const confirmMsg = hasChanges ?
+                        '{{ __('messages.owner.outlet.all_outlets.js_unsaved_changes') }}' :
+                        '{{ __('messages.owner.outlet.all_outlets.are_you_sure_cancel') }}';
 
-                // Check only key fields
-                const nameInput = document.querySelector('input[name="name"]');
-                const usernameInput = document.querySelector('input[name="username"]');
-                const emailInput = document.querySelector('input[name="email"]');
-
-                if ((nameInput && nameInput.value.trim()) ||
-                    (usernameInput && usernameInput.value.trim()) ||
-                    (emailInput && emailInput.value.trim())) {
-                    hasChanges = true;
-                }
-
-                const confirmMsg = hasChanges ?
-                    '{{ __('You have unsaved changes. Are you sure you want to cancel?') }}' :
-                    '{{ __('Are you sure you want to cancel?') }}';
-
-                if (confirm(confirmMsg)) {
-                    window.location.href = '{{ route('owner.user-owner.outlets.index') }}';
-                }
-            });
+                    if (hasChanges && !confirm(confirmMsg)) {
+                         e.preventDefault();
+                    }
+                });
+            }
 
             // Form submission handler
-            outletForm.addEventListener('submit', function(e) {
-                // Prevent double submission
-                if (saveBtn.classList.contains('loading')) {
-                    e.preventDefault();
-                    return;
-                }
+            if (outletForm && saveBtn) {
+                outletForm.addEventListener('submit', function(e) {
+                    // Prevent double submission
+                    if (saveBtn.classList.contains('loading')) {
+                        e.preventDefault();
+                        return;
+                    }
 
-                // Show loading state
-                saveBtn.classList.add('loading');
-                saveBtn.disabled = true;
-                saveBtn.querySelector('.btn-label').textContent = 'Saving...';
+                    // Show loading state
+                    saveBtn.classList.add('loading');
+                    saveBtn.disabled = true;
+                    // Check if btn-label exists, otherwise change text directly
+                    const btnLabel = saveBtn.querySelector('.btn-label');
+                    const originalText = saveBtn.innerText;
+                    
+                    if (btnLabel) {
+                        btnLabel.textContent = '{{ __('messages.owner.outlet.all_outlets.js_saving') }}';
+                    } else {
+                        saveBtn.innerText = '{{ __('messages.owner.outlet.all_outlets.js_saving') }}';
+                    }
 
-                // Validate required fields
-                const requiredFields = outletForm.querySelectorAll('[required]');
-                let isValid = true;
+                    // Validate required fields
+                    const requiredFields = outletForm.querySelectorAll('[required]');
+                    let isValid = true;
 
-                requiredFields.forEach(field => {
-                    if (!field.value.trim()) {
-                        field.classList.add('is-invalid');
+                    requiredFields.forEach(field => {
+                        if (!field.value.trim()) {
+                            field.classList.add('is-invalid');
+                            isValid = false;
+                        }
+                    });
+
+                    // Validate password match
+                    const password = document.getElementById('password')?.value || '';
+                    const passwordConfirm = document.getElementById('password_confirmation')?.value || '';
+
+                    if (password !== passwordConfirm) {
+                        alert('{{ __('messages.owner.outlet.all_outlets.js_password_mismatch') }}');
                         isValid = false;
+                    }
+
+                    if (!isValid) {
+                        const firstError = outletForm.querySelector('.is-invalid');
+                        if (firstError) {
+                            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            firstError.focus();
+                        }
+
+                        saveBtn.classList.remove('loading');
+                        saveBtn.disabled = false;
+                        if (btnLabel) {
+                            btnLabel.textContent = originalText;
+                        } else {
+                            saveBtn.innerText = '{{ __('messages.owner.outlet.all_outlets.create_outlet') }}';
+                        }
+
+                        e.preventDefault();
+                        return;
                     }
                 });
 
-                // Validate password match
-                const password = document.getElementById('password')?.value || '';
-                const passwordConfirm = document.getElementById('password_confirmation')?.value || '';
-
-                if (password !== passwordConfirm) {
-                    alert('Password dan konfirmasi password tidak sama');
-                    isValid = false;
-                }
-
-                if (!isValid) {
-                    // Scroll to first error
-                    const firstError = outletForm.querySelector('.is-invalid');
-                    if (firstError) {
-                        firstError.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center'
-                        });
-                        firstError.focus();
-                    }
-
-                    // Reset button
-                    saveBtn.classList.remove('loading');
-                    saveBtn.disabled = false;
-                    saveBtn.querySelector('.btn-label').textContent = 'Save';
-
-                    e.preventDefault();
-                    return;
-                }
-
-                // Allow form to submit normally
-            });
-
-            // Reset button on page reload
-            window.addEventListener('pageshow', function(event) {
-                if (event.persisted) {
-                    saveBtn.classList.remove('loading');
-                    saveBtn.disabled = false;
-                    saveBtn.querySelector('.btn-label').textContent = 'Save';
-                }
-            });
-
-            // Handle Enter key (prevent accidental submission)
-            outletForm.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA' && e.target.type !== 'submit') {
-                    // Find next focusable element
-                    const formElements = Array.from(outletForm.elements);
-                    const currentIndex = formElements.indexOf(e.target);
-
-                    if (currentIndex < formElements.length - 1) {
-                        e.preventDefault();
-                        const nextElement = formElements[currentIndex + 1];
-                        if (nextElement && nextElement.tabIndex !== -1) {
-                            nextElement.focus();
+                // Reset button on page reload
+                window.addEventListener('pageshow', function(event) {
+                    if (event.persisted) {
+                        saveBtn.classList.remove('loading');
+                        saveBtn.disabled = false;
+                        const btnLabel = saveBtn.querySelector('.btn-label');
+                        if (btnLabel) {
+                            btnLabel.textContent = '{{ __('messages.owner.outlet.all_outlets.create_outlet') }}';
+                        } else {
+                             saveBtn.innerText = '{{ __('messages.owner.outlet.all_outlets.create_outlet') }}';
                         }
                     }
-                }
-            });
+                });
 
-            // Simple change detection for beforeunload
-            window.addEventListener('beforeunload', function(e) {
-                if (saveBtn.classList.contains('loading')) {
-                    return; // Don't warn if already submitting
-                }
+                // Handle Enter key
+                outletForm.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA' && e.target.type !== 'submit') {
+                        const formElements = Array.from(outletForm.elements);
+                        const currentIndex = formElements.indexOf(e.target);
 
-                const nameInput = document.querySelector('input[name="name"]');
-                const usernameInput = document.querySelector('input[name="username"]');
+                        if (currentIndex < formElements.length - 1) {
+                            e.preventDefault();
+                            const nextElement = formElements[currentIndex + 1];
+                            if (nextElement && nextElement.tabIndex !== -1) {
+                                nextElement.focus();
+                            }
+                        }
+                    }
+                });
 
-                if ((nameInput && nameInput.value.trim()) ||
-                    (usernameInput && usernameInput.value.trim())) {
-                    e.preventDefault();
-                    e.returnValue =
-                        '{{ __('You have unsaved changes. Are you sure you want to leave?') }}';
-                }
-            });
+                // Beforeunload warning
+                window.addEventListener('beforeunload', function(e) {
+                    if (saveBtn.classList.contains('loading')) return;
+
+                    const hasData = ['name', 'username'].some(fieldName => {
+                        const field = document.querySelector(`input[name="${fieldName}"]`);
+                        return field && field.value.trim();
+                    });
+
+                    if (hasData) {
+                        e.preventDefault();
+                        e.returnValue = '{{ __('messages.owner.outlet.all_outlets.js_unsaved_changes_leave') }}';
+                    }
+                });
+            }
         });
     </script>
 @endpush

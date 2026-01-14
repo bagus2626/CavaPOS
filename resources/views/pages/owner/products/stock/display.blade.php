@@ -1,4 +1,4 @@
-<div class="d-flex flex-wrap align-items-center justify-content-between mb-2">
+{{-- <div class="d-flex flex-wrap align-items-center justify-content-between mb-2">
 
   <div class="filter-tabs-container">
     <ul class="nav nav-tabs" id="stockFilterTabs">
@@ -14,15 +14,9 @@
     </ul>
   </div>
 
-  <div class="ms-auto pt-2 pt-md-0">
-    <a href="{{ route('owner.user-owner.stocks.movements.index') }}" class="btn btn-outline-primary btn-movements">
-      <i class="fas fa-history me-1"></i>
-      {{ __('messages.owner.products.stocks.movement_history') }}
-    </a>
-  </div>
-</div>
+</div> --}}
 
-<div class="sub-filter-container mb-3 ms-3" id="stockPartnerFilterContainer" style="display: none;">
+{{-- <div class="sub-filter-container mb-3 ms-3" id="stockPartnerFilterContainer" style="display: none;">
   <ul class="nav nav-tabs" id="stockPartnerFilterTabs">
     <li class="nav-item">
       <a class="nav-link font-weight-normal active" id="filter-partner-product-tab" href="#"
@@ -33,132 +27,108 @@
         data-filter-partner-type="option">{{ __('messages.owner.products.stocks.product_opt') }}</a>
     </li>
   </ul>
+</div> --}}
+
+<!-- Table Card -->
+<div class="modern-card">
+    <div class="data-table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th class="text-center" style="width: 60px;">#</th>
+                    <th>{{ __('messages.owner.products.stocks.stock_code') }}</th>
+                    <th>{{ __('messages.owner.products.stocks.stock_name') }}</th>
+                    <th>{{ __('messages.owner.products.stocks.stock_quantity') }}</th>
+                    <th>{{ __('messages.owner.products.stocks.unit') }}</th>
+                    <th>{{ __('messages.owner.products.stocks.last_price_unit') }}</th>
+                    <th class="text-center" style="width: 160px;">
+                        {{ __('messages.owner.products.stocks.actions') }}
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody id="stockTableBody">
+                @forelse ($stocks as $index => $stock)
+                    <tr class="table-row"
+                        data-type="{{ $stock->type }}"
+                        data-stock_type="{{ $stock->stock_type }}"
+                        data-partner-type="{{ $stock->partner_product_id && !$stock->partner_product_option_id ? 'product' : ($stock->partner_product_id && $stock->partner_product_option_id ? 'option' : 'none') }}">
+
+                        <!-- Number -->
+                        <td class="text-center text-muted">
+                            {{ $stocks->firstItem() + $index }}
+                        </td>
+
+                        <!-- Stock Code -->
+                        <td class="mono fw-600">
+                            {{ $stock->stock_code }}
+                        </td>
+
+                        <!-- Stock Name -->
+                        <td>
+                            <span class="fw-600">{{ $stock->stock_name }}</span>
+                        </td>
+
+                        <!-- Quantity -->
+                        <td>
+                            {{ number_format($stock->display_quantity, 2, ',', '.') }}
+                        </td>
+
+                        <!-- Unit -->
+                        <td>
+                            @if($stock->displayUnit)
+                                <span class="badge-modern badge-info">
+                                    {{ $stock->displayUnit->unit_name }}
+                                </span>
+                            @else
+                                <span class="text-muted small">
+                                    ({{ __('messages.owner.products.stocks.base_unit') }})
+                                </span>
+                            @endif
+                        </td>
+
+                        <!-- Last Price -->
+                        <td>
+                            <span class="fw-600">
+                                {{ $stock->last_price_per_unit }}
+                            </span>
+                        </td>
+
+                        <!-- Actions -->
+                        <td class="text-center">
+                            <div class="table-actions">
+                                <button onclick="deleteStock({{ $stock->id }})"
+                                    class="btn-table-action delete"
+                                    title="{{ __('messages.owner.products.stocks.delete') }}">
+                                    <span class="material-symbols-outlined">delete</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" class="text-center">
+                            <div class="table-empty-state">
+                                <span class="material-symbols-outlined">inventory_2</span>
+                                <h4>{{ __('messages.owner.products.stocks.no_stock_found') }}</h4>
+                                <p>{{ __('messages.owner.products.stocks.add_first_stock') ?? 'Add your first stock to get started' }}</p>
+                            </div>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    @if($stocks->hasPages())
+        <div class="table-pagination">
+            {{ $stocks->links() }}
+        </div>
+    @endif
 </div>
 
-<div class="table-responsive owner-stocks-table">
-  <table class="table table-hover align-middle">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>{{ __('messages.owner.products.stocks.stock_code') }}</th>
-        <th>{{ __('messages.owner.products.stocks.stock_name') }}</th>
-        <th>{{ __('messages.owner.products.stocks.stock_quantity') }}</th>
-        <th>{{ __('messages.owner.products.stocks.unit') }}</th>
-        <th>{{ __('messages.owner.products.stocks.last_price_unit') }}</th>
-        <th class="text-nowrap">{{ __('messages.owner.products.stocks.actions') }}</th>
-      </tr>
-    </thead>
-    <tbody>
-      @forelse ($stocks as $index => $stock)
-        <tr data-type="{{ $stock->type }}"
-          data-stock_type="{{ $stock->stock_type }}"
-          data-partner-type="{{ $stock->partner_product_id && !$stock->partner_product_option_id ? 'product' : ($stock->partner_product_id && $stock->partner_product_option_id ? 'option' : 'none') }}">
-          <td class="text-muted">{{ $stocks->firstItem() + $index }}</td>
-          <td class="mono">{{ $stock->stock_code }}</td>
-          <td class="fw-600">{{ $stock->stock_name }}</td>
-          <td>{{ number_format($stock->display_quantity, 2, ',', '.') }}</td>
 
-          <td>
-            @if($stock->displayUnit)
-              {{ $stock->displayUnit->unit_name }}
-            @else
-              <span class="text-muted small">({{ __('messages.owner.products.stocks.base_unit') }})</span>
-            @endif
-          </td>
-
-          <td>{{ $stock->last_price_per_unit }}</td>
-          <td class="text-nowrap">
-            @if($stock->type === 'master')
-              <button onclick="deleteStock({{ $stock->id }})" class="btn btn-sm btn-soft-danger">{{ __('messages.owner.products.stocks.delete') }}</button>
-            @endif
-          </td>
-        </tr>
-      @empty
-        <tr>
-          <td colspan="7" class="text-center text-muted py-4">
-            {{ __('messages.owner.products.stocks.no_stock_found') }}
-          </td>
-        </tr>
-      @endforelse
-    </tbody>
-  </table>
-</div>
-
-{{-- Pagination Links --}}
-<div class="d-flex justify-content-between align-items-center mt-3">
-  <div class="text-muted small">
-    Showing {{ $stocks->firstItem() ?? 0 }} to {{ $stocks->lastItem() ?? 0 }} of {{ $stocks->total() }} entries
-  </div>
-  <div>
-    {{ $stocks->links() }}
-  </div>
-</div>
-
-<style>
-  .owner-stocks .owner-stocks-table {
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, .08);
-    overflow-y: hidden;
-    background: #fff;
-  }
-
-  .owner-stocks .btn-soft-danger:hover {
-    background: #fecaca;
-    color: #7f1d1d;
-    border-color: #fca5a5;
-  }
-
-  .owner-stocks .nav-tabs {
-    border-bottom: 2px solid #eef1f4;
-  }
-
-  .owner-stocks .nav-tabs .nav-link {
-    border: none;
-    border-bottom: 3px solid transparent;
-    color: #6b7280;
-    font-weight: 600;
-    padding: 0.75rem 1rem;
-  }
-
-  .owner-stocks .nav-tabs .nav-link.active {
-    border-color: #8c1000;
-    color: #8c1000;
-    background-color: transparent;
-  }
-
-  .owner-stocks .nav-tabs .nav-link:hover {
-    border-color: #e5e7eb;
-  }
-
-  /* Custom Pagination Style */
-  .pagination {
-    margin-bottom: 1rem;
-  }
-
-  .page-link {
-    color: #8c1000;
-    border-color: #dee2e6;
-  }
-
-  .page-link:hover {
-    color: #6b0d00;
-    background-color: #f8f9fa;
-    border-color: #dee2e6;
-  }
-
-  .page-item.active .page-link {
-    background-color: #8c1000;
-    border-color: #8c1000;
-    color: white;
-  }
-
-  .page-item.disabled .page-link {
-    color: #6c757d;
-    pointer-events: none;
-    background-color: #fff;
-    border-color: #dee2e6;
-  }
-</style>
 
 <script>
   function deleteStock(stockId) {

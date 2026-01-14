@@ -20,12 +20,62 @@ use Illuminate\Support\Str;
 
 class PartnerEmployeeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $partner = Auth::user();
-        $employees = Employee::where('partner_id', $partner->id)->get();
-        $roles = $employees->pluck('role')->unique()->sort()->values();
-        return view('pages.partner.human-resource.employee.index', compact('employees', 'roles'));
+
+        // Ambil filter role dari query string
+        $roleFilter = $request->query('role');
+
+        // Query untuk semua data
+        $employeesQuery = Employee::where('partner_id', $partner->id);
+
+        if ($roleFilter && $roleFilter !== 'all') {
+            $employeesQuery->where('role', $roleFilter);
+        }
+
+        // Get semua data untuk JavaScript filter
+        $allEmployees = $employeesQuery->orderBy('name')->get();
+
+        // Format data untuk JavaScript
+        $allEmployeesFormatted = $allEmployees->map(function ($employee) {
+            return [
+                'id' => $employee->id,
+                'name' => $employee->name,
+                'user_name' => $employee->user_name,
+                'email' => $employee->email,
+                'role' => $employee->role,
+                'is_active' => $employee->is_active,
+                'image' => $employee->image,
+            ];
+        });
+
+        // Simulasi pagination object untuk compatibility dengan view
+        $perPage = 10;
+        $currentPage = $request->input('page', 1);
+        $offset = ($currentPage - 1) * $perPage;
+
+        $employees = new \Illuminate\Pagination\LengthAwarePaginator(
+            $allEmployees->slice($offset, $perPage)->values(),
+            $allEmployees->count(),
+            $perPage,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        // Get unique roles untuk filter dropdown
+        $roles = Employee::where('partner_id', $partner->id)
+            ->pluck('role')
+            ->unique()
+            ->sort()
+            ->values();
+
+        return view('pages.partner.human-resource.employee.index', compact(
+            'employees',
+            'roles',
+            'roleFilter',
+            'allEmployeesFormatted'
+        ));
     }
 
     public function create()

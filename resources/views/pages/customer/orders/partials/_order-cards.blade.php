@@ -135,7 +135,7 @@
 
                 @if($order->payment_flag == 1)
                     <a href="{{ route('customer.orders.receipt', $order->id) }}"
-                       class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-choco text-xs md:text-sm text-choco hover:bg-soft-choco hover:text-white">
+                       class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#ae1504] text-xs md:text-sm text-[#ae1504] hover:bg-[#8a1103] hover:text-white">
                         <svg xmlns="http://www.w3.org/2000/svg"
                              fill="none" viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor"
                              class="w-4 h-4">
@@ -164,7 +164,7 @@
                 @if ($order->order_status === 'PAYMENT')
                     @if ($order->last_xendit_invoice)
                         <a href="{{ $order->last_xendit_invoice->invoice_url }}"
-                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs bg-choco md:text-sm text-white hover:bg-soft-choco">
+                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs bg-[#ae1504] md:text-sm text-white hover:bg-[#8a1103]">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" 
                                 viewBox="0 0 24 24" stroke-width="1.7" stroke="currentColor"
                                 class="w-4 h-4">

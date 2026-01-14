@@ -3,12 +3,6 @@
 namespace App\Http\Controllers\Partner\Store;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product\Product;
-use App\Models\Partner\Products\PartnerProduct;
-use App\Models\Partner\Products\PartnerProductParentOption;
-use App\Models\Partner\Products\PartnerProductOption;
-use App\Models\Product\Specification;
-use App\Models\Admin\Product\Category;
 use App\Models\Store\Table;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,9 +11,7 @@ use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Writer\PngWriter;
-use Endroid\QrCode\Label\Font\NotoSans;
 use Endroid\QrCode\Color\Color;
-use Illuminate\Http\Response;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
 
@@ -27,19 +19,59 @@ class PartnerTableController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Table::where('partner_id', Auth::id());
+        $partnerId = Auth::id();
 
-        if ($request->filled('table_class')) {
-            $query->where('table_class', $request->table_class);
+        // Ambil semua table classes untuk filter dropdown
+        $table_classes = Table::where('partner_id', $partnerId)
+            ->pluck('table_class')
+            ->unique()
+            ->values();
+
+        $tableClass = $request->query('table_class');
+
+        // Query untuk semua data
+        $tablesQuery = Table::where('partner_id', $partnerId);
+
+        if ($tableClass && $tableClass !== 'all') {
+            $tablesQuery->where('table_class', $tableClass);
         }
 
-        $tables = $query->paginate(10)->withQueryString();
+        // Get semua data untuk JavaScript filter
+        $allTables = $tablesQuery->orderBy('table_class')->orderBy('table_no')->get();
 
-        $table_classes = Table::where('partner_id', Auth::id())
-            ->pluck('table_class')
-            ->unique();
+        // Format data untuk JavaScript
+        $allTablesFormatted = $allTables->map(function ($table) {
+            return [
+                'id' => $table->id,
+                'table_no' => $table->table_no,
+                'table_code' => $table->table_code,
+                'table_class' => $table->table_class,
+                'description' => $table->description,
+                'status' => $table->status,
+                'images' => $table->images,
+                'table_url' => $table->table_url,
+            ];
+        });
 
-        return view('pages.partner.store.tables.index', compact('tables', 'table_classes'));
+        // Simulasi pagination object untuk compatibility dengan view
+        $perPage = 10;
+        $currentPage = $request->input('page', 1);
+        $offset = ($currentPage - 1) * $perPage;
+
+        $tables = new \Illuminate\Pagination\LengthAwarePaginator(
+            $allTables->slice($offset, $perPage)->values(),
+            $allTables->count(),
+            $perPage,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        return view('pages.partner.store.tables.index', compact(
+            'tables',
+            'table_classes',
+            'tableClass',
+            'allTablesFormatted'
+        ));
     }
 
     public function create()
@@ -54,19 +86,26 @@ class PartnerTableController extends Controller
         try {
             $validated = $request->validate([
                 'table_no' => 'required|string|max:255',
-                'table_class' => 'required|string|max:255',
+                'table_class' => 'required_without:new_table_class|string|max:255',
+                'new_table_class' => 'nullable|string|max:255',
                 'description' => 'nullable|string',
-                'images' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', // Ubah ke tunggal
+                'images' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             ], [
                 'table_no.required' => 'Nomor meja wajib diisi.',
-                'table_class.required' => 'Kelas meja wajib diisi.',
+                'table_class.required_without' => 'Kelas meja wajib diisi.',
                 'images.image' => 'File harus berupa gambar.',
                 'images.max' => 'Ukuran gambar maksimal 2MB.',
             ]);
 
-            $storedImageData = null; // Bukan array lagi
+            // Handle table class (select or new input)
+            $tableClass = $request->filled('new_table_class')
+                ? $request->new_table_class
+                : $request->table_class;
+
+            // Handle image upload - PENTING: Simpan sebagai ARRAY
+            $storedImageData = null;
             if ($request->hasFile('images')) {
-                $image = $request->file('images'); // Ambil satu file
+                $image = $request->file('images');
                 $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
                 $path = $image->storeAs('uploads/store/tables', $filename, 'public');
 
@@ -77,11 +116,14 @@ class PartnerTableController extends Controller
                     $constraint->upsize();
                 })->save();
 
+                // PENTING: Simpan sebagai ARRAY dengan satu elemen
                 $storedImageData = [
-                    'path'     => 'storage/' . $path,
-                    'filename' => $filename,
-                    'mime'     => $image->getClientMimeType(),
-                    'size'     => $image->getSize(),
+                    [
+                        'path'     => 'storage/' . $path,
+                        'filename' => $filename,
+                        'mime'     => $image->getClientMimeType(),
+                        'size'     => $image->getSize(),
+                    ]
                 ];
             }
 
@@ -92,10 +134,10 @@ class PartnerTableController extends Controller
             $table->table_no = $validated['table_no'];
             $table->table_code = $barcode;
             $table->partner_id = Auth::id();
-            $table->table_class = $validated['table_class'];
+            $table->table_class = $tableClass;
             $table->description = $validated['description'] ?? null;
             $table->status = $request->input('status', 'available');
-            $table->images = $storedImageData; // Simpan data gambar tunggal
+            $table->images = $storedImageData; // Akan auto-convert ke JSON karena cast di model
             $table->table_url = $table_url ?? null;
             $table->save();
 
@@ -109,7 +151,6 @@ class PartnerTableController extends Controller
             return redirect()->back()->withInput()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
-
 
     public function show(Table $table)
     {
@@ -131,27 +172,31 @@ class PartnerTableController extends Controller
 
             $validated = $request->validate([
                 'table_no'    => 'required|string|max:255',
-                'table_class' => 'required|string|max:255',
+                'table_class' => 'required_without:new_table_class|string|max:255',
+                'new_table_class' => 'nullable|string|max:255',
                 'description' => 'nullable|string',
-                'images'      => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048', // Tunggal
+                'images'      => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
             ]);
 
+            // Handle table class
+            $tableClass = $request->filled('new_table_class')
+                ? $request->new_table_class
+                : $request->table_class;
+
             $disk = Storage::disk('public');
-            $storedImages = $table->images; // Ambil data lama
+            $storedImages = $table->images;
 
             // Logika Hapus Gambar Lama
             if ($request->keep_existing_image == '0' || $request->hasFile('images')) {
-                if (!empty($storedImages)) {
-                    // Karena data lama mungkin berbentuk array (dari sistem sebelumnya)
-                    $oldImages = is_array($storedImages) ? $storedImages : json_decode($storedImages, true);
-                    foreach ($oldImages as $img) {
+                if (!empty($storedImages) && is_array($storedImages)) {
+                    foreach ($storedImages as $img) {
                         $relativePath = ltrim(preg_replace('#^storage/#', '', $img['path']), '/');
                         if ($disk->exists($relativePath)) {
                             $disk->delete($relativePath);
                         }
                     }
                 }
-                $storedImages = null; // Reset data di DB
+                $storedImages = null;
             }
 
             // Simpan Gambar Baru (Jika ada)
@@ -167,19 +212,20 @@ class PartnerTableController extends Controller
                     $constraint->upsize();
                 })->save();
 
-                // Simpan sebagai array pembungkus (agar konsisten dengan format data lama jika perlu)
-                // atau simpan sebagai satu objek. Di sini kita simpan sebagai array tunggal.
-                $storedImages = [[
-                    'path'     => "storage/" . $path,
-                    'filename' => $filename,
-                    'mime'     => $image->getClientMimeType(),
-                    'size'     => $image->getSize(),
-                ]];
+                // PENTING: Simpan sebagai ARRAY dengan satu elemen
+                $storedImages = [
+                    [
+                        'path'     => "storage/" . $path,
+                        'filename' => $filename,
+                        'mime'     => $image->getClientMimeType(),
+                        'size'     => $image->getSize(),
+                    ]
+                ];
             }
 
             $table->update([
                 'table_no'    => $validated['table_no'],
-                'table_class' => $validated['table_class'],
+                'table_class' => $tableClass,
                 'description' => $validated['description'] ?? null,
                 'status'      => $request->input('status', $table->status),
                 'images'      => $storedImages,
@@ -193,11 +239,9 @@ class PartnerTableController extends Controller
         }
     }
 
-
-
     public function destroy(Table $table)
     {
-        if ($table->images) {
+        if ($table->images && is_array($table->images)) {
             foreach ($table->images as $image) {
                 if (isset($image['path'])) {
                     $imagePath = str_replace('storage/', '', $image['path']);
@@ -218,18 +262,15 @@ class PartnerTableController extends Controller
         }
 
         $storeName = Auth::user()->name;
-
         $pngBinary = $this->buildBarcodePng($table, $storeName);
 
         return response($pngBinary, 200)->header('Content-Type', 'image/png');
     }
 
-
     public function generateAllBarcode(Request $request)
     {
         $outlet = Auth::user();
 
-        // ambil semua table milik outlet ini
         $tables = Table::where('partner_id', $outlet->id)
             ->orderBy('table_class')
             ->orderBy('table_no')
@@ -241,7 +282,6 @@ class PartnerTableController extends Controller
 
         $storeName = $outlet->name;
 
-        // buat array data: tiap item punya table dan src base64 png
         $barcodes = $tables->map(function ($table) use ($storeName) {
             $pngBinary   = $this->buildBarcodePng($table, $storeName);
             $base64      = base64_encode($pngBinary);
@@ -253,17 +293,15 @@ class PartnerTableController extends Controller
             ];
         });
 
-        // render ke PDF A6
         $pdf = Pdf::loadView('pages.partner.store.tables.pdf.all-barcodes-pdf', [
             'barcodes'  => $barcodes,
             'storeName' => $storeName,
-        ])->setPaper('a6', 'portrait'); // ukuran A6, 1 barcode per halaman
+        ])->setPaper('a6', 'portrait');
 
         $fileName = 'barcodes-' . Str::slug($storeName) . '.pdf';
 
         return $pdf->stream($fileName);
     }
-
 
     private function buildBarcodePng(Table $table, string $storeName): string
     {
@@ -271,42 +309,36 @@ class PartnerTableController extends Controller
             throw new \RuntimeException('Table URL not found');
         }
 
-        // Generate QR code normal (tanpa label bawaan!)
         $result = Builder::create()
             ->writer(new PngWriter())
             ->data(url($table->table_url))
             ->size(300)
             ->margin(10)
-            ->backgroundColor(new Color(255, 255, 255)) // putih
-            ->foregroundColor(new Color(0, 0, 0))       // hitam
+            ->backgroundColor(new Color(255, 255, 255))
+            ->foregroundColor(new Color(0, 0, 0))
             ->build();
 
-        // Ambil string PNG dari QR
         $qrString = $result->getString();
         $qrImage = imagecreatefromstring($qrString);
 
         $qrWidth  = imagesx($qrImage);
         $qrHeight = imagesy($qrImage);
 
-        // Tambahkan padding hitam
-        $paddingTop    = 100;  // diperbesar agar muat teks di atas QR
+        $paddingTop    = 100;
         $paddingSide   = 40;
         $paddingBottom = 100;
 
         $finalWidth  = $qrWidth + ($paddingSide * 2);
         $finalHeight = $qrHeight + $paddingTop + $paddingBottom;
 
-        // Buat canvas hitam
         $canvas = imagecreatetruecolor($finalWidth, $finalHeight);
         $black  = imagecolorallocate($canvas, 0, 0, 0);
         $white  = imagecolorallocate($canvas, 255, 255, 255);
         imagefill($canvas, 0, 0, $black);
 
-        // Ambil nama store dan teks table
         $tableText = "Table: {$table->table_no}";
         $fontPath  = public_path('fonts/MotleyForcesRegular-w1rZ3.ttf');
 
-        // ====== TULIS STORE NAME DI ATAS QR ======
         $fontSizeStore = 18;
         $bboxStore     = imagettfbbox($fontSizeStore, 0, $fontPath, $storeName);
         $storeWidth    = $bboxStore[2] - $bboxStore[0];
@@ -325,10 +357,8 @@ class PartnerTableController extends Controller
             $storeName
         );
 
-        // ====== TEMPATKAN QR DI TENGAH ======
         imagecopy($canvas, $qrImage, $paddingSide, $paddingTop, 0, 0, $qrWidth, $qrHeight);
 
-        // ====== TULIS TABLE TEXT DI BAWAH QR ======
         $fontSizeTable = 28;
         $bboxTable     = imagettfbbox($fontSizeTable, 0, $fontPath, $tableText);
         $tableWidth    = $bboxTable[2] - $bboxTable[0];
@@ -347,7 +377,6 @@ class PartnerTableController extends Controller
             $tableText
         );
 
-        // Kembalikan sebagai string PNG
         ob_start();
         imagepng($canvas);
         $pngBinary = ob_get_clean();
@@ -355,6 +384,6 @@ class PartnerTableController extends Controller
         imagedestroy($qrImage);
         imagedestroy($canvas);
 
-        return $pngBinary; // string binary PNG
+        return $pngBinary;
     }
 }
