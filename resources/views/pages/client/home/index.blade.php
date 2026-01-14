@@ -1,53 +1,151 @@
 <!DOCTYPE html>
-<html lang="id">
+<html class="light" lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>CAVAA - Landing Page</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>CAVAA - Modern POS Solution</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <!-- Tailwind Config -->
     <script>
         tailwind.config = {
+            darkMode: "class",
             theme: {
                 extend: {
-                    fontFamily: {
-                        'inter': ['Inter', 'sans-serif'],
-                        'poppins': ['Poppins', 'sans-serif'],
-                    },
                     colors: {
-                        'primary': '#b91c1c',
-                        'primary-light': '#dc2626',
-                        'primary-dark': '#991b1b',
-                        'accent': '#d97706',
-                        'accent-light': '#f59e0b',
-                        'cream': '#fef3c7',
-                        'cream-dark': '#fde68a',
-                        'dark-brown': '#451a03',
+                        "primary": "#b91d1d",
+                        "primary-hover": "#991b1b",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#201212",
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#2d1b1b",
                     },
-                    backgroundImage: {
-                        'hero-pattern': "url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><defs><pattern id=\"dots\" width=\"20\" height=\"20\" patternUnits=\"userSpaceOnUse\"><circle cx=\"10\" cy=\"10\" r=\"1.5\" fill=\"white\" opacity=\"0.1\"/></pattern></defs><rect width=\"100\" height=\"100\" fill=\"url(%23dots)\"/></svg>')",
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
                     },
-                    animation: {
-                        'fade-in-up': 'fadeInUp 0.8s ease forwards',
-                        'slide-in-right': 'slideInRight 0.8s ease forwards',
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 15px rgba(185, 29, 29, 0.15)',
                     }
-                }
-            }
+                },
+            },
         }
     </script>
+
     <style>
-        /* Prevent horizontal scroll */
-        html,
         body {
-            overflow-x: hidden;
-            max-width: 100vw;
+            font-family: 'Inter', sans-serif;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+
+        /* Glass Card Effect */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .dark .glass-card {
+            background: rgba(32, 18, 18, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Feature Card Hover */
+        .feature-card:hover .icon-container {
+            background-color: #b91d1d;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .feature-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px rgba(185, 29, 29, 0.15);
+            border-color: rgba(185, 29, 29, 0.3);
+        }
+
+        .icon-container {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Animations */
+        @keyframes blob {
+            0% {
+                transform: translate(0px, 0px) scale(1);
+            }
+
+            33% {
+                transform: translate(30px, -50px) scale(1.1);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) scale(0.9);
+            }
+
+            100% {
+                transform: translate(0px, 0px) scale(1);
+            }
+        }
+
+        .animate-blob {
+            animation: blob 7s infinite;
+        }
+
+        .animation-delay-2000 {
+            animation-delay: 2s;
+        }
+
+        .animation-delay-4000 {
+            animation-delay: 4s;
+        }
+
+        /* Fade In Animations */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -60,7 +158,19 @@
             }
         }
 
-        @keyframes slideInRight {
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInRight {
             from {
                 opacity: 0;
                 transform: translateX(30px);
@@ -72,18 +182,104 @@
             }
         }
 
-        /* Mobile menu toggle */
-        .mobile-menu {
-            display: none;
+        .animate-fadeInUp {
+            animation: fadeInUp 0.8s ease-out forwards;
         }
 
-        .mobile-menu.active {
-            display: block;
+        .animate-fadeInLeft {
+            animation: fadeInLeft 0.8s ease-out forwards;
+        }
+
+        .animate-fadeInRight {
+            animation: fadeInRight 0.8s ease-out forwards;
+        }
+
+        .animation-delay-200 {
+            animation-delay: 0.2s;
+            opacity: 0;
+        }
+
+        .animation-delay-400 {
+            animation-delay: 0.4s;
+            opacity: 0;
+        }
+
+        .animation-delay-600 {
+            animation-delay: 0.6s;
+            opacity: 0;
+        }
+
+        .animation-delay-800 {
+            animation-delay: 0.8s;
+            opacity: 0;
+        }
+
+        /* WhatsApp Floating Button */
+        .whatsapp-float {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            bottom: 30px;
+            right: 30px;
+            background-color: #25D366;
+            color: #FFF;
+            border-radius: 50px;
+            text-align: center;
+            font-size: 32px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .whatsapp-float:hover {
+            background-color: #128C7E;
+            transform: scale(1.1);
+            box-shadow: 2px 2px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .whatsapp-float i {
+            margin-top: 2px;
+        }
+
+        /* Animasi pulse untuk WhatsApp button */
+        @keyframes pulse-wa {
+            0% {
+                box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 15px rgba(37, 211, 102, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+            }
+        }
+
+        .whatsapp-float {
+            animation: pulse-wa 2s infinite;
+        }
+
+        .whatsapp-float:hover {
+            animation: none;
+        }
+
+        /* Responsive - ukuran lebih kecil di mobile s */
+        @media screen and (max-width: 768px) {
+            .whatsapp-float {
+                width: 50px;
+                height: 50px;
+                bottom: 20px;
+                right: 20px;
+                font-size: 28px;
+            }
         }
     </style>
 </head>
 
-<body class="font-inter text-gray-900 bg-white overflow-x-hidden">
+<body
+    class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display selection:bg-primary/20 selection:text-primary">
 
     <!-- Header -->
     @include('pages.client.home.header')
@@ -91,132 +287,65 @@
     <!-- Hero Section -->
     @include('pages.client.home.hero-section')
 
+    <!-- Fitur CAVAA Section -->
+    @include('pages.client.home.fitur-cavaa-section')
+
     <!-- Video Demo Section -->
     @include('pages.client.home.video-demo-section')
 
     <!-- Features Section -->
     @include('pages.client.home.features-section')
 
-    <!-- Fitur CAVAA Section -->
-    @include('pages.client.home.fitur-cavaa-section')
-
     <!-- CTA Section -->
-    @include('pages.client.home.cta-section')
+
+    <!-- Testimonial Section -->
+    @include('pages.client.home.contact-section')
 
     <!-- Footer -->
     @include('pages.client.home.footer')
 
+    <!-- WhatsApp Floating Button -->
+    <a href="https://wa.me/6285177152837?text=Halo%20CAVAA,%20saya%20ingin%20bertanya%20tentang%20produk%20Anda" 
+       target="_blank"
+       class="whatsapp-float"
+       aria-label="Chat WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
     <script>
-        function toggleMobileMenu() {
-            const mobileMenu = document.getElementById('mobileMenu');
-            mobileMenu.classList.toggle('active');
-        }
+        // Language Switcher
+        const languageButton = document.getElementById('languageButton');
+        const languageDropdown = document.getElementById('languageDropdown');
+        const currentLang = document.getElementById('currentLang');
 
-        function playDemo() {
-            alert('Demo video akan segera dimuat!');
-        }
-
-        // Smooth scrolling
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    const headerHeight = document.querySelector('header').offsetHeight;
-                    // Reduced offset to position better at section background
-                    const targetPosition = target.offsetTop - headerHeight - 5; // 5px minimal padding
-
-                    window.scrollTo({
-                        top: targetPosition,
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
-
-        // Animation on scroll
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('animate-fade-in-up');
-                }
-            });
-        }, observerOptions);
-
-        // Observe elements for animation
-        document.querySelectorAll('.grid > div, .space-y-16 > div').forEach(el => {
-            observer.observe(el);
-        });
-
-        // Close mobile menu when clicking outside
-        document.addEventListener('click', function(event) {
-            const mobileMenu = document.getElementById('mobileMenu');
-            const menuButton = event.target.closest('button');
-            const isClickInsideMenu = mobileMenu.contains(event.target);
-
-            if (!isClickInsideMenu && !menuButton && mobileMenu.classList.contains('active')) {
-                mobileMenu.classList.remove('active');
-            }
-        });
-
-        // Close mobile menu on window resize
-        window.addEventListener('resize', function() {
-            if (window.innerWidth >= 768) {
-                const mobileMenu = document.getElementById('mobileMenu');
-                mobileMenu.classList.remove('active');
-            }
-        });
-
-        // Fungsi toggle dropdown language
-        function toggleLanguageDropdown() {
-            const dropdown = document.getElementById('langDropdown');
-            const chevron = document.getElementById('langChevron');
+        // Toggle dropdown language
+        languageButton?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const dropdown = document.getElementById('languageDropdown');
 
             if (dropdown.classList.contains('hidden')) {
                 dropdown.classList.remove('hidden');
-                chevron.style.transform = 'rotate(180deg)';
             } else {
                 dropdown.classList.add('hidden');
-                chevron.style.transform = 'rotate(0deg)';
-            }
-        }
-
-        // Tutup dropdown jika klik di luar
-        document.addEventListener('click', function(event) {
-            const dropdown = document.getElementById('langDropdown');
-            const langButton = event.target.closest('button[onclick="toggleLanguageDropdown()"]');
-
-            if (!langButton && !dropdown?.contains(event.target)) {
-                dropdown?.classList.add('hidden');
-                const chevron = document.getElementById('langChevron');
-                if (chevron) chevron.style.transform = 'rotate(0deg)';
             }
         });
 
-        // Fungsi untuk switch language
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            languageDropdown?.classList.add('hidden');
+        });
+
+        // Fungsi untuk switch language - TAMBAHKAN INI
         function switchLanguage(locale) {
-            const dropdown = document.getElementById('langDropdown');
-            const chevron = document.getElementById('langChevron');
-            const mobileMenu = document.getElementById('mobileMenu');
-            
+            const dropdown = document.getElementById('languageDropdown');
+
             if (dropdown) {
                 dropdown.classList.add('hidden');
             }
-            if (chevron) {
-                chevron.style.transform = 'rotate(0deg)';
-            }
-            if (mobileMenu) {
-                mobileMenu.classList.remove('active');
-            }
-            
+
             // Cek apakah bahasa sudah sama
-            const currentLang = '{{ app()->getLocale() }}';
-            if (locale === currentLang) {
+            const currentLangValue = currentLang?.textContent?.toLowerCase() || 'id';
+            if (locale === currentLangValue) {
                 return;
             }
 
@@ -224,66 +353,138 @@
             window.location.href = `/set-language?locale=${locale}`;
         }
 
-        // Update tampilan berdasarkan bahasa yang aktif
-        function updateLanguageUI() {
-            const currentLang = '{{ app()->getLocale() }}';
-
-            // Update text pada desktop
-            const currentLangText = document.getElementById('currentLangText');
-            if (currentLangText) {
-                currentLangText.textContent = currentLang.toUpperCase();
+        // Load saved language on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Update tampilan berdasarkan session
+            const sessionLang = '{{ session('app_locale', 'id') }}';
+            if (currentLang) {
+                currentLang.textContent = sessionLang.toUpperCase();
             }
+        });
 
-            // Update checkmark pada dropdown desktop
-            document.querySelectorAll('.lang-check-id, .lang-check-en').forEach(el => {
-                el.style.opacity = '0';
+        // ============================================
+        // GANTI VIDEO DI SINI - SATU-SATUNYA TEMPAT!
+        // ============================================
+        const VIDEO_URL = 'https://youtu.be/Oextk-If8HQ?si=hhX57jBYTfF6Wnav';
+        // ============================================
+
+        // PENGATURAN FADE OUT (dalam milidetik)
+        const FADE_OUT_DELAY = 5000; // 5 detik (ubah angka ini untuk mengatur waktu)
+
+        let infoBarHidden = false;
+
+        // Function to extract YouTube video ID from any URL format
+        function getYouTubeVideoId(url) {
+            const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[7].length === 11) ? match[7] : null;
+        }
+
+
+        // Function to hide video info bar
+        function hideVideoInfoBar() {
+            const infoBar = document.getElementById('video-info-bar');
+            setTimeout(() => {
+                infoBar.style.opacity = '0';
+                infoBarHidden = true;
+            }, FADE_OUT_DELAY);
+        }
+
+
+        // Function to show video info bar on hover
+        function setupHoverEffect() {
+            const videoContainer = document.getElementById('video-container');
+            const infoBar = document.getElementById('video-info-bar');
+
+            videoContainer.addEventListener('mouseenter', () => {
+                if (infoBarHidden) {
+                    infoBar.style.opacity = '1';
+                }
             });
 
-            const activeCheck = document.querySelector(`.lang-check-${currentLang}`);
-            if (activeCheck) {
-                activeCheck.style.opacity = '1';
+            videoContainer.addEventListener('mouseleave', () => {
+                if (infoBarHidden) {
+                    infoBar.style.opacity = '0';
+                }
+            });
+        }
+
+
+        // Initialize video on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const videoId = getYouTubeVideoId(VIDEO_URL);
+
+            if (!videoId) {
+                console.error('Invalid YouTube URL');
+                document.getElementById('video-title').textContent = 'Video tidak valid';
+                return;
             }
 
-            // Update checkmark pada mobile
-            document.querySelectorAll('.lang-check-mobile-id, .lang-check-mobile-en').forEach(el => {
-                el.style.opacity = '0';
-            });
+            // Set iframe src with proper embed format
+            const iframe = document.getElementById('youtube-video');
+            iframe.src = `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&enablejsapi=1`;
 
-            const activeMobileCheck = document.querySelector(`.lang-check-mobile-${currentLang}`);
-            if (activeMobileCheck) {
-                activeMobileCheck.style.opacity = '1';
-            }
+            // Set button link
+            document.getElementById('youtube-link').href = VIDEO_URL;
 
-            // Update border pada mobile buttons
-            document.querySelectorAll('.lang-mobile-btn').forEach(btn => {
-                btn.classList.remove('border-primary', 'bg-cream/20');
-                btn.classList.add('border-primary/20');
-            });
+            // Setup hover effect
+            setupHoverEffect();
 
-            const activeMobileBtn = document.querySelector(
-                `button[onclick="switchLanguage('${currentLang}')"].lang-mobile-btn`);
-            if (activeMobileBtn) {
-                activeMobileBtn.classList.remove('border-primary/20');
-                activeMobileBtn.classList.add('border-primary', 'bg-cream/20');
+            // Load video info
+            loadVideoInfo(videoId);
+        });
+
+
+        // Function to fetch video info
+        async function loadVideoInfo(videoId) {
+            try {
+                // Using YouTube oEmbed API (no key required)
+                const oEmbedResponse = await fetch(
+                    `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+                const oEmbedData = await oEmbedResponse.json();
+
+                // Update title
+                document.getElementById('video-title').textContent = oEmbedData.title;
+
+                // Load YouTube Player API for duration
+                loadYouTubePlayerAPI(videoId);
+
+            } catch (error) {
+                console.error('Error loading video info:', error);
+                document.getElementById('video-title').textContent = 'Video Demo CAVAA';
+                document.getElementById('video-duration').textContent = 'N/A';
+                // Still hide even on error
+                hideVideoInfoBar();
             }
         }
 
-        // Jalankan saat halaman dimuat
-        document.addEventListener('DOMContentLoaded', function() {
-            updateLanguageUI();
 
-            // Update placeholder search bar berdasarkan bahasa
-            const searchInput = document.querySelector('input[type="text"][placeholder]');
-            if (searchInput) {
-                const currentLang = '{{ app()->getLocale() }}';
-                const placeholder = currentLang === 'id' ?
-                    searchInput.getAttribute('data-lang-id-placeholder') :
-                    searchInput.getAttribute('data-lang-en-placeholder');
-                if (placeholder) {
-                    searchInput.placeholder = placeholder;
-                }
+        // Load YouTube Player API to get duration
+        function loadYouTubePlayerAPI(videoId) {
+            if (!window.YT) {
+                const tag = document.createElement('script');
+                tag.src = "https://www.youtube.com/iframe_api";
+                const firstScriptTag = document.getElementsByTagName('script')[0];
+                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
             }
-        });
+
+            window.onYouTubeIframeAPIReady = function() {
+                const player = new YT.Player('youtube-video', {
+                    events: {
+                        'onReady': function(event) {
+                            const duration = event.target.getDuration();
+                            const minutes = Math.floor(duration / 60);
+                            const seconds = Math.floor(duration % 60);
+                            document.getElementById('video-duration').textContent =
+                                `${minutes}:${seconds.toString().padStart(2, '0')} min`;
+
+                            // Hide info bar after delay
+                            hideVideoInfoBar();
+                        }
+                    }
+                });
+            };
+        }
     </script>
 </body>
 
