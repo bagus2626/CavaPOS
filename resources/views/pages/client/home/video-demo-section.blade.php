@@ -7,7 +7,7 @@
     </div>
    
     <div class="layout-container flex h-full grow flex-col z-10 px-4 sm:px-6 md:px-10 lg:px-20 xl:px-40">
-        <!-- Text Content -->
+        <!-- Text Content s -->
         <div class="max-w-[960px] mx-auto text-center mb-8 sm:mb-12 opacity-0 translate-y-10" data-scroll-animate>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-3 sm:mb-4 border border-primary/20">
                 <span class="material-symbols-outlined text-sm">play_circle</span> {{ __('messages.home.video_demo_badge') }}

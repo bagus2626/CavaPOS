@@ -265,7 +265,7 @@
             animation: none;
         }
 
-        /* Responsive - ukuran lebih kecil di mobile */
+        /* Responsive - ukuran lebih kecil di mobile s */
         @media screen and (max-width: 768px) {
             .whatsapp-float {
                 width: 50px;
