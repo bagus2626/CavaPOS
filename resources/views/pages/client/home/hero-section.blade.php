@@ -202,7 +202,7 @@
                     </a>
                 </div>
 
-                <!-- Trust Indicator -->
+                <!-- Trust Indicators -->
                 <div
                     class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 sm:gap-6 pt-2 sm:pt-4 text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium animate-fadeInUp animation-delay-800">
                     <div class="flex items-center gap-2">
