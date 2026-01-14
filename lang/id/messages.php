@@ -599,6 +599,7 @@ return [
         'xen_platform' => [
             'accounts' => [
                 'account_information' => 'Informasi Akun',
+                'subtitle' => 'Kelola informasi akun Xendit Anda dan lihat ringkasan aktivitas terbaru.',
                 'profile' => 'Profil',
                 'transactions' => 'Transaksi',
                 'invoices' => 'Faktur',
@@ -728,6 +729,7 @@ return [
             ],
             'split_payments' => [
                 'split_payments' => 'Pembayaran Terpisah',
+                'subtitle' => 'Kelola dan tinjau pembayaran terpisah untuk transaksi Anda',
                 'loading_data' => 'Memuat data...',
                 'transaction_reference_id' => 'ID Referensi Transaksi',
                 'search_reference_id' => 'Cari ID Referensi',
@@ -739,8 +741,8 @@ return [
                 'max_split_amount' => 'Jumlah Maks Pemisahan',
                 'date_created' => 'Tanggal Dibuat',
                 'business_name' => 'Nama Bisnis',
-                'apply_filter' => 'Terapkan menyaring',
-                'reset_and_reload_data' => 'Mengatur Ulang dan Muat Ulang',
+                'apply_filter' => 'Terapkan',
+                'reset_and_reload_data' => 'Mengatur Ulang',
                 'split_id' => 'ID Pemisahan',
                 'reference' => 'Referensi',
                 'source_account_id' => 'ID Akun Sumber',
@@ -755,6 +757,7 @@ return [
             ],
             'payouts' => [
                 'withdrawal' => 'Penarikan',
+                'subtitle' => 'Kelola dan tinjau permintaan penarikan dana Anda',
                 'withdrawal_list' => 'Daftar Penarikan',
                 'create_withdrawal' => 'Buat Penarikan',
                 'withdrawal_detail' => 'Detail Penarikan',
