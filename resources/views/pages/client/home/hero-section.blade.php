@@ -162,15 +162,15 @@
                 </div>
                
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 justify-center lg:justify-start animate-fadeInUp animation-delay-600">
-                    <button class="w-full sm:w-auto px-6 sm:px-8 h-12 sm:h-14 rounded-full btn-shimmer text-white text-sm sm:text-base font-bold tracking-wide hover:shadow-glow hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2 group">
-                        {{ __('messages.home.hero_btn_start') }}
-                        <span class="material-symbols-outlined text-lg transition-transform group-hover:translate-x-1">arrow_forward</span>
-                    </button>
+                    <a href="#features" class="w-full sm:w-auto px-6 sm:px-8 h-12 sm:h-14 rounded-full btn-shimmer text-white text-sm sm:text-base font-bold tracking-wide hover:shadow-glow hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2 group">
+    {{ __('messages.home.hero_btn_start') }}
+    <span class="material-symbols-outlined text-lg transition-transform group-hover:translate-x-1">arrow_forward</span>
+</a>
                    
-                    <button class="w-full sm:w-auto px-6 sm:px-8 h-12 sm:h-14 rounded-full border border-gray-300 dark:border-white/20 text-slate-900 dark:text-white text-sm sm:text-base font-bold tracking-wide hover:bg-gray-50 dark:hover:bg-white/5 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2">
-                        <span class="material-symbols-outlined text-primary">call</span>
-                        {{ __('messages.home.hero_btn_contact') }}
-                    </button>
+                    <a href="#contact" class="w-full sm:w-auto px-6 sm:px-8 h-12 sm:h-14 rounded-full border border-gray-300 dark:border-white/20 text-slate-900 dark:text-white text-sm sm:text-base font-bold tracking-wide hover:bg-gray-50 dark:hover:bg-white/5 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2">
+    <span class="material-symbols-outlined text-primary">call</span>
+    {{ __('messages.home.hero_btn_contact') }}
+</a>
                 </div>
                
                 <!-- Trust Indicators -->
@@ -246,4 +246,22 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Smooth scroll untuk semua anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+});
+</script>
 </section>
