@@ -1,6 +1,6 @@
 <!-- Hero Section -->
 <style>
-    /* Fade In Animations */
+    /* Fade In Animations s */
     @keyframes fadeInUp {
         from {
             opacity: 0;

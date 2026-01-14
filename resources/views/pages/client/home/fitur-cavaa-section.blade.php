@@ -12,7 +12,7 @@
             </p>
         </div>
        
-        <!-- Features Grid -->
+        <!-- Features Grid s -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             <!-- Card 1 - Dashboard -->
             <div class="feature-card-wrapper scroll-reveal" data-delay="0">

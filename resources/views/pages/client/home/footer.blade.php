@@ -13,7 +13,7 @@
                     </p>
                 </div>
                
-                <!-- Social Media Icons -->
+                <!-- Social Media Icons s -->
                 <div class="flex items-center gap-3">
                     <a class="group flex items-center justify-center w-11 h-11 rounded-lg bg-white/10 border border-white/20 hover:bg-white hover:border-white transition-all duration-300" href="#">
                         <i class="fa-brands fa-instagram text-xl text-white group-hover:text-[#b91d1d] transition-colors"></i>

@@ -51,7 +51,7 @@
             </div>
         </div>
        
-        <!-- Feature 2 -->
+        <!-- Feature 2 s-->
         <div class="flex flex-col lg:flex-row items-center gap-8 sm:gap-10 lg:gap-20 mb-16 sm:mb-20 md:mb-24 lg:mb-32 group">
             <div class="flex-1 relative w-full opacity-0 -translate-x-12 transition-all duration-700 delay-100" data-scroll-animate>
                 <div class="relative rounded-lg overflow-hidden shadow-2xl shadow-gray-200/50 dark:shadow-none bg-white dark:bg-gray-800 p-1.5 sm:p-2 transform transition-transform duration-500 group-hover:scale-[1.02] hover:-rotate-1">

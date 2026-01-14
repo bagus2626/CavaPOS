@@ -1,6 +1,6 @@
 <!-- Contact Section -->
 <section id="contact" class="relative w-full py-12 sm:py-16 lg:py-20 bg-white dark:bg-[#1a1111] overflow-hidden">
-    <!-- Animated Background Elements -->
+    <!-- Animated Background Elements s -->
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
         <div class="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl animate-float"></div>
         <div class="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-float" style="animation-delay: 2s;"></div>

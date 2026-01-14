@@ -84,7 +84,7 @@
                             </button>
                         </div>
 
-                        <!-- Trust Indicator with animation -->
+                        <!-- Trust Indicator with animations -->
                         <div class="flex items-center gap-4 mt-6 pt-6 border-t border-gray-100 dark:border-gray-800 w-full scroll-animate"
                             data-scroll="fade-up" data-delay="1000">
                             <div class="flex -space-x-3">

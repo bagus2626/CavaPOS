@@ -79,7 +79,7 @@
         font-weight: 700;
     }
     
-    /* Garis bawah untuk link aktif */
+    /* Garis bawah untuk link aktif s */
     .nav-link.active::after {
         content: '';
         position: absolute;
