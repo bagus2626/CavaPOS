@@ -137,4 +137,85 @@
             </div>
         </div>
     </div>
+
+    <style>
+        /* Animasi Scroll Contact Section */
+#contact .opacity-0 {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+#contact .animate-in {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+/* Animasi Float untuk Background */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) translateX(0);
+    }
+    25% {
+        transform: translateY(-20px) translateX(10px);
+    }
+    50% {
+        transform: translateY(-10px) translateX(-10px);
+    }
+    75% {
+        transform: translateY(-30px) translateX(5px);
+    }
+}
+
+.animate-float {
+    animation: float 20s ease-in-out infinite;
+}
+        </style>
+
+    <script>
+        // Animasi Scroll untuk Contact Section
+document.addEventListener('DOMContentLoaded', function() {
+    // Konfigurasi Intersection Observer
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-in');
+            }
+        });
+    }, observerOptions);
+
+    // Target elemen yang akan dianimasi
+    const contactSection = document.querySelector('#contact');
+    
+    if (contactSection) {
+        // Animasi untuk header
+        const header = contactSection.querySelector('.text-center.mb-12');
+        if (header) {
+            header.classList.add('opacity-0', 'translate-y-10');
+            observer.observe(header);
+        }
+
+        // Animasi untuk contact cards
+        const cards = contactSection.querySelectorAll('.grid > a');
+        cards.forEach((card, index) => {
+            card.classList.add('opacity-0', 'translate-y-10');
+            card.style.transitionDelay = `${index * 150}ms`;
+            observer.observe(card);
+        });
+
+        // Animasi untuk bottom CTA
+        const cta = contactSection.querySelector('.relative.rounded-2xl.bg-white');
+        if (cta) {
+            cta.classList.add('opacity-0', 'translate-y-10');
+            cta.style.transitionDelay = '450ms';
+            observer.observe(cta);
+        }
+    }
+});
+        </script>
 </section>
