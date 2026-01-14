@@ -38,31 +38,11 @@
           <h1 class="page-title">{{ __('messages.partner.outlet.table_management.tables.detail_table') }}</h1>
           <p class="page-subtitle">{{ __('messages.partner.outlet.table_management.tables.view_complete_information') }}</p>
         </div>
+        <a href="{{ route('partner.store.tables.index') }}" class="back-button">
+           <span class="material-symbols-outlined">arrow_back</span>
+           {{ __('messages.partner.outlet.table_management.tables.back_to_tables') }}
+        </a>
       </div>
-
-      {{-- Success Message --}}
-      {{-- @if (session('success'))
-        <div class="alert alert-success alert-modern">
-          <div class="alert-icon">
-            <span class="material-symbols-outlined">check_circle</span>
-          </div>
-          <div class="alert-content">
-            {{ session('success') }}
-          </div>
-        </div>
-      @endif --}}
-
-      {{-- Error Message --}}
-      {{-- @if (session('error'))
-        <div class="alert alert-danger alert-modern">
-          <div class="alert-icon">
-            <span class="material-symbols-outlined">error</span>
-          </div>
-          <div class="alert-content">
-            {{ session('error') }}
-          </div>
-        </div>
-      @endif --}}
 
       {{-- Hero Card --}}
       <div class="modern-card">
@@ -144,17 +124,16 @@
                 <div class="detail-info-value">{{ $table->table_code ?? '—' }}</div>
               </div>
 
-              {{-- Status --}}
+              {{-- Created At --}}
               <div class="detail-info-item">
                 <div class="detail-info-label">
-                  {{ __('messages.partner.outlet.table_management.tables.status') }}
+                  {{ __('messages.partner.outlet.table_management.tables.created_at') ?? 'Created At' }}
                 </div>
                 <div class="detail-info-value">
-                  <span class="badge-modern {{ $statusInfo['class'] }}">
-                    {{ $statusInfo['label'] }}
-                  </span>
+                  {{ $table->created_at ? $table->created_at->format('d M Y, H:i') : '—' }}
                 </div>
               </div>
+              
             </div>
 
             <div class="detail-info-group">
@@ -166,29 +145,15 @@
                 <div class="detail-info-value">{{ $table->table_class ?? '—' }}</div>
               </div>
 
-              {{-- Table URL --}}
+              {{-- Status --}}
               <div class="detail-info-item">
                 <div class="detail-info-label">
-                  {{ __('messages.partner.outlet.table_management.tables.table_url') ?? 'Table URL' }}
+                  {{ __('messages.partner.outlet.table_management.tables.status') }}
                 </div>
                 <div class="detail-info-value">
-                  @if($table->table_url)
-                    <a href="{{ url($table->table_url) }}" target="_blank" class="text-primary">
-                      {{ url($table->table_url) }}
-                    </a>
-                  @else
-                    —
-                  @endif
-                </div>
-              </div>
-
-              {{-- Created At --}}
-              <div class="detail-info-item">
-                <div class="detail-info-label">
-                  {{ __('messages.partner.outlet.table_management.tables.created_at') ?? 'Created At' }}
-                </div>
-                <div class="detail-info-value">
-                  {{ $table->created_at ? $table->created_at->format('d M Y, H:i') : '—' }}
+                  <span class="badge-modern {{ $statusInfo['class'] }}">
+                    {{ $statusInfo['label'] }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -216,7 +181,7 @@
       </div>
 
       {{-- QR Code Section --}}
-      {{-- @if($table->table_code)
+      @if($table->table_code)
         <div class="modern-card">
           <div class="card-body-modern">
 
@@ -227,102 +192,137 @@
               <h3 class="section-title">{{ __('messages.partner.outlet.table_management.tables.qr_code') ?? 'QR Code' }}</h3>
             </div>
 
-            <div class="detail-info-item">
-              <div class="detail-info-value text-center">
-                <div class="qr-code-container">
-                  <img src="{{ route('partner.store.tables.barcode', $table->id) }}" 
+            <div class="qr-code-display">
+              <div class="qr-frame">
+                <div class="qr-frame-inner">
+                  <img src="{{ route('partner.store.tables.generate-barcode', $table->id) }}" 
                        alt="QR Code for Table {{ $table->table_no }}"
-                       class="qr-code-image">
-                  <div class="mt-3">
-                    <a href="{{ route('partner.store.tables.barcode', $table->id) }}" 
-                       download="table-{{ $table->table_no }}-qr.png"
-                       class="btn-modern btn-primary-modern">
-                      <span class="material-symbols-outlined">download</span>
-                      {{ __('messages.partner.outlet.table_management.tables.download_qr') ?? 'Download QR Code' }}
-                    </a>
-                  </div>
+                       class="qr-image">
                 </div>
               </div>
             </div>
 
           </div>
         </div>
-      @endif --}}
-    </div>
-  </div>
+      @endif
 
   <style>
-    /* QR Code Styling */
-    .qr-code-container {
-      display: inline-block;
-      padding: 2rem;
-      background: #fff;
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-md);
-    }
-
-    .qr-code-image {
-      max-width: 300px;
-      width: 100%;
-      height: auto;
-      border-radius: var(--radius-md);
-    }
-
-    /* Detail Actions */
-    .detail-actions {
+    /* QR Code Display */
+    .qr-code-display {
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
-      gap: 1rem;
-      flex-wrap: wrap;
+      padding: 2rem 1rem;
+      min-height: 400px;
     }
 
-    .detail-actions-right {
-      display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
+    .qr-frame-inner {
+      position: relative;
+      padding: 2rem;
+      background: #ffffff;
+      border-radius: 16px;
+      border: 4px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
     }
 
+    .qr-image {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      display: block;
+      image-rendering: pixelated;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: crisp-edges;
+      border-radius: 8px;
+      z-index: 1;
+    }
+
+    /* Corner Accents */
+    .qr-frame-inner::after {
+      content: '';
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border: 5px solid #ae1504;
+      border-right: none;
+      border-bottom: none;
+      top: 10px;
+      left: 10px;
+      border-radius: 8px 0 0 0;
+    }
+
+    /* Responsive Design */
     @media (max-width: 768px) {
-      .detail-actions {
-        flex-direction: column;
-        align-items: stretch;
+      .qr-code-display {
+        padding: 1.5rem 1rem;
+        min-height: 350px;
       }
 
-      .detail-actions-right {
-        flex-direction: column;
+      .qr-frame {
+        padding: 1.5rem;
+      }
+
+      .qr-frame-inner {
+        padding: 1.5rem;
+      }
+
+      .qr-image {
+        width: 260px;
+        height: 260px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .qr-code-display {
+        padding: 1rem;
+        min-height: 300px;
+      }
+
+      .qr-frame {
+        padding: 1.25rem;
+        border-radius: 20px;
+      }
+
+      .qr-frame::before {
+        border-radius: 22px;
+      }
+
+      .qr-frame-inner {
+        padding: 1.25rem;
+        border-radius: 12px;
+      }
+
+      .qr-image {
+        width: 200px;
+        height: 200px;
+      }
+
+      .qr-frame-inner::after {
+        width: 30px;
+        height: 30px;
+        border-width: 2px;
+      }
+    }
+
+    /* Print Optimization */
+    @media print {
+      .qr-frame {
+        box-shadow: none !important;
+        background: white !important;
+        animation: none !important;
+      }
+
+      .qr-frame::before,
+      .qr-frame::after,
+      .qr-frame-inner::before,
+      .qr-frame-inner::after {
+        display: none !important;
+      }
+
+      .qr-frame-inner {
+        box-shadow: none !important;
       }
     }
   </style>
 @endsection
-
-{{-- @push('scripts')
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script>
-    function deleteTable(tableId) {
-      Swal.fire({
-        title: '{{ __('messages.partner.outlet.table_management.tables.delete_confirmation') ?? 'Are you sure?' }}',
-        text: '{{ __('messages.partner.outlet.table_management.tables.delete_warning') ?? 'You won\'t be able to revert this!' }}',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#ae1504',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: '{{ __('messages.partner.outlet.table_management.tables.delete_confirm') ?? 'Yes, delete it!' }}',
-        cancelButtonText: '{{ __('messages.partner.outlet.table_management.tables.cancel') ?? 'Cancel' }}'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          const form = document.createElement('form');
-          form.method = 'POST';
-          form.action = `/partner/store/tables/${tableId}`;
-          form.style.display = 'none';
-          form.innerHTML = `
-            @csrf
-            <input type="hidden" name="_method" value="DELETE">
-          `;
-          document.body.appendChild(form);
-          form.submit();
-        }
-      });
-    }
-  </script>
-@endpush --}}

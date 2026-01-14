@@ -2115,6 +2115,7 @@ return [
                     'created_at' => 'Created At',
                     'update_table_information' => 'Update table information',
                     'back_to_tables' => 'Back to Tables',
+                    'qr_code' => 'QR Code',
                 ],
             ],
         ],

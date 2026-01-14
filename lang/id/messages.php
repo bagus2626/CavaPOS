@@ -2120,6 +2120,7 @@ return [
                     'update_table_information' => 'Perbarui informasi meja',
                     'all_categories' => 'Semua Kategori',
                     'back_to_tables' => 'Kembali ke Meja',
+                    'qr_code' => 'Kode QR',
                 ],
             ],
         ],
