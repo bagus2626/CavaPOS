@@ -29,6 +29,10 @@
         <h1 class="page-title">{{ __('messages.partner.user_management.employees.employee_detail') }}</h1>
         <p class="page-subtitle">View complete information about this employee.</p>
       </div>
+      <a href="{{ route('partner.user-management.employees.index') }}" class="back-button">
+            <span class="material-symbols-outlined">arrow_back</span>
+            {{ __('messages.partner.user_management.employees.back_to_employees') }}
+        </a>
     </div>
 
     {{-- Success Message --}}
