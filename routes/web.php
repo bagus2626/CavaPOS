@@ -59,6 +59,7 @@ use \App\Http\Controllers\Admin\MessageNotification\MessageController;
 use App\Http\Controllers\Customer\Table\TableStatusController;
 use App\Http\Controllers\Owner\OwnerMessageController;
 use App\Http\Controllers\Owner\Report\StockReportController;
+use App\Http\Controllers\Partner\PartnerMessageController;
 use App\Notifications\CustomerVerifyEmail;
 use App\Models\Owner;
 
@@ -425,6 +426,14 @@ Route::middleware('setlocale')->group(function () {
         Route::get('timeline/messages', [PartnerDashboardController::class, 'timelineMessages'])
             ->name('timeline.messages');
 
+        Route::prefix('messages')->name('messages.')->group(function () {
+            Route::get('/', [PartnerMessageController::class, 'index'])->name('index');
+            Route::get('/{id}', [PartnerMessageController::class, 'show'])->name('show');
+            Route::get('/notifications/list', [PartnerMessageController::class, 'getNotificationMessages'])->name('notifications');
+            Route::post('/mark-as-read/{id}', [PartnerMessageController::class, 'markMessageAsRead'])->name('mark-read');
+            Route::post('/mark-all-read', [PartnerMessageController::class, 'markAllMessagesAsRead'])->name('mark-all-read');
+        });
+
         Route::get('products/recipe/ingredients', [PartnerProductController::class, 'getRecipeIngredients'])
             ->name('products.recipe.ingredients');
 
@@ -468,6 +477,7 @@ Route::middleware('setlocale')->group(function () {
             Route::get('metrics', [CashierDashboardController::class, 'metrics'])->name('metrics');
             Route::get('tab/{tab}', [CashierDashboardController::class, 'show'])->name('tab');
             Route::get('/open-order/{id}', [CashierDashboardController::class, 'openOrder'])->name('open-order');
+            Route::get('/cashier/activity', [CashierDashboardController::class, 'activity'])->name('activity');
 
             Route::post('cash-payment/{id}', [CashierTransactionController::class, 'cashPayment'])->name('cash-payment');
             Route::get('order-detail/{id}', [CashierTransactionController::class, 'orderDetail'])->name('order-detail');

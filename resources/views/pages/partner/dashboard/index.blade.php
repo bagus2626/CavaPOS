@@ -5,574 +5,482 @@
 @section('page_title', 'Dashboard Partner')
 
 @section('content')
-    <!-- Main Content -->
-    <section class="content">
-        <div class="container-fluid">
-            <!-- Info boxes -->
-            <div class="row mb-3">
-                <div class="col-12 col-sm-6 col-md-3">
-                    <div class="info-box">
-                        <span class="info-box-icon bg-info elevation-1"><i class="fas fa-users"></i></span>
-                        <div class="info-box-content">
-                            <span
-                                class="info-box-text">{{ __('messages.partner.dashboard.total_employees') }}</span>
-                            <span class="info-box-number">{{ $data['total_employees'] }}</span>
+    <div class="modern-container">
+        <div class="container-modern">
+            <!-- Header Section -->
+            <div class="page-header">
+                <div class="header-content">
+                    <h1 class="page-title">Dashboard Partner</h1>
+                    <p class="page-subtitle">Overview penjualan dan performa outlet hari ini</p>
+                </div>
+            </div>
+
+            <!-- Success/Error Messages -->
+            @if (session('success'))
+                <div class="alert alert-success alert-modern">
+                    <div class="alert-icon">
+                        <span class="material-symbols-outlined">check_circle</span>
+                    </div>
+                    <div class="alert-content">
+                        {{ session('success') }}
+                    </div>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="alert alert-danger alert-modern">
+                    <div class="alert-icon">
+                        <span class="material-symbols-outlined">error</span>
+                    </div>
+                    <div class="alert-content">
+                        {{ session('error') }}
+                    </div>
+                </div>
+            @endif
+
+            <!-- Stats Cards - Hari Ini -->
+            <div class="row mb-4">
+                <!-- Total Penjualan Hari Ini -->
+                <div class="col-12 col-sm-6 col-lg-3 mb-3">
+                    <div class="modern-card stats-card">
+                        <div class="stats-icon">
+                            <span class="material-symbols-outlined">payments</span>
+                        </div>
+                        <div class="stats-content">
+                            <div class="stats-label">{{ __('messages.partner.dashboard.today_sales') }}</div>
+                            <div class="stats-value">Rp {{ number_format($data['today_sales'], 0, ',', '.') }}</div>
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-sm-6 col-md-3">
-                    <div class="info-box">
-                        <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-shopping-cart"></i></span>
-                        <div class="info-box-content">
-                            <span class="info-box-text">{{ __('messages.partner.dashboard.total_orders') }}
-                                ({{ now()->year }})</span>
-                            <span class="info-box-number">{{ $data['total_orders'] }}</span>
+
+                <!-- Total Employee Aktif -->
+                <div class="col-12 col-sm-6 col-lg-3 mb-3">
+                    <div class="modern-card stats-card">
+                        <div class="stats-icon">
+                            <span class="material-symbols-outlined">group</span>
+                        </div>
+                        <div class="stats-content">
+                            <div class="stats-label">{{ __('messages.partner.dashboard.active_employees') }}</div>
+                            <div class="stats-value">{{ $data['total_employees_active'] }}</div>
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-sm-6 col-md-3">
-                    <div class="info-box">
-                        <span class="info-box-icon bg-success elevation-1"><i class="fas fa-dollar-sign"></i></span>
-                        <div class="info-box-content">
-                            <span class="info-box-text">{{ __('messages.partner.dashboard.total_sales') }}
-                                ({{ now()->year }})</span>
-                            <span class="info-box-number">Rp. {{ number_format($data['total_sales']) }}</span>
+
+                <!-- Pesanan Hari Ini (PAID) -->
+                <div class="col-12 col-sm-6 col-lg-3 mb-3">
+                    <div class="modern-card stats-card">
+                        <div class="stats-icon">
+                            <span class="material-symbols-outlined">receipt_long</span>
+                        </div>
+                        <div class="stats-content">
+                            <div class="stats-label">{{ __('messages.partner.dashboard.paid_orders') }}</div>
+                            <div class="stats-value">{{ number_format($data['today_orders_paid']) }}</div>
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-sm-6 col-md-3">
-                    <div class="info-box">
-                        <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-star"></i></span>
-                        <div class="info-box-content">
-                            <span class="info-box-text">{{ __('messages.partner.dashboard.products') }}</span>
-                            <span class="info-box-number">{{ $data['total_products'] }}</span>
+
+                <!-- Total Produk -->
+                <div class="col-12 col-sm-6 col-lg-3 mb-3">
+                    <div class="modern-card stats-card">
+                        <div class="stats-icon">
+                            <span class="material-symbols-outlined">inventory_2</span>
+                        </div>
+                        <div class="stats-content">
+                            <div class="stats-label">{{ __('messages.partner.dashboard.total_products') }}</div>
+                            <div class="stats-value">{{ number_format($data['total_products']) }}</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- @yield('content') --}}
-
-            <!-- Example content -->
+            <!-- Row 1: Sales Trend & Top Products -->
             <div class="row">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">{{ __('messages.partner.dashboard.recent_orders') }}</h3>
-                            <div class="card-tools">
-                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                    <i class="fas fa-minus"></i>
-                                </button>
+                <!-- Sales Trend Chart -->
+                <div class="col-12 col-lg-7 mb-4">
+                    <div class="modern-card">
+                        <div class="card-header-modern">
+                            <div class="section-header mb-0">
+                                <div class="section-icon section-icon-red">
+                                    <span class="material-symbols-outlined">trending_up</span>
+                                </div>
+                                <h3 class="section-title">{{ __('messages.partner.dashboard.sales_trend') }}</h3>
                             </div>
                         </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-striped table-hover table-modern">
-                                    <thead>
-                                        <tr>
-                                            <th>{{ __('messages.partner.dashboard.order_id') }}</th>
-                                            <th>{{ __('messages.partner.dashboard.customer') }}</th>
-                                            <th>{{ __('messages.partner.dashboard.status') }}</th>
-                                            <th>{{ __('messages.partner.dashboard.amount') }}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse ($data['last_orders'] as $order)
-                                            <tr style="cursor: pointer;" data-toggle="modal"
-                                                data-target="#orderDetailModal{{ $order->id }}">
-                                                <td><a href="#"
-                                                        class="order-link">{{ $order->booking_order_code ?? '-' }}</a></td>
-                                                <td>{{ $order->customer_name ?? '-' }}</td>
-                                                <td>
-                                                    <span
-                                                        class="badge 
-                                                    @if ($order->order_status === 'PAID') badge-primary
-                                                    @elseif ($order->order_status === 'SERVED') badge-success
-                                                    @elseif ($order->order_status === 'PENDING') badge-warning
-                                                    @elseif ($order->order_status === 'UNPAID') badge-warning
-                                                    @elseif ($order->order_status === 'PROCESSED') badge-primary
-                                                    @elseif ($order->order_status === 'CANCELLED') badge-danger
-                                                    @else badge-secondary @endif
-                                                ">
-                                                        {{ $order->order_status }}
-                                                    </span>
-                                                </td>
-                                                <td>Rp. {{ number_format($order->total_order_value ?? 0) }}</td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="4" class="text-center text-muted py-3">
-                                                    {{ __('messages.partner.product.all_product.no_option') }}
-                                                </td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="card-body-modern">
+                            <canvas id="salesTrendChart" style="height: 300px;"></canvas>
                         </div>
-                        <!-- Modal untuk setiap order -->
-                        @include('pages.partner.dashboard.partials.recent-order-modal')
                     </div>
                 </div>
 
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">{{ __('messages.partner.dashboard.my_timeline') }}</h3>
-                            <div class="card-tools">
-                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                    <i class="fas fa-minus"></i>
-                                </button>
+                <!-- Top 5 Products -->
+                <div class="col-12 col-lg-5 mb-4">
+                    <div class="modern-card">
+                        <div class="card-header-modern">
+                            <div class="section-header mb-0">
+                                <div class="section-icon section-icon-red">
+                                    <span class="material-symbols-outlined">star</span>
+                                </div>
+                                <h3 class="section-title">{{ __('messages.partner.dashboard.top_products') }}</h3>
                             </div>
                         </div>
-                        <div class="card-body">
-                            <div class="timeline">
-                                @php
-                                    use Illuminate\Support\Facades\Storage;
-                                    use Illuminate\Support\Str;
-                                @endphp
+                        <div class="card-body-modern">
+                            <canvas id="topProductsChart" style="height: 300px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                                {{-- Page pertama (5 pesan pertama) --}}
-                                @include('pages.partner.dashboard.partials.timeline-items', [
-                                    'messages' => $data['messages'],
-                                ])
-
-                                {{-- Penutup timeline --}}
-                                <div class="timeline-end">
-                                    <i class="fas fa-clock bg-gray"></i>
+            <!-- Row 2: Category Performance -->
+            <div class="row">
+                <!-- Category Performance Chart -->
+                <div class="col-12 mb-4">
+                    <div class="modern-card">
+                        <div class="card-header-modern">
+                            <div class="section-header mb-0">
+                                <div class="section-icon section-icon-red">
+                                    <span class="material-symbols-outlined">leaderboard</span>
                                 </div>
-
-                                @if ($data['messages']->hasMorePages())
-                                    <div class="text-center mt-2">
-                                        <button class="btn btn-sm btn-outline-primary" id="loadMoreTimeline"
-                                            data-next-page="{{ $data['messages']->currentPage() + 1 }}"
-                                            data-last-page="{{ $data['messages']->lastPage() }}">
-                                            Load more
-                                        </button>
-                                    </div>
-                                @endif
+                                <h3 class="section-title">{{ __('messages.partner.dashboard.performance_this_month') }}
+                                </h3>
                             </div>
+                            <div class="chart-filter-group">
+                                <div class="select-wrapper">
+                                    <select id="categoryFilterType" class="form-control-modern">
+                                        <option value="top">{{ __('messages.partner.dashboard.best_performing') }}
+                                        </option>
+                                        <option value="bottom">{{ __('messages.partner.dashboard.lowest_performing') }}
+                                        </option>
+                                    </select>
+                                    <span class="material-symbols-outlined select-arrow">expand_more</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body-modern">
+                            <canvas id="categoryPerformanceChart" style="height: 300px;"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
 
     {{-- Popup carousel kalau ada popup messages --}}
-    @includeWhen(isset($data['popups']) && $data['popups']->isNotEmpty(), 'pages.partner.dashboard.partials.popup-carousel',[
-        'popups' => $data['popups'],
-    ])
-
-    <style>
-        /* ====== INFO-BOX DASHBOARD (Total Employees / Orders / Revenue / Products) ====== */
-        .info-box {
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            border: 1px solid #eef1f4;
-            background: #ffffff;
-            padding-right: 0.85rem;
-            min-height: 70px !important;
-        }
-
-        .info-box .info-box-content {
-            line-height: 1 !important;
-        }
-
-        .info-box .info-box-icon {
-            border-radius: 16px;
-            width: 54px;
-            height: 54px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, .08);
-        }
-
-        .info-box .info-box-text {
-            font-size: 0.78rem;
-            text-transform: uppercase;
-            letter-spacing: .04em;
-            color: #6b7280;
-            font-weight: 600;
-            margin-bottom: 2px;
-        }
-
-        .info-box .info-box-number {
-            font-size: 1.35rem;
-            font-weight: 700;
-            color: var(--ink);
-        }
-
-        /* warna icon pakai tone sedikit lebih lembut, tetap beda-beda */
-        .info-box-icon.bg-info {
-            background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
-            color: #fff;
-        }
-
-        .info-box-icon.bg-danger {
-            background: linear-gradient(135deg, var(--choco), var(--soft-choco)) !important;
-            color: #fff;
-        }
-
-        .info-box-icon.bg-success {
-            background: linear-gradient(135deg, #16a34a, #22c55e) !important;
-            color: #fff;
-        }
-
-        .info-box-icon.bg-warning {
-            background: linear-gradient(135deg, #f97316, #f59e0b) !important;
-            color: #fff;
-        }
-
-        /* ====== TABEL RECENT ORDERS ====== */
-        .table-modern {
-            margin-bottom: 0;
-            border-collapse: separate;
-            border-spacing: 0;
-        }
-
-        .table-modern thead th {
-            border-bottom: 1px solid #e5e7eb !important;
-            font-size: 0.78rem;
-            text-transform: uppercase;
-            letter-spacing: .04em;
-            color: #6b7280;
-            background: #ffffff;
-            font-weight: 600;
-            padding-top: 0.55rem;
-            padding-bottom: 0.55rem;
-        }
-
-        .table-modern tbody td {
-            vertical-align: middle;
-            font-size: 0.88rem;
-            color: #374151;
-            border-top: 1px solid #f3f4f6;
-        }
-
-        .table-modern tbody tr {
-            transition: background-color .15s ease, transform .08s ease, box-shadow .15s ease;
-        }
-
-        .table-modern tbody tr:hover {
-            background-color: #f9fafb;
-            transform: translateY(-1px);
-            box-shadow: 0 3px 10px rgba(0, 0, 0, .03);
-        }
-
-        .table-modern .order-link {
-            color: var(--choco);
-            font-weight: 600;
-            text-decoration: none;
-        }
-
-        .table-modern .order-link:hover {
-            text-decoration: underline;
-        }
-
-        /* ====== BADGE STATUS ORDER ====== */
-        .badge-status {
-            border-radius: 999px;
-            padding: 0.25rem 0.65rem;
-            font-size: 0.7rem;
-            letter-spacing: .04em;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-
-        .card .badge-primary {
-            background: linear-gradient(135deg, var(--choco), var(--soft-choco));
-            border: none;
-        }
-
-        .card .badge-success {
-            background: linear-gradient(135deg, #16a34a, #22c55e);
-            border: none;
-            color: #fff;
-        }
-
-        .card .badge-warning {
-            background: linear-gradient(135deg, #facc15, #f97316);
-            border: none;
-            color: #111827;
-        }
-
-        .card .badge-danger {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-            border: none;
-            color: #fff;
-        }
-
-        .card .badge-secondary {
-            background: #e5e7eb;
-            color: #4b5563;
-            border: none;
-        }
-
-        /* ====== KARTU DASHBOARD (Recent Orders & Timeline) ====== */
-        .card {
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            border: 0;
-            overflow: hidden;
-        }
-
-        .card-header {
-            border-bottom: 1px solid #eef1f4;
-            background: #ffffff;
-            padding: 0.75rem 1rem;
-        }
-
-        .card-header .card-title {
-            font-weight: 600;
-            color: var(--ink);
-            font-size: 0.95rem;
-        }
-
-        .card-header .btn-tool {
-            color: #9ca3af;
-        }
-
-        .card-header .btn-tool:hover {
-            color: var(--choco);
-        }
-
-        /* ====== Timeline ====== */
-        .card .timeline {
-            padding-top: 0.25rem;
-            padding-bottom: 0.25rem;
-        }
-
-        .timeline .time-label span {
-            background: linear-gradient(135deg, var(--choco), var(--soft-choco)) !important;
-            border-radius: 999px;
-            padding: 4px 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, .12);
-        }
-
-        .timeline .timeline-item {
-            border-radius: var(--radius);
-            border: 1px solid #eef1f4;
-            background: #ffffff;
-            box-shadow: var(--shadow);
-            margin: 0.5rem 0 0.75rem 0;
-            padding: 0.75rem 1rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .timeline .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 12px;
-            bottom: 12px;
-            width: 3px;
-            background: linear-gradient(180deg, rgba(140, 16, 0, 0.1), rgba(193, 40, 20, 0.4));
-            border-radius: 999px;
-        }
-
-        .timeline .timeline-item .time {
-            color: #6b7280;
-            font-size: 0.8rem;
-        }
-
-        .timeline .timeline-item .time i {
-            color: var(--choco);
-            margin-right: 4px;
-        }
-
-        .timeline .timeline-header {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-top: 0.25rem;
-            color: var(--ink);
-        }
-
-        .timeline .timeline-header a {
-            color: var(--choco);
-            text-decoration: none;
-        }
-
-        .timeline .timeline-header a:hover {
-            text-decoration: underline;
-        }
-
-        .timeline .timeline-body {
-            margin-top: 0.35rem;
-            color: #4b5563;
-            font-size: 0.9rem;
-        }
-
-        .timeline>div>i {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, .12);
-        }
-
-        .timeline i.bg-blue {
-            background: linear-gradient(135deg, var(--choco), var(--soft-choco)) !important;
-            color: #fff !important;
-        }
-
-        .timeline i.bg-green {
-            background: linear-gradient(135deg, #059669, #10b981) !important;
-            color: #fff !important;
-        }
-
-        .timeline i.bg-gray {
-            background: #e5e7eb !important;
-            color: #4b5563 !important;
-        }
-
-        .timeline-end i {
-            background: #e5e7eb !important;
-            color: #6b7280 !important;
-            box-shadow: none !important;
-        }
-
-        .attachment-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 6px 10px;
-            margin: 3px;
-            border-radius: 999px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: var(--ink);
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            text-decoration: none;
-            transition: all 0.15s ease-in-out;
-        }
-
-        .attachment-badge:hover {
-            background: #eef2ff;
-            border-color: #c4b5fd;
-            text-decoration: none;
-        }
-
-        .attachment-badge i {
-            margin-right: 6px;
-            font-size: 0.9rem;
-            color: var(--choco);
-        }
-
-        .attachment-image-thumb {
-            width: 120px;
-            height: 120px;
-            object-fit: cover;
-            object-position: center;
-            border-radius: 10px;
-            margin: 4px 8px 4px 0;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
-            transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-        }
-
-        .attachment-image-thumb:hover {
-            transform: scale(1.03);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-        }
-
-        .timeline .timeline-footer {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 6px;
-        }
-
-        /* ===== Gambar dari Quill di dalam timeline-body ===== */
-        .timeline .timeline-body img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            border-radius: 10px;
-            margin: 6px 0;
-        }
-
-        .timeline .timeline-item {
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }
-
-        .timeline .timeline-body .ql-align-center img {
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .timeline .timeline-body .ql-align-right img {
-            margin-left: auto;
-            margin-right: 0;
-        }
-    </style>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const btn = document.getElementById('loadMoreTimeline');
-            if (!btn) return;
-
-            const timeline = document.querySelector('.timeline');
-            const endMarker = document.querySelector('.timeline-end');
-
-            let nextPage = parseInt(btn.dataset.nextPage, 10);
-            const lastPage = parseInt(btn.dataset.lastPage, 10);
-
-            btn.addEventListener('click', function() {
-                if (nextPage > lastPage) return;
-
-                btn.disabled = true;
-                btn.innerText = 'Loading...';
-
-                const url = "{{ route('partner.timeline.messages') }}" + "?page=" + nextPage;
-
-                fetch(url)
-                    .then(res => res.text())
-                    .then(html => {
-                        const temp = document.createElement('div');
-                        temp.innerHTML = html;
-
-                        const existingLabelSpans = timeline.querySelectorAll('.time-label span');
-                        const lastExistingLabelText = existingLabelSpans.length ?
-                            existingLabelSpans[existingLabelSpans.length - 1].textContent.trim() :
-                            null;
-
-                        const firstNewLabelDiv = temp.querySelector('.time-label');
-                        const firstNewLabelSpan = firstNewLabelDiv ? firstNewLabelDiv.querySelector(
-                            'span') : null;
-                        const firstNewLabelText = firstNewLabelSpan ? firstNewLabelSpan.textContent
-                            .trim() : null;
-
-                        if (lastExistingLabelText && firstNewLabelText &&
-                            lastExistingLabelText === firstNewLabelText &&
-                            firstNewLabelDiv
-                        ) {
-                            firstNewLabelDiv.remove();
-                        }
-
-                        const items = Array.from(temp.children);
-
-                        items.forEach(el => {
-                            timeline.insertBefore(el, endMarker);
-                        });
-
-                        nextPage++;
-
-                        if (nextPage > lastPage || items.length === 0) {
-                            btn.remove();
-                        } else {
-                            btn.dataset.nextPage = nextPage;
-                            btn.disabled = false;
-                            btn.innerText = 'Load more';
-                        }
-                    })
-                    .catch(() => {
-                        btn.disabled = false;
-                        btn.innerText = 'Load more';
-                    });
-            });
-        });
-    </script>
+    @includeWhen(isset($data['popups']) && $data['popups']->isNotEmpty(),
+        'pages.partner.dashboard.partials.popup-carousel',
+        [
+            'popups' => $data['popups'],
+        ]
+    )
 
 @endsection
+
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const topProductsData = @json($data['topProducts']);
+            const allCategoryData = @json($data['categoryPerformance']);
+
+            let categoryChart = null;
+
+            // ==================== SALES TREND CHART ====================
+            const salesCtx = document.getElementById('salesTrendChart');
+            if (salesCtx) {
+                new Chart(salesCtx, {
+                    type: 'line',
+                    data: {
+                        labels: @json($data['last7Days']),
+                        datasets: [{
+                            label: 'Penjualan (Rp)',
+                            data: @json($data['salesLast7Days']),
+                            borderColor: 'rgb(174, 21, 4)',
+                            backgroundColor: 'rgba(174, 21, 4, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            pointBackgroundColor: 'rgb(174, 21, 4)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                padding: 12,
+                                borderRadius: 8,
+                                titleFont: {
+                                    size: 14,
+                                    weight: 'bold'
+                                },
+                                bodyFont: {
+                                    size: 13
+                                },
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Rp ' + context.parsed.y.toLocaleString('id-ID');
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    },
+                                    callback: function(value) {
+                                        if (value >= 1000000) {
+                                            return 'Rp ' + (value / 1000000).toFixed(1) + 'jt';
+                                        } else if (value >= 1000) {
+                                            return 'Rp ' + (value / 1000).toFixed(0) + 'rb';
+                                        }
+                                        return 'Rp ' + value.toLocaleString('id-ID');
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // ==================== TOP PRODUCTS CHART ====================
+            const topProductsCtx = document.getElementById('topProductsChart');
+            if (!topProductsCtx) {
+                console.warn('Canvas topProductsChart tidak ditemukan');
+            } else if (topProductsData.length === 0) {
+                // Empty state - sembunyikan canvas dan tampilkan pesan
+                topProductsCtx.style.display = 'none';
+                const emptyDiv = document.createElement('div');
+                emptyDiv.className = 'd-flex align-items-center justify-content-center';
+                emptyDiv.style.height = '300px';
+                emptyDiv.innerHTML =
+                    '<p class="text-center" style="color: #999;">Belum ada data produk bulan ini.</p>';
+                topProductsCtx.parentElement.appendChild(emptyDiv);
+            } else {
+                topProductsCtx.style.display = 'block';
+                const productLabels = topProductsData.map(p => p.product_name);
+                const productQuantities = topProductsData.map(p => p.total_quantity);
+
+                new Chart(topProductsCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: productLabels,
+                        datasets: [{
+                            label: 'Jumlah Terjual',
+                            data: productQuantities,
+                            backgroundColor: '#ae1504',
+                            borderRadius: 6,
+                            borderSkipped: false
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                padding: 12,
+                                borderRadius: 8,
+                                titleFont: {
+                                    size: 14,
+                                    weight: 'bold'
+                                },
+                                bodyFont: {
+                                    size: 13
+                                },
+                                callbacks: {
+                                    label: function(context) {
+                                        const index = context.dataIndex;
+                                        const quantity = topProductsData[index].total_quantity;
+                                        const revenue = topProductsData[index].total_revenue;
+                                        return [
+                                            'Terjual: ' + quantity.toLocaleString('id-ID') +
+                                            ' item',
+                                            'Revenue: Rp ' + revenue.toLocaleString('id-ID')
+                                        ];
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // ==================== CATEGORY PERFORMANCE CHART ====================
+            function updateCategoryChart() {
+                const categoryCtx = document.getElementById('categoryPerformanceChart');
+
+                if (!categoryCtx) {
+                    console.warn('Canvas categoryPerformanceChart tidak ditemukan');
+                    return;
+                }
+
+                const filterType = document.getElementById('categoryFilterType').value;
+                const filterCount = 5; // Fixed at 5 categories
+
+                let filteredData = [...allCategoryData];
+                let categoryLabels = [];
+                let categoryQuantities = [];
+                let colors = [];
+
+                // Handle empty data
+                if (allCategoryData.length === 0) {
+                    categoryLabels = [];
+                    categoryQuantities = [];
+                    colors = [];
+                } else {
+                    // Sort and filter based on type
+                    if (filterType === 'top') {
+                        // Top performers: terbanyak di atas
+                        filteredData = filteredData
+                            .sort((a, b) => b.total_quantity - a.total_quantity)
+                            .slice(0, filterCount);
+                    } else {
+                        // Lowest performers: tersedikit di atas
+                        filteredData = filteredData
+                            .sort((a, b) => a.total_quantity - b.total_quantity)
+                            .slice(0, filterCount);
+                    }
+
+                    categoryLabels = filteredData.map(c => c.category_name);
+                    categoryQuantities = filteredData.map(c => c.total_quantity);
+                    colors = filteredData.map(() =>
+                        filterType === 'top' ? '#10b981' : '#ef4444'
+                    );
+                }
+
+                // Destroy existing chart
+                if (categoryChart) {
+                    categoryChart.destroy();
+                }
+
+                // Create new chart
+                categoryChart = new Chart(categoryCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: categoryLabels,
+                        datasets: [{
+                            label: 'Total Item Terjual',
+                            data: categoryQuantities,
+                            backgroundColor: colors,
+                            borderRadius: 6,
+                            borderSkipped: false
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                padding: 12,
+                                borderRadius: 8,
+                                titleFont: {
+                                    size: 14,
+                                    weight: 'bold'
+                                },
+                                bodyFont: {
+                                    size: 13
+                                },
+                                callbacks: {
+                                    label: function(context) {
+                                        if (filteredData.length === 0) return '';
+                                        const index = context.dataIndex;
+                                        const quantity = filteredData[index].total_quantity;
+                                        return 'Total Item: ' + quantity.toLocaleString('id-ID') +
+                                            ' terjual';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    },
+                                    callback: function(value) {
+                                        return value.toLocaleString('id-ID');
+                                    }
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Initial chart render
+            updateCategoryChart();
+
+            // Add event listener to filter
+            document.getElementById('categoryFilterType').addEventListener('change', updateCategoryChart);
+        });
+    </script>
+@endpush

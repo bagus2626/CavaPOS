@@ -42,6 +42,8 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ asset('css/base.css') }}">
     <link rel="stylesheet" href="{{ asset('css/components.css') }}">
+
+    <link rel="stylesheet" href="{{ asset('css/message.css') }}">
     <link rel="stylesheet" href="{{ asset('css/sidebar.css') }}">
     <link rel="stylesheet" href="{{ asset('css/forms.css') }}">
     <link rel="stylesheet" href="{{ asset('css/add-product-options.css') }}">
@@ -205,10 +207,38 @@
                         </div>
                     </div>
 
-                    <!-- Fullscreen Toggle -->
-                    <button class="navbar-icon-btn" onclick="toggleFullscreen()">
-                        <span class="material-symbols-outlined">fullscreen</span>
-                    </button>
+                    <!-- Notifications -->
+                    <div class="dropdown">
+                        <button class="navbar-icon-btn" type="button" data-toggle="dropdown" id="notificationBtn">
+                            <span class="material-symbols-outlined">notifications</span>
+                            <span class="badge" id="notificationBadge" style="display: none;"></span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right notification-dropdown" style="min-width: 380px; max-height: 500px; overflow-y: auto;">
+                            <div class="dropdown-header d-flex justify-content-between align-items-center">
+                                <span id="notificationTitle">{{ __('messages.partner.layout.notifications') }}</span>
+                                <button class="btn btn-sm btn-link text-primary p-0" id="markAllReadBtn" style="display: none;">
+                                    Tandain telah dibaca
+                                </button>
+                            </div>
+                            <div class="dropdown-divider m-0"></div>
+                            
+                            <div id="notificationContent">
+                                <!-- Loading state -->
+                                <div class="text-center py-4" id="notificationLoading">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                        <span class="sr-only">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="dropdown-divider m-0" id="notificationDivider" style="display: none;"></div>
+                            <div class="dropdown-footer text-center" id="notificationFooter" style="display: none;">
+                                <a href="{{ route('partner.messages.index') }}" class="btn btn-sm btn-link text-primary">
+                                    Lihat semua
+                                </a>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="navbar-divider"></div>
 
@@ -402,6 +432,203 @@
                 });
             }
         });
+    </script>
+
+    <!-- NOTIFICATION SCRIPT -->
+    <script>
+    $(document).ready(function() {
+        let currentPage = 1;
+        let lastPage = 1;
+        let isLoading = false;
+
+        // Load notifications on dropdown open
+        $('#notificationBtn').on('click', function() {
+            if ($('#notificationContent').children('.notification-item').length === 0) {
+                loadNotifications(1);
+            }
+        });
+
+        // Load notifications function
+        function loadNotifications(page = 1) {
+            if (isLoading) return;
+            
+            isLoading = true;
+            $('#notificationLoading').show();
+
+            $.ajax({
+                url: '{{ route("partner.messages.notifications") }}',
+                method: 'GET',
+                data: { page: page },
+                success: function(response) {
+                    if (response.success) {
+                        currentPage = response.pagination.current_page;
+                        lastPage = response.pagination.last_page;
+
+                        // Update badge
+                        updateBadge(response.unread_count);
+
+                        // Clear loading
+                        $('#notificationLoading').hide();
+
+                        if (response.messages.length === 0 && page === 1) {
+                            showEmptyState();
+                        } else {
+                            if (page === 1) {
+                                $('#notificationContent').empty();
+                            }
+                            renderNotifications(response.messages);
+                            
+                            // Show footer if there are messages
+                            $('#notificationDivider').show();
+                            $('#notificationFooter').show();
+                        }
+                    }
+                },
+                error: function() {
+                    $('#notificationLoading').hide();
+                    toastr.error('Failed to load notifications');
+                },
+                complete: function() {
+                    isLoading = false;
+                }
+            });
+        }
+
+        // Render notifications
+        function renderNotifications(messages) {
+            messages.forEach(function(message) {
+                const isRead = message.recipients && message.recipients.length > 0 && message.recipients[0].is_read;
+                const timeAgo = formatTimeAgo(message.created_at);
+                const messageUrl = '{{ route("partner.messages.show", ":id") }}'.replace(':id', message.id);
+                
+                const notificationHtml = `
+                    <a href="${messageUrl}" class="notification-item ${!isRead ? 'unread' : ''}" data-id="${message.id}" style="text-decoration: none; color: inherit; display: block;">
+                        <div class="d-flex">
+                            <div class="notification-icon mr-3">
+                                <span class="material-symbols-outlined">mail</span>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-title">${message.title || 'No Title'}</div>
+                                <div class="notification-time">${timeAgo}</div>
+                            </div>
+                        </div>
+                    </a>
+                `;
+                
+                $('#notificationContent').append(notificationHtml);
+            });
+        }
+
+        // Show empty state
+        function showEmptyState() {
+            const emptyHtml = `
+                <div class="notification-empty">
+                    <span class="material-symbols-outlined">notifications_off</span>
+                    <div style="font-size: 14px; font-weight: 500;">No notifications</div>
+                    <div style="font-size: 12px; margin-top: 4px;">You're all caught up!</div>
+                </div>
+            `;
+            $('#notificationContent').html(emptyHtml);
+            $('#notificationDivider').hide();
+            $('#notificationFooter').hide();
+        }
+
+        // Update badge
+        function updateBadge(count) {
+            if (count > 0) {
+                $('#notificationBadge').text(count > 99 ? '99+' : count).show();
+                $('#markAllReadBtn').show();
+                $('#notificationTitle').text(`${count} Pesan belum terbaca`);
+            } else {
+                $('#notificationBadge').hide();
+                $('#markAllReadBtn').hide();
+                $('#notificationTitle').text('Pesan');
+            }
+        }
+
+        // Mark as read on click
+        $(document).on('click', '.notification-item', function(e) {
+            const id = $(this).data('id');
+            const $item = $(this);
+            const url = $(this).attr('href');
+
+            if ($item.hasClass('unread')) {
+                e.preventDefault();
+                
+                $.ajax({
+                    url: '{{ route("partner.messages.mark-read", ":id") }}'.replace(':id', id),
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $item.removeClass('unread');
+                            updateBadge(response.unread_count);
+                            window.location.href = url;
+                        }
+                    },
+                    error: function() {
+                        window.location.href = url;
+                    }
+                });
+            }
+        });
+
+        // Mark all as read
+        $('#markAllReadBtn').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            $.ajax({
+                url: '{{ route("partner.messages.mark-all-read") }}',
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('.notification-item').removeClass('unread');
+                        updateBadge(0);
+                        toastr.success('All messages marked as read');
+                    }
+                },
+                error: function() {
+                    toastr.error('Failed to mark messages as read');
+                }
+            });
+        });
+
+        // Infinite scroll
+        $('.notification-dropdown').on('scroll', function() {
+            if (isLoading || currentPage >= lastPage) return;
+
+            const scrollTop = $(this).scrollTop();
+            const scrollHeight = $(this)[0].scrollHeight;
+            const clientHeight = $(this).height();
+
+            if (scrollTop + clientHeight >= scrollHeight - 50) {
+                loadNotifications(currentPage + 1);
+            }
+        });
+
+        // Helper function to format time ago
+        function formatTimeAgo(datetime) {
+            const now = new Date();
+            const past = new Date(datetime);
+            const diffInSeconds = Math.floor((now - past) / 1000);
+
+            if (diffInSeconds < 60) return 'Just now';
+            if (diffInSeconds < 3600) return Math.floor(diffInSeconds / 60) + ' minutes ago';
+            if (diffInSeconds < 86400) return Math.floor(diffInSeconds / 3600) + ' hours ago';
+            if (diffInSeconds < 604800) return Math.floor(diffInSeconds / 86400) + ' days ago';
+            
+            return past.toLocaleDateString();
+        }
+
+        // Initial load badge count
+        loadNotifications(1);
+    });
     </script>
 
     @yield('scripts')

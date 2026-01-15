@@ -12,6 +12,10 @@
           <h1 class="page-title">{{ __('messages.partner.product.all_product.edit_stock') }}</h1>
           <p class="page-subtitle">{{ __('messages.partner.product.all_product.update_stock') }}</p>
         </div>
+        <a href="{{ route('partner.products.index') }}" class="back-button">
+            <span class="material-symbols-outlined">arrow_back</span>
+            {{ __('messages.partner.product.all_product.back_to_products') }}
+        </a>
       </div>
 
       <!-- Error Messages -->

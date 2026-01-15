@@ -55,6 +55,10 @@
           <h1 class="page-title">{{ __('messages.partner.product.all_product.product_detail') }}</h1>
           <p class="page-subtitle">{{ __('messages.partner.product.all_product.view_information') }}</p>
         </div>
+        <a href="{{ route('partner.products.index') }}" class="back-button">
+            <span class="material-symbols-outlined">arrow_back</span>
+            {{ __('messages.partner.product.all_product.back_to_products') }}
+        </a>
       </div>
 
       {{-- Success Message --}}
