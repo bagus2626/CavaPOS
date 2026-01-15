@@ -101,7 +101,7 @@
 }
 
 .data-table tbody tr:hover {
-  background: #f8fafc;
+  background: var(--primary-light);
 }
 
 .data-table td {
@@ -393,4 +393,32 @@
 
 .sortable-header:hover .sort-icon {
   color: #666;
+}
+
+/* ============================================
+   TABLE DETAILS (Label-Value Pairs)
+   ============================================ */
+
+/* Table khusus untuk detail (tanpa header) */
+.table-details {
+  width: 100%;
+  margin-bottom: 0;
+  border-collapse: separate;
+  border-spacing: 0 1rem;
+}
+
+/* Kolom Label (Kiri) */
+.table-details .label-col {
+  width: 35%;
+  min-width: 180px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  vertical-align: top;
+  padding-right: 10px;
+}
+
+/* Kolom Value (Kanan) */
+.table-details .value-col {
+  color: var(--text-primary);
+  vertical-align: top;
 }
