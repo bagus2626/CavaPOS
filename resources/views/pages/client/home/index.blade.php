@@ -365,7 +365,7 @@
         // ============================================
         // GANTI VIDEO DI SINI - SATU-SATUNYA TEMPAT!
         // ============================================
-        const VIDEO_URL = 'https://youtu.be/Oextk-If8HQ?si=hhX57jBYTfF6Wnav';
+        const VIDEO_URL = 'https://youtu.be/Zq2JxULcNcw?si=74YlB2WRangEZHhK';
         // ============================================
 
         // PENGATURAN FADE OUT (dalam milidetik)

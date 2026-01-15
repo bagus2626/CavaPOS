@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Broadcast;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Public\PriceController;
+// use App\Http\Controllers\Public\PriceController;
 use App\Http\Controllers\Admin\Dashboard\DashboardController;
 use App\Http\Controllers\Admin\OwnerManagement\OwnerListController;
 use App\Http\Controllers\Admin\OwnerVerification\OwnerVerificationController;
