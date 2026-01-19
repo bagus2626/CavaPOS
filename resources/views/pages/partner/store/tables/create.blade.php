@@ -12,6 +12,10 @@
                     <h1 class="page-title">{{ __('messages.partner.outlet.table_management.tables.create_new_table') }}</h1>
                     <p class="page-subtitle">{{ __('messages.partner.outlet.table_management.tables.add_new_table') }}</p>
                 </div>
+                <a href="{{ route('partner.store.tables.index') }}" class="back-button">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    {{ __('messages.partner.outlet.table_management.tables.back_to_tables') }}
+                </a>
             </div>
 
             <!-- Error Messages -->
@@ -261,96 +265,110 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
 
-            // Initialize Table Image Cropper (1:1 Square)
-            ImageCropper.init({
-                id: 'table',
-                inputId: 'tableImage',
-                previewId: 'imagePreview',
-                modalId: 'cropModal',
-                imageToCropId: 'imageToCrop',
-                cropBtnId: 'cropBtn',
-                containerId: 'tableImageContainer',
-                aspectRatio: 1,
-                outputWidth: 800,
-                outputHeight: 800
-            });
+    // Initialize Table Image Cropper (1:1 Square)
+    try {
+        ImageCropper.init({
+            id: 'table',
+            inputId: 'tableImage',
+            previewId: 'imagePreview',
+            modalId: 'cropModal',
+            imageToCropId: 'imageToCrop',
+            cropBtnId: 'cropBtn',
+            containerId: 'tableImageContainer',
+            aspectRatio: 1,
+            outputWidth: 800,
+            outputHeight: 800
+        });
+    } catch (error) {
+        console.error('ImageCropper error:', error);
+    }
 
-            // ==== Table Class Toggle System ====
-            const selectMode = document.getElementById('select_mode');
-            const inputMode = document.getElementById('input_mode');
-            const selectClass = document.getElementById('table_class');
-            const newClassInput = document.getElementById('new_table_class');
-            const btnAddNewClass = document.getElementById('btn_add_new_class');
-            const cancelBtn = document.getElementById('cancel_new_class');
-            const form = document.getElementById('tableForm');
+    // ==== Table Class Toggle System ====
+    const selectMode = document.getElementById('select_mode');
+    const inputMode = document.getElementById('input_mode');
+    const selectClass = document.getElementById('table_class');
+    const newClassInput = document.getElementById('new_table_class');
+    const btnAddNewClass = document.getElementById('btn_add_new_class');
+    const cancelBtn = document.getElementById('cancel_new_class');
+    const form = document.getElementById('tableForm');
 
-            let isInputMode = false;
+    // Safety check
+    if (!btnAddNewClass || !selectMode || !inputMode || !selectClass || !newClassInput) {
+        return;
+    }
 
-            function switchToInputMode() {
-                isInputMode = true;
-                selectMode.style.display = 'none';
-                inputMode.style.display = 'block';
-                selectClass.required = false;
-                newClassInput.required = true;
+    let isInputMode = false;
 
-                setTimeout(() => {
+    function switchToInputMode() {
+        isInputMode = true;
+        selectMode.style.display = 'none';
+        inputMode.style.display = 'block';
+        selectClass.required = false;
+        newClassInput.required = true;
+
+        inputMode.style.opacity = '0';
+        inputMode.style.transition = 'opacity 0.2s ease';
+        
+        setTimeout(() => {
+            newClassInput.focus();
+            inputMode.style.opacity = '1';
+        }, 50);
+    }
+
+    function switchToSelectMode() {
+        isInputMode = false;
+        inputMode.style.display = 'none';
+        selectMode.style.display = 'block';
+        selectClass.required = true;
+        newClassInput.required = false;
+        newClassInput.value = '';
+        selectClass.value = '';
+    }
+
+    // Add event listeners
+    btnAddNewClass.addEventListener('click', function(e) {
+        e.preventDefault();
+        switchToInputMode();
+    });
+
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            switchToSelectMode();
+        });
+    }
+
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            if (isInputMode) {
+                const newClassName = newClassInput.value.trim();
+
+                if (!newClassName) {
+                    e.preventDefault();
+                    alert('Silakan masukkan nama kelas baru atau klik "Batal".');
                     newClassInput.focus();
-                    inputMode.style.opacity = '1';
-                }, 50);
+                    return false;
+                }
 
-                inputMode.style.opacity = '0';
-                inputMode.style.transition = 'opacity 0.2s ease';
-            }
+                // Add new option to select before submit
+                const newOption = document.createElement('option');
+                newOption.value = newClassName;
+                newOption.text = newClassName;
+                newOption.selected = true;
+                selectClass.appendChild(newOption);
 
-            function switchToSelectMode() {
-                isInputMode = false;
-                inputMode.style.display = 'none';
-                selectMode.style.display = 'block';
                 selectClass.required = true;
                 newClassInput.required = false;
-                newClassInput.value = '';
-                selectClass.value = '';
-            }
-
-            if (btnAddNewClass) {
-                btnAddNewClass.addEventListener('click', switchToInputMode);
-            }
-
-            if (cancelBtn) {
-                cancelBtn.addEventListener('click', switchToSelectMode);
-            }
-
-            if (form) {
-                form.addEventListener('submit', function (e) {
-                    if (isInputMode) {
-                        const newClassName = newClassInput.value.trim();
-
-                        if (!newClassName) {
-                            e.preventDefault();
-                            alert('Silakan masukkan nama kelas baru atau klik "Batal".');
-                            newClassInput.focus();
-                            return false;
-                        }
-
-                        // Add new option to select before submit
-                        const newOption = document.createElement('option');
-                        newOption.value = newClassName;
-                        newOption.text = newClassName;
-                        newOption.selected = true;
-                        selectClass.appendChild(newOption);
-
-                        selectClass.required = true;
-                        newClassInput.required = false;
-                    }
-                });
-            }
-
-            // Handle old input on page reload
-            const initialValue = selectClass.value;
-            if (!initialValue && '{{ old('new_table_class') }}') {
-                switchToInputMode();
-                newClassInput.value = '{{ old('new_table_class') }}';
             }
         });
+    }
+
+    // Handle old input on page reload
+    const initialValue = selectClass.value;
+    if (!initialValue && '{{ old('new_table_class') }}') {
+        switchToInputMode();
+        newClassInput.value = '{{ old('new_table_class') }}';
+    }
+});
     </script>
 @endpush

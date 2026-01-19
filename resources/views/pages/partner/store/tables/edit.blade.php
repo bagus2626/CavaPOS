@@ -12,6 +12,10 @@
           <h1 class="page-title">{{ __('messages.partner.outlet.table_management.tables.edit_table') }}</h1>
           <p class="page-subtitle">{{ __('messages.partner.outlet.table_management.tables.update_table_information') }}</p>
         </div>
+        <a href="{{ route('partner.store.tables.index') }}" class="back-button">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    {{ __('messages.partner.outlet.table_management.tables.back_to_tables') }}
+                </a>
       </div>
 
       <!-- Error Messages -->
