@@ -1,87 +1,110 @@
 <!-- Create Disbursement Modal -->
-<div class="modal fade" id="createDisbursementModal" role="dialog" aria-labelledby="createDisbursementModalLabel"
-     aria-hidden="true">
+<div class="modal fade" id="createDisbursementModal" role="dialog" aria-labelledby="createDisbursementModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-choco">
-                <h5 class="modal-title text-white" id="createDisbursementModalLabel">
-                    <i class="fas fa-money-bill-transfer mr-2"></i>
+        <div class="modal-content modern-modal">
+            <div class="modal-header modern-modal-header">
+                <h5 class="modal-title" id="createDisbursementModalLabel">
+                    <span class="material-symbols-outlined">payments</span>
                     {{ __('messages.owner.xen_platform.payouts.single_withdrawal') }}
                 </h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form id="createAccountForm" method="POST"
-                  action="{{ route('owner.user-owner.xen_platform.payout.create') }}">
+            <form id="createAccountForm" method="POST" action="{{ route('owner.user-owner.xen_platform.payout.create') }}">
                 @csrf
                 <input type="hidden" id="validate_account_number" name="validate_account_number" value="">
                 <input type="hidden" id="validate_account_holder_name" name="validate_account_holder_name" value="">
                 <input type="hidden" name="for_user_id" id="for_user_id" value="{{ $accounts['id'] }}"
                        data-balance="{{ $accounts['balance']}}" data-email="{{ $accounts['email'] ?? '' }}">
 
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="channel_code" class="font-weight-bold">{{ __('messages.owner.xen_platform.payouts.recipient_bank') }}</label>
-                        <select class="form-control select2" name="channel_code" id="channel_code" style="width: 100%;">
-                            <option value="" selected>{{ __('messages.owner.xen_platform.payouts.select_bank') }}</option>
-                            @foreach($payoutChannels AS $channel)
-                                <option value="{{ $channel['channel_code'] }}"
-                                        data-min="{{ $channel['amount_limits']['minimum'] ?? 0 }}"
-                                        data-max="{{ $channel['amount_limits']['maximum'] ?? 0 }}"
-                                >{{ $channel['channel_name'] }}</option>
-                            @endforeach
-                        </select>
-                        <small class="form-text text-muted" id="bank-limits"></small>
+                <div class="modal-body p-4">
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">
+                            {{ __('messages.owner.xen_platform.payouts.recipient_bank') }}
+                            <span class="text-danger">*</span>
+                        </label>
+                        <div class="select-wrapper">
+                            <select class="form-control-modern" name="channel_code" id="channel_code" style="width: 100%;">
+                                <option value="" selected>{{ __('messages.owner.xen_platform.payouts.select_bank') }}</option>
+                                @foreach($payoutChannels AS $channel)
+                                    <option value="{{ $channel['channel_code'] }}"
+                                            data-min="{{ $channel['amount_limits']['minimum'] ?? 0 }}"
+                                            data-max="{{ $channel['amount_limits']['maximum'] ?? 0 }}">
+                                        {{ $channel['channel_name'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <span class="material-symbols-outlined select-arrow">expand_more</span>
+                        </div>
+                        <small class="form-text text-muted mt-2" id="bank-limits"></small>
                     </div>
 
-                    <div class="form-group">
-                        <label for="account_number" class="font-weight-bold">{{ __('messages.owner.xen_platform.payouts.recipient_account_number') }}</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" placeholder="527XXXXXXX"
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">
+                            {{ __('messages.owner.xen_platform.payouts.recipient_account_number') }}
+                            <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">
+                                <span class="material-symbols-outlined">account_balance</span>
+                            </span>
+                            <input type="text" class="form-control-modern with-icon" placeholder="527XXXXXXX"
                                    aria-label="Account Number" id="account_number" name="account_number">
-                            <div class="input-group-append">
-                                <button class="btn btn-warning" type="button" id="validateBtn">
-                                    <i class="fas fa-check-circle mr-1"></i> {{ __('messages.owner.xen_platform.payouts.validate') }}
-                                </button>
-                            </div>
                         </div>
+                        <button class="btn-modern btn-warning-modern mt-2 w-100" type="button" id="validateBtn">
+                            <span class="material-symbols-outlined">verified</span>
+                            {{ __('messages.owner.xen_platform.payouts.validate') }}
+                        </button>
                         <div id="validation-feedback" class="invalid-feedback" style="display: none;"></div>
                         <div id="validation-success" class="valid-feedback" style="display: none;"></div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="amount" class="font-weight-bold">{{ __('messages.owner.xen_platform.payouts.amount_to_send') }}</label>
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text">IDR</span>
-                            </div>
-                            <input class="form-control" type="number" id="amount" name="amount" placeholder="0"
-                                   required>
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">
+                            {{ __('messages.owner.xen_platform.payouts.amount_to_send') }}
+                            <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">IDR</span>
+                            <input class="form-control-modern with-icon" type="number" id="amount" name="amount" placeholder="0" required>
                         </div>
-                        <small class="form-text text-muted">
-                            {{ __('messages.owner.xen_platform.payouts.available_balance') }}: <span id="available-balance" class="font-weight-bold">0</span>
+                        <small class="form-text text-muted mt-2">
+                            {{ __('messages.owner.xen_platform.payouts.available_balance') }}: 
+                            <span id="available-balance" class="fw-600">0</span>
                         </small>
                     </div>
 
-                    <div class="form-group">
-                        <label for="reference_id" class="font-weight-bold">{{ __('messages.owner.xen_platform.payouts.reference_id') }}</label>
-                        <input class="form-control" type="text" id="reference_id" name="reference_id"
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">
+                            {{ __('messages.owner.xen_platform.payouts.reference_id') }}
+                            <span class="text-danger">*</span>
+                        </label>
+                        <input class="form-control-modern" type="text" id="reference_id" name="reference_id"
                                placeholder="Unique reference ID" required>
                     </div>
 
-
-                    <div class="form-group">
-                        <label for="description" class="font-weight-bold">{{ __('messages.owner.xen_platform.payouts.description') }}</label>
-                        <textarea class="form-control" id="description" name="description"
-                                  rows="2" placeholder="Transaction description" required>{{ __('messages.owner.xen_platform.payouts.withdrawal') }}</textarea>
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">
+                            {{ __('messages.owner.xen_platform.payouts.description') }}
+                            <span class="text-danger">*</span>
+                        </label>
+                        <textarea class="form-control-modern" id="description" name="description"
+                                  rows="3" placeholder="Transaction description" required>{{ __('messages.owner.xen_platform.payouts.withdrawal') }}</textarea>
                     </div>
 
-                    <div class="form-group">
-                        <label for="recipient_email" class="font-weight-bold">{{ __('messages.owner.xen_platform.payouts.recipient_email') }}</label>
-                        <input class="form-control" type="text" id="recipient_email" name="recipient_email"
-                               placeholder="email1@example.com, email2@example.com">
-                        <small class="form-text text-muted">
+                    <div class="form-group-modern">
+                        <label class="form-label-modern">
+                            {{ __('messages.owner.xen_platform.payouts.recipient_email') }}
+                        </label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">
+                                <span class="material-symbols-outlined">mail</span>
+                            </span>
+                            <input class="form-control-modern with-icon" type="text" id="recipient_email" name="recipient_email"
+                                   placeholder="email1@example.com, email2@example.com">
+                        </div>
+                        <small class="form-text text-muted mt-2">
                             {{ __('messages.owner.xen_platform.payouts.email_instruction') }}
                             <span id="email-validation-status" class="ml-2"></span>
                         </small>
@@ -89,17 +112,23 @@
                     </div>
 
                     <!-- Validation Summary -->
-                    <div class="alert alert-info" id="validation-summary" style="display: none;">
-                        <h6 class="alert-heading"><i class="fas fa-info-circle mr-1"></i> {{ __('messages.owner.xen_platform.payouts.validation_summary') }}</h6>
-                        <div id="validation-details" class="small"></div>
+                    <div class="alert alert-info alert-modern" id="validation-summary" style="display: none;">
+                        <div class="alert-icon">
+                            <span class="material-symbols-outlined">info</span>
+                        </div>
+                        <div class="alert-content">
+                            <h6 class="alert-heading mb-2">{{ __('messages.owner.xen_platform.payouts.validation_summary') }}</h6>
+                            <div id="validation-details" class="small"></div>
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                        <i class="fas fa-times mr-1"></i> {{ __('messages.owner.xen_platform.payouts.cancel') }}
+                
+                <div class="modal-footer modern-modal-footer">
+                    <button type="button" class="btn-cancel-modern" data-dismiss="modal">
+                        {{ __('messages.owner.xen_platform.payouts.cancel') }}
                     </button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-eye mr-1"></i> {{ __('messages.owner.xen_platform.payouts.preview') }}
+                    <button type="submit" class="btn-submit-modern" id="previewBtn">
+                        {{ __('messages.owner.xen_platform.payouts.preview') }}
                     </button>
                 </div>
             </form>
@@ -108,63 +137,80 @@
 </div>
 
 <!-- Confirm Disbursement Modal -->
-<div class="modal fade" id="confirmDisbursementModal" role="dialog" aria-labelledby="confirmDisbursementModalLabel"
-     aria-hidden="true">
+<div class="modal fade" id="confirmDisbursementModal" role="dialog" aria-labelledby="confirmDisbursementModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-md" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-choco">
-                <h5 class="modal-title text-white" id="confirmDisbursementModalLabel">
-                    <i class="fas fa-shield-alt mr-2"></i>
+        <div class="modal-content modern-modal">
+            <div class="modal-header modern-modal-header">
+                <h5 class="modal-title" id="confirmDisbursementModalLabel">
+                    <span class="material-symbols-outlined">shield</span>
                     {{ __('messages.owner.xen_platform.payouts.confirm_withdrawal') }}
                 </h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
-                <div class="confirm-detail">
-                    <h5 class="text-dark">{{ __('messages.owner.xen_platform.payouts.amount_to_send') }}</h5>
-                    <h4 id="confirm-amount" class="font-weight-bold text-danger"></h4>
-                    <small class="text-muted">{{ __('messages.owner.xen_platform.payouts.from') }} <span id="confirm-balance"></span> {{ __('messages.owner.xen_platform.payouts.available') }}</small>
-                </div>
-                <hr>
-
-                <h5 class="text-dark">{{ __('messages.owner.xen_platform.payouts.send_to') }}</h5>
-                <p class="mb-1">
-                    <span id="confirm-bank-name" class="font-weight-bold"></span>
-                </p>
-                <p class="mb-1">
-                    <span id="confirm-account-number" class="text-dark"></span>
-                </p>
-                <p class="mb-1 text-uppercase">
-                    <span id="confirm-account-holder" class="font-weight-bold"></span>
-                </p>
-
-                <hr>
-
-                <p>
-                    <strong>{{ __('messages.owner.xen_platform.payouts.reference') }}:</strong> <span id="confirm-reference"></span>
-                </p>
-                <p>
-                    <strong>{{ __('messages.owner.xen_platform.payouts.description') }}:</strong> <span id="confirm-description"></span>
-                </p>
-                <p>
-                    <strong>{{ __('messages.owner.xen_platform.payouts.recipient_email') }}:</strong> <span id="confirm-email"></span>
-                </p>
-                <!-- Warning Message -->
-                <div class="alert alert-danger py-2">
-                    <small>
-                        <i class="fas fa-exclamation-triangle mr-1"></i>
-                        {{ __('messages.owner.xen_platform.payouts.preview_instruction') }}
+            <div class="modal-body p-4">
+                <div class="confirm-detail mb-4">
+                    <h6 class="text-muted mb-2">{{ __('messages.owner.xen_platform.payouts.amount_to_send') }}</h6>
+                    <h3 id="confirm-amount" class="fw-700 text-danger mb-2"></h3>
+                    <small class="text-muted">
+                        {{ __('messages.owner.xen_platform.payouts.from') }} 
+                        <span id="confirm-balance" class="fw-600"></span> 
+                        {{ __('messages.owner.xen_platform.payouts.available') }}
                     </small>
                 </div>
+
+                <div class="section-divider"></div>
+
+                <div class="mb-3">
+                    <h6 class="text-muted mb-3">{{ __('messages.owner.xen_platform.payouts.send_to') }}</h6>
+                    <div class="mb-2">
+                        <span id="confirm-bank-name" class="fw-600 d-block"></span>
+                    </div>
+                    <div class="mb-2">
+                        <span id="confirm-account-number" class="d-block"></span>
+                    </div>
+                    <div class="mb-2">
+                        <span id="confirm-account-holder" class="fw-600 text-uppercase d-block"></span>
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <div class="mb-3">
+                    <div class="mb-2">
+                        <strong class="text-muted">{{ __('messages.owner.xen_platform.payouts.reference') }}:</strong>
+                        <span id="confirm-reference" class="d-block mt-1"></span>
+                    </div>
+                    <div class="mb-2">
+                        <strong class="text-muted">{{ __('messages.owner.xen_platform.payouts.description') }}:</strong>
+                        <span id="confirm-description" class="d-block mt-1"></span>
+                    </div>
+                    <div class="mb-2">
+                        <strong class="text-muted">{{ __('messages.owner.xen_platform.payouts.recipient_email') }}:</strong>
+                        <span id="confirm-email" class="d-block mt-1"></span>
+                    </div>
+                </div>
+
+                <!-- Warning Message -->
+                <div class="alert alert-danger alert-modern">
+                    <div class="alert-icon">
+                        <span class="material-symbols-outlined">warning</span>
+                    </div>
+                    <div class="alert-content">
+                        <small>{{ __('messages.owner.xen_platform.payouts.preview_instruction') }}</small>
+                    </div>
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                    <i class="fas fa-arrow-left mr-1"></i> {{ __('messages.owner.xen_platform.payouts.back') }}
+            
+            <div class="modal-footer modern-modal-footer">
+                <button type="button" class="btn-cancel-modern" data-dismiss="modal">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    {{ __('messages.owner.xen_platform.payouts.back') }}
                 </button>
-                <button type="button" class="btn btn-success" id="submitDisbursementBtn">
-                    <i class="fas fa-paper-plane mr-1"></i> {{ __('messages.owner.xen_platform.payouts.confirm_and_submit') }}
+                <button type="button" class="btn-submit-modern btn-success-modern" id="submitDisbursementBtn">
+                    <span class="material-symbols-outlined">send</span>
+                    {{ __('messages.owner.xen_platform.payouts.confirm_and_submit') }}
                 </button>
             </div>
         </div>
@@ -289,15 +335,15 @@
 
                 if (message) {
                     $amountInput.addClass('is-invalid').removeClass('is-valid');
-                    let $amountFeedback = $amountInput.siblings('.amount-feedback');
+                    let $amountFeedback = $amountInput.closest('.input-wrapper').siblings('.amount-feedback');
                     if ($amountFeedback.length === 0) {
-                        $amountFeedback = $('<div class="invalid-feedback amount-feedback"></div>').insertAfter($amountInput);
+                        $amountFeedback = $('<div class="invalid-feedback amount-feedback" style="display: block;"></div>').insertAfter($amountInput.closest('.input-wrapper'));
                     }
                     $amountFeedback.html(`❌ ${message}`).show();
                     return false;
                 } else {
                     $amountInput.removeClass('is-invalid');
-                    $amountInput.siblings('.amount-feedback').hide();
+                    $amountInput.closest('.input-wrapper').siblings('.amount-feedback').hide();
                     return true;
                 }
             }
@@ -431,7 +477,7 @@
                         controlFormState(2);
                     },
                     complete: function () {
-                        $btn.prop('disabled', false).html('<i class="fas fa-check-circle mr-1"></i> Validate');
+                        $btn.prop('disabled', false).html('<span class="material-symbols-outlined">verified</span> Validate');
                         updatePreviewButtonState();
                     }
                 });
@@ -543,20 +589,20 @@
 
                         showTemporaryNotification('Error: ' + errorMessage, 'Terjadi Kesalahan', 'error');
 
-                        $btn.prop('disabled', false).html('<i class="fas fa-paper-plane mr-1"></i> Confirm & Submit');
+                        $btn.prop('disabled', false).html('<span class="material-symbols-outlined">send</span> Confirm & Submit');
                         $confirmModal.modal('show');
 
                         isSubmitting = false;
                     },
                     complete: function () {
-                        $btn.prop('disabled', false).html('<i class="fas fa-paper-plane mr-1"></i> Confirm & Submit');
+                        $btn.prop('disabled', false).html('<span class="material-symbols-outlined">send</span> Confirm & Submit');
                     }
                 });
             });
 
             $confirmModal.on('hidden.bs.modal', function () {
                 if (!isSubmitting) {
-                    $submitDisbursementBtn.prop('disabled', false).html('<i class="fas fa-paper-plane mr-1"></i> Confirm & Submit');
+                    $submitDisbursementBtn.prop('disabled', false).html('<span class="material-symbols-outlined">send</span> Confirm & Submit');
                     $modal.modal('show');
                 }
             });

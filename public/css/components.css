@@ -134,7 +134,7 @@
   background: var(--card-bg);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-soft);
-  overflow: hidden;
+  overflow: visible;
   margin-bottom: var(--spacing-lg);
   -webkit-border-radius: var(--radius-sm);
   -moz-border-radius: var(--radius-sm);
@@ -144,7 +144,7 @@
 
 /* Card Body */
 .card-body-modern {
-  padding: var(--spacing-2xl) var(--spacing-2xl) var(--spacing-xl);
+  padding: var(--spacing-xl) var(--spacing-xl) var(--spacing-lg);
 }
 
 /* Card Header */
@@ -258,6 +258,19 @@
   font-size: 14px;
 }
 
+/* Badge Ukuran Kecil (Small) */
+.badge-modern.badge-sm {
+  padding: 0.2rem 0.5rem; /* Padding lebih ramping */
+  font-size: 0.65rem; /* Ukuran teks lebih kecil */
+  gap: 0.25rem; /* Jarak ikon dan teks lebih rapat */
+  letter-spacing: 0.3px; /* Sedikit penyesuaian spasi huruf */
+}
+
+/* Penyesuaian ikon untuk ukuran kecil */
+.badge-modern.badge-sm .material-symbols-outlined {
+  font-size: 11px; /* Ikon mengecil mengikuti teks */
+}
+
 .badge-success {
   background: var(--success-light) !important;
   color: var(--success-dark) !important;
@@ -292,6 +305,267 @@
   border-color: var(--primary);
 }
 
+.badge-secondary {
+  background: var(--secondary-light) !important;
+  color: var(--secondary-dark) !important;
+  border-color: var(--secondary);
+}
+
+/* ============================================
+   NAV TABS MODERN COMPONENTS
+   ============================================ */
+
+/* Nav Tabs Container */
+.nav-tabs-modern {
+  border-bottom: 2px solid var(--border-color);
+  margin-bottom: var(--spacing-lg);
+  display: flex;
+  gap: var(--spacing-xs);
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 0;
+}
+
+.nav-tabs-modern::-webkit-scrollbar {
+  display: none;
+}
+
+/* Nav Item */
+.nav-tabs-modern .nav-item {
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+
+/* Nav Link */
+.nav-tabs-modern .nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-xl);
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all var(--transition-base);
+  cursor: pointer;
+  text-decoration: none;
+  position: relative;
+  white-space: nowrap;
+  border-radius: 0;
+  margin-bottom: -2px;
+}
+
+.nav-tabs-modern .nav-link .material-symbols-outlined {
+  font-size: 20px;
+  transition: all var(--transition-base);
+}
+
+/* Hover State */
+.nav-tabs-modern .nav-link:hover {
+  color: var(--primary);
+  background: var(--primary-light);
+  border-bottom-color: var(--primary-light);
+}
+
+.nav-tabs-modern .nav-link:hover .material-symbols-outlined {
+  transform: scale(1.1);
+}
+
+/* Active State */
+.nav-tabs-modern .nav-link.active {
+  color: var(--primary);
+  background: transparent;
+  border-bottom-color: var(--primary);
+  font-weight: 700;
+}
+
+.nav-tabs-modern .nav-link.active .material-symbols-outlined {
+  color: var(--primary);
+}
+
+/* Focus State */
+.nav-tabs-modern .nav-link:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Active Indicator Animation */
+.nav-tabs-modern .nav-link::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 3px;
+  background: var(--primary);
+  transition: width var(--transition-base);
+}
+
+.nav-tabs-modern .nav-link.active::after {
+  width: 100%;
+}
+
+/* ============================================
+   ALTERNATIVE STYLE - PILL TABS
+   ============================================ */
+
+.nav-tabs-pill {
+  border-bottom: none;
+  background: var(--background);
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-xl);
+}
+
+.nav-tabs-pill .nav-link {
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  margin-bottom: 0;
+}
+
+.nav-tabs-pill .nav-link:hover {
+  background: white;
+  border-bottom-color: transparent;
+}
+
+.nav-tabs-pill .nav-link.active {
+  background: white;
+  border-bottom-color: transparent;
+  box-shadow: var(--shadow-soft);
+}
+
+.nav-tabs-pill .nav-link::after {
+  display: none;
+}
+
+/* ============================================
+   ALTERNATIVE STYLE - BOXED TABS
+   ============================================ */
+
+.nav-tabs-boxed {
+  border-bottom: none;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+  margin-bottom: var(--spacing-xl);
+}
+
+.nav-tabs-boxed .nav-link {
+  border-right: 1px solid var(--border-color);
+  border-bottom: none;
+  border-radius: 0;
+  margin-bottom: 0;
+  flex: 1;
+  justify-content: center;
+}
+
+.nav-tabs-boxed .nav-item:last-child .nav-link {
+  border-right: none;
+}
+
+.nav-tabs-boxed .nav-link:hover {
+  background: var(--background);
+  border-bottom-color: transparent;
+}
+
+.nav-tabs-boxed .nav-link.active {
+  background: var(--primary);
+  color: white;
+  border-bottom-color: transparent;
+}
+
+.nav-tabs-boxed .nav-link.active .material-symbols-outlined {
+  color: white;
+}
+
+.nav-tabs-boxed .nav-link::after {
+  display: none;
+}
+
+/* ============================================
+   TAB CONTENT
+   ============================================ */
+
+.tab-content {
+  animation: fadeIn var(--transition-base);
+}
+
+.tab-pane {
+  display: none;
+}
+
+.tab-pane.active {
+  display: block;
+  animation: fadeIn var(--transition-base);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   BADGE INTEGRATION IN TABS
+   ============================================ */
+
+.nav-tabs-modern .nav-link .badge {
+  margin-left: var(--spacing-xs);
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+}
+
+/* ============================================
+   LOADING STATE
+   ============================================ */
+
+.nav-tabs-modern .nav-link.loading {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.nav-tabs-modern .nav-link.loading::before {
+  content: "";
+  display: inline-block;
+  width: 0.875rem;
+  height: 0.875rem;
+  border: 2px solid var(--primary-light);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin-right: var(--spacing-xs);
+}
+
+/* ============================================
+   DISABLED STATE
+   ============================================ */
+
+.nav-tabs-modern .nav-link.disabled,
+.nav-tabs-modern .nav-link:disabled {
+  color: var(--text-muted);
+  pointer-events: none;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.nav-tabs-modern .nav-link.disabled:hover {
+  background: transparent;
+  border-bottom-color: transparent;
+}
+
 /* ============================================
    BUTTON COMPONENTS
    ============================================ */
@@ -304,6 +578,7 @@
   font-weight: 700;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.625rem;
   cursor: pointer;
   transition: all var(--transition-base);
@@ -627,12 +902,6 @@
   min-height: 5rem;
 }
 
-.stats-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-hover);
-  border-color: var(--primary-light);
-}
-
 /* Stats Icon */
 .stats-icon {
   width: 3rem;
@@ -648,6 +917,31 @@
 .stats-icon .material-symbols-outlined {
   font-size: 24px;
   color: var(--primary);
+}
+
+/* Stats Icon Variants */
+.stats-success .stats-icon {
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.stats-success .stats-icon .material-symbols-outlined {
+  color: #22c55e;
+}
+
+.stats-success .stats-value {
+  color: #22c55e;
+}
+
+.stats-danger .stats-icon {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.stats-danger .stats-icon .material-symbols-outlined {
+  color: #ef4444;
+}
+
+.stats-danger .stats-value {
+  color: #ef4444;
 }
 
 /* Stats Content */
@@ -677,6 +971,75 @@
   letter-spacing: -0.02em;
   line-height: 1.2;
   word-break: break-word;
+}
+
+/* ============================================
+   TIMELINE COMPONENTS
+   ============================================ */
+
+.timeline {
+  position: relative;
+  padding-left: 32px;
+  list-style: none;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 15px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #e9ecef;
+}
+
+.timeline-item {
+  position: relative;
+  padding-bottom: 1.5rem;
+}
+
+.timeline-icon {
+  position: absolute;
+  left: -32px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  z-index: 1;
+  background: white;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 2px #e9ecef;
+}
+
+.timeline-content {
+  padding-left: 10px;
+}
+
+.time {
+  display: block;
+  font-size: 0.75rem;
+  color: #868e96;
+  margin-bottom: 4px;
+}
+
+.timeline-header {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 0;
+  color: #495057;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.timeline-details {
+  display: block;
+  line-height: 1.4;
 }
 
 /* Responsive - Tablet */
@@ -729,5 +1092,3 @@
     line-height: 1.2;
   }
 }
-
-

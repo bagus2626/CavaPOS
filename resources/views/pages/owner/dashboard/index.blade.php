@@ -37,7 +37,7 @@
         @endif
 
         <div class="row mb-4">
-            <div class="col-12 col-sm-6 col-lg-3 mb-3">
+            <div class="col-12 col-sm-6 col-lg-3">
                 <div class="modern-card stats-card">
                     <div class="stats-icon">
                         <span class="material-symbols-outlined">payments</span>
@@ -49,7 +49,7 @@
                 </div>
             </div>
 
-            <div class="col-12 col-sm-6 col-lg-3 mb-3">
+            <div class="col-12 col-sm-6 col-lg-3">
                 <div class="modern-card stats-card">
                     <div class="stats-icon">
                         <span class="material-symbols-outlined">store</span>
@@ -61,7 +61,7 @@
                 </div>
             </div>
 
-            <div class="col-12 col-sm-6 col-lg-3 mb-3">
+            <div class="col-12 col-sm-6 col-lg-3">
                 <div class="modern-card stats-card">
                     <div class="stats-icon">
                         <span class="material-symbols-outlined">receipt_long</span>
@@ -73,14 +73,14 @@
                 </div>
             </div>
 
-            <div class="col-12 col-sm-6 col-lg-3 mb-3">
+            <div class="col-12 col-sm-6 col-lg-3">
                 <div class="modern-card stats-card stats-warning">
                     <div class="stats-icon">
                         <span class="material-symbols-outlined">account_balance_wallet</span>
                     </div>
                     <div class="stats-content">
                         <div class="stats-label">{{ __('messages.owner.dashboard.stats_xendit_balance') }}</div>
-                        <div class="stats-value">Rp 100.000</div>
+                        <div class="stats-value">Rp {{ number_format($data['xendit_balance'], 0, ',', '.') }}</div>
                     </div>
                 </div>
             </div>

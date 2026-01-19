@@ -4,16 +4,20 @@
 @section('page_title', 'Invoice Detail')
 
 @section('content')
-    <section class="content">
-        <div class="container-fluid">
-            <div class="card  border-4 border">
-                <div class="card-content">
-                    <div class="card-body card-dashboard">
-                        @include('pages.owner.xen_platform.accounts.tab-panel.invoice.detail.content-body')
-                    </div>
+    <div class="modern-container">
+        <div class="container-modern">
+            <div class="page-header">
+                <div class="header-content">
+                    <h1 class="page-title">Invoice Detail</h1>
+                    <p class="page-subtitle">View complete invoice information</p> 
                 </div>
+                <a href="{{ url()->previous() }}" class="back-button">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    {{ __('messages.owner.xen_platform.accounts.back') }}
+                </a>
             </div>
-        </div>
-        <section>
-@endsection
 
+            @include('pages.owner.xen_platform.accounts.tab-panel.invoice.detail.content-body')
+        </div>
+    </div>
+@endsection

@@ -734,6 +734,7 @@ return [
         'xen_platform' => [
             'accounts' => [
                 'account_information' => 'Account Information',
+                'subtitle' => 'Manage your Xen Platform account details and settings',
                 'profile' => 'Profile',
                 'transactions' => 'Transactions',
                 'invoices' => 'Invoices',
@@ -859,9 +860,11 @@ return [
                 'view_invoice' => 'View Invoice',
                 'business_profile' => 'Business Profile',
                 'business_account' => 'Business Account',
+                'view_complete_info' => 'View Complete Info Transaction',
             ],
             'split_payments' => [
                 'split_payments' => 'Split Payments',
+                'subtitle' => 'Manage and monitor your split payment transactions',
                 'loading_data' => 'Loading data...',
                 'transaction_reference_id' => 'Transaction Reference ID',
                 'search_reference_id' => 'Search Reference ID',
@@ -874,7 +877,7 @@ return [
                 'date_created' => 'Date Created',
                 'business_name' => 'Business Name',
                 'apply_filter' => 'Apply Filter',
-                'reset_and_reload_data' => 'Reset and Reload',
+                'reset_and_reload_data' => 'Reset',
                 'split_id' => 'Split ID',
                 'reference' => 'Reference',
                 'source_account_id' => 'Source Account ID',
@@ -889,6 +892,7 @@ return [
             ],
             'payouts' => [
                 'withdrawal' => 'Withdrawal',
+                'subtitle' => 'Manage and monitor your withdrawal transactions',
                 'withdrawal_list' => 'Withdrawal List',
                 'create_withdrawal' => 'Create Withdrawal',
                 'withdrawal_detail' => 'Withdrawal Detail',

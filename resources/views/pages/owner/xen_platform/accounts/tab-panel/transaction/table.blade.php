@@ -1,108 +1,170 @@
-<div class="table-responsive">
-    <table class="table table-striped table-hover" style="width:100%">
-        <thead class="thead-dark">
+<table class="data-table">
+    <thead>
         <tr>
-            <th>No</th>
-            <th>Status</th>
+            <th class="text-center" style="width: 60px;">#</th>
+            <th>status</th>
             <th>{{ __('messages.owner.xen_platform.accounts.type') }}</th>
             <th>{{ __('messages.owner.xen_platform.accounts.channel') }}</th>
             <th>{{ __('messages.owner.xen_platform.accounts.account') }}</th>
             <th>{{ __('messages.owner.xen_platform.accounts.reference_id') }}</th>
             <th>{{ __('messages.owner.xen_platform.accounts.amount') }}</th>
-            <th>{{ __('messages.owner.xen_platform.accounts.settlement') }} <br> Status</th>
-            <th>{{ __('messages.owner.xen_platform.accounts.date_created') }} (GMT +7)</th>
-            <th>{{ __('messages.owner.xen_platform.accounts.action') }}</th>
+            <th>{{ __('messages.owner.xen_platform.accounts.settlement') }}</th>
+            <th>{{ __('messages.owner.xen_platform.accounts.date_created') }}</th>
+            <th class="text-center" style="width: 120px;">
+                {{ __('messages.owner.xen_platform.accounts.action') }}
+            </th>
         </tr>
-        </thead>
-        <tbody>
-        @forelse($data['transactions'] as $item)
-            <tr class="transaction-clickable-row row-ov"
-                data-transaction-id="{{ $item['id'] ?? '' }}"
-                data-business-id="{{ $item['business_id'] ?? '' }}"
-                style="cursor: pointer;">
+    </thead>
+    <tbody>
+        @forelse($data['transactions'] as $index => $item)
+            <tr class="table-row transaction-clickable-row" data-transaction-id="{{ $item['id'] ?? '' }}"
+                data-business-id="{{ $item['business_id'] ?? '' }}" style="cursor: pointer;">
+
+                <!-- Status -->
                 <td>
                     @php
                         $status = $item['status'] ?? 'UNKNOWN';
                         $badgeClasses = [
-                            'PENDING'   => 'bg-warning',
-                            'SUCCESS'   => 'bg-success',
-                            'FAILED'    => 'bg-danger',
-                            'VOIDED'    => 'bg-secondary',
-                            'REVERSED'  => 'bg-info',
-                            'UNKNOWN'   => 'bg-dark',
+                            'PENDING' => 'badge-warning',
+                            'SUCCESS' => 'badge-success',
+                            'FAILED' => 'badge-danger',
+                            'VOIDED' => 'badge-secondary',
+                            'REVERSED' => 'badge-info',
+                            'UNKNOWN' => 'badge-secondary',
                         ];
                     @endphp
-                    <span class="badge {{ $badgeClasses[$status] ?? 'bg-dark' }} badge-pill">{{ $status }}</span>
+                    <span class="badge-modern {{ $badgeClasses[$status] ?? 'badge-secondary' }}">
+                        {{ $status }}
+                    </span>
                 </td>
-                <td class="text-bold-500">{{ $item['type'] ?? '-' }}</td>
-                <td>{{ $item['channel_category'] ?? '-' }}</td>
-                <td>{{ $item['channel_code'] ?? '-' }}</td>
-                <td>{{ $item['reference_id'] ?? ($item['id'] ?? '-') }}</td>
+
+                <!-- Type -->
+                <td>
+                    <span class="fw-600">{{ $item['type'] ?? '-' }}</span>
+                </td>
+
+                <!-- Channel Category -->
+                <td>
+                    <span class="text-secondary">{{ $item['channel_category'] ?? '-' }}</span>
+                </td>
+
+                <!-- Channel Code -->
+                <td>
+                    <span class="badge-modern badge-info">
+                        {{ $item['channel_code'] ?? '-' }}
+                    </span>
+                </td>
+
+                <!-- Reference ID -->
+                <td>
+                    <code class="text-monospace small">{{ $item['reference_id'] ?? ($item['id'] ?? '-') }}</code>
+                </td>
+
+                <!-- Amount -->
                 <td>
                     @php
                         $cashflow = $item['cashflow'] ?? null;
                         $amount = $item['amount'] ?? 0;
                         $currency = $item['currency'] ?? 'IDR';
 
-                        $iconClass = 'fas fa-minus text-secondary';
+                        $iconClass = 'text-secondary';
+                        $amountClass = 'text-secondary';
 
                         if ($cashflow === 'MONEY_IN') {
-                            $iconClass = 'fas fa-arrow-down text-success';
+                            $iconClass = 'text-success';
+                            $amountClass = 'text-success fw-600';
                         } elseif ($cashflow === 'MONEY_OUT') {
-                            $iconClass = 'fas fa-arrow-up text-danger';
+                            $iconClass = 'text-danger';
+                            $amountClass = 'text-danger fw-600';
                         }
                     @endphp
 
-                    <i class="{{ $iconClass }}"></i>
-                    {{ $currency }} {{ number_format($amount, 0, ',', '.') }}
+                    <div class="cell-with-icon">
+                        @if($cashflow === 'MONEY_IN')
+                            <span class="material-symbols-outlined {{ $iconClass }}"
+                                style="font-size: 18px;">arrow_downward</span>
+                        @elseif($cashflow === 'MONEY_OUT')
+                            <span class="material-symbols-outlined {{ $iconClass }}"
+                                style="font-size: 18px;">arrow_upward</span>
+                        @else
+                            <span class="material-symbols-outlined {{ $iconClass }}" style="font-size: 18px;">remove</span>
+                        @endif
+                        <span class="{{ $amountClass }}">{{ $currency }} {{ number_format($amount, 0, ',', '.') }}</span>
+                    </div>
                 </td>
+
+                <!-- Settlement -->
                 <td>
                     @if(isset($item['estimated_settlement_time']))
                         @php
                             $settlementTime = \Carbon\Carbon::parse($item['estimated_settlement_time'])->timezone('Asia/Jakarta');
                         @endphp
-                        <span class="font-weight-bold">{{ $item['settlement_status'] ?? '-' }}</span><br>
-                        <small class="text-muted">{{ $settlementTime->format('d M Y, H:i A') }}</small>
+                        <div>
+                            <span class="fw-600">{{ $item['settlement_status'] ?? '-' }}</span><br>
+                            <small class="text-muted">{{ $settlementTime->format('d M Y, H:i A') }}</small>
+                        </div>
                     @else
-                        -
+                        <span class="text-muted">-</span>
                     @endif
                 </td>
+
+                <!-- Created Date -->
                 <td>
                     @if(isset($item['created']))
                         @php
                             $createdDate = \Carbon\Carbon::parse($item['created'])->timezone('Asia/Jakarta');
                         @endphp
-                        <span class="font-weight-bold">{{ $createdDate->format('d M Y') }}</span><br>
-                        <small class="text-muted">{{ $createdDate->format('H:i A') }}</small>
+                        <div>
+                            <span class="fw-600">{{ $createdDate->format('d M Y') }}</span><br>
+                            <small class="text-muted">{{ $createdDate->format('H:i A') }}</small>
+                        </div>
                     @else
-                        -
+                        <span class="text-muted">-</span>
                     @endif
                 </td>
+
+                <!-- Actions -->
                 <td class="text-center">
                     @if(isset($item['id']))
                         <div class="dropdown">
-                            <span class="fas fa-ellipsis-v fa-lg font-medium-3 nav-hide-arrow cursor-pointer" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="menu"></span>
+                            <span class="fas fa-ellipsis-v fa-lg font-medium-3 nav-hide-arrow cursor-pointer"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="menu"></span>
                             <div class="dropdown-menu dropdown-menu-right">
-                                <a class="dropdown-item copy-btn" data-copy-value="{{ $item['id'] }}"><i class="bx bx-copy-alt mr-1"></i> {{ __('messages.owner.xen_platform.accounts.copy_transaction_id') }}</a>
-                                <a class="dropdown-item copy-btn" data-copy-value="{{ $item['reference_id'] ?? '' }}"><i class="bx bx-copy-alt mr-1"></i> {{ __('messages.owner.xen_platform.accounts.copy_reference') }}</a>
-                                <a class="dropdown-item copy-btn" data-copy-value="{{ $item['product_id'] ?? '' }}"><i class="bx bx-copy-alt mr-1"></i> {{ __('messages.owner.xen_platform.accounts.copy_product_id') }}</a>
+                                <a class="dropdown-item copy-btn" data-copy-value="{{ $item['id'] }}">
+                                    <i class="bx bx-copy-alt mr-1"></i>
+                                    {{ __('messages.owner.xen_platform.accounts.copy_transaction_id') }}
+                                </a>
+                                <a class="dropdown-item copy-btn" data-copy-value="{{ $item['reference_id'] ?? '' }}">
+                                    <i class="bx bx-copy-alt mr-1"></i>
+                                    {{ __('messages.owner.xen_platform.accounts.copy_reference') }}
+                                </a>
+                                <a class="dropdown-item copy-btn" data-copy-value="{{ $item['product_id'] ?? '' }}">
+                                    <i class="bx bx-copy-alt mr-1"></i>
+                                    {{ __('messages.owner.xen_platform.accounts.copy_product_id') }}
+                                </a>
                             </div>
                         </div>
                     @else
-                        -
+                        <span class="text-muted">-</span>
                     @endif
                 </td>
             </tr>
         @empty
             <tr>
                 <td colspan="10" class="text-center">
-                    <i class="fas fa-info-circle"></i> {{ __('messages.owner.xen_platform.accounts.no_transaction_data_found') }}
+                    <div class="table-empty-state">
+                        <span class="material-symbols-outlined">receipt_long</span>
+                        <h4>{{ __('messages.owner.xen_platform.accounts.no_transaction_data_found') }}</h4>
+                        <p>{{ __('messages.owner.xen_platform.accounts.no_transaction_description') ?? 'No transactions available at the moment' }}
+                        </p>
+                    </div>
                 </td>
             </tr>
         @endforelse
-        </tbody>
-    </table>
-</div>
+    </tbody>
+</table>
+
+<!-- Pagination -->
 
 @php
     $meta = $data['meta'] ?? [];
@@ -113,34 +175,46 @@
     $count = count($data['transactions']);
 @endphp
 
-<div id="xendit-pagination" class="mt-1">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center border-top pt-1">
+<div id="xendit-pagination" class="border-top py-3 px-3">
+    <div class="row align-items-center">
 
-        <div class="d-flex align-items-center text-muted small">
-            <i class="bx bx-info-circle me-1"></i>
-            <span>{{ __('messages.owner.xen_platform.accounts.showing') }} <strong>{{ $count }}</strong> {{ __('messages.owner.xen_platform.accounts.records') }} (Limit: <strong>{{ $limit }}</strong>)</span>
+        <div class="col-md-6 col-12 mb-2 mb-md-0">
+            <div class="text-muted small">
+                <i class="bx bx-info-circle me-1"></i>
+                {{ __('messages.owner.xen_platform.accounts.showing') }}
+                <span class="fw-bold text-dark">{{ $count }}</span>
+                {{ __('messages.owner.xen_platform.accounts.records') }}
+                (Limit: <span class="fw-bold text-dark">{{ $limit }}</span>)
+            </div>
         </div>
 
-        <nav aria-label="Navigasi halaman transaksi" class="py-2 px-2">
-            <ul class="pagination mb-0 pagination">
-                <li class="page-item {{ empty($beforeId) ? 'disabled' : '' }} mr-1">
-                    <a class="page-link fw-mediu rounded-pill" href="#"
-                       data-before="{{ $beforeId }}"
-                       data-after=""
-                       data-direction="before">
-                        &laquo; {{ __('messages.owner.xen_platform.accounts.previous') }}
-                    </a>
-                </li>
+        <div class="col-md-6 col-12">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-md-end justify-content-start mb-0">
+                    <li class="page-item pagination-nav-btn {{ empty($beforeId) ? 'disabled' : '' }}">
+                        <a class="page-link" href="#" style="width: auto !important; height: auto !important;"
+                            data-before="{{ $beforeId }}" data-after="" data-direction="before"
+                            tabindex="{{ empty($beforeId) ? '-1' : '0' }}"
+                            aria-disabled="{{ empty($beforeId) ? 'true' : 'false' }}">
+                            <span aria-hidden="true">&laquo;</span>
+                            <span
+                                class=" d-sm-inline ml-1">{{ __('messages.owner.xen_platform.accounts.previous') }}</span>
+                        </a>
+                    </li>
 
-                <li class="page-item {{ (empty($afterId) || !$hasMore || ($count < $limit)) ? 'disabled' : '' }}">
-                    <a class="page-link fw-medium rounded-pill ms-2" href="#"
-                       data-after="{{ $afterId }}"
-                       data-before=""
-                       data-direction="after">
-                        {{ __('messages.owner.xen_platform.accounts.next') }} &raquo;
-                    </a>
-                </li>
-            </ul>
-        </nav>
+                    <li
+                        class="page-item pagination-nav-btn {{ (empty($afterId) || !$hasMore || ($count < $limit)) ? 'disabled' : '' }}">
+                        <a class="page-link" href="#" style="width: auto !important; height: auto !important;"
+                            data-after="{{ $afterId }}" data-before="" data-direction="after"
+                            tabindex="{{ (empty($afterId) || !$hasMore || ($count < $limit)) ? '-1' : '0' }}"
+                            aria-disabled="{{ (empty($afterId) || !$hasMore || ($count < $limit)) ? 'true' : 'false' }}">
+                            <span class=" d-sm-inline mr-1">{{ __('messages.owner.xen_platform.accounts.next') }}</span>
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+
+                </ul>
+            </nav>
+        </div>
     </div>
 </div>
