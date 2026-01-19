@@ -860,6 +860,7 @@ return [
                 'view_invoice' => 'View Invoice',
                 'business_profile' => 'Business Profile',
                 'business_account' => 'Business Account',
+                'view_complete_info' => 'View Complete Info Transaction',
             ],
             'split_payments' => [
                 'split_payments' => 'Split Payments',

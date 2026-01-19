@@ -272,7 +272,7 @@
                                                 class="profile-preview {{ $outlet->logo ? 'active' : '' }}"
                                                 src="{{ $outlet->logo ? asset('storage/' . $outlet->logo) : '' }}"
                                                 alt="Logo Preview">
-                                                                                    <button type="button" id="removeImageBtn" class="btn-remove btn-remove-top" 
+                                            <button type="button" id="removeLogoBtn" class="btn-remove btn-remove-top" 
                                                 style="{{ $outlet->logo ? 'display: block;' : 'display: none;' }}">
                                                 <span class="material-symbols-outlined">close</span>
                                             </button>
@@ -309,7 +309,7 @@
                                                 class="profile-preview {{ $outlet->background_picture ? 'active' : '' }}"
                                                 src="{{ $outlet->background_picture ? asset('storage/' . $outlet->background_picture) : '' }}"
                                                 alt="Background Preview">
-                                                 <button type="button" id="removeImageBtn" class="btn-remove btn-remove-top" 
+                                                 <button type="button" id="removeBackgroundBtn" class="btn-remove btn-remove-top" 
                                                     style="{{ $outlet->background_picture ? 'display: block;' : 'display: none;' }}">
                                                     <span class="material-symbols-outlined">close</span>
                                                 </button>
@@ -682,15 +682,24 @@
             outputHeight: 800
         });
 
-        // Initialize Remove Image Handler
         ImageRemoveHandler.init({
-            removeBtnId: 'removeImageBtn',
-            imageInputId: 'image',
-            imagePreviewId: 'imagePreview',
-            uploadPlaceholderId: 'uploadPlaceholder',
-            removeInputId: 'remove_image', // For edit page - tells server to delete
-            confirmRemove: false // No confirmation
-        });
+        removeBtnId: 'removeLogoBtn',
+        imageInputId: 'logo',
+        imagePreviewId: 'imagePreview2',
+        uploadPlaceholderId: 'logoPlaceholder',
+        removeInputId: 'remove_logo',
+        confirmRemove: false
+    });
+
+    // Initialize Remove Image Handler untuk Background Picture
+    ImageRemoveHandler.init({
+        removeBtnId: 'removeBackgroundBtn',
+        imageInputId: 'image',
+        imagePreviewId: 'imagePreview',
+        uploadPlaceholderId: 'backgroundPlaceholder',
+        removeInputId: 'remove_background_picture',
+        confirmRemove: false
+    });
 
         // ==== Realtime Username Check ====
         const usernameInput = document.getElementById('username');

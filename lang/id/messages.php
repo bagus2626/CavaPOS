@@ -863,6 +863,8 @@ return [
                 'view_invoice' => 'Lihat Faktur',
                 'business_profile' => 'Profil Bisnis',
                 'business_account' => 'Akun Bisnis',
+                'view_complete_info' => 'Lihat Info Lengkap Transaksi',
+
             ],
             'split_payments' => [
                 'split_payments' => 'Pembayaran Terpisah',

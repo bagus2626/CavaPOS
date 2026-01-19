@@ -6,17 +6,33 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\Owner;
 use App\Models\Partner\HumanResource\Employee;
 use App\Models\Transaction\BookingOrder;
 use App\Models\Product\MasterProduct;
 use App\Models\MessageNotification\Message;
 use App\Models\MessageNotification\MessageRecipient;
 use App\Models\MessageNotification\MessageAttachment;
+use App\Services\XenditService;
+use App\Http\Controllers\PaymentGateway\Xendit\BalanceController;
+use App\Http\Controllers\PaymentGateway\Xendit\SubAccountController;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class OwnerDashboardController extends Controller
 {
+    protected $xendit;
+    protected $xenditSubAccount;
+    protected $xenditBalance;
+
+    public function __construct(XenditService $xendit)
+    {
+        $this->xendit = $xendit;
+        $this->xenditSubAccount = new SubAccountController($xendit);
+        $this->xenditBalance = new BalanceController($xendit);
+    }
+
     public function index()
     {
         $owner = Auth::user();
@@ -66,16 +82,16 @@ class OwnerDashboardController extends Controller
         // === CHART DATA: 7 HARI TERAKHIR ===
         $last7Days = [];
         $salesLast7Days = [];
-        
+
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::today()->subDays($i);
             $last7Days[] = $date->format('D, d M'); // Format: Sen, 01 Jan
-            
+
             $sales = BookingOrder::whereIn('partner_id', $outlet_ids)
                 ->whereDate('created_at', $date)
                 ->whereIn('order_status', ['PAID', 'PROCESSED', 'SERVED'])
                 ->sum('total_order_value');
-            
+
             $salesLast7Days[] = (float) $sales;
         }
 
@@ -95,7 +111,7 @@ class OwnerDashboardController extends Controller
             ->orderByDesc('total_quantity')
             ->limit(5)
             ->get()
-            ->map(function($product) {
+            ->map(function ($product) {
                 return [
                     'product_name' => $product->product_name,
                     'total_quantity' => (int) $product->total_quantity,
@@ -105,11 +121,11 @@ class OwnerDashboardController extends Controller
 
         // === ALL OUTLETS PERFORMANCE (for filtering) ===
         $outletPerformance = BookingOrder::select(
-                'partner_id',
-                'partner_name',
-                DB::raw('SUM(total_order_value) as total_sales'),
-                DB::raw('COUNT(*) as total_orders')
-            )
+            'partner_id',
+            'partner_name',
+            DB::raw('SUM(total_order_value) as total_sales'),
+            DB::raw('COUNT(*) as total_orders')
+        )
             ->whereIn('partner_id', $outlet_ids)
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
@@ -117,7 +133,7 @@ class OwnerDashboardController extends Controller
             ->groupBy('partner_id', 'partner_name')
             ->orderByDesc('total_sales')
             ->get()
-            ->map(function($outlet) {
+            ->map(function ($outlet) {
                 return [
                     'partner_id' => $outlet->partner_id,
                     'partner_name' => $outlet->partner_name,
@@ -125,6 +141,9 @@ class OwnerDashboardController extends Controller
                     'total_orders' => $outlet->total_orders
                 ];
             });
+
+        // === XENDIT BALANCE ===
+        $xendit_balance = $this->getXenditBalance($owner->id);
 
         // Messages and Popups (existing code)
         $popups = Message::with(['recipients', 'attachments'])
@@ -179,8 +198,60 @@ class OwnerDashboardController extends Controller
             'salesLast7Days'       => $salesLast7Days,
             'topProducts'          => $topProducts,
             'outletPerformance'    => $outletPerformance,
+
+            // Xendit balance
+            'xendit_balance'       => $xendit_balance,
         ];
 
         return view('pages.owner.dashboard.index', compact('data'));
+    }
+
+    /**
+     * Get Xendit Balance for Owner
+     */
+    private function getXenditBalance($ownerId)
+    {
+        try {
+            // Get xendit account ID
+            $xenditAccount = Owner::with('xenditSubAccount')
+                ->where('id', $ownerId)
+                ->first()
+                ->xenditSubAccount ?? null;
+
+            if (!$xenditAccount || !$xenditAccount->xendit_user_id) {
+                return 0;
+            }
+
+            $accountId = $xenditAccount->xendit_user_id;
+
+            // Get sub account details
+            $subAccountResponse = $this->xenditSubAccount->getSubAccountById($accountId);
+            $subAccountData = $subAccountResponse->getData(true);
+
+            if (!($subAccountData['success'] ?? false)) {
+                Log::warning('Failed to get Xendit sub account for dashboard', [
+                    'owner_id' => $ownerId,
+                    'account_id' => $accountId
+                ]);
+                return 0;
+            }
+
+            $account = $subAccountData['data'];
+
+            // Get balance
+            $balanceResponse = $this->xenditBalance->getBalance($account['id'], new Request());
+            $balanceData = $balanceResponse->getData(true);
+
+            if ($balanceData['success'] ?? false) {
+                return $balanceData['data']['balance'] ?? 0;
+            }
+
+            return 0;
+        } catch (\Exception $e) {
+            Log::error('Error fetching Xendit balance for dashboard: ' . $e->getMessage(), [
+                'owner_id' => $ownerId
+            ]);
+            return 0;
+        }
     }
 }
