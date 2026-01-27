@@ -1,133 +1,214 @@
 <div class="lg:col-span-1 h-full">
-    <div class="rounded-2xl border border-choco/10 bg-white shadow-sm h-full flex flex-col">
-        <!-- HEADER jadi sticky -->
-        <div class="px-4 py-3 border-b border-choco/10 flex items-center justify-between sticky top-0 bg-white z-10">
-            <h2 class="font-semibold text-choco">Pembayaran Cash</h2>
-            <span class="text-xs text-gray-500">{{ $items->count() }} order</span>
+    <div class="rounded-2xl border border-gray-200 bg-white shadow-sm h-full flex flex-col overflow-hidden">
+        <!-- HEADER - Sticky dengan shadow -->
+        <div class="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
+            <div class="px-4 sm:px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-gray-900">Pembayaran Cash</h2>
+                    <span class="text-sm font-normal text-gray-500">({{ $items->count() }})</span>
+                </div>
+            </div>
         </div>
 
-        <!-- SCROLL AREA -->
-        <div class="p-4 overflow-y-auto max-h-[70vh]">
+
+        <!-- TABLE AREA - dengan styling smooth -->
+        <div class="flex-1 overflow-y-auto bg-gray-50">
             @if ($items->isEmpty())
-                <div class="text-center text-sm text-gray-500 h-full">
-                    Tidak ada order yang diproses.
+                <div class="flex items-center justify-center h-64">
+                    <div class="text-center">
+                        <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                        </svg>
+                        <p class="text-sm text-gray-500">Tidak ada order yang diproses</p>
+                    </div>
                 </div>
             @else
-                <ul class="space-y-3">
-                    @foreach ($items as $i)
-                        <li class="rounded-xl border border-choco/10 p-3 hover:bg-soft-choco/5"
-                            id="order-item-{{ $i->id }}">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50 sticky top-0 z-10">
+                            <tr>
+                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Order ID
+                                </th>
+                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Table
+                                </th>
+                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Customer Info
+                                </th>
+                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Time
+                                </th>
+                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Total Amount
+                                </th>
+                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status
+                                </th>
+                                <th scope="col" class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @foreach ($items as $i)
+                                <tr class="hover:bg-gray-50 transition-colors" id="order-item-{{ $i->id }}">
+                                    <!-- Order ID -->
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">
+                                            {{ $i->booking_order_code }}
+                                        </div>
+                                    </td>
 
-                            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
-                                {{-- 🔹 INFO ORDER --}}
-                                <div class="flex-1">
-                                    <p class="text-sm font-semibold text-gray-900 leading-tight">
-                                        {{ $i->booking_order_code }}
-                                        &middot; Meja {{ $i->table->table_no ?? '-' }}
-                                        &middot; {{ $i->payment_method }}
+                                    <!-- Table -->
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            @if ($i->order_status === 'PROCESSED')
+                                                <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-purple-100 text-purple-600 font-semibold text-sm">
+                                                    {{ $i->table->table_no ?? '-' }}
+                                                </div>
+                                            @else
+                                                <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-orange-100 text-orange-600 font-semibold text-sm">
+                                                    {{ $i->table->table_no ?? '-' }}
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </td>
 
+
+                                    <!-- Customer Info -->
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            @if ($i->order_status === 'PROCESSED')
+                                                <div class="flex-shrink-0 h-8 w-8 flex items-center justify-center rounded-full bg-purple-100 text-purple-600 font-semibold text-xs">
+                                                    {{ strtoupper(substr($i->customer_name, 0, 2)) }}
+                                                </div>
+                                            @else
+                                                <div class="flex-shrink-0 h-8 w-8 flex items-center justify-center rounded-full bg-orange-100 text-orange-600 font-semibold text-xs">
+                                                    {{ strtoupper(substr($i->customer_name, 0, 2)) }}
+                                                </div>
+                                            @endif
+                                            <div class="ml-3">
+                                                <div class="text-sm font-medium text-gray-900">
+                                                    {{ $i->customer_name }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+
+
+                                    <!-- Time -->
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">
+                                            {{ $i->created_at?->format('H:i') }}
+                                        </div>
+                                    </td>
+
+
+                                    <!-- Total Amount -->
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-semibold text-gray-900">
+                                            Rp {{ number_format($i->total_order_value, 0, ',', '.') }}
+                                        </div>
+                                    </td>
+
+
+                                    <!-- Status -->
+                                    <td class="px-4 py-4 whitespace-nowrap">
                                         @if ($i->order_status === 'PROCESSED')
-                                            <span class="ml-1 text-blue-500">{{ $i->order_status }}</span>
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                                <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-purple-600"></span>
+                                                Sedang Diproses
+                                            </span>
                                         @elseif ($i->order_status === 'PAID')
-                                            <span class="ml-1 text-choco">{{ $i->order_status }}</span>
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                                <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-orange-600"></span>
+                                                Menunggu Diproses
+                                            </span>
                                         @else
-                                            <span class="ml-1">{{ $i->order_status }}</span>
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-gray-600"></span>
+                                                {{ $i->order_status }}
+                                            </span>
                                         @endif
-                                    </p>
+                                    </td>
 
-                                    <p class="text-xs text-gray-500 mt-1">
-                                        Rp {{ number_format($i->total_order_value, 0, ',', '.') }}
-                                        &middot; {{ $i->created_at?->format('H:i') }}
-                                        · <span class="font-bold">{{ $i->customer_name }}</span>
-                                    </p>
-                                </div>
 
-                                {{-- 🔹 ACTION BUTTONS --}}
-                                <div
-                                    class="flex items-center gap-2
-                                        w-full sm:w-auto
-                                        justify-between sm:justify-end">
+                                    <!-- Actions -->
+                                    <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <!-- Detail Button -->
+                                            <a href="{{ route('employee.cashier.order-detail', $i->id) }}"
+                                                data-detail-btn
+                                                data-order-id="{{ $i->id }}"
+                                                class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-300 text-gray-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all"
+                                                title="View Details">
+                                                <x-heroicon-o-eye class="w-5 h-5" />
+                                            </a>
 
-                                    {{-- Detail --}}
-                                    <a href="{{ route('employee.cashier.order-detail', $i->id) }}"
-                                    data-detail-btn
-                                    data-order-id="{{ $i->id }}"
-                                    class="h-9 flex-1 sm:flex-none flex items-center justify-center
-                                            text-sm px-3 rounded-lg
-                                            border border-choco/20 text-choco
-                                            hover:bg-soft-choco/10
-                                            focus:ring-2 focus:ring-soft-choco/30">
-                                        Detail
-                                    </a>
 
-                                    {{-- Struk --}}
-                                    <button type="button"
-                                        data-print-receipt-process
-                                        data-order-id="{{ $i->id }}"
-                                        class="h-9 flex-1 sm:flex-none flex items-center justify-center
-                                            text-sm px-3 rounded-lg
-                                            border border-choco/20 text-choco
-                                            hover:bg-soft-choco/20
-                                            focus:ring-2 focus:ring-choco/30">
-                                        Struk
-                                    </button>
+                                            <!-- Struk Button -->
+                                            <button type="button"
+                                                data-print-receipt-process
+                                                data-order-id="{{ $i->id }}"
+                                                class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-300 text-gray-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all"
+                                                title="Print Receipt">
+                                                <x-heroicon-o-printer class="w-5 h-5" />
+                                            </button>
 
-                                    {{-- Status-dependent button --}}
-                                    @if ($i->order_status === 'PAID')
-                                        <button type="button"
-                                            data-turn-to-process-btn
-                                            data-order-id="{{ $i->id }}"
-                                            data-order-name="{{ $i->customer_name }}"
-                                            data-order-code="{{ $i->booking_order_code }}"
-                                            data-order-total="{{ $i->total_order_value }}"
-                                            data-order-table="{{ $i->table->table_no ?? '-' }}"
-                                            data-order-url="{{ route('employee.cashier.process-order', '__ID__') }}"
-                                            class="h-9 flex-1 sm:flex-none flex items-center justify-center
-                                                text-sm px-3 rounded-lg
-                                                bg-blue-500 text-white
-                                                hover:bg-blue-500/90
-                                                focus:ring-2 focus:ring-blue-400/40">
-                                            Proses
-                                        </button>
-                                    @elseif ($i->order_status === 'PROCESSED')
-                                        <button type="button"
-                                            data-turn-to-paid-btn
-                                            data-order-id="{{ $i->id }}"
-                                            data-order-name="{{ $i->customer_name }}"
-                                            data-order-code="{{ $i->booking_order_code }}"
-                                            data-order-total="{{ $i->total_order_value }}"
-                                            data-order-table="{{ $i->table->table_no ?? '-' }}"
-                                            data-order-url="{{ route('employee.cashier.cancel-process-order', '__ID__') }}"
-                                            class="h-9 flex-1 sm:flex-none flex items-center justify-center
-                                                text-sm px-3 rounded-lg
-                                                bg-red-500 text-white
-                                                hover:bg-red-500/90
-                                                focus:ring-2 focus:ring-red-400/40">
-                                            Batal Proses
-                                        </button>
-                                        <button type="button"
-                                            data-process-btn
-                                            data-order-id="{{ $i->id }}"
-                                            data-order-name="{{ $i->customer_name }}"
-                                            data-order-code="{{ $i->booking_order_code }}"
-                                            data-order-total="{{ $i->total_order_value }}"
-                                            data-order-table="{{ $i->table->table_no ?? '-' }}"
-                                            data-order-get-url="{{ route('employee.cashier.order-detail', $i->id) }}"
-                                            data-order-url="{{ route('employee.cashier.finish-order', '__ID__') }}"
-                                            class="h-9 flex-1 sm:flex-none flex items-center justify-center
-                                                text-sm px-3 rounded-lg
-                                                bg-green-500 text-white
-                                                hover:bg-green-400/90
-                                                focus:ring-2 focus:ring-green-400/40">
-                                            Selesaikan
-                                        </button>
-                                    @endif
-                                </div>
-                            </div>
-                        </li>
-                    @endforeach
-                </ul>
+
+                                            <!-- Status-dependent button -->
+                                            @if ($i->order_status === 'PAID')
+                                                <!-- Tombol Proses (Orange) -->
+                                                <button type="button"
+                                                    data-turn-to-process-btn
+                                                    data-order-id="{{ $i->id }}"
+                                                    data-order-name="{{ $i->customer_name }}"
+                                                    data-order-code="{{ $i->booking_order_code }}"
+                                                    data-order-total="{{ $i->total_order_value }}"
+                                                    data-order-table="{{ $i->table->table_no ?? '-' }}"
+                                                    data-order-url="{{ route('employee.cashier.process-order', '__ID__') }}"
+                                                    class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium bg-orange-500 text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all shadow-sm">
+                                                    <x-heroicon-o-clock class="w-4 h-4 mr-1.5" />
+                                                    Mulai Proses
+                                                </button>
+                                            @elseif ($i->order_status === 'PROCESSED')
+                                                <!-- Tombol Batal Proses (X Icon) -->
+                                                <button type="button"
+                                                    data-turn-to-paid-btn
+                                                    data-order-id="{{ $i->id }}"
+                                                    data-order-name="{{ $i->customer_name }}"
+                                                    data-order-code="{{ $i->booking_order_code }}"
+                                                    data-order-total="{{ $i->total_order_value }}"
+                                                    data-order-table="{{ $i->table->table_no ?? '-' }}"
+                                                    data-order-url="{{ route('employee.cashier.cancel-process-order', '__ID__') }}"
+                                                    class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-red-300 text-red-600 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-200 transition-all"
+                                                    title="Batalkan Proses">
+                                                    <x-heroicon-o-x-mark class="w-5 h-5" />
+                                                </button>
+                                                <!-- Tombol Selesaikan (Purple) -->
+                                                <button type="button"
+                                                    data-process-btn
+                                                    data-order-id="{{ $i->id }}"
+                                                    data-order-name="{{ $i->customer_name }}"
+                                                    data-order-code="{{ $i->booking_order_code }}"
+                                                    data-order-total="{{ $i->total_order_value }}"
+                                                    data-order-table="{{ $i->table->table_no ?? '-' }}"
+                                                    data-order-get-url="{{ route('employee.cashier.order-detail', $i->id) }}"
+                                                    data-order-url="{{ route('employee.cashier.finish-order', '__ID__') }}"
+                                                    class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium bg-purple-600 text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all shadow-sm">
+                                                    <x-heroicon-o-check-circle class="w-4 h-4 mr-1.5" />
+                                                    Selesaikan
+                                                </button>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             @endif
         </div>
     </div>
@@ -137,6 +218,7 @@
 @include('pages.employee.cashier.dashboard.modals.cash')
 @include('pages.employee.cashier.dashboard.modals.detail')
 @include('pages.employee.cashier.dashboard.modals.served')
+
 
 <script>
 (function () {
@@ -150,8 +232,10 @@
       return;
     }
 
+
     // Bangun URL ke route cetak
     const url = `/employee/cashier/print-receipt/${encodeURIComponent(id)}`;
+
 
     // Buka di tab baru
     window.open(url, '_blank', 'noopener,noreferrer');
