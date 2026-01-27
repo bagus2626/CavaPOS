@@ -2974,4 +2974,15 @@
                 applyFilters();
             })();
         </script>
+        <script>
+            // Tutup Swal kalau user balik ke halaman ini (bfcache / back)
+            window.addEventListener('pageshow', function () {
+                if (window.Swal) Swal.close();
+            });
+
+            // Tutup Swal kalau tab balik fokus
+            document.addEventListener('visibilitychange', function () {
+                if (!document.hidden && window.Swal) Swal.close();
+            });
+        </script>
     @endpush
