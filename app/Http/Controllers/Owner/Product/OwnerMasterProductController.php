@@ -270,7 +270,7 @@ class OwnerMasterProductController extends Controller
             // dd($validated);
 
             // Konversi harga ke integer
-            $price = (int) str_replace('.', '', $validated['price']);
+            $price = $this->toIntRupiah($validated['price']);
 
             // Handle existing images
             $storedImages = [];
@@ -405,7 +405,7 @@ class OwnerMasterProductController extends Controller
                         foreach ($parentOption['options'] as $optionIndex => $option) {
                             // $optionId = $option['option_id'] ?? null;
                             $optionId = $option['option_id'] ? (int) $option['option_id'] : null;
-                            $optionPrice = (int) str_replace('.', '', $option['price']);
+                            $optionPrice = $this->toIntRupiah($option['price'] ?? 0);
 
                             $optionImages = null;
                             if (isset($option['image']) && $option['image'] instanceof \Illuminate\Http\UploadedFile) {
@@ -474,6 +474,33 @@ class OwnerMasterProductController extends Controller
                 ->withInput()
                 ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
+    }
+
+    private function toIntRupiah($value): int
+    {
+        $v = trim((string) $value);
+        if ($v === '') return 0;
+
+        $v = preg_replace('/[^\d,\.]/', '', $v);
+
+        if (str_contains($v, ',') && str_contains($v, '.')) {
+            $v = str_replace('.', '', $v);
+            $v = str_replace(',', '.', $v);
+            return (int) round((float) $v);
+        }
+
+        if (str_contains($v, ',')) {
+            $v = str_replace(',', '.', $v);
+            return (int) round((float) $v);
+        }
+
+        // hanya titik:
+        if (preg_match('/\.\d{1,2}$/', $v)) {
+            return (int) round((float) $v);
+        }
+
+        $v = str_replace('.', '', $v);
+        return (int) $v;
     }
 
 
