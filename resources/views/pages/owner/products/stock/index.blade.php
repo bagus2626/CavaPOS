@@ -138,7 +138,7 @@
       const allStocksData = @json($allStocksFormatted ?? []);
 
       let filteredStocks = [...allStocksData];
-      let currentFilterType = 'all'; // all, linked, direct
+      let currentFilterType = 'linked'; // all, linked, direct
       let currentLocation = locationFilter ? locationFilter.value : 'owner';
       const itemsPerPage = 10;
       let currentPage = 1;
@@ -396,7 +396,15 @@
       // ==========================================
       // INITIALIZE
       // ==========================================
-      renderTable();
+      filterTabs.forEach(tab => {
+        if (tab.getAttribute('data-filter-type') === 'linked') { //all, linked, direct
+          tab.classList.add('active');
+        } else {
+          tab.classList.remove('active');
+        }
+      });
+      // renderTable();
+      filterStocks();
     });
 
     // ==========================================

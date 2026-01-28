@@ -1,0 +1,13 @@
+/* Mobile */
+@media (max-width: 576px) {
+    .main-footer {
+        font-size: 12px;
+        text-align: center;
+    }
+
+    .main-footer .float-right {
+        float: none !important;
+        display: block;
+        margin-bottom: 6px;
+    }
+}

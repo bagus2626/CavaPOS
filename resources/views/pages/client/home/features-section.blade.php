@@ -1,5 +1,5 @@
 <!-- Why Choose Us Section -->
-<section id="why-choose" class="w-full relative border-b border-gray-200 dark:border-gray-800">
+<section id="why-choose" class="w-full relative border-b border-gray-200 dark:border-gray-800 overflow-x-hidden">
     <!-- Background Elements -->
     <div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
         <div class="absolute top-20 right-0 w-[300px] sm:w-[400px] lg:w-[500px] h-[300px] sm:h-[400px] lg:h-[500px] bg-red-100/50 dark:bg-primary/5 rounded-full blur-3xl opacity-60 transition-transform duration-1000" id="blob1"></div>

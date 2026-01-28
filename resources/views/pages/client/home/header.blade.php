@@ -60,12 +60,36 @@
             </div>
            
             <!-- Mobile Menu Button -->
-            <button class="md:hidden p-2 text-slate-900 dark:text-white">
+            <button id="mobileMenuBtn" class="md:hidden p-2 text-slate-900 dark:text-white">
                 <span class="material-symbols-outlined">menu</span>
             </button>
         </div>
     </div>
 </nav>
+<!-- Mobile Menu -->
+<div id="mobileMenu"
+     class="hidden md:hidden fixed top-20 left-0 right-0 bg-white dark:bg-background-dark 
+            border-t border-gray-200 dark:border-white/10 z-40">
+
+    <div class="flex flex-col px-6 py-4 gap-4">
+        <a class="nav-link" href="#home">{{ __('messages.home.home') }}</a>
+        <a class="nav-link" href="#features">{{ __('messages.home.feature') }}</a>
+        <a class="nav-link" href="#video">Video</a>
+        <a class="nav-link" href="#why-choose">{{ __('messages.home.why_section') }}</a>
+        <a class="nav-link" href="#contact">{{ __('messages.home.contact') }}</a>
+
+        <hr class="my-2 border-gray-200 dark:border-white/10">
+
+        <a href="{{ route('owner.login') }}" class="text-center font-semibold text-slate-700 dark:text-white">
+            Masuk
+        </a>
+        <a href="{{ route('owner.register') }}"
+           class="text-center px-4 py-3 rounded-full bg-primary text-white font-bold">
+            Daftar
+        </a>
+    </div>
+</div>
+
 
 <style>
     /* Smooth scroll untuk seluruh halaman */
@@ -162,5 +186,24 @@
         
         // Set active link saat halaman dimuat
         updateActiveLink();
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const btn = document.getElementById('mobileMenuBtn');
+        const menu = document.getElementById('mobileMenu');
+
+        if (!btn || !menu) return;
+
+        btn.addEventListener('click', function () {
+            menu.classList.toggle('hidden');
+        });
+
+        // auto close ketika klik link
+        menu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                menu.classList.add('hidden');
+            });
+        });
     });
 </script>
