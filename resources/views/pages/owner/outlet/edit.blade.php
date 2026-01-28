@@ -455,15 +455,15 @@
                                                 <option value="disabled" {{ old('qr_mode', $outlet->qr_mode ?? 'disabled') == 'disabled' ? 'selected' : '' }}>
                                                     {{ __('messages.owner.outlet.all_outlets.inactive') }}
                                                 </option>
-                                                <option value="barcode_only" {{ old('qr_mode', $outlet->qr_mode ?? 'disabled') == 'barcode_only' ? 'selected' : '' }}>
+                                                {{-- <option value="barcode_only" {{ old('qr_mode', $outlet->qr_mode ?? 'disabled') == 'barcode_only' ? 'selected' : '' }}>
                                                     {{ __('messages.owner.outlet.all_outlets.qr_only') }}
-                                                </option>
+                                                </option> --}}
                                                 <option value="cashier_only" {{ old('qr_mode', $outlet->qr_mode ?? 'disabled') == 'cashier_only' ? 'selected' : '' }}>
                                                     {{ __('messages.owner.outlet.all_outlets.cashier_only') }}
                                                 </option>
-                                                <option value="both" {{ old('qr_mode', $outlet->qr_mode ?? 'disabled') == 'both' ? 'selected' : '' }}>
+                                                {{-- <option value="both" {{ old('qr_mode', $outlet->qr_mode ?? 'disabled') == 'both' ? 'selected' : '' }}>
                                                     {{ __('messages.owner.outlet.all_outlets.all_methods') }}
-                                                </option>
+                                                </option> --}}
                                             </select>
                                             <span class="material-symbols-outlined select-arrow">expand_more</span>
                                         </div>
