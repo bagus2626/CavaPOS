@@ -116,12 +116,12 @@
                                                     <option value="available" {{ old('status') == 'available' ? 'selected' : '' }}>
                                                         {{ __('messages.partner.outlet.table_management.tables.available') }}
                                                     </option>
-                                                    <option value="occupied" {{ old('status') == 'occupied' ? 'selected' : '' }}>
+                                                    {{-- <option value="occupied" {{ old('status') == 'occupied' ? 'selected' : '' }}>
                                                         {{ __('messages.partner.outlet.table_management.tables.occupied') }}
                                                     </option>
                                                     <option value="reserved" {{ old('status') == 'reserved' ? 'selected' : '' }}>
                                                         {{ __('messages.partner.outlet.table_management.tables.reserved') }}
-                                                    </option>
+                                                    </option> --}}
                                                     <option value="not_available" {{ old('status') == 'not_available' ? 'selected' : '' }}>
                                                         {{ __('messages.partner.outlet.table_management.tables.not_available') }}
                                                     </option>

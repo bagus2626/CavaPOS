@@ -396,7 +396,7 @@
             const html = `
             <div class="option-item">
                 <div class="option-item-header">
-                    <span class="option-number">{{ __('messages.owner.products.master_products.option_number') }} ${optionIndex}</span>
+                    <span class="option-number">${optionIndex}</span>
                     <button type="button" class="btn-remove" onclick="removeOption(this)">
                         <span class="material-symbols-outlined">close</span>
                     </button>

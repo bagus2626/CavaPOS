@@ -347,7 +347,7 @@
                           value="{{ $option->id }}">
 
                         <div class="option-item-header">
-                           <span class="option-number">{{ __('messages.owner.products.master_products.option_number') }} {{ $oIndex + 1 }}</span>
+                           <span class="option-number">{{ $oIndex + 1 }}</span>
                           <button type="button" class="btn-remove" onclick="removeOption(this)">
                             <span class="material-symbols-outlined">close</span>
                           </button>
@@ -598,7 +598,7 @@
                   <input type="hidden" name="menu_options[${menuIndex}][options][${optionIndex}][option_id]" value="">
 
                   <div class="option-item-header">
-                      <span class="option-number">{{ __('messages.owner.products.master_products.option_number') }} ${optionIndex}</span>
+                      <span class="option-number">${optionIndex}</span>
                       <button type="button" class="btn-remove" onclick="removeOption(this)">
                           <span class="material-symbols-outlined">close</span>
                       </button>
