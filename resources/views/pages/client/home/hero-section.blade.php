@@ -224,7 +224,7 @@
                     class="relative w-full max-w-[500px] sm:max-w-[650px] lg:max-w-[750px] animate-fadeInRight animate-float">
                     <!-- Laptop Frame -->
                     <div
-                        class="relative bg-gray-800 rounded-t-xl sm:rounded-t-2xl p-2 sm:p-3 shadow-2xl shadow-red-900/10 dark:shadow-black/50 transition-transform duration-500 hover:scale-[1.01]">
+                        class="relative bg-gray-800 rounded-t-2xl sm:rounded-t-2xl p-2 sm:p-3 shadow-2xl shadow-red-900/10 dark:shadow-black/50 transition-transform duration-500 hover:scale-[1.01]">
                         <!-- Screen Bezel -->
                         <div class="bg-black rounded-lg p-1 sm:p-1.5">
                             <!-- Screen Content -->

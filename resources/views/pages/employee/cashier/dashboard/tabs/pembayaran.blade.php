@@ -1,4 +1,59 @@
+
+
 <div class="lg:col-span-1 h-full flex flex-col bg-white rounded-xl border border-gray-200 shadow-card overflow-hidden">
+    <div class="p-6 border-b border-gray-200 bg-white">
+        <form method="GET" action="{{ route('employee.cashier.dashboard') }}" class="mb-6">
+            <div class="relative flex items-center gap-2">
+                
+                <!-- Input -->
+                <input
+                    name="q"
+                    id="searchInputDashboardPembayaran"
+                    class="w-full z-0 bg-white border-gray-200 rounded-2xl py-4 pl-6 pr-24 shadow-sm text-gray-600 placeholder-gray-400 focus:ring-2 outline-none search-input-red"
+                    placeholder="Cari order (kode/meja/nama)..."
+                    type="text"
+                    value="{{ request('q') }}"
+                />
+
+                <!-- Clear (X) button -->
+                @if(request('q'))
+                    <button
+                        type="submit"
+                        name="q"
+                        value=""
+                        title="Reset pencarian"
+                        class="absolute right-32 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-600 transition"
+                    >
+                        <span class="material-icons-round text-xl">close</span>
+                    </button>
+                @endif
+
+                <!-- barcode button -->
+                <button
+                    type="button"
+                    id="scanBarcodeBtn"
+                    title="Scan barcode"
+                    class="absolute z-10 right-20 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary transition"
+                >
+                    <span class="material-icons-round text-xl">qr_code_scanner</span>
+                </button>
+
+
+                <!-- Search button -->
+                <button
+                    type="submit"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 text-white rounded-xl px-4 py-2 transition-colors"
+                    style="background-color:#ae1504;"
+                    onmouseover="this.style.backgroundColor='#8a1003'"
+                    onmouseout="this.style.backgroundColor='#ae1504'"
+                >
+                    <span class="material-icons-round">search</span>
+                </button>
+
+            </div>
+        </form>
+    </div>
+    
     <!-- HEADER - Sticky -->
     <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between sticky top-0 z-10">
         <h2 class="text-lg font-bold text-gray-900">Pembayaran Cash</h2>
@@ -180,9 +235,9 @@
 
 
 @include('pages.employee.cashier.dashboard.modals.cash')
+@include('pages.employee.cashier.dashboard.modals.scanner')
 @include('pages.employee.cashier.dashboard.modals.detail')
-
-
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script>
     function handleSoftDeleteSubmit(event, orderCode) {
         event.preventDefault();
@@ -218,3 +273,77 @@
         return false;
     }
 </script>
+<script>
+console.log('scanner script loaded');
+
+(function initScanner() {
+    const scanBtn   = document.getElementById('scanBarcodeBtn');
+    const modal     = document.getElementById('barcodeModal');
+    const closeBtn  = document.getElementById('closeScanner');
+    const input     = document.getElementById('searchInputDashboardPembayaran');
+
+    if (!scanBtn || !modal || !closeBtn || !input) {
+        console.warn('Scanner elements not found');
+        return;
+    }
+
+    let qr = null;
+    let isScanning = false;
+
+    async function openScanner() {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+
+        if (!qr) {
+            qr = new Html5Qrcode("barcodeScanner");
+        }
+
+        if (isScanning) return;
+
+        try {
+            await qr.start(
+                { facingMode: "environment" }, // kamera belakang
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 }
+                },
+                (decodedText) => {
+                    console.log('Barcode detected:', decodedText);
+                    input.value = decodedText;
+
+                    closeScanner();
+                    input.closest('form').submit();
+                },
+                () => {} // ignore scan errors
+            );
+
+            isScanning = true;
+        } catch (err) {
+            console.error('Camera error:', err);
+            alert('Tidak bisa mengakses kamera');
+            closeScanner();
+        }
+    }
+
+    async function closeScanner() {
+        if (qr && isScanning) {
+            await qr.stop();
+            await qr.clear();
+            isScanning = false;
+        }
+
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    scanBtn.addEventListener('click', openScanner);
+    closeBtn.addEventListener('click', closeScanner);
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeScanner();
+    });
+
+})();
+</script>
+
+
