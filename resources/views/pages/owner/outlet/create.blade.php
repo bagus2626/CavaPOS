@@ -501,15 +501,15 @@
                                                 <option value="disabled" {{ old('qr_mode', 'disabled') == 'disabled' ? 'selected' : '' }}>
                                                     {{ __('messages.owner.outlet.all_outlets.inactive') }}
                                                 </option>
-                                                <option value="barcode_only" {{ old('qr_mode') == 'barcode_only' ? 'selected' : '' }}>
+                                                {{-- <option value="barcode_only" {{ old('qr_mode') == 'barcode_only' ? 'selected' : '' }}>
                                                     {{ __('messages.owner.outlet.all_outlets.qr_only') }}
-                                                </option>
+                                                </option> --}}
                                                 <option value="cashier_only" {{ old('qr_mode') == 'cashier_only' ? 'selected' : '' }}>
                                                     {{ __('messages.owner.outlet.all_outlets.cashier_only') }}
                                                 </option>
-                                                <option value="both" {{ old('qr_mode') == 'both' ? 'selected' : '' }}>
+                                                {{-- <option value="both" {{ old('qr_mode') == 'both' ? 'selected' : '' }}>
                                                     {{ __('messages.owner.outlet.all_outlets.all_methods') }}
-                                                </option>
+                                                </option> --}}
                                             </select>
                                             <span class="material-symbols-outlined select-arrow">expand_more</span>
                                         </div>
