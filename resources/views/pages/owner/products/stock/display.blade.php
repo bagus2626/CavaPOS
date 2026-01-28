@@ -1,14 +1,14 @@
 <!-- Filter Navigation Tabs -->
 <div class="mb-4">
     <ul class="nav nav-tabs nav-tabs-modern" role="tablist">
-        <li class="nav-item">
+        {{-- <li class="nav-item">
             <a class="nav-link active" 
                data-filter-type="all" 
                href="#" 
                role="tab">
                 {{ __('messages.owner.products.stocks.all_stock') }}
             </a>
-        </li>
+        </li> --}}
         <li class="nav-item">
             <a class="nav-link" 
                data-filter-type="linked" 
@@ -17,14 +17,14 @@
                 {{ __('messages.owner.products.stocks.raw_materials') }}
             </a>
         </li>
-        <li class="nav-item">
+        {{-- <li class="nav-item">
             <a class="nav-link" 
                data-filter-type="direct" 
                href="#" 
                role="tab">
                 {{ __('messages.owner.products.stocks.products') }}
             </a>
-        </li>
+        </li> --}}
     </ul>
 </div>
 

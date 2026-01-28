@@ -145,7 +145,7 @@
 </style>
 
 <section id="home"
-    class="relative pt-20 pb-12 sm:pt-24 sm:pb-16 lg:pt-32 lg:pb-24 xl:pt-40 xl:pb-32 overflow-hidden border-b border-gray-200 dark:border-gray-800 bg-white">
+    class="relative pt-32 pb-12 sm:pt-32 sm:pb-16 lg:pt-32 lg:pb-24 xl:pt-40 xl:pb-32 overflow-hidden border-b border-gray-200 dark:border-gray-800 bg-white">
     <!-- Abstract Background Shapes -->
     <div
         class="absolute top-0 right-0 -z-10 w-[400px] sm:w-[600px] lg:w-[800px] h-[400px] sm:h-[600px] lg:h-[800px] bg-red-100/50 dark:bg-red-900/10 rounded-full blur-3xl opacity-60 translate-x-1/3 -translate-y-1/4 animate-gradientShift">

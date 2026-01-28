@@ -374,12 +374,16 @@ class StockReportController extends Controller
         if ($request->filled('stock_type')) {
             $query->where('stock_type', $request->stock_type);
         }
-
         // Filter berdasarkan partner/outlet
         if ($request->filled('partner_id')) {
-            $query->where('partner_id', $request->partner_id);
+            if ($request->partner_id === 'owner') {
+                $query->whereNull('partner_id');
+                $query->where('owner_id', $ownerId);
+            } else {
+                $query->where('partner_id', $request->partner_id);
+            }
         }
-
+        
         return $query->orderBy('updated_at', 'desc')->get();
     }
 

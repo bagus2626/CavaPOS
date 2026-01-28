@@ -50,6 +50,7 @@
     <link rel="stylesheet" href="{{ asset('css/table.css') }}">
     <link rel="stylesheet" href="{{ asset('css/show.css') }}">
     <link rel="stylesheet" href="{{ asset('css/responsive-global.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/partner.css') }}">
 </head>
 
 <body>
