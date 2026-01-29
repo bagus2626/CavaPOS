@@ -559,6 +559,7 @@ Route::middleware('setlocale')->group(function () {
         Route::get('{partner_slug}/order-histories/{table_code}', [CustomerMenuController::class, 'getOrderHistory'])->name('orders.histories');
         Route::post('{partner_slug}/unpaid-order/{order_id}', [CustomerMenuController::class, 'makeUnpaidOrder'])->name('orders.unpaid-order');
         Route::get('/orders/{id}/receipt', [CustomerMenuController::class, 'printReceipt'])->name('orders.receipt');
+        Route::post('/cancel-order/{id}', [CustomerMenuController::class, 'cancelOrder'])->name('orders.cancel-order');
 
         Route::prefix('payment')->name('payment.')->group(function () {
             Route::get('{partner_slug}/get-payment-cash/{table_code}', [CustomerPaymentController::class, 'getPaymentCash'])

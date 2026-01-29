@@ -935,4 +935,105 @@ class CustomerMenuController extends Controller
         
     }
 
+    public function cancelOrder($id, Request $request) // sama seperti fungsi softDeleteUnpaidOrder() di cashierTransactionController
+    {
+        if ($id !== $request->order_id) {
+            return back()->with('error', 'Order ID not found.');
+        }
+        $order = BookingOrder::with('partner', 'table')->findOrFail($id);
+
+         // Validasi partner_slug dan table_code
+        if ($request->partner_slug !== $order->partner?->slug || $request->table_code !== $order->table?->table_code) {
+            return back()->with('error', 'Partner or Table not found.');
+        }
+
+        // Filter status agar hanya UNPAID atau EXPIRED yang bisa dihapus
+        if (!in_array($order->order_status, ['UNPAID', 'EXPIRED'])) {
+            return back()->with('error', 'This order cannot be deleted.');
+        }
+
+        if (method_exists($order, 'trashed') && $order->trashed()) {
+            return back()->with('info', 'Order has already been deleted.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $order_details = OrderDetail::where('booking_order_id', $order->id)->get();
+
+            foreach ($order_details as $detail) {
+                $partner_product = PartnerProduct::findOrFail($detail->partner_product_id);
+
+                // 1. Kembalikan Reserved Quantity Produk Utama
+                if ($partner_product && $partner_product->always_available_flag === 0) {
+                    if ($partner_product->stock_type === 'direct') {
+                        $stock = Stock::where('partner_product_id', $partner_product->id)
+                            ->whereNull('partner_product_option_id')
+                            ->first();
+
+                        if ($stock) {
+                            $stock->quantity_reserved -= $detail->quantity;
+                            $stock->save();
+
+                            // PENTING: Hitung ulang semua produk linked yang menggunakan stok ini
+                            $this->recalculationService->recalculateLinkedProducts($stock);
+                        }
+                    } else {
+                        $partner_recipes = PartnerProductRecipe::where('partner_product_id', $partner_product->id)->get();
+                        foreach ($partner_recipes as $pr) {
+                            $stock = Stock::findOrFail($pr->stock_id);
+                            $stock->quantity_reserved -= ($detail->quantity * $pr->quantity_used);
+                            $stock->save();
+
+                            // PENTING: Hitung ulang karena stok bahan baku berubah reserved-nya
+                            $this->recalculationService->recalculateLinkedProducts($stock);
+                        }
+                    }
+                }
+
+                // 2. Kembalikan Reserved Quantity Opsi Produk
+                $order_detail_options = OrderDetailOption::where('order_detail_id', $detail->id)->get();
+                foreach ($order_detail_options as $option) {
+                    $partner_option = PartnerProductOption::findOrFail($option->option_id);
+
+                    if ($partner_option && $partner_option->always_available_flag === 0) {
+                        if ($partner_option->stock_type === 'direct') {
+                            $stockOption = Stock::where('partner_product_option_id', $partner_option->id)->first();
+                            if ($stockOption) {
+                                $stockOption->quantity_reserved -= $detail->quantity;
+                                $stockOption->save();
+
+                                $this->recalculationService->recalculateLinkedProducts($stockOption);
+                            }
+                        } else {
+                            $partner_option_recipes = PartnerProductOptionsRecipe::where('partner_product_option_id', $partner_option->id)->get();
+                            foreach ($partner_option_recipes as $por) {
+                                $stockOption = Stock::findOrFail($por->stock_id);
+                                $stockOption->quantity_reserved -= ($detail->quantity * $por->quantity_used);
+                                $stockOption->save();
+
+                                $this->recalculationService->recalculateLinkedProducts($stockOption);
+                            }
+                        }
+                    }
+                }
+            }
+
+            $order->delete(); // Soft Delete
+            DB::commit();
+
+            // return back()->with('success', 'Order berhasil dihapus dan stok telah diperbarui.');
+            return redirect()
+                ->route('customer.orders.histories', [
+                    'partner_slug' => $request->partner_slug,
+                    'table_code'   => $request->table_code,
+                ])
+                ->with('success', __('messages.customer.orders.detail.cancel_order_success'));
+
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
 }
