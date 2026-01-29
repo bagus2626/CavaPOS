@@ -171,7 +171,25 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="mt-4 flex justify-center md:justify-end">
+                            <button
+                                type="button"
+                                onclick="cancelOrder({{ $order->id }}, '{{ $partner->slug }}', '{{ $table->table_code }}', '{{ $customer->id }}')"
+                                class="inline-flex items-center gap-2 rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-xs md:text-sm font-semibold text-red-700 hover:bg-red-100 hover:border-red-400 transition"
+                            >
+                                {{ __('messages.customer.orders.detail.cancel_order') ?? 'Cancel Order' }}
+                            </button>
+                            <form id="cancelOrderForm" method="POST" style="display:none;">
+                                @csrf
+
+                                <input type="hidden" name="order_id">
+                                <input type="hidden" name="partner_slug">
+                                <input type="hidden" name="table_code">
+                                <input type="hidden" name="customer_id">
+                            </form>
+                        </div>
                     </div>
+                    
                 </div>
             </div>
         @elseif ($order->order_status === 'PAYMENT')
@@ -640,4 +658,31 @@
         localStorage.removeItem('menuCart');
     @endif
 </script>
+<script>
+    function cancelOrder(orderId, partnerSlug, tableCode, customerId) {
+        if (!orderId) return;
+
+        Swal.fire({
+            title: "{{ __('messages.customer.orders.detail.cancel_order_confirm_1') }}",
+            text: "{{ __('messages.customer.orders.detail.cancel_order_confirm_2') }}",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: "{{ __('messages.customer.orders.detail.cancel_order_confirm_yes') }}",
+            cancelButtonText: "{{ __('messages.customer.orders.detail.cancel_order_confirm_no') }}",
+            confirmButtonColor: '#d33',
+            reverseButtons: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const form = document.getElementById('cancelOrderForm');
+                form.action = `/customer/cancel-order/${orderId}`;
+                form.querySelector('input[name="order_id"]').value = orderId;
+                form.querySelector('input[name="partner_slug"]').value = partnerSlug;
+                form.querySelector('input[name="table_code"]').value = tableCode;
+                form.querySelector('input[name="customer_id"]').value = customerId;
+                form.submit();
+            }
+        });
+    }
+</script>
+
 @endpush

@@ -46,6 +46,10 @@ class BookingOrder extends Model
     {
         return $this->belongsTo(Table::class, 'table_id');
     }
+    public function partner()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'partner_id', 'id');
+    }
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'customer_id');

@@ -2507,6 +2507,13 @@
                 //reorder
                 (function applyReorderOnLoad() {
                     const items = window.__REORDER_ITEMS__ || [];
+
+                    // JIKA ADA REORDER → RESET CART TOTAL
+                    if (Array.isArray(items) && items.length > 0) {
+                        cart = {};
+                        lastKeyPerProduct = {};
+                        clearCartFromStorage();
+                    }
                     
                     // HAPUS PARAMETER REORDER DARI URL SEGERA SETELAH DATA DIBACA
                     const url = new URL(window.location.href);
