@@ -343,8 +343,8 @@
                         @foreach ($item->order_detail_options as $option)
                             <tr class="opt-row">
                                 <td class="opt">
-                                    <span class="bullet">•</span>{{ $option->option->name ?? '' }}
-                                    <span class="price">Rp {{ number_format($option->price, 0, ',', '.') }}</span>
+                                    <span class="bullet">•</span>{{ $option->option->name ?? '' }} Rp {{ number_format($option->price, 0, ',', '.') }}
+                                    {{-- <span class="price">Rp {{ number_format($option->price, 0, ',', '.') }}</span> --}}
                                 </td>
                                 <td></td>
                             </tr>
