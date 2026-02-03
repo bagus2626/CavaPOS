@@ -29,7 +29,7 @@ class OwnerAuthController extends Controller
             'email'        => ['required', 'string', 'email', 'max:255', 'unique:owners,email'],
             'phone_number' => ['nullable', 'string', 'max:30'],
             'password'     => ['required', 'string', 'min:8', 'confirmed'],
-            'image'        => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'image'        => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp'],
         ]);
 
         $imagePath = null;

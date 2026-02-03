@@ -10,8 +10,7 @@
             </div>
         </div>
 
-
-        <!-- TABLE AREA - dengan styling smooth -->
+        <!-- CONTENT -->
         <div class="flex-1 overflow-y-auto bg-gray-50">
             @if ($items->isEmpty())
                 <div class="flex items-center justify-center h-64">
@@ -23,7 +22,9 @@
                     </div>
                 </div>
             @else
-                <div class="overflow-x-auto">
+
+                {{-- DESKTOP: TABLE --}}
+                <div class="hidden md:block overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50 sticky top-0 z-10">
                             <tr>
@@ -50,16 +51,16 @@
                                 </th>
                             </tr>
                         </thead>
+
                         <tbody class="bg-white divide-y divide-gray-200">
                             @foreach ($items as $i)
-                                <tr class="hover:bg-gray-50 transition-colors">
+                                <tr class="hover:bg-gray-50 transition-colors" id="order-row-{{ $i->id }}">
                                     <!-- Order ID -->
                                     <td class="px-4 py-4 whitespace-nowrap">
                                         <div class="text-sm font-medium text-gray-900">
                                             {{ $i->booking_order_code }}
                                         </div>
                                     </td>
-
 
                                     <!-- Table -->
                                     <td class="px-4 py-4 whitespace-nowrap">
@@ -69,7 +70,6 @@
                                             </div>
                                         </div>
                                     </td>
-
 
                                     <!-- Customer Info -->
                                     <td class="px-4 py-4 whitespace-nowrap">
@@ -85,7 +85,6 @@
                                         </div>
                                     </td>
 
-
                                     <!-- Time -->
                                     <td class="px-4 py-4 whitespace-nowrap">
                                         <div class="text-sm text-gray-900">
@@ -93,14 +92,12 @@
                                         </div>
                                     </td>
 
-
                                     <!-- Total Amount -->
                                     <td class="px-4 py-4 whitespace-nowrap">
                                         <div class="text-sm font-semibold text-gray-900">
                                             Rp {{ number_format($i->total_order_value, 0, ',', '.') }}
                                         </div>
                                     </td>
-
 
                                     <!-- Status -->
                                     <td class="px-4 py-4 whitespace-nowrap">
@@ -110,16 +107,14 @@
                                         </span>
                                     </td>
 
-
                                     <!-- Actions -->
                                     <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div class="flex items-center justify-end gap-2">
-                                            <!-- Detail Button (Eye Icon) -->
                                             <a href="{{ route('employee.cashier.order-detail', $i->id) }}"
-                                                data-detail-btn
-                                                data-order-id="{{ $i->id }}"
-                                                class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-300 text-gray-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all"
-                                                title="View Details">
+                                               data-detail-btn
+                                               data-order-id="{{ $i->id }}"
+                                               class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-300 text-gray-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all"
+                                               title="View Details">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -132,11 +127,72 @@
                         </tbody>
                     </table>
                 </div>
+
+                {{-- MOBILE: CARD LIST --}}
+                <div class="md:hidden p-3 space-y-2">
+                    @foreach ($items as $i)
+                        <div id="order-card-{{ $i->id }}"
+                             class="rounded-xl border border-gray-200 bg-white shadow-sm px-3 py-2.5">
+
+                            {{-- Top: code + status --}}
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="min-w-0">
+                                    <div class="inline-flex items-center text-[12px] font-mono font-semibold text-gray-900 bg-gray-100 px-2 py-0.5 rounded">
+                                        {{ $i->booking_order_code }}
+                                    </div>
+
+                                    <div class="mt-1 text-sm font-semibold text-gray-900 truncate">
+                                        {{ $i->customer_name }}
+                                    </div>
+
+                                    <div class="mt-0.5 text-[11px] text-gray-500">
+                                        Meja:
+                                        <span class="font-semibold text-green-700">
+                                            {{ $i->table->table_no ?? '-' }}
+                                        </span>
+                                        <span class="mx-1.5">•</span>
+                                        {{ $i->created_at?->format('H:i') }}
+                                    </div>
+                                </div>
+
+                                <div class="shrink-0">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-green-100 text-green-800">
+                                        <span class="size-1.5 rounded-full bg-green-600"></span>
+                                        Completed
+                                    </span>
+                                </div>
+                            </div>
+
+                            {{-- Bottom: total + action --}}
+                            <div class="mt-2 pt-2 border-t border-gray-100 flex items-center justify-between gap-2">
+                                <div class="min-w-0">
+                                    <div class="text-[11px] text-gray-500 leading-none">Total</div>
+                                    <div class="text-sm font-bold text-gray-900 tabular-nums leading-tight">
+                                        Rp {{ number_format($i->total_order_value, 0, ',', '.') }}
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-1.5 shrink-0">
+                                    <a href="{{ route('employee.cashier.order-detail', $i->id) }}"
+                                       data-detail-btn
+                                       data-order-id="{{ $i->id }}"
+                                       class="p-2 rounded-lg border border-gray-200 text-gray-600 bg-white hover:bg-gray-50 transition"
+                                       title="Detail">
+                                        {{-- icon mata kecil --}}
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
             @endif
         </div>
     </div>
 </div>
-
 
 @include('pages.employee.cashier.dashboard.modals.cash')
 @include('pages.employee.cashier.dashboard.modals.detail')

@@ -38,6 +38,10 @@ use App\Models\Store\Stock;
 use Milon\Barcode\Facades\DNS2DFacade as DNS2D;
 use App\Services\StockRecalculationService;
 use Illuminate\Support\Facades\Schema;
+use App\Models\Owner\OwnerManualPayment;
+use App\Models\Partner\PaymentMethod\PartnerManualPayment;
+use Illuminate\Support\Facades\Log;
+
 
 class CustomerMenuController extends Controller
 {
@@ -82,6 +86,14 @@ class CustomerMenuController extends Controller
         $categories = Category::whereIn('id', $partner_products->pluck('category_id'))
             ->orderBy('category_order')
             ->get();
+        $manualPaymentMethods = PartnerManualPayment::query()
+            ->where('partner_id', $partner->id)
+            ->whereHas('ownerManualPayment', function ($q) {
+                $q->where('is_active', 1);
+            })
+            ->with('ownerManualPayment')
+            ->get();
+
 
         $reorderItems    = [];
         $reorderMessages = [];
@@ -239,12 +251,14 @@ class CustomerMenuController extends Controller
             'table_code'      => $table_code,
             'reorderItems'    => $reorderItems,
             'reorderMessages' => $reorderMessages,
+            'manualPaymentMethods' => $manualPaymentMethods,
         ]);
     }
 
 
     public function checkout(Request $request, $partner_slug, $table_code)
     {
+        // dd($request->all());
         DB::beginTransaction();
         try {
             // dd($request->all());
@@ -258,8 +272,10 @@ class CustomerMenuController extends Controller
             $validRegistrationStatuses = ['LIVE', 'LIVE_TESTMODE'];
 
             $this->checkStockAvailability($orders, $partner);
-
+            $payment_method = $request->payment_method;
             if ($request->payment_method === 'QRIS') {
+                $payment_method = $request->payment_method;
+                
                 if (!in_array($owner->xendit_registration_status, $validRegistrationStatuses)) {
                     return response()->json([
                         'success' => false,
@@ -273,6 +289,22 @@ class CustomerMenuController extends Controller
                         'message' => 'Pengaturan pembayaran belum lengkap. Silakan hubungi pengelola.',
                     ]);
                 }
+            } else if ($request->payment_method === 'CASH') {
+                $payment_method = $request->payment_method;
+            } else {
+                $partnerManualPayment = PartnerManualPayment::with('ownerManualPayment')
+                    ->where('partner_id', $partner->id)
+                    ->where('owner_manual_payment_id', (int) $request->payment_method)
+                    ->first();
+                if (!$partnerManualPayment || !$partnerManualPayment->ownerManualPayment || $partnerManualPayment->ownerManualPayment->is_active == 0) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Metode pembayaran tidak valid.',
+                    ]);
+                }
+
+                $payment_method = $partnerManualPayment->payment_type;
+                // dd($partner->id, $partnerManualPayment);
             }
 
             $booking_order_code = $this->generateBookingOrderCode($partner->partner_code);
@@ -293,10 +325,9 @@ class CustomerMenuController extends Controller
                 'order_by' => 'CUSTOMER',
                 'customer_name' => $customer ? $customer->name : 'guest-' . $request->order_name,
                 'order_status' => 'UNPAID',
-                'payment_method' => $request->payment_method,
+                'payment_method' => $payment_method,
                 'total_order_value' => $request->total_amount,
             ]);
-
 
             $partnerProductIds = [];
 
@@ -457,6 +488,30 @@ class CustomerMenuController extends Controller
                         'redirect_url' => $invoiceData['invoice_url']
                     ]);
                 }
+            } else if ($request->payment_method === 'CASH') {
+
+            } else {
+                // Manual Payment
+                $booking_order->order_status = 'PAYMENT';
+                $booking_order->payment_method = $partnerManualPayment->OwnerManualPayment->payment_type ?? null;
+                // dd($partnerManualPayment->OwnerManualPayment->payment_type,);
+
+                $payment = OrderPayment::create([
+                    'booking_order_id'  => $booking_order->id,
+                    'customer_id'       => $customer ? $customer->id : null,
+                    'customer_name'     => $customer ? $customer->name : 'guest-' . $request->order_name,
+                    'payment_type'      => $partnerManualPayment->OwnerManualPayment->payment_type ?? null,
+                    'owner_manual_payment_id' => $partnerManualPayment->owner_manual_payment_id ?? null,
+                    'manual_provider_name' => $partnerManualPayment->OwnerManualPayment->provider_name ?? null,
+                    'manual_provider_account_name' => $partnerManualPayment->OwnerManualPayment->provider_account_name ?? null,
+                    'manual_provider_account_no' => $partnerManualPayment->OwnerManualPayment->provider_account_no ?? null,
+                    'paid_amount'       => 0,
+                    'change_amount'     => 0,
+                    'payment_status'    => 'PENDING'
+                ]);
+
+                $booking_order->payment_id = $payment->id;
+                $booking_order->save();
             }
 
             if (!$customer) {
@@ -468,26 +523,38 @@ class CustomerMenuController extends Controller
 
             DB::commit();
 
-            DB::afterCommit(function () use ($booking_order) {
-                event(new OrderCreated($booking_order));
-            });
-
             $token = Crypt::encrypt([
                 'p' => $partner_slug,
                 't' => $table_code,
                 'o' => $booking_order->id,
             ]);
 
-
-            $url = URL::temporarySignedRoute(
-                'customer.orders.order-detail',
-                now()->addMinutes(120),
-                [
-                    'partner_slug' => $partner_slug,
-                    'table_code' => $table_code,
-                    'order_id' => $booking_order->id
-                ]
-            );
+            $url = null;
+            if ($payment_method === 'CASH' || $payment_method === 'QRIS') {
+                DB::afterCommit(function () use ($booking_order) {
+                    event(new OrderCreated($booking_order));
+                });
+                $url = URL::temporarySignedRoute(
+                    'customer.orders.order-detail',
+                    now()->addMinutes(120),
+                    [
+                        'partner_slug' => $partner_slug,
+                        'table_code' => $table_code,
+                        'order_id' => $booking_order->id
+                    ]
+                );
+            } else {
+                $url = URL::temporarySignedRoute(
+                    'customer.orders.order-manual-payment',
+                    now()->addMinutes(120),
+                    [
+                        'partner_slug' => $partner_slug,
+                        'table_code' => $table_code,
+                        'order_id' => $booking_order->id
+                    ]
+                );
+            }
+            
             return redirect()->to($url)->with('success', 'Product updated successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -745,6 +812,212 @@ class CustomerMenuController extends Controller
         }
     }
 
+    public function orderManualPayment(Request $request, $partner_slug, $table_code, $order_id)
+    {
+        $customer = Auth::guard('customer')->user();
+        $guestOrders = collect(session('guest_orders', []));
+
+        $partner = User::where('slug', $partner_slug)->firstOrFail();
+        $table = Table::where('table_code', $table_code)
+            ->where('partner_id', $partner->id)
+            ->firstOrFail();
+
+        $order = BookingOrder::with([
+            'order_details.order_detail_options.option',
+            'order_details.partnerProduct',
+            'payment.ownerManualPayment',
+            'table',
+        ])->findOrFail($order_id);
+
+        // Validasi kepemilikan (tetap seperti punyamu)
+        if ($order->customer_id) {
+            if (!$customer || ($customer->id ?? null) !== $order->customer_id) {
+                abort(403, 'Kamu tidak bisa melihat pesanan pelanggan lain.');
+            }
+        } else {
+            if ($customer) {
+                abort(403, 'Pesanan ini dibuat tanpa login. Silakan akses dari perangkat yang sama saat memesan.');
+            }
+            if (!$guestOrders->contains($order->id)) {
+                abort(403, 'Sesi kamu untuk melihat pesanan ini sudah tidak berlaku.');
+            }
+
+            $customer = (object)[
+                'id'   => null,
+                'name' => $order->customer_name,
+                'email' => null,
+            ];
+        }
+
+        // Payment + owner manual payment
+        $payment = $order->payment;
+        $ownerManual = $payment?->ownerManualPayment;
+
+        // Jika halaman ini memang khusus manual payment, validasi agar aman:
+        if (!$payment || !$ownerManual) {
+            // Bisa diarahkan balik ke order detail / kasih warning
+            abort(404, 'Manual payment tidak ditemukan untuk pesanan ini.');
+        }
+
+        // Timeline (opsional, kalau mau tetap pakai)
+        $statusIndexMap = [
+            'UNPAID'    => 0,
+            'PAID'      => 1,
+            'PROCESSED' => 2,
+            'SERVED'    => 3,
+        ];
+        $currentIndex = $statusIndexMap[$order->order_status] ?? 0;
+
+        $headline = __('messages.customer.orders.detail.waiting_for_payment');
+        $subtitle = __('messages.customer.orders.detail.waiting_for_payment_desc');
+
+        // QR (kalau masih dipakai)
+        $qrPayload = $order->booking_order_code;
+        $qrPngBase64 = DNS2D::getBarcodePNG($qrPayload, 'QRCODE', 6, 6);
+
+        // wifi snapshot (kalau masih perlu)
+        $wifiData = null;
+        if ($order->payment_flag === 1) {
+            $snapshot = $order->wifi_snapshot;
+            if ($snapshot && ($snapshot['wifi_shown'] ?? 0) == 1) {
+                $wifiData = [
+                    'ssid' => $snapshot['wifi_ssid'] ?? null,
+                    'password' => $snapshot['wifi_password'] ?? null,
+                ];
+            }
+        }
+
+        return view('pages.customer.payment.manual-payment.index', [
+            'order'        => $order,
+            'partner'      => $partner,
+            'table'        => $table,
+            'customer'     => $customer,
+            'payment'      => $payment,
+            'ownerManual'  => $ownerManual,
+            'currentIndex' => $currentIndex,
+            'headline'     => $headline,
+            'subtitle'     => $subtitle,
+            'qrPngBase64'  => $qrPngBase64,
+            'wifiData'     => $wifiData,
+        ]);
+    }
+
+    public function uploadManualPaymentProof(Request $request, $partner_slug, $table_code, $order_id)
+    {
+        DB::beginTransaction();
+
+        try {
+
+            $request->validate([
+                'payment_proof' => 'required|file|max:5120|mimes:jpg,jpeg,png,webp',
+                'payment_note'  => 'nullable|string|max:500',
+            ]);
+
+            $order = BookingOrder::with(['payment.ownerManualPayment'])->findOrFail($order_id);
+
+            if (!$order->payment || !$order->payment->ownerManualPayment) {
+                throw new \Exception('Manual payment tidak ditemukan.');
+            }
+
+            $payment = $order->payment;
+
+            if (!empty($payment->manual_payment_image)) {
+                $oldPath = str_replace(asset('storage/'), '', $payment->manual_payment_image);
+
+                if (Storage::disk('public')->exists($oldPath)) {
+                    Storage::disk('public')->delete($oldPath);
+                }
+            }
+
+            $file = $request->file('payment_proof');
+            $extension = strtolower($file->getClientOriginalExtension());
+
+            $folder = 'customer_manual_payment_proofs';
+            $storagePath = storage_path('app/public/' . $folder);
+
+            if (!file_exists($storagePath)) {
+                mkdir($storagePath, 0755, true);
+            }
+
+            $filenameBase = 'order_' . $order->id . '_' . Str::random(8);
+            $publicUrl = null;
+            $newRelativePath = null;
+
+            if (in_array($extension, ['jpg','jpeg','png','webp'])) {
+
+                $filename = $filenameBase . '.webp';
+                $newRelativePath = $folder . '/' . $filename;
+
+                $image = Image::make($file->getRealPath())
+                    ->resize(1200, null, function ($constraint) {
+                        $constraint->aspectRatio();
+                        $constraint->upsize();
+                    })
+                    ->encode('webp', 70);
+
+                $quality = 70;
+                while (strlen($image) > 100 * 1024 && $quality > 45) {
+                    $quality -= 5;
+                    $image->encode('webp', $quality);
+                }
+
+                file_put_contents($storagePath . '/' . $filename, $image);
+
+                $publicUrl = asset('storage/' . $newRelativePath);
+
+            } else {
+                $filename = $filenameBase . '.' . $extension;
+                $newRelativePath = $folder . '/' . $filename;
+
+                $file->storeAs($folder, $filename, 'public');
+
+                $publicUrl = asset('storage/' . $newRelativePath);
+            }
+
+            $payment->update([
+                'manual_payment_image' => $publicUrl,
+                'note'                 => trim(($payment->note ?? '') . ' | customer_payment: ' . ($request->payment_note ?? '-')),
+                'payment_status'       => 'PAYMENT REQUEST',
+            ]);
+            $order->update([
+                'order_status' => 'PAYMENT REQUEST',
+            ]);
+
+            DB::commit();
+            DB::afterCommit(function () use ($order) {
+                event(new OrderCreated($order));
+            });
+            $url = URL::temporarySignedRoute(
+                'customer.orders.order-detail',
+                now()->addMinutes(120),
+                [
+                    'partner_slug' => $partner_slug,
+                    'table_code' => $table_code,
+                    'order_id' => $order->id
+                ]
+            );
+
+            return redirect()->to($url)->with('success', 'Payment updated successfully!');
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+            if (!empty($newRelativePath) && Storage::disk('public')->exists($newRelativePath)) {
+                Storage::disk('public')->delete($newRelativePath);
+            }
+
+            // LOG ERROR
+            Log::error('Upload manual payment gagal', [
+                'order_id' => $order_id ?? null,
+                'error'    => $e->getMessage(),
+            ]);
+
+            return back()->withErrors('Gagal mengunggah bukti pembayaran. Silakan coba lagi.');
+        }
+    }
+
+
+
     public function orderDetail(Request $request, $partner_slug, $table_code, $order_id)
     {
         // Customer login / guest
@@ -791,9 +1064,10 @@ class CustomerMenuController extends Controller
         $statusOrder = $order->order_status;
         $statusIndexMap = [
             'UNPAID'    => 0,
-            'PAID'      => 1,
-            'PROCESSED' => 2,
-            'SERVED'    => 3,
+            'PAYMENT REQUEST' => 1,
+            'PAID'      => 2,
+            'PROCESSED' => 3,
+            'SERVED'    => 4,
         ];
         $currentIndex = $statusIndexMap[$statusOrder] ?? 0;
 
@@ -805,6 +1079,10 @@ class CustomerMenuController extends Controller
             case 'UNPAID':
                 $headline = __('messages.customer.orders.detail.waiting_for_payment');
                 $subtitle = __('messages.customer.orders.detail.waiting_for_payment_desc');
+                break;
+            case 'PAYMENT REQUEST':
+                $headline = __('messages.customer.orders.detail.payment_validation');
+                $subtitle = __('messages.customer.orders.detail.payment_validation_desc');
                 break;
             case 'PAID':
                 $headline = __('messages.customer.orders.detail.waiting_to_be_processed');
@@ -839,6 +1117,25 @@ class CustomerMenuController extends Controller
             }
         }
 
+        $payment = $order->payment; // model, bukan collection
+
+        if (
+            in_array($order->payment_method, ['manual_tf','manual_ewallet','manual_qris'], true)
+            && $payment
+            && $payment->payment_status === 'PENDING'
+        ) {
+            $url = URL::temporarySignedRoute(
+                'customer.orders.order-manual-payment',
+                now()->addMinutes(120),
+                [
+                    'partner_slug' => $partner_slug,
+                    'table_code' => $table_code,
+                    'order_id' => $order->id
+                ]
+            );
+            return redirect()->to($url);
+        }
+
         return view('pages.customer.orders.detail', [
             'order'        => $order,
             'partner'      => $partner,
@@ -847,8 +1144,8 @@ class CustomerMenuController extends Controller
             'currentIndex' => $currentIndex,
             'headline'     => $headline,
             'subtitle'     => $subtitle,
-            'qrPngBase64'  => $qrPngBase64, // <- kirim ke Blade
-            'wifiData'     => $wifiData, // ← TAMBAHKAN BARIS INI
+            'qrPngBase64'  => $qrPngBase64,
+            'wifiData'     => $wifiData,
         ]);
     }
 
@@ -948,7 +1245,7 @@ class CustomerMenuController extends Controller
         }
 
         // Filter status agar hanya UNPAID atau EXPIRED yang bisa dihapus
-        if (!in_array($order->order_status, ['UNPAID', 'EXPIRED'])) {
+        if (!in_array($order->order_status, ['UNPAID', 'EXPIRED', 'PAYMENT'])) {
             return back()->with('error', 'This order cannot be deleted.');
         }
 
@@ -1020,6 +1317,14 @@ class CustomerMenuController extends Controller
 
             $order->delete(); // Soft Delete
             DB::commit();
+
+            if (!Auth::guard('customer')->check() && session()->has('guest_customer')) {
+                // Guest → kembali ke menu utama
+                return redirect()->route('customer.menu.index', [
+                    'partner_slug' => $request->partner_slug,
+                    'table_code'   => $request->table_code,
+                ])->with('success', __('messages.customer.orders.detail.cancel_order_success'));
+            }
 
             // return back()->with('success', 'Order berhasil dihapus dan stok telah diperbarui.');
             return redirect()

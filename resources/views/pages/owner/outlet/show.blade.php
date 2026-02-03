@@ -34,6 +34,19 @@
             'both' => __('messages.owner.outlet.all_outlets.mode_both')
         ];
         $qrModeLabel = $qrModeLabels[$outlet->qr_mode] ?? 'Unknown';
+
+        // Ambil daftar yang dipilih outlet dari relasi pivot
+        $selectedManualPayments = collect($outlet->partnerManualPayments ?? [])
+            ->pluck('ownerManualPayment')
+            ->filter(); // buang null kalau relasi kosong
+
+        $selectedGrouped = $selectedManualPayments->groupBy('payment_type');
+
+        $typeLabels = [
+            'manual_tf'      => __('messages.owner.payment_methods.type_transfer'),
+            'manual_ewallet' => __('messages.owner.payment_methods.type_ewallet'),
+            'manual_qris'    => __('messages.owner.payment_methods.type_qris'),
+        ];
     @endphp
 
     <div class="modern-container">
@@ -392,6 +405,113 @@
                         <div class="section-divider"></div>
                     @endif
 
+                    {{-- Section Divider --}}
+                    <div class="section-divider"></div>
+
+                    {{-- Payment Section --}}
+                    <div class="section-header">
+                        <div class="section-icon section-icon-red">
+                            <span class="material-symbols-outlined">payments</span>
+                        </div>
+                        <h3 class="section-title">{{ __('messages.owner.outlet.all_outlets.payment_methods') ?? 'Payment Methods' }}</h3>
+                    </div>
+
+                    <div class="qr-manual-grid">
+                        {{-- LEFT: Payment Modes (status) --}}
+                        <div class="qr-box">
+                            <div class="qr-box-header">
+                                <span class="material-symbols-outlined">qr_code_2</span>
+                                <h4 class="qr-box-title">{{ __('messages.owner.outlet.all_outlets.payment_mode') ?? 'Payment Mode' }}</h4>
+                            </div>
+
+                            <div class="payment-items">
+                                {{-- QR --}}
+                                <div class="check-card {{ $isQrActive ? 'is-selected' : '' }}" style="cursor: default;">
+                                    <div class="check-card-body">
+                                        <div class="check-card-title">
+                                            {{ __('messages.owner.outlet.all_outlets.qr_active_status') ?? 'QR Active' }}
+                                            @if($isQrActive)
+                                                <span class="mini-badge" style="background:#dcfce7;color:#166534;">ON</span>
+                                            @else
+                                                <span class="mini-badge mini-badge-gray">OFF</span>
+                                            @endif
+                                        </div>
+                                        <div class="check-card-desc">
+                                            {{ __('messages.owner.outlet.all_outlets.qr_mode') ?? 'QR Mode' }}: <strong>{{ $qrModeLabel }}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Cashier --}}
+                                <div class="check-card {{ $isCashierActive ? 'is-selected' : '' }}" style="cursor: default;">
+                                    <div class="check-card-body">
+                                        <div class="check-card-title">
+                                            {{ __('messages.owner.outlet.all_outlets.cashier_active_status') ?? 'Cashier Active' }}
+                                            @if($isCashierActive)
+                                                <span class="mini-badge" style="background:#dcfce7;color:#166534;">ON</span>
+                                            @else
+                                                <span class="mini-badge mini-badge-gray">OFF</span>
+                                            @endif
+                                        </div>
+                                        <div class="check-card-desc">
+                                            {{ __('messages.owner.outlet.all_outlets.cashier_payment_available') ?? 'Cashier payment is available when enabled.' }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- RIGHT: Manual Payment Selected --}}
+                        <div class="qr-box">
+                            <div class="qr-box-header">
+                                <span class="material-symbols-outlined">account_balance_wallet</span>
+                                <h4 class="qr-box-title">{{ __('messages.owner.outlet.all_outlets.manual_payment') ?? 'Manual Payment' }}</h4>
+                            </div>
+
+                            @if($selectedManualPayments->count() === 0)
+                                <div class="empty-note">
+                                    {{ __('messages.owner.outlet.all_outlets.no_manual_payment_selected') ?? 'Belum ada manual payment yang dipilih.' }}
+                                </div>
+                            @else
+                                @foreach (['manual_tf', 'manual_ewallet', 'manual_qris'] as $type)
+                                    @php $items = $selectedGrouped->get($type, collect()); @endphp
+
+                                    @if($items->count() > 0)
+                                        <div class="payment-group">
+                                            <div class="payment-group-title">
+                                                {{ $typeLabels[$type] ?? $type }}
+                                            </div>
+
+                                            <div class="payment-items">
+                                                @foreach($items as $pm)
+                                                    <div class="check-card is-selected" style="cursor: default;">
+                                                        <div class="check-card-body">
+                                                            <div class="check-card-title">
+                                                                {{ $pm->provider_name ?? '-' }}
+                                                                @if(isset($pm->is_active) && !$pm->is_active)
+                                                                    <span class="mini-badge mini-badge-gray">Disabled</span>
+                                                                @endif
+                                                            </div>
+
+                                                            <div class="check-card-desc">
+                                                                @php
+                                                                    $line1 = trim(($pm->provider_account_name ?? '') . ' ' . ($pm->provider_account_no ? '(' . $pm->provider_account_no . ')' : ''));
+                                                                @endphp
+                                                                {{ $line1 ?: '-' }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endforeach
+                            @endif
+                        </div>
+                    </div>
+
+
+
                     {{-- System Information Section --}}
                     <div class="section-header">
                         <div class="section-icon section-icon-red">
@@ -427,3 +547,89 @@
         </div>
     </div>
 @endsection
+<style>
+.qr-manual-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 992px){
+  .qr-manual-grid{ grid-template-columns: 1fr; }
+}
+.qr-box{
+  background: #fff;
+  border: 1px solid #eef0f4;
+  border-radius: 14px;
+  padding: 14px;
+}
+.qr-box-header{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.qr-box-title{
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+.empty-note{
+  background: #f9fafb;
+  border: 1px dashed #e5e7eb;
+  padding: 12px;
+  border-radius: 12px;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+/* checkbox card */
+.payment-group{ margin-top: 8px; }
+.payment-group-title{
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: #111827;
+  margin: 10px 0 8px;
+}
+.payment-items{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+.check-card{
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px;
+  border: 1px solid #eef0f4;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+  background: #fff;
+}
+.check-card:hover{ border-color: #e5e7eb; background: #fafafa; }
+.check-card.is-selected{ border-color: #bbf7d0; background: #f0fdf4; }
+.check-card-title{
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.check-card-desc{
+  font-size: 0.82rem;
+  color: #6b7280;
+  margin-top: 2px;
+}
+.mini-badge{
+  display:inline-flex;
+  align-items:center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+.mini-badge-gray{
+  background: #f3f4f6;
+  color: #4b5563;
+}
+</style>

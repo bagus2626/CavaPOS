@@ -56,7 +56,7 @@
         </div>
 
         {{-- PERINGATAN JIKA PEMBAYARAN BELUM LUNAS --}}
-        @if(!$order->payment_flag && $payment && $payment->payment_status !== 'PAID' && $order->order_status !== 'PAYMENT')
+        @if(!$order->payment_flag && $payment && $payment->payment_status !== 'PAID' && !in_array($order->order_status, ['PAYMENT', 'PAYMENT REQUEST'], true))
             <div class="mt-4 rounded-xl border border-red-300 bg-red-100 px-4 py-3 text-sm">
                 <div class="flex items-start gap-3">
                     <div class="flex-1 space-y-2">
@@ -261,6 +261,12 @@
                     'icon'  => asset('icons/icon-payment-90.png'),
                 ],
                 [
+                    'key'   => 'PAYMENT REQUEST',
+                    'title' => __('messages.customer.orders.detail.payment_validation'),
+                    'desc'  => __('messages.customer.orders.detail.payment_validation_desc'),
+                    'icon'  => asset('icons/icon-payment-90.png'),
+                ],
+                [
                     'key'   => 'PAID',
                     'title' => __('messages.customer.orders.detail.waiting_to_be_processed'),
                     'desc'  => __('messages.customer.orders.detail.waiting_to_be_processed_desc'),
@@ -282,9 +288,10 @@
 
             $statusIndexMap = [
                 'UNPAID'    => 0,
-                'PAID'      => 1,
-                'PROCESSED' => 2,
-                'SERVED'    => 3,
+                'PAYMENT REQUEST' => 1,
+                'PAID'      => 2,
+                'PROCESSED' => 3,
+                'SERVED'    => 4,
             ];
 
             $currentIndex = $currentIndex ?? ($statusIndexMap[$order->order_status] ?? 0);
@@ -294,11 +301,13 @@
             $currentIndex = min(max($currentIndex, 0), $maxIndex);
 
             $progressMap = [
-                0 => 12.5,   // UNPAID
-                1 => 37.5, // PAID
-                2 => 62.5, // PROCESSED
-                3 => 100,  // SERVED
+                0 => 0,    // UNPAID
+                1 => 25,   // PAYMENT REQUEST
+                2 => 50,   // PROCESSED
+                3 => 75,   // READY / NEXT STEP
+                4 => 100,  // SERVED
             ];
+
 
             $progressPercent = $progressMap[$currentIndex] ?? 0;
 
@@ -440,6 +449,12 @@
                                 <img src="{{ asset('icons/qris_svg.svg') }}" 
                                             alt="QRIS" 
                                             class="h-3 w-auto">
+                                @elseif ($payment->payment_type === 'manual_tf')
+                                    {{ __('messages.customer.orders.detail.manual_tf') }}
+                                @elseif ($payment->payment_type === 'manual_ewallet')
+                                    {{ __('messages.customer.orders.detail.manual_ewallet') }}
+                                @elseif ($payment->payment_type === 'manual_qris')
+                                    {{ __('messages.customer.orders.detail.manual_qris') }}
                                 @else
                                     {{ $payment->payment_type ?? '' }}
                                 @endif

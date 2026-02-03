@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Partner\PaymentMethod\PartnerManualPayment;;
 
 class User extends Authenticatable
 {
@@ -82,5 +83,9 @@ class User extends Authenticatable
     public function owner()
     {
         return $this->belongsTo(Owner::class, 'owner_id', 'id');
+    }
+    public function partnerManualPayments()
+    {
+        return $this->hasMany(PartnerManualPayment::class, 'partner_id', 'id');
     }
 }

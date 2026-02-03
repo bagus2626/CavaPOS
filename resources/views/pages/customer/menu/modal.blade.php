@@ -229,6 +229,86 @@
         $autofillName = '';
     }
     $lockName = filled($autofillName) && $customerUser;
+
+    // ===== Online Payment =====
+    $onlinePayments = collect();
+
+    if (($partner->is_qr_active ?? 0) == 1) {
+        $onlinePayments->push([
+            'key'   => 'QRIS',
+            'label' => 'QRIS (Xendit)',
+            'desc'  => __('messages.customer.menu.pay_with_qris_description'),
+        ]);
+    }
+
+    // ===== Manual Payment (sub groups) =====
+    $manualCashier = collect();        // pay at cashier
+    $manualTf      = collect();        // manual_tf
+    $manualEwallet  = collect();        // manual_ewallet
+    $manualQris     = collect();        // manual_qris
+
+    if (($partner->is_cashier_active ?? 0) == 1) {
+        $manualCashier->push([
+            'key'   => 'CASH',
+            'label' => __('messages.customer.menu.pay_at_cashier'),
+            'desc'  => __('messages.customer.menu.pay_at_cashier_description'),
+        ]);
+    }
+
+    foreach (($manualPaymentMethods ?? []) as $row) {
+        $pm = $row->ownerManualPayment;
+        if (!$pm) continue;
+
+        $title = $pm->provider_name ?? '-';
+        $acc   = trim(($pm->provider_account_name ?? '') . ' ' . ($pm->provider_account_no ? '(' . $pm->provider_account_no . ')' : ''));
+
+        $item = [
+            'key'       => $pm->id,
+            'label'     => $title,
+            // 'desc'      => $acc ?: null,
+            'manual_id' => $pm->id,
+            'type'      => $pm->payment_type ?? null,
+        ];
+
+        switch ($pm->payment_type) {
+            case 'manual_tf':      $manualTf->push($item); break;
+            case 'manual_ewallet': $manualEwallet->push($item); break;
+            case 'manual_qris':    $manualQris->push($item); break;
+            default:               $manualTf->push($item); // fallback kalau ada type baru
+        }
+    }
+
+    // label untuk sub group manual
+    $manualTypeLabels = [
+        'cashier'       => __('messages.customer.menu.pay_at_cashier') ?? 'Pay at Cashier',
+        'manual_tf'     => __('messages.owner.payment_methods.type_transfer') ?? 'Transfer Bank',
+        'manual_ewallet'=> __('messages.owner.payment_methods.type_ewallet') ?? 'E-Wallet',
+        'manual_qris'   => __('messages.owner.payment_methods.type_qris') ?? 'QRIS Manual',
+    ];
+
+    // susun sub groups manual (yang kosong di-skip)
+    $manualSubGroups = collect([
+        ['key' => 'cashier',        'title' => $manualTypeLabels['cashier'],        'items' => $manualCashier],
+        ['key' => 'manual_tf',      'title' => $manualTypeLabels['manual_tf'],      'items' => $manualTf],
+        ['key' => 'manual_ewallet', 'title' => $manualTypeLabels['manual_ewallet'], 'items' => $manualEwallet],
+        ['key' => 'manual_qris',    'title' => $manualTypeLabels['manual_qris'],    'items' => $manualQris],
+    ])->filter(fn($g) => ($g['items'] ?? collect())->count() > 0)->values();
+
+    // group utama
+    $groups = collect([
+        [
+            'title' => 'Online Payment',
+            'items' => $onlinePayments,
+        ],
+        [
+            'title'     => 'Manual Payment',
+            'subgroups' => $manualSubGroups, // <— penting
+        ],
+    ])->filter(function ($g) {
+        if (!empty($g['items'])) return $g['items']->count() > 0;
+        if (!empty($g['subgroups'])) return collect($g['subgroups'])->count() > 0;
+        return false;
+    })->values();
 @endphp
 
 <div id="checkoutModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4" role="dialog" aria-modal="true"
@@ -316,36 +396,65 @@
                                 </svg>
                                 {{ __('messages.customer.menu.metode_pembayaran') }}
                             </label>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                @if ($partner->is_cashier_active == 1)
-                                <label class="relative flex items-center justify-between cursor-pointer rounded-lg border border-gray-200 bg-white p-4 transition-all hover:border-[#ae1504]/50 hover:bg-gray-50 has-[:checked]:border-[#ae1504] has-[:checked]:bg-[#ae1504]/5">
-                                    <div class="flex items-center gap-3">
-                                        <div class="flex h-5 w-5 items-center justify-center rounded-full border border-gray-300 has-[:checked]:border-choco">
-                                            <div class="h-2.5 w-2.5 rounded-full bg-choco opacity-0 transition-opacity peer-checked:opacity-100"></div>
+                            <div class="space-y-3">
+                                @foreach($groups as $gi => $group)
+                                    <details class="group rounded-xl border border-gray-200 bg-white overflow-hidden"
+                                        @if($gi === 0) open @endif>
+                                        
+                                        <summary class="list-none cursor-pointer px-4 py-3 bg-[#ae1504] border-b border-[#ae1504] flex items-center justify-between">
+                                            <div>
+                                                <p class="text-sm font-bold text-white">{{ $group['title'] }}</p>
+                                                <p class="text-xs text-gray-100">
+                                                    {{ __('messages.customer.menu.click_to_open') }}
+                                                </p>
+                                            </div>
+
+                                            <div class="flex items-center gap-2">
+                                                @php
+                                                    $optCount = !empty($group['items'])
+                                                        ? ($group['items'] ?? collect())->count()
+                                                        : collect($group['subgroups'] ?? [])->sum(fn($sg) => ($sg['items'] ?? collect())->count());
+                                                @endphp
+
+                                                <span class="text-xs font-semibold text-gray-100">
+                                                    {{ $optCount }} {{ __('messages.customer.menu.options') }}
+                                                </span>
+
+                                                <svg class="w-5 h-5 text-gray-100 transition-transform duration-200 group-open:rotate-180"
+                                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                                </svg>
+                                            </div>
+                                        </summary>
+
+                                        <div class="p-3 space-y-4">
+                                            {{-- GROUP ONLINE (punya items) --}}
+                                            @if(!empty($group['items']))
+                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                    @foreach($group['items'] as $opt)
+                                                        @include('pages.customer.menu.payment-option-modal', ['opt' => $opt])
+                                                    @endforeach
+                                                </div>
+                                            @endif
+
+                                            {{-- GROUP MANUAL (punya subgroups) --}}
+                                            @if(!empty($group['subgroups']))
+                                                @foreach($group['subgroups'] as $sg)
+                                                    {{-- Judul kecil saja (tanpa card) --}}
+                                                    <div class="text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                                        {{ $sg['title'] }}
+                                                    </div>
+
+                                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                        @foreach($sg['items'] as $opt)
+                                                            @include('pages.customer.menu.payment-option-modal', ['opt' => $opt])
+                                                        @endforeach
+                                                    </div>
+                                                @endforeach
+                                            @endif
                                         </div>
-                                        <span class="text-gray-900 font-medium text-sm">{{ __('messages.customer.menu.pay_at_cashier') }}</span>
-                                    </div>
-                                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-                                    </svg>
-                                    <input class="hidden peer" name="payment" type="radio" value="CASH"/>
-                                </label>
-                                @endif
-                                
-                                @if ($partner->is_qr_active === 1)
-                                <label class="relative flex items-center justify-between cursor-pointer rounded-lg border border-gray-200 bg-white p-4 transition-all hover:border-[#ae1504]/50 hover:bg-gray-50 has-[:checked]:border-[#ae1504] has-[:checked]:bg-[#ae1504]/5">
-                                    <div class="flex items-center gap-3">
-                                        <div class="flex h-5 w-5 items-center justify-center rounded-full border border-gray-300 has-[:checked]:border-choco">
-                                            <div class="h-2.5 w-2.5 rounded-full bg-choco opacity-0 transition-opacity peer-checked:opacity-100"></div>
-                                        </div>
-                                        <span class="text-gray-900 font-medium text-sm">QRIS</span>
-                                    </div>
-                                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
-                                    </svg>
-                                    <input class="hidden peer" name="payment" type="radio" value="QRIS"/>
-                                </label>
-                                @endif
+                                    </details>
+                                @endforeach
                             </div>
                         </div>
                     </div>

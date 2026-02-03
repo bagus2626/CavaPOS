@@ -1,7 +1,4 @@
-/**
- * Multi Image Cropper Module
- * Handles multiple image upload, validation, and cropping with Cropper.js
- */
+
 
 const ImageCropper = (function() {
     // Configuration
@@ -39,14 +36,16 @@ const ImageCropper = (function() {
             return;
         }
 
-        // Store config
+        const hasAspectRatio = Object.prototype.hasOwnProperty.call(options, 'aspectRatio');
+
         const config = {
             id: id,
-            aspectRatio: options.aspectRatio || 1,
-            outputWidth: options.outputWidth || 800,
-            outputHeight: options.outputHeight || (options.outputWidth || 800) / (options.aspectRatio || 1),
+            aspectRatio: hasAspectRatio ? options.aspectRatio : 1,
+            outputWidth: options.outputWidth ?? null,
+            outputHeight: options.outputHeight ?? null,
             elements: elements
         };
+
 
         bindEvents(config);
     }
@@ -174,8 +173,8 @@ const ImageCropper = (function() {
             
             croppers[id] = new Cropper(elements.imageToCrop, {
                 aspectRatio: aspectRatio,
-                viewMode: isCircleCrop ? 1 : 2,
-                dragMode: 'move',
+                viewMode: 1,
+                dragMode: false,
                 autoCropArea: 0.9,
                 restore: true,
                 guides: !isCircleCrop,
