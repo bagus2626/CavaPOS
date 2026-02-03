@@ -29,11 +29,13 @@ console.log("cashier.js loaded");
 
     // tentukan tab tujuan berdasarkan status
     const statusToTab = {
-      UNPAID: "pembayaran",
-      EXPIRED: "pembayaran",
-      PROCESSED: "proses",
-      PAID: "proses", // optional kalau mau
+      "PAYMENT REQUEST": "pembayaran",
+      "UNPAID": "pembayaran",
+      "EXPIRED": "pembayaran",
+      "PROCESSED": "proses",
+      "PAID": "proses",
     };
+
 
     const targetTab = statusToTab[status] || "pembelian";
 
@@ -175,35 +177,80 @@ console.log("cashier.js loaded");
 
 function goToOrder(targetTab, orderId) {
   if (!window.CASHIER) return;
-  // aktifkan tab
+
   window.CASHIER.setActiveTab(targetTab);
 
-  // muat konten tab, lalu scroll ke item
   window.CASHIER.loadTab(targetTab, () => {
-    const el = document.getElementById(`order-item-${orderId}`);
-    if (el) {
+    const container = document.getElementById("tabContent") || document;
+
+    // helper: highlight element
+    const highlight = (el) => {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+
       el.classList.add(
         "ring-2",
         "ring-amber-400",
         "ring-offset-2",
-        "rounded-xl"
+        "ring-offset-white",
+        "shadow-lg"
       );
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-      setTimeout(
-        () => el.classList.remove("ring-2", "ring-amber-400", "ring-offset-2"),
-        2000
-      );
-    } else {
-      // fallback ringan
-      console.warn(
-        "Order tidak ditemukan di tab:",
-        targetTab,
-        "orderId:",
-        orderId
-      );
-    }
+
+      setTimeout(() => {
+        el.classList.remove(
+          "ring-2",
+          "ring-amber-400",
+          "ring-offset-2",
+          "ring-offset-white",
+          "shadow-lg"
+        );
+      }, 2000);
+    };
+
+    // helper: cari wrapper yang benar
+    const isVisible = (el) =>
+    !!(el && (el.offsetWidth || el.offsetHeight || el.getClientRects().length));
+
+    const findTarget = () => {
+      const row  = container.querySelector(`#order-row-${orderId}`);
+      const card = container.querySelector(`#order-card-${orderId}`);
+
+      // pilih yang benar-benar tampil
+      if (isVisible(row))  return row;
+      if (isVisible(card)) return card;
+
+      // fallback: kalau klik dari child element
+      const any = container.querySelector(`[data-order-id="${orderId}"]`);
+      if (any) {
+        const wrap =
+          any.closest(`#order-card-${orderId}`) ||
+          any.closest(`#order-row-${orderId}`);
+        if (isVisible(wrap)) return wrap;
+        if (isVisible(any)) return any;
+      }
+
+      return null;
+    };
+
+
+    // retry beberapa kali (karena mobile kadang render belakangan)
+    let tries = 0;
+    const maxTries = 20; // ~20 frame (cepat, < 1 detik)
+    const tick = () => {
+      const el = findTarget();
+      if (el) return highlight(el);
+
+      tries += 1;
+      if (tries < maxTries) {
+        requestAnimationFrame(tick);
+      } else {
+        console.warn("Order tidak ditemukan setelah render:", targetTab, orderId);
+      }
+    };
+
+    requestAnimationFrame(tick);
   });
 }
+
 
 function bindGotoClicks(containerId) {
   const ul = document.getElementById(containerId);

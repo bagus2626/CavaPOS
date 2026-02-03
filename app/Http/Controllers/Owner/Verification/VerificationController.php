@@ -66,8 +66,8 @@ class VerificationController extends Controller
 
         // KTP photo dan business logo optional jika resubmit dan ada foto lama
         $ktpPhotoRule = ($isResubmit && $latestVerification && $latestVerification->ktp_photo_path)
-            ? 'nullable|image|mimes:jpeg,png,webp|max:1024'
-            : 'required|image|mimes:jpeg,png,webp|max:1024';
+            ? 'nullable|image|mimes:jpeg,png,webp'
+            : 'required|image|mimes:jpeg,png,webp';
 
         $validatedData = $request->validate([
             'owner_name' => 'required|string|min:3|max:255',
@@ -79,7 +79,7 @@ class VerificationController extends Controller
             'business_address' => 'required|string|min:10',
             'business_phone' => ['required', 'string', 'min:10', 'max:15', 'regex:/^(08|62)\d{8,12}$/'],
             'business_email' => 'nullable|email|max:255',
-            'business_logo' => 'nullable|image|mimes:jpeg,png,webp|max:2048',
+            'business_logo' => 'nullable|image|mimes:jpeg,png,webp',
             'terms' => 'accepted',
         ]);
 

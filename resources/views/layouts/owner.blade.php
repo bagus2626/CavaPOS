@@ -251,6 +251,31 @@
                     </div>
                 </div>
 
+                @php
+                    $paymentMethodRoutes = ['owner.user-owner.payment-methods.*'];
+                @endphp
+
+
+                <div class="nav-item {{ Route::is($paymentMethodRoutes) ? 'menu-open' : '' }}">
+                    <a href="javascript:void(0)"
+                        class="nav-link {{ !$isVerified || !$isActive ? 'disabled-link' : '' }} {{ Route::is($paymentMethodRoutes) ? 'active' : '' }}"
+                        onclick="{{ !$isVerified ? 'showVerificationAlert(event)' : 'toggleSubmenu(this)' }}">
+                        <span class="material-symbols-outlined">payment</span>
+                        <span>{{ __('messages.owner.layout.payment_methods') }}</span>
+                        @if($isVerified)
+                            <span class="material-symbols-outlined expand-icon">expand_more</span>
+                        @endif
+                    </a>
+                    <div class="nav-treeview {{ !$isVerified || !$isActive ? 'disabled' : '' }}">
+                        <div class="nav-item">
+                            <a href="{{ route('owner.user-owner.payment-methods.index') }}"
+                                class="nav-link {{ Route::is('owner.user-owner.payment-methods.*') ? 'active' : '' }}">
+                                <span>{{ __('messages.owner.layout.all_payment_methods') }}</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
 
                 @php
                     $settingRoutes = ['owner.user-owner.settings.*'];

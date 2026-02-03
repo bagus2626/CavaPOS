@@ -36,6 +36,70 @@
                         <!-- Isi order akan dimuat lewat JS -->
                     </div>
 
+                    <div id="paymentInfoBox" class="hidden bg-amber-50 border border-amber-200 rounded-xl p-4">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <p class="text-xs text-amber-700 uppercase tracking-wide">Pembayaran Manual Terdeteksi</p>
+                                <p id="payInfoType" class="text-sm font-semibold text-amber-900">—</p>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-white text-[11px] font-semibold border border-amber-300 text-amber-800">
+                                    PAYMENT REQUEST
+                                </span>
+
+                                <div class="mt-2 text-sm text-gray-800 space-y-1">
+                                    <div class="flex justify-between gap-3">
+                                    <span class="text-gray-500">Provider</span>
+                                    <span id="payInfoProvider" class="font-medium text-right">—</span>
+                                    </div>
+                                    <div class="flex justify-between gap-3">
+                                    <span class="text-gray-500">Nama Akun</span>
+                                    <span id="payInfoAccName" class="font-medium text-right">—</span>
+                                    </div>
+
+                                    <div id="payInfoAccNoWrap" class="flex justify-between gap-3">
+                                    <span class="text-gray-500">No Akun</span>
+                                    <div class="flex items-center gap-2">
+                                        <span id="payInfoAccNo" class="font-mono font-semibold">—</span>
+                                    </div>
+                                    </div>
+
+                                    <div id="payInfoProofWrap" class="pt-3 border-t border-amber-200">
+                                        <div class="flex items-center justify-between gap-3">
+                                            <p class="text-xs text-gray-500">Bukti bayar</p>
+
+                                            <a id="payInfoProofLink" href="#" target="_blank"
+                                            class="px-3 py-1.5 text-xs rounded-lg border bg-white hover:bg-gray-50 whitespace-nowrap">
+                                            Lihat Bukti
+                                            </a>
+                                        </div>
+
+                                        <!-- Preview besar (mirip QRIS customer) -->
+                                        <div id="payInfoProofPreview" class="mt-3 hidden">
+                                            <div class="w-full max-w-[420px] mx-auto">
+                                            <div class="bg-white rounded-2xl border-2 border-amber-200 shadow-sm p-3 md:p-4">
+                                                <img
+                                                id="payInfoProofImg"
+                                                src=""
+                                                alt="Bukti bayar"
+                                                class="w-full h-auto object-contain mx-auto rounded-xl"
+                                                loading="lazy"
+                                                >
+                                            </div>
+                                            <p class="mt-2 text-[11px] text-gray-500 text-center">
+                                                Klik “Lihat Bukti” untuk membuka ukuran penuh.
+                                            </p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Kalau bukti PDF -->
+                                        <p id="payInfoProofPdfHint" class="mt-2 text-[11px] text-gray-500 hidden">
+                                            Bukti berbentuk PDF. Klik “Lihat Bukti” untuk membuka.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     {{-- Input Uang Diterima --}}
                     <div>
                         <label class="block text-sm font-medium mb-1">Uang Diterima</label>

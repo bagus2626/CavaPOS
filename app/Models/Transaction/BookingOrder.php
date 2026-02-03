@@ -58,6 +58,10 @@ class BookingOrder extends Model
     {
         return $this->belongsTo(OrderPayment::class, 'payment_id');
     }
+    public function latestPayment()
+    {
+        return $this->hasOne(OrderPayment::class, 'booking_order_id')->latestOfMany();
+    }
     public function order_details()
     {
         return $this->hasMany(OrderDetail::class, 'booking_order_id');

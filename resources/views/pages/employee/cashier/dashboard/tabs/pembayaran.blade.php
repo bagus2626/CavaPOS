@@ -78,7 +78,7 @@
                 <p class="text-sm text-gray-500">Tidak ada order cash yang menunggu pembayaran.</p>
             </div>
         @else
-            <div class="overflow-x-auto">
+            <div class="hidden md:block overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
@@ -105,7 +105,7 @@
                     <tbody class="divide-y divide-gray-100" id="order-list">
                         @foreach ($items as $i)
                             <tr class="group hover:bg-blue-50/30 transition-colors duration-150"
-                                id="order-item-{{ $i->id }}">
+                                id="order-row-{{ $i->id }}">
                                 {{-- ORDER ID --}}
                                 <td class="px-4 py-4 align-middle">
                                     <span
@@ -162,6 +162,12 @@
                                             class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200">
                                             <span class="size-1.5 rounded-full bg-rose-500"></span>
                                             Unpaid
+                                        </span>
+                                    @elseif ($i->order_status === 'PAYMENT REQUEST')
+                                        <span
+                                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                                            <span class="size-1.5 rounded-full bg-amber-500"></span>
+                                            Payment Request
                                         </span>
                                     @else
                                         <span
@@ -228,6 +234,112 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+            {{-- MOBILE: CARD LIST --}}
+            <div class="md:hidden px-3 py-3 space-y-2">
+                @foreach ($items as $i)
+                    <div id="order-card-{{ $i->id }}"
+                        class="rounded-xl border border-gray-200 bg-white shadow-sm px-3 py-2.5">
+
+                        {{-- Row 1: kode + status --}}
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0">
+                                <div class="inline-flex items-center text-[12px] font-mono font-semibold text-gray-900 bg-gray-100 px-2 py-0.5 rounded">
+                                    {{ $i->booking_order_code }}
+                                </div>
+
+                                <div class="mt-1 text-sm font-semibold text-gray-900 truncate">
+                                    {{ $i->customer_name }}
+                                </div>
+
+                                <div class="mt-0.5 text-[11px] text-gray-500">
+                                    Meja: <span class="font-semibold text-gray-700">{{ $i->table?->table_no ?? '-' }}</span>
+                                    <span class="mx-1.5">•</span>
+                                    {{ $i->created_at?->format('H:i') }}
+                                </div>
+                            </div>
+
+                            {{-- STATUS badge (lebih kecil) --}}
+                            <div class="shrink-0">
+                                @if ($i->payment_method === 'QRIS' && $i->order_status === 'EXPIRED')
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                                        <span class="size-1.5 rounded-full bg-rose-500"></span>
+                                        Unpaid
+                                    </span>
+                                @elseif ($i->order_status === 'PAYMENT REQUEST')
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                        <span class="size-1.5 rounded-full bg-amber-500"></span>
+                                        Request
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                        <span class="size-1.5 rounded-full bg-amber-500"></span>
+                                        Pending
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- Row 2: total + action --}}
+                        <div class="mt-2 pt-2 border-t border-gray-100 flex items-center justify-between gap-2">
+                            <div class="min-w-0">
+                                <div class="text-[11px] text-gray-500 leading-none">Total</div>
+                                <div class="text-sm font-bold text-gray-900 tabular-nums leading-tight">
+                                    Rp {{ number_format($i->total_order_value, 0, ',', '.') }}
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                {{-- Detail --}}
+                                <a href="{{ route('employee.cashier.order-detail', $i->id) }}"
+                                data-detail-btn
+                                data-order-id="{{ $i->id }}"
+                                class="p-2 rounded-lg text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition"
+                                title="Detail">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                </a>
+
+                                {{-- Delete --}}
+                                <form action="{{ route('employee.cashier.order.soft-delete', $i->id) }}"
+                                    method="POST"
+                                    class="inline-block"
+                                    onsubmit="return handleSoftDeleteSubmit(event, '{{ $i->booking_order_code }}')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit"
+                                            class="p-2 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50 transition"
+                                            title="Hapus">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
+                                            viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M8.5 3a1.5 1.5 0 011.5-1.5h0a1.5 1.5 0 011.5 1.5H15a.75.75 0 010 1.5h-.278l-.69 9.042A2.25 2.25 0 0111.79 16.75H8.21a2.25 2.25 0 01-2.242-2.208L5.278 4.5H5a.75.75 0 010-1.5h3.5z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                </form>
+
+                                {{-- Process (lebih pendek) --}}
+                                <button type="button"
+                                        data-cash-btn
+                                        data-order-id="{{ $i->id }}"
+                                        data-order-name="{{ $i->customer_name }}"
+                                        data-order-code="{{ $i->booking_order_code }}"
+                                        data-order-total="{{ $i->total_order_value }}"
+                                        data-cash-get-url="{{ route('employee.cashier.order-detail', $i->id) }}"
+                                        data-cash-url="{{ route('employee.cashier.cash-payment', '__ID__') }}"
+                                        class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-semibold transition">
+                                    Process
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
             </div>
         @endif
     </div>

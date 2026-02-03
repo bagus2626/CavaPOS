@@ -57,9 +57,34 @@ class CashierTransactionController extends Controller
             'table',
             'customer',
             'payment',
+            'latestPayment',
             'order_details.partnerProduct',
             'order_details.order_detail_options.option.parent'
         ])->findOrFail($id);
+         $paymentRequest = null;
+
+        if ($order->order_status === 'PAYMENT REQUEST' && $order->latestPayment) {
+            $p = $order->latestPayment;
+
+            $paymentTypeLabel = match ($p->payment_type) {
+                'manual_tf'     => 'Transfer Manual',
+                'manual_ewallet'=> 'E-Wallet Manual',
+                'manual_qris'   => 'QRIS Manual/Statis',
+                default         => strtoupper((string) $p->payment_type),
+            };
+
+            $paymentRequest = [
+                'payment_type'                 => $p->payment_type,
+                'payment_type_label'           => $paymentTypeLabel,
+                'manual_provider_name'         => $p->manual_provider_name,
+                'manual_provider_account_name' => $p->manual_provider_account_name,
+                'manual_provider_account_no'   => $p->manual_provider_account_no,
+                'manual_payment_image'         => $p->manual_payment_image, // bisa full URL atau relative
+            ];
+        }
+
+        // Inject ke response
+        $order->setAttribute('payment_request', $paymentRequest);
         return response()->json($order);
     }
     public function cashPayment(Request $request, $id)
@@ -68,10 +93,10 @@ class CashierTransactionController extends Controller
         $cashier = Auth::user();
         $booking_order = BookingOrder::with('order_details.order_detail_options.option', 'order_details.partnerProduct')
             ->findOrFail($id);
-        $payment = OrderPayment::where('booking_order_id', $id)
+        $paid_payment = OrderPayment::where('booking_order_id', $id)
             ->where('payment_status', 'PAID')
             ->first();
-        if ($payment) {
+        if ($paid_payment) {
 
             $booking_order->order_status = 'PAID';
             $booking_order->payment_flag = true;
@@ -91,25 +116,40 @@ class CashierTransactionController extends Controller
 
         DB::beginTransaction();
         try {
+            if ($booking_order->order_status === 'PAYMENT REQUEST') {
+                $payment_request = OrderPayment::where('booking_order_id', $id)
+                    ->where('payment_status', 'PAYMENT REQUEST')
+                    ->first();
+                $payment_request->employee_id = $cashier->id;
+                $payment_request->paid_amount = $request->paid_amount;
+                $payment_request->change_amount = $request->change_amount;
+                $payment_request->payment_status = 'PAID';
+                $payment_request->note = $payment_request->note . '||' . ($request->note ?? null);
+                $payment_request->save();
 
 
-            $order_payment = OrderPayment::create([
-                'booking_order_id' => $id,
-                'employee_id' => $cashier->id,
-                'customer_id' => $booking_order->customer_id ?? null,
-                'customer_name' => $booking_order->customer_name ?? 'guest',
-                'payment_type' => $booking_order->payment_method,
-                'paid_amount' => $request->paid_amount,
-                'change_amount' => $request->change_amount,
-                'payment_status' => 'PAID',
-                'note' => $request->note ?? null
-            ]);
+                $booking_order->order_status = 'PAID';
+                $booking_order->payment_flag = true;
+                $booking_order->save();
+            } else {
+                $order_payment = OrderPayment::create([
+                    'booking_order_id' => $id,
+                    'employee_id' => $cashier->id,
+                    'customer_id' => $booking_order->customer_id ?? null,
+                    'customer_name' => $booking_order->customer_name ?? 'guest',
+                    'payment_type' => $booking_order->payment_method,
+                    'paid_amount' => $request->paid_amount,
+                    'change_amount' => $request->change_amount,
+                    'payment_status' => 'PAID',
+                    'note' => $request->note ?? null
+                ]);
 
-            $booking_order->order_status = 'PAID';
-            $booking_order->payment_method = 'CASH';
-            $booking_order->payment_id = $order_payment->id;
-            $booking_order->payment_flag = true;
-            $booking_order->save();
+                $booking_order->order_status = 'PAID';
+                $booking_order->payment_method = 'CASH';
+                $booking_order->payment_id = $order_payment->id;
+                $booking_order->payment_flag = true;
+                $booking_order->save();
+            }
 
             DB::commit();
 
@@ -923,7 +963,7 @@ class CashierTransactionController extends Controller
         $order = BookingOrder::findOrFail($id);
 
         // Filter status agar hanya UNPAID atau EXPIRED yang bisa dihapus
-        if (!in_array($order->order_status, ['UNPAID', 'EXPIRED'])) {
+        if (!in_array($order->order_status, ['UNPAID', 'EXPIRED', 'PAYMENT REQUEST'])) {
             return back()->with('error', 'Order ini tidak dapat dihapus.');
         }
 

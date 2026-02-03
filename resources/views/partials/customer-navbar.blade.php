@@ -5,14 +5,24 @@
         {{-- Left Section: Back Button & User Name --}}
         <div class="flex items-center gap-3">
             {{-- Back Button --}}
-            <a href="javascript:history.back()"
-                class="group flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#ae1504] hover:bg-[#8a1103] text-white transition-all duration-200">
-                <svg class="w-5 h-5 transition-transform group-hover:-translate-x-0.5" xmlns="http://www.w3.org/2000/svg"
-                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            @php
+                $fallbackUrl = (isset($partner) && isset($table))
+                    ? route('customer.menu.index', [$partner->slug, $table->table_code])
+                    : route('customer.menu.index', [$partner_slug, $table_code]); // atau route('customer.login.choice') / route('home')
+            @endphp
+            <button
+                type="button"
+                onclick="safeBack('{{ $fallbackUrl }}')"
+                class="group flex h-10 w-10 shrink-0 items-center justify-center rounded-full
+                    bg-[#ae1504] hover:bg-[#8a1103] text-white transition-all duration-200"
+            >
+                <svg class="w-5 h-5 transition-transform group-hover:-translate-x-0.5"
+                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M5 12h14M5 12l4-4m-4 4 4 4" />
                 </svg>
-            </a>
+            </button>
+
 
             {{-- Divider --}}
             <div class="h-6 w-px bg-gray-300 hidden sm:block"></div>
@@ -305,6 +315,54 @@
         });
     });
 </script>
+<script>
+    async function safeBack(fallbackUrl) {
+        const ref = document.referrer;
+
+        // tidak ada referrer
+        if (!ref) return (window.location.href = fallbackUrl);
+
+        // jangan balik ke halaman yang sama
+        if (ref === window.location.href) return (window.location.href = fallbackUrl);
+
+        // wajib 1 origin (biar bisa di-fetch)
+        const sameOrigin = (() => {
+            try { return new URL(ref).origin === window.location.origin; }
+            catch { return false; }
+        })();
+        if (!sameOrigin) return (window.location.href = fallbackUrl);
+
+        // cek apakah referrer masih valid (tidak 404)
+        try {
+            let res = await fetch(ref, {
+                method: 'HEAD',
+                credentials: 'same-origin',
+                redirect: 'follow'
+            });
+
+            // beberapa server tidak support HEAD (405/403), coba GET ringan
+            if (res.status === 405 || res.status === 403) {
+                res = await fetch(ref, {
+                    method: 'GET',
+                    credentials: 'same-origin',
+                    redirect: 'follow',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+            }
+
+            // kalau 404 / error status lainnya -> fallback
+            if (!res.ok) return (window.location.href = fallbackUrl);
+
+            // aman -> balik
+            window.location.href = ref;
+        } catch (e) {
+            // network error / fetch blocked -> fallback
+            window.location.href = fallbackUrl;
+        }
+    }
+</script>
+
+
 
 <style>
     /* Smooth transitions */

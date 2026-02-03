@@ -22,14 +22,11 @@
                 <p class="text-xs text-gray-500 mt-0.5">{{ now()->isoFormat('dddd, DD MMMM YYYY') }}</p>
             </div>
         </div>
-        <div
-            </div>
-        </div>
     </header>
 
 
     {{-- Content --}}
-    <div class="flex-1 overflow-y-auto px-6 py-6">
+    <div id="activityScroll" class="flex-1 overflow-y-auto px-6 py-6">
         {{-- Metrics Cards --}}
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
             {{-- Total orders --}}
@@ -169,23 +166,29 @@
 
         {{-- Tabs --}}
         <div class="mb-6">
-            <div class="flex justify-start gap-2">
-                @php
-                    $tabs = [
-                        'pembayaran' => 'Pembayaran',
-                        'proses'     => 'Proses',
-                        'selesai'    => 'Selesai',
-                    ];
-                    $activeTab = request('tab', 'pembayaran');
-                @endphp
+            @php
+                $tabs = [
+                    'pembayaran' => 'Pembayaran',
+                    'proses'     => 'Proses',
+                    'selesai'    => 'Selesai',
+                ];
+                $activeTab = request('tab', 'pembayaran');
+            @endphp
 
-
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 md:flex md:flex-wrap md:justify-start">
                 @foreach ($tabs as $key => $label)
                     <a href="{{ route('employee.cashier.activity', array_merge(request()->except('tab'), ['tab' => $key])) }}"
-                       class="px-4 py-2 rounded-xl font-medium text-sm transition-colors flex items-center gap-2
-                       {{ $activeTab == $key ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm' }}"
-                       @if($activeTab == $key) style="background-color: #ae1504;" @endif>
-                        <span>{{ $label }}</span>
+                    data-tab-link
+                        class="
+                        px-4 py-2 rounded-xl font-medium text-sm transition-colors
+                        flex items-center gap-2 justify-center
+                        w-full sm:w-full md:w-auto
+                        {{ $activeTab == $key ? 'text-white' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm' }}
+                    "
+                    @if($activeTab == $key) style="background-color: #ae1504;" @endif>
+                    
+                        <span class="truncate">{{ $label }}</span>
+
                         @if(isset($tabCounts[$key]))
                             <span class="px-2 py-0.5 rounded-full text-xs font-bold
                                 {{ $activeTab == $key ? '' : 'bg-gray-200' }}"
@@ -197,7 +200,6 @@
                 @endforeach
             </div>
         </div>
-
 
         {{-- Orders Table berdasarkan tab aktif --}}
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -243,7 +245,8 @@
                         @endif
                     </div>
                 @else
-                    <div class="overflow-x-auto">
+                    {{-- DESKTOP: TABLE --}}
+                    <div class="hidden md:block overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="bg-gray-50 border-b border-gray-200">
@@ -257,16 +260,18 @@
                                     <th class="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
                                 </tr>
                             </thead>
+
                             <tbody class="divide-y divide-gray-100" id="order-list">
                                 @foreach ($filteredOrders as $order)
-                                    <tr class="group hover:bg-red-50/30 transition-colors duration-150" id="order-item-{{ $order->id }}">
+                                    <tr class="group hover:bg-red-50/30 transition-colors duration-150"
+                                        id="order-row-{{ $order->id }}">
+
                                         {{-- ORDER ID --}}
                                         <td class="px-4 py-4 align-middle">
                                             <span class="inline-flex items-center text-sm font-medium text-gray-900 font-mono bg-gray-100 px-2 py-1 rounded">
                                                 {{ $order->booking_order_code }}
                                             </span>
                                         </td>
-
 
                                         {{-- TABLE --}}
                                         <td class="px-4 py-4 align-middle">
@@ -275,11 +280,11 @@
                                             </span>
                                         </td>
 
-
                                         {{-- CUSTOMER INFO --}}
                                         <td class="px-4 py-4 align-middle">
                                             <div class="flex items-center gap-3">
-                                                <div class="size-9 rounded-full flex items-center justify-center text-xs font-bold" style="background-color: #fef2f2; color: #ae1504;">
+                                                <div class="size-9 rounded-full flex items-center justify-center text-xs font-bold"
+                                                    style="background-color: #fef2f2; color: #ae1504;">
                                                     {{ strtoupper(substr($order->customer_name ?? 'G', 0, 2)) }}
                                                 </div>
                                                 <div class="flex flex-col">
@@ -288,7 +293,6 @@
                                                 </div>
                                             </div>
                                         </td>
-
 
                                         {{-- PAYMENT METHOD --}}
                                         <td class="px-4 py-4 align-middle text-center">
@@ -302,7 +306,6 @@
                                             @endif
                                         </td>
 
-
                                         {{-- TIME --}}
                                         <td class="px-4 py-4 align-middle text-center">
                                             <span class="text-sm text-gray-600 font-medium tabular-nums">
@@ -310,14 +313,12 @@
                                             </span>
                                         </td>
 
-
                                         {{-- TOTAL AMOUNT --}}
                                         <td class="px-4 py-4 align-middle text-center">
                                             <span class="text-sm font-bold text-gray-900 tabular-nums">
                                                 Rp {{ number_format($order->total_order_value, 0, ',', '.') }}
                                             </span>
                                         </td>
-
 
                                         {{-- STATUS --}}
                                         <td class="px-4 py-4 align-middle text-center">
@@ -332,7 +333,8 @@
                                                     PAID
                                                 </span>
                                             @elseif($order->order_status === 'PROCESSED')
-                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border" style="background-color: #fef2f2; color: #ae1504; border-color: #fecaca;">
+                                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border"
+                                                    style="background-color: #fef2f2; color: #ae1504; border-color: #fecaca;">
                                                     <span class="size-1.5 rounded-full" style="background-color: #ae1504;"></span>
                                                     PROCESSED
                                                 </span>
@@ -349,11 +351,9 @@
                                             @endif
                                         </td>
 
-
                                         {{-- ACTIONS --}}
                                         <td class="px-4 py-4 align-middle">
                                             <div class="flex items-center justify-end gap-2">
-                                                {{-- Detail Button --}}
                                                 <button type="button"
                                                     data-detail-btn
                                                     data-order-id="{{ $order->id }}"
@@ -371,7 +371,102 @@
                             </tbody>
                         </table>
                     </div>
+
+                    {{-- MOBILE: CARD LIST --}}
+                    <div class="md:hidden p-3 space-y-2">
+                        @foreach ($filteredOrders as $order)
+                            <div id="order-card-{{ $order->id }}"
+                                class="rounded-xl border border-gray-200 bg-white shadow-sm px-3 py-2.5">
+
+                                {{-- ROW 1: code + status --}}
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="min-w-0">
+                                        <div class="inline-flex items-center text-[12px] font-mono font-semibold text-gray-900 bg-gray-100 px-2 py-0.5 rounded">
+                                            {{ $order->booking_order_code }}
+                                        </div>
+
+                                        <div class="mt-1 text-sm font-semibold text-gray-900 truncate">
+                                            {{ $order->customer_name ?? 'Guest' }}
+                                        </div>
+
+                                        <div class="mt-0.5 text-[11px] text-gray-500">
+                                            Meja:
+                                            <span class="font-semibold text-gray-700">{{ $order->table?->table_no ?? '-' }}</span>
+                                            <span class="mx-1.5">•</span>
+                                            {{ $order->created_at?->format('H:i') }}
+                                        </div>
+                                    </div>
+
+                                    {{-- STATUS badge --}}
+                                    <div class="shrink-0">
+                                        @if(in_array($order->order_status, ['UNPAID', 'EXPIRED']))
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                                                <span class="size-1.5 rounded-full bg-rose-500"></span>
+                                                {{ $order->order_status }}
+                                            </span>
+                                        @elseif($order->order_status === 'PAID')
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                <span class="size-1.5 rounded-full bg-emerald-500"></span>
+                                                PAID
+                                            </span>
+                                        @elseif($order->order_status === 'PROCESSED')
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border"
+                                                style="background-color: #fef2f2; color: #ae1504; border-color: #fecaca;">
+                                                <span class="size-1.5 rounded-full" style="background-color:#ae1504;"></span>
+                                                PROCESSED
+                                            </span>
+                                        @elseif($order->order_status === 'SERVED')
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-green-50 text-green-700 border border-green-200">
+                                                <span class="size-1.5 rounded-full bg-green-500"></span>
+                                                SERVED
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                                <span class="size-1.5 rounded-full bg-amber-500"></span>
+                                                {{ $order->order_status }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                {{-- ROW 2: payment + total + action --}}
+                                <div class="mt-2 pt-2 border-t border-gray-100 flex items-center justify-between gap-2">
+                                    <div class="min-w-0">
+                                        <div class="flex items-center gap-2 text-[11px] text-gray-500">
+                                            <span class="font-medium text-gray-700">
+                                                @if($order->payment_method === 'QRIS')
+                                                    QRIS
+                                                @else
+                                                    CASH
+                                                @endif
+                                            </span>
+                                            <span class="text-gray-300">•</span>
+                                            <span>Total</span>
+                                        </div>
+
+                                        <div class="text-sm font-bold text-gray-900 tabular-nums leading-tight">
+                                            Rp {{ number_format($order->total_order_value, 0, ',', '.') }}
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center gap-1.5 shrink-0">
+                                        <button type="button"
+                                            data-detail-btn
+                                            data-order-id="{{ $order->id }}"
+                                            class="p-2 rounded-lg border border-gray-200 text-gray-600 bg-white hover:bg-gray-50 transition"
+                                            title="Detail">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
                 @endif
+
             </div>
         </div>
          {{-- Pagination --}}

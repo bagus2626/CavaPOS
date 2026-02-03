@@ -157,16 +157,128 @@
 
 
         /* Responsive - Hide sidebar on mobile */
-        @media (max-width: 768px) {
-            .fixed.left-0.w-28 {
-                display: none;
-            }
-
-
-            .ml-28 {
-                margin-left: 0;
-            }
+         /* ===== MOBILE PORTRAIT: Bottom Nav ===== */
+        @media (max-width: 768px) and (orientation: portrait) {
+        /* sidebar jadi bottom bar */
+        .fixed.left-0.top-0.h-screen.w-28 {
+            display: flex !important;
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            top: auto;
+            height: 72px;
+            width: 100%;
+            border-right: 0;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 0;
+            z-index: 50;
         }
+
+        .fixed.left-0.top-0.h-screen.w-28 > .flex.flex-col.gap-3.px-2.py-2 {
+            flex-direction: row;
+            gap: 8px;
+            padding: 8px;
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .tab-btn {
+            flex: 1;
+            min-height: 56px;
+            padding: 8px 6px !important;
+            border-radius: 16px;
+        }
+
+        .tab-btn .material-icons-round {
+            font-size: 22px !important;
+            margin-bottom: 2px !important;
+        }
+
+        .tab-btn span:not(.material-icons-round):not([id^="tab-badge"]) {
+            font-size: 10px;
+            line-height: 1.1;
+        }
+
+        .tab-btn .indicator-bar {
+            display: none;
+        }
+
+        .tab-btn span[id^="tab-badge"] {
+            top: 4px !important;
+            right: 8px !important;
+        }
+
+        .ml-28 {
+            margin-left: 0 !important;
+        }
+
+        #mainScrollContainer {
+            padding-bottom: 90px; /* supaya konten gak ketutup bottom bar */
+        }
+        }
+
+        /* ===== MOBILE LANDSCAPE: Sidebar kiri, tapi scrollable & responsif tinggi ===== */
+        @media (max-width: 1024px) and (orientation: landscape) {
+        /* balik lagi jadi sidebar kiri */
+        .fixed.left-0.top-0.h-screen.w-28 {
+            display: flex !important;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: auto;
+            width: 88px;          /* sedikit lebih lebar dari w-28 (7rem=112px), biar hemat space */
+            height: 100dvh;       /* lebih akurat di mobile */
+            border-top: 0;
+            border-right: 1px solid #e5e7eb;
+            padding-top: 64px;    /* ganti dari pt-20 agar tidak kepotong */
+            z-index: 50;
+        }
+
+        /* container tombol jadi area yang bisa scroll */
+        .fixed.left-0.top-0.h-screen.w-28 > .flex.flex-col.gap-3.px-2.py-2 {
+            flex-direction: column;
+            gap: 10px;
+            padding: 10px 8px;
+            width: 100%;
+            overflow-y: auto;                 /* kunci: bisa scroll */
+            max-height: calc(100dvh - 64px);  /* 64px = padding-top sidebar */
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* kecilkan tombol agar muat */
+        .tab-btn {
+            min-height: 64px;     /* lebih kecil dari 88px */
+            padding: 10px 6px !important;
+            border-radius: 16px;
+        }
+
+        .tab-btn .material-icons-round {
+            font-size: 22px !important;
+            margin-bottom: 0 !important;
+        }
+
+        .tab-btn span:not(.material-icons-round):not([id^="tab-badge"]) {
+            font-size: 9px;
+            line-height: 1.1;
+        }
+
+        /* indikator bar masih boleh ada */
+        .tab-btn .indicator-bar {
+            display: block;
+        }
+
+        /* konten utama balik margin-left agar tidak ketutup sidebar */
+        .ml-28 {
+            margin-left: 88px !important;
+        }
+
+        #mainScrollContainer {
+            padding-bottom: 24px; /* ga perlu ruang bottom bar */
+        }
+        }
+
     </style>
 @endpush
 
@@ -337,31 +449,29 @@
 
         function highlightOrderCard(orderId) {
             if (!orderId) return;
-            const tabContentEl = document.getElementById('tabContent');
+
+            const tabContentEl = document.getElementById('tabContent') || document;
             if (!tabContentEl) return;
 
-
-            const selector = `#order-item-${orderId}, [data-order-id="${orderId}"]`;
-            const el = tabContentEl.querySelector(selector);
-
+            // Prioritas: row/table dulu, lalu card mobile, baru fallback elemen ber-data-order-id
+            const el =
+                tabContentEl.querySelector(`#order-row-${orderId}`) ||
+                tabContentEl.querySelector(`#order-card-${orderId}`) ||
+                tabContentEl.querySelector(`[data-order-id="${orderId}"]`);
 
             if (!el) {
                 console.warn('Order card tidak ditemukan untuk ID', orderId);
                 return;
             }
 
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-            el.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
-            });
             el.classList.add('ring-4', 'ring-amber-400', 'ring-offset-2', 'ring-offset-white', 'shadow-lg');
-
-
             setTimeout(() => {
                 el.classList.remove('ring-4', 'ring-amber-400', 'ring-offset-2', 'ring-offset-white', 'shadow-lg');
             }, 2000);
         }
+
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {

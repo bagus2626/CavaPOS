@@ -137,6 +137,20 @@
     const changeAmount = qs("#changeAmount");
     const errorBox = qs("#cashError");
 
+    const paymentInfoBox = qs("#paymentInfoBox");
+    const payInfoType = qs("#payInfoType");
+    const payInfoProvider = qs("#payInfoProvider");
+    const payInfoAccName = qs("#payInfoAccName");
+    const payInfoAccNoWrap = qs("#payInfoAccNoWrap");
+    const payInfoAccNo = qs("#payInfoAccNo");
+    const payInfoProofWrap = qs("#payInfoProofWrap");
+    const payInfoProofLink = qs("#payInfoProofLink");
+    const payInfoProofImg = qs("#payInfoProofImg");
+    const payInfoProofPreview = qs("#payInfoProofPreview");
+    const payInfoProofPdfHint = qs("#payInfoProofPdfHint");
+
+
+
     // Ambil CSRF dari meta
     const CSRF =
       document
@@ -211,6 +225,74 @@
 
             html += `</ul>`;
             detailItem.innerHTML = html;
+            // === Render payment info khusus PAYMENT REQUEST ===
+            const pr = order.payment_request;
+
+            if (
+              paymentInfoBox &&
+              order.order_status === "PAYMENT REQUEST" &&
+              pr
+            ) {
+              paymentInfoBox.classList.remove("hidden");
+
+              if (payInfoType) payInfoType.textContent = pr.payment_type_label || "-";
+              if (payInfoProvider) payInfoProvider.textContent = pr.manual_provider_name || "-";
+              if (payInfoAccName) payInfoAccName.textContent = pr.manual_provider_account_name || "-";
+
+              // No akun: tampilkan hanya kalau ada
+              const accNo = pr.manual_provider_account_no || "";
+              if (payInfoAccNoWrap && payInfoAccNo) {
+                if (accNo) {
+                  payInfoAccNoWrap.classList.remove("hidden");
+                  payInfoAccNo.textContent = accNo;
+                } else {
+                  payInfoAccNoWrap.classList.add("hidden");
+                }
+              }
+
+              // Bukti bayar: url bisa full atau relative
+              const proof = pr.manual_payment_image || "";
+              if (payInfoProofWrap && payInfoProofLink) {
+                if (proof) {
+                  payInfoProofWrap.classList.remove("hidden");
+
+                  const proofUrl = proof.startsWith("http")
+                    ? proof
+                    : `/storage/${proof.replace(/^\/?storage\/?/, "")}`;
+
+                  payInfoProofLink.href = proofUrl;
+
+                  const isPdf = proofUrl.toLowerCase().endsWith(".pdf");
+
+                  // Reset dulu (biar tidak kebawa dari order sebelumnya)
+                  if (payInfoProofPreview) payInfoProofPreview.classList.add("hidden");
+                  if (payInfoProofPdfHint) payInfoProofPdfHint.classList.add("hidden");
+                  if (payInfoProofImg) {
+                    payInfoProofImg.classList.remove("hidden");
+                    payInfoProofImg.removeAttribute("src");
+                  }
+
+                  if (isPdf) {
+                    // PDF: tidak preview, hanya hint
+                    if (payInfoProofPreview) payInfoProofPreview.classList.add("hidden");
+                    if (payInfoProofPdfHint) payInfoProofPdfHint.classList.remove("hidden");
+                    if (payInfoProofImg) payInfoProofImg.classList.add("hidden");
+                  } else {
+                    // Image: tampilkan preview besar
+                    if (payInfoProofImg) payInfoProofImg.src = proofUrl;
+                    if (payInfoProofPreview) payInfoProofPreview.classList.remove("hidden");
+                  }
+                } else {
+                  payInfoProofWrap.classList.add("hidden");
+                }
+              }
+              setPaidToTotal();
+
+            } else {
+              // kalau tidak memenuhi syarat, sembunyikan panel
+              if (paymentInfoBox) paymentInfoBox.classList.add("hidden");
+            }
+
           })
           .catch(() => {
             detailItem.innerHTML = '<p class="text-red-500">Gagal memuat data.</p>';
@@ -258,6 +340,18 @@
       changeDisplay.value = rupiah(change);
       changeAmount.value = change;
     }
+    function setPaidToTotal() {
+      if (!orderTotalRawEl || !paidInput) return;
+
+      const total = Number(orderTotalRawEl.value || 0);
+
+      // isi otomatis
+      paidInput.value = String(total);
+
+      // hitung kembalian (trigger recalcChange)
+      paidInput.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+
     if (paidInput) paidInput.addEventListener("input", recalcChange);
 
     // Print langsung dari modal
