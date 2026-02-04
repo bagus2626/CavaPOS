@@ -84,7 +84,7 @@ class OwnerEmployeeController extends Controller
             'partner'               => ['required'],
             'role'                  => ['required', 'in:CASHIER,KITCHEN,WAITER'],
             'password'              => ['required', 'string', 'min:8', 'confirmed'],
-            'image'                 => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'], // max 2MB
+            'image'                 => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp'], // max 2MB
             'is_active'             => ['nullable', 'boolean'],
         ]);
 

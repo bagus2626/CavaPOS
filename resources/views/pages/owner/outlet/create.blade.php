@@ -1005,12 +1005,15 @@
 
             // ==== WiFi toggle ====
             const wifiToggle = document.getElementById('is_wifi_shown');
-            const wifiFields = document.getElementById('wifiFormFields');
-            if (wifiToggle && wifiFields) {
+            const wifiNameField = document.getElementById('wifiNameField');
+            const wifiPasswordField = document.getElementById('wifiPasswordField');
+            if (wifiToggle && wifiNameField && wifiPasswordField) {
                 wifiToggle.addEventListener('change', function() {
-                    wifiFields.style.display = this.checked ? 'grid' : 'none';
+                    wifiNameField.style.display = this.checked ? 'grid' : 'none';
+                    wifiPasswordField.style.display = this.checked ? 'grid' : 'none';
                 });
-                wifiFields.style.display = wifiToggle.checked ? 'grid' : 'none';
+                wifiNameField.style.display = wifiToggle.checked ? 'grid' : 'none';
+                wifiPasswordField.style.display = wifiToggle.checked ? 'grid' : 'none';
             }
 
             // ==== Password toggles ====

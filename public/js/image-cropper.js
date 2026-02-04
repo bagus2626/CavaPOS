@@ -3,7 +3,7 @@
 const ImageCropper = (function() {
     // Configuration
     const CONFIG = {
-        MAX_SIZE: 2 * 1024 * 1024, // 2 MB
+        MAX_SIZE: 10 * 1024 * 1024, // 2 MB
         ALLOWED_TYPES: ['image/jpeg', 'image/png', 'image/webp'],
         JPEG_QUALITY: 0.92,
         PNG_QUALITY: 1,
@@ -129,7 +129,7 @@ const ImageCropper = (function() {
 
         // Validate file size
         if (file.size > CONFIG.MAX_SIZE) {
-            alert('Ukuran file lebih dari 2 MB. Pilih file yang lebih kecil.');
+            alert('Ukuran file lebih dari 10 MB. Pilih file yang lebih kecil.');
             elements.input.value = '';
             return;
         }
