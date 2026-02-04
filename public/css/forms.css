@@ -10,6 +10,36 @@
 }
 
 /* ============================================
+   Qris PICTURE UPLOAD
+   ============================================ */
+.qris-picture-wrapper {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  /* Tambahkan padding untuk memberi ruang pada button remove */
+  padding: 0.75rem;
+}
+
+/* Profile Picture Container */
+.qris-picture-container {
+  position: relative;
+  width: 10rem;
+  height: 10rem;
+  border-radius: 2.5rem;
+  background: var(--background);
+  border: 4px solid var(--card-bg);
+  box-shadow: 0 0 0 4px var(--border-color), var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* PENTING: Hapus overflow hidden agar button tidak terpotong */
+  overflow: visible;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+/* ============================================
    PROFILE PICTURE UPLOAD
    ============================================ */
 /* Profile Picture Wrapper */

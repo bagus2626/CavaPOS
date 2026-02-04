@@ -98,9 +98,9 @@
 
         table.items thead th {
             text-align: left;
-            color: #555;
+            color: #000000;
             /* font-weight: 700; */
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #000000;
         }
 
         table.items .right {
@@ -117,7 +117,8 @@
 
         /* Jarak antar item (baris utama) */
         .items tr.item-row td {
-            padding-top: 8px;
+            padding-top: 10px;
+            line-height: 1.35;
             /* padding-bottom: 6px; */
         }
 
@@ -237,6 +238,7 @@
     /* font-weight: 600; */
     margin-top: 8px;
     line-height: 1.5;
+    padding-bottom: 100px;
 }
 
 .come-again {
@@ -253,6 +255,9 @@
             font-size: 14px;
             margin-top: 6px;
             line-height: 1.3;
+        }
+        table.items thead {
+            display: table-row-group;
         }
     </style>
 </head>
@@ -343,12 +348,13 @@
                         @foreach ($item->order_detail_options as $option)
                             <tr class="opt-row">
                                 <td class="opt">
-                                    <span class="bullet">•</span>{{ $option->option->name ?? '' }}
-                                    <span class="price">Rp {{ number_format($option->price, 0, ',', '.') }}</span>
+                                    <span class="bullet">•</span>{{ $option->option->name ?? '' }} Rp {{ number_format($option->price, 0, ',', '.') }}
+                                    {{-- <span class="price">Rp {{ number_format($option->price, 0, ',', '.') }}</span> --}}
                                 </td>
                                 <td></td>
                             </tr>
                         @endforeach
+                        {{-- <hr class="sep"> --}}
                     @endforeach
                 </tbody>
             </table>
@@ -421,3 +427,4 @@
     <br>
     <span class="come-again">Sampai jumpa kembali</span>
 </div>
+<hr class="sep">
