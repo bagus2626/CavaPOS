@@ -18,7 +18,6 @@ class OwnerPaymentMethodController extends Controller
      */
     public function index(Request $request)
     {
-        // dd($request->all());
         $ownerId = Auth::guard('owner')->id();
         $search = $request->query('search');
 
@@ -28,15 +27,17 @@ class OwnerPaymentMethodController extends Controller
                     $qq->where('payment_type', 'like', "%{$search}%")
                     ->orWhere('provider_name', 'like', "%{$search}%")
                     ->orWhere('provider_account_name', 'like', "%{$search}%")
+                    ->orWhere('provider_account_no', 'like', "%{$search}%")
                     ->orWhere('additional_info', 'like', "%{$search}%");
                 });
             })
             ->orderBy('created_at', 'desc')
             ->paginate(10)
-            ->withQueryString(); // ⭐ penting biar pagination inget search
+            ->withQueryString();
 
         return view('pages.owner.payment-method.index', compact('paymentMethods', 'search'));
     }
+
 
 
     /**

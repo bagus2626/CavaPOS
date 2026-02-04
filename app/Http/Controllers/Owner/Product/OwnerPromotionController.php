@@ -20,81 +20,26 @@ class OwnerPromotionController extends Controller
     {
         $owner = Auth::user();
 
-        // Get semua data untuk JavaScript filter
-        $allPromotions = Promotion::where('owner_id', $owner->id)
+        $q    = request('q');       // keyword search
+        $type = request('type');    // percentage | amount
+
+        $promotions = Promotion::where('owner_id', $owner->id)
+            ->when($q, function ($query) use ($q) {
+                $query->where(function ($qq) use ($q) {
+                    $qq->where('promotion_code', 'like', "%{$q}%")
+                    ->orWhere('promotion_name', 'like', "%{$q}%");
+                });
+            })
+            ->when($type, function ($query) use ($type) {
+                $query->where('promotion_type', $type);
+            })
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(10)
+            ->withQueryString();
 
-        // Format data untuk JavaScript
-        $allPromotionsFormatted = $allPromotions->map(function ($promotion) {
-            $daysMap = [
-                'sun' => __('messages.owner.products.promotions.sunday'),
-                'mon' => __('messages.owner.products.promotions.monday'),
-                'tue' => __('messages.owner.products.promotions.tuesday'),
-                'wed' => __('messages.owner.products.promotions.wednesday'),
-                'thu' => __('messages.owner.products.promotions.thursday'),
-                'fri' => __('messages.owner.products.promotions.friday'),
-                'sat' => __('messages.owner.products.promotions.saturday'),
-            ];
-
-            $activeDaysArr = is_array($promotion->active_days) ? $promotion->active_days : [];
-            $activeDays = count($activeDaysArr) === 7
-                ? 'Setiap Hari'
-                : collect($activeDaysArr)->map(fn($d) => $daysMap[$d] ?? $d)->join(', ');
-
-            // Status calculation
-            $now = now();
-            $start = $promotion->start_date;
-            $end = $promotion->end_date;
-
-            if (!$promotion->is_active) {
-                $status = 'inactive';
-                $statusLabel = __('messages.owner.products.promotions.inactive');
-            } else {
-                if ($start && $now->lt($start)) {
-                    $status = 'will_be_active';
-                    $statusLabel = __('messages.owner.products.promotions.will_be_active');
-                } elseif ($end && $now->gt($end)) {
-                    $status = 'expired';
-                    $statusLabel = __('messages.owner.products.promotions.expired');
-                } else {
-                    $status = 'active';
-                    $statusLabel = __('messages.owner.products.promotions.active');
-                }
-            }
-
-            return [
-                'id' => $promotion->id,
-                'promotion_code' => $promotion->promotion_code,
-                'promotion_name' => $promotion->promotion_name,
-                'promotion_type' => $promotion->promotion_type,
-                'promotion_value' => $promotion->promotion_value,
-                'start_date' => $promotion->start_date ? $promotion->start_date->translatedFormat('d F Y') : null,
-                'start_time' => $promotion->start_date ? $promotion->start_date->format('H:i') : null,
-                'end_date' => $promotion->end_date ? $promotion->end_date->translatedFormat('d F Y') : null,
-                'end_time' => $promotion->end_date ? $promotion->end_date->format('H:i') : null,
-                'active_days' => $activeDays,
-                'is_active' => (int) $promotion->is_active,
-                'status' => $status,
-                'status_label' => $statusLabel,
-            ];
-        });
-
-        // Simulasi pagination object untuk compatibility dengan view
-        $perPage = 10;
-        $currentPage = request()->input('page', 1);
-        $offset = ($currentPage - 1) * $perPage;
-
-        $promotions = new \Illuminate\Pagination\LengthAwarePaginator(
-            $allPromotions->slice($offset, $perPage)->values(),
-            $allPromotions->count(),
-            $perPage,
-            $currentPage,
-            ['path' => request()->url(), 'query' => request()->query()]
-        );
-
-        return view('pages.owner.products.promotion.index', compact('promotions', 'allPromotionsFormatted'));
+        return view('pages.owner.products.promotion.index', compact('promotions'));
     }
+
 
     public function create()
     {

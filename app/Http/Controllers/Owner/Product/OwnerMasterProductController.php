@@ -27,62 +27,44 @@ class OwnerMasterProductController extends Controller
     {
         $categories = Category::where('owner_id', Auth::id())->get();
 
-        $productsQuery = MasterProduct::with('parent_options.options', 'category', 'promotion')
+        $productsQuery = MasterProduct::with(['parent_options', 'category', 'promotion'])
             ->where('owner_id', Auth::id());
 
-        // ambil parameter ?category=...
         $categoryId = $request->query('category');
-
         if (!empty($categoryId) && $categoryId !== 'all') {
             $productsQuery->where('category_id', $categoryId);
         }
 
-        // Get semua data untuk JavaScript filter
-        $allProducts = $productsQuery
-            ->orderBy('id', 'desc')
-            ->get();
+        $q = trim((string) $request->query('q', ''));
+        if ($q !== '') {
+            $productsQuery->where(function ($qq) use ($q) {
+                $qq->where('name', 'like', "%{$q}%")
+                ->orWhereHas('category', function ($c) use ($q) {
+                    $c->where('category_name', 'like', "%{$q}%");
+                })
+                ->orWhereHas('parent_options', function ($o) use ($q) {
+                    $o->where('name', 'like', "%{$q}%");
+                })
+                ->orWhereHas('promotion', function ($p) use ($q) {
+                    $p->where('promotion_name', 'like', "%{$q}%");
+                });
+            });
+        }
 
-        // Format data untuk JavaScript
-        $allProductsFormatted = $allProducts->map(function ($product) {
-            $firstPicture = null;
-            if (!empty($product->pictures) && is_array($product->pictures)) {
-                $firstPicture = $product->pictures[0]['path'] ?? null;
-            }
-
-            return [
-                'id' => $product->id,
-                'name' => $product->name,
-                'category_id' => $product->category_id,
-                'category_name' => $product->category->category_name ?? '-',
-                'quantity' => $product->quantity,
-                'price' => $product->price,
-                'promotion_name' => $product->promotion->promotion_name ?? null,
-                'parent_options' => $product->parent_options->pluck('name')->implode(', '),
-                'has_options' => $product->parent_options->isNotEmpty(),
-                'picture' => $firstPicture,
-            ];
-        });
-
-        // Simulasi pagination object untuk compatibility dengan view
         $perPage = 10;
-        $currentPage = $request->input('page', 1);
-        $offset = ($currentPage - 1) * $perPage;
-
-        $products = new \Illuminate\Pagination\LengthAwarePaginator(
-            $allProducts->slice($offset, $perPage)->values(),
-            $allProducts->count(),
-            $perPage,
-            $currentPage,
-            ['path' => $request->url(), 'query' => $request->query()]
-        );
+        $products = $productsQuery
+            ->orderBy('id', 'desc')
+            ->paginate($perPage)
+            ->appends($request->query());
 
         return view('pages.owner.products.master-product.index', compact(
             'products',
             'categories',
             'categoryId',
-            'allProductsFormatted'
+            'q'
         ));
     }
+
 
     public function create()
     {

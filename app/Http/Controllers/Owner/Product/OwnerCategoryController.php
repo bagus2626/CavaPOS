@@ -18,38 +18,37 @@ class OwnerCategoryController extends Controller
     public function index()
     {
         $owner_id = Auth::id();
+        $q = request('q');
 
-        // Ambil SEMUA categories (tanpa pagination di backend)
+        $categories = Category::where('owner_id', $owner_id)
+            ->when($q, function ($query) use ($q) {
+                $query->where(function($sub) use ($q){
+                    $sub->where('category_name', 'like', "%{$q}%")
+                        ->orWhere('description', 'like', "%{$q}%");
+                });
+            })
+            ->orderBy('category_order')
+            ->paginate(10)
+            ->withQueryString();
+
+        // kalau masih butuh untuk order modal:
+        $allCategoriesFormatted = Category::where('owner_id', $owner_id)
+            ->orderBy('category_order')
+            ->get()
+            ->map(fn($c) => [
+                'id' => $c->id,
+                'category_name' => $c->category_name,
+                'description' => $c->description,
+                'has_image' => $c->images && isset($c->images['path']),
+                'image_path' => ($c->images && isset($c->images['path'])) ? $c->images['path'] : null,
+            ]);
         $allCategories = Category::where('owner_id', $owner_id)
             ->orderBy('category_order')
             ->get();
 
-        // Format data untuk JavaScript
-        $allCategoriesFormatted = $allCategories->map(function ($category) {
-            return [
-                'id' => $category->id,
-                'category_name' => $category->category_name,
-                'description' => $category->description,
-                'has_image' => $category->images && isset($category->images['path']),
-                'image_path' => $category->images && isset($category->images['path']) ? $category->images['path'] : null,
-            ];
-        });
-
-        // Simulasi pagination untuk compatibility dengan view
-        $perPage = 10;
-        $currentPage = request()->input('page', 1);
-        $offset = ($currentPage - 1) * $perPage;
-
-        $categories = new \Illuminate\Pagination\LengthAwarePaginator(
-            $allCategories->slice($offset, $perPage)->values(),
-            $allCategories->count(),
-            $perPage,
-            $currentPage,
-            ['path' => request()->url(), 'query' => request()->query()]
-        );
-
-        return view('pages.owner.products.categories.index', compact('categories', 'allCategoriesFormatted'));
+        return view('pages.owner.products.categories.index', compact('categories','allCategoriesFormatted','q', 'allCategories'));
     }
+
 
     public function create()
     {

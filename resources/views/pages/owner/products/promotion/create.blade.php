@@ -416,29 +416,47 @@ window.promoLang = {
     const suffixPct = document.getElementById('suffixPercent');
 
     function applyTypeUI() {
-        const t = typeSel.value;
+        const t = (typeSel?.value || '');
 
         if (t === 'percentage') {
-            prefixAmt.style.display = 'none';
-            suffixPct.style.display = '';
-            valInput.min = '1';
-            valInput.max = '100';
-            valInput.step = '1';
-            helpText.textContent = window.promoLang.percentageExample;
-            if (valInput.value && (+valInput.value > 100)) valInput.value = 100;
+        prefixAmt.style.display = 'none';
+        suffixPct.style.display = 'flex';
+
+        // padding biar tidak nabrak suffix
+        valInput.classList.remove('with-icon'); // ini khusus prefix di kiri
+        valInput.style.paddingLeft = 'var(--spacing-lg)';
+        valInput.style.paddingRight = '3rem';
+
+        valInput.min = '1'; valInput.max = '100'; valInput.step = '1';
+        helpText.textContent = window.promoLang.percentageExample;
+
+        if (valInput.value && (+valInput.value > 100)) valInput.value = 100;
+
         } else if (t === 'amount') {
-            prefixAmt.style.display = '';
-            suffixPct.style.display = 'none';
-            valInput.removeAttribute('max');
-            valInput.min = '0';
-            valInput.step = '1';
-            helpText.textContent = window.promoLang.reducedFareExample;
+        prefixAmt.style.display = 'flex';
+        suffixPct.style.display = 'none';
+
+        // padding biar tidak nabrak prefix Rp
+        valInput.classList.add('with-icon');
+        valInput.style.paddingLeft = '3rem';
+        valInput.style.paddingRight = 'var(--spacing-lg)';
+
+        valInput.removeAttribute('max');
+        valInput.min = '0'; valInput.step = '1';
+        helpText.textContent = window.promoLang.reducedFareExample;
+
         } else {
-            prefixAmt.style.display = 'none';
-            suffixPct.style.display = 'none';
-            valInput.removeAttribute('min');
-            valInput.removeAttribute('max');
-            helpText.textContent = '';
+        prefixAmt.style.display = 'none';
+        suffixPct.style.display = 'none';
+
+        valInput.classList.remove('with-icon');
+        valInput.style.paddingLeft = 'var(--spacing-lg)';
+        valInput.style.paddingRight = 'var(--spacing-lg)';
+
+        valInput.removeAttribute('min');
+        valInput.removeAttribute('max');
+        valInput.removeAttribute('step');
+        helpText.textContent = '';
         }
     }
 

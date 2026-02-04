@@ -146,15 +146,14 @@ class CashierDashboardController extends Controller
 
     public function show(Request $request, string $tab)
     {
-        // dd($request->all());
         $partnerId = auth('employee')->user()->partner_id;
         $employeeId = auth('employee')->id();
 
 
         $payment = $request->string('payment')->toString();
         $status  = $request->string('status')->toString();
-        $from    = $request->date('from') ?: Carbon::today();
-        $to      = $request->date('to')   ?: Carbon::today();
+        $from = $request->date('from');
+        $to   = $request->date('to');
         $q       = $request->string('q')->toString();
 
 
@@ -162,10 +161,12 @@ class CashierDashboardController extends Controller
             ->with('table')
             ->where('partner_id', $partnerId)
             ->whereNotIn('order_status', ['PAYMENT'])
-            ->whereBetween('created_at', [
-                Carbon::parse($from)->startOfDay(),
-                Carbon::parse($to)->endOfDay(),
-            ])
+            ->when($from || $to, function ($query) use ($from, $to) {
+                $query->whereBetween('created_at', [
+                    Carbon::parse($from ?? $to)->startOfDay(),
+                    Carbon::parse($to ?? $from)->endOfDay(),
+                ]);
+            })
             ->when($payment, fn($q2) => $q2->where('payment_method', $payment))
             ->when($status !== null && $status !== '', function ($q2) use ($status) {
                 if ($status === '0' || $status === '1') {
@@ -190,8 +191,6 @@ class CashierDashboardController extends Controller
 
         switch ($tab) {
             case 'pembelian':
-
-
                 $partner = User::findOrFail($partnerId);
                 $partner_products = PartnerProduct::with([
                     'category',
@@ -209,7 +208,6 @@ class CashierDashboardController extends Controller
                 $categories = Category::whereIn('id', $partner_products->pluck('category_id'))->get();
                 $tables = Table::where('partner_id', $partner->id)->orderBy('table_no', 'ASC')->get();
 
-
                 return view('pages.employee.cashier.dashboard.tabs.pembelian', compact('partner', 'partner_products', 'categories', 'tables'));
             case 'pembayaran':
                 $items = (clone $base)->whereIn('payment_method', ['CASH', 'QRIS', 'manual_tf', 'manual_ewallet', 'manual_qris'])->whereIn('order_status', ['UNPAID', 'EXPIRED', 'PAYMENT REQUEST'])->latest()->get();
@@ -225,7 +223,7 @@ class CashierDashboardController extends Controller
                     ->get();
                 return view('pages.employee.cashier.dashboard.tabs.proses', compact('items', 'employeeId'));
             case 'selesai':
-                $items = (clone $base)->where('order_status', 'SERVED')->latest()->get();
+                $items = (clone $base)->where('order_status', 'SERVED')->whereDate('updated_at', Carbon::today())->latest()->get();
                 return view('pages.employee.cashier.dashboard.tabs.selesai', compact('items'));
             default:
                 abort(404);
