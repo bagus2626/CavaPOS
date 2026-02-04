@@ -89,7 +89,7 @@ class OwnerMasterProductController extends Controller
                 'description'      => 'nullable|string',
                 'images'           => 'nullable|array|max:5',
                 'promotion_id'     => 'nullable|integer|exists:promotions,id',
-                'images.*'         => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+                'images.*'         => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
                 'options'          => 'nullable|array',
             ], [
                 'name.required'             => 'Nama produk wajib diisi.',
@@ -230,7 +230,6 @@ class OwnerMasterProductController extends Controller
 
     public function update(Request $request, $id)
     {
-        // dd($request->all());
         DB::beginTransaction();
         try {
             $product = MasterProduct::with(['parent_options.options'])->findOrFail($id);
@@ -255,35 +254,62 @@ class OwnerMasterProductController extends Controller
             $price = $this->toIntRupiah($validated['price']);
 
             // Handle existing images
-            $storedImages = [];
-            $existingFilenames = $request->input('existing_images', []); // filenames yang dipertahankan
+            $storedImages = [];            
 
             // PERBAIKAN: Jika tidak ada gambar baru dan tidak ada existing_images yang dicentang,
             // pertahankan gambar lama
-            if (!$request->hasFile('images') && empty($existingFilenames) && !empty($product->pictures)) {
-                $storedImages = $product->pictures; // Pertahankan semua gambar lama
-            } else {
-                // Logic existing (loop untuk filter gambar yang dipertahankan)
-                foreach ((array) $product->pictures as $pic) {
+            $pictures = (array) ($product->pictures ?? []);
+
+            $existingFilenames = (array) $request->input('existing_images', []); // checkbox keep (kalau ada)
+            $removeImage = $request->boolean('remove_image');                   // tombol hapus satu gambar
+            $removeFilename = $request->input('existing_image');                // filename yg dihapus
+
+            // === CASE A: user klik hapus 1 gambar tertentu ===
+            if ($removeImage && $removeFilename) {
+                foreach ($pictures as $pic) {
                     $filename   = $pic['filename'] ?? null;
                     $pathFromDb = $pic['path'] ?? null;
 
-                    // Jika user memilih untuk tetap menyimpan gambar ini → keep
-                    if ($filename && in_array($filename, $existingFilenames, true)) {
-                        $storedImages[] = $pic;
+                    // ini gambar yang diminta dihapus
+                    if ($filename === $removeFilename) {
+                        $relativePath = $pathFromDb
+                            ? ltrim(str_replace('storage/', '', $pathFromDb), '/')
+                            : 'uploads/master-products/' . $filename;
+
+                        if ($relativePath && Storage::disk('public')->exists($relativePath)) {
+                            Storage::disk('public')->delete($relativePath);
+                        }
+
+                        // jangan masukkan ke $storedImages (hapus dari DB)
                         continue;
                     }
 
-                    // Jika user menghapus gambar → hapus file-nya di storage
-                    if ($pathFromDb) {
-                        $relativePath = ltrim(str_replace('storage/', '', $pathFromDb), '/');
-                        if (Storage::disk('public')->exists($relativePath)) {
-                            Storage::disk('public')->delete($relativePath);
+                    // simpan sisanya
+                    $storedImages[] = $pic;
+                }
+
+            // === CASE B: mode normal (keep by existing_images) ===
+            } else {
+                // tidak upload baru + tidak ada pilihan existing_images => keep all
+                if (!$request->hasFile('images') && empty($existingFilenames)) {
+                    $storedImages = $pictures;
+                } else {
+                    foreach ($pictures as $pic) {
+                        $filename   = $pic['filename'] ?? null;
+                        $pathFromDb = $pic['path'] ?? null;
+
+                        if ($filename && in_array($filename, $existingFilenames, true)) {
+                            $storedImages[] = $pic; // keep checked
+                            continue;
                         }
-                    } elseif ($filename) {
-                        $guess = 'uploads/master-products/' . $filename;
-                        if (Storage::disk('public')->exists($guess)) {
-                            Storage::disk('public')->delete($guess);
+
+                        // delete yang tidak dipertahankan
+                        $relativePath = $pathFromDb
+                            ? ltrim(str_replace('storage/', '', $pathFromDb), '/')
+                            : ($filename ? 'uploads/master-products/' . $filename : null);
+
+                        if ($relativePath && Storage::disk('public')->exists($relativePath)) {
+                            Storage::disk('public')->delete($relativePath);
                         }
                     }
                 }

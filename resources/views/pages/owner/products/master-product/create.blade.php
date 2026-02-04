@@ -160,6 +160,13 @@
                                                     @foreach($promotions as $promotion)
                                                         <option value="{{ $promotion->id }}" {{ old('promotion_id') == $promotion->id ? 'selected' : '' }}>
                                                             {{ $promotion->promotion_name }}
+                                                            (
+                                                            @if($promotion->promotion_type === 'percentage')
+                                                                {{ number_format($promotion->promotion_value, 0, ',', '.') }}% Off
+                                                            @else
+                                                                Rp {{ number_format($promotion->promotion_value, 0, ',', '.') }} Off
+                                                            @endif
+                                                            )
                                                         </option>
                                                     @endforeach
                                                 </select>
