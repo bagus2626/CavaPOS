@@ -15,14 +15,15 @@
                 <p class="text-muted mb-2">{{ __('messages.owner.products.categories.drag_drop_instruction') }}</p>
 
                 <ul id="sortableCategoryList" class="list-group">
-                    @foreach($categories->sortBy('category_order') as $c)
+                    @foreach(($allCategories ?? collect())->sortBy('category_order') as $c)
                         <li class="list-group-item d-flex justify-content-between align-items-center"
                             data-id="{{ $c->id }}">
-                            <span>{{ $c->category_name }}</span>
-                            <i class="fas fa-bars text-secondary sort-handle"></i>
+                        <span>{{ $c->category_name }}</span>
+                        <i class="fas fa-bars text-secondary sort-handle"></i>
                         </li>
                     @endforeach
                 </ul>
+
             </div>
 
             <div class="modal-footer">

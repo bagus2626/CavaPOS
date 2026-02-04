@@ -782,6 +782,8 @@ return [
                 'js_invalid_format_short' => 'Format tidak valid.',
 
                 'back' => 'Kembali ke Pegawai',
+                'no_employees' => 'Tidak ada pegawai yang ditampilkan.',
+                'add_first_employee' => 'Silahkan tambahkan pegawai anda.'
 
             ],
         ],
@@ -1214,6 +1216,11 @@ return [
                 'mode_barcode_only' => 'Barcode Saja',
                 'mode_cashier_only' => 'Kasir Saja',
                 'mode_both' => 'Keduanya',
+                'qr_mode' => 'Mode QRIS',
+                'cashier_payment_available' => 'Pembayaran kasir bisa dilakukan ketika diaktifkan.',
+                'badge_available' => 'Tersedia',
+                'badge_taken' => 'Terpakai',
+                'back' => 'Kembali ke Toko',
 
             ],
         ],
@@ -1454,6 +1461,7 @@ return [
                 'recipe_btn' => 'Resep',
 
                 'back' => 'Kembali ke Produk Toko',
+                'search_placeholder' => 'Cari Produk...',
             ],
             'stocks' => [
                 'add_stock_item' => 'Tambah Item Stok',

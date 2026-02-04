@@ -38,28 +38,36 @@
       <div class="modern-card mb-4">
         <div class="card-body-modern" style="padding: var(--spacing-lg) var(--spacing-xl);">
           <div class="table-controls">
-            <div class="search-filter-group">
-              <div class="input-wrapper search-wrapper" style="flex: 1; max-width: 400px; position: relative;">
-                  <span class="input-icon">
-                      <span class="material-symbols-outlined">search</span>
-                  </span>
+            <form method="GET"
+                action="{{ route('owner.user-owner.payment-methods.index') }}"
+                class="payment-search-form">
+              <div class="input-wrapper search-wrapper" style="position: relative;">
+                <span class="input-icon">
+                  <span class="material-symbols-outlined">search</span>
+                </span>
 
-                  <input type="text"
-                      id="searchInput"
-                      class="form-control-modern with-icon"
-                      value="{{ $search ?? '' }}"
-                      placeholder="{{ __('messages.owner.payment_methods.search_placeholder') }}">
+                <input type="text"
+                  id="searchInput"
+                  name="search"
+                  class="form-control-modern with-icon"
+                  value="{{ request('search') }}"
+                  placeholder="{{ __('messages.owner.payment_methods.search_placeholder') }}">
 
-                  {{-- Clear button --}}
-                  <button type="button"
-                      id="clearSearchBtn"
-                      class="search-clear-btn"
-                      onclick="clearSearch()"
-                      style="display: none;">
-                      <span class="material-symbols-outlined">close</span>
+                <button type="button"
+                  id="clearSearchBtn"
+                  class="search-clear-btn"
+                  style="display:none;">
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+
+                <noscript>
+                  <button type="submit" class="btn-modern btn-secondary-modern">
+                    {{ __('messages.owner.payment_methods.search') ?? 'Search' }}
                   </button>
+                </noscript>
               </div>
-            </div>
+            </form>
+
 
             <div style="display: flex; gap: var(--spacing-sm);">
               
@@ -80,24 +88,6 @@
 @endsection
 
 <style>
-  .search-clear-btn {
-    position: absolute;
-    right: 50px;
-    top: 50%;
-    transform: translateY(-50%);
-    border: none;
-    background: transparent;
-    color: #999;
-    cursor: pointer;
-    padding: 0;
-    display: flex;
-    align-items: center;
-}
-
-.search-clear-btn:hover {
-    color: #ae1504;
-}
-
 .qris-modal {
   position: fixed;
   inset: 0;
@@ -164,6 +154,95 @@
   object-fit: contain;
 }
 
+.payment-search-form {
+  flex: 1;
+  max-width: 520px; /* desktop lebih lebar */
+  width: 100%;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+/* ========= SEARCH INPUT LAYOUT (FINAL) ========= */
+.input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* input utama */
+.input-wrapper input.form-control-modern{
+  width: 100%;
+  padding-left: 44px;   /* ruang icon search kiri */
+  padding-right: 44px;  /* ruang tombol X kanan */
+}
+
+/* icon search kiri */
+.input-wrapper .input-icon{
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #999;
+}
+
+/* tombol clear (X) */
+.search-clear-btn{
+  position: absolute;
+  right: 50px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: #999;
+  cursor: pointer;
+  padding: 0;
+  display: none;
+  align-items: center;
+  z-index: 2;
+}
+
+.search-clear-btn:hover{
+  color: #ae1504;
+}
+
+
+/* ===== FORCE FULL WIDTH SEARCH ON MOBILE ===== */
+@media (max-width: 768px) {
+  .table-controls{
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: var(--spacing-md);
+    width: 100%;
+  }
+
+  .payment-search-form{
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+  }
+
+  .payment-search-form .input-wrapper,
+  .payment-search-form .search-wrapper,
+  .payment-search-form input{
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* button add juga full width biar rapi */
+  .table-controls > div:last-child{
+    width: 100% !important;
+  }
+
+  .table-controls > div:last-child .btn-modern{
+    width: 100% !important;
+    justify-content: center;
+  }
+}
+
+
 </style>
 
 @push('scripts')
@@ -173,50 +252,44 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-      const searchInput = document.getElementById('searchInput');
-      const clearBtn    = document.getElementById('clearSearchBtn');
+    const searchInput = document.getElementById('searchInput');
+    const clearBtn = document.getElementById('clearSearchBtn');
+    if (!searchInput || !clearBtn) return;
 
-      if (!searchInput || !clearBtn) return;
+    let timer;
 
-      let timeout = null;
+    function toggleClearBtn(){
+      clearBtn.style.display = (searchInput.value || '').trim() ? 'flex' : 'none';
+    }
 
-      // toggle tombol X
-      function toggleClearBtn() {
-          clearBtn.style.display = searchInput.value.trim() ? 'flex' : 'none';
-      }
+    function applySearch(keyword){
+      const url = new URL(window.location.href);
 
-      toggleClearBtn(); // init saat load (jika ada search lama)
+      if (keyword) url.searchParams.set('search', keyword);
+      else url.searchParams.delete('search');
 
-      searchInput.addEventListener('input', function () {
-          toggleClearBtn();
-          clearTimeout(timeout);
+      url.searchParams.delete('page'); // reset page saat keyword berubah
+      window.location.href = url.toString();
+    }
 
-          timeout = setTimeout(() => {
-              applySearch(searchInput.value.trim());
-          }, 400);
-      });
+    toggleClearBtn();
 
-      // expose ke global supaya bisa dipanggil onclick
-      window.clearSearch = function () {
-          searchInput.value = '';
-          toggleClearBtn();
-          applySearch('');
-      };
+    searchInput.addEventListener('input', function(){
+      toggleClearBtn();
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        applySearch(searchInput.value.trim());
+      }, 350);
+    });
 
-      function applySearch(keyword) {
-          const url = new URL(window.location.href);
-
-          if (keyword.length > 0) {
-              url.searchParams.set('search', keyword);
-          } else {
-              url.searchParams.delete('search');
-          }
-
-          url.searchParams.delete('page'); // reset pagination
-          window.location.href = url.toString();
-      }
+    clearBtn.addEventListener('click', function(){
+      searchInput.value = '';
+      toggleClearBtn();
+      applySearch('');
+    });
   });
 </script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 

@@ -37,39 +37,65 @@
 
       <div class="modern-card mb-4">
         <div class="card-body-modern" style="padding: var(--spacing-lg) var(--spacing-xl);">
-          <div class="table-controls">
-            <div class="search-filter-group">
-              <div class="select-wrapper" style="min-width: 200px;">
-                <select id="outletFilter" class="form-control-modern" onchange="window.location.href=this.value">
-                  @foreach($outlets as $outlet)
-                    <option value="{{ route('owner.user-owner.outlet-products.index', ['outlet_id' => $outlet->id]) }}" 
-                            {{ $currentOutletId == $outlet->id ? 'selected' : '' }}>
-                      {{ $outlet->name }}
-                    </option>
-                  @endforeach
-                </select>
-                <span class="material-symbols-outlined select-arrow">expand_more</span>
+          <form method="GET" action="{{ url()->current() }}" id="outletProductFilterForm">
+            <div class="table-controls">
+              <div class="search-filter-group">
+
+                {{-- Outlet selector (tetap redirect, tapi bawa q & category) --}}
+                <div class="select-wrapper" style="min-width: 220px;">
+                  <select id="outletFilter" class="form-control-modern" onchange="changeOutlet(this)">
+                    @foreach($outlets as $outlet)
+                      <option value="{{ $outlet->id }}" {{ (string)$currentOutletId === (string)$outlet->id ? 'selected' : '' }}>
+                        {{ $outlet->name }}
+                      </option>
+                    @endforeach
+                  </select>
+                  <span class="material-symbols-outlined select-arrow">expand_more</span>
+                </div>
+
+                {{-- Search --}}
+                <div class="input-wrapper" style="flex: 1; max-width: 420px;">
+                  <span class="input-icon">
+                    <span class="material-symbols-outlined">search</span>
+                  </span>
+                  <input
+                    type="text"
+                    name="q"
+                    id="productSearchInput"
+                    value="{{ $q ?? request('q') }}"
+                    class="form-control-modern with-icon"
+                    placeholder="{{ __('messages.owner.products.outlet_products.search_placeholder') ?? 'Search product...' }}"
+                    oninput="debouncedSubmit(this, 500)"
+                  >
+                </div>
+
+                {{-- Category --}}
+                <div class="select-wrapper" style="min-width: 220px;">
+                  <select name="category" id="categoryFilter" class="form-control-modern" onchange="submitFilterResetPage()">
+                    <option value="">{{ __('messages.owner.products.outlet_products.all_category_dropdown') }}</option>
+                    @foreach($categories as $category)
+                      <option value="{{ $category->id }}" @selected((string)request('category') === (string)$category->id)>
+                        {{ $category->category_name }}
+                      </option>
+                    @endforeach
+                  </select>
+                  <span class="material-symbols-outlined select-arrow">expand_more</span>
+                </div>
+
+                <input type="hidden" name="outlet_id" id="outletIdInput" value="{{ $currentOutletId }}">
+                <input type="hidden" name="page" id="pageInput" value="{{ request('page', 1) }}">
               </div>
 
-              <div class="select-wrapper" style="min-width: 200px;">
-                <select id="categoryFilter" class="form-control-modern">
-                  <option value="">{{ __('messages.owner.products.outlet_products.all_category_dropdown') }}</option>
-                  @foreach($categories as $category)
-                    <option value="{{ $category->id }}">{{ $category->category_name }}</option>
-                  @endforeach
-                </select>
-                <span class="material-symbols-outlined select-arrow">expand_more</span>
-              </div>
+              <button class="btn-modern btn-primary-modern btn-add-product"
+                      type="button"
+                      data-toggle="modal"
+                      data-target="#addProductModal"
+                      data-outlet="{{ $currentOutletId }}">
+                <span class="material-symbols-outlined">add</span>
+                {{ __('messages.owner.products.outlet_products.add_product') }}
+              </button>
             </div>
-
-            <button class="btn-modern btn-primary-modern btn-add-product" 
-                    data-toggle="modal" 
-                    data-target="#addProductModal"
-                    data-outlet="{{ $currentOutletId }}">
-              <span class="material-symbols-outlined">add</span>
-              {{ __('messages.owner.products.outlet_products.add_product') }}
-            </button>
-          </div>
+          </form>
         </div>
       </div>
 
@@ -83,313 +109,6 @@
 
 @push('scripts')
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  
-  {{-- SEARCH & FILTER SCRIPT --}}
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const categoryFilter = document.getElementById('categoryFilter');
-      const tableBody = document.getElementById('productTableBody');
-      const paginationWrapper = document.querySelector('.table-pagination');
-
-      if (!tableBody) {
-        console.error('Table body not found');
-        return;
-      }
-
-      // Ambil semua data dari Blade
-      const allProductsData = @json($allProductsFormatted ?? []);
-      
-      let filteredProducts = [...allProductsData];
-      const itemsPerPage = 10;
-      let currentPage = 1;
-
-      // ==========================================
-      // FILTER FUNCTION
-      // ==========================================
-      function filterProducts() {
-        const selectedCategory = categoryFilter ? categoryFilter.value.trim() : '';
-
-        filteredProducts = allProductsData.filter(product => {
-          // Category filter
-          const matchesCategory = !selectedCategory || String(product.category_id) === selectedCategory;
-
-          return matchesCategory;
-        });
-
-        currentPage = 1; // Reset ke halaman pertama
-        renderTable();
-      }
-
-      // ==========================================
-      // RENDER TABLE
-      // ==========================================
-      function renderTable() {
-        // Hitung pagination
-        const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        const currentProducts = filteredProducts.slice(startIndex, endIndex);
-
-        // Clear table
-        tableBody.innerHTML = '';
-
-        // Render rows
-        if (currentProducts.length === 0) {
-          // UPDATE: Translate Empty State
-          tableBody.innerHTML = `
-            <tr class="empty-filter-row">
-              <td colspan="8" class="text-center">
-                <div class="table-empty-state">
-                  <span class="material-symbols-outlined">search_off</span>
-                  <h4>{{ __('messages.owner.products.outlet_products.data_not_found') }}</h4>
-                  <p>{{ __('messages.owner.products.outlet_products.adjust_filter') }}</p>
-                </div>
-              </td>
-            </tr>
-          `;
-        } else {
-          currentProducts.forEach((product, index) => {
-            const rowNumber = startIndex + index + 1;
-            const row = createProductRow(product, rowNumber);
-            tableBody.appendChild(row);
-          });
-        }
-
-        // Handle pagination visibility
-        if (paginationWrapper) {
-          if (filteredProducts.length <= itemsPerPage) {
-            paginationWrapper.style.display = 'none';
-          } else {
-            paginationWrapper.style.display = '';
-            renderPagination(totalPages);
-          }
-        }
-      }
-
-      // ==========================================
-      // CREATE PRODUCT ROW
-      // ==========================================
-      function createProductRow(product, rowNumber) {
-        const tr = document.createElement('tr');
-        tr.className = 'table-row';
-        tr.setAttribute('data-category', product.category_id || '');
-
-        // Product image
-        let imageHtml = '';
-        if (product.picture_path) {
-          imageHtml = `
-            <img src="{{ asset('') }}${product.picture_path}"
-                 alt="${product.name}"
-                 class="user-avatar"
-                 style="width:40px; height:40px; object-fit:cover; border-radius:6px;"
-                 loading="lazy">
-          `;
-        } else {
-          imageHtml = `
-            <div class="user-avatar-placeholder">
-              <span class="material-symbols-outlined">image</span>
-            </div>
-          `;
-        }
-
-        // Hot product badge
-        let hotBadge = '';
-        if (product.is_hot_product) {
-          // UPDATE: Translate HOT badge tooltip/text if needed (Keeping HOT as universal term)
-          hotBadge = `
-            <span style="
-              position:absolute;
-              top:-6px;
-              right:-6px;
-              background:#ff5722;
-              color:white;
-              padding:2px 6px;
-              border-radius:8px;
-              font-size:10px;
-              font-weight:600;
-              box-shadow:0 2px 6px rgba(0,0,0,0.2);
-            ">
-              HOT
-            </span>
-          `;
-        }
-
-        // Status badge
-        // UPDATE: Translate Active/Inactive
-        const statusBadgeClass = product.is_active ? 'badge-success' : 'badge-danger';
-        const statusText = product.is_active 
-          ? '{{ __('messages.owner.products.outlet_products.active') }}'
-          : '{{ __('messages.owner.products.outlet_products.inactive') }}';
-
-        // Promotion
-        const promoText = product.promotion_name 
-          ? `<span class="badge-modern badge-warning">${product.promotion_name}</span>`
-          : '<span class="text-muted">—</span>';
-
-        // URLs
-        const editUrl = `/owner/user-owner/outlet-products/${product.id}/edit`;
-
-        tr.innerHTML = `
-          <td class="text-center text-muted">${rowNumber}</td>
-          <td>
-            <div class="user-info-cell">
-              <div class="position-relative" style="width:40px; height:40px;">
-                ${imageHtml}
-                ${hotBadge}
-              </div>
-              <span class="data-name">${product.name}</span>
-            </div>
-          </td>
-          <td>
-            <span class="badge-modern badge-info">
-              ${product.category_name}
-            </span>
-          </td>
-          <td>
-            ${product.stock_display}
-          </td>
-          <td class="text-center">
-            <span class="badge-modern ${statusBadgeClass}">
-              ${statusText}
-            </span>
-          </td>
-          <td>
-            <span class="fw-600">Rp ${new Intl.NumberFormat('id-ID').format(product.price)}</span>
-          </td>
-          <td>
-            ${promoText}
-          </td>
-          <td class="text-center">
-            <div class="table-actions">
-              <a href="${editUrl}"
-                 class="btn-table-action edit"
-                 title="{{ __('messages.owner.products.outlet_products.edit') }}">
-                <span class="material-symbols-outlined">edit</span>
-              </a>
-              <button onclick="deleteProduct(${product.id})" 
-                      class="btn-table-action delete"
-                      title="{{ __('messages.owner.products.outlet_products.delete') }}">
-                <span class="material-symbols-outlined">delete</span>
-              </button>
-            </div>
-          </td>
-        `;
-
-        return tr;
-      }
-
-      // ==========================================
-      // RENDER PAGINATION
-      // ==========================================
-      function renderPagination(totalPages) {
-        if (!paginationWrapper) return;
-
-        paginationWrapper.innerHTML = '';
-
-        const nav = document.createElement('nav');
-        nav.setAttribute('role', 'navigation');
-        nav.setAttribute('aria-label', 'Pagination Navigation');
-        
-        const ul = document.createElement('ul');
-        ul.className = 'pagination';
-
-        // Previous Button
-        const prevLi = document.createElement('li');
-        prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
-        
-        if (currentPage === 1) {
-          prevLi.innerHTML = `
-            <span class="page-link" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
-              </svg>
-            </span>
-          `;
-        } else {
-          prevLi.innerHTML = `
-            <a href="#" class="page-link" data-page="${currentPage - 1}" aria-label="Previous">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
-              </svg>
-            </a>
-          `;
-        }
-        ul.appendChild(prevLi);
-
-        // Page Numbers
-        for (let i = 1; i <= totalPages; i++) {
-          if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-            const pageLi = document.createElement('li');
-            pageLi.className = `page-item ${i === currentPage ? 'active' : ''}`;
-            
-            if (i === currentPage) {
-              pageLi.innerHTML = `<span class="page-link" aria-current="page">${i}</span>`;
-            } else {
-              pageLi.innerHTML = `<a href="#" class="page-link" data-page="${i}">${i}</a>`;
-            }
-            
-            ul.appendChild(pageLi);
-          } else if (i === currentPage - 2 || i === currentPage + 2) {
-            const dotsLi = document.createElement('li');
-            dotsLi.className = 'page-item disabled';
-            dotsLi.innerHTML = `<span class="page-link">...</span>`;
-            ul.appendChild(dotsLi);
-          }
-        }
-
-        // Next Button
-        const nextLi = document.createElement('li');
-        nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
-        
-        if (currentPage === totalPages) {
-          nextLi.innerHTML = `
-            <span class="page-link" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
-              </svg>
-            </span>
-          `;
-        } else {
-          nextLi.innerHTML = `
-            <a href="#" class="page-link" data-page="${currentPage + 1}" aria-label="Next">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
-              </svg>
-            </a>
-          `;
-        }
-        ul.appendChild(nextLi);
-
-        nav.appendChild(ul);
-        paginationWrapper.appendChild(nav);
-
-        // Add click handlers
-        nav.querySelectorAll('a.page-link[data-page]').forEach(link => {
-          link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const page = parseInt(this.dataset.page);
-            if (page > 0 && page <= totalPages && page !== currentPage) {
-              currentPage = page;
-              renderTable();
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-          });
-        });
-      }
-
-      // ==========================================
-      // EVENT LISTENERS
-      // ==========================================
-      if (categoryFilter) {
-        categoryFilter.addEventListener('change', filterProducts);
-      }
-
-      // ==========================================
-      // INITIALIZE
-      // ==========================================
-      renderTable();
-    });
-  </script>
 
   {{-- DELETE PRODUCT SCRIPT --}}
   <script>
@@ -628,4 +347,36 @@
       syncStockTypeUI();
     })();
   </script>
+  <script>
+    function submitFilterResetPage(){
+      const form = document.getElementById('outletProductFilterForm');
+      const pageInput = document.getElementById('pageInput');
+      if (pageInput) pageInput.value = 1;
+      form?.submit();
+    }
+
+    function debouncedSubmit(el, delay = 500){
+      const form = document.getElementById('outletProductFilterForm');
+      const pageInput = document.getElementById('pageInput');
+      if (!form || !el) return;
+
+      if (pageInput) pageInput.value = 1;
+
+      if (el._debounceTimer) clearTimeout(el._debounceTimer);
+      el._debounceTimer = setTimeout(() => form.submit(), delay);
+    }
+
+    function changeOutlet(selectEl){
+      const outletId = selectEl.value;
+      const form = document.getElementById('outletProductFilterForm');
+      const outletInput = document.getElementById('outletIdInput');
+      const pageInput = document.getElementById('pageInput');
+      if (!form || !outletInput) return;
+
+      outletInput.value = outletId;
+      if (pageInput) pageInput.value = 1;
+      form.submit();
+    }
+  </script>
+
 @endpush

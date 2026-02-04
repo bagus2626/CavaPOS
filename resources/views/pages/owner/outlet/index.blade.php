@@ -81,7 +81,9 @@
       const searchInput = document.getElementById('searchInput');
       const statusFilter = document.getElementById('statusFilter');
       const tableBody = document.getElementById('outletTableBody');
+      const cardList  = document.getElementById('outletCardList');
       const paginationWrapper = document.querySelector('.table-pagination');
+
 
       if (!tableBody) {
         console.error('Table body not found');
@@ -134,11 +136,12 @@
         const endIndex = startIndex + itemsPerPage;
         const currentOutlets = filteredOutlets.slice(startIndex, endIndex);
 
-        // Clear table
+        // Clear table + cards
         tableBody.innerHTML = '';
+        if (cardList) cardList.innerHTML = '';
 
-        // Render rows
         if (currentOutlets.length === 0) {
+          // Empty state untuk TABLE
           tableBody.innerHTML = `
             <tr class="empty-filter-row">
               <td colspan="7" class="text-center">
@@ -150,13 +153,30 @@
               </td>
             </tr>
           `;
+
+          // Empty state untuk CARDS
+          if (cardList) {
+            cardList.innerHTML = `
+              <div class="table-empty-state" style="padding: 24px;">
+                <span class="material-symbols-outlined">search_off</span>
+                <h4>{{ __('messages.owner.outlet.all_outlets.no_results_title') }}</h4>
+                <p>{{ __('messages.owner.outlet.all_outlets.no_results_subtitle') }}</p>
+              </div>
+            `;
+          }
+
         } else {
           currentOutlets.forEach((outlet, index) => {
             const rowNumber = startIndex + index + 1;
-            const row = createOutletRow(outlet, rowNumber);
-            tableBody.appendChild(row);
+
+            // Table row
+            tableBody.appendChild(createOutletRow(outlet, rowNumber));
+
+            // Card mobile
+            if (cardList) cardList.appendChild(createOutletCard(outlet, rowNumber));
           });
         }
+
 
         // Handle pagination visibility
         if (paginationWrapper) {
@@ -246,6 +266,89 @@
 
         return tr;
       }
+
+      function createOutletCard(outlet, rowNumber) {
+        const isActive = outlet.is_active === 1 || outlet.is_active === '1' || outlet.is_active === true;
+
+        let imageHtml = '';
+        if (outlet.logo) {
+          const imgSrc = outlet.logo.startsWith('http://') || outlet.logo.startsWith('https://')
+            ? outlet.logo
+            : `{{ asset('storage/') }}/${outlet.logo}`;
+          imageHtml = `<img src="${imgSrc}" alt="${outlet.name}" loading="lazy">`;
+        } else {
+          imageHtml = `
+            <div class="user-avatar-placeholder">
+              <span class="material-symbols-outlined">store</span>
+            </div>
+          `;
+        }
+
+        const statusBadge = isActive
+          ? `<span class="badge-modern badge-success badge-sm">{{ __("messages.owner.outlet.all_outlets.active") }}</span>`
+          : `<span class="badge-modern badge-danger  badge-sm">{{ __("messages.owner.outlet.all_outlets.inactive") }}</span>`;
+
+        const showUrl = `/owner/user-owner/outlets/${outlet.id}`;
+        const editUrl = `/owner/user-owner/outlets/${outlet.id}/edit`;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'outlet-card';
+        wrapper.setAttribute('data-status', isActive ? 'active' : 'inactive');
+
+        wrapper.innerHTML = `
+          <div class="outlet-card__top">
+            <div class="outlet-card__avatar">${imageHtml}</div>
+
+            <div class="outlet-card__meta">
+              <div class="outlet-card__name">${outlet.name || '-'}</div>
+
+              <div class="outlet-card__chips">
+                <span class="outlet-chip">
+                  <span class="material-symbols-outlined">account_circle</span>
+                  <span class="chip-text">${outlet.username || '-'}</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="outlet-card__status">
+              ${statusBadge}
+            </div>
+          </div>
+
+          <div class="outlet-card__info">
+            <div class="outlet-info-row">
+              <span class="label">{{ __("messages.owner.outlet.all_outlets.email") }}</span>
+              <a class="value link" href="mailto:${outlet.email || ''}">${outlet.email || '-'}</a>
+            </div>
+
+            <div class="outlet-info-row">
+              <span class="label">Address</span>
+              <span class="value address">${outlet.city || '-'}</span>
+            </div>
+          </div>
+
+          <div class="outlet-card__actions">
+            <a href="${showUrl}" class="btn-card-action">
+              <span class="material-symbols-outlined">visibility</span>
+              <span>{{ __("messages.owner.outlet.all_outlets.view_details") ?? "View" }}</span>
+            </a>
+
+            <a href="${editUrl}" class="btn-card-action">
+              <span class="material-symbols-outlined">edit</span>
+              <span>{{ __("messages.owner.outlet.all_outlets.edit") }}</span>
+            </a>
+
+            <button type="button" class="btn-card-action danger" onclick="deleteOutlet(${outlet.id})">
+              <span class="material-symbols-outlined">delete</span>
+              <span>{{ __("messages.owner.outlet.all_outlets.delete") }}</span>
+            </button>
+          </div>
+        `;
+
+
+        return wrapper;
+      }
+
 
       // ==========================================
       // RENDER PAGINATION

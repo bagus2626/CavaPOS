@@ -781,6 +781,8 @@ return [
                 'js_invalid_format_short' => 'Invalid format.',
 
                 'back' => 'Back to Employees',
+                'no_employees' => 'No Employee Found.',
+                'add_first_employee' => 'Please add new employee.'
 
             ],
         ],
@@ -1213,6 +1215,10 @@ return [
                 'mode_barcode_only' => 'Barcode Only',
                 'mode_cashier_only' => 'Cashier Only',
                 'mode_both' => 'Both',
+                'qr_mode' => 'QRIS Mode',
+                'cashier_payment_available' => 'Cashier payment is available when enabled.',
+                'badge_available' => 'Available',
+                'badge_taken' => 'Taken',
 
                 'back' => 'Back to Outlets',
             ],
@@ -1453,6 +1459,7 @@ return [
                 'recipe_btn' => 'Recipe',
 
                 'back' => 'Back to Outlet Products',
+                'search_placeholder' => 'Search product...',
             ],
             'stocks' => [
                 'add_stock_item'        => 'Add Stock Item',
