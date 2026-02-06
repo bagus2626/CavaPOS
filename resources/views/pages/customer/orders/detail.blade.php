@@ -56,7 +56,7 @@
         </div>
 
         {{-- PERINGATAN JIKA PEMBAYARAN BELUM LUNAS --}}
-        @if(!$order->payment_flag && $payment && $payment->payment_status !== 'PAID' && $order->order_status !== 'PAYMENT')
+        @if(!$order->payment_flag && $payment && $payment->payment_status !== 'PAID' && !in_array($order->order_status, ['PAYMENT', 'PAYMENT REQUEST'], true))
             <div class="mt-4 rounded-xl border border-red-300 bg-red-100 px-4 py-3 text-sm">
                 <div class="flex items-start gap-3">
                     <div class="flex-1 space-y-2">
@@ -171,7 +171,25 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="mt-4 flex justify-center md:justify-end">
+                            <button
+                                type="button"
+                                onclick="cancelOrder({{ $order->id }}, '{{ $partner->slug }}', '{{ $table->table_code }}', '{{ $customer->id }}')"
+                                class="inline-flex items-center gap-2 rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-xs md:text-sm font-semibold text-red-700 hover:bg-red-100 hover:border-red-400 transition"
+                            >
+                                {{ __('messages.customer.orders.detail.cancel_order') ?? 'Cancel Order' }}
+                            </button>
+                            <form id="cancelOrderForm" method="POST" style="display:none;">
+                                @csrf
+
+                                <input type="hidden" name="order_id">
+                                <input type="hidden" name="partner_slug">
+                                <input type="hidden" name="table_code">
+                                <input type="hidden" name="customer_id">
+                            </form>
+                        </div>
                     </div>
+                    
                 </div>
             </div>
         @elseif ($order->order_status === 'PAYMENT')
@@ -243,6 +261,12 @@
                     'icon'  => asset('icons/icon-payment-90.png'),
                 ],
                 [
+                    'key'   => 'PAYMENT REQUEST',
+                    'title' => __('messages.customer.orders.detail.payment_validation'),
+                    'desc'  => __('messages.customer.orders.detail.payment_validation_desc'),
+                    'icon'  => asset('icons/icon-payment-90.png'),
+                ],
+                [
                     'key'   => 'PAID',
                     'title' => __('messages.customer.orders.detail.waiting_to_be_processed'),
                     'desc'  => __('messages.customer.orders.detail.waiting_to_be_processed_desc'),
@@ -264,9 +288,10 @@
 
             $statusIndexMap = [
                 'UNPAID'    => 0,
-                'PAID'      => 1,
-                'PROCESSED' => 2,
-                'SERVED'    => 3,
+                'PAYMENT REQUEST' => 1,
+                'PAID'      => 2,
+                'PROCESSED' => 3,
+                'SERVED'    => 4,
             ];
 
             $currentIndex = $currentIndex ?? ($statusIndexMap[$order->order_status] ?? 0);
@@ -276,11 +301,13 @@
             $currentIndex = min(max($currentIndex, 0), $maxIndex);
 
             $progressMap = [
-                0 => 12.5,   // UNPAID
-                1 => 37.5, // PAID
-                2 => 62.5, // PROCESSED
-                3 => 100,  // SERVED
+                0 => 0,    // UNPAID
+                1 => 25,   // PAYMENT REQUEST
+                2 => 50,   // PROCESSED
+                3 => 75,   // READY / NEXT STEP
+                4 => 100,  // SERVED
             ];
+
 
             $progressPercent = $progressMap[$currentIndex] ?? 0;
 
@@ -422,6 +449,12 @@
                                 <img src="{{ asset('icons/qris_svg.svg') }}" 
                                             alt="QRIS" 
                                             class="h-3 w-auto">
+                                @elseif ($payment->payment_type === 'manual_tf')
+                                    {{ __('messages.customer.orders.detail.manual_tf') }}
+                                @elseif ($payment->payment_type === 'manual_ewallet')
+                                    {{ __('messages.customer.orders.detail.manual_ewallet') }}
+                                @elseif ($payment->payment_type === 'manual_qris')
+                                    {{ __('messages.customer.orders.detail.manual_qris') }}
                                 @else
                                     {{ $payment->payment_type ?? '' }}
                                 @endif
@@ -640,4 +673,31 @@
         localStorage.removeItem('menuCart');
     @endif
 </script>
+<script>
+    function cancelOrder(orderId, partnerSlug, tableCode, customerId) {
+        if (!orderId) return;
+
+        Swal.fire({
+            title: "{{ __('messages.customer.orders.detail.cancel_order_confirm_1') }}",
+            text: "{{ __('messages.customer.orders.detail.cancel_order_confirm_2') }}",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: "{{ __('messages.customer.orders.detail.cancel_order_confirm_yes') }}",
+            cancelButtonText: "{{ __('messages.customer.orders.detail.cancel_order_confirm_no') }}",
+            confirmButtonColor: '#d33',
+            reverseButtons: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const form = document.getElementById('cancelOrderForm');
+                form.action = `/customer/cancel-order/${orderId}`;
+                form.querySelector('input[name="order_id"]').value = orderId;
+                form.querySelector('input[name="partner_slug"]').value = partnerSlug;
+                form.querySelector('input[name="table_code"]').value = tableCode;
+                form.querySelector('input[name="customer_id"]').value = customerId;
+                form.submit();
+            }
+        });
+    }
+</script>
+
 @endpush

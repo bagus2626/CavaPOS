@@ -1,12 +1,9 @@
-/**
- * Multi Image Cropper Module
- * Handles multiple image upload, validation, and cropping with Cropper.js
- */
+
 
 const ImageCropper = (function() {
     // Configuration
     const CONFIG = {
-        MAX_SIZE: 2 * 1024 * 1024, // 2 MB
+        MAX_SIZE: 10 * 1024 * 1024, // 2 MB
         ALLOWED_TYPES: ['image/jpeg', 'image/png', 'image/webp'],
         JPEG_QUALITY: 0.92,
         PNG_QUALITY: 1,
@@ -39,14 +36,16 @@ const ImageCropper = (function() {
             return;
         }
 
-        // Store config
+        const hasAspectRatio = Object.prototype.hasOwnProperty.call(options, 'aspectRatio');
+
         const config = {
             id: id,
-            aspectRatio: options.aspectRatio || 1,
-            outputWidth: options.outputWidth || 800,
-            outputHeight: options.outputHeight || (options.outputWidth || 800) / (options.aspectRatio || 1),
+            aspectRatio: hasAspectRatio ? options.aspectRatio : 1,
+            outputWidth: options.outputWidth ?? null,
+            outputHeight: options.outputHeight ?? null,
             elements: elements
         };
+
 
         bindEvents(config);
     }
@@ -130,7 +129,7 @@ const ImageCropper = (function() {
 
         // Validate file size
         if (file.size > CONFIG.MAX_SIZE) {
-            alert('Ukuran file lebih dari 2 MB. Pilih file yang lebih kecil.');
+            alert('Ukuran file lebih dari 10 MB. Pilih file yang lebih kecil.');
             elements.input.value = '';
             return;
         }
@@ -174,8 +173,8 @@ const ImageCropper = (function() {
             
             croppers[id] = new Cropper(elements.imageToCrop, {
                 aspectRatio: aspectRatio,
-                viewMode: isCircleCrop ? 1 : 2,
-                dragMode: 'move',
+                viewMode: 1,
+                dragMode: false,
                 autoCropArea: 0.9,
                 restore: true,
                 guides: !isCircleCrop,

@@ -27,62 +27,44 @@ class OwnerMasterProductController extends Controller
     {
         $categories = Category::where('owner_id', Auth::id())->get();
 
-        $productsQuery = MasterProduct::with('parent_options.options', 'category', 'promotion')
+        $productsQuery = MasterProduct::with(['parent_options', 'category', 'promotion'])
             ->where('owner_id', Auth::id());
 
-        // ambil parameter ?category=...
         $categoryId = $request->query('category');
-
         if (!empty($categoryId) && $categoryId !== 'all') {
             $productsQuery->where('category_id', $categoryId);
         }
 
-        // Get semua data untuk JavaScript filter
-        $allProducts = $productsQuery
-            ->orderBy('id', 'desc')
-            ->get();
+        $q = trim((string) $request->query('q', ''));
+        if ($q !== '') {
+            $productsQuery->where(function ($qq) use ($q) {
+                $qq->where('name', 'like', "%{$q}%")
+                ->orWhereHas('category', function ($c) use ($q) {
+                    $c->where('category_name', 'like', "%{$q}%");
+                })
+                ->orWhereHas('parent_options', function ($o) use ($q) {
+                    $o->where('name', 'like', "%{$q}%");
+                })
+                ->orWhereHas('promotion', function ($p) use ($q) {
+                    $p->where('promotion_name', 'like', "%{$q}%");
+                });
+            });
+        }
 
-        // Format data untuk JavaScript
-        $allProductsFormatted = $allProducts->map(function ($product) {
-            $firstPicture = null;
-            if (!empty($product->pictures) && is_array($product->pictures)) {
-                $firstPicture = $product->pictures[0]['path'] ?? null;
-            }
-
-            return [
-                'id' => $product->id,
-                'name' => $product->name,
-                'category_id' => $product->category_id,
-                'category_name' => $product->category->category_name ?? '-',
-                'quantity' => $product->quantity,
-                'price' => $product->price,
-                'promotion_name' => $product->promotion->promotion_name ?? null,
-                'parent_options' => $product->parent_options->pluck('name')->implode(', '),
-                'has_options' => $product->parent_options->isNotEmpty(),
-                'picture' => $firstPicture,
-            ];
-        });
-
-        // Simulasi pagination object untuk compatibility dengan view
         $perPage = 10;
-        $currentPage = $request->input('page', 1);
-        $offset = ($currentPage - 1) * $perPage;
-
-        $products = new \Illuminate\Pagination\LengthAwarePaginator(
-            $allProducts->slice($offset, $perPage)->values(),
-            $allProducts->count(),
-            $perPage,
-            $currentPage,
-            ['path' => $request->url(), 'query' => $request->query()]
-        );
+        $products = $productsQuery
+            ->orderBy('id', 'desc')
+            ->paginate($perPage)
+            ->appends($request->query());
 
         return view('pages.owner.products.master-product.index', compact(
             'products',
             'categories',
             'categoryId',
-            'allProductsFormatted'
+            'q'
         ));
     }
+
 
     public function create()
     {
@@ -107,7 +89,7 @@ class OwnerMasterProductController extends Controller
                 'description'      => 'nullable|string',
                 'images'           => 'nullable|array|max:5',
                 'promotion_id'     => 'nullable|integer|exists:promotions,id',
-                'images.*'         => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+                'images.*'         => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
                 'options'          => 'nullable|array',
             ], [
                 'name.required'             => 'Nama produk wajib diisi.',
@@ -248,7 +230,6 @@ class OwnerMasterProductController extends Controller
 
     public function update(Request $request, $id)
     {
-        // dd($request->all());
         DB::beginTransaction();
         try {
             $product = MasterProduct::with(['parent_options.options'])->findOrFail($id);
@@ -270,38 +251,65 @@ class OwnerMasterProductController extends Controller
             // dd($validated);
 
             // Konversi harga ke integer
-            $price = (int) str_replace('.', '', $validated['price']);
+            $price = $this->toIntRupiah($validated['price']);
 
             // Handle existing images
-            $storedImages = [];
-            $existingFilenames = $request->input('existing_images', []); // filenames yang dipertahankan
+            $storedImages = [];            
 
             // PERBAIKAN: Jika tidak ada gambar baru dan tidak ada existing_images yang dicentang,
             // pertahankan gambar lama
-            if (!$request->hasFile('images') && empty($existingFilenames) && !empty($product->pictures)) {
-                $storedImages = $product->pictures; // Pertahankan semua gambar lama
-            } else {
-                // Logic existing (loop untuk filter gambar yang dipertahankan)
-                foreach ((array) $product->pictures as $pic) {
+            $pictures = (array) ($product->pictures ?? []);
+
+            $existingFilenames = (array) $request->input('existing_images', []); // checkbox keep (kalau ada)
+            $removeImage = $request->boolean('remove_image');                   // tombol hapus satu gambar
+            $removeFilename = $request->input('existing_image');                // filename yg dihapus
+
+            // === CASE A: user klik hapus 1 gambar tertentu ===
+            if ($removeImage && $removeFilename) {
+                foreach ($pictures as $pic) {
                     $filename   = $pic['filename'] ?? null;
                     $pathFromDb = $pic['path'] ?? null;
 
-                    // Jika user memilih untuk tetap menyimpan gambar ini → keep
-                    if ($filename && in_array($filename, $existingFilenames, true)) {
-                        $storedImages[] = $pic;
+                    // ini gambar yang diminta dihapus
+                    if ($filename === $removeFilename) {
+                        $relativePath = $pathFromDb
+                            ? ltrim(str_replace('storage/', '', $pathFromDb), '/')
+                            : 'uploads/master-products/' . $filename;
+
+                        if ($relativePath && Storage::disk('public')->exists($relativePath)) {
+                            Storage::disk('public')->delete($relativePath);
+                        }
+
+                        // jangan masukkan ke $storedImages (hapus dari DB)
                         continue;
                     }
 
-                    // Jika user menghapus gambar → hapus file-nya di storage
-                    if ($pathFromDb) {
-                        $relativePath = ltrim(str_replace('storage/', '', $pathFromDb), '/');
-                        if (Storage::disk('public')->exists($relativePath)) {
-                            Storage::disk('public')->delete($relativePath);
+                    // simpan sisanya
+                    $storedImages[] = $pic;
+                }
+
+            // === CASE B: mode normal (keep by existing_images) ===
+            } else {
+                // tidak upload baru + tidak ada pilihan existing_images => keep all
+                if (!$request->hasFile('images') && empty($existingFilenames)) {
+                    $storedImages = $pictures;
+                } else {
+                    foreach ($pictures as $pic) {
+                        $filename   = $pic['filename'] ?? null;
+                        $pathFromDb = $pic['path'] ?? null;
+
+                        if ($filename && in_array($filename, $existingFilenames, true)) {
+                            $storedImages[] = $pic; // keep checked
+                            continue;
                         }
-                    } elseif ($filename) {
-                        $guess = 'uploads/master-products/' . $filename;
-                        if (Storage::disk('public')->exists($guess)) {
-                            Storage::disk('public')->delete($guess);
+
+                        // delete yang tidak dipertahankan
+                        $relativePath = $pathFromDb
+                            ? ltrim(str_replace('storage/', '', $pathFromDb), '/')
+                            : ($filename ? 'uploads/master-products/' . $filename : null);
+
+                        if ($relativePath && Storage::disk('public')->exists($relativePath)) {
+                            Storage::disk('public')->delete($relativePath);
                         }
                     }
                 }
@@ -405,7 +413,7 @@ class OwnerMasterProductController extends Controller
                         foreach ($parentOption['options'] as $optionIndex => $option) {
                             // $optionId = $option['option_id'] ?? null;
                             $optionId = $option['option_id'] ? (int) $option['option_id'] : null;
-                            $optionPrice = (int) str_replace('.', '', $option['price']);
+                            $optionPrice = $this->toIntRupiah($option['price'] ?? 0);
 
                             $optionImages = null;
                             if (isset($option['image']) && $option['image'] instanceof \Illuminate\Http\UploadedFile) {
@@ -474,6 +482,33 @@ class OwnerMasterProductController extends Controller
                 ->withInput()
                 ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
+    }
+
+    private function toIntRupiah($value): int
+    {
+        $v = trim((string) $value);
+        if ($v === '') return 0;
+
+        $v = preg_replace('/[^\d,\.]/', '', $v);
+
+        if (str_contains($v, ',') && str_contains($v, '.')) {
+            $v = str_replace('.', '', $v);
+            $v = str_replace(',', '.', $v);
+            return (int) round((float) $v);
+        }
+
+        if (str_contains($v, ',')) {
+            $v = str_replace(',', '.', $v);
+            return (int) round((float) $v);
+        }
+
+        // hanya titik:
+        if (preg_match('/\.\d{1,2}$/', $v)) {
+            return (int) round((float) $v);
+        }
+
+        $v = str_replace('.', '', $v);
+        return (int) $v;
     }
 
 

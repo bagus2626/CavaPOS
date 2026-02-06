@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Broadcast;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Public\PriceController;
+// use App\Http\Controllers\Public\PriceController;
 use App\Http\Controllers\Admin\Dashboard\DashboardController;
 use App\Http\Controllers\Admin\OwnerManagement\OwnerListController;
 use App\Http\Controllers\Admin\OwnerVerification\OwnerVerificationController;
@@ -33,6 +33,7 @@ use App\Http\Controllers\Owner\XenPlatform\OwnerSplitPaymentController;
 use App\Http\Controllers\Partner\PartnerDashboardController;
 use App\Http\Controllers\Auth\GoogleCallbackController;
 use App\Http\Controllers\Owner\Product\OwnerPromotionController;
+use App\Http\Controllers\Owner\PaymentMethod\OwnerPaymentMethodController;
 use App\Http\Controllers\Owner\Product\OwnerStockController;
 use App\Http\Controllers\Customer\Auth\CustomerAuthController;
 use App\Http\Controllers\Customer\Menu\CustomerMenuController;
@@ -381,6 +382,7 @@ Route::middleware('setlocale')->group(function () {
                     });
                 });
                 Route::resource('promotions', OwnerPromotionController::class);
+                Route::resource('payment-methods', OwnerPaymentMethodController::class);
 
                 Route::prefix('stocks')->name('stocks.')->group(function () {
                     Route::delete('/delete-stock/{id}', [OwnerStockController::class, 'deleteStock'])->name('delete-stock');
@@ -552,13 +554,16 @@ Route::middleware('setlocale')->group(function () {
     Route::prefix('customer')->name('customer.')->middleware('customer.access')->group(function () {
         Route::get('{partner_slug}/table-status/{table_code}', [TableStatusController::class, 'show'])->name('table.status');
 
-        Route::get('{partner_slug}/menu/{table_code}', [CustomerMenuController::class, 'index'])->name('menu.index')->middleware(['throttle:10,1', 'check.table.status']);
+        Route::get('{partner_slug}/menu/{table_code}', [CustomerMenuController::class, 'index'])->name('menu.index')->middleware(['throttle:30,1', 'check.table.status']);
         Route::post('{partner_slug}/menu/{table_code}/check-stock', [CustomerMenuController::class, 'checkStockRealtime'])->name('menu.check-stock');
         Route::post('{partner_slug}/checkout/{table_code}', [CustomerMenuController::class, 'checkout'])->name('menu.checkout')->middleware(['throttle:30,1', 'check.table.status']);
         Route::get('{partner_slug}/order-detail/{table_code}/{order_id}', [CustomerMenuController::class, 'orderDetail'])->name('orders.order-detail');
+        Route::get('{partner_slug}/order-manual-payment/{table_code}/{order_id}', [CustomerMenuController::class, 'orderManualPayment'])->name('orders.order-manual-payment');
+        Route::post('{partner_slug}/{table_code}/orders/{order_id}/manual-payment/upload', [CustomerMenuController::class, 'uploadManualPaymentProof'])->name('orders.manual-payment.upload');
         Route::get('{partner_slug}/order-histories/{table_code}', [CustomerMenuController::class, 'getOrderHistory'])->name('orders.histories');
         Route::post('{partner_slug}/unpaid-order/{order_id}', [CustomerMenuController::class, 'makeUnpaidOrder'])->name('orders.unpaid-order');
         Route::get('/orders/{id}/receipt', [CustomerMenuController::class, 'printReceipt'])->name('orders.receipt');
+        Route::post('/cancel-order/{id}', [CustomerMenuController::class, 'cancelOrder'])->name('orders.cancel-order');
 
         Route::prefix('payment')->name('payment.')->group(function () {
             Route::get('{partner_slug}/get-payment-cash/{table_code}', [CustomerPaymentController::class, 'getPaymentCash'])

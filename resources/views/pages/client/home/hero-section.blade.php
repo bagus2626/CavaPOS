@@ -145,7 +145,7 @@
 </style>
 
 <section id="home"
-    class="relative pt-20 pb-12 sm:pt-24 sm:pb-16 lg:pt-32 lg:pb-24 xl:pt-40 xl:pb-32 overflow-hidden border-b border-gray-200 dark:border-gray-800 bg-white">
+    class="relative pt-32 pb-12 sm:pt-32 sm:pb-16 lg:pt-32 lg:pb-24 xl:pt-40 xl:pb-32 overflow-hidden border-b border-gray-200 dark:border-gray-800 bg-white">
     <!-- Abstract Background Shapes -->
     <div
         class="absolute top-0 right-0 -z-10 w-[400px] sm:w-[600px] lg:w-[800px] h-[400px] sm:h-[600px] lg:h-[800px] bg-red-100/50 dark:bg-red-900/10 rounded-full blur-3xl opacity-60 translate-x-1/3 -translate-y-1/4 animate-gradientShift">
@@ -224,7 +224,7 @@
                     class="relative w-full max-w-[500px] sm:max-w-[650px] lg:max-w-[750px] animate-fadeInRight animate-float">
                     <!-- Laptop Frame -->
                     <div
-                        class="relative bg-gray-800 rounded-t-xl sm:rounded-t-2xl p-2 sm:p-3 shadow-2xl shadow-red-900/10 dark:shadow-black/50 transition-transform duration-500 hover:scale-[1.01]">
+                        class="relative bg-gray-800 rounded-t-2xl sm:rounded-t-2xl p-2 sm:p-3 shadow-2xl shadow-red-900/10 dark:shadow-black/50 transition-transform duration-500 hover:scale-[1.01]">
                         <!-- Screen Bezel -->
                         <div class="bg-black rounded-lg p-1 sm:p-1.5">
                             <!-- Screen Content -->

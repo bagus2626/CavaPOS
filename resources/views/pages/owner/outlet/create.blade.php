@@ -483,7 +483,7 @@
                                                 <input type="checkbox" id="is_active" name="is_active" value="1" {{ old('is_active') ? 'checked' : '' }}>
                                                 <span class="slider-modern"></span>
                                             </label>
-                                            <span class="status-label">
+                                            <span class="" style="font-weight: 600; line-height: 1; font-size: 14px;">
                                                 {{ __('messages.owner.outlet.all_outlets.muted_text_3') }}
                                             </span>
                                         </div>
@@ -493,26 +493,130 @@
                                 {{-- QR Mode --}}
                                 <div class="col-12">
                                     <div class="form-group-modern">
-                                        <label class="form-label-modern">
-                                            {{ __('messages.owner.outlet.all_outlets.activate_qr') }}
+                                        <label class="form-label-modern d-block">
+                                        {{ __('messages.owner.outlet.all_outlets.activate_qr') }}
                                         </label>
-                                        <div class="select-wrapper">
-                                            <select id="qr_mode" name="qr_mode" class="form-control-modern">
-                                                <option value="disabled" {{ old('qr_mode', 'disabled') == 'disabled' ? 'selected' : '' }}>
-                                                    {{ __('messages.owner.outlet.all_outlets.inactive') }}
-                                                </option>
-                                                <option value="barcode_only" {{ old('qr_mode') == 'barcode_only' ? 'selected' : '' }}>
-                                                    {{ __('messages.owner.outlet.all_outlets.qr_only') }}
-                                                </option>
-                                                <option value="cashier_only" {{ old('qr_mode') == 'cashier_only' ? 'selected' : '' }}>
-                                                    {{ __('messages.owner.outlet.all_outlets.cashier_only') }}
-                                                </option>
-                                                <option value="both" {{ old('qr_mode') == 'both' ? 'selected' : '' }}>
-                                                    {{ __('messages.owner.outlet.all_outlets.all_methods') }}
-                                                </option>
-                                            </select>
-                                            <span class="material-symbols-outlined select-arrow">expand_more</span>
+
+                                        <div class="qr-manual-grid">
+                                        {{-- LEFT: System Method (radio, pilih 1) --}}
+                                        <div class="qr-box">
+                                            <div class="qr-box-header">
+                                            <span class="material-symbols-outlined">settings</span>
+                                            <h4 class="qr-box-title">System Method</h4>
+                                            </div>
+
+                                            @php
+                                            $qrMode = old('qr_mode', 'disabled');
+                                            @endphp
+
+                                            <label class="radio-card {{ $qrMode === 'disabled' ? 'is-selected' : '' }}">
+                                            <input type="radio" name="qr_mode" value="disabled" {{ $qrMode === 'disabled' ? 'checked' : '' }}>
+                                            <div class="radio-card-body">
+                                                <div class="radio-card-title">{{ __('messages.owner.outlet.all_outlets.inactive') }}</div>
+                                                <div class="radio-card-desc">{{ __('messages.owner.outlet.all_outlets.inactive_desc') }}</div>
+                                            </div>
+                                            </label>
+
+                                            {{-- <label class="radio-card {{ $qrMode === 'barcode_only' ? 'is-selected' : '' }}">
+                                            <input type="radio" name="qr_mode" value="barcode_only" {{ $qrMode === 'barcode_only' ? 'checked' : '' }}>
+                                            <div class="radio-card-body">
+                                                <div class="radio-card-title">{{ __('messages.owner.outlet.all_outlets.qr_only') }}</div>
+                                                <div class="radio-card-desc">{{ __('messages.owner.outlet.all_outlets.qr_only_desc') }}</div>
+                                            </div>
+                                            </label> --}}
+
+                                            <label class="radio-card {{ $qrMode === 'cashier_only' ? 'is-selected' : '' }}">
+                                            <input type="radio" name="qr_mode" value="cashier_only" {{ $qrMode === 'cashier_only' ? 'checked' : '' }}>
+                                            <div class="radio-card-body">
+                                                <div class="radio-card-title">{{ __('messages.owner.outlet.all_outlets.cashier_only') }}</div>
+                                                <div class="radio-card-desc">{{ __('messages.owner.outlet.all_outlets.cashier_only_desc') }}</div>
+                                            </div>
+                                            </label>
+
+                                            {{-- <label class="radio-card {{ $qrMode === 'both' ? 'is-selected' : '' }}">
+                                            <input type="radio" name="qr_mode" value="both" {{ $qrMode === 'both' ? 'checked' : '' }}>
+                                            <div class="radio-card-body">
+                                                <div class="radio-card-title">{{ __('messages.owner.outlet.all_outlets.all_methods') }}</div>
+                                                <div class="radio-card-desc">{{ __('messages.owner.outlet.all_outlets.all_methods_desc') }}</div>
+                                            </div>
+                                            </label> --}}
                                         </div>
+
+                                        {{-- RIGHT: Manual Payment (checkbox, multi select) --}}
+                                        <div class="qr-box">
+                                            <div class="qr-box-header">
+                                            <span class="material-symbols-outlined">payments</span>
+                                            <h4 class="qr-box-title">{{ __('messages.owner.outlet.all_outlets.manual_payment') }}</h4>
+                                            </div>
+
+                                            @php
+                                            // ids terpilih saat validation error / edit
+                                            $selectedManualPaymentIds = collect(old('manual_payment_ids', []))->map(fn($v) => (int) $v)->all();
+
+                                            // grouping berdasarkan payment_type
+                                            $grouped = collect($manualPaymentMethods ?? [])->groupBy('payment_type');
+
+                                            $typeLabels = [
+                                                'manual_tf'     => __('messages.owner.payment_methods.type_transfer'),
+                                                'manual_ewallet'=> __('messages.owner.payment_methods.type_ewallet'),
+                                                'manual_qris'   => __('messages.owner.payment_methods.type_qris'),
+                                            ];
+                                            @endphp
+
+                                            @if(empty($manualPaymentMethods) || count($manualPaymentMethods) === 0)
+                                            <div class="empty-note">
+                                                {{ __('messages.owner.outlet.all_outlets.no_manual_payment_available') }}
+                                            </div>
+                                            @else
+
+                                            @foreach (['manual_tf', 'manual_ewallet', 'manual_qris'] as $type)
+                                                @php $items = $grouped->get($type, collect()); @endphp
+                                                @if($items->count() > 0)
+                                                <div class="payment-group">
+                                                    <div class="payment-group-title">
+                                                    {{ $typeLabels[$type] ?? $type }}
+                                                    </div>
+
+                                                    <div class="payment-items ml-0 ml-md-4">
+                                                    @foreach($items as $pm)
+                                                        @php
+                                                        $checked = in_array((int)$pm->id, $selectedManualPaymentIds, true);
+                                                        $disabled = isset($pm->is_active) && !$pm->is_active; // kalau kamu mau block yang inactive
+                                                        @endphp
+
+                                                        <label class="check-card {{ $checked ? 'is-selected' : '' }} {{ $disabled ? 'is-disabled' : '' }}">
+                                                        <input type="checkbox"
+                                                                name="manual_payment_ids[]"
+                                                                value="{{ $pm->id }}"
+                                                                {{ $checked ? 'checked' : '' }}
+                                                                {{ $disabled ? 'disabled' : '' }}>
+
+                                                        <div class="check-card-body">
+                                                            <div class="check-card-title">
+                                                            {{ $pm->provider_name ?? '-' }}
+                                                            @if($disabled)
+                                                                <span class="mini-badge mini-badge-gray">Disabled</span>
+                                                            @endif
+                                                            </div>
+
+                                                            <div class="check-card-desc">
+                                                            @php
+                                                                $line1 = trim(($pm->provider_account_name ?? '') . ' ' . ($pm->provider_account_no ? '(' . $pm->provider_account_no . ')' : ''));
+                                                            @endphp
+                                                            {{ $line1 ?: '-' }}
+                                                            </div>
+                                                        </div>
+                                                        </label>
+                                                    @endforeach
+                                                    </div>
+                                                </div>
+                                                @endif
+                                            @endforeach
+
+                                            @endif
+                                        </div>
+                                        </div>
+
                                     </div>
                                 </div>
 
@@ -695,9 +799,138 @@
                 </div>
             </div>
         </div>
-
-
 @endsection
+<style>
+.qr-manual-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 992px){
+  .qr-manual-grid{
+    grid-template-columns: 1fr;
+  }
+}
+
+.qr-box{
+  background: #fff;
+  border: 1px solid #eef0f4;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.qr-box-header{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.qr-box-title{
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.empty-note{
+  background: #f9fafb;
+  border: 1px dashed #e5e7eb;
+  padding: 12px;
+  border-radius: 12px;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+/* radio card */
+.radio-card{
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px;
+  border: 1px solid #eef0f4;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+  margin-bottom: 10px;
+  background: #fff;
+}
+.radio-card input{ margin-top: 3px; }
+.radio-card:hover{ border-color: #e5e7eb; background: #fafafa; }
+.radio-card.is-selected{ border-color: #fecaca; background: #fff1f2; }
+
+.radio-card-title{
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.radio-card-desc{
+  font-size: 0.82rem;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+/* checkbox card */
+.payment-group{ margin-top: 8px; }
+.payment-group-title{
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: #111827;
+  margin: 10px 0 8px;
+}
+
+.payment-items{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.check-card{
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px;
+  border: 1px solid #eef0f4;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+  background: #fff;
+}
+.check-card input{ margin-top: 3px; }
+.check-card:hover{ border-color: #e5e7eb; background: #fafafa; }
+.check-card.is-selected{ border-color: #bbf7d0; background: #f0fdf4; }
+
+.check-card.is-disabled{
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.check-card-title{
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.check-card-desc{
+  font-size: 0.82rem;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.mini-badge{
+  display:inline-flex;
+  align-items:center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+.mini-badge-gray{
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+</style>
 @push('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
@@ -772,12 +1005,15 @@
 
             // ==== WiFi toggle ====
             const wifiToggle = document.getElementById('is_wifi_shown');
-            const wifiFields = document.getElementById('wifiFormFields');
-            if (wifiToggle && wifiFields) {
+            const wifiNameField = document.getElementById('wifiNameField');
+            const wifiPasswordField = document.getElementById('wifiPasswordField');
+            if (wifiToggle && wifiNameField && wifiPasswordField) {
                 wifiToggle.addEventListener('change', function() {
-                    wifiFields.style.display = this.checked ? 'grid' : 'none';
+                    wifiNameField.style.display = this.checked ? 'grid' : 'none';
+                    wifiPasswordField.style.display = this.checked ? 'grid' : 'none';
                 });
-                wifiFields.style.display = wifiToggle.checked ? 'grid' : 'none';
+                wifiNameField.style.display = wifiToggle.checked ? 'grid' : 'none';
+                wifiPasswordField.style.display = wifiToggle.checked ? 'grid' : 'none';
             }
 
             // ==== Password toggles ====
@@ -1236,5 +1472,26 @@
                 });
             }
         });
+    </script>
+    <script>
+        // ==== QR mode radio-card highlight ====
+        const qrRadios = document.querySelectorAll('input[type="radio"][name="qr_mode"]');
+
+        function updateQrModeCardHighlight() {
+        qrRadios.forEach((radio) => {
+            const card = radio.closest('.radio-card');
+            if (!card) return;
+            card.classList.toggle('is-selected', radio.checked);
+        });
+        }
+
+        // on change
+        qrRadios.forEach((radio) => {
+        radio.addEventListener('change', updateQrModeCardHighlight);
+        });
+
+        // initial state (on load)
+        updateQrModeCardHighlight();
+
     </script>
 @endpush

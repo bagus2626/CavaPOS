@@ -46,4 +46,5 @@ window.Echo = new Echo({
 });
 
 // opsional: beri sinyal siap
+
 window.dispatchEvent(new Event("echo:ready"));

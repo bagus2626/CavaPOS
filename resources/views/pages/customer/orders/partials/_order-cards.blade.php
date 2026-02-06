@@ -65,7 +65,15 @@
                     <div class="mt-1 text-xs text-gray-500">
                         {{ __('messages.customer.orders.histories.method') }}:
                         <span class="font-medium text-gray-800">
-                            {{ $order->payment_method }}
+                            @if ($order->payment_method === 'manual_qris')
+                                <span class="font-bold">{{ __('messages.customer.orders.histories.manual_qris') }}</span>
+                            @elseif ($order->payment_method === 'manual_tf')
+                                <span class="font-bold">{{ __('messages.customer.orders.histories.manual_tf') }}</span>
+                            @elseif ($order->payment_method === 'manual_ewallet')
+                                <span class="font-bold">{{ __('messages.customer.orders.histories.manual_ewallet') }}</span>
+                            @else
+                                {{ $order->payment_method }}
+                            @endif
                         </span>
                     </div>
                 @endif
@@ -75,7 +83,11 @@
         {{-- Baris status --}}
         <div class="flex flex-wrap items-center gap-2 mt-1">
             {{-- Status pesanan --}}
-            @if ($order->order_status === 'PAYMENT' && !$order->last_xendit_invoice && $payment)
+            @if ($order->order_status === 'PAYMENT' && (in_array($order->payment_method, ['manual_tf', 'manual_ewallet', 'manual_qris'], true)))
+                <span class="inline-flex items-center px-1 py-1 rounded-md text-[11px] font-semibold border bg-gray-400 text-white {{ $orderStatusColor }}">
+                    PAYMENT REQUEST
+                </span>
+            @elseif ($order->order_status === 'PAYMENT' && !$order->last_xendit_invoice && $payment)
                 <span class="inline-flex items-center px-1 py-1 rounded-md text-[11px] font-semibold border bg-red-400 text-white {{ $orderStatusColor }}">
                     {{ __('messages.customer.orders.histories.failed') }}
                 </span>
@@ -101,6 +113,15 @@
                         <img src="{{ asset('icons/qris_svg.svg') }}"
                              alt="QRIS"
                              class="h-3 w-auto">
+                    @elseif ($payment->payment_type === 'manual_qris')
+                        <span class="font-bold">{{ __('messages.customer.orders.histories.static') }}</span>
+                        <img src="{{ asset('icons/qris_svg.svg') }}"
+                                alt="QRIS"
+                                class="h-3 w-auto">
+                    @elseif ($payment->payment_type === 'manual_tf')
+                        <span class="font-bold">{{ __('messages.customer.orders.histories.manual_tf') }}</span>
+                    @elseif ($payment->payment_type === 'manual_ewallet')
+                        <span class="font-bold">{{ __('messages.customer.orders.histories.manual_ewallet') }}</span>
                     @else
                         {{ $payment->payment_type }}
                     @endif

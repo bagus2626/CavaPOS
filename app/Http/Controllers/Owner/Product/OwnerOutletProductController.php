@@ -45,105 +45,65 @@ class OwnerOutletProductController extends Controller
     {
         $owner = Auth::user();
 
-        // Get all outlets
         $outlets = User::where('owner_id', $owner->id)
             ->select('id', 'name')
             ->orderBy('name')
             ->get();
 
-        // Get categories
         $categories = Category::where('owner_id', $owner->id)
             ->orderBy('category_name')
             ->get();
 
-        // Determine current outlet (default to first outlet)
-        $currentOutletId = $request->get('outlet_id') ?? $outlets->first()->id ?? null;
+        $currentOutletId = $request->get('outlet_id') ?? ($outlets->first()->id ?? null);
 
-        // Get ALL products for current outlet (no pagination here)
-        $allProducts = collect();
+        $categoryId = $request->get('category'); // string / null
+        $q = trim((string) $request->get('q', ''));
+
+        $productsQuery = PartnerProduct::with(['category', 'promotion', 'stock.displayUnit'])
+            ->where('owner_id', $owner->id);
+
         if ($currentOutletId) {
-            $allProducts = PartnerProduct::with(['category', 'promotion', 'stock.displayUnit'])
-                ->where('owner_id', $owner->id)
-                ->where('partner_id', $currentOutletId)
-                ->orderBy('name')
-                ->get();
+            $productsQuery->where('partner_id', $currentOutletId);
+        } else {
+            $products = PartnerProduct::whereRaw('1=0')->paginate(10);
+            return view('pages.owner.products.outlet-product.index', compact(
+                'outlets',
+                'categories',
+                'products',
+                'currentOutletId',
+                'categoryId',
+                'q'
+            ));
         }
 
-        // Format data untuk JavaScript
-        $allProductsFormatted = $allProducts->map(function ($p) {
-            $qtyAvailable = $p->quantity_available;
-            $isQtyZero = $qtyAvailable < 1 && $qtyAvailable !== 999999999;
+        // category filter
+        if (!empty($categoryId)) {
+            $productsQuery->where('category_id', $categoryId);
+        }
 
-            // Format stock display
-            $stockDisplay = '';
-            $stockValue = 0;
+        // search filter
+        if ($q !== '') {
+            $productsQuery->where(function ($w) use ($q) {
+                $w->where('name', 'like', "%{$q}%");
+            });
+        }
 
-            if ($p->stock_type == 'linked') {
-                if ($qtyAvailable === 999999999) {
-                    $stockDisplay = __('messages.owner.products.outlet_products.always_available');
-                    $stockValue = 999999999;
-                } elseif ($isQtyZero) {
-                    $stockDisplay = 'Out of Stock';
-                    $stockValue = 0;
-                } else {
-                    $stockValue = floor($qtyAvailable);
-                    $stockDisplay = number_format($stockValue, 0) . ' pcs';
-                }
-            } elseif ((int) $p->always_available_flag === 1) {
-                $stockDisplay = __('messages.owner.products.outlet_products.always_available');
-                $stockValue = 999999999;
-            } elseif ($p->stock) {
-                if ($isQtyZero) {
-                    $stockDisplay = '0';
-                    $stockValue = 0;
-                } else {
-                    $stockValue = $qtyAvailable;
-                    $unit = $p->stock->displayUnit->unit_name ?? 'unit';
-                    $stockDisplay = rtrim(rtrim(number_format($qtyAvailable, 2, ',', '.'), '0'), ',') . ' ' . $unit;
-                }
-            } else {
-                $stockDisplay = '0';
-                $stockValue = 0;
-            }
-
-            return [
-                'id' => $p->id,
-                'name' => $p->name ?? $p->product_name,
-                'category_id' => $p->category_id,
-                'category_name' => $p->category->category_name ?? '-',
-                'stock_type' => $p->stock_type,
-                'stock_display' => $stockDisplay,
-                'stock_value' => $stockValue,
-                'always_available_flag' => $p->always_available_flag,
-                'is_active' => (int) ($p->is_active ?? 1),
-                'is_hot_product' => (int) ($p->is_hot_product ?? 0),
-                'price' => $p->price,
-                'promotion_name' => $p->promotion ? $p->promotion->promotion_name : null,
-                'picture_path' => !empty($p->pictures) && isset($p->pictures[0]['path']) ? $p->pictures[0]['path'] : null,
-            ];
-        });
-
-        // Simulasi pagination untuk compatibility dengan view
-        $perPage = 10;
-        $currentPage = $request->input('page', 1);
-        $offset = ($currentPage - 1) * $perPage;
-
-        $products = new \Illuminate\Pagination\LengthAwarePaginator(
-            $allProducts->slice($offset, $perPage)->values(),
-            $allProducts->count(),
-            $perPage,
-            $currentPage,
-            ['path' => $request->url(), 'query' => $request->query()]
-        );
+        // paginate asli
+        $products = $productsQuery
+            ->orderBy('name')
+            ->paginate(10)
+            ->appends($request->query()); // supaya query ikut ke pagination links
 
         return view('pages.owner.products.outlet-product.index', compact(
             'outlets',
             'categories',
             'products',
             'currentOutletId',
-            'allProductsFormatted'
+            'categoryId',
+            'q'
         ));
     }
+
 
     public function create()
     {

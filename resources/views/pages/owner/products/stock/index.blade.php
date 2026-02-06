@@ -43,8 +43,14 @@
                 <span class="input-icon">
                   <span class="material-symbols-outlined">search</span>
                 </span>
-                <input type="text" id="searchInput" class="form-control-modern with-icon" 
-                       placeholder="{{ __('messages.owner.products.stocks.search_placeholder') }}">
+                <input
+                  type="text"
+                  id="searchInput"
+                  class="form-control-modern with-icon"
+                  placeholder="{{ __('messages.owner.products.stocks.search_placeholder') }}"
+                  oninput="debouncedStockSearch(this, 400)"
+                >
+
               </div>
 
               <div class="select-wrapper" style="min-width: 200px;">
@@ -55,7 +61,7 @@
                       {{ __('messages.owner.products.stocks.owner_warehouse') }}
                     </option>
                     @foreach ($partners as $partner)
-                      <option value="{{ $partner->id }}" {{ $filterLocation == $partner->id ? 'selected' : '' }}>
+                      <option value="{{ $partner->username }}" {{ $filterLocation == $partner->username ? 'selected' : '' }}>
                         {{ $partner->name }} (Outlet)
                       </option>
                     @endforeach
@@ -63,6 +69,7 @@
                   <span class="material-symbols-outlined select-arrow">expand_more</span>
                 </form>
               </div>
+
             </div>
 
             <a href="{{ route('owner.user-owner.stocks.create') }}" class="btn-modern btn-primary-modern">
@@ -118,260 +125,311 @@
 @push('scripts')
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
-    // ==========================================
-    // STOCK INDEX - SEARCH & PAGINATION
-    // ==========================================
+    // ==============================
+    // Debounce helper untuk search
+    // ==============================
+    function debouncedStockSearch(el, delay = 400){
+      if (!el) return;
+      if (el._debounceTimer) clearTimeout(el._debounceTimer);
+      el._debounceTimer = setTimeout(() => {
+        window.__applyStockFilter?.(); // panggil global function
+      }, delay);
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
       const searchInput = document.getElementById('searchInput');
       const tableBody = document.getElementById('stockTableBody');
-      const paginationWrapper = document.querySelector('.table-pagination');
+      const mobileList = document.getElementById('stockMobileList');
+      const paginationWrapper = document.getElementById('stockPagination');
+      const filterTabs = document.querySelectorAll('#stockFilterTabs .nav-link');
 
-      if (!tableBody) {
-        console.error('Table body not found');
+      if (!tableBody || !mobileList || !paginationWrapper) {
+        console.error('Stock UI containers not found');
         return;
       }
 
-      // Ambil semua data dari Blade
       const allStocksData = @json($allStocksFormatted ?? []);
-      
-      let filteredStocks = [...allStocksData];
+
+      let filtered = [...allStocksData];
+      let currentFilterType = 'linked'; // default sesuai kamu
       const itemsPerPage = 10;
       let currentPage = 1;
 
-      // ==========================================
-      // FILTER FUNCTION
-      // ==========================================
-      function filterStocks() {
-        const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+      // set active tab awal (linked)
+      filterTabs.forEach(tab => {
+        if (tab.getAttribute('data-filter-type') === currentFilterType) tab.classList.add('active');
+        else tab.classList.remove('active');
+      });
 
-        filteredStocks = allStocksData.filter(stock => {
-          // Search: cari di stock_code, stock_name
-          const searchText = `
-            ${stock.stock_code || ''} 
-            ${stock.stock_name || ''}
-          `.toLowerCase();
-          
-          const matchesSearch = !searchTerm || searchText.includes(searchTerm);
+      // ==============================
+      // FILTER
+      // ==============================
+      function applyFilter() {
+        const q = (searchInput?.value || '').toLowerCase().trim();
 
-          return matchesSearch;
+        filtered = allStocksData.filter(s => {
+          // Tab filter
+          let matchesTab = true;
+          if (currentFilterType === 'linked') matchesTab = s.stock_type === 'linked';
+          else if (currentFilterType === 'direct') matchesTab = s.stock_type === 'direct';
+          // all => true
+
+          // Search
+          const hay = `${s.stock_code || ''} ${s.stock_name || ''}`.toLowerCase();
+          const matchesSearch = !q || hay.includes(q);
+
+          return matchesTab && matchesSearch;
         });
 
-        currentPage = 1; // Reset ke halaman pertama
-        renderTable();
+        currentPage = 1;
+        render();
       }
 
-      // ==========================================
-      // RENDER TABLE
-      // ==========================================
-      function renderTable() {
-        // Hitung pagination
-        const totalPages = Math.ceil(filteredStocks.length / itemsPerPage);
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        const currentStocks = filteredStocks.slice(startIndex, endIndex);
+      // expose global supaya debouncedStockSearch bisa manggil
+      window.__applyStockFilter = applyFilter;
 
-        // Clear table
+      // ==============================
+      // RENDER
+      // ==============================
+      function render() {
+        renderDesktopTable();
+        renderMobileCards();
+        renderPagination();
+      }
+
+      function emptyStateHtml() {
+        return `
+          <div class="table-empty-state" style="padding: 20px;">
+            <span class="material-symbols-outlined">search_off</span>
+            <h4>{{ __('messages.owner.products.stocks.no_results_found') }}</h4>
+            <p>{{ __('messages.owner.products.stocks.adjust_search_filter') }}</p>
+          </div>
+        `;
+      }
+
+      function getPagedItems() {
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        return { start, end, items: filtered.slice(start, end) };
+      }
+
+      function renderDesktopTable() {
+        const { start, items } = getPagedItems();
+
         tableBody.innerHTML = '';
 
-        // Render rows
-        if (currentStocks.length === 0) {
-          // UPDATE: Translate Empty State
+        if (items.length === 0) {
           tableBody.innerHTML = `
             <tr class="empty-filter-row">
-              <td colspan="7" class="text-center">
-                <div class="table-empty-state">
-                  <span class="material-symbols-outlined">search_off</span>
-                  <h4>{{ __('messages.owner.products.stocks.no_results_found') }}</h4>
-                  <p>{{ __('messages.owner.products.stocks.adjust_search_filter') }}</p>
-                </div>
-              </td>
+              <td colspan="7" class="text-center">${emptyStateHtml()}</td>
             </tr>
           `;
-        } else {
-          currentStocks.forEach((stock, index) => {
-            const rowNumber = startIndex + index + 1;
-            const row = createStockRow(stock, rowNumber);
-            tableBody.appendChild(row);
-          });
+          return;
         }
 
-        // Handle pagination visibility
-        if (paginationWrapper) {
-          if (filteredStocks.length <= itemsPerPage) {
-            paginationWrapper.style.display = 'none';
-          } else {
-            paginationWrapper.style.display = '';
-            renderPagination(totalPages, startIndex, endIndex);
-          }
-        }
+        items.forEach((s, idx) => {
+          const rowNumber = start + idx + 1;
+
+          const formattedQty = new Intl.NumberFormat('id-ID', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          }).format(Number(s.display_quantity ?? 0));
+
+          const unitDisplay = s.display_unit_name
+            ? `<span class="badge-modern badge-info">${escapeHtml(s.display_unit_name)}</span>`
+            : `<span class="text-muted small">({{ __('messages.owner.products.stocks.base_unit') }})</span>`;
+
+          const tr = document.createElement('tr');
+          tr.className = 'table-row';
+          tr.innerHTML = `
+            <td class="text-center text-muted">${rowNumber}</td>
+            <td class="mono fw-600">${escapeHtml(s.stock_code ?? '')}</td>
+            <td><span class="fw-600">${escapeHtml(s.stock_name ?? '')}</span></td>
+            <td>${formattedQty}</td>
+            <td>${unitDisplay}</td>
+            <td><span class="fw-600">${escapeHtml(String(s.last_price_per_unit ?? ''))}</span></td>
+            <td class="text-center">
+              <div class="table-actions">
+                <button onclick="deleteStock(${s.id})"
+                  class="btn-table-action delete"
+                  title="{{ __('messages.owner.products.stocks.delete') }}">
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+              </div>
+            </td>
+          `;
+          tableBody.appendChild(tr);
+        });
       }
 
-      // ==========================================
-      // CREATE STOCK ROW
-      // ==========================================
-      function createStockRow(stock, rowNumber) {
-        const tr = document.createElement('tr');
-        tr.className = 'table-row';
-        tr.setAttribute('data-type', stock.type || '');
-        tr.setAttribute('data-stock_type', stock.stock_type || '');
-        
-        const partnerType = stock.partner_product_id && !stock.partner_product_option_id 
-          ? 'product' 
-          : (stock.partner_product_id && stock.partner_product_option_id ? 'option' : 'none');
-        tr.setAttribute('data-partner-type', partnerType);
+      function renderMobileCards() {
+        const { items } = getPagedItems();
 
-        // Format quantity
-        const formattedQuantity = new Intl.NumberFormat('id-ID', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        }).format(stock.display_quantity);
+        mobileList.innerHTML = '';
 
-        // Unit display
-        let unitDisplay = '';
-        if (stock.display_unit_name) {
-          unitDisplay = `<span class="badge-modern badge-info">${stock.display_unit_name}</span>`;
-        } else {
-          unitDisplay = `<span class="text-muted small">({{ __('messages.owner.products.stocks.base_unit') }})</span>`;
+        if (items.length === 0) {
+          mobileList.innerHTML = emptyStateHtml();
+          return;
         }
 
-        tr.innerHTML = `
-          <td class="text-center text-muted">${rowNumber}</td>
-          <td class="mono fw-600">${stock.stock_code}</td>
-          <td><span class="fw-600">${stock.stock_name}</span></td>
-          <td>${formattedQuantity}</td>
-          <td>${unitDisplay}</td>
-          <td><span class="fw-600">${stock.last_price_per_unit}</span></td>
-          <td class="text-center">
-            <div class="table-actions">
-              <button onclick="deleteStock(${stock.id})"
-                class="btn-table-action delete"
-                title="{{ __('messages.owner.products.stocks.delete') }}">
-                <span class="material-symbols-outlined">delete</span>
-              </button>
+        items.forEach(s => {
+          const formattedQty = new Intl.NumberFormat('id-ID', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          }).format(Number(s.display_quantity ?? 0));
+
+          const unitName = s.display_unit_name || '{{ __('messages.owner.products.stocks.base_unit') }}';
+          const code = s.stock_code ?? '';
+          const name = s.stock_name ?? '';
+
+          const card = document.createElement('div');
+          card.className = 'stock-card';
+          card.innerHTML = `
+            <div class="stock-card__top">
+              <div class="stock-card__title">
+                <div class="stock-card__code">${escapeHtml(code)}</div>
+                <div class="stock-card__name">${escapeHtml(name)}</div>
+              </div>
             </div>
-          </td>
-        `;
 
-        return tr;
+            <div class="stock-card__bottom">
+              <span class="stock-chip">
+                <span class="material-symbols-outlined">inventory</span>
+                <span>${formattedQty}</span>
+              </span>
+
+              <span class="stock-chip">
+                <span class="material-symbols-outlined">straighten</span>
+                <span>${escapeHtml(unitName)}</span>
+              </span>
+
+              <span class="stock-chip">
+                <span class="material-symbols-outlined">payments</span>
+                <span>${escapeHtml(String(s.last_price_per_unit ?? ''))}</span>
+              </span>
+
+              <div class="stock-actions">
+                <button type="button" class="btn-card-action danger" onclick="deleteStock(${s.id})">
+                  <span class="material-symbols-outlined">delete</span>
+                  <span>{{ __('messages.owner.products.stocks.delete') }}</span>
+                </button>
+              </div>
+            </div>
+          `;
+          mobileList.appendChild(card);
+        });
       }
 
-      // ==========================================
-      // RENDER PAGINATION
-      // ==========================================
-      function renderPagination(totalPages, startIndex, endIndex) {
-        if (!paginationWrapper) return;
+      function renderPagination() {
+        const totalPages = Math.ceil(filtered.length / itemsPerPage);
 
         paginationWrapper.innerHTML = '';
+
+        if (totalPages <= 1) return;
 
         const nav = document.createElement('nav');
         nav.setAttribute('role', 'navigation');
         nav.setAttribute('aria-label', 'Pagination Navigation');
-        
+
         const ul = document.createElement('ul');
         ul.className = 'pagination';
 
-        // Previous Button
-        const prevLi = document.createElement('li');
-        prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
-        
-        if (currentPage === 1) {
-          prevLi.innerHTML = `
-            <span class="page-link" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
-              </svg>
-            </span>
-          `;
-        } else {
-          prevLi.innerHTML = `
-            <a href="#" class="page-link" data-page="${currentPage - 1}" aria-label="Previous">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
-              </svg>
-            </a>
-          `;
-        }
-        ul.appendChild(prevLi);
+        // Prev
+        ul.appendChild(makePageItem('prev', currentPage - 1, currentPage === 1));
 
-        // Page Numbers
+        // Numbers (WAJIB langsung <li>)
         for (let i = 1; i <= totalPages; i++) {
-          if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-            const pageLi = document.createElement('li');
-            pageLi.className = `page-item ${i === currentPage ? 'active' : ''}`;
-            
-            if (i === currentPage) {
-              pageLi.innerHTML = `<span class="page-link" aria-current="page">${i}</span>`;
-            } else {
-              pageLi.innerHTML = `<a href="#" class="page-link" data-page="${i}">${i}</a>`;
-            }
-            
-            ul.appendChild(pageLi);
-          } else if (i === currentPage - 2 || i === currentPage + 2) {
-            const dotsLi = document.createElement('li');
-            dotsLi.className = 'page-item disabled';
-            dotsLi.innerHTML = `<span class="page-link">...</span>`;
-            ul.appendChild(dotsLi);
+          const show =
+            i === 1 ||
+            i === totalPages ||
+            (i >= currentPage - 1 && i <= currentPage + 1);
+
+          const showDots =
+            i === currentPage - 2 || i === currentPage + 2;
+
+          if (show) {
+            const li = document.createElement('li');
+            li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+            li.innerHTML = (i === currentPage)
+              ? `<span class="page-link" aria-current="page">${i}</span>`
+              : `<a href="#" class="page-link" data-page="${i}">${i}</a>`;
+            ul.appendChild(li);
+          } else if (showDots) {
+            const li = document.createElement('li');
+            li.className = 'page-item disabled';
+            li.innerHTML = `<span class="page-link">...</span>`;
+            ul.appendChild(li);
           }
         }
 
-        // Next Button
-        const nextLi = document.createElement('li');
-        nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
-        
-        if (currentPage === totalPages) {
-          nextLi.innerHTML = `
-            <span class="page-link" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
-              </svg>
-            </span>
-          `;
-        } else {
-          nextLi.innerHTML = `
-            <a href="#" class="page-link" data-page="${currentPage + 1}" aria-label="Next">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
-              </svg>
-            </a>
-          `;
-        }
-        ul.appendChild(nextLi);
+        // Next
+        ul.appendChild(makePageItem('next', currentPage + 1, currentPage === totalPages));
 
         nav.appendChild(ul);
         paginationWrapper.appendChild(nav);
 
-        // Add click handlers
-        nav.querySelectorAll('a.page-link[data-page]').forEach(link => {
-          link.addEventListener('click', function(e) {
+        // Handlers
+        nav.querySelectorAll('a.page-link[data-page]').forEach(a => {
+          a.addEventListener('click', (e) => {
             e.preventDefault();
-            const page = parseInt(this.dataset.page);
-            if (page > 0 && page <= totalPages && page !== currentPage) {
-              currentPage = page;
-              renderTable();
+            const p = parseInt(a.dataset.page, 10);
+            if (!Number.isFinite(p)) return;
+            if (p >= 1 && p <= totalPages && p !== currentPage) {
+              currentPage = p;
+              render();
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }
           });
         });
+
+        function makePageItem(type, page, disabled) {
+          const li = document.createElement('li');
+          li.className = `page-item ${disabled ? 'disabled' : ''}`;
+
+          if (disabled) {
+            li.innerHTML = `<span class="page-link" aria-hidden="true">${type === 'prev' ? '‹' : '›'}</span>`;
+          } else {
+            li.innerHTML = `<a href="#" class="page-link" data-page="${page}" aria-label="${type}">${type === 'prev' ? '‹' : '›'}</a>`;
+          }
+          return li;
+        }
       }
 
-      // ==========================================
-      // EVENT LISTENERS
-      // ==========================================
-      if (searchInput) {
-        searchInput.addEventListener('input', filterStocks);
-      }
 
-      // ==========================================
-      // INITIALIZE
-      // ==========================================
-      renderTable();
+      // ==============================
+      // TABS HANDLER
+      // ==============================
+      filterTabs.forEach(tab => {
+        tab.addEventListener('click', function(e){
+          e.preventDefault();
+          filterTabs.forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+          currentFilterType = this.getAttribute('data-filter-type') || 'linked';
+          applyFilter();
+        });
+      });
+
+      // init pertama kali
+      applyFilter();
+
+      // ==============================
+      // helper: escape HTML
+      // ==============================
+      function escapeHtml(str){
+        return String(str ?? '')
+          .replaceAll('&','&amp;')
+          .replaceAll('<','&lt;')
+          .replaceAll('>','&gt;')
+          .replaceAll('"','&quot;')
+          .replaceAll("'",'&#039;');
+      }
     });
-
+  </script>
+  <script>
     // ==========================================
     // DELETE STOCK FUNCTION
     // ==========================================
     function deleteStock(stockId) {
-      // UPDATE: Translate Delete Confirm
       Swal.fire({
         title: '{{ __('messages.owner.products.stocks.delete_confirmation_1') }}',
         text: '{{ __('messages.owner.products.stocks.delete_confirmation_2') }}',
@@ -389,9 +447,9 @@
           form.style.display = 'none';
 
           form.innerHTML = `
-            @csrf
-            <input type="hidden" name="_method" value="DELETE">
-          `;
+          @csrf
+          <input type="hidden" name="_method" value="DELETE">
+        `;
 
           document.body.appendChild(form);
           form.submit();

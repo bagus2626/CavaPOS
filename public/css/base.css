@@ -20,6 +20,11 @@
   --primary-light: rgba(174, 21, 4, 0.12);
   --primary-shadow: rgba(174, 21, 4, 0.35);
 
+  /* Tambahkan ini di dalam :root, di bawah Status Colors */
+  --secondary: #64748b; /* Warna abu-abu medium */
+  --secondary-light: #f1f5f9; /* Warna abu-abu sangat muda (untuk background badge) */
+  --secondary-dark: #1e293b; /* Warna abu-abu tua (untuk teks badge) */
+
   /* Background Colors */
   --background: #f4f6f8;
   --card-bg: #ffffff;
@@ -78,10 +83,10 @@
   --transition-slow: 0.5s ease;
 }
 
-p{
+p {
   margin: 0;
 }
-a:hover{
+a:hover {
   text-decoration: none;
 }
 

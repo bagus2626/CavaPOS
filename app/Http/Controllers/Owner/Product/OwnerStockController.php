@@ -43,7 +43,19 @@ class OwnerStockController extends Controller
         if ($filterLocation === 'owner') {
             $query->whereNull('partner_id');
         } else {
-            $query->where('partner_id', $filterLocation);
+            // Cari partner berdasarkan username
+            $partner = User::where('owner_id', $owner->id)
+                ->where('role', 'partner')
+                ->where('username', $filterLocation)
+                ->first();
+
+            if ($partner) {
+                $query->where('partner_id', $partner->id);
+            } else {
+                // Jika username tidak ditemukan, fallback ke owner
+                $query->whereNull('partner_id');
+                $filterLocation = 'owner';
+            }
         }
 
         // Ambil SEMUA stocks (tanpa pagination di backend)

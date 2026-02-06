@@ -2507,6 +2507,13 @@
                 //reorder
                 (function applyReorderOnLoad() {
                     const items = window.__REORDER_ITEMS__ || [];
+
+                    // JIKA ADA REORDER → RESET CART TOTAL
+                    if (Array.isArray(items) && items.length > 0) {
+                        cart = {};
+                        lastKeyPerProduct = {};
+                        clearCartFromStorage();
+                    }
                     
                     // HAPUS PARAMETER REORDER DARI URL SEGERA SETELAH DATA DIBACA
                     const url = new URL(window.location.href);
@@ -2973,5 +2980,16 @@
                 // init pertama
                 applyFilters();
             })();
+        </script>
+        <script>
+            // Tutup Swal kalau user balik ke halaman ini (bfcache / back)
+            window.addEventListener('pageshow', function () {
+                if (window.Swal) Swal.close();
+            });
+
+            // Tutup Swal kalau tab balik fokus
+            document.addEventListener('visibilitychange', function () {
+                if (!document.hidden && window.Swal) Swal.close();
+            });
         </script>
     @endpush

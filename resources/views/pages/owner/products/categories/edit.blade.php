@@ -130,11 +130,50 @@
             </div>
         </div>
     </div>
-
+    <div class="modal fade" id="cropModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content modern-modal">
+                <div class="modal-header modern-modal-header">
+                    <h5 class="modal-title">
+                        <span class="material-symbols-outlined">crop</span>
+                        {{ __('messages.owner.products.categories.crop_modal_title') }}
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="alert alert-info alert-modern mb-3">
+                        <div class="alert-icon">
+                            <span class="material-symbols-outlined">info</span>
+                        </div>
+                        <div class="alert-content">
+                            <small>{{ __('messages.owner.products.categories.crop_instruction') }}</small>
+                        </div>
+                    </div>
+                    <div class="img-container-crop">
+                        <img id="imageToCrop" style="max-width: 100%;" alt="Image to crop">
+                    </div>
+                </div>
+                <div class="modal-footer modern-modal-footer">
+                    <button type="button" class="btn-cancel-modern" data-dismiss="modal">
+                        <span class="material-symbols-outlined">close</span>
+                        {{ __('messages.owner.products.categories.cancel') }}
+                    </button>
+                    <button type="button" id="cropBtn" class="btn-submit-modern">
+                        <span class="material-symbols-outlined">check</span>
+                        {{ __('messages.owner.products.categories.crop_save') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/image-cropper.js') }}"></script>
+    {{-- <script src="{{ asset('js/image-cropper.js') }}"></script> --}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script>
 
         document.addEventListener('DOMContentLoaded', function () {

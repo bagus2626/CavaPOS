@@ -11,8 +11,8 @@
         }
 
         body {
-            font-family: DejaVu Sans, sans-serif;
-            font-size: 10px;
+            font-family: "Courier New", monospace;
+            font-size: 16px;
             color: #111;
         }
 
@@ -28,23 +28,23 @@
         /* ====== Header ====== */
         .title {
             text-align: center;
-            font-weight: 700;
-            font-size: 14px;
+            /* font-weight: 700; */
+            font-size: 16px; /* test */
             margin: 0 0 2px;
             line-height: 1.1;
         }
 
         .subtitle {
             text-align: center;
-            color: #666;
-            font-size: 9px;
+            color: #000000;
+            font-size: 12px;
             margin: 0 0 6px;
         }
 
         /* ====== Separator ====== */
         .sep {
             border: 0;
-            border-top: 1px dashed #999;
+            border-top: 1px dashed #000000;
             margin: 6px 0;
             height: 0;
         }
@@ -61,19 +61,20 @@
         }
 
         .meta .label {
-            color: #666;
+            color: #000000;
             width: 34%;
         }
 
         .meta .value {
             text-align: right;
-            font-weight: 600;
+            /* font-weight: 600; */
         }
 
         /* ====== Items ====== */
         table.items {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed; /* penting: cegah kolom berubah-ubah */
         }
 
         table.items th,
@@ -81,12 +82,25 @@
             padding: 3px 0;
             vertical-align: top;
         }
+        .items td.col-name {
+            word-break: break-word;      /* aman untuk nama panjang */
+            overflow-wrap: anywhere;     /* lebih kuat untuk thermal */
+        }
+
+        .items .col-qty { width: 12%; }
+        .items .col-name { width: 58%; }
+        .items .col-sub { width: 30%; }
+
+        .items td.col-sub, .items th.col-sub {
+            text-align: right;
+            white-space: nowrap;
+        }
 
         table.items thead th {
             text-align: left;
-            color: #555;
-            font-weight: 700;
-            border-bottom: 1px solid #ddd;
+            color: #000000;
+            /* font-weight: 700; */
+            border-bottom: 1px solid #000000;
         }
 
         table.items .right {
@@ -95,21 +109,34 @@
         }
 
         table.items .name {
-            font-weight: 600;
+            /* font-weight: 600; */
             padding-left: 0px;
-            font-size: 10px;
-            color: #555;
+            font-size: 16px; /* test */
+            color: #000000;
+        }
+
+        /* Jarak antar item (baris utama) */
+        .items tr.item-row td {
+            padding-top: 10px;
+            line-height: 1.35;
+            /* padding-bottom: 6px; */
+        }
+
+        /* Opsi tetap rapat tapi tidak mepet */
+        .items tr.opt-row td {
+            padding-top: 2px;
+            padding-bottom: 2px;
         }
 
         table.items .hint {
-            color: #666;
-            font-size: 9px;
+            color: #000000;
+            font-size: 14px;
         }
 
         .opt {
             padding-left: 14px;
-            font-size: 9px;
-            color: #555;
+            font-size: 16px;
+            color: #000000;
         }
 
         .opt .bullet {
@@ -134,7 +161,7 @@
         }
 
         table.totals .label {
-            color: #444;
+            color: #000000;
         }
 
         table.totals .val {
@@ -143,8 +170,8 @@
         }
 
         .grand {
-            font-weight: 800;
-            font-size: 12px;
+            /* font-weight: 800; */
+            font-size: 16px; /* test */
             border-top: 1px solid #111;
             border-bottom: 1px solid #111;
             padding: 4px 0;
@@ -152,7 +179,6 @@
 
         /* ====== WiFi Info ====== */
 .wifi-box {
-    background: #f5f5f5;
     border-radius: 6px;
     padding: 10px;
     margin: 6px 0;
@@ -160,16 +186,16 @@
 }
 
 .wifi-title {
-    font-weight: 700;
-    font-size: 10px;
-    color: #333;
+    /* font-weight: 700; */
+    font-size: 14px;
+    color: #000000;
     margin-bottom: 6px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .wifi-title i {
-    color: #666;
+    color: #000000;
     margin-right: 3px;
 }
 
@@ -184,19 +210,19 @@
     justify-content: center;
     align-items: center;
     gap: 8px;
-    font-size: 9px;
+    font-size: 14px;
 }
 
 .wifi-label {
-    color: #666;
-    font-weight: 600;
+    color: #000000;
+    /* font-weight: 600; */
     min-width: 50px;
     text-align: right;
 }
 
 .wifi-value {
     color: #111;
-    font-weight: 700;
+    /* font-weight: 700; */
     font-family: 'Courier New', monospace;
     letter-spacing: 0.3px;
     text-align: left;
@@ -207,27 +233,31 @@
 /* ====== Thank You Message ====== */
 .thank-you {
     text-align: center;
-    color: #444;
-    font-size: 10px;
-    font-weight: 600;
+    color: #000000;
+    font-size: 13px;
+    /* font-weight: 600; */
     margin-top: 8px;
     line-height: 1.5;
+    padding-bottom: 100px;
 }
 
 .come-again {
-    font-size: 9px;
-    color: #666;
-    font-weight: 500;
+    font-size: 13px;
+    color: #000000;
+    /* font-weight: 500; */
     font-style: italic;
 }
 
         /* ====== Footer ====== */
         .foot {
             text-align: center;
-            color: #666;
-            font-size: 9px;
+            color: #000000;
+            font-size: 14px;
             margin-top: 6px;
             line-height: 1.3;
+        }
+        table.items thead {
+            display: table-row-group;
         }
     </style>
 </head>
@@ -306,7 +336,7 @@
                         @endphp
 
                         {{-- Baris produk (nama + subtotal kanan) --}}
-                        <tr>
+                        <tr class="item-row">
                             <td class="name">
                                 {{ $qty }} &times; {{ $item->partnerProduct->name ?? '-' }}
                                 <span class="price">Rp {{ number_format($withPromo, 0, ',', '.') }}</span>
@@ -316,14 +346,15 @@
 
                         {{-- Opsi-opsi (jika ada) --}}
                         @foreach ($item->order_detail_options as $option)
-                            <tr>
+                            <tr class="opt-row">
                                 <td class="opt">
-                                    <span class="bullet">•</span>{{ $option->option->name ?? '' }}
-                                    <span class="price">Rp {{ number_format($option->price, 0, ',', '.') }}</span>
+                                    <span class="bullet">•</span>{{ $option->option->name ?? '' }} Rp {{ number_format($option->price, 0, ',', '.') }}
+                                    {{-- <span class="price">Rp {{ number_format($option->price, 0, ',', '.') }}</span> --}}
                                 </td>
                                 <td></td>
                             </tr>
                         @endforeach
+                        {{-- <hr class="sep"> --}}
                     @endforeach
                 </tbody>
             </table>
@@ -342,7 +373,17 @@
                 </tr>
                 <tr>
                     <td class="label">Metode Pembayaran</td>
-                    <td class="val">{{ $data->payment_method ?? '' }}</td>
+                    <td class="val">
+                        @if ($data->payment_method === 'manual_tf')
+                            Transfer
+                        @elseif ($data->payment_method === 'manual_ewallet')
+                            E-wallet
+                        @elseif ($data->payment_method === 'manual_qris')
+                            QR Statis
+                        @else
+                            {{ $data->payment_method ?? '' }}
+                        @endif
+                    </td>
                 </tr>
                 <tr>
                     <td class="label">Jumlah Dibayarkan</td>
@@ -386,3 +427,4 @@
     <br>
     <span class="come-again">Sampai jumpa kembali</span>
 </div>
+<hr class="sep">

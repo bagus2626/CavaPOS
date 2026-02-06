@@ -46,6 +46,10 @@ class BookingOrder extends Model
     {
         return $this->belongsTo(Table::class, 'table_id');
     }
+    public function partner()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'partner_id', 'id');
+    }
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'customer_id');
@@ -53,6 +57,10 @@ class BookingOrder extends Model
     public function payment()
     {
         return $this->belongsTo(OrderPayment::class, 'payment_id');
+    }
+    public function latestPayment()
+    {
+        return $this->hasOne(OrderPayment::class, 'booking_order_id')->latestOfMany();
     }
     public function order_details()
     {

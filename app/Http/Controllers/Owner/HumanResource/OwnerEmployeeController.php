@@ -28,45 +28,31 @@ class OwnerEmployeeController extends Controller
         $partners = User::where('owner_id', $owner_id)->get();
         $partnerIds = $partners->pluck('id');
 
+        $currentPartnerId = $request->input('partner_id');
+        $q = trim((string) $request->input('q', ''));
+
         $employeesQuery = Employee::with('partner')
             ->whereIn('partner_id', $partnerIds);
-
-        $currentPartnerId = $request->input('partner_id');
 
         if (!empty($currentPartnerId)) {
             $employeesQuery->where('partner_id', $currentPartnerId);
         }
 
-        // Get semua data untuk JavaScript filter
-        $allEmployees = $employeesQuery->orderBy('id', 'desc')->get();
+        if ($q !== '') {
+            $employeesQuery->where(function ($qq) use ($q) {
+                $qq->where('name', 'like', "%{$q}%")
+                    ->orWhere('user_name', 'like', "%{$q}%")
+                    ->orWhere('email', 'like', "%{$q}%")
+                    ->orWhere('role', 'like', "%{$q}%");
+            });
+        }
 
-        // Format data untuk JavaScript
-        $allEmployeesFormatted = $allEmployees->map(function ($employee) {
-            return [
-                'id' => $employee->id,
-                'name' => $employee->name,
-                'user_name' => $employee->user_name,
-                'email' => $employee->email,
-                'role' => $employee->role,
-                'is_active' => $employee->is_active,
-                'image' => $employee->image,
-                'partner_id' => $employee->partner_id,
-                'partner_name' => $employee->partner->name ?? '-',
-            ];
-        });
-
-        // Simulasi pagination object untuk compatibility dengan view
         $perPage = 10;
-        $currentPage = $request->input('page', 1);
-        $offset = ($currentPage - 1) * $perPage;
 
-        $employees = new \Illuminate\Pagination\LengthAwarePaginator(
-            $allEmployees->slice($offset, $perPage)->values(),
-            $allEmployees->count(),
-            $perPage,
-            $currentPage,
-            ['path' => $request->url(), 'query' => $request->query()]
-        );
+        $employees = $employeesQuery
+            ->orderByDesc('id')
+            ->paginate($perPage)
+            ->appends($request->query());
 
         $roles = (clone $employeesQuery)->pluck('role')->unique()->sort()->values();
 
@@ -75,9 +61,10 @@ class OwnerEmployeeController extends Controller
             'employees',
             'roles',
             'currentPartnerId',
-            'allEmployeesFormatted'
+            'q'
         ));
     }
+
 
     public function create()
     {
@@ -97,7 +84,7 @@ class OwnerEmployeeController extends Controller
             'partner'               => ['required'],
             'role'                  => ['required', 'in:CASHIER,KITCHEN,WAITER'],
             'password'              => ['required', 'string', 'min:8', 'confirmed'],
-            'image'                 => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'], // max 2MB
+            'image'                 => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp'], // max 2MB
             'is_active'             => ['nullable', 'boolean'],
         ]);
 

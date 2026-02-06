@@ -16,6 +16,8 @@ use Illuminate\Validation\Rules;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Owner\OwnerManualPayment;
+use App\Models\Partner\PaymentMethod\PartnerManualPayment;
 
 class OwnerOutletController extends Controller
 {
@@ -67,7 +69,10 @@ class OwnerOutletController extends Controller
     public function create()
     {
         $outlets = User::where('owner_id', Auth::id())->get();
-        return view('pages.owner.outlet.create', compact('outlets'));
+        $manualPaymentMethods = OwnerManualPayment::where('owner_id', Auth::id())
+        ->where('is_active', 1)
+        ->get();
+        return view('pages.owner.outlet.create', compact('outlets', 'manualPaymentMethods'));
     }
 
     /**
@@ -100,6 +105,7 @@ class OwnerOutletController extends Controller
                 'is_wifi_shown' => ['nullable', 'boolean'],
                 'partner_code' => ['required', 'size:4', 'alpha_num', Rule::unique('users', 'partner_code')],
                 'qr_mode' => ['nullable', 'string', 'in:disabled,barcode_only,cashier_only,both'],
+                'manual_payment_ids' => ['nullable', 'array'],
 
                 // Validasi untuk field profile_outlet
                 'contact_person' => ['nullable', 'string', 'max:255'],
@@ -221,6 +227,16 @@ class OwnerOutletController extends Controller
                 'website'        => $request->website,
             ]);
 
+            if ($request->filled('manual_payment_ids')) {
+                $manualPaymentIds = $request->input('manual_payment_ids', []);
+                foreach ($manualPaymentIds as $mpId) {
+                    $partnerManualPayment = new PartnerManualPayment();
+                    $partnerManualPayment->partner_id = $user->id;
+                    $partnerManualPayment->owner_manual_payment_id = $mpId;
+                    $partnerManualPayment->save();
+                }
+            }
+
             event(new Registered($user));
 
             DB::commit();
@@ -266,9 +282,14 @@ class OwnerOutletController extends Controller
         }
 
         // Load relasi profile outlet
-        $outlet->load('profileOutlet');
+        $outlet->load(['profileOutlet','partnerManualPayments.ownerManualPayment']);
+        $manualPaymentMethods = OwnerManualPayment::query()
+            ->where('owner_id', Auth::id())
+            ->orderBy('payment_type')
+            ->orderBy('provider_name')
+            ->get();
 
-        return view('pages.owner.outlet.show', compact('outlet'));
+        return view('pages.owner.outlet.show', compact('outlet', 'manualPaymentMethods'));
     }
 
     /**
@@ -276,8 +297,13 @@ class OwnerOutletController extends Controller
      */
     public function edit(User $outlet)
     {
+        
         abort_if($outlet->role !== 'partner', 404);
         abort_if($outlet->owner_id !== Auth::id(), 403);
+
+        $outlet->load([
+            'partnerManualPayments.ownerManualPayment',
+        ]);
 
         // Tentukan qr_mode berdasarkan kombinasi is_qr_active dan is_cashier_active
         if ($outlet->is_qr_active && $outlet->is_cashier_active) {
@@ -290,13 +316,17 @@ class OwnerOutletController extends Controller
             $outlet->qr_mode = 'disabled';
         }
 
+        $manualPaymentMethods = OwnerManualPayment::where('owner_id', Auth::id())
+            ->where('is_active', 1)
+            ->get();
+        // dd($manualPaymentMethods);
 
-        return view('pages.owner.outlet.edit', compact('outlet'));
+
+        return view('pages.owner.outlet.edit', compact('outlet', 'manualPaymentMethods'));
     }
 
     public function update(Request $request, User $outlet)
     {
-        // dd($request->all());
         abort_if($outlet->role !== 'partner', 404);
         abort_if($outlet->owner_id !== Auth::id(), 403);
 
@@ -326,6 +356,11 @@ class OwnerOutletController extends Controller
             'qr_mode' => ['nullable', 'string', 'in:disabled,barcode_only,cashier_only,both'],
             'image'    => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:4096'],
             'logo'     => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:4096'],
+            'manual_payment_ids'   => ['nullable', 'array'],
+            'manual_payment_ids.*' => [
+                'integer',
+                Rule::exists('owner_manual_payments', 'id')->where(fn($q) => $q->where('owner_id', Auth::id())),
+            ],
 
             // flag hapus
             'remove_background_picture' => ['nullable', 'boolean'],
@@ -473,6 +508,30 @@ class OwnerOutletController extends Controller
             }
 
             $outlet->update($updateData);
+
+            // ====== MANUAL PAYMENT (sync) ======
+            $manualPaymentIds = $request->input('manual_payment_ids', []);
+            $manualPaymentIds = collect($manualPaymentIds)
+                ->filter(fn($v) => $v !== null && $v !== '')
+                ->map(fn($v) => (int) $v)
+                ->unique()
+                ->values()
+                ->all();
+
+            // 1) hapus dulu data lama
+            PartnerManualPayment::where('partner_id', $outlet->id)->delete();
+
+            // 2) insert ulang data baru (kalau ada)
+            if (!empty($manualPaymentIds)) {
+                $rows = array_map(fn($mpId) => [
+                    'partner_id' => $outlet->id,
+                    'owner_manual_payment_id' => $mpId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ], $manualPaymentIds);
+
+                PartnerManualPayment::insert($rows);
+            }
 
             // Update atau create profile outlet
             $profileData = [
