@@ -19,6 +19,24 @@
       </div>
 
       <div class="modal-body" style="padding: var(--spacing-lg);">
+        {{-- ====== Cara Menambahkan Produk (Info di paling atas) ====== --}}
+        <div class="mb-4 mt-4"
+            style="display:flex; gap:12px; align-items:flex-start; padding: var(--spacing-md);
+                    background: var(--info-light, #e3f2fd); border-left: 4px solid var(--info, #2196F3);
+                    border-radius: var(--radius-sm);">
+          <span class="material-symbols-outlined" style="color: var(--info, #2196F3); flex-shrink:0; font-size:22px;">
+            tips_and_updates
+          </span>
+          <div style="font-size: 0.95rem; line-height: 1.45;">
+            <strong style="display:block; color: var(--info, #2196F3); margin-bottom: 4px;">
+              {{ __('messages.owner.products.outlet_products.how_to_add_product') }}
+            </strong>
+
+            <ol style="margin: 0; padding-left: 18px; color: var(--text-secondary);">
+              {!! __('messages.owner.products.outlet_products.step_information') !!}
+            </ol>
+          </div>
+        </div>
         {{-- Category --}}
         <div class="form-group-modern">
           <label for="qp_category_id" class="form-label-modern">

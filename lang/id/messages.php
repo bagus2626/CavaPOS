@@ -678,8 +678,8 @@ return [
             'trend_sales_title' => 'Tren Penjualan 7 Hari Terakhir',
             'top_products_title' => 'Top 5 Produk (Bulan Ini)',
             'outlet_performance_title' => 'Performa Outlet (Bulan Ini)',
-            'filter_best' => 'Terbaik',
-            'filter_worst' => 'Terburuk',
+            'filter_best' => 'Tertinggi',
+            'filter_worst' => 'Terendah',
             'chart_sales_label' => 'Penjualan (Rp)',
             'chart_quantity_label' => 'Jumlah Terjual',
             'chart_tooltip_sold' => 'Terjual',
@@ -1462,6 +1462,11 @@ return [
 
                 'back' => 'Kembali ke Produk Toko',
                 'search_placeholder' => 'Cari Produk...',
+                'how_to_add_product' => 'Cara menambahkan produk',
+                'step_information' => '<li>Buat produk di menu <b>Master Produk</b>.</li>
+                                        <li>Masuk ke <b>Produk Toko</b>.</li>
+                                        <li>Pilih produk dari <b>Master Produk</b> yang akan dijadikan produk di toko.</li>',
+
             ],
             'stocks' => [
                 'add_stock_item' => 'Tambah Item Stok',

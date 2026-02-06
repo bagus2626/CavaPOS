@@ -5,11 +5,12 @@ namespace App\Models\Partner\HumanResource;
 use Illuminate\Foundation\Auth\User as Authenticatable; // penting
 use Illuminate\Notifications\Notifiable;
 use App\Models\User;
+use Laravel\Sanctum\HasApiTokens;
 // use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Employee extends Authenticatable
 {
-    use Notifiable; //, HasFactory;
+    use HasApiTokens, Notifiable; //, HasFactory;
 
     // Kalau nama tabel default "employees", baris ini bisa dihapus
     // protected $table = 'employees';

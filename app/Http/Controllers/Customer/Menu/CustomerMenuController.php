@@ -886,6 +886,22 @@ class CustomerMenuController extends Controller
                 ];
             }
         }
+        if ($payment) {
+            if ($payment->payment_status === 'PAYMENT REQUEST' && in_array($payment->payment_type, ['manual_ewallet', 'manual_tf', 'manual_qris'])) {
+                // dd('masuuuk');
+                $url = URL::temporarySignedRoute(
+                    'customer.orders.order-detail',
+                    now()->addMinutes(120),
+                    [
+                        'partner_slug' => $partner_slug,
+                        'table_code' => $table_code,
+                        'order_id' => $order_id
+                    ]
+                );
+
+                return redirect()->to($url)->with('success', 'Your payment is being processed!');
+            }
+        }
 
         return view('pages.customer.payment.manual-payment.index', [
             'order'        => $order,
@@ -904,15 +920,14 @@ class CustomerMenuController extends Controller
 
     public function uploadManualPaymentProof(Request $request, $partner_slug, $table_code, $order_id)
     {
+        
         DB::beginTransaction();
 
         try {
-
             $request->validate([
-                'payment_proof' => 'required|file|max:5120|mimes:jpg,jpeg,png,webp',
+                'payment_proof' => 'required|file|mimes:jpg,jpeg,png,webp',
                 'payment_note'  => 'nullable|string|max:500',
             ]);
-
             $order = BookingOrder::with(['payment.ownerManualPayment'])->findOrFail($order_id);
 
             if (!$order->payment || !$order->payment->ownerManualPayment) {

@@ -676,8 +676,8 @@ return [
             'trend_sales_title' => 'Sales Trend (Last 7 Days)',
             'top_products_title' => 'Top 5 Products (This Month)',
             'outlet_performance_title' => 'Outlet Performance (This Month)',
-            'filter_best' => 'Best',
-            'filter_worst' => 'Worst',
+            'filter_best' => 'Highest',
+            'filter_worst' => 'Lowest',
             'chart_sales_label' => 'Sales (Rp)',
             'chart_quantity_label' => 'Quantity Sold',
             'chart_tooltip_sold' => 'Sold',
@@ -1460,6 +1460,11 @@ return [
 
                 'back' => 'Back to Outlet Products',
                 'search_placeholder' => 'Search product...',
+                'how_to_add_product' => 'How to add a product',
+                'step_information' => '<li>Create a product in the <b>Master Product</b> menu.</li>
+                                        <li>Go to <b>Store Products</b>.</li>
+                                        <li>Select a product from <b>Master Product</b> to be added as a store product.</li>',
+
             ],
             'stocks' => [
                 'add_stock_item'        => 'Add Stock Item',
