@@ -239,6 +239,7 @@
   border-radius: 14px;
   background: #fff;
   padding: 14px;
+  margin-bottom: 5px;
 }
 
 .employee-card__top {
@@ -282,8 +283,17 @@
   padding: 6px 10px;
   border-radius: 999px;
   background: rgba(0,0,0,.04);
+  font-size: 10px;
+}
+
+.employee-chip-role {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(0,0,0,.04);
   font-size: 12px;
-  color: #555;
 }
 
 .employee-chip .material-symbols-outlined {
