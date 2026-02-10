@@ -4,12 +4,41 @@
 @section('page_title', __('messages.owner.products.categories.categories'))
 
 @section('content')
+<link rel="stylesheet" href="{{ asset('css/mobile-owner.css') }}">
   <div class="modern-container">
     <div class="container-modern">
-      <div class="page-header">
+      {{-- Page Header - Desktop Only --}}
+      <div class="page-header only-desktop">
         <div class="header-content">
           <h1 class="page-title">{{ __('messages.owner.products.categories.categories') }}</h1>
           <p class="page-subtitle">{{ __('messages.owner.products.categories.subtitle') }}</p>
+        </div>
+      </div>
+
+      {{-- Mobile Header - Mobile Only --}}
+      <div class="only-mobile mobile-header-card">
+        <div class="mobile-header-content">
+          <div class="mobile-header-left">
+            <h1 class="mobile-header-title">{{ __('messages.owner.products.categories.categories') }}</h1>
+            <p class="mobile-header-subtitle">{{ __('messages.owner.products.categories.subtitle') }}</p>
+          </div>
+        </div>
+
+        {{-- Mobile Search Box --}}
+        <div class="mobile-search-box">
+          <span class="mobile-search-icon">
+            <span class="material-symbols-outlined">search</span>
+          </span>
+          <input 
+            type="text" 
+            id="searchInputMobile" 
+            class="mobile-search-input"
+            value="{{ request('q') }}"
+            placeholder="{{ __('messages.owner.products.categories.search_placeholder') }}"
+          >
+          <button class="mobile-filter-btn" data-toggle="modal" data-target="#orderModal">
+            <span class="material-symbols-outlined">swap_vert</span>
+          </button>
         </div>
       </div>
 
@@ -35,7 +64,8 @@
         </div>
       @endif
 
-      <div class="modern-card mb-4">
+      {{-- Search & Filter Card - Desktop Only --}}
+      <div class="modern-card mb-4 only-desktop">
         <div class="card-body-modern" style="padding: var(--spacing-lg) var(--spacing-xl);">
           <div class="table-controls">
             <div class="search-filter-group">
@@ -47,7 +77,6 @@
                   class="form-control-modern with-icon"
                   value="{{ request('q') }}"
                   placeholder="{{ __('messages.owner.products.categories.search_placeholder') }}">
-
               </div>
             </div>
 
@@ -71,16 +100,37 @@
     </div>
   </div>
 
+  {{-- Floating Add Button - Mobile Only --}}
+  <a href="{{ route('owner.user-owner.categories.create') }}" class="btn-add-outlet-mobile">
+    <span class="material-symbols-outlined">add</span>
+  </a>
+
   @include('pages.owner.products.categories.category-order-modal')
 
 @endsection
+
+<style>
+/* Hide desktop elements on mobile */
+@media (max-width: 768px) {
+  .only-desktop {
+    display: none !important;
+  }
+}
+
+/* Hide mobile elements on desktop */
+@media (min-width: 769px) {
+  .only-mobile {
+    display: none !important;
+  }
+}
+</style>
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
 
-{{-- ✅ script order modal kamu tetap (tidak diubah) --}}
+{{-- Category Order Modal Script --}}
 <script>
 // ==========================================
 // CATEGORY ORDER MODAL
@@ -142,6 +192,7 @@ $(function() {
     });
 });
 </script>
+
 @php
   $pageCategories = $categories->map(function($c){
     return [
@@ -158,28 +209,36 @@ $(function() {
 document.addEventListener('DOMContentLoaded', function () {
   applyDesktopSearch('');
   const searchInput = document.getElementById('searchInput');
+  const searchInputMobile = document.getElementById('searchInputMobile');
   const mobileList = document.getElementById('categoryMobileList');
 
   const pageCategories = @json($pageCategories);
 
-  if (!searchInput) return;
+  // Fungsi search yang sama untuk desktop dan mobile
+  function handleSearch(input) {
+    if (!input) return;
 
-  let timer;
-  searchInput.addEventListener('input', function () {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      const params = new URLSearchParams(window.location.search);
+    let timer;
+    input.addEventListener('input', function () {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        const params = new URLSearchParams(window.location.search);
 
-      const q = (searchInput.value || '').trim();
-      if (q) params.set('q', q);
-      else params.delete('q');
+        const q = (input.value || '').trim();
+        if (q) params.set('q', q);
+        else params.delete('q');
 
-      // reset page ke 1 saat keyword berubah
-      params.delete('page');
+        // reset page ke 1 saat keyword berubah
+        params.delete('page');
 
-      window.location.search = params.toString();
-    }, 300);
-  });
+        window.location.search = params.toString();
+      }, 300);
+    });
+  }
+
+  // Attach event ke kedua input
+  handleSearch(searchInput);
+  handleSearch(searchInputMobile);
 
   function escapeHtml(str){
     return String(str ?? '')
@@ -292,29 +351,33 @@ document.addEventListener('DOMContentLoaded', function () {
       mobileList.appendChild(card);
     });
 
-    // ✅ penting: pasang handler setelah card dibuat
     attachDeleteHandlers('.js-delete-form-mobile');
   }
 
   // Render awal
   renderMobile(pageCategories);
 
-  // Search hanya untuk data halaman ini
-  if (searchInput){
-    searchInput.addEventListener('input', function(){
-      const q = (searchInput.value || '').toLowerCase().trim();
+  // Search hanya untuk data halaman ini (client-side untuk instant feedback)
+  function handleInstantSearch(input) {
+    if (!input) return;
+    
+    input.addEventListener('input', function(){
+      const q = (input.value || '').toLowerCase().trim();
 
-      // ✅ mobile (render ulang)
+      // mobile (render ulang)
       const filtered = pageCategories.filter(c => {
         const hay = `${c.category_name || ''} ${c.description || ''}`.toLowerCase();
         return !q || hay.includes(q);
       });
       renderMobile(filtered);
 
-      // ✅ desktop (filter tr tanpa render ulang)
+      // desktop (filter tr tanpa render ulang)
       applyDesktopSearch(q);
     });
   }
+
+  handleInstantSearch(searchInput);
+  handleInstantSearch(searchInputMobile);
 });
 
 function applyDesktopSearch(q){
@@ -330,11 +393,7 @@ function applyDesktopSearch(q){
 
     row.style.display = (!keyword || hay.includes(keyword)) ? '' : 'none';
   });
-
-  // kalau kamu mau: tampilkan empty state di desktop saat hasil kosong
-  // (opsional) -> nanti aku bikinkan juga kalau kamu mau
 }
-
 </script>
 
 @endpush

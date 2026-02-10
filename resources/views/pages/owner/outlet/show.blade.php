@@ -328,7 +328,7 @@
                                     <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.phone_number') }}</div>
                                     <div class="detail-info-value">
                                         @if($outlet->profileOutlet->contact_phone)
-                                            <a
+                                            
                                                 href="tel:{{ $outlet->profileOutlet->contact_phone }}">{{ $outlet->profileOutlet->contact_phone }}</a>
                                         @else
                                             —
@@ -542,11 +542,51 @@
                         </div>
                     </div>
 
+                    {{-- Action Buttons --}}
+                    <div class="action-buttons-group">
+                        <a href="{{ route('owner.user-owner.outlets.edit', $outlet->id) }}" class="btn-action btn-action-edit">
+                            <span class="material-symbols-outlined">edit</span>
+                            {{ __('messages.owner.outlet.all_outlets.edit') }}
+                        </a>
+                        
+                        <form action="{{ route('owner.user-owner.outlets.destroy', $outlet->id) }}" method="POST" class="d-inline-block" id="deleteForm">
+                            @csrf
+                            @method('DELETE')
+                            <button type="button" class="btn-action btn-action-delete" onclick="confirmDelete()">
+                                <span class="material-symbols-outlined">delete</span>
+                                {{ __('messages.owner.outlet.all_outlets.delete') }}
+                            </button>
+                        </form>
+                    </div>
+
                 </div>
             </div>
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function confirmDelete() {
+    Swal.fire({
+        title: '{{ __('messages.owner.outlet.all_outlets.delete_confirmation_1') }}',
+        text: '{{ __('messages.owner.outlet.all_outlets.delete_confirmation_2') }}',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ae1504',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '{{ __('messages.owner.outlet.all_outlets.delete_confirmation_3') }}',
+        cancelButtonText: '{{ __('messages.owner.outlet.all_outlets.cancel') }}'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('deleteForm').submit();
+        }
+    });
+}
+</script>
+@endpush
+
 <style>
 .qr-manual-grid{
   display: grid;
@@ -631,5 +671,66 @@
 .mini-badge-gray{
   background: #f3f4f6;
   color: #4b5563;
+}
+
+/* Action Buttons */
+.action-buttons-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(0,0,0,.10);
+  cursor: pointer;
+  font-size: 0.95rem;
+  background: #fff;
+}
+
+.btn-action .material-symbols-outlined {
+  font-size: 1.25rem;
+}
+
+.btn-action-edit {
+  color: #333;
+  border-color: rgba(0,0,0,.10);
+}
+
+.btn-action-edit:hover {
+  background: #f8f9fa;
+  color: #333;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,.08);
+}
+
+.btn-action-delete {
+  border-color: rgba(174,21,4,.25);
+  color: #ae1504;
+}
+
+.btn-action-delete:hover {
+  background: rgba(174,21,4,.05);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(174,21,4,.15);
+}
+
+@media (max-width: 576px) {
+  .action-buttons-group {
+    flex-direction: column;
+  }
+  
+  .btn-action {
+    width: 100%;
+  }
 }
 </style>

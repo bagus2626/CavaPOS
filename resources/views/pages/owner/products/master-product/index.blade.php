@@ -6,79 +6,59 @@
 @section('content')
   <div class="modern-container">
     <div class="container-modern">
-      <div class="page-header">
-        <div class="header-content">
-          <h1 class="page-title">{{ __('messages.owner.products.master_products.master_products') }}</h1>
-          <p class="page-subtitle">{{ __('messages.owner.products.master_products.manage_catalog_subtitle') }}</p>
+      {{-- Page Header - Desktop Only --}}
+<div class="page-header only-desktop">
+  <div class="header-content">
+    <h1 class="page-title">{{ __('messages.owner.products.master_products.master_products') }}</h1>
+    <p class="page-subtitle">{{ __('messages.owner.products.master_products.manage_catalog_subtitle') }}</p>
+  </div>
+</div>
+
+{{-- Search & Filter Card - Desktop Only --}}
+<div class="modern-card mb-4 only-desktop">
+  <div class="card-body-modern" style="padding: var(--spacing-lg) var(--spacing-xl);">
+    <form method="GET" action="{{ url()->current() }}" id="productFilterForm">
+      <div class="table-controls">
+        <div class="search-filter-group">
+
+          <div class="input-wrapper" style="flex: 1; max-width: 400px;">
+            <span class="input-icon">
+              <span class="material-symbols-outlined">search</span>
+            </span>
+
+            <input
+              type="text"
+              name="q"
+              id="productSearchInput"
+              value="{{ $q ?? request('q') }}"
+              class="form-control-modern with-icon"
+              placeholder="{{ __('messages.owner.products.master_products.search_placeholder') }}"
+              oninput="searchFilter(this, 500)"
+            >
+            <input type="hidden" name="page" id="pageInput" value="{{ request('page', 1) }}">
+          </div>
+
+          <div class="select-wrapper" style="min-width: 200px;">
+            <select name="category" class="form-control-modern" onchange="document.getElementById('productFilterForm').submit()">
+              <option value="all">{{ __('messages.owner.products.master_products.all') }}</option>
+              @foreach($categories as $category)
+                <option value="{{ $category->id }}" @selected((string)request('category') === (string)$category->id)>
+                  {{ $category->category_name }}
+                </option>
+              @endforeach
+            </select>
+            <span class="material-symbols-outlined select-arrow">expand_more</span>
+          </div>
         </div>
+
+        <a href="{{ route('owner.user-owner.master-products.create') }}" class="btn-modern btn-primary-modern">
+          <span class="material-symbols-outlined">add</span>
+          {{ __('messages.owner.products.master_products.add_product') ?? 'Add Product' }}
+        </a>
       </div>
-
-      @if (session('success'))
-        <div class="alert alert-success alert-modern">
-          <div class="alert-icon">
-            <span class="material-symbols-outlined">check_circle</span>
-          </div>
-          <div class="alert-content">
-            {{ session('success') }}
-          </div>
-        </div>
-      @endif
-
-      @if (session('error'))
-        <div class="alert alert-danger alert-modern">
-          <div class="alert-icon">
-            <span class="material-symbols-outlined">error</span>
-          </div>
-          <div class="alert-content">
-            {{ session('error') }}
-          </div>
-        </div>
-      @endif
-
-      <div class="modern-card mb-4">
-        <div class="card-body-modern" style="padding: var(--spacing-lg) var(--spacing-xl);">
-          <form method="GET" action="{{ url()->current() }}" id="productFilterForm">
-            <div class="table-controls">
-              <div class="search-filter-group">
-
-                <div class="input-wrapper" style="flex: 1; max-width: 400px;">
-                  <span class="input-icon">
-                    <span class="material-symbols-outlined">search</span>
-                  </span>
-
-                  <input
-                    type="text"
-                    name="q"
-                    id="productSearchInput"
-                    value="{{ $q ?? request('q') }}"
-                    class="form-control-modern with-icon"
-                    placeholder="{{ __('messages.owner.products.master_products.search_placeholder') }}"
-                    oninput="searchFilter(this, 500)"
-                  >
-                  <input type="hidden" name="page" id="pageInput" value="{{ request('page', 1) }}">
-                </div>
-
-                <div class="select-wrapper" style="min-width: 200px;">
-                  <select name="category" class="form-control-modern" onchange="document.getElementById('productFilterForm').submit()">
-                    <option value="all">{{ __('messages.owner.products.master_products.all') }}</option>
-                    @foreach($categories as $category)
-                      <option value="{{ $category->id }}" @selected((string)request('category') === (string)$category->id)>
-                        {{ $category->category_name }}
-                      </option>
-                    @endforeach
-                  </select>
-                  <span class="material-symbols-outlined select-arrow">expand_more</span>
-                </div>
-              </div>
-
-              <a href="{{ route('owner.user-owner.master-products.create') }}" class="btn-modern btn-primary-modern">
-                <span class="material-symbols-outlined">add</span>
-                {{ __('messages.owner.products.master_products.add_product') ?? 'Add Product' }}
-              </a>
-            </div>
-          </form>
-        </div>
-      </div>
+    </form>
+  </div>
+</div>
 
 
       @include('pages.owner.products.master-product.display')
@@ -86,6 +66,22 @@
     </div>
   </div>
 @endsection
+
+<style>
+/* Hide desktop elements on mobile */
+@media (max-width: 768px) {
+  .only-desktop {
+    display: none !important;
+  }
+}
+
+/* Hide mobile elements on desktop */
+@media (min-width: 769px) {
+  .only-mobile {
+    display: none !important;
+  }
+}
+  </style>
 
 @push('scripts')
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
