@@ -4,8 +4,18 @@
 @section('page_title', __('messages.owner.user_management.employees.all_employees'))
 
 @section('content')
+  <style>
+    /* Hide page header on mobile */
+    @media (max-width: 768px) {
+      .page-header {
+        display: none !important;
+      }
+    }
+  </style>
+
   <div class="modern-container">
     <div class="container-modern">
+      {{-- PAGE HEADER - DESKTOP ONLY --}}
       <div class="page-header">
         <div class="header-content">
           <h1 class="page-title">{{ __('messages.owner.user_management.employees.all_employees') }}</h1>
@@ -35,7 +45,8 @@
         </div>
       @endif
 
-      <div class="modern-card mb-4">
+      {{-- DESKTOP SEARCH & FILTER --}}
+      <div class="modern-card mb-4 desktop-only-card">
         <div class="card-body-modern" style="padding: var(--spacing-lg) var(--spacing-xl);">
           <form method="GET" action="{{ url()->current() }}" id="employeeFilterForm">
             <div class="table-controls">
@@ -86,17 +97,20 @@
 @push('scripts')
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
+    // ==========================================
+    // SEARCH FILTER FUNCTION (WORKS FOR BOTH DESKTOP & MOBILE)
+    // ==========================================
     function searchFilter(el, delay = 400) {
-      const form = document.getElementById('employeeFilterForm');
+      // Cari form terdekat dari element yang trigger
+      const form = el.closest('form');
       if (!form) return;
 
-      // simpan timer per-element (biar aman kalau nanti ada lebih dari 1 input)
+      // Simpan timer per-element
       if (el._searchDebounceTimer) {
         clearTimeout(el._searchDebounceTimer);
       }
 
       // Enter = langsung submit
-      // event tersedia di window.event karena dipanggil inline dari HTML
       const e = window.event;
       if (e && e.key === 'Enter') {
         e.preventDefault();
@@ -104,10 +118,12 @@
         return;
       }
 
+      // Debounce submit
       el._searchDebounceTimer = setTimeout(() => {
         form.submit();
       }, delay);
     }
+    
     // ==========================================
     // DELETE EMPLOYEE FUNCTION
     // ==========================================
@@ -117,7 +133,7 @@
         text: '{{ __('messages.owner.user_management.employees.delete_confirmation_2') }}',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#ae1504',
+        confirmButtonColor: '#b3311d',
         cancelButtonColor: '#6c757d',
         confirmButtonText: '{{ __('messages.owner.user_management.employees.delete_confirmation_3') }}',
         cancelButtonText: '{{ __('messages.owner.user_management.employees.cancel') }}'
@@ -138,5 +154,32 @@
         }
       });
     }
+
+    // ==========================================
+    // MOBILE FILTER MODAL FUNCTIONS
+    // ==========================================
+    function toggleMobileFilter() {
+      const modal = document.getElementById('mobileFilterModal');
+      if (modal) {
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden'; // Prevent scroll
+      }
+    }
+
+    function closeMobileFilter() {
+      const modal = document.getElementById('mobileFilterModal');
+      if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = ''; // Restore scroll
+      }
+    }
+
+    // Close modal when clicking outside
+    document.addEventListener('click', function(e) {
+      const modal = document.getElementById('mobileFilterModal');
+      if (modal && e.target === modal) {
+        closeMobileFilter();
+      }
+    });
   </script>
 @endpush

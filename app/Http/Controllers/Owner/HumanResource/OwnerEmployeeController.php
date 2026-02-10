@@ -29,15 +29,34 @@ class OwnerEmployeeController extends Controller
         $partnerIds = $partners->pluck('id');
 
         $currentPartnerId = $request->input('partner_id');
+        $currentRole = $request->input('role');
+        $currentStatus = $request->input('status');
         $q = trim((string) $request->input('q', ''));
 
+        // Base query
         $employeesQuery = Employee::with('partner')
             ->whereIn('partner_id', $partnerIds);
 
+        // Filter by partner
         if (!empty($currentPartnerId)) {
             $employeesQuery->where('partner_id', $currentPartnerId);
         }
 
+        // Filter by role
+        if (!empty($currentRole)) {
+            $employeesQuery->where('role', $currentRole);
+        }
+
+        // Filter by status
+        if (!empty($currentStatus)) {
+            if ($currentStatus === 'on_duty') {
+                $employeesQuery->where('is_active', 1);
+            } elseif ($currentStatus === 'off') {
+                $employeesQuery->where('is_active', 0);
+            }
+        }
+
+        // Search
         if ($q !== '') {
             $employeesQuery->where(function ($qq) use ($q) {
                 $qq->where('name', 'like', "%{$q}%")
@@ -54,13 +73,76 @@ class OwnerEmployeeController extends Controller
             ->paginate($perPage)
             ->appends($request->query());
 
-        $roles = (clone $employeesQuery)->pluck('role')->unique()->sort()->values();
+        // Ambil available roles berdasarkan filter aktif (partner_id & search)
+        $availableRolesQuery = Employee::whereIn('partner_id', $partnerIds);
+
+        if (!empty($currentPartnerId)) {
+            $availableRolesQuery->where('partner_id', $currentPartnerId);
+        }
+
+        if ($q !== '') {
+            $availableRolesQuery->where(function ($qq) use ($q) {
+                $qq->where('name', 'like', "%{$q}%")
+                    ->orWhere('user_name', 'like', "%{$q}%")
+                    ->orWhere('email', 'like', "%{$q}%")
+                    ->orWhere('role', 'like', "%{$q}%");
+            });
+        }
+
+        $availableRoles = $availableRolesQuery
+            ->distinct()
+            ->pluck('role')
+            ->filter()
+            ->sort()
+            ->values();
+
+        // Hitung active employees berdasarkan filter aktif
+        $activeCountQuery = Employee::whereIn('partner_id', $partnerIds)
+            ->where('is_active', 1);
+
+        if (!empty($currentPartnerId)) {
+            $activeCountQuery->where('partner_id', $currentPartnerId);
+        }
+
+        if ($q !== '') {
+            $activeCountQuery->where(function ($qq) use ($q) {
+                $qq->where('name', 'like', "%{$q}%")
+                    ->orWhere('user_name', 'like', "%{$q}%")
+                    ->orWhere('email', 'like', "%{$q}%")
+                    ->orWhere('role', 'like', "%{$q}%");
+            });
+        }
+
+        $activeCount = $activeCountQuery->count();
+
+        // Hitung inactive employees berdasarkan filter aktif
+        $inactiveCountQuery = Employee::whereIn('partner_id', $partnerIds)
+            ->where('is_active', 0);
+
+        if (!empty($currentPartnerId)) {
+            $inactiveCountQuery->where('partner_id', $currentPartnerId);
+        }
+
+        if ($q !== '') {
+            $inactiveCountQuery->where(function ($qq) use ($q) {
+                $qq->where('name', 'like', "%{$q}%")
+                    ->orWhere('user_name', 'like', "%{$q}%")
+                    ->orWhere('email', 'like', "%{$q}%")
+                    ->orWhere('role', 'like', "%{$q}%");
+            });
+        }
+
+        $inactiveCount = $inactiveCountQuery->count();
 
         return view('pages.owner.human-resource.employee.index', compact(
             'partners',
             'employees',
-            'roles',
+            'availableRoles',
+            'activeCount',
+            'inactiveCount',
             'currentPartnerId',
+            'currentRole',
+            'currentStatus',
             'q'
         ));
     }

@@ -2,7 +2,8 @@
   use Illuminate\Support\Str;
 @endphp
 
-<div class="modern-card outlet-responsive">
+<link rel="stylesheet" href="{{ asset('css/mobile-owner.css') }}">
+<div class="modern-card">
 
   {{-- =======================
     DESKTOP: TABLE
@@ -24,7 +25,6 @@
       </thead>
 
       <tbody id="outletTableBody">
-        {{-- ISI AWAL AKAN DI-RENDER JS (renderTable()) --}}
         @forelse ($outlets as $index => $outlet)
           @php
             $img = $outlet->logo
@@ -112,145 +112,223 @@
   </div>
 
   {{-- =======================
-    MOBILE: CARDS (akan diisi JS juga)
+    MOBILE: HEADER + SEARCH + FILTER + CARDS
   ======================= --}}
-  <div class="only-mobile mobile-outlet-list" id="outletCardList">
+  <div class="only-mobile">
+    {{-- Mobile Header with Avatar & Search --}}
+    <div class="mobile-header-section">
+      <div class="mobile-header-card">
+        <div class="mobile-header-content">
+          <div class="mobile-header-left">
+            <h2 class="mobile-header-title">Outlet Directory</h2>
+            <p class="mobile-header-subtitle">{{ $outlets->total() }} Total Outlets</p>
+          </div>
+          <div class="mobile-header-right">
+            @if (auth()->user()->image)
+              @php
+                $userImg = Str::startsWith(auth()->user()->image, ['http://', 'https://'])
+                  ? auth()->user()->image
+                  : asset('storage/' . auth()->user()->image);
+              @endphp
+              <img src="{{ $userImg }}" alt="Profile" class="mobile-header-avatar">
+            @else
+              <div class="mobile-header-avatar-placeholder">
+                <span class="material-symbols-outlined">person</span>
+              </div>
+            @endif
+          </div>
+        </div>
+
+        {{-- Mobile Search Box --}}
+        <div class="mobile-search-wrapper">
+          <div class="mobile-search-box">
+            <span class="mobile-search-icon">
+              <span class="material-symbols-outlined">search</span>
+            </span>
+            <input type="text" 
+              class="mobile-search-input"
+              placeholder="Search outlets...">
+            <button type="button" class="mobile-filter-btn" onclick="toggleMobileFilter()">
+              <span class="material-symbols-outlined">tune</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {{-- Mobile Outlet List --}}
+    <div class="mobile-outlet-list">
+      @forelse ($outlets as $outlet)
+        @php
+          $img = $outlet->logo
+            ? (Str::startsWith($outlet->logo, ['http://', 'https://'])
+                ? $outlet->logo
+                : asset('storage/' . $outlet->logo))
+            : null;
+          $isActive = (int) $outlet->is_active === 1;
+        @endphp
+
+        <div class="outlet-card-wrapper">
+          {{-- Swipe Actions Background --}}
+          <div class="swipe-actions">
+            <a href="{{ route('owner.user-owner.outlets.edit', $outlet->id) }}"
+              class="swipe-action edit">
+              <span class="material-symbols-outlined">edit</span>
+            </a>
+            <button type="button" onclick="deleteOutlet({{ $outlet->id }})"
+              class="swipe-action delete">
+              <span class="material-symbols-outlined">delete</span>
+            </button>
+          </div>
+
+          {{-- Card Content --}}
+          <a href="{{ route('owner.user-owner.outlets.show', $outlet->id) }}"
+            class="outlet-card-link">
+            <div class="outlet-card-clickable">
+              <div class="outlet-card__left">
+                <div class="outlet-card__avatar">
+                  @if ($img)
+                    <img src="{{ $img }}" alt="{{ $outlet->name }}" loading="lazy">
+                  @else
+                    <div class="user-avatar-placeholder">
+                      <span class="material-symbols-outlined">store</span>
+                    </div>
+                  @endif
+                </div>
+
+                <div class="outlet-card__info">
+                  <div class="outlet-card__name">{{ $outlet->name }}</div>
+                  <div class="outlet-card__details">
+                    <span class="detail-text">{{ $outlet->username ?? '-' }}</span>
+                    <span class="detail-separator">•</span>
+                    <span class="detail-text">{{ $outlet->city ?? '-' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="outlet-card__right">
+                <span class="material-symbols-outlined chevron">chevron_right</span>
+              </div>
+            </div>
+          </a>
+        </div>
+      @empty
+        <div class="table-empty-state">
+          <span class="material-symbols-outlined">store_off</span>
+          <h4>{{ __('messages.owner.outlet.all_outlets.no_outlets') ?? 'No outlets found' }}</h4>
+          <p>{{ __('messages.owner.outlet.all_outlets.add_first_outlet') ?? 'Add your first outlet to get started' }}</p>
+        </div>
+      @endforelse
+    </div>
   </div>
 
-  <div class="table-pagination"></div>
+  {{-- =======================
+    PAGINATION
+  ======================= --}}
+  @if ($outlets->hasPages())
+    <div class="table-pagination">
+      {{ $outlets->links() }}
+    </div>
+  @endif
+
 </div>
 
-<style>
-  .outlet-responsive .only-desktop { display: block !important; }
-  .outlet-responsive .only-mobile  { display: none !important; }
+{{-- Floating Add Button (Mobile Only) --}}
+<a href="{{ route('owner.user-owner.outlets.create') }}" class="btn-add-outlet-mobile">
+  <span class="material-symbols-outlined">add</span>
+</a>
 
-  @media (max-width: 768px) {
-    .outlet-responsive .only-desktop { display: none !important; }
-    .outlet-responsive .only-mobile  { display: block !important; }
-  }
-
-  .mobile-outlet-list{
-    padding: 14px;
-    display: grid;
-    gap: 12px;
-  }
-
-  .outlet-card{
-        border: 1px solid rgba(0,0,0,.08);
-        border-radius: 16px;
-        background: #fff;
-        padding: 14px;
-        box-shadow: 0 8px 22px rgba(0,0,0,.06);
-        margin-bottom: 5px;
-    }
-
-
-  .outlet-card__top{
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-  }
-
-  .outlet-card__avatar img{
-    width: 46px;
-    height: 46px;
-    border-radius: 12px;
-    object-fit: cover;
-  }
-  .outlet-card__avatar .user-avatar-placeholder{
-        width: 46px;
-        height: 46px;
-        border-radius: 12px;
-        display: grid;
-        place-items: center;
-        background: rgba(0,0,0,.05);
-    }
-
-    .outlet-card__chips{
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-    .outlet-chip{
-        max-width: 100%;
-    }
-    .outlet-chip .chip-text{
-        display: inline-block;
-        max-width: 220px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .outlet-card__status{
-        flex: 0 0 auto;
-        margin-left: 8px;
-    }
-
-  .outlet-card__meta{ flex: 1; min-width: 0; }
-
-  .outlet-card__name{
-    font-weight: 800;
-    font-size: 15px;
-    line-height: 1.2;
-    margin-bottom: 6px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .outlet-chip{
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 10px;
-    border-radius: 999px;
-    background: rgba(0,0,0,.04);
-    font-size: 12px;
-    color: #555;
-    margin-right: 8px;
-    margin-bottom: 8px;
-  }
-
-  .outlet-chip .material-symbols-outlined{ font-size: 16px; opacity: .8; }
-
-  .outlet-card__info{
-    margin-top: 10px;
-    border-top: 1px dashed rgba(0,0,0,.08);
-    padding-top: 10px;
-    display: grid;
-    gap: 8px;
-  }
-
-  .outlet-info-row{
-    display:flex;
-    justify-content:space-between;
-    gap:12px;
-  }
-
-  .outlet-info-row .label{ color:#888; font-size:12px; }
-  .outlet-info-row .value{ color:#333; font-size:12px; text-align:right; word-break: break-word; }
-  .outlet-info-row .value.link{ text-decoration: underline; color: inherit; }
-
-  .outlet-card__actions{
-    margin-top: 12px;
-    display:flex;
-    gap:8px;
-  }
-
-  .btn-card-action{
-    flex:1;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:6px;
-    padding:10px;
-    border-radius:12px;
-    border:1px solid rgba(0,0,0,.10);
-    background:#fff;
-    font-size:12px;
-    font-weight:700;
-  }
-
-  .btn-card-action .material-symbols-outlined{ font-size:18px; }
-  .btn-card-action.danger{ border-color: rgba(174,21,4,.25); color:#ae1504; }
-</style>
+{{-- Mobile Filter Modal --}}
+<div id="mobileFilterModal" class="mobile-filter-modal">
+    <div class="filter-modal-backdrop" onclick="closeMobileFilter()"></div>
+    <div class="filter-modal-content">
+        <div class="filter-modal-header">
+            <div class="filter-header-left">
+                <span class="material-symbols-outlined filter-header-icon">tune</span>
+                <h3>Filter Outlets</h3>
+            </div>
+            <button type="button" class="filter-close-btn" onclick="closeMobileFilter()">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <div class="filter-modal-body">
+            {{-- Pill Filter untuk Status --}}
+            <div class="modal-filter-pills">
+                {{-- All Status --}}
+                <a href="javascript:void(0)" 
+                   onclick="setStatusFilter('')"
+                   class="modal-pill {{ !request('status') ? 'active' : '' }}">
+                    <div class="pill-left">
+                        <div class="pill-icon-wrapper {{ !request('status') ? 'active' : '' }}">
+                            <span class="material-symbols-outlined">store</span>
+                        </div>
+                        <div class="pill-info">
+                            <span class="pill-text">All Outlets</span>
+                            <span class="pill-subtext">View all outlets</span>
+                        </div>
+                    </div>
+                    <div class="pill-right">
+                        @if(!request('status'))
+                        <span class="material-symbols-outlined pill-check">check_circle</span>
+                        @endif
+                    </div>
+                </a>
+                
+                {{-- Divider --}}
+                <div class="filter-divider">
+                    <span>Status</span>
+                </div>
+                
+                {{-- Active Status --}}
+                <a href="javascript:void(0)"
+                   onclick="setStatusFilter('active')"
+                   class="modal-pill {{ request('status') === 'active' ? 'active' : '' }}">
+                    <div class="pill-left">
+                        <div class="pill-icon-wrapper {{ request('status') === 'active' ? 'active' : '' }}">
+                            <span class="material-symbols-outlined">check_circle</span>
+                        </div>
+                        <div class="pill-info">
+                            <span class="pill-text">Active Outlets</span>
+                            <span class="pill-subtext">Currently operational</span>
+                        </div>
+                    </div>
+                    <div class="pill-right">
+                        @if(request('status') === 'active')
+                        <span class="material-symbols-outlined pill-check">check_circle</span>
+                        @endif
+                    </div>
+                </a>
+                
+                {{-- Inactive Status --}}
+                <a href="javascript:void(0)"
+                   onclick="setStatusFilter('inactive')"
+                   class="modal-pill {{ request('status') === 'inactive' ? 'active' : '' }}">
+                    <div class="pill-left">
+                        <div class="pill-icon-wrapper {{ request('status') === 'inactive' ? 'active' : '' }}">
+                            <span class="material-symbols-outlined">cancel</span>
+                        </div>
+                        <div class="pill-info">
+                            <span class="pill-text">Inactive Outlets</span>
+                            <span class="pill-subtext">Not operational</span>
+                        </div>
+                    </div>
+                    <div class="pill-right">
+                        @if(request('status') === 'inactive')
+                        <span class="material-symbols-outlined pill-check">check_circle</span>
+                        @endif
+                    </div>
+                </a>
+            </div>
+        </div>
+        
+        {{-- Modal Footer --}}
+        <div class="filter-modal-footer">
+            <button type="button" class="btn-clear-filter" 
+                onclick="setStatusFilter(''); if(document.querySelector('.mobile-search-input')) document.querySelector('.mobile-search-input').value = ''; if(document.getElementById('searchInput')) document.getElementById('searchInput').value = '';">
+                <span class="material-symbols-outlined">restart_alt</span>
+                Clear Filter
+            </button>
+        </div>
+    </div>
+</div>

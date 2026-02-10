@@ -19,7 +19,7 @@ window.Echo = new Echo({
   forceTLS: (import.meta.env.VITE_PUSHER_SCHEME || "https") === "https",
   enabledTransports: ["ws", "wss"],
 
-  // ⬇️ kunci: jangan pakai authEndpoint lama; pakai authorizer ini
+  // ⬇️ kunci: jangan pakai authEndpoint lama pakai authorizer ini
   authorizer: (channel) => ({
     authorize(socketId, callback) {
       fetch("/broadcasting/auth", {

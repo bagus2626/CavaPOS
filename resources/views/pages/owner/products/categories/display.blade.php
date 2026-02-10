@@ -2,7 +2,7 @@
 <div class="modern-card category-responsive">
 
     {{-- =======================
-      DESKTOP: TABLE (Tetap Blade biar modal gambar aman)
+      DESKTOP: TABLE
     ======================= --}}
     <div class="data-table-wrapper only-desktop">
         <table class="data-table">
@@ -17,7 +17,6 @@
             </thead>
 
             <tbody id="categoryTableBody">
-                {{-- ✅ KODE LAMA TETAP (jangan dihapus) --}}
                 @forelse($categories as $index => $category)
                     <tr class="table-row">
                         <td class="text-center text-muted">
@@ -84,129 +83,213 @@
     </div>
 
     {{-- =======================
-      MOBILE: CARDS (JS render)
+      MOBILE: DESAIN 2 - IMAGE FULL WIDTH (2 KOLOM)
     ======================= --}}
-    <div class="only-mobile mobile-category-list" id="categoryMobileList">
-        {{-- di-render via JS --}}
+    <div class="only-mobile mobile-category-list-v2">
+        <div class="category-grid-v2">
+            @forelse ($categories as $category)
+                <div class="category-card-v2">
+                    <!-- Image Header -->
+                    <div class="card-image-header">
+                        @if($category->images && isset($category->images['path']))
+                            <img src="{{ asset($category->images['path']) }}" alt="{{ $category->category_name }}" loading="lazy">
+                        @else
+                            <div class="image-placeholder-v2">
+                                <span class="material-symbols-outlined">category</span>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="card-body-v2">
+                        <h3 class="category-title-v2">{{ $category->category_name }}</h3>
+
+                        @if($category->description)
+                            <div class="description-v2">
+                                <p>{{ $category->description }}</p>
+                            </div>
+                        @endif
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons-v2">
+                            <a href="{{ route('owner.user-owner.categories.edit', $category) }}"
+                                class="btn-v2 btn-edit">
+                                <span class="material-symbols-outlined">edit</span>
+                            </a>
+                            <form action="{{ route('owner.user-owner.categories.destroy', $category) }}" method="POST"
+                                  class="js-delete-form"
+                                  data-name="{{ $category->category_name }}"
+                                  style="display: inline; width: 100%;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn-v2 btn-delete">
+                                    <span class="material-symbols-outlined">delete</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="table-empty-state" style="padding: 24px; grid-column: 1 / -1;">
+                    <span class="material-symbols-outlined">category_off</span>
+                    <h4>{{ __('messages.owner.products.categories.no_categories') ?? 'No categories found' }}</h4>
+                    <p>{{ __('messages.owner.products.categories.add_first_category') ?? 'Add your first category to get started' }}</p>
+                </div>
+            @endforelse
+        </div>
     </div>
 
-    {{-- Pagination (Laravel) - tetap ada tapi akan disembunyikan saat JS aktif --}}
+    {{-- Pagination --}}
     @if($categories->hasPages())
-        <div class="table-pagination" id="categoryLaravelPagination">
+        <div class="table-pagination">
             {{ $categories->links() }}
         </div>
     @endif
-
-    {{-- Pagination (JS) --}}
-    <div class="table-pagination" id="categoryPagination"></div>
 </div>
 
 <style>
-  .category-responsive .only-desktop{ display:block; }
-  .category-responsive .only-mobile{ display:none; }
+    .category-responsive .only-desktop {
+        display: block;
+    }
 
-  @media (max-width: 768px){
-    .category-responsive .only-desktop{ display:none; }
-    .category-responsive .only-mobile{ display:block; }
-  }
+    .category-responsive .only-mobile {
+        display: none;
+    }
 
-  /* MOBILE CARDS */
-  .mobile-category-list{
-    padding: 14px;
-    display: grid;
-    gap: 12px;
-  }
-  .category-card{
-    border: 1px solid rgba(0,0,0,.08);
-    background: #fff;
-    border-radius: 16px;
-    padding: 14px;
-    box-shadow: 0 10px 24px rgba(0,0,0,.06);
-    margin-bottom: 5px;
-  }
-  .category-card__top{
-    display:flex;
-    gap: 12px;
-    align-items:flex-start;
-  }
-  .category-card__thumb{
-    width: 54px;
-    height: 54px;
-    border-radius: 14px;
-    overflow: hidden;
-    position: relative;
-    flex: 0 0 auto;
-    background: rgba(0,0,0,.04);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-  }
-  .category-card__thumb img{
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .category-card__meta{ flex:1; min-width:0; }
-  .category-card__name{
-    font-weight: 900;
-    font-size: 14px;
-    line-height: 1.25;
-  }
-  .category-card__desc{
-    margin-top: 6px;
-    font-size: 12px;
-    color: #666;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  .category-card__bottom{
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px dashed rgba(0,0,0,.10);
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap: 10px;
-  }
-  .category-card__badge{
-    display:inline-flex;
-    align-items:center;
-    gap: 6px;
-    padding: 6px 10px;
-    border-radius: 999px;
-    background: rgba(0,0,0,.04);
-    font-size: 12px;
-    color: #555;
-  }
-  .category-card__actions{
-    display:flex;
-    gap: 8px;
-  }
-  .btn-card-action{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap: 6px;
-    padding: 10px 12px;
-    border-radius: 12px;
-    border: 1px solid rgba(0,0,0,.10);
-    background:#fff;
-    font-size: 12px;
-    font-weight: 800;
-    white-space: nowrap;
-  }
-  .btn-card-action.danger{
-    border-color: rgba(174,21,4,.25);
-    color: #ae1504;
-  }
+    @media (max-width: 768px) {
+        .category-responsive .only-desktop {
+            display: none;
+        }
 
-  /* pagination center */
-  #categoryPagination{
-    display:flex;
-    justify-content:center;
-    padding: 14px 10px;
-  }
-  #categoryPagination .pagination{ margin: 0; }
+        .category-responsive .only-mobile {
+            display: block;
+        }
+    }
+
+    /* ============================================
+     DESAIN 2: IMAGE FULL WIDTH (2 KOLOM GRID)
+  ============================================ */
+    .mobile-category-list-v2 {
+        padding: 12px;
+    }
+
+    .category-grid-v2 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .category-card-v2 {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s;
+    }
+
+    .category-card-v2:active {
+        transform: scale(0.98);
+    }
+
+    .card-image-header {
+        position: relative;
+        width: 100%;
+        height: 120px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        overflow: hidden;
+    }
+
+    .card-image-header img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .image-placeholder-v2 {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+
+    .image-placeholder-v2 .material-symbols-outlined {
+        font-size: 48px;
+    }
+
+    .card-body-v2 {
+        padding: 10px;
+    }
+
+    .category-title-v2 {
+        font-size: 14px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0 0 8px 0;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 38px;
+    }
+
+    .description-v2 {
+        margin-bottom: 10px;
+    }
+
+    .description-v2 p {
+        font-size: 11px;
+        color: #6b7280;
+        margin: 0;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .action-buttons-v2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        padding-top: 8px;
+        border-top: 1px solid #f3f4f6;
+    }
+
+    .btn-v2 {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        width: 100%;
+    }
+
+    .btn-v2 .material-symbols-outlined {
+        font-size: 18px;
+    }
+
+    .btn-edit {
+        background: #eff6ff;
+        color: #1e40af;
+    }
+
+    .btn-edit:active {
+        background: #dbeafe;
+    }
+
+    .btn-delete {
+        background: #fef2f2;
+        color: #991b1b;
+    }
+
+    .btn-delete:active {
+        background: #fee2e2;
+    }
 </style>
