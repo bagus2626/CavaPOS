@@ -15,33 +15,6 @@
         </div>
       </div>
 
-      {{-- Mobile Header - Mobile Only --}}
-      <div class="only-mobile mobile-header-card">
-        <div class="mobile-header-content">
-          <div class="mobile-header-left">
-            <h1 class="mobile-header-title">{{ __('messages.owner.products.categories.categories') }}</h1>
-            <p class="mobile-header-subtitle">{{ __('messages.owner.products.categories.subtitle') }}</p>
-          </div>
-        </div>
-
-        {{-- Mobile Search Box --}}
-        <div class="mobile-search-box">
-          <span class="mobile-search-icon">
-            <span class="material-symbols-outlined">search</span>
-          </span>
-          <input 
-            type="text" 
-            id="searchInputMobile" 
-            class="mobile-search-input"
-            value="{{ request('q') }}"
-            placeholder="{{ __('messages.owner.products.categories.search_placeholder') }}"
-          >
-          <button class="mobile-filter-btn" data-toggle="modal" data-target="#orderModal">
-            <span class="material-symbols-outlined">swap_vert</span>
-          </button>
-        </div>
-      </div>
-
       @if(session('success'))
         <div class="alert alert-success alert-modern">
           <div class="alert-icon">

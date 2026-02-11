@@ -50,13 +50,20 @@ class OwnerOutletProductController extends Controller
             ->orderBy('name')
             ->get();
 
-        $categories = Category::where('owner_id', $owner->id)
-            ->orderBy('category_name')
-            ->get();
-
         $currentOutletId = $request->get('outlet_id') ?? ($outlets->first()->id ?? null);
 
-        $categoryId = $request->get('category'); // string / null
+        if ($currentOutletId) {
+            $categories = Category::where('owner_id', $owner->id)
+                ->whereHas('partnerProducts', function ($query) use ($currentOutletId) {
+                    $query->where('partner_id', $currentOutletId);
+                })
+                ->orderBy('category_name')
+                ->get();
+        } else {
+            $categories = collect(); // Empty collection jika tidak ada outlet
+        }
+
+        $categoryId = $request->get('category');
         $q = trim((string) $request->get('q', ''));
 
         $productsQuery = PartnerProduct::with(['category', 'promotion', 'stock.displayUnit'])
@@ -88,11 +95,11 @@ class OwnerOutletProductController extends Controller
             });
         }
 
-        // paginate asli
+        // paginate
         $products = $productsQuery
             ->orderBy('name')
             ->paginate(10)
-            ->appends($request->query()); // supaya query ikut ke pagination links
+            ->appends($request->query());
 
         return view('pages.owner.products.outlet-product.index', compact(
             'outlets',

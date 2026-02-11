@@ -2,7 +2,118 @@
     use Illuminate\Support\Str;
 @endphp
 
+<link rel="stylesheet" href="{{ asset('css/mobile-owner.css') }}">
+
+{{-- Mobile Header Section - Mobile Only --}}
+<div class="only-mobile mobile-header-section">
+    <div class="mobile-header-card">
+        <div class="mobile-header-content">
+            <div class="mobile-header-left">
+                <h2 class="mobile-header-title">{{ __('messages.owner.products.outlet_products.outlet_products') }}</h2>
+                <p class="mobile-header-subtitle">{{ $products->total() }} Total Products</p>
+            </div>
+            <div class="mobile-header-right">
+                @if (auth()->user()->image)
+                    @php
+                        $userImg = Str::startsWith(auth()->user()->image, ['http://', 'https://'])
+                            ? auth()->user()->image
+                            : asset('storage/' . auth()->user()->image);
+                    @endphp
+                    <img src="{{ $userImg }}" alt="Profile" class="mobile-header-avatar">
+                @else
+                    <div class="mobile-header-avatar-placeholder">
+                        <span class="material-symbols-outlined">shopping_bag</span>
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        {{-- Mobile Search Box --}}
+        <div class="mobile-search-wrapper">
+            <div class="mobile-search-box">
+                <span class="mobile-search-icon">
+                    <span class="material-symbols-outlined">search</span>
+                </span>
+                <input type="text" id="productSearchInputMobile" class="mobile-search-input"
+                    value="{{ $q ?? request('q') }}"
+                    placeholder="{{ __('messages.owner.products.outlet_products.search_placeholder') ?? 'Search product...' }}">
+                <button class="mobile-filter-btn" id="openFilterModalBtn">
+                    <span class="material-symbols-outlined">tune</span>
+                </button>
+            </div>
+        </div>
+
+        {{-- Mobile Category Dropdown --}}
+        <div class="mobile-category-dropdown">
+            <div class="select-wrapper-mobile">
+                <select id="categoryFilterMobile" class="form-control-mobile" onchange="changeCategoryMobile(this)">
+                    <option value="">{{ __('messages.owner.products.outlet_products.all_category_dropdown') }}
+                    </option>
+                    @foreach ($categories as $category)
+                        <option value="{{ $category->id }}" @selected((string) request('category') === (string) $category->id)>
+                            {{ $category->category_name }}
+                        </option>
+                    @endforeach
+                </select>
+                <span class="material-symbols-outlined select-arrow-mobile">expand_more</span>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modern-card outlet-products-responsive">
+
+    {{-- TAMBAHKAN: Mobile Filter Modal --}}
+    <div class="mobile-filter-modal" id="mobileFilterModal">
+        <div class="filter-modal-backdrop" id="filterModalBackdrop"></div>
+        <div class="filter-modal-content">
+            <div class="filter-modal-header">
+                <div class="filter-header-left">
+                    <span class="material-symbols-outlined filter-header-icon">tune</span>
+                    <h3>{{ __('messages.owner.products.outlet_products.filter_title') ?? 'Filter' }}</h3>
+                </div>
+                <button class="filter-close-btn" id="closeFilterModalBtn">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="filter-modal-body">
+                {{-- Outlet Filter --}}
+                <div class="filter-divider">
+                    <span>{{ __('messages.owner.products.outlet_products.outlet_label') ?? 'Outlet' }}</span>
+                </div>
+                <div class="modal-filter-pills">
+                    @foreach ($outlets as $outlet)
+                        <a href="javascript:void(0)"
+                            class="modal-pill {{ (string) $currentOutletId === (string) $outlet->id ? 'active' : '' }}"
+                            onclick="selectOutletFilter('{{ $outlet->id }}')">
+                            <div class="pill-left">
+                                <div
+                                    class="pill-icon-wrapper {{ (string) $currentOutletId === (string) $outlet->id ? 'active' : '' }}">
+                                    <span class="material-symbols-outlined">store</span>
+                                </div>
+                                <div class="pill-info">
+                                    <div class="pill-text">{{ $outlet->name }}</div>
+                                </div>
+                            </div>
+                            @if ((string) $currentOutletId === (string) $outlet->id)
+                                <div class="pill-right">
+                                    <span class="material-symbols-outlined pill-check">check_circle</span>
+                                </div>
+                            @endif
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="filter-modal-footer">
+                <button class="btn-clear-filter" onclick="clearAllFilters()">
+                    <span class="material-symbols-outlined">filter_alt_off</span>
+                    <span>{{ __('messages.owner.products.outlet_products.clear_all_filters') ?? 'Clear All Filters' }}</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
     {{-- =======================
     DESKTOP: TABLE (SAMA SEPERTI SEBELUMNYA)
@@ -263,6 +374,103 @@
         </div>
     @endif
 </div>
+
+<script>
+    // Mobile Filter Modal Functions
+    document.addEventListener('DOMContentLoaded', function() {
+        // Open/Close Modal
+        const openBtn = document.getElementById('openFilterModalBtn');
+        const closeBtn = document.getElementById('closeFilterModalBtn');
+        const backdrop = document.getElementById('filterModalBackdrop');
+        const modal = document.getElementById('mobileFilterModal');
+
+        if (openBtn) {
+            openBtn.addEventListener('click', function() {
+                if (modal) {
+                    modal.classList.add('show');
+                    document.body.style.overflow = 'hidden';
+                }
+            });
+        }
+
+        function closeFilterModal() {
+            if (modal) {
+                modal.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeFilterModal);
+        }
+
+        if (backdrop) {
+            backdrop.addEventListener('click', closeFilterModal);
+        }
+
+        // Mobile search handler
+        const searchInputMobile = document.getElementById('productSearchInputMobile');
+        if (searchInputMobile) {
+            let timer;
+            searchInputMobile.addEventListener('input', function() {
+                clearTimeout(timer);
+                timer = setTimeout(() => {
+                    const params = new URLSearchParams(window.location.search);
+                    const q = (searchInputMobile.value || '').trim();
+
+                    if (q) params.set('q', q);
+                    else params.delete('q');
+
+                    params.delete('page');
+                    window.location.search = params.toString();
+                }, 500);
+            });
+        }
+    });
+
+    // Select category filter
+    function selectCategoryFilter(categoryId) {
+        const params = new URLSearchParams(window.location.search);
+
+        if (categoryId) {
+            params.set('category', categoryId);
+        } else {
+            params.delete('category');
+        }
+
+        params.delete('page');
+        window.location.search = params.toString();
+    }
+
+    // Clear all filters
+    function clearAllFilters() {
+        const params = new URLSearchParams(window.location.search);
+
+        // Keep only outlet_id
+        const outletId = params.get('outlet_id');
+        const newParams = new URLSearchParams();
+        if (outletId) {
+            newParams.set('outlet_id', outletId);
+        }
+
+        window.location.search = newParams.toString();
+    }
+
+    // Mobile category dropdown handler
+    function changeCategoryMobile(selectEl) {
+        const categoryId = selectEl.value;
+        const params = new URLSearchParams(window.location.search);
+
+        if (categoryId) {
+            params.set('category', categoryId);
+        } else {
+            params.delete('category');
+        }
+
+        params.delete('page');
+        window.location.search = params.toString();
+    }
+</script>
 
 <style>
     .outlet-products-responsive .only-desktop {
@@ -525,4 +733,14 @@
     .btn-delete:active {
         background: #fee2e2;
     }
+    /* Hide floating button when modal is open */
+body:has(.mobile-filter-modal.show) .btn-add-outlet-mobile {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.8);
+}
+
+.btn-add-outlet-mobile {
+    transition: opacity 0.3s, transform 0.3s;
+}
 </style>

@@ -1,5 +1,57 @@
+@php
+    use Illuminate\Support\Str;
+@endphp
+
+<link rel="stylesheet" href="{{ asset('css/mobile-owner.css') }}">
+
+{{-- Mobile Header Section - Mobile Only --}}
+<div class="only-mobile mobile-header-section">
+    <div class="mobile-header-card">
+        <div class="mobile-header-content">
+            <div class="mobile-header-left">
+                <h2 class="mobile-header-title">{{ __('messages.owner.products.categories.categories') }}</h2>
+                <p class="mobile-header-subtitle">{{ $categories->total() }} Total Categories</p>
+            </div>
+            <div class="mobile-header-right">
+                @if (auth()->user()->image)
+                    @php
+                        $userImg = Str::startsWith(auth()->user()->image, ['http://', 'https://'])
+                            ? auth()->user()->image
+                            : asset('storage/' . auth()->user()->image);
+                    @endphp
+                    <img src="{{ $userImg }}" alt="Profile" class="mobile-header-avatar">
+                @else
+                    <div class="mobile-header-avatar-placeholder">
+                        <span class="material-symbols-outlined">category</span>
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        {{-- Mobile Search Box --}}
+        <div class="mobile-search-wrapper">
+            <div class="mobile-search-box">
+                <span class="mobile-search-icon">
+                    <span class="material-symbols-outlined">search</span>
+                </span>
+                <input 
+                    type="text" 
+                    id="searchInputMobile" 
+                    class="mobile-search-input"
+                    value="{{ request('q') }}"
+                    placeholder="{{ __('messages.owner.products.categories.search_placeholder') }}"
+                >
+                <button class="mobile-filter-btn" data-toggle="modal" data-target="#orderModal">
+                    <span class="material-symbols-outlined">swap_vert</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Table Card -->
 <div class="modern-card category-responsive">
+    {{-- Sisanya tetap sama --}}
 
     {{-- =======================
       DESKTOP: TABLE

@@ -23,8 +23,8 @@ class Category extends Model
         'images' => 'array', // otomatis decode JSON ke array saat diambil
     ];
 
-    public function partner_products()
+    public function partnerProducts()
     {
-        return $this->hasMany(PartnerProduct::class, 'category_id', 'id');
+        return $this->hasMany(\App\Models\Partner\Products\PartnerProduct::class, 'category_id');
     }
 }
