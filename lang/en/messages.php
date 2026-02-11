@@ -1155,6 +1155,9 @@ return [
                 'choose_city' => 'Select City/Regency',
                 'choose_district' => 'Select District',
                 'choose_village' => 'Select Village/Subdistrict',
+                'no_manual_payment_selected' => 'No manual payment has been selected ',
+                'no_outlets' => 'No outlets found',
+                'add_first_outlet' => 'Add your first outlet to get started',
 
                 'subtitle' => 'Manage your outlets and their configurations',
                 'search_placeholder' => 'Search outlets...',
@@ -1303,6 +1306,9 @@ return [
                 'apply_promotion_all_outlets' => 'Apply promotion to all outlets',
                 'update' => 'Update',
 
+                'no_products' => 'No products found',
+                'add_first_product' => 'Add your first product to get started',
+
                 'manage_catalog_subtitle' => 'Manage your product catalog and inventory',
                 'search_placeholder' => 'Search products...',
                 'no_results_found' => 'No results found',
@@ -1442,6 +1448,8 @@ return [
                 'enter_new_stock' => 'Enter new stock',
                 'current_stock' => 'Current',
                 'update' => 'Update',
+
+                'add_first_product' => 'Add your first product to get started',
 
                 'filter_title' => 'Filter',
                 'outlet_label' => 'Outlet',
@@ -1718,6 +1726,9 @@ return [
                 'upload_text' => 'Upload',
                 'image_hint' => 'JPG, PNG, WEBP. Max 2 MB',
 
+                'no_categories' => 'No categories found',
+                'add_first_category' => 'Add your first category to get started',
+
                 // JS Messages
                 'js_name_required' => 'Category name is required.',
                 'js_confirm_remove_image' => 'Remove this image?',
@@ -1806,6 +1817,9 @@ return [
                 'valid_period' => 'Valid Period',
                 'back_to_list' => 'Back to List',
                 'update' => 'Update',
+
+                'no_promotions' => 'No promotions found',
+                'add_first_promotion' => 'Add your first promotion to get started',
 
                 'manage_promotions_subtitle' => 'Manage your promotional campaigns and discount codes',
                 'search_placeholder' => 'Search promotions...',

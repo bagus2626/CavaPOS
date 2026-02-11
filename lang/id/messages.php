@@ -1156,6 +1156,10 @@ return [
                 'choose_city' => 'Pilih Kota/Kabupaten',
                 'choose_district' => 'Pilih Kecamatan',
                 'choose_village' => 'Pilih Kelurahan/Desa',
+                'no_manual_payment_selected' => 'Belum ada manual payment yang dipilih',
+                'no_outlets' => 'Tidak ada outlet yang ditemukan',
+                'add_first_outlet' => 'Tambahkan outlet pertama Anda untuk memulai.',
+
 
                 'subtitle' => 'Kelola outlet Anda dan konfigurasinya',
                 'search_placeholder' => 'Cari outlet...',
@@ -1304,6 +1308,9 @@ return [
                 'apply_promotion_all_outlets' => 'Terapkan promosi untuk semua outlet',
                 'update' => 'Perbarui',
 
+                'no_products' => 'Tidak ada produk yang ditemukan',
+                'add_first_product' => 'Tambahkan produk pertama Anda untuk memulai.',
+
                 'manage_catalog_subtitle' => 'Kelola katalog produk dan inventaris Anda',
                 'search_placeholder' => 'Cari produk...',
                 'no_results_found' => 'Tidak ada hasil ditemukan',
@@ -1444,6 +1451,7 @@ return [
                 'enter_new_stock' => 'Masukkan stok baru',
                 'current_stock' => 'Saat Ini',
                 'update' => 'Perbarui',
+                'add_first_product' => 'Tambahkan produk pertama Anda untuk memulai.',
 
                 'filter_title' => 'Filter',
                 'outlet_label' => 'Outlet',
@@ -1719,6 +1727,9 @@ return [
                 'upload_text' => 'Unggah',
                 'image_hint' => 'JPG, PNG, WEBP. Maks 2 MB',
 
+                'no_categories' => 'Tidak ada kategori yang ditemukan',
+                'add_first_category' => 'Tambahkan kategori pertama Anda untuk memulai.',
+
                 // JS Messages
                 'js_name_required' => 'Nama kategori wajib diisi.',
                 'js_confirm_remove_image' => 'Hapus gambar ini?',
@@ -1809,6 +1820,9 @@ return [
                 'valid_period' => 'Periode Berlaku',
                 'back_to_list' => 'Kembali ke Daftar',
                 'update' => 'Perbarui',
+
+                'no_promotions' => 'Tidak ada promosi yang ditemukan',
+                'add_first_promotion' => 'Tambahkan promosi pertama Anda untuk memulai',
 
                 'manage_promotions_subtitle' => 'Kelola kampanye promosi dan kode diskon Anda',
                 'search_placeholder' => 'Cari promosi...',

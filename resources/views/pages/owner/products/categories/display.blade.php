@@ -123,7 +123,7 @@
                     <tr>
                         <td colspan="5" class="text-center">
                             <div class="table-empty-state">
-                                <span class="material-symbols-outlined">category_off</span>
+                                <span class="material-symbols-outlined">category</span>
                                 <h4>{{ __('messages.owner.products.categories.no_categories') ?? 'No categories found' }}</h4>
                                 <p>{{ __('messages.owner.products.categories.add_first_category') ?? 'Add your first category to get started' }}</p>
                             </div>
@@ -183,7 +183,7 @@
                 </div>
             @empty
                 <div class="table-empty-state" style="padding: 24px; grid-column: 1 / -1;">
-                    <span class="material-symbols-outlined">category_off</span>
+                    <span class="material-symbols-outlined">category</span>
                     <h4>{{ __('messages.owner.products.categories.no_categories') ?? 'No categories found' }}</h4>
                     <p>{{ __('messages.owner.products.categories.add_first_category') ?? 'Add your first category to get started' }}</p>
                 </div>

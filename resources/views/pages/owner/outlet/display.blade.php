@@ -100,7 +100,7 @@
           <tr>
             <td colspan="7" class="text-center">
               <div class="table-empty-state">
-                <span class="material-symbols-outlined">store_off</span>
+                <span class="material-symbols-outlined">store</span>
                 <h4>{{ __('messages.owner.outlet.all_outlets.no_outlets') ?? 'No outlets found' }}</h4>
                 <p>{{ __('messages.owner.outlet.all_outlets.add_first_outlet') ?? 'Add your first outlet to get started' }}</p>
               </div>
@@ -133,7 +133,7 @@
               <img src="{{ $userImg }}" alt="Profile" class="mobile-header-avatar">
             @else
               <div class="mobile-header-avatar-placeholder">
-                <span class="material-symbols-outlined">person</span>
+                <span class="material-symbols-outlined">store</span>
               </div>
             @endif
           </div>
@@ -214,7 +214,7 @@
         </div>
       @empty
         <div class="table-empty-state">
-          <span class="material-symbols-outlined">store_off</span>
+          <span class="material-symbols-outlined">store</span>
           <h4>{{ __('messages.owner.outlet.all_outlets.no_outlets') ?? 'No outlets found' }}</h4>
           <p>{{ __('messages.owner.outlet.all_outlets.add_first_outlet') ?? 'Add your first outlet to get started' }}</p>
         </div>
