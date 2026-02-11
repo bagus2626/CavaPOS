@@ -4,7 +4,7 @@
 @section('page_title', __('messages.owner.products.stocks.all_stock'))
 
 @section('content')
-<link rel="stylesheet" href="{{ asset('css/mobile-owner.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/mobile-owner.css') }}">
 
     <div class="modern-container">
         <div class="container-modern">
@@ -38,31 +38,7 @@
                 </div>
             @endif
 
-            {{-- MOBILE HEADER CARD --}}
-            <div class="modern-card only-mobile mb-4">
-                <div class="mobile-header-card">
-                    <div class="mobile-header-content">
-                        <div class="mobile-header-left">
-                            <h2 class="mobile-header-title">{{ __('messages.owner.products.stocks.all_stock') }}</h2>
-                            <p class="mobile-header-subtitle" id="mobileStockSubtitle">0 {{ __('messages.owner.products.stocks.stock_list') }}</p>
-                        </div>
-                        <div class="mobile-header-avatar-placeholder">
-                            <span class="material-symbols-outlined">inventory_2</span>
-                        </div>
-                    </div>
 
-                    <div class="mobile-search-box">
-                        <span class="mobile-search-icon">
-                            <span class="material-symbols-outlined">search</span>
-                        </span>
-                        <input type="text" class="mobile-search-input" id="mobileSearchInput"
-                            placeholder="{{ __('messages.owner.products.stocks.search_placeholder') }}">
-                        <button type="button" class="mobile-filter-btn" onclick="toggleMobileStockFilter()">
-                            <span class="material-symbols-outlined">tune</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
 
             {{-- DESKTOP SEARCH & FILTER --}}
             <div class="modern-card mb-4 only-desktop">
@@ -105,38 +81,6 @@
                 </div>
             </div>
 
-            {{-- STOCK ACTIONS CARD --}}
-            <div class="modern-card mb-4">
-                <div class="card-body-modern" style="padding: var(--spacing-lg) var(--spacing-xl);">
-                    <div class="stock-actions-container">
-                        <div class="stock-actions-group">
-                            <a href="{{ route('owner.user-owner.stocks.movements.create-stock-in') }}"
-                                class="btn-modern btn-sm-modern btn-secondary-modern">
-                                {{ __('messages.owner.products.stocks.stock_in') }}
-                            </a>
-
-                            <a href="{{ route('owner.user-owner.stocks.movements.create-transfer') }}"
-                                class="btn-modern btn-sm-modern btn-secondary-modern">
-                                {{ __('messages.owner.products.stocks.transfer') }}
-                            </a>
-
-                            <a href="{{ route('owner.user-owner.stocks.movements.create-adjustment') }}"
-                                class="btn-modern btn-sm-modern btn-secondary-modern">
-                                {{ __('messages.owner.products.stocks.adjustment') }}
-                            </a>
-                        </div>
-
-                        <div class="stock-history-wrapper">
-                            <a href="{{ route('owner.user-owner.stocks.movements.index') }}"
-                                class="btn-modern btn-sm-modern btn-secondary-modern">
-                                <span class="material-symbols-outlined">history</span>
-                                {{ __('messages.owner.products.stocks.movement_history') }}
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             @include('pages.owner.products.stock.display')
 
         </div>
@@ -147,65 +91,12 @@
         <span class="material-symbols-outlined">add</span>
     </a>
 
-    {{-- MOBILE FILTER MODAL --}}
-    <div class="mobile-filter-modal" id="mobileStockFilterModal">
-        <div class="filter-modal-backdrop" onclick="closeMobileStockFilter()"></div>
-        <div class="filter-modal-content">
-            <div class="filter-modal-header">
-                <div class="filter-header-left">
-                    <span class="material-symbols-outlined filter-header-icon">tune</span>
-                    <h3>Filter Stock</h3>
-                </div>
-                <button type="button" class="filter-close-btn" onclick="closeMobileStockFilter()">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
-            </div>
 
-            <div class="filter-modal-body">
-                <div class="modal-filter-pills">
-                    <div class="modal-pill" onclick="setStockTypeFilter('all')">
-                        <div class="pill-left">
-                            <div class="pill-icon-wrapper">
-                                <span class="material-symbols-outlined">select_all</span>
-                            </div>
-                            <div class="pill-info">
-                                <div class="pill-text">All Stock</div>
-                                <div class="pill-subtext">Show everything</div>
-                            </div>
-                        </div>
-                        <div class="pill-right"></div>
-                    </div>
 
-                    <div class="modal-pill active" onclick="setStockTypeFilter('linked')">
-                        <div class="pill-left">
-                            <div class="pill-icon-wrapper active">
-                                <span class="material-symbols-outlined">link</span>
-                            </div>
-                            <div class="pill-info">
-                                <div class="pill-text">Linked Stock</div>
-                                <div class="pill-subtext">Connected to products</div>
-                            </div>
-                        </div>
-                        <div class="pill-right">
-                            <span class="material-symbols-outlined pill-check">check_circle</span>
-                        </div>
-                    </div>
+    <div class="filter-modal-body">
 
-                    <div class="modal-pill" onclick="setStockTypeFilter('direct')">
-                        <div class="pill-left">
-                            <div class="pill-icon-wrapper">
-                                <span class="material-symbols-outlined">inventory</span>
-                            </div>
-                            <div class="pill-info">
-                                <div class="pill-text">Direct Stock</div>
-                                <div class="pill-subtext">Standalone items</div>
-                            </div>
-                        </div>
-                        <div class="pill-right"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
+
+
     </div>
 @endsection
 
@@ -222,6 +113,44 @@
         .only-mobile {
             display: none !important;
         }
+    }
+
+    /* Mobile Category/Location Dropdown */
+    .mobile-category-dropdown {
+        margin-top: 12px;
+    }
+
+    .select-wrapper-mobile {
+        position: relative;
+        width: 100%;
+    }
+
+    .form-control-mobile {
+        width: 100%;
+        padding: 12px 40px 12px 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 14px;
+        background-color: #fff;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        cursor: pointer;
+    }
+
+    .form-control-mobile:focus {
+        outline: none;
+        border-color: #ae1504;
+    }
+
+    .select-arrow-mobile {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        color: #666;
+        font-size: 20px;
     }
 </style>
 
@@ -255,7 +184,7 @@
             if (window.currentStockFilterType !== undefined) {
                 window.currentStockFilterType = type;
             }
-            
+
             if (typeof window.__applyStockFilter === 'function') {
                 window.__applyStockFilter(type);
             }
@@ -339,7 +268,8 @@
             // ==============================
             function updateMobileSubtitle() {
                 if (mobileStockSubtitle) {
-                    mobileStockSubtitle.textContent = `${filtered.length} {{ __('messages.owner.products.stocks.stock_list') }}`;
+                    mobileStockSubtitle.textContent =
+                        `${filtered.length} {{ __('messages.owner.products.stocks.stock_list') }}`;
                 }
             }
 
@@ -516,6 +446,27 @@
                     `;
                     mobileList.appendChild(card);
                 });
+            }
+
+            // Select location filter
+            function selectLocationFilter(location) {
+                const form = document.createElement('form');
+                form.method = 'GET';
+                form.action = '{{ route('owner.user-owner.stocks.index') }}';
+
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'filter_location';
+                input.value = location;
+
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
+            }
+
+            // Clear all filters
+            function clearStockFilters() {
+                window.location.href = '{{ route('owner.user-owner.stocks.index') }}?filter_location=owner';
             }
 
             function renderPagination() {

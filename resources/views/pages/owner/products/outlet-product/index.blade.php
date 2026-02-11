@@ -15,47 +15,6 @@
                 </div>
             </div>
 
-            {{-- Mobile Header - Mobile Only --}}
-            <div class="only-mobile mobile-header-card">
-                <div class="mobile-header-content">
-                    <div class="mobile-header-left">
-                        <h1 class="mobile-header-title">{{ __('messages.owner.products.outlet_products.outlet_products') }}
-                        </h1>
-                        <p class="mobile-header-subtitle">
-                            {{ __('messages.owner.products.outlet_products.manage_products_subtitle') }}</p>
-                    </div>
-                </div>
-
-                {{-- Mobile Search Box --}}
-                <div class="mobile-search-box">
-                    <span class="mobile-search-icon">
-                        <span class="material-symbols-outlined">search</span>
-                    </span>
-                    <input type="text" id="productSearchInputMobile" class="mobile-search-input"
-                        value="{{ $q ?? request('q') }}"
-                        placeholder="{{ __('messages.owner.products.outlet_products.search_placeholder') ?? 'Search product...' }}">
-                    <button class="mobile-filter-btn" id="openFilterModalBtn">
-                        <span class="material-symbols-outlined">tune</span>
-                    </button>
-                </div>
-
-                {{-- Mobile Category Dropdown --}}
-                <div class="mobile-category-dropdown">
-                    <div class="select-wrapper-mobile">
-                        <select id="categoryFilterMobile" class="form-control-mobile" onchange="changeCategoryMobile(this)">
-                            <option value="">{{ __('messages.owner.products.outlet_products.all_category_dropdown') }}
-                            </option>
-                            @foreach ($categories as $category)
-                                <option value="{{ $category->id }}" @selected((string) request('category') === (string) $category->id)>
-                                    {{ $category->category_name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <span class="material-symbols-outlined select-arrow-mobile">expand_more</span>
-                    </div>
-                </div>
-            </div>
-
             @if (session('success'))
                 <div class="alert alert-success alert-modern">
                     <div class="alert-icon">
@@ -150,507 +109,436 @@
         <span class="material-symbols-outlined">add</span>
     </button>
 
-    {{-- Mobile Filter Modal --}}
-    <div class="mobile-filter-modal" id="mobileFilterModal">
-        <div class="filter-modal-backdrop" id="filterModalBackdrop"></div>
-        <div class="filter-modal-content">
-            <div class="filter-modal-header">
-                <div class="filter-header-left">
-                    <span class="material-symbols-outlined filter-header-icon">tune</span>
-                    <h3>{{ __('messages.owner.products.outlet_products.filter_title') ?? 'Filter' }}</h3>
-                </div>
-                <button class="filter-close-btn" id="closeFilterModalBtn">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
-            </div>
-
-            <div class="filter-modal-body">
 
 
-                {{-- Category Filter --}}
-                <div class="filter-divider">
-                    <span>{{ __('messages.owner.products.outlet_products.category_label') ?? 'Category' }}</span>
-                </div>
-                <div class="modal-filter-pills">
-                    <a href="javascript:void(0)" class="modal-pill {{ !request('category') ? 'active' : '' }}"
-                        onclick="selectCategoryFilter('')">
-                        <div class="pill-left">
-                            <div class="pill-icon-wrapper {{ !request('category') ? 'active' : '' }}">
-                                <span class="material-symbols-outlined">apps</span>
-                            </div>
-                            <div class="pill-info">
-                                <div class="pill-text">
-                                    {{ __('messages.owner.products.outlet_products.all_category_dropdown') }}</div>
-                            </div>
-                        </div>
-                        @if (!request('category'))
-                            <div class="pill-right">
-                                <span class="material-symbols-outlined pill-check">check_circle</span>
-                            </div>
-                        @endif
-                    </a>
+    @include('pages.owner.products.outlet-product.modal')
+@endsection
 
-                    @foreach ($categories as $category)
-                        <a href="javascript:void(0)"
-                            class="modal-pill {{ (string) request('category') === (string) $category->id ? 'active' : '' }}"
-                            onclick="selectCategoryFilter('{{ $category->id }}')">
-                            <div class="pill-left">
-                                <div
-                                    class="pill-icon-wrapper {{ (string) request('category') === (string) $category->id ? 'active' : '' }}">
-                                    <span class="material-symbols-outlined">category</span>
-                                </div>
-                                <div class="pill-info">
-                                    <div class="pill-text">{{ $category->category_name }}</div>
-                                    @if ($category->description)
-                                        <div class="pill-subtext">{{ $category->description }}</div>
-                                    @endif
-                                </div>
-                            </div>
-                            @if ((string) request('category') === (string) $category->id)
-                                <div class="pill-right">
-                                    <span class="material-symbols-outlined pill-check">check_circle</span>
-                                </div>
-                            @endif
-                        </a>
-                    @endforeach
-                </div>
-            </div>
+<style>
+    /* Hide desktop elements on mobile */
+    @media (max-width: 768px) {
+        .only-desktop {
+            display: none !important;
+        }
+    }
 
-            <div class="filter-modal-footer">
-                <button class="btn-clear-filter" onclick="clearAllFilters()">
-                    <span class="material-symbols-outlined">filter_alt_off</span>
-                    <span>{{ __('messages.owner.products.outlet_products.clear_all_filters') ?? 'Clear All Filters' }}</span>
-                </button>
-            </div>
+    /* Hide mobile elements on desktop */
+    @media (min-width: 769px) {
+        .only-mobile {
+            display: none !important;
+        }
+    }
 
-            @include('pages.owner.products.outlet-product.modal')
-        @endsection
+    .mobile-category-dropdown {
+        margin-top: 12px;
+    }
 
-        <style>
-            /* Hide desktop elements on mobile */
-            @media (max-width: 768px) {
-                .only-desktop {
-                    display: none !important;
-                }
+    .select-wrapper-mobile {
+        position: relative;
+        width: 100%;
+    }
+
+    .form-control-mobile {
+        width: 100%;
+        padding: 12px 40px 12px 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 14px;
+        background-color: #fff;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        cursor: pointer;
+    }
+
+    .form-control-mobile:focus {
+        outline: none;
+        border-color: #ae1504;
+    }
+
+    .select-arrow-mobile {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        color: #666;
+        font-size: 20px;
+    }
+</style>
+
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    {{-- Mobile Filter Modal Functions --}}
+    <script>
+        // Store selected filters temporarily
+        let tempOutletId = '{{ $currentOutletId }}';
+
+        // Open/Close Modal
+        document.getElementById('openFilterModalBtn')?.addEventListener('click', function() {
+            const modal = document.getElementById('mobileFilterModal');
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+
+            // Reset temp values to current
+            tempOutletId = '{{ $currentOutletId }}';
+        });
+
+        function closeFilterModal() {
+            const modal = document.getElementById('mobileFilterModal');
+            modal.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('closeFilterModalBtn')?.addEventListener('click', closeFilterModal);
+        document.getElementById('filterModalBackdrop')?.addEventListener('click', closeFilterModal);
+
+        // Select outlet filter
+        function selectOutletFilter(outletId) {
+            tempOutletId = outletId;
+            applyFilters();
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const params = new URLSearchParams(window.location.search);
+
+            params.set('outlet_id', tempOutletId);
+
+            // Keep current category
+            const currentCategory = document.getElementById('categoryFilterMobile')?.value;
+            if (currentCategory) {
+                params.set('category', currentCategory);
+            } else {
+                params.delete('category');
             }
 
-            /* Hide mobile elements on desktop */
-            @media (min-width: 769px) {
-                .only-mobile {
-                    display: none !important;
-                }
+            params.delete('page');
+
+            window.location.search = params.toString();
+        }
+
+        // Clear all filters
+        function clearAllFilters() {
+            const params = new URLSearchParams(window.location.search);
+
+            // Keep only outlet_id (default to first outlet)
+            const firstOutletId = '{{ $outlets->first()->id ?? '' }}';
+            params.set('outlet_id', firstOutletId);
+            params.delete('category');
+            params.delete('q');
+            params.delete('page');
+
+            window.location.search = params.toString();
+        }
+
+        // Mobile category dropdown handler
+        function changeCategoryMobile(selectEl) {
+            const categoryId = selectEl.value;
+            const params = new URLSearchParams(window.location.search);
+
+            if (categoryId) {
+                params.set('category', categoryId);
+            } else {
+                params.delete('category');
             }
 
-            .mobile-category-dropdown {
-                margin-top: 12px;
+            params.delete('page');
+            window.location.search = params.toString();
+        }
+
+        // Mobile search handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInputMobile = document.getElementById('productSearchInputMobile');
+
+            if (searchInputMobile) {
+                let timer;
+                searchInputMobile.addEventListener('input', function() {
+                    clearTimeout(timer);
+                    timer = setTimeout(() => {
+                        const params = new URLSearchParams(window.location.search);
+                        const q = (searchInputMobile.value || '').trim();
+
+                        if (q) params.set('q', q);
+                        else params.delete('q');
+
+                        params.delete('page');
+                        window.location.search = params.toString();
+                    }, 500);
+                });
             }
+        });
+    </script>
 
-            .select-wrapper-mobile {
-                position: relative;
-                width: 100%;
-            }
+    {{-- DELETE PRODUCT SCRIPT --}}
+    <script>
+        async function deleteProduct(id) {
+            const result = await Swal.fire({
+                title: '{{ __('messages.owner.products.outlet_products.delete_confirmation_1') }}',
+                text: "{{ __('messages.owner.products.outlet_products.delete_confirmation_2') }}",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ae1504',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '{{ __('messages.owner.products.outlet_products.delete_confirmation_3') }}',
+                cancelButtonText: '{{ __('messages.owner.products.outlet_products.cancel') }}'
+            });
 
-            .form-control-mobile {
-                width: 100%;
-                padding: 12px 40px 12px 16px;
-                border: 1px solid #e0e0e0;
-                border-radius: 8px;
-                font-size: 14px;
-                background-color: #fff;
-                appearance: none;
-                -webkit-appearance: none;
-                -moz-appearance: none;
-                cursor: pointer;
-            }
+            if (!result.isConfirmed) return;
 
-            .form-control-mobile:focus {
-                outline: none;
-                border-color: #ae1504;
-            }
+            try {
+                const url = "{{ route('owner.user-owner.outlet-products.destroy', ':id') }}".replace(':id', id);
+                const formData = new FormData();
+                formData.append('_method', 'DELETE');
 
-            .select-arrow-mobile {
-                position: absolute;
-                right: 12px;
-                top: 50%;
-                transform: translateY(-50%);
-                pointer-events: none;
-                color: #666;
-                font-size: 20px;
-            }
-        </style>
-
-        @push('scripts')
-            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-            {{-- Mobile Filter Modal Functions --}}
-            <script>
-                // Store selected filters temporarily
-                let tempOutletId = '{{ $currentOutletId }}';
-
-                // Open/Close Modal
-                document.getElementById('openFilterModalBtn')?.addEventListener('click', function() {
-                    const modal = document.getElementById('mobileFilterModal');
-                    modal.classList.add('show');
-                    document.body.style.overflow = 'hidden';
-
-                    // Reset temp values to current
-                    tempOutletId = '{{ $currentOutletId }}';
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                    },
+                    body: formData
                 });
 
-                function closeFilterModal() {
-                    const modal = document.getElementById('mobileFilterModal');
-                    modal.classList.remove('show');
-                    document.body.style.overflow = '';
-                }
-
-                document.getElementById('closeFilterModalBtn')?.addEventListener('click', closeFilterModal);
-                document.getElementById('filterModalBackdrop')?.addEventListener('click', closeFilterModal);
-
-                // Select outlet filter
-                function selectOutletFilter(outletId) {
-                    tempOutletId = outletId;
-                    applyFilters();
-                }
-
-                // Apply filters
-                function applyFilters() {
-                    const params = new URLSearchParams(window.location.search);
-
-                    params.set('outlet_id', tempOutletId);
-
-                    // Keep current category
-                    const currentCategory = document.getElementById('categoryFilterMobile')?.value;
-                    if (currentCategory) {
-                        params.set('category', currentCategory);
-                    } else {
-                        params.delete('category');
-                    }
-
-                    params.delete('page');
-
-                    window.location.search = params.toString();
-                }
-
-                // Clear all filters
-                function clearAllFilters() {
-                    const params = new URLSearchParams(window.location.search);
-
-                    // Keep only outlet_id (default to first outlet)
-                    const firstOutletId = '{{ $outlets->first()->id ?? '' }}';
-                    params.set('outlet_id', firstOutletId);
-                    params.delete('category');
-                    params.delete('q');
-                    params.delete('page');
-
-                    window.location.search = params.toString();
-                }
-
-                // Mobile category dropdown handler
-                function changeCategoryMobile(selectEl) {
-                    const categoryId = selectEl.value;
-                    const params = new URLSearchParams(window.location.search);
-
-                    if (categoryId) {
-                        params.set('category', categoryId);
-                    } else {
-                        params.delete('category');
-                    }
-
-                    params.delete('page');
-                    window.location.search = params.toString();
-                }
-
-                // Mobile search handler
-                document.addEventListener('DOMContentLoaded', function() {
-                    const searchInputMobile = document.getElementById('productSearchInputMobile');
-
-                    if (searchInputMobile) {
-                        let timer;
-                        searchInputMobile.addEventListener('input', function() {
-                            clearTimeout(timer);
-                            timer = setTimeout(() => {
-                                const params = new URLSearchParams(window.location.search);
-                                const q = (searchInputMobile.value || '').trim();
-
-                                if (q) params.set('q', q);
-                                else params.delete('q');
-
-                                params.delete('page');
-                                window.location.search = params.toString();
-                            }, 500);
-                        });
-                    }
-                });
-            </script>
-
-            {{-- DELETE PRODUCT SCRIPT --}}
-            <script>
-                async function deleteProduct(id) {
-                    const result = await Swal.fire({
-                        title: '{{ __('messages.owner.products.outlet_products.delete_confirmation_1') }}',
-                        text: "{{ __('messages.owner.products.outlet_products.delete_confirmation_2') }}",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#ae1504',
-                        cancelButtonColor: '#6c757d',
-                        confirmButtonText: '{{ __('messages.owner.products.outlet_products.delete_confirmation_3') }}',
-                        cancelButtonText: '{{ __('messages.owner.products.outlet_products.cancel') }}'
+                if (res.ok) {
+                    await Swal.fire({
+                        title: '{{ __('messages.owner.products.outlet_products.success') }}',
+                        text: '{{ __('messages.owner.products.outlet_products.delete_success') }}',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
                     });
-
-                    if (!result.isConfirmed) return;
-
-                    try {
-                        const url = "{{ route('owner.user-owner.outlet-products.destroy', ':id') }}".replace(':id', id);
-                        const formData = new FormData();
-                        formData.append('_method', 'DELETE');
-
-                        const res = await fetch(url, {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json',
-                            },
-                            body: formData
-                        });
-
-                        if (res.ok) {
-                            await Swal.fire({
-                                title: '{{ __('messages.owner.products.outlet_products.success') }}',
-                                text: '{{ __('messages.owner.products.outlet_products.delete_success') }}',
-                                icon: 'success',
-                                confirmButtonText: 'OK'
-                            });
-                            location.reload();
-                        } else {
-                            const data = await res.json();
-                            Swal.fire({
-                                title: '{{ __('messages.owner.products.outlet_products.failed') }}',
-                                text: data.message || res.statusText,
-                                icon: 'error',
-                                confirmButtonText: 'OK'
-                            });
-                        }
-                    } catch (err) {
-                        console.error(err);
-                        Swal.fire({
-                            title: '{{ __('messages.owner.products.outlet_products.error') }}',
-                            text: '{{ __('messages.owner.products.outlet_products.delete_error') }}',
-                            icon: 'error',
-                            confirmButtonText: 'OK'
-                        });
-                    }
+                    location.reload();
+                } else {
+                    const data = await res.json();
+                    Swal.fire({
+                        title: '{{ __('messages.owner.products.outlet_products.failed') }}',
+                        text: data.message || res.statusText,
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
                 }
-            </script>
+            } catch (err) {
+                console.error(err);
+                Swal.fire({
+                    title: '{{ __('messages.owner.products.outlet_products.error') }}',
+                    text: '{{ __('messages.owner.products.outlet_products.delete_error') }}',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        }
+    </script>
 
-            {{-- MODAL ADD PRODUCT SCRIPT --}}
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    const modal = document.getElementById('addProductModal');
-                    const form = document.getElementById('outletProductQuickAddForm');
-                    const outletInput = document.getElementById('qp_outlet_id');
-                    const categorySelect = document.getElementById('qp_category_id');
-                    const mpBox = document.getElementById('qp_master_product_box');
-                    const mpSelectAll = document.getElementById('qp_check_all');
-                    const mpError = document.getElementById('qp_mp_error');
-                    const qtyInput = document.getElementById('qp_quantity');
-                    const statusSelect = document.getElementById('qp_is_active');
+    {{-- MODAL ADD PRODUCT SCRIPT --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('addProductModal');
+            const form = document.getElementById('outletProductQuickAddForm');
+            const outletInput = document.getElementById('qp_outlet_id');
+            const categorySelect = document.getElementById('qp_category_id');
+            const mpBox = document.getElementById('qp_master_product_box');
+            const mpSelectAll = document.getElementById('qp_check_all');
+            const mpError = document.getElementById('qp_mp_error');
+            const qtyInput = document.getElementById('qp_quantity');
+            const statusSelect = document.getElementById('qp_is_active');
 
-                    form.setAttribute('autocomplete', 'off');
-                    form.querySelectorAll('input, select').forEach(el => el.setAttribute('autocomplete', 'off'));
+            form.setAttribute('autocomplete', 'off');
+            form.querySelectorAll('input, select').forEach(el => el.setAttribute('autocomplete', 'off'));
 
-                    function hardResetFields(keepOutlet = true) {
-                        form.reset();
-                        categorySelect.value = '';
-                        mpBox.innerHTML =
-                            '<div class="text-muted small text-center" style="padding: 2rem 1rem;"><span class="material-symbols-outlined" style="font-size: 2rem; opacity: 0.3; display: block; margin-bottom: 0.5rem;">inventory_2</span>{{ __('messages.owner.products.outlet_products.select_category_first') }}</div>';
-                        mpSelectAll.disabled = true;
-                        mpSelectAll.checked = false;
-                        mpError.style.display = 'none';
-                        qtyInput.value = '0';
-                        statusSelect.value = '1';
-                        if (!keepOutlet) outletInput.value = '';
-                    }
+            function hardResetFields(keepOutlet = true) {
+                form.reset();
+                categorySelect.value = '';
+                mpBox.innerHTML =
+                    '<div class="text-muted small text-center" style="padding: 2rem 1rem;"><span class="material-symbols-outlined" style="font-size: 2rem; opacity: 0.3; display: block; margin-bottom: 0.5rem;">inventory_2</span>{{ __('messages.owner.products.outlet_products.select_category_first') }}</div>';
+                mpSelectAll.disabled = true;
+                mpSelectAll.checked = false;
+                mpError.style.display = 'none';
+                qtyInput.value = '0';
+                statusSelect.value = '1';
+                if (!keepOutlet) outletInput.value = '';
+            }
 
-                    function getDefaultCategoryId() {
-                        const current = categorySelect.value;
-                        if (current) return current;
+            function getDefaultCategoryId() {
+                const current = categorySelect.value;
+                if (current) return current;
 
-                        const firstOption = Array.from(categorySelect.options).find(opt => opt.value && opt.value !== '');
-                        return firstOption ? firstOption.value : '';
-                    }
+                const firstOption = Array.from(categorySelect.options).find(opt => opt.value && opt.value !== '');
+                return firstOption ? firstOption.value : '';
+            }
 
-                    function renderMasterProductCheckboxes(items) {
-                        mpBox.innerHTML = '';
-                        mpSelectAll.disabled = true;
-                        mpSelectAll.checked = false;
+            function renderMasterProductCheckboxes(items) {
+                mpBox.innerHTML = '';
+                mpSelectAll.disabled = true;
+                mpSelectAll.checked = false;
 
-                        if (!Array.isArray(items) || items.length === 0) {
-                            mpBox.innerHTML =
-                                '<div class="text-muted small text-center" style="padding: 2rem 1rem;">{{ __('messages.owner.products.outlet_products.no_master_product_filter') }}</div>';
-                            return;
-                        }
+                if (!Array.isArray(items) || items.length === 0) {
+                    mpBox.innerHTML =
+                        '<div class="text-muted small text-center" style="padding: 2rem 1rem;">{{ __('messages.owner.products.outlet_products.no_master_product_filter') }}</div>';
+                    return;
+                }
 
-                        items.forEach(item => {
-                            const id = String(item.id);
-                            const label = item.name || ('#' + id);
+                items.forEach(item => {
+                    const id = String(item.id);
+                    const label = item.name || ('#' + id);
 
-                            const div = document.createElement('div');
-                            div.className = 'form-check';
-                            div.innerHTML = `
+                    const div = document.createElement('div');
+                    div.className = 'form-check';
+                    div.innerHTML = `
             <input class="form-check-input" type="checkbox" name="master_product_ids[]" value="${id}" id="mp_${id}">
             <label class="form-check-label" for="mp_${id}">${label}</label>
           `;
-                            mpBox.appendChild(div);
-                        });
-
-                        mpSelectAll.disabled = false;
-                        mpSelectAll.checked = false;
-                    }
-
-                    mpSelectAll.addEventListener('change', function() {
-                        const checked = this.checked;
-                        mpBox.querySelectorAll('input[type="checkbox"][name="master_product_ids[]"]').forEach(
-                            cb => {
-                                cb.checked = checked;
-                            });
-                    });
-
-                    form.addEventListener('submit', function(e) {
-                        const anyChecked = mpBox.querySelectorAll('input[name="master_product_ids[]"]:checked')
-                            .length > 0;
-                        if (!anyChecked) {
-                            e.preventDefault();
-                            mpError.style.display = 'block';
-                            mpBox.classList.add('border-danger');
-                            setTimeout(() => mpBox.classList.remove('border-danger'), 1500);
-                        } else {
-                            mpError.style.display = 'none';
-                        }
-                    });
-
-                    document.addEventListener('click', function(e) {
-                        if (e.target.closest('.btn-add-product')) {
-                            e.preventDefault();
-                            const btn = e.target.closest('.btn-add-product');
-                            const outletId = btn.getAttribute('data-outlet') || '';
-
-                            hardResetFields(true);
-                            outletInput.value = outletId;
-
-                            const catId = getDefaultCategoryId();
-                            if (catId) {
-                                categorySelect.value = catId;
-                                loadMasterProducts(catId, outletId);
-                            }
-                        }
-                    });
-
-                    if (modal) {
-                        modal.addEventListener('hidden.bs.modal', function() {
-                            hardResetFields(true);
-                        });
-                    }
-
-                    async function loadMasterProducts(categoryId, outletId) {
-                        mpBox.innerHTML =
-                            '<div class="text-muted small text-center" style="padding: 2rem 1rem;">{{ __('messages.owner.products.outlet_products.loading') }}</div>';
-                        mpSelectAll.disabled = true;
-                        mpSelectAll.checked = false;
-                        mpError.style.display = 'none';
-
-                        try {
-                            const url = new URL("{{ route('owner.user-owner.outlet-products.get-master-products') }}",
-                                window.location.origin);
-                            url.searchParams.set('category_id', categoryId || 'all');
-                            if (outletId) url.searchParams.set('outlet_id', outletId);
-
-                            const res = await fetch(url.toString(), {
-                                headers: {
-                                    'Accept': 'application/json'
-                                }
-                            });
-                            const data = await res.json();
-                            renderMasterProductCheckboxes(data);
-                        } catch {
-                            mpBox.innerHTML =
-                                '<div class="text-danger small text-center" style="padding: 2rem 1rem;">{{ __('messages.owner.products.outlet_products.failed_load_master_products') }}</div>';
-                        }
-                    }
-
-                    categorySelect.addEventListener('change', function() {
-                        loadMasterProducts(this.value, outletInput.value);
-                    });
+                    mpBox.appendChild(div);
                 });
-            </script>
 
-            {{-- STOCK TYPE TOGGLE --}}
-            <script>
-                (function() {
-                    const directRadio = document.getElementById('stock_type_direct');
-                    const linkedRadio = document.getElementById('stock_type_linked');
-                    const qtyGroup = document.getElementById('qp_quantity_group');
-                    const qtyInput = document.getElementById('qp_quantity');
-                    const linkedInfo = document.getElementById('linked_stock_info');
+                mpSelectAll.disabled = false;
+                mpSelectAll.checked = false;
+            }
 
-                    function syncStockTypeUI() {
-                        if (!directRadio || !linkedRadio || !qtyGroup || !qtyInput || !linkedInfo) return;
+            mpSelectAll.addEventListener('change', function() {
+                const checked = this.checked;
+                mpBox.querySelectorAll('input[type="checkbox"][name="master_product_ids[]"]').forEach(
+                    cb => {
+                        cb.checked = checked;
+                    });
+            });
 
-                        if (linkedRadio.checked) {
-                            qtyGroup.classList.add('d-none');
-                            qtyInput.required = false;
-                            qtyInput.value = '0';
-                            linkedInfo.classList.remove('d-none');
-                        } else {
-                            qtyGroup.classList.remove('d-none');
-                            qtyInput.required = true;
-                            linkedInfo.classList.add('d-none');
-                        }
-                    }
-
-                    directRadio?.addEventListener('change', syncStockTypeUI);
-                    linkedRadio?.addEventListener('change', syncStockTypeUI);
-
-                    const modal = document.getElementById('addProductModal');
-                    if (modal) {
-                        modal.addEventListener('shown.bs.modal', function() {
-                            if (directRadio) directRadio.checked = true;
-                            syncStockTypeUI();
-                        });
-                    }
-
-                    syncStockTypeUI();
-                })();
-            </script>
-
-            <script>
-                function submitFilterResetPage() {
-                    const form = document.getElementById('outletProductFilterForm');
-                    const pageInput = document.getElementById('pageInput');
-                    if (pageInput) pageInput.value = 1;
-                    form?.submit();
+            form.addEventListener('submit', function(e) {
+                const anyChecked = mpBox.querySelectorAll('input[name="master_product_ids[]"]:checked')
+                    .length > 0;
+                if (!anyChecked) {
+                    e.preventDefault();
+                    mpError.style.display = 'block';
+                    mpBox.classList.add('border-danger');
+                    setTimeout(() => mpBox.classList.remove('border-danger'), 1500);
+                } else {
+                    mpError.style.display = 'none';
                 }
+            });
 
-                function debouncedSubmit(el, delay = 500) {
-                    const form = document.getElementById('outletProductFilterForm');
-                    const pageInput = document.getElementById('pageInput');
-                    if (!form || !el) return;
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.btn-add-product')) {
+                    e.preventDefault();
+                    const btn = e.target.closest('.btn-add-product');
+                    const outletId = btn.getAttribute('data-outlet') || '';
 
-                    if (pageInput) pageInput.value = 1;
-
-                    if (el._debounceTimer) clearTimeout(el._debounceTimer);
-                    el._debounceTimer = setTimeout(() => form.submit(), delay);
-                }
-
-                function changeOutlet(selectEl) {
-                    const outletId = selectEl.value;
-                    const form = document.getElementById('outletProductFilterForm');
-                    const outletInput = document.getElementById('outletIdInput');
-                    const pageInput = document.getElementById('pageInput');
-                    if (!form || !outletInput) return;
-
+                    hardResetFields(true);
                     outletInput.value = outletId;
-                    if (pageInput) pageInput.value = 1;
-                    form.submit();
+
+                    const catId = getDefaultCategoryId();
+                    if (catId) {
+                        categorySelect.value = catId;
+                        loadMasterProducts(catId, outletId);
+                    }
                 }
-            </script>
-        @endpush
+            });
+
+            if (modal) {
+                modal.addEventListener('hidden.bs.modal', function() {
+                    hardResetFields(true);
+                });
+            }
+
+            async function loadMasterProducts(categoryId, outletId) {
+                mpBox.innerHTML =
+                    '<div class="text-muted small text-center" style="padding: 2rem 1rem;">{{ __('messages.owner.products.outlet_products.loading') }}</div>';
+                mpSelectAll.disabled = true;
+                mpSelectAll.checked = false;
+                mpError.style.display = 'none';
+
+                try {
+                    const url = new URL("{{ route('owner.user-owner.outlet-products.get-master-products') }}",
+                        window.location.origin);
+                    url.searchParams.set('category_id', categoryId || 'all');
+                    if (outletId) url.searchParams.set('outlet_id', outletId);
+
+                    const res = await fetch(url.toString(), {
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
+                    const data = await res.json();
+                    renderMasterProductCheckboxes(data);
+                } catch {
+                    mpBox.innerHTML =
+                        '<div class="text-danger small text-center" style="padding: 2rem 1rem;">{{ __('messages.owner.products.outlet_products.failed_load_master_products') }}</div>';
+                }
+            }
+
+            categorySelect.addEventListener('change', function() {
+                loadMasterProducts(this.value, outletInput.value);
+            });
+        });
+    </script>
+
+    {{-- STOCK TYPE TOGGLE --}}
+    <script>
+        (function() {
+            const directRadio = document.getElementById('stock_type_direct');
+            const linkedRadio = document.getElementById('stock_type_linked');
+            const qtyGroup = document.getElementById('qp_quantity_group');
+            const qtyInput = document.getElementById('qp_quantity');
+            const linkedInfo = document.getElementById('linked_stock_info');
+
+            function syncStockTypeUI() {
+                if (!directRadio || !linkedRadio || !qtyGroup || !qtyInput || !linkedInfo) return;
+
+                if (linkedRadio.checked) {
+                    qtyGroup.classList.add('d-none');
+                    qtyInput.required = false;
+                    qtyInput.value = '0';
+                    linkedInfo.classList.remove('d-none');
+                } else {
+                    qtyGroup.classList.remove('d-none');
+                    qtyInput.required = true;
+                    linkedInfo.classList.add('d-none');
+                }
+            }
+
+            directRadio?.addEventListener('change', syncStockTypeUI);
+            linkedRadio?.addEventListener('change', syncStockTypeUI);
+
+            const modal = document.getElementById('addProductModal');
+            if (modal) {
+                modal.addEventListener('shown.bs.modal', function() {
+                    if (directRadio) directRadio.checked = true;
+                    syncStockTypeUI();
+                });
+            }
+
+            syncStockTypeUI();
+        })();
+    </script>
+
+    <script>
+        function submitFilterResetPage() {
+            const form = document.getElementById('outletProductFilterForm');
+            const pageInput = document.getElementById('pageInput');
+            if (pageInput) pageInput.value = 1;
+            form?.submit();
+        }
+
+        function debouncedSubmit(el, delay = 500) {
+            const form = document.getElementById('outletProductFilterForm');
+            const pageInput = document.getElementById('pageInput');
+            if (!form || !el) return;
+
+            if (pageInput) pageInput.value = 1;
+
+            if (el._debounceTimer) clearTimeout(el._debounceTimer);
+            el._debounceTimer = setTimeout(() => form.submit(), delay);
+        }
+
+        function changeOutlet(selectEl) {
+            const outletId = selectEl.value;
+            const form = document.getElementById('outletProductFilterForm');
+            const outletInput = document.getElementById('outletIdInput');
+            const pageInput = document.getElementById('pageInput');
+            if (!form || !outletInput) return;
+
+            outletInput.value = outletId;
+            if (pageInput) pageInput.value = 1;
+            form.submit();
+        }
+    </script>
+@endpush
