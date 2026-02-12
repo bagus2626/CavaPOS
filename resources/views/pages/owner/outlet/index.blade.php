@@ -251,7 +251,7 @@
             <tr class="empty-filter-row">
               <td colspan="7" class="text-center">
                 <div class="table-empty-state">
-                  <span class="material-symbols-outlined">store_off</span>
+                  <span class="material-symbols-outlined">store</span>
                   <h4>{{ __('messages.owner.outlet.all_outlets.no_outlets') ?? 'No outlets found' }}</h4>
                   <p>{{ __('messages.owner.outlet.all_outlets.add_first_outlet') ?? 'Add your first outlet to get started' }}</p>
                 </div>
@@ -263,7 +263,7 @@
                     if (mobileList) {
                         mobileList.innerHTML = `
               <div class="table-empty-state">
-                <span class="material-symbols-outlined">store_off</span>
+                <span class="material-symbols-outlined">store</span>
                 <h4>{{ __('messages.owner.outlet.all_outlets.no_outlets') ?? 'No outlets found' }}</h4>
                 <p>{{ __('messages.owner.outlet.all_outlets.add_first_outlet') ?? 'Add your first outlet to get started' }}</p>
               </div>

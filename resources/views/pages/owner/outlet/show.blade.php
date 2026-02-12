@@ -8,18 +8,20 @@
         use Illuminate\Support\Str;
 
         // Gambar logo (relatif → storage)
-        $logo = $outlet && $outlet->logo
-            ? (Str::startsWith($outlet->logo, ['http://', 'https://'])
-                ? $outlet->logo
-                : asset('storage/' . $outlet->logo))
-            : null;
+        $logo =
+            $outlet && $outlet->logo
+                ? (Str::startsWith($outlet->logo, ['http://', 'https://'])
+                    ? $outlet->logo
+                    : asset('storage/' . $outlet->logo))
+                : null;
 
         // Gambar background
-        $background = $outlet && $outlet->background_picture
-            ? (Str::startsWith($outlet->background_picture, ['http://', 'https://'])
-                ? $outlet->background_picture
-                : asset('storage/' . $outlet->background_picture))
-            : null;
+        $background =
+            $outlet && $outlet->background_picture
+                ? (Str::startsWith($outlet->background_picture, ['http://', 'https://'])
+                    ? $outlet->background_picture
+                    : asset('storage/' . $outlet->background_picture))
+                : null;
 
         $isActive = (int) ($outlet->is_active ?? 0) === 1;
         $isQrActive = (int) ($outlet->is_qr_active ?? 0) === 1;
@@ -31,7 +33,7 @@
             'disabled' => __('messages.owner.outlet.all_outlets.mode_disabled'),
             'barcode_only' => __('messages.owner.outlet.all_outlets.mode_barcode_only'),
             'cashier_only' => __('messages.owner.outlet.all_outlets.mode_cashier_only'),
-            'both' => __('messages.owner.outlet.all_outlets.mode_both')
+            'both' => __('messages.owner.outlet.all_outlets.mode_both'),
         ];
         $qrModeLabel = $qrModeLabels[$outlet->qr_mode] ?? 'Unknown';
 
@@ -43,9 +45,9 @@
         $selectedGrouped = $selectedManualPayments->groupBy('payment_type');
 
         $typeLabels = [
-            'manual_tf'      => __('messages.owner.payment_methods.type_transfer'),
+            'manual_tf' => __('messages.owner.payment_methods.type_transfer'),
             'manual_ewallet' => __('messages.owner.payment_methods.type_ewallet'),
-            'manual_qris'    => __('messages.owner.payment_methods.type_qris'),
+            'manual_qris' => __('messages.owner.payment_methods.type_qris'),
         ];
     @endphp
 
@@ -93,7 +95,7 @@
                 <div class="detail-hero-header">
                     {{-- Avatar --}}
                     <div class="detail-avatar">
-                        @if($logo)
+                        @if ($logo)
                             <img src="{{ $logo }}" alt="{{ $outlet->name }}" class="detail-avatar-image">
                         @else
                             <div class="detail-avatar-placeholder">
@@ -110,9 +112,10 @@
                         </p>
                         <div class="detail-hero-badges">
                             <span class="detail-badge-role">
-                                {{ __('messages.owner.outlet.all_outlets.partner_code') }}: {{ $outlet->partner_code ?? '—' }}
+                                {{ __('messages.owner.outlet.all_outlets.partner_code') }}:
+                                {{ $outlet->partner_code ?? '—' }}
                             </span>
-                            @if($isActive)
+                            @if ($isActive)
                                 <span class="badge-modern badge-success">
                                     {{ __('messages.owner.outlet.all_outlets.active') }}
                                 </span>
@@ -142,7 +145,8 @@
                         <div class="detail-info-group">
                             {{-- Outlet Name --}}
                             <div class="detail-info-item">
-                                <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.outlet_name') }}</div>
+                                <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.outlet_name') }}
+                                </div>
                                 <div class="detail-info-value">{{ $outlet->name ?? '—' }}</div>
                             </div>
 
@@ -150,7 +154,7 @@
                             <div class="detail-info-item">
                                 <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.email') }}</div>
                                 <div class="detail-info-value">
-                                    @if(!empty($outlet->email))
+                                    @if (!empty($outlet->email))
                                         <a href="mailto:{{ $outlet->email }}">{{ $outlet->email }}</a>
                                     @else
                                         —
@@ -174,7 +178,8 @@
 
                             {{-- Partner Code --}}
                             <div class="detail-info-item">
-                                <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.partner_code') }}</div>
+                                <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.partner_code') }}
+                                </div>
                                 <div class="detail-info-value">
                                     <strong>{{ $outlet->partner_code ?? '—' }}</strong>
                                 </div>
@@ -183,7 +188,8 @@
                             {{-- Package --}}
                             <div class="detail-info-item">
                                 <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.package') }}</div>
-                                <div class="detail-info-value">{{ $outlet->package ?? __('messages.owner.outlet.all_outlets.no_package') }}</div>
+                                <div class="detail-info-value">
+                                    {{ $outlet->package ?? __('messages.owner.outlet.all_outlets.no_package') }}</div>
                             </div>
                         </div>
                     </div>
@@ -251,36 +257,45 @@
 
                             {{-- QR Active --}}
                             <div class="detail-info-item">
-                                <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.qr_active_status') }}</div>
+                                <div class="detail-info-label">
+                                    {{ __('messages.owner.outlet.all_outlets.qr_active_status') }}</div>
                                 <div class="detail-info-value">
-                                    @if($isQrActive)
-                                        <span class="badge-modern badge-success">{{ __('messages.owner.outlet.all_outlets.active') }}</span>
+                                    @if ($isQrActive)
+                                        <span
+                                            class="badge-modern badge-success">{{ __('messages.owner.outlet.all_outlets.active') }}</span>
                                     @else
-                                        <span class="badge-modern badge-danger">{{ __('messages.owner.outlet.all_outlets.inactive') }}</span>
+                                        <span
+                                            class="badge-modern badge-danger">{{ __('messages.owner.outlet.all_outlets.inactive') }}</span>
                                     @endif
                                 </div>
                             </div>
 
                             {{-- Cashier Active --}}
                             <div class="detail-info-item">
-                                <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.cashier_active_status') }}</div>
+                                <div class="detail-info-label">
+                                    {{ __('messages.owner.outlet.all_outlets.cashier_active_status') }}</div>
                                 <div class="detail-info-value">
-                                    @if($isCashierActive)
-                                        <span class="badge-modern badge-success">{{ __('messages.owner.outlet.all_outlets.active') }}</span>
+                                    @if ($isCashierActive)
+                                        <span
+                                            class="badge-modern badge-success">{{ __('messages.owner.outlet.all_outlets.active') }}</span>
                                     @else
-                                        <span class="badge-modern badge-danger">{{ __('messages.owner.outlet.all_outlets.inactive') }}</span>
+                                        <span
+                                            class="badge-modern badge-danger">{{ __('messages.owner.outlet.all_outlets.inactive') }}</span>
                                     @endif
                                 </div>
                             </div>
 
                             {{-- WiFi Shown --}}
                             <div class="detail-info-item">
-                                <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.wifi_shown_status') }}</div>
+                                <div class="detail-info-label">
+                                    {{ __('messages.owner.outlet.all_outlets.wifi_shown_status') }}</div>
                                 <div class="detail-info-value">
-                                    @if($isWifiShown)
-                                        <span class="badge-modern badge-success">{{ __('messages.owner.outlet.all_outlets.active') }}</span>
+                                    @if ($isWifiShown)
+                                        <span
+                                            class="badge-modern badge-success">{{ __('messages.owner.outlet.all_outlets.active') }}</span>
                                     @else
-                                        <span class="badge-modern badge-danger">{{ __('messages.owner.outlet.all_outlets.inactive') }}</span>
+                                        <span
+                                            class="badge-modern badge-danger">{{ __('messages.owner.outlet.all_outlets.inactive') }}</span>
                                     @endif
                                 </div>
                             </div>
@@ -289,17 +304,19 @@
                         <div class="detail-info-group">
                             {{-- WiFi Username --}}
                             <div class="detail-info-item">
-                                <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.wifi_username_label') }}</div>
+                                <div class="detail-info-label">
+                                    {{ __('messages.owner.outlet.all_outlets.wifi_username_label') }}</div>
                                 <div class="detail-info-value">{{ $outlet->user_wifi ?? '—' }}</div>
                             </div>
 
                             {{-- WiFi Password --}}
                             <div class="detail-info-item">
-                                <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.wifi_password') }}</div>
+                                <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.wifi_password') }}
+                                </div>
                                 <div class="detail-info-value">{{ $outlet->pass_wifi ?? '—' }}</div>
                             </div>
 
-                            
+
                         </div>
                     </div>
 
@@ -307,29 +324,32 @@
                     <div class="section-divider"></div>
 
                     {{-- Contact & Social Media Section --}}
-                    @if($outlet->profileOutlet)
+                    @if ($outlet->profileOutlet)
                         <div class="section-header">
                             <div class="section-icon section-icon-red">
                                 <span class="material-symbols-outlined">contact_page</span>
                             </div>
-                            <h3 class="section-title">{{ __('messages.owner.outlet.all_outlets.contact_and_social_media') }}</h3>
+                            <h3 class="section-title">
+                                {{ __('messages.owner.outlet.all_outlets.contact_and_social_media') }}</h3>
                         </div>
 
                         <div class="detail-info-grid">
                             <div class="detail-info-group">
                                 {{-- Contact Person --}}
                                 <div class="detail-info-item">
-                                    <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.contact_name') }}</div>
-                                    <div class="detail-info-value">{{ $outlet->profileOutlet->contact_person ?? '—' }}</div>
+                                    <div class="detail-info-label">
+                                        {{ __('messages.owner.outlet.all_outlets.contact_name') }}</div>
+                                    <div class="detail-info-value">{{ $outlet->profileOutlet->contact_person ?? '—' }}
+                                    </div>
                                 </div>
 
                                 {{-- Contact Phone --}}
                                 <div class="detail-info-item">
-                                    <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.phone_number') }}</div>
+                                    <div class="detail-info-label">
+                                        {{ __('messages.owner.outlet.all_outlets.phone_number') }}</div>
                                     <div class="detail-info-value">
-                                        @if($outlet->profileOutlet->contact_phone)
-                                            
-                                                href="tel:{{ $outlet->profileOutlet->contact_phone }}">{{ $outlet->profileOutlet->contact_phone }}</a>
+                                        @if ($outlet->profileOutlet->contact_phone)
+                                            href="tel:{{ $outlet->profileOutlet->contact_phone }}">{{ $outlet->profileOutlet->contact_phone }}</a>
                                         @else
                                             —
                                         @endif
@@ -338,9 +358,10 @@
 
                                 {{-- WhatsApp --}}
                                 <div class="detail-info-item">
-                                    <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.whatsapp') }}</div>
+                                    <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.whatsapp') }}
+                                    </div>
                                     <div class="detail-info-value">
-                                        @if($outlet->profileOutlet->whatsapp)
+                                        @if ($outlet->profileOutlet->whatsapp)
                                             <a href="https://wa.me/{{ $outlet->profileOutlet->whatsapp }}"
                                                 target="_blank">{{ $outlet->profileOutlet->whatsapp }}</a>
                                         @else
@@ -351,9 +372,10 @@
 
                                 {{-- Website --}}
                                 <div class="detail-info-item">
-                                    <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.website') }}</div>
+                                    <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.website') }}
+                                    </div>
                                     <div class="detail-info-value">
-                                        @if($outlet->profileOutlet->website)
+                                        @if ($outlet->profileOutlet->website)
                                             <a href="{{ $outlet->profileOutlet->website }}"
                                                 target="_blank">{{ $outlet->profileOutlet->website }}</a>
                                         @else
@@ -366,41 +388,44 @@
                             <div class="detail-info-group">
                                 {{-- Instagram --}}
                                 <div class="detail-info-item">
-                                    <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.instagram') }}</div>
+                                    <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.instagram') }}
+                                    </div>
                                     <div class="detail-info-value">{{ $outlet->profileOutlet->instagram ?? '—' }}</div>
                                 </div>
 
                                 {{-- Facebook --}}
                                 <div class="detail-info-item">
-                                    <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.facebook') }}</div>
+                                    <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.facebook') }}
+                                    </div>
                                     <div class="detail-info-value">{{ $outlet->profileOutlet->facebook ?? '—' }}</div>
                                 </div>
 
                                 {{-- Twitter --}}
                                 <div class="detail-info-item">
-                                    <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.twitter') }}</div>
+                                    <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.twitter') }}
+                                    </div>
                                     <div class="detail-info-value">{{ $outlet->profileOutlet->twitter ?? '—' }}</div>
                                 </div>
 
                                 {{-- TikTok --}}
                                 <div class="detail-info-item">
-                                    <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.tiktok') }}</div>
+                                    <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.tiktok') }}
+                                    </div>
                                     <div class="detail-info-value">{{ $outlet->profileOutlet->tiktok ?? '—' }}</div>
                                 </div>
                             </div>
                         </div>
 
                         {{-- Google Maps Full Width --}}
-                        @if($outlet->profileOutlet->gmaps_url)
+                        @if ($outlet->profileOutlet->gmaps_url)
                             <div class="detail-info-item" style="margin-top: 1rem;">
                                 <div class="detail-info-label">Google Maps</div>
-                                <div class="detail-info-value">
-                                    <a href="{{ $outlet->profileOutlet->gmaps_url }}"
-                                        target="_blank">{{ $outlet->profileOutlet->gmaps_url }}</a>
+                                <div class="detail-info-value gmaps-url-container">
+                                    <a href="{{ $outlet->profileOutlet->gmaps_url }}" target="_blank"
+                                        class="gmaps-url-link">{{ $outlet->profileOutlet->gmaps_url }}</a>
                                 </div>
                             </div>
                         @endif
-
                         {{-- Section Divider --}}
                         <div class="section-divider"></div>
                     @endif
@@ -413,7 +438,8 @@
                         <div class="section-icon section-icon-red">
                             <span class="material-symbols-outlined">payments</span>
                         </div>
-                        <h3 class="section-title">{{ __('messages.owner.outlet.all_outlets.payment_methods') ?? 'Payment Methods' }}</h3>
+                        <h3 class="section-title">
+                            {{ __('messages.owner.outlet.all_outlets.payment_methods') ?? 'Payment Methods' }}</h3>
                     </div>
 
                     <div class="qr-manual-grid">
@@ -421,7 +447,8 @@
                         <div class="qr-box">
                             <div class="qr-box-header">
                                 <span class="material-symbols-outlined">qr_code_2</span>
-                                <h4 class="qr-box-title">{{ __('messages.owner.outlet.all_outlets.payment_mode') ?? 'Payment Mode' }}</h4>
+                                <h4 class="qr-box-title">
+                                    {{ __('messages.owner.outlet.all_outlets.payment_mode') ?? 'Payment Mode' }}</h4>
                             </div>
 
                             <div class="payment-items">
@@ -430,25 +457,29 @@
                                     <div class="check-card-body">
                                         <div class="check-card-title">
                                             {{ __('messages.owner.outlet.all_outlets.qr_active_status') ?? 'QR Active' }}
-                                            @if($isQrActive)
-                                                <span class="mini-badge" style="background:#dcfce7;color:#166534;">ON</span>
+                                            @if ($isQrActive)
+                                                <span class="mini-badge"
+                                                    style="background:#dcfce7;color:#166534;">ON</span>
                                             @else
                                                 <span class="mini-badge mini-badge-gray">OFF</span>
                                             @endif
                                         </div>
                                         <div class="check-card-desc">
-                                            {{ __('messages.owner.outlet.all_outlets.qr_mode') ?? 'QR Mode' }}: <strong>{{ $qrModeLabel }}</strong>
+                                            {{ __('messages.owner.outlet.all_outlets.qr_mode') ?? 'QR Mode' }}:
+                                            <strong>{{ $qrModeLabel }}</strong>
                                         </div>
                                     </div>
                                 </div>
 
                                 {{-- Cashier --}}
-                                <div class="check-card {{ $isCashierActive ? 'is-selected' : '' }}" style="cursor: default;">
+                                <div class="check-card {{ $isCashierActive ? 'is-selected' : '' }}"
+                                    style="cursor: default;">
                                     <div class="check-card-body">
                                         <div class="check-card-title">
                                             {{ __('messages.owner.outlet.all_outlets.cashier_active_status') ?? 'Cashier Active' }}
-                                            @if($isCashierActive)
-                                                <span class="mini-badge" style="background:#dcfce7;color:#166534;">ON</span>
+                                            @if ($isCashierActive)
+                                                <span class="mini-badge"
+                                                    style="background:#dcfce7;color:#166534;">ON</span>
                                             @else
                                                 <span class="mini-badge mini-badge-gray">OFF</span>
                                             @endif
@@ -465,10 +496,11 @@
                         <div class="qr-box">
                             <div class="qr-box-header">
                                 <span class="material-symbols-outlined">account_balance_wallet</span>
-                                <h4 class="qr-box-title">{{ __('messages.owner.outlet.all_outlets.manual_payment') ?? 'Manual Payment' }}</h4>
+                                <h4 class="qr-box-title">
+                                    {{ __('messages.owner.outlet.all_outlets.manual_payment') ?? 'Manual Payment' }}</h4>
                             </div>
 
-                            @if($selectedManualPayments->count() === 0)
+                            @if ($selectedManualPayments->count() === 0)
                                 <div class="empty-note">
                                     {{ __('messages.owner.outlet.all_outlets.no_manual_payment_selected') ?? 'Belum ada manual payment yang dipilih.' }}
                                 </div>
@@ -476,26 +508,33 @@
                                 @foreach (['manual_tf', 'manual_ewallet', 'manual_qris'] as $type)
                                     @php $items = $selectedGrouped->get($type, collect()); @endphp
 
-                                    @if($items->count() > 0)
+                                    @if ($items->count() > 0)
                                         <div class="payment-group">
                                             <div class="payment-group-title">
                                                 {{ $typeLabels[$type] ?? $type }}
                                             </div>
 
                                             <div class="payment-items">
-                                                @foreach($items as $pm)
+                                                @foreach ($items as $pm)
                                                     <div class="check-card is-selected" style="cursor: default;">
                                                         <div class="check-card-body">
                                                             <div class="check-card-title">
                                                                 {{ $pm->provider_name ?? '-' }}
-                                                                @if(isset($pm->is_active) && !$pm->is_active)
-                                                                    <span class="mini-badge mini-badge-gray">Disabled</span>
+                                                                @if (isset($pm->is_active) && !$pm->is_active)
+                                                                    <span
+                                                                        class="mini-badge mini-badge-gray">Disabled</span>
                                                                 @endif
                                                             </div>
 
                                                             <div class="check-card-desc">
                                                                 @php
-                                                                    $line1 = trim(($pm->provider_account_name ?? '') . ' ' . ($pm->provider_account_no ? '(' . $pm->provider_account_no . ')' : ''));
+                                                                    $line1 = trim(
+                                                                        ($pm->provider_account_name ?? '') .
+                                                                            ' ' .
+                                                                            ($pm->provider_account_no
+                                                                                ? '(' . $pm->provider_account_no . ')'
+                                                                                : ''),
+                                                                    );
                                                                 @endphp
                                                                 {{ $line1 ?: '-' }}
                                                             </div>
@@ -524,7 +563,8 @@
                         <div class="detail-info-group">
                             {{-- Created At --}}
                             <div class="detail-info-item">
-                                <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.created_at') }}</div>
+                                <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.created_at') }}
+                                </div>
                                 <div class="detail-info-value">
                                     {{ optional($outlet->created_at)->format('d M Y, H:i') ?? '—' }}
                                 </div>
@@ -534,7 +574,8 @@
                         <div class="detail-info-group">
                             {{-- Updated At --}}
                             <div class="detail-info-item">
-                                <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.last_updated') }}</div>
+                                <div class="detail-info-label">{{ __('messages.owner.outlet.all_outlets.last_updated') }}
+                                </div>
                                 <div class="detail-info-value">
                                     {{ optional($outlet->updated_at)->format('d M Y, H:i') ?? '—' }}
                                 </div>
@@ -544,12 +585,14 @@
 
                     {{-- Action Buttons --}}
                     <div class="action-buttons-group">
-                        <a href="{{ route('owner.user-owner.outlets.edit', $outlet->id) }}" class="btn-action btn-action-edit">
+                        <a href="{{ route('owner.user-owner.outlets.edit', $outlet->id) }}"
+                            class="btn-action btn-action-edit">
                             <span class="material-symbols-outlined">edit</span>
                             {{ __('messages.owner.outlet.all_outlets.edit') }}
                         </a>
-                        
-                        <form action="{{ route('owner.user-owner.outlets.destroy', $outlet->id) }}" method="POST" class="d-inline-block" id="deleteForm">
+
+                        <form action="{{ route('owner.user-owner.outlets.destroy', $outlet->id) }}" method="POST"
+                            class="d-inline-block" id="deleteForm">
                             @csrf
                             @method('DELETE')
                             <button type="button" class="btn-action btn-action-delete" onclick="confirmDelete()">
@@ -566,171 +609,314 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-function confirmDelete() {
-    Swal.fire({
-        title: '{{ __('messages.owner.outlet.all_outlets.delete_confirmation_1') }}',
-        text: '{{ __('messages.owner.outlet.all_outlets.delete_confirmation_2') }}',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#ae1504',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: '{{ __('messages.owner.outlet.all_outlets.delete_confirmation_3') }}',
-        cancelButtonText: '{{ __('messages.owner.outlet.all_outlets.cancel') }}'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            document.getElementById('deleteForm').submit();
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function confirmDelete() {
+            Swal.fire({
+                title: '{{ __('messages.owner.outlet.all_outlets.delete_confirmation_1') }}',
+                text: '{{ __('messages.owner.outlet.all_outlets.delete_confirmation_2') }}',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ae1504',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '{{ __('messages.owner.outlet.all_outlets.delete_confirmation_3') }}',
+                cancelButtonText: '{{ __('messages.owner.outlet.all_outlets.cancel') }}'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deleteForm').submit();
+                }
+            });
         }
-    });
-}
-</script>
+    </script>
 @endpush
 
 <style>
-.qr-manual-grid{
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-@media (max-width: 992px){
-  .qr-manual-grid{ grid-template-columns: 1fr; }
-}
-.qr-box{
-  background: #fff;
-  border: 1px solid #eef0f4;
-  border-radius: 14px;
-  padding: 14px;
-}
-.qr-box-header{
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-.qr-box-title{
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 700;
-}
-.empty-note{
-  background: #f9fafb;
-  border: 1px dashed #e5e7eb;
-  padding: 12px;
-  border-radius: 12px;
-  color: #6b7280;
-  font-size: 0.9rem;
-}
+    .qr-manual-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
 
-/* checkbox card */
-.payment-group{ margin-top: 8px; }
-.payment-group-title{
-  font-weight: 800;
-  font-size: 0.85rem;
-  color: #111827;
-  margin: 10px 0 8px;
-}
-.payment-items{
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-}
-.check-card{
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  padding: 12px;
-  border: 1px solid #eef0f4;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: 0.2s;
-  background: #fff;
-}
-.check-card:hover{ border-color: #e5e7eb; background: #fafafa; }
-.check-card.is-selected{ border-color: #bbf7d0; background: #f0fdf4; }
-.check-card-title{
-  font-weight: 700;
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.check-card-desc{
-  font-size: 0.82rem;
-  color: #6b7280;
-  margin-top: 2px;
-}
-.mini-badge{
-  display:inline-flex;
-  align-items:center;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 0.7rem;
-  font-weight: 700;
-}
-.mini-badge-gray{
-  background: #f3f4f6;
-  color: #4b5563;
-}
+    @media (max-width: 992px) {
+        .qr-manual-grid {
+            grid-template-columns: 1fr;
+        }
+    }
 
-/* Action Buttons */
-.action-buttons-group {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1.5rem;
-  flex-wrap: wrap;
-}
+    .qr-box {
+        background: #fff;
+        border: 1px solid #eef0f4;
+        border-radius: 14px;
+        padding: 14px;
+    }
 
-.btn-action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 12px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  border: 1px solid rgba(0,0,0,.10);
-  cursor: pointer;
-  font-size: 0.95rem;
-  background: #fff;
-}
+    .qr-box-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
 
-.btn-action .material-symbols-outlined {
-  font-size: 1.25rem;
-}
+    .qr-box-title {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+    }
 
-.btn-action-edit {
-  color: #333;
-  border-color: rgba(0,0,0,.10);
-}
+    .empty-note {
+        background: #f9fafb;
+        border: 1px dashed #e5e7eb;
+        padding: 12px;
+        border-radius: 12px;
+        color: #6b7280;
+        font-size: 0.9rem;
+    }
 
-.btn-action-edit:hover {
-  background: #f8f9fa;
-  color: #333;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0,0,0,.08);
-}
+    /* checkbox card */
+    .payment-group {
+        margin-top: 8px;
+    }
 
-.btn-action-delete {
-  border-color: rgba(174,21,4,.25);
-  color: #ae1504;
-}
+    .payment-group-title {
+        font-weight: 800;
+        font-size: 0.85rem;
+        color: #111827;
+        margin: 10px 0 8px;
+    }
 
-.btn-action-delete:hover {
-  background: rgba(174,21,4,.05);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(174,21,4,.15);
-}
+    .payment-items {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
 
-@media (max-width: 576px) {
-  .action-buttons-group {
-    flex-direction: column;
-  }
-  
-  .btn-action {
-    width: 100%;
-  }
-}
+    .check-card {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        padding: 12px;
+        border: 1px solid #eef0f4;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: 0.2s;
+        background: #fff;
+    }
+
+    .check-card:hover {
+        border-color: #e5e7eb;
+        background: #fafafa;
+    }
+
+    .check-card.is-selected {
+        border-color: #bbf7d0;
+        background: #f0fdf4;
+    }
+
+    .check-card-title {
+        font-weight: 700;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .check-card-desc {
+        font-size: 0.82rem;
+        color: #6b7280;
+        margin-top: 2px;
+    }
+
+    .mini-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 700;
+    }
+
+    .mini-badge-gray {
+        background: #f3f4f6;
+        color: #4b5563;
+    }
+
+    /* Action Buttons */
+    .action-buttons-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        border: 1px solid rgba(0, 0, 0, .10);
+        cursor: pointer;
+        font-size: 0.95rem;
+        background: #fff;
+    }
+
+    .btn-action .material-symbols-outlined {
+        font-size: 1.25rem;
+    }
+
+    .btn-action-edit {
+        color: #333;
+        border-color: rgba(0, 0, 0, .10);
+    }
+
+    .btn-action-edit:hover {
+        background: #f8f9fa;
+        color: #333;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, .08);
+    }
+
+    .btn-action-delete {
+        border-color: rgba(174, 21, 4, .25);
+        color: #ae1504;
+    }
+
+    .btn-action-delete:hover {
+        background: rgba(174, 21, 4, .05);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(174, 21, 4, .15);
+    }
+
+    @media (max-width: 576px) {
+        .action-buttons-group {
+            flex-direction: column;
+        }
+
+        .btn-action {
+            width: 100%;
+        }
+    }
+
+    /* Perbaikan untuk payment methods di mobile */
+    .qr-box {
+        background: #fff;
+        border: 1px solid #eef0f4;
+        border-radius: 14px;
+        padding: 14px;
+        overflow: hidden;
+        /* Tambahkan ini */
+    }
+
+    .qr-box-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+        /* Tambahkan ini */
+    }
+
+    .check-card {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        padding: 12px;
+        border: 1px solid #eef0f4;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: 0.2s;
+        background: #fff;
+        overflow: hidden;
+        /* Tambahkan ini */
+        word-wrap: break-word;
+        /* Tambahkan ini */
+    }
+
+    .check-card-body {
+        flex: 1;
+        min-width: 0;
+        /* Penting untuk text truncation */
+        overflow: hidden;
+        /* Tambahkan ini */
+    }
+
+    .check-card-title {
+        font-weight: 700;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        /* Tambahkan ini */
+        word-break: break-word;
+        /* Tambahkan ini */
+    }
+
+    .check-card-desc {
+        font-size: 0.82rem;
+        color: #6b7280;
+        margin-top: 2px;
+        word-break: break-word;
+        /* Tambahkan ini */
+        overflow-wrap: break-word;
+        /* Tambahkan ini */
+    }
+
+    .empty-note {
+        background: #f9fafb;
+        border: 1px dashed #e5e7eb;
+        padding: 12px;
+        border-radius: 12px;
+        color: #6b7280;
+        font-size: 0.9rem;
+        word-break: break-word;
+        /* Tambahkan ini */
+    }
+
+    @media (max-width: 768px) {
+        .qr-manual-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .qr-box {
+            padding: 12px;
+        }
+
+        .check-card {
+            padding: 10px;
+        }
+
+        .check-card-title {
+            font-size: 0.85rem;
+        }
+
+        .check-card-desc {
+            font-size: 0.78rem;
+        }
+    }
+
+    /* Google Maps URL Styling */
+    .gmaps-url-container {
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    .gmaps-url-link {
+        display: inline-block;
+        max-width: 100%;
+        word-break: break-all;
+        overflow-wrap: break-word;
+        white-space: normal;
+        line-height: 1.5;
+    }
+
+    @media (max-width: 768px) {
+        .gmaps-url-link {
+            font-size: 0.85rem;
+        }
+    }
 </style>
