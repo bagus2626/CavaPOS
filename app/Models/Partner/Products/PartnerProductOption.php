@@ -61,30 +61,21 @@ class PartnerProductOption extends Model
 
     public function getQuantityAvailableAttribute(): float
     {
-        // Jika tidak terbatas (always_available), kembalikan nilai besar
         if ((int) $this->always_available_flag === 1) {
-            return 999999999;
+            return 0.00;
         }
 
-        // Ambil service yang diperlukan
         $converter = app(UnitConversionService::class);
-        $recipeCalc = app(LinkedStockCalculatorService::class);
 
-        // 1. Logika untuk Linked Stock (Membaca Kolom Cache)
         if ($this->stock_type === 'linked') {
-            // Ambil nilai dari kolom yang sudah dihitung dan disimpan
             return (float) $this->available_linked_quantity;
         }
 
-        // 2. Logika untuk Direct Stock (Tetap Konversi Langsung)
-        elseif ($this->stock_type === 'direct') {
-            if ($this->stock) {
-                return $converter->convertToDisplayUnit(
-                    $this->stock->quantity - ($this->stock->quantity_reserved ?? 0),
-                    $this->stock->display_unit_id
-                );
-            }
-            return 0.00;
+        if ($this->stock_type === 'direct' && $this->stock) {
+            return $converter->convertToDisplayUnit(
+                $this->stock->quantity - ($this->stock->quantity_reserved ?? 0),
+                $this->stock->display_unit_id
+            );
         }
 
         return 0.00;
