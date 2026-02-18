@@ -433,14 +433,13 @@ class OwnerOutletProductController extends Controller
                     }
                 }
 
-                // Validasi Opsi
+                // Validasi Opsi 
                 if ($hasOptions) {
                     foreach ((array)$request->input('options', []) as $oid => $opt) {
                         $optStockType = $opt['stock_type'] ?? 'direct';
                         if ($optStockType === 'direct') {
                             $oa = (int)($opt['always_available'] ?? 0) === 1;
                             if (!$oa) {
-                                // UBAH: cek new_quantity bukan quantity
                                 if (!array_key_exists('new_quantity', $opt) || $opt['new_quantity'] === '' || $opt['new_quantity'] === null) {
                                     $v->errors()->add("options.$oid.new_quantity", 'New quantity is required unless this option is set to always available.');
                                 }
@@ -548,9 +547,6 @@ class OwnerOutletProductController extends Controller
             ->whereNull('partner_product_option_id')
             ->first();
 
-        // Hitung selisih
-        $difference = $newQuantity - $currentQuantity;
-
         // Jika belum ada stok, buat baru
         if (!$existingStock) {
             Stock::create([
@@ -570,12 +566,12 @@ class OwnerOutletProductController extends Controller
             return;
         }
 
-        // Jika Always Available, set quantity ke 0
+        // Jika status Always Available (Unlimited), kita HENTIKAN proses.
         if ($productAlways) {
-            $existingStock->quantity = $existingStock->quantity_reserved ?? 0;
-            $existingStock->save();
             return;
         }
+
+        $difference = $newQuantity - $currentQuantity;
 
         // Jika tidak ada perubahan, skip
         if ($difference == 0) {
@@ -583,7 +579,7 @@ class OwnerOutletProductController extends Controller
         }
 
         // Buat stock movement berdasarkan selisih
-        $category = 'stock_adjustment'; // Kategori default untuk adjustment dari owner
+        $category = 'stock_adjustment';
 
         if ($difference > 0) {
             // PENAMBAHAN STOK (IN)
@@ -703,8 +699,8 @@ class OwnerOutletProductController extends Controller
 
             // Jika Always Available, set quantity ke reserved only
             if ($optAlways) {
-                $existingStock->quantity = $existingStock->quantity_reserved ?? 0;
-                $existingStock->save();
+                // $existingStock->quantity = $existingStock->quantity_reserved ?? 0;
+                // $existingStock->save();
                 continue;
             }
 
