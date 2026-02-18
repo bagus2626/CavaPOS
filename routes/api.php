@@ -21,7 +21,11 @@ Route::prefix('v1/mobile')->group(function () {
             Route::post('/logout', [CashierMobileAuthController::class, 'logout']);
 
             Route::get('/products', [CashierMobileOrderController::class, 'getProducts']);
-
+            Route::get('/get-orders-data/{tab}', [CashierMobileOrderController::class, 'getOrdersData']);
+            Route::post('/checkout', [CashierMobileOrderController::class, 'checkout']);
+            Route::get('/order-detail/{id}', [CashierMobileOrderController::class, 'orderDetail']);
+            Route::post('/delete-order/{id}', [CashierMobileOrderController::class, 'softDeleteUnpaidOrder']);
+            Route::post('/payment-order/{id}', [CashierMobileOrderController::class, 'paymentOrder']);
         });
     });
 
