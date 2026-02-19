@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="{{ asset('css/mobile-owner.css') }}">
     <div class="modern-container">
         <div class="container-modern">
-            {{-- Page Header - Desktop Only --}}
             <div class="page-header only-desktop">
                 <div class="header-content">
                     <h1 class="page-title">{{ __('messages.owner.products.outlet_products.outlet_products') }}</h1>
@@ -17,34 +16,23 @@
 
             @if (session('success'))
                 <div class="alert alert-success alert-modern">
-                    <div class="alert-icon">
-                        <span class="material-symbols-outlined">check_circle</span>
-                    </div>
-                    <div class="alert-content">
-                        {{ session('success') }}
-                    </div>
+                    <div class="alert-icon"><span class="material-symbols-outlined">check_circle</span></div>
+                    <div class="alert-content">{{ session('success') }}</div>
                 </div>
             @endif
 
             @if (session('error'))
                 <div class="alert alert-danger alert-modern">
-                    <div class="alert-icon">
-                        <span class="material-symbols-outlined">error</span>
-                    </div>
-                    <div class="alert-content">
-                        {{ session('error') }}
-                    </div>
+                    <div class="alert-icon"><span class="material-symbols-outlined">error</span></div>
+                    <div class="alert-content">{{ session('error') }}</div>
                 </div>
             @endif
 
-            {{-- Search & Filter Card - Desktop Only --}}
             <div class="modern-card mb-4 only-desktop">
                 <div class="card-body-modern" style="padding: var(--spacing-lg) var(--spacing-xl);">
                     <form method="GET" action="{{ url()->current() }}" id="outletProductFilterForm">
                         <div class="table-controls">
                             <div class="search-filter-group">
-
-                                {{-- Outlet selector --}}
                                 <div class="select-wrapper" style="min-width: 220px;">
                                     <select id="outletFilter" class="form-control-modern" onchange="changeOutlet(this)">
                                         @foreach ($outlets as $outlet)
@@ -57,18 +45,14 @@
                                     <span class="material-symbols-outlined select-arrow">expand_more</span>
                                 </div>
 
-                                {{-- Search --}}
                                 <div class="input-wrapper" style="flex: 1; max-width: 420px;">
-                                    <span class="input-icon">
-                                        <span class="material-symbols-outlined">search</span>
-                                    </span>
+                                    <span class="input-icon"><span class="material-symbols-outlined">search</span></span>
                                     <input type="text" name="q" id="productSearchInput"
                                         value="{{ $q ?? request('q') }}" class="form-control-modern with-icon"
                                         placeholder="{{ __('messages.owner.products.outlet_products.search_placeholder') ?? 'Search product...' }}"
                                         oninput="debouncedSubmit(this, 500)">
                                 </div>
 
-                                {{-- Category --}}
                                 <div class="select-wrapper" style="min-width: 220px;">
                                     <select name="category" id="categoryFilter" class="form-control-modern"
                                         onchange="submitFilterResetPage()">
@@ -103,26 +87,18 @@
         </div>
     </div>
 
-    {{-- Floating Add Button - Mobile Only --}}
-    <button class="btn-add-outlet-mobile btn-add-product" data-toggle="modal" data-target="#addProductModal"
-        data-outlet="{{ $currentOutletId }}">
-        <span class="material-symbols-outlined">add</span>
-    </button>
-
-
+    {{-- TOMBOL FLOATING DIPINDAH KE display.blade.php --}}
 
     @include('pages.owner.products.outlet-product.modal')
 @endsection
 
 <style>
-    /* Hide desktop elements on mobile */
     @media (max-width: 768px) {
         .only-desktop {
             display: none !important;
         }
     }
 
-    /* Hide mobile elements on desktop */
     @media (min-width: 769px) {
         .only-mobile {
             display: none !important;
@@ -170,18 +146,13 @@
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    {{-- Mobile Filter Modal Functions --}}
     <script>
-        // Store selected filters temporarily
         let tempOutletId = '{{ $currentOutletId }}';
 
-        // Open/Close Modal
         document.getElementById('openFilterModalBtn')?.addEventListener('click', function() {
             const modal = document.getElementById('mobileFilterModal');
             modal.classList.add('show');
             document.body.style.overflow = 'hidden';
-
-            // Reset temp values to current
             tempOutletId = '{{ $currentOutletId }}';
         });
 
@@ -194,64 +165,42 @@
         document.getElementById('closeFilterModalBtn')?.addEventListener('click', closeFilterModal);
         document.getElementById('filterModalBackdrop')?.addEventListener('click', closeFilterModal);
 
-        // Select outlet filter
         function selectOutletFilter(outletId) {
             tempOutletId = outletId;
             applyFilters();
         }
 
-        // Apply filters
         function applyFilters() {
             const params = new URLSearchParams(window.location.search);
-
             params.set('outlet_id', tempOutletId);
-
-            // Keep current category
             const currentCategory = document.getElementById('categoryFilterMobile')?.value;
-            if (currentCategory) {
-                params.set('category', currentCategory);
-            } else {
-                params.delete('category');
-            }
-
+            if (currentCategory) params.set('category', currentCategory);
+            else params.delete('category');
             params.delete('page');
-
             window.location.search = params.toString();
         }
 
-        // Clear all filters
         function clearAllFilters() {
             const params = new URLSearchParams(window.location.search);
-
-            // Keep only outlet_id (default to first outlet)
             const firstOutletId = '{{ $outlets->first()->id ?? '' }}';
             params.set('outlet_id', firstOutletId);
             params.delete('category');
             params.delete('q');
             params.delete('page');
-
             window.location.search = params.toString();
         }
 
-        // Mobile category dropdown handler
         function changeCategoryMobile(selectEl) {
             const categoryId = selectEl.value;
             const params = new URLSearchParams(window.location.search);
-
-            if (categoryId) {
-                params.set('category', categoryId);
-            } else {
-                params.delete('category');
-            }
-
+            if (categoryId) params.set('category', categoryId);
+            else params.delete('category');
             params.delete('page');
             window.location.search = params.toString();
         }
 
-        // Mobile search handler
         document.addEventListener('DOMContentLoaded', function() {
             const searchInputMobile = document.getElementById('productSearchInputMobile');
-
             if (searchInputMobile) {
                 let timer;
                 searchInputMobile.addEventListener('input', function() {
@@ -259,10 +208,8 @@
                     timer = setTimeout(() => {
                         const params = new URLSearchParams(window.location.search);
                         const q = (searchInputMobile.value || '').trim();
-
                         if (q) params.set('q', q);
                         else params.delete('q');
-
                         params.delete('page');
                         window.location.search = params.toString();
                     }, 500);
@@ -271,7 +218,6 @@
         });
     </script>
 
-    {{-- DELETE PRODUCT SCRIPT --}}
     <script>
         async function deleteProduct(id) {
             const result = await Swal.fire({
@@ -291,16 +237,14 @@
                 const url = "{{ route('owner.user-owner.outlet-products.destroy', ':id') }}".replace(':id', id);
                 const formData = new FormData();
                 formData.append('_method', 'DELETE');
-
                 const res = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json',
+                        'Accept': 'application/json'
                     },
                     body: formData
                 });
-
                 if (res.ok) {
                     await Swal.fire({
                         title: '{{ __('messages.owner.products.outlet_products.success') }}',
@@ -330,7 +274,6 @@
         }
     </script>
 
-    {{-- MODAL ADD PRODUCT SCRIPT --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const modal = document.getElementById('addProductModal');
@@ -362,7 +305,6 @@
             function getDefaultCategoryId() {
                 const current = categorySelect.value;
                 if (current) return current;
-
                 const firstOption = Array.from(categorySelect.options).find(opt => opt.value && opt.value !== '');
                 return firstOption ? firstOption.value : '';
             }
@@ -371,26 +313,22 @@
                 mpBox.innerHTML = '';
                 mpSelectAll.disabled = true;
                 mpSelectAll.checked = false;
-
                 if (!Array.isArray(items) || items.length === 0) {
                     mpBox.innerHTML =
                         '<div class="text-muted small text-center" style="padding: 2rem 1rem;">{{ __('messages.owner.products.outlet_products.no_master_product_filter') }}</div>';
                     return;
                 }
-
                 items.forEach(item => {
                     const id = String(item.id);
                     const label = item.name || ('#' + id);
-
                     const div = document.createElement('div');
                     div.className = 'form-check';
                     div.innerHTML = `
-            <input class="form-check-input" type="checkbox" name="master_product_ids[]" value="${id}" id="mp_${id}">
-            <label class="form-check-label" for="mp_${id}">${label}</label>
-          `;
+                        <input class="form-check-input" type="checkbox" name="master_product_ids[]" value="${id}" id="mp_${id}">
+                        <label class="form-check-label" for="mp_${id}">${label}</label>
+                    `;
                     mpBox.appendChild(div);
                 });
-
                 mpSelectAll.disabled = false;
                 mpSelectAll.checked = false;
             }
@@ -398,9 +336,9 @@
             mpSelectAll.addEventListener('change', function() {
                 const checked = this.checked;
                 mpBox.querySelectorAll('input[type="checkbox"][name="master_product_ids[]"]').forEach(
-                    cb => {
-                        cb.checked = checked;
-                    });
+                cb => {
+                    cb.checked = checked;
+                });
             });
 
             form.addEventListener('submit', function(e) {
@@ -418,13 +356,20 @@
 
             document.addEventListener('click', function(e) {
                 if (e.target.closest('.btn-add-product')) {
+                    // Cek apakah sidebar sedang terbuka - jangan buka modal
+                    const sidebar = document.querySelector('#sidebar, .sidebar, #sidenav-main, .sidenav');
+                    if (sidebar) {
+                        const rect = sidebar.getBoundingClientRect();
+                        const sidebarOpen = rect.right > 0 && rect.left < window.innerWidth && rect.width >
+                            100;
+                        if (sidebarOpen) return;
+                    }
+
                     e.preventDefault();
                     const btn = e.target.closest('.btn-add-product');
                     const outletId = btn.getAttribute('data-outlet') || '';
-
                     hardResetFields(true);
                     outletInput.value = outletId;
-
                     const catId = getDefaultCategoryId();
                     if (catId) {
                         categorySelect.value = catId;
@@ -445,13 +390,11 @@
                 mpSelectAll.disabled = true;
                 mpSelectAll.checked = false;
                 mpError.style.display = 'none';
-
                 try {
                     const url = new URL("{{ route('owner.user-owner.outlet-products.get-master-products') }}",
                         window.location.origin);
                     url.searchParams.set('category_id', categoryId || 'all');
                     if (outletId) url.searchParams.set('outlet_id', outletId);
-
                     const res = await fetch(url.toString(), {
                         headers: {
                             'Accept': 'application/json'
@@ -471,7 +414,6 @@
         });
     </script>
 
-    {{-- STOCK TYPE TOGGLE --}}
     <script>
         (function() {
             const directRadio = document.getElementById('stock_type_direct');
@@ -482,7 +424,6 @@
 
             function syncStockTypeUI() {
                 if (!directRadio || !linkedRadio || !qtyGroup || !qtyInput || !linkedInfo) return;
-
                 if (linkedRadio.checked) {
                     qtyGroup.classList.add('d-none');
                     qtyInput.required = false;
@@ -505,7 +446,6 @@
                     syncStockTypeUI();
                 });
             }
-
             syncStockTypeUI();
         })();
     </script>
@@ -522,9 +462,7 @@
             const form = document.getElementById('outletProductFilterForm');
             const pageInput = document.getElementById('pageInput');
             if (!form || !el) return;
-
             if (pageInput) pageInput.value = 1;
-
             if (el._debounceTimer) clearTimeout(el._debounceTimer);
             el._debounceTimer = setTimeout(() => form.submit(), delay);
         }
@@ -535,7 +473,6 @@
             const outletInput = document.getElementById('outletIdInput');
             const pageInput = document.getElementById('pageInput');
             if (!form || !outletInput) return;
-
             outletInput.value = outletId;
             if (pageInput) pageInput.value = 1;
             form.submit();

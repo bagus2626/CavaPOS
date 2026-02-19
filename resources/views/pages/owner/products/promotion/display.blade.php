@@ -83,7 +83,8 @@
                             <div class="text-secondary" style="font-size:0.875rem;">
                                 @if ($promotion->start_date && $promotion->end_date)
                                     {{ $promotion->start_date->translatedFormat('d F Y') }}
-                                    ({{ $promotion->start_date->format('H:i') }}) –
+                                    ({{ $promotion->start_date->format('H:i') }})
+                                    –
                                     {{ $promotion->end_date->translatedFormat('d F Y') }}
                                     ({{ $promotion->end_date->format('H:i') }})
                                 @elseif($promotion->start_date)
@@ -159,18 +160,9 @@
                         <p class="mobile-header-subtitle">{{ $promotions->total() }} Total Promotions</p>
                     </div>
                     <div class="mobile-header-right">
-                        @if (auth()->user()->image)
-                            @php
-                                $userImg = Str::startsWith(auth()->user()->image, ['http://', 'https://'])
-                                    ? auth()->user()->image
-                                    : asset('storage/' . auth()->user()->image);
-                            @endphp
-                            <img src="{{ $userImg }}" alt="Profile" class="mobile-header-avatar">
-                        @else
-                            <div class="mobile-header-avatar-placeholder">
-                                <span class="material-symbols-outlined">local_offer</span>
-                            </div>
-                        @endif
+                        <div class="mobile-header-avatar-placeholder">
+                            <span class="material-symbols-outlined">local_offer</span>
+                        </div>
                     </div>
                 </div>
 

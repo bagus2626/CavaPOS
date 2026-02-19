@@ -45,8 +45,8 @@
             @endif
 
             <div class="modern-card">
-                <form action="{{ route('owner.user-owner.promotions.update', $data->id) }}"
-                      method="POST" id="promotionForm">
+                <form action="{{ route('owner.user-owner.promotions.update', $data->id) }}" method="POST"
+                    id="promotionForm">
                     @csrf
                     @method('PUT')
 
@@ -56,7 +56,8 @@
                                 <div class="section-icon section-icon-red">
                                     <span class="material-symbols-outlined">local_offer</span>
                                 </div>
-                                <h3 class="section-title">{{ __('messages.owner.products.promotions.promotion_information') }}</h3>
+                                <h3 class="section-title">
+                                    {{ __('messages.owner.products.promotions.promotion_information') }}</h3>
                             </div>
 
                             <div class="row g-4">
@@ -67,13 +68,11 @@
                                             <span class="text-danger">*</span>
                                         </label>
                                         <input type="text"
-                                               class="form-control-modern @error('promotion_name') is-invalid @enderror"
-                                               id="promotion_name"
-                                               name="promotion_name"
-                                               value="{{ old('promotion_name', $data->promotion_name) }}"
-                                               placeholder="{{ __('messages.owner.products.promotions.promotion_name_placeholder') }}"
-                                               required
-                                               maxlength="150">
+                                            class="form-control-modern @error('promotion_name') is-invalid @enderror"
+                                            id="promotion_name" name="promotion_name"
+                                            value="{{ old('promotion_name', $data->promotion_name) }}"
+                                            placeholder="{{ __('messages.owner.products.promotions.promotion_name_placeholder') }}"
+                                            required maxlength="150">
                                         @error('promotion_name')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -88,13 +87,17 @@
                                             <span class="text-danger">*</span>
                                         </label>
                                         <div class="select-wrapper">
-                                            <select id="promotion_type"
-                                                    name="promotion_type"
-                                                    class="form-control-modern @error('promotion_type') is-invalid @enderror"
-                                                    required>
-                                                <option value="">{{ __('messages.owner.products.promotions.select_type_dropdown') }}</option>
-                                                <option value="percentage" {{ $type === 'percentage' ? 'selected' : '' }}>{{ __('messages.owner.products.promotions.percentage') }} (%)</option>
-                                                <option value="amount" {{ $type === 'amount' ? 'selected' : '' }}>{{ __('messages.owner.products.promotions.reduced_fare') }} (Rp)</option>
+                                            <select id="promotion_type" name="promotion_type"
+                                                class="form-control-modern @error('promotion_type') is-invalid @enderror"
+                                                required>
+                                                <option value="">
+                                                    {{ __('messages.owner.products.promotions.select_type_dropdown') }}
+                                                </option>
+                                                <option value="percentage" {{ $type === 'percentage' ? 'selected' : '' }}>
+                                                    {{ __('messages.owner.products.promotions.percentage') }} (%)</option>
+                                                <option value="amount" {{ $type === 'amount' ? 'selected' : '' }}>
+                                                    {{ __('messages.owner.products.promotions.reduced_fare') }} (Rp)
+                                                </option>
                                             </select>
                                             <span class="material-symbols-outlined select-arrow">expand_more</span>
                                         </div>
@@ -113,13 +116,12 @@
                                         <div class="input-wrapper" id="valueInputWrapper">
                                             <span class="input-icon" id="prefixAmount" style="display:none;">Rp</span>
                                             <input type="number"
-                                                   class="form-control-modern @error('promotion_value') is-invalid @enderror"
-                                                   id="promotion_value"
-                                                   name="promotion_value"
-                                                   value="{{ old('promotion_value', $data->promotion_value) }}"
-                                                   inputmode="numeric"
-                                                   required>
-                                            <span class="input-icon" id="suffixPercent" style="display:none; left:auto; right:1rem;">%</span>
+                                                class="form-control-modern @error('promotion_value') is-invalid @enderror"
+                                                id="promotion_value" name="promotion_value"
+                                                value="{{ old('promotion_value', $data->promotion_value) }}"
+                                                inputmode="numeric" required>
+                                            <span class="input-icon" id="suffixPercent"
+                                                style="display:none; left:auto; right:1rem;">%</span>
                                         </div>
                                         <small class="text-muted d-block mt-1" id="valueHelp">
                                             {{ $type === 'amount' ? __('messages.owner.products.promotions.reduced_fare_example') : __('messages.owner.products.promotions.percentage_example') }}
@@ -135,11 +137,8 @@
                                         <label class="form-label-modern">
                                             {{ __('messages.owner.products.promotions.description') }}
                                         </label>
-                                        <textarea id="description"
-                                                  name="description"
-                                                  class="form-control-modern @error('description') is-invalid @enderror"
-                                                  rows="3"
-                                                  placeholder="{{ __('messages.owner.products.promotions.description_placeholder') }}">{{ old('description', $data->description) }}</textarea>
+                                        <textarea id="description" name="description" class="form-control-modern @error('description') is-invalid @enderror"
+                                            rows="3" placeholder="{{ __('messages.owner.products.promotions.description_placeholder') }}">{{ old('description', $data->description) }}</textarea>
                                         @error('description')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -155,11 +154,12 @@
                                 <div class="section-icon section-icon-red">
                                     <span class="material-symbols-outlined">schedule</span>
                                 </div>
-                                <h3 class="section-title">{{ __('messages.owner.products.promotions.validity_period') }}</h3>
+                                <h3 class="section-title">{{ __('messages.owner.products.promotions.validity_period') }}
+                                </h3>
                             </div>
 
                             @php $usesExpiryInit = old('uses_expiry', ($data->start_date && $data->end_date) ? 1 : 0); @endphp
-                            
+
                             <div class="row g-4">
                                 <div class="col-md-12">
                                     <div class="form-group-modern">
@@ -169,11 +169,8 @@
                                         <input type="hidden" name="uses_expiry" value="0">
                                         <div class="status-switch">
                                             <label class="switch-modern">
-                                                <input type="checkbox"
-                                                       id="uses_expiry"
-                                                       name="uses_expiry"
-                                                       value="1"
-                                                       {{ $usesExpiryInit ? 'checked' : '' }}>
+                                                <input type="checkbox" id="uses_expiry" name="uses_expiry" value="1"
+                                                    {{ $usesExpiryInit ? 'checked' : '' }}>
                                                 <span class="slider-modern"></span>
                                             </label>
                                             <span class="status-label">
@@ -186,34 +183,34 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-6" id="startDateGroup" style="{{ $usesExpiryInit ? '' : 'display:none;' }}">
+                                <div class="col-md-6" id="startDateGroup"
+                                    style="{{ $usesExpiryInit ? '' : 'display:none;' }}">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern">
                                             {{ __('messages.owner.products.promotions.start_date') }}
                                             <span class="text-danger">*</span>
                                         </label>
                                         <input type="datetime-local"
-                                               class="form-control-modern @error('start_date') is-invalid @enderror"
-                                               id="start_date"
-                                               name="start_date"
-                                               value="{{ old('start_date', optional($data->start_date)->format('Y-m-d\TH:i')) }}">
+                                            class="form-control-modern @error('start_date') is-invalid @enderror"
+                                            id="start_date" name="start_date"
+                                            value="{{ old('start_date', optional($data->start_date)->format('Y-m-d\TH:i')) }}">
                                         @error('start_date')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
                                 </div>
 
-                                <div class="col-md-6" id="endDateGroup" style="{{ $usesExpiryInit ? '' : 'display:none;' }}">
+                                <div class="col-md-6" id="endDateGroup"
+                                    style="{{ $usesExpiryInit ? '' : 'display:none;' }}">
                                     <div class="form-group-modern">
                                         <label class="form-label-modern">
                                             {{ __('messages.owner.products.promotions.end_date') }}
                                             <span class="text-danger">*</span>
                                         </label>
                                         <input type="datetime-local"
-                                               class="form-control-modern @error('end_date') is-invalid @enderror"
-                                               id="end_date"
-                                               name="end_date"
-                                               value="{{ old('end_date', optional($data->end_date)->format('Y-m-d\TH:i')) }}">
+                                            class="form-control-modern @error('end_date') is-invalid @enderror"
+                                            id="end_date" name="end_date"
+                                            value="{{ old('end_date', optional($data->end_date)->format('Y-m-d\TH:i')) }}">
                                         @error('end_date')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -252,7 +249,8 @@
                             <div class="row g-4">
                                 <div class="col-md-12">
                                     <div class="form-group-modern">
-                                        <label class="form-label-modern d-block">{{ __('messages.owner.products.promotions.every_day') }}</label>
+                                        <label
+                                            class="form-label-modern d-block">{{ __('messages.owner.products.promotions.every_day') }}</label>
                                         <div class="status-switch mb-3">
                                             <label class="switch-modern">
                                                 <input type="checkbox" id="every_day" {{ $isEveryDay ? 'checked' : '' }}>
@@ -263,25 +261,25 @@
                                             </span>
                                         </div>
                                         <small class="text-muted d-block mb-3">
-                                            {{ __('messages.owner.products.promotions.tick') }} <em>"{{ __('messages.owner.products.promotions.every_day') }}"</em> {{ __('messages.owner.products.promotions.to_activate_promo_everyday') }}
+                                            {{ __('messages.owner.products.promotions.tick') }}
+                                            <em>"{{ __('messages.owner.products.promotions.every_day') }}"</em>
+                                            {{ __('messages.owner.products.promotions.to_activate_promo_everyday') }}
                                         </small>
                                     </div>
                                 </div>
 
                                 <div class="col-md-12">
                                     <div id="days_grid" class="row g-3">
-                                        @foreach($daysMap as $key => $label)
+                                        @foreach ($daysMap as $key => $label)
                                             <div class="col-md-3 col-6">
                                                 <div class="form-group-modern">
                                                     <label class="form-label-modern d-block">{{ $label }}</label>
                                                     <div class="status-switch">
                                                         <label class="switch-modern">
-                                                            <input type="checkbox"
-                                                                   class="day-checkbox"
-                                                                   id="day_{{ $key }}"
-                                                                   name="active_days[]"
-                                                                   value="{{ $key }}"
-                                                                   {{ in_array($key, $selectedDays, true) ? 'checked' : '' }}>
+                                                            <input type="checkbox" class="day-checkbox"
+                                                                id="day_{{ $key }}" name="active_days[]"
+                                                                value="{{ $key }}"
+                                                                {{ in_array($key, $selectedDays, true) ? 'checked' : '' }}>
                                                             <span class="slider-modern"></span>
                                                         </label>
                                                         <span class="status-label day-status-{{ $key }}">
@@ -319,11 +317,8 @@
                                         <input type="hidden" name="is_active" value="0">
                                         <div class="status-switch">
                                             <label class="switch-modern">
-                                                <input type="checkbox"
-                                                       id="is_active"
-                                                       name="is_active"
-                                                       value="1"
-                                                       {{ old('is_active', $data->is_active) ? 'checked' : '' }}>
+                                                <input type="checkbox" id="is_active" name="is_active" value="1"
+                                                    {{ old('is_active', $data->is_active) ? 'checked' : '' }}>
                                                 <span class="slider-modern"></span>
                                             </label>
                                             <span class="status-label" id="statusLabel">
@@ -351,160 +346,167 @@
 @endsection
 
 @section('scripts')
-<script>
-// 1. Definisikan object Translation untuk JavaScript
-window.promoLang = {
-    enabled: "{{ __('messages.owner.products.promotions.enabled') }}",
-    disabled: "{{ __('messages.owner.products.promotions.disabled') }}",
-    allDaysSelected: "{{ __('messages.owner.products.promotions.all_days_selected') }}",
-    customDays: "{{ __('messages.owner.products.promotions.custom_days') }}",
-    activeStatus: "{{ __('messages.owner.products.promotions.active_status') }}",
-    inactiveStatus: "{{ __('messages.owner.products.promotions.inactive_status') }}",
-    percentageExample: "{{ __('messages.owner.products.promotions.percentage_example') }}",
-    reducedFareExample: "{{ __('messages.owner.products.promotions.reduced_fare_example') }}",
-    endDateAlert: "{{ __('messages.owner.products.promotions.end_date_alert') }}"
-};
+    <script>
+        // 1. Definisikan object Translation untuk JavaScript
+        window.promoLang = {
+            enabled: "{{ __('messages.owner.products.promotions.enabled') }}",
+            disabled: "{{ __('messages.owner.products.promotions.disabled') }}",
+            allDaysSelected: "{{ __('messages.owner.products.promotions.all_days_selected') }}",
+            customDays: "{{ __('messages.owner.products.promotions.custom_days') }}",
+            activeStatus: "{{ __('messages.owner.products.promotions.active_status') }}",
+            inactiveStatus: "{{ __('messages.owner.products.promotions.inactive_status') }}",
+            percentageExample: "{{ __('messages.owner.products.promotions.percentage_example') }}",
+            reducedFareExample: "{{ __('messages.owner.products.promotions.reduced_fare_example') }}",
+            endDateAlert: "{{ __('messages.owner.products.promotions.end_date_alert') }}"
+        };
 
-(function () {
-    const typeSel   = document.getElementById('promotion_type');
-    const valInput  = document.getElementById('promotion_value');
-    const helpText  = document.getElementById('valueHelp');
-    const prefixAmt = document.getElementById('prefixAmount');
-    const suffixPct = document.getElementById('suffixPercent');
+        (function() {
+            const typeSel = document.getElementById('promotion_type');
+            const valInput = document.getElementById('promotion_value');
+            const helpText = document.getElementById('valueHelp');
+            const prefixAmt = document.getElementById('prefixAmount');
+            const suffixPct = document.getElementById('suffixPercent');
 
-    function applyTypeUI() {
-        const t = typeSel.value;
+            function applyTypeUI() {
+                const t = typeSel.value;
 
-        if (t === 'percentage') {
-            prefixAmt.style.display = 'none';
-            suffixPct.style.display = 'flex';
-            valInput.classList.remove('with-icon');
-            valInput.style.paddingRight = '3rem';
-            valInput.style.paddingLeft = 'var(--spacing-lg)';
+                if (t === 'percentage') {
+                    prefixAmt.style.display = 'none';
+                    suffixPct.style.display = 'flex';
+                    valInput.classList.remove('with-icon');
+                    valInput.style.paddingRight = '3rem';
+                    valInput.style.paddingLeft = 'var(--spacing-lg)';
 
-            valInput.min = '1'; valInput.max = '100'; valInput.step = '1';
-            helpText.textContent = window.promoLang.percentageExample;
+                    valInput.min = '1';
+                    valInput.max = '100';
+                    valInput.step = '1';
+                    helpText.textContent = window.promoLang.percentageExample;
 
-            if (valInput.value && (+valInput.value > 100)) valInput.value = 100;
+                    if (valInput.value && (+valInput.value > 100)) valInput.value = 100;
 
-        } else if (t === 'amount') {
-            prefixAmt.style.display = 'flex';
-            suffixPct.style.display = 'none';
-            valInput.classList.add('with-icon');
-            valInput.style.paddingLeft = '3rem';
-            valInput.style.paddingRight = 'var(--spacing-lg)';
+                } else if (t === 'amount') {
+                    prefixAmt.style.display = 'flex';
+                    suffixPct.style.display = 'none';
+                    valInput.classList.add('with-icon');
+                    valInput.style.paddingLeft = '3rem';
+                    valInput.style.paddingRight = 'var(--spacing-lg)';
 
-            valInput.removeAttribute('max'); valInput.min = '0'; valInput.step = '1';
-            helpText.textContent = window.promoLang.reducedFareExample;
+                    valInput.removeAttribute('max');
+                    valInput.min = '0';
+                    valInput.step = '1';
+                    helpText.textContent = window.promoLang.reducedFareExample;
 
-        } else {
-            prefixAmt.style.display = 'none';
-            suffixPct.style.display = 'none';
-            valInput.classList.remove('with-icon');
-            valInput.style.paddingLeft = 'var(--spacing-lg)';
-            valInput.style.paddingRight = 'var(--spacing-lg)';
+                } else {
+                    prefixAmt.style.display = 'none';
+                    suffixPct.style.display = 'none';
+                    valInput.classList.remove('with-icon');
+                    valInput.style.paddingLeft = 'var(--spacing-lg)';
+                    valInput.style.paddingRight = 'var(--spacing-lg)';
 
-            valInput.removeAttribute('min'); valInput.removeAttribute('max'); valInput.removeAttribute('step');
-            helpText.textContent = '';
-        }
-    }
-    typeSel?.addEventListener('change', applyTypeUI);
-    applyTypeUI();
-
-    // Uses expiry toggle
-    const usesExpiry = document.getElementById('uses_expiry');
-    const startDateGroup = document.getElementById('startDateGroup');
-    const endDateGroup = document.getElementById('endDateGroup');
-    const startDate = document.getElementById('start_date');
-    const endDate = document.getElementById('end_date');
-
-    function toggleDateRange() {
-        const show = usesExpiry.checked;
-        startDateGroup.style.display = show ? '' : 'none';
-        endDateGroup.style.display = show ? '' : 'none';
-        
-        if (startDate) startDate.required = show;
-        if (endDate) endDate.required = show;
-        
-        const statusLabel = usesExpiry.closest('.status-switch')?.querySelector('.status-label');
-        if (statusLabel) {
-            statusLabel.textContent = show ? window.promoLang.enabled : window.promoLang.disabled;
-        }
-    }
-    usesExpiry?.addEventListener('change', toggleDateRange);
-    toggleDateRange();
-
-    // Form validation
-    const form = document.getElementById('promotionForm');
-    form?.addEventListener('submit', function (e) {
-        if (usesExpiry?.checked && startDate.value && endDate.value) {
-            const s = new Date(startDate.value);
-            const ed = new Date(endDate.value);
-            if (ed <= s) {
-                e.preventDefault();
-                alert(window.promoLang.endDateAlert);
-                endDate.focus();
+                    valInput.removeAttribute('min');
+                    valInput.removeAttribute('max');
+                    valInput.removeAttribute('step');
+                    helpText.textContent = '';
+                }
             }
-        }
-    });
+            typeSel?.addEventListener('change', applyTypeUI);
+            applyTypeUI();
 
-     const everyDay = document.getElementById('every_day');
-    const dayCheckboxes = Array.from(document.querySelectorAll('.day-checkbox'));
+            // Uses expiry toggle
+            const usesExpiry = document.getElementById('uses_expiry');
+            const startDateGroup = document.getElementById('startDateGroup');
+            const endDateGroup = document.getElementById('endDateGroup');
+            const startDate = document.getElementById('start_date');
+            const endDate = document.getElementById('end_date');
 
-    if (!everyDay || !dayCheckboxes.length) return;
+            function toggleDateRange() {
+                const show = usesExpiry.checked;
+                startDateGroup.style.display = show ? '' : 'none';
+                endDateGroup.style.display = show ? '' : 'none';
 
-    const everyDayStatusLabel = everyDay
-        .closest('.status-switch')
-        .querySelector('.status-label');
+                if (startDate) startDate.required = show;
+                if (endDate) endDate.required = show;
 
-    function updateDayStatusLabel(cb) {
-        const label = document.querySelector('.day-status-' + cb.value);
-        if (label) {
-            label.textContent = cb.checked ? window.promoLang.activeStatus : window.promoLang.inactiveStatus;
-        }
-    }
+                const statusLabel = usesExpiry.closest('.status-switch')?.querySelector('.status-label');
+                if (statusLabel) {
+                    statusLabel.textContent = show ? window.promoLang.enabled : window.promoLang.disabled;
+                }
+            }
+            usesExpiry?.addEventListener('change', toggleDateRange);
+            toggleDateRange();
 
-    function syncEveryDayState() {
-        let checkedCount = 0;
+            // Form validation
+            const form = document.getElementById('promotionForm');
+            form?.addEventListener('submit', function(e) {
+                if (usesExpiry?.checked && startDate.value && endDate.value) {
+                    const s = new Date(startDate.value);
+                    const ed = new Date(endDate.value);
+                    if (ed <= s) {
+                        e.preventDefault();
+                        alert(window.promoLang.endDateAlert);
+                        endDate.focus();
+                    }
+                }
+            });
 
-        dayCheckboxes.forEach(cb => {
-            if (cb.checked) checkedCount++;
-            updateDayStatusLabel(cb);
-        });
+            const everyDay = document.getElementById('every_day');
+            const dayCheckboxes = Array.from(document.querySelectorAll('.day-checkbox'));
 
-        const allChecked = checkedCount === dayCheckboxes.length;
-        everyDay.checked = allChecked;
+            if (!everyDay || !dayCheckboxes.length) return;
 
-        if (everyDayStatusLabel) {
-            everyDayStatusLabel.textContent = allChecked
-                ? window.promoLang.allDaysSelected
-                : window.promoLang.customDays;
-        }
-    }
+            const everyDayStatusLabel = everyDay
+                .closest('.status-switch')
+                .querySelector('.status-label');
 
-    // Toggle Every Day → toggle semua hari
-    everyDay.addEventListener('change', function () {
-        dayCheckboxes.forEach(cb => cb.checked = everyDay.checked);
-        syncEveryDayState();
-    });
+            function updateDayStatusLabel(cb) {
+                const label = document.querySelector('.day-status-' + cb.value);
+                if (label) {
+                    label.textContent = cb.checked ? window.promoLang.activeStatus : window.promoLang.inactiveStatus;
+                }
+            }
 
-    // Toggle hari individual
-    dayCheckboxes.forEach(cb => {
-        cb.addEventListener('change', syncEveryDayState);
-    });
+            function syncEveryDayState() {
+                let checkedCount = 0;
 
-    // INIT (penting untuk EDIT)
-    syncEveryDayState();
+                dayCheckboxes.forEach(cb => {
+                    if (cb.checked) checkedCount++;
+                    updateDayStatusLabel(cb);
+                });
 
-    // Status toggle label update
-    const isActiveToggle = document.getElementById('is_active');
-    const statusLabel = document.getElementById('statusLabel');
-    
-    isActiveToggle?.addEventListener('change', function() {
-        if (statusLabel) {
-            statusLabel.textContent = this.checked ? window.promoLang.activeStatus : window.promoLang.inactiveStatus;
-        }
-    });
-})();
-</script>
+                const allChecked = checkedCount === dayCheckboxes.length;
+                everyDay.checked = allChecked;
+
+                if (everyDayStatusLabel) {
+                    everyDayStatusLabel.textContent = allChecked ?
+                        window.promoLang.allDaysSelected :
+                        window.promoLang.customDays;
+                }
+            }
+
+            // Toggle Every Day → toggle semua hari
+            everyDay.addEventListener('change', function() {
+                dayCheckboxes.forEach(cb => cb.checked = everyDay.checked);
+                syncEveryDayState();
+            });
+
+            // Toggle hari individual
+            dayCheckboxes.forEach(cb => {
+                cb.addEventListener('change', syncEveryDayState);
+            });
+
+            // INIT (penting untuk EDIT)
+            syncEveryDayState();
+
+            // Status toggle label update
+            const isActiveToggle = document.getElementById('is_active');
+            const statusLabel = document.getElementById('statusLabel');
+
+            isActiveToggle?.addEventListener('change', function() {
+                if (statusLabel) {
+                    statusLabel.textContent = this.checked ? window.promoLang.activeStatus : window.promoLang
+                        .inactiveStatus;
+                }
+            });
+        })();
+    </script>
 @endsection

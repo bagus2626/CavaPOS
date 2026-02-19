@@ -124,18 +124,9 @@
             <p class="mobile-header-subtitle">{{ $outlets->total() }} Total Outlets</p>
           </div>
           <div class="mobile-header-right">
-            @if (auth()->user()->image)
-              @php
-                $userImg = Str::startsWith(auth()->user()->image, ['http://', 'https://'])
-                  ? auth()->user()->image
-                  : asset('storage/' . auth()->user()->image);
-              @endphp
-              <img src="{{ $userImg }}" alt="Profile" class="mobile-header-avatar">
-            @else
-              <div class="mobile-header-avatar-placeholder">
+           <div class="mobile-header-avatar-placeholder">
                 <span class="material-symbols-outlined">store</span>
               </div>
-            @endif
           </div>
         </div>
 
