@@ -13,22 +13,12 @@
                 <p class="mobile-header-subtitle">{{ $products->total() }} Total Products</p>
             </div>
             <div class="mobile-header-right">
-                @if (auth()->user()->image)
-                    @php
-                        $userImg = Str::startsWith(auth()->user()->image, ['http://', 'https://'])
-                            ? auth()->user()->image
-                            : asset('storage/' . auth()->user()->image);
-                    @endphp
-                    <img src="{{ $userImg }}" alt="Profile" class="mobile-header-avatar">
-                @else
-                    <div class="mobile-header-avatar-placeholder">
-                        <span class="material-symbols-outlined">shopping_bag</span>
-                    </div>
-                @endif
+                <div class="mobile-header-avatar-placeholder">
+                    <span class="material-symbols-outlined">shopping_bag</span>
+                </div>
             </div>
         </div>
 
-        {{-- Mobile Search Box --}}
         <div class="mobile-search-wrapper">
             <div class="mobile-search-box">
                 <span class="mobile-search-icon">
@@ -43,7 +33,6 @@
             </div>
         </div>
 
-        {{-- Mobile Category Dropdown --}}
         <div class="mobile-category-dropdown">
             <div class="select-wrapper-mobile">
                 <select id="categoryFilterMobile" class="form-control-mobile" onchange="changeCategoryMobile(this)">
@@ -63,7 +52,6 @@
 
 <div class="modern-card outlet-products-responsive">
 
-    {{-- TAMBAHKAN: Mobile Filter Modal --}}
     <div class="mobile-filter-modal" id="mobileFilterModal">
         <div class="filter-modal-backdrop" id="filterModalBackdrop"></div>
         <div class="filter-modal-content">
@@ -78,7 +66,6 @@
             </div>
 
             <div class="filter-modal-body">
-                {{-- Outlet Filter --}}
                 <div class="filter-divider">
                     <span>{{ __('messages.owner.products.outlet_products.outlet_label') ?? 'Outlet' }}</span>
                 </div>
@@ -115,9 +102,7 @@
         </div>
     </div>
 
-    {{-- =======================
-    DESKTOP: TABLE (SAMA SEPERTI SEBELUMNYA)
-    ======================= --}}
+    {{-- DESKTOP TABLE --}}
     <div class="data-table-wrapper only-desktop">
         <table class="data-table">
             <thead>
@@ -130,11 +115,9 @@
                     <th>{{ __('messages.owner.products.outlet_products.price') }}</th>
                     <th>{{ __('messages.owner.products.outlet_products.promo') }}</th>
                     <th class="text-center" style="width: 160px;">
-                        {{ __('messages.owner.products.outlet_products.actions') }}
-                    </th>
+                        {{ __('messages.owner.products.outlet_products.actions') }}</th>
                 </tr>
             </thead>
-
             <tbody id="productTableBody">
                 @forelse ($products as $index => $p)
                     @php
@@ -167,10 +150,8 @@
                             }
                         }
                     @endphp
-
                     <tr class="table-row">
                         <td class="text-center text-muted">{{ $products->firstItem() + $index }}</td>
-
                         <td>
                             <div class="user-info-cell">
                                 <div class="position-relative" style="width:40px;height:40px;">
@@ -182,25 +163,17 @@
                                             <span class="material-symbols-outlined">image</span>
                                         </div>
                                     @endif
-
                                     @if ((int) $p->is_hot_product === 1)
                                         <span class="hot-dot" title="HOT">HOT</span>
                                     @endif
                                 </div>
-
                                 <div class="product-title">
                                     <div class="data-name">{{ $name }}</div>
                                     <div class="subtle">{{ $p->category->category_name ?? '-' }}</div>
                                 </div>
                             </div>
                         </td>
-
-                        <td>
-                            <span class="badge-modern badge-info">
-                                {{ $p->category->category_name ?? '-' }}
-                            </span>
-                        </td>
-
+                        <td><span class="badge-modern badge-info">{{ $p->category->category_name ?? '-' }}</span></td>
                         <td>
                             @if ($stockDisplay === __('messages.owner.products.outlet_products.always_available'))
                                 <span class="text-muted" style="font-style: italic;">{{ $stockDisplay }}</span>
@@ -210,15 +183,12 @@
                                 <span class="fw-700">{{ $stockDisplay }}</span>
                             @endif
                         </td>
-
                         <td class="text-center">
                             <span class="badge-modern badge-{{ $active ? 'success' : 'danger' }}">
                                 {{ $active ? __('messages.owner.products.outlet_products.active') : __('messages.owner.products.outlet_products.inactive') }}
                             </span>
                         </td>
-
                         <td><span class="fw-700">Rp {{ number_format($p->price, 0, ',', '.') }}</span></td>
-
                         <td>
                             @if ($p->promotion)
                                 <span class="badge-modern badge-warning">{{ $p->promotion->promotion_name }}</span>
@@ -226,7 +196,6 @@
                                 <span class="text-muted">—</span>
                             @endif
                         </td>
-
                         <td class="text-center">
                             <div class="table-actions">
                                 <a href="{{ route('owner.user-owner.outlet-products.edit', $p->id) }}"
@@ -257,9 +226,7 @@
         </table>
     </div>
 
-    {{-- =======================
-    MOBILE: DESAIN 2 - IMAGE FULL WIDTH (2 KOLOM)
-    ======================= --}}
+    {{-- MOBILE GRID --}}
     <div class="only-mobile mobile-product-list-v2">
         <div class="product-grid-v2">
             @forelse ($products as $p)
@@ -295,9 +262,7 @@
                         }
                     }
                 @endphp
-
                 <div class="product-card-v2">
-                    <!-- Image Header -->
                     <div class="card-image-header">
                         @if ($img)
                             <img src="{{ $img }}" alt="{{ $name }}" loading="lazy">
@@ -306,15 +271,12 @@
                                 <span class="material-symbols-outlined">image</span>
                             </div>
                         @endif
-
                         <div class="image-overlay">
                             @if ((int) $p->is_hot_product === 1)
                                 <span class="hot-tag">🔥</span>
                             @endif
                         </div>
                     </div>
-
-                    <!-- Card Body -->
                     <div class="card-body-v2">
                         <div class="category-status-row">
                             <div class="category-tag">{{ $p->category->category_name ?? '-' }}</div>
@@ -322,28 +284,22 @@
                                 {{ $active ? 'Active' : 'Inactive' }}
                             </span>
                         </div>
-
                         <h3 class="product-title-v2">{{ $name }}</h3>
-
                         <div class="info-row">
                             <div class="info-item-compact">
                                 <span class="material-symbols-outlined">inventory</span>
                                 <span>{{ $stockDisplay }}</span>
                             </div>
                         </div>
-
                         <div class="price-row">
                             <span class="price-label">Price</span>
                             <span class="price-value">Rp {{ number_format($p->price, 0, ',', '.') }}</span>
                         </div>
-
                         @if ($p->promotion)
                             <div class="promo-compact">
                                 <span class="material-symbols-outlined">local_offer</span>
                             </div>
                         @endif
-
-                        <!-- Action Buttons -->
                         <div class="action-buttons-v2">
                             <a href="{{ route('owner.user-owner.outlet-products.edit', $p->id) }}" class="btn-v2 btn-edit">
                                 <span class="material-symbols-outlined">edit</span>
@@ -365,13 +321,16 @@
         </div>
     </div>
 
-    {{-- Pagination --}}
     @if ($products->hasPages())
-        <div class="table-pagination">
-            {{ $products->links() }}
-        </div>
+        <div class="table-pagination">{{ $products->links() }}</div>
     @endif
 </div>
+
+{{-- FLOATING ADD BUTTON - MOBILE ONLY (dipindah dari index.blade.php) --}}
+<button class="btn-add-outlet-mobile btn-add-product only-mobile" data-toggle="modal" data-target="#addProductModal"
+    data-outlet="{{ $currentOutletId }}">
+    <span class="material-symbols-outlined">add</span>
+</button>
 
 <script>
     // Mobile Filter Modal Functions
@@ -398,15 +357,9 @@
             }
         }
 
-        if (closeBtn) {
-            closeBtn.addEventListener('click', closeFilterModal);
-        }
+        if (closeBtn) closeBtn.addEventListener('click', closeFilterModal);
+        if (backdrop) backdrop.addEventListener('click', closeFilterModal);
 
-        if (backdrop) {
-            backdrop.addEventListener('click', closeFilterModal);
-        }
-
-        // Mobile search handler
         const searchInputMobile = document.getElementById('productSearchInputMobile');
         if (searchInputMobile) {
             let timer;
@@ -415,56 +368,44 @@
                 timer = setTimeout(() => {
                     const params = new URLSearchParams(window.location.search);
                     const q = (searchInputMobile.value || '').trim();
-
                     if (q) params.set('q', q);
                     else params.delete('q');
-
                     params.delete('page');
                     window.location.search = params.toString();
                 }, 500);
             });
         }
+
+        // Block floating button when sidebar is open
+        const floatingBtn = document.querySelector('.btn-add-outlet-mobile');
+        if (floatingBtn) {
+            setInterval(function() {
+                let isOpen = false;
+                const sidebar = document.querySelector('#sidebar, .sidebar, #sidenav-main, .sidenav');
+                if (sidebar) {
+                    const rect = sidebar.getBoundingClientRect();
+                    isOpen = rect.right > 0 && rect.left < window.innerWidth && rect.width > 100;
+                }
+                floatingBtn.style.pointerEvents = isOpen ? 'none' : '';
+                floatingBtn.style.opacity = isOpen ? '0.4' : '';
+                floatingBtn.style.filter = isOpen ? 'brightness(0.6)' : '';
+            }, 200);
+        }
     });
 
-    // Select category filter
     function selectCategoryFilter(categoryId) {
         const params = new URLSearchParams(window.location.search);
-
-        if (categoryId) {
-            params.set('category', categoryId);
-        } else {
-            params.delete('category');
-        }
-
+        if (categoryId) params.set('category', categoryId);
+        else params.delete('category');
         params.delete('page');
         window.location.search = params.toString();
     }
 
-    // Clear all filters
-    function clearAllFilters() {
-        const params = new URLSearchParams(window.location.search);
-
-        // Keep only outlet_id
-        const outletId = params.get('outlet_id');
-        const newParams = new URLSearchParams();
-        if (outletId) {
-            newParams.set('outlet_id', outletId);
-        }
-
-        window.location.search = newParams.toString();
-    }
-
-    // Mobile category dropdown handler
     function changeCategoryMobile(selectEl) {
         const categoryId = selectEl.value;
         const params = new URLSearchParams(window.location.search);
-
-        if (categoryId) {
-            params.set('category', categoryId);
-        } else {
-            params.delete('category');
-        }
-
+        if (categoryId) params.set('category', categoryId);
+        else params.delete('category');
         params.delete('page');
         window.location.search = params.toString();
     }
@@ -489,9 +430,6 @@
         }
     }
 
-    /* ============================================
-     DESAIN 2: IMAGE FULL WIDTH (2 KOLOM GRID)
-  ============================================ */
     .mobile-product-list-v2 {
         padding: 12px;
     }
@@ -559,25 +497,6 @@
         border-radius: 12px;
         font-size: 16px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    }
-
-    .status-tag {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        background: rgba(255, 255, 255, 0.95);
-        padding: 4px 8px;
-        border-radius: 12px;
-        font-size: 10px;
-        font-weight: 600;
-    }
-
-    .status-tag.active {
-        color: #065f46;
-    }
-
-    .status-tag.inactive {
-        color: #991b1b;
     }
 
     .card-body-v2 {
@@ -732,14 +651,52 @@
         background: #fee2e2;
     }
 
-    /* Hide floating button when modal is open */
+    /* Floating button transition */
+    .btn-add-outlet-mobile {
+        transition: opacity 0.3s, filter 0.3s;
+    }
+
+    /* Sembunyikan floating button saat filter modal terbuka */
     body:has(.mobile-filter-modal.show) .btn-add-outlet-mobile {
-        opacity: 0;
-        pointer-events: none;
+        opacity: 0 !important;
+        pointer-events: none !important;
         transform: scale(0.8);
     }
 
-    .btn-add-outlet-mobile {
-        transition: opacity 0.3s, transform 0.3s;
+    .mobile-category-dropdown {
+        margin-top: 12px;
+    }
+
+    .select-wrapper-mobile {
+        position: relative;
+        width: 100%;
+    }
+
+    .form-control-mobile {
+        width: 100%;
+        padding: 12px 40px 12px 16px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 14px;
+        background-color: #fff;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        cursor: pointer;
+    }
+
+    .form-control-mobile:focus {
+        outline: none;
+        border-color: #ae1504;
+    }
+
+    .select-arrow-mobile {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        color: #666;
+        font-size: 20px;
     }
 </style>

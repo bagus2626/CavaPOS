@@ -57,16 +57,19 @@
                                 <div class="profile-picture-container" id="productImageContainer">
                                     <div class="upload-placeholder" id="uploadPlaceholder">
                                         <span class="material-symbols-outlined">image</span>
-                                        <span class="upload-text">{{ __('messages.owner.products.master_products.upload_text') }}</span>
+                                        <span
+                                            class="upload-text">{{ __('messages.owner.products.master_products.upload_text') }}</span>
                                     </div>
                                     <img id="imagePreview" class="profile-preview" alt="Product Preview">
-                                    <button type="button" id="removeImageBtn" class="btn-remove btn-remove-top" style="display: none;">
+                                    <button type="button" id="removeImageBtn" class="btn-remove btn-remove-top"
+                                        style="display: none;">
                                         <span class="material-symbols-outlined">close</span>
-                                    </button>                                    
+                                    </button>
                                 </div>
-                                <input type="file" name="images[]" id="productImage" accept="image/*" style="display: none;"
-                                    required>
-                                <small class="text-muted d-block text-center mt-2">{{ __('messages.owner.products.master_products.image_upload_help') }}</small>
+                                <input type="file" name="images[]" id="productImage" accept="image/*"
+                                    style="display: none;" required>
+                                <small
+                                    class="text-muted d-block text-center mt-2">{{ __('messages.owner.products.master_products.image_upload_help') }}</small>
                                 @error('images')
                                     <div class="text-danger text-center mt-1 small">{{ $message }}</div>
                                 @enderror
@@ -112,8 +115,9 @@
                                                     <option value="">
                                                         {{ __('messages.owner.products.master_products.select_category') }}
                                                     </option>
-                                                    @foreach($categories as $category)
-                                                        <option value="{{ $category->id }}" {{ old('product_category') == $category->id ? 'selected' : '' }}>
+                                                    @foreach ($categories as $category)
+                                                        <option value="{{ $category->id }}"
+                                                            {{ old('product_category') == $category->id ? 'selected' : '' }}>
                                                             {{ $category->category_name }}
                                                         </option>
                                                     @endforeach
@@ -157,16 +161,18 @@
                                                     <option value="">
                                                         {{ __('messages.owner.products.master_products.select_promotion') }}
                                                     </option>
-                                                    @foreach($promotions as $promotion)
-                                                        <option value="{{ $promotion->id }}" {{ old('promotion_id') == $promotion->id ? 'selected' : '' }}>
+                                                    @foreach ($promotions as $promotion)
+                                                        <option value="{{ $promotion->id }}"
+                                                            {{ old('promotion_id') == $promotion->id ? 'selected' : '' }}>
                                                             {{ $promotion->promotion_name }}
-                                                            (
-                                                            @if($promotion->promotion_type === 'percentage')
-                                                                {{ number_format($promotion->promotion_value, 0, ',', '.') }}% Off
+                                                            (@if ($promotion->promotion_type === 'percentage')
+                                                                {{ number_format($promotion->promotion_value, 0, ',', '.') }}%
+                                                                Off
                                                             @else
-                                                                Rp {{ number_format($promotion->promotion_value, 0, ',', '.') }} Off
-                                                            @endif
-                                                            )
+                                                                Rp
+                                                                {{ number_format($promotion->promotion_value, 0, ',', '.') }}
+                                                                Off
+                                                            @endif)
                                                         </option>
                                                     @endforeach
                                                 </select>
@@ -183,10 +189,8 @@
                                             <label class="form-label-modern">
                                                 {{ __('messages.owner.products.master_products.description') }}
                                             </label>
-                                            <textarea name="description" id="description"
-                                                class="form-control-modern @error('description') is-invalid @enderror"
-                                                rows="4"
-                                                placeholder="{{ __('messages.owner.products.master_products.product_description_placeholder') }}">{{ old('description') }}</textarea>
+                                            <textarea name="description" id="description" class="form-control-modern @error('description') is-invalid @enderror"
+                                                rows="4" placeholder="{{ __('messages.owner.products.master_products.product_description_placeholder') }}">{{ old('description') }}</textarea>
                                             @error('description')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -213,9 +217,9 @@
                         </div>
 
                         <div id="menu-options-container" class="menu-options-container">
-                            </div>
+                        </div>
                     </div>
-                    
+
                     <div class="card-footer-modern">
                         <button type="button" class="btn-cancel-modern"
                             onclick="window.location.href='{{ route('owner.user-owner.master-products.index') }}'">
@@ -271,51 +275,50 @@
 @endsection
 
 @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-
-        // Initialize Product Image Cropper (1:1 Square)
-        ImageCropper.init({
-            id: 'product',
-            inputId: 'productImage',
-            previewId: 'imagePreview',
-            modalId: 'cropModal',
-            imageToCropId: 'imageToCrop',
-            cropBtnId: 'cropBtn',
-            containerId: 'productImageContainer',
-            aspectRatio: 1, // Square crop
-            outputWidth: 800,
-            outputHeight: 800
-        });
-
-        // Initialize Remove Image Handler
-        ImageRemoveHandler.init({
-            removeBtnId: 'removeImageBtn',
-            imageInputId: 'productImage',
-            imagePreviewId: 'imagePreview',
-            uploadPlaceholderId: 'uploadPlaceholder',
-            confirmRemove: false // No confirmation for create page
-        });        
-
-        // ==== Price Formatting ====
-        const priceInput = document.getElementById('price');
-        if (priceInput) {
-            priceInput.addEventListener('input', function (e) {
-                let value = this.value.replace(/[^,\d]/g, '');
-                this.value = new Intl.NumberFormat('id-ID').format(value);
+            // Initialize Product Image Cropper (1:1 Square)
+            ImageCropper.init({
+                id: 'product',
+                inputId: 'productImage',
+                previewId: 'imagePreview',
+                modalId: 'cropModal',
+                imageToCropId: 'imageToCrop',
+                cropBtnId: 'cropBtn',
+                containerId: 'productImageContainer',
+                aspectRatio: 1, // Square crop
+                outputWidth: 800,
+                outputHeight: 800
             });
-        }
 
-        // ==== Menu Options System ====
-        let menuIndex = 0;
+            // Initialize Remove Image Handler
+            ImageRemoveHandler.init({
+                removeBtnId: 'removeImageBtn',
+                imageInputId: 'productImage',
+                imagePreviewId: 'imagePreview',
+                uploadPlaceholderId: 'uploadPlaceholder',
+                confirmRemove: false // No confirmation for create page
+            });
 
-        window.addMenuOption = function () {
-            menuIndex++;
-            const container = document.getElementById('menu-options-container');
+            // ==== Price Formatting ====
+            const priceInput = document.getElementById('price');
+            if (priceInput) {
+                priceInput.addEventListener('input', function(e) {
+                    let value = this.value.replace(/[^,\d]/g, '');
+                    this.value = new Intl.NumberFormat('id-ID').format(value);
+                });
+            }
 
-            // UPDATE: Di dalam template string ini, kita menyisipkan key blade untuk terjemahan
-            const html = `
+            // ==== Menu Options System ====
+            let menuIndex = 0;
+
+            window.addMenuOption = function() {
+                menuIndex++;
+                const container = document.getElementById('menu-options-container');
+
+                // UPDATE: Di dalam template string ini, kita menyisipkan key blade untuk terjemahan
+                const html = `
             <div class="menu-option-card" data-menu-index="${menuIndex}">
                 <div class="menu-option-header">
                     <div class="menu-option-title">
@@ -389,18 +392,18 @@
             </div>
         `;
 
-            container.insertAdjacentHTML('beforeend', html);
-        };
+                container.insertAdjacentHTML('beforeend', html);
+            };
 
-        window.removeMenuOption = function (button) {
-            button.closest('.menu-option-card').remove();
-        };
+            window.removeMenuOption = function(button) {
+                button.closest('.menu-option-card').remove();
+            };
 
-        window.addOption = function (menuIndex) {
-            const container = document.getElementById('options-container-' + menuIndex);
-            const optionIndex = container.children.length + 1;
+            window.addOption = function(menuIndex) {
+                const container = document.getElementById('options-container-' + menuIndex);
+                const optionIndex = container.children.length + 1;
 
-            const html = `
+                const html = `
             <div class="option-item">
                 <div class="option-item-header">
                     <span class="option-number">${optionIndex}</span>
@@ -446,44 +449,44 @@
             </div>
         `;
 
-            container.insertAdjacentHTML('beforeend', html);
-        };
+                container.insertAdjacentHTML('beforeend', html);
+            };
 
-        window.removeOption = function (button) {
-            button.closest('.option-item').remove();
-        };
+            window.removeOption = function(button) {
+                button.closest('.option-item').remove();
+            };
 
-        // ==== Provision Toggle Logic ====
-        function toggleProvisionValue(index, provisionValue) {
-            const valueCol = document.getElementById(`provision-value-${index}`);
-            if (!valueCol) return;
+            // ==== Provision Toggle Logic ====
+            function toggleProvisionValue(index, provisionValue) {
+                const valueCol = document.getElementById(`provision-value-${index}`);
+                if (!valueCol) return;
 
-            const input = valueCol.querySelector('input[name$="[provision_value]"]');
-            const hide = (provisionValue === 'OPTIONAL');
+                const input = valueCol.querySelector('input[name$="[provision_value]"]');
+                const hide = (provisionValue === 'OPTIONAL');
 
-            if (hide) {
-                valueCol.style.display = 'none';
-                if (input) {
-                    input.disabled = true;
-                    input.required = false;
-                    input.value = 0;
-                }
-            } else {
-                valueCol.style.display = '';
-                if (input) {
-                    input.disabled = false;
-                    input.required = true;
+                if (hide) {
+                    valueCol.style.display = 'none';
+                    if (input) {
+                        input.disabled = true;
+                        input.required = false;
+                        input.value = 0;
+                    }
+                } else {
+                    valueCol.style.display = '';
+                    if (input) {
+                        input.disabled = false;
+                        input.required = true;
+                    }
                 }
             }
-        }
 
-        // Event delegation for dynamically added provisions
-        document.getElementById('menu-options-container')?.addEventListener('change', function (e) {
-            if (e.target.matches('.provision-select')) {
-                const index = e.target.dataset.index;
-                toggleProvisionValue(index, e.target.value);
-            }
+            // Event delegation for dynamically added provisions
+            document.getElementById('menu-options-container')?.addEventListener('change', function(e) {
+                if (e.target.matches('.provision-select')) {
+                    const index = e.target.dataset.index;
+                    toggleProvisionValue(index, e.target.value);
+                }
+            });
         });
-    });
-</script>
+    </script>
 @endpush

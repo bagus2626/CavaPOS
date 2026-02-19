@@ -13,18 +13,9 @@
                 <p class="mobile-header-subtitle">{{ $categories->total() }} Total Categories</p>
             </div>
             <div class="mobile-header-right">
-                @if (auth()->user()->image)
-                    @php
-                        $userImg = Str::startsWith(auth()->user()->image, ['http://', 'https://'])
-                            ? auth()->user()->image
-                            : asset('storage/' . auth()->user()->image);
-                    @endphp
-                    <img src="{{ $userImg }}" alt="Profile" class="mobile-header-avatar">
-                @else
-                    <div class="mobile-header-avatar-placeholder">
-                        <span class="material-symbols-outlined">category</span>
-                    </div>
-                @endif
+                <div class="mobile-header-avatar-placeholder">
+                    <span class="material-symbols-outlined">category</span>
+                </div>
             </div>
         </div>
 
@@ -34,13 +25,8 @@
                 <span class="mobile-search-icon">
                     <span class="material-symbols-outlined">search</span>
                 </span>
-                <input 
-                    type="text" 
-                    id="searchInputMobile" 
-                    class="mobile-search-input"
-                    value="{{ request('q') }}"
-                    placeholder="{{ __('messages.owner.products.categories.search_placeholder') }}"
-                >
+                <input type="text" id="searchInputMobile" class="mobile-search-input" value="{{ request('q') }}"
+                    placeholder="{{ __('messages.owner.products.categories.search_placeholder') }}">
                 <button class="mobile-filter-btn" data-toggle="modal" data-target="#orderModal">
                     <span class="material-symbols-outlined">swap_vert</span>
                 </button>
@@ -51,7 +37,6 @@
 
 <!-- Table Card -->
 <div class="modern-card category-responsive">
-    {{-- Sisanya tetap sama --}}
 
     {{-- =======================
       DESKTOP: TABLE
@@ -62,9 +47,11 @@
                 <tr>
                     <th class="text-center" style="width: 60px;">#</th>
                     <th>{{ __('messages.owner.products.categories.category_name') }}</th>
-                    <th class="text-center" style="width: 150px;">{{ __('messages.owner.products.categories.picture') }}</th>
+                    <th class="text-center" style="width: 150px;">{{ __('messages.owner.products.categories.picture') }}
+                    </th>
                     <th>{{ __('messages.owner.products.categories.description') }}</th>
-                    <th class="text-center" style="width: 180px;">{{ __('messages.owner.products.categories.actions') }}</th>
+                    <th class="text-center" style="width: 180px;">{{ __('messages.owner.products.categories.actions') }}
+                    </th>
                 </tr>
             </thead>
 
@@ -80,10 +67,10 @@
                         </td>
 
                         <td class="text-center">
-                            @if($category->images && isset($category->images['path']))
+                            @if ($category->images && isset($category->images['path']))
                                 <a href="#" data-toggle="modal" data-target="#imageModal{{ $category->id }}">
-                                    <img src="{{ asset($category->images['path']) }}" alt="{{ $category->category_name }}"
-                                         class="table-image" loading="lazy">
+                                    <img src="{{ asset($category->images['path']) }}"
+                                        alt="{{ $category->category_name }}" class="table-image" loading="lazy">
                                 </a>
                                 @include('pages.owner.products.categories.modal')
                             @else
@@ -100,19 +87,18 @@
                         <td class="text-center">
                             <div class="table-actions">
                                 <a href="{{ route('owner.user-owner.categories.edit', $category) }}"
-                                   class="btn-table-action edit"
-                                   title="{{ __('messages.owner.products.categories.edit') }}">
+                                    class="btn-table-action edit"
+                                    title="{{ __('messages.owner.products.categories.edit') }}">
                                     <span class="material-symbols-outlined">edit</span>
                                 </a>
 
-                                <form action="{{ route('owner.user-owner.categories.destroy', $category) }}" method="POST"
-                                      class="d-inline js-delete-form"
-                                      data-name="{{ $category->category_name }}"
-                                      style="display: inline;">
+                                <form action="{{ route('owner.user-owner.categories.destroy', $category) }}"
+                                    method="POST" class="d-inline js-delete-form"
+                                    data-name="{{ $category->category_name }}" style="display: inline;">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn-table-action delete"
-                                            title="{{ __('messages.owner.products.categories.delete') }}">
+                                        title="{{ __('messages.owner.products.categories.delete') }}">
                                         <span class="material-symbols-outlined">delete</span>
                                     </button>
                                 </form>
@@ -124,8 +110,10 @@
                         <td colspan="5" class="text-center">
                             <div class="table-empty-state">
                                 <span class="material-symbols-outlined">category</span>
-                                <h4>{{ __('messages.owner.products.categories.no_categories') ?? 'No categories found' }}</h4>
-                                <p>{{ __('messages.owner.products.categories.add_first_category') ?? 'Add your first category to get started' }}</p>
+                                <h4>{{ __('messages.owner.products.categories.no_categories') ?? 'No categories found' }}
+                                </h4>
+                                <p>{{ __('messages.owner.products.categories.add_first_category') ?? 'Add your first category to get started' }}
+                                </p>
                             </div>
                         </td>
                     </tr>
@@ -143,8 +131,9 @@
                 <div class="category-card-v2">
                     <!-- Image Header -->
                     <div class="card-image-header">
-                        @if($category->images && isset($category->images['path']))
-                            <img src="{{ asset($category->images['path']) }}" alt="{{ $category->category_name }}" loading="lazy">
+                        @if ($category->images && isset($category->images['path']))
+                            <img src="{{ asset($category->images['path']) }}" alt="{{ $category->category_name }}"
+                                loading="lazy">
                         @else
                             <div class="image-placeholder-v2">
                                 <span class="material-symbols-outlined">category</span>
@@ -156,7 +145,7 @@
                     <div class="card-body-v2">
                         <h3 class="category-title-v2">{{ $category->category_name }}</h3>
 
-                        @if($category->description)
+                        @if ($category->description)
                             <div class="description-v2">
                                 <p>{{ $category->description }}</p>
                             </div>
@@ -169,9 +158,8 @@
                                 <span class="material-symbols-outlined">edit</span>
                             </a>
                             <form action="{{ route('owner.user-owner.categories.destroy', $category) }}" method="POST"
-                                  class="js-delete-form"
-                                  data-name="{{ $category->category_name }}"
-                                  style="display: inline; width: 100%;">
+                                class="js-delete-form" data-name="{{ $category->category_name }}"
+                                style="display: inline; width: 100%;">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn-v2 btn-delete">
@@ -185,19 +173,25 @@
                 <div class="table-empty-state" style="padding: 24px; grid-column: 1 / -1;">
                     <span class="material-symbols-outlined">category</span>
                     <h4>{{ __('messages.owner.products.categories.no_categories') ?? 'No categories found' }}</h4>
-                    <p>{{ __('messages.owner.products.categories.add_first_category') ?? 'Add your first category to get started' }}</p>
+                    <p>{{ __('messages.owner.products.categories.add_first_category') ?? 'Add your first category to get started' }}
+                    </p>
                 </div>
             @endforelse
         </div>
     </div>
 
     {{-- Pagination --}}
-    @if($categories->hasPages())
+    @if ($categories->hasPages())
         <div class="table-pagination">
             {{ $categories->links() }}
         </div>
     @endif
 </div>
+
+{{-- Floating Add Button (Mobile Only) --}}
+<a href="{{ route('owner.user-owner.categories.create') }}" class="btn-add-employee-mobile">
+    <span class="material-symbols-outlined">add</span>
+</a>
 
 <style>
     .category-responsive .only-desktop {

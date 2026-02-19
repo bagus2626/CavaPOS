@@ -131,18 +131,9 @@
                         <p class="mobile-header-subtitle">{{ $paymentMethods->total() }} Total Methods</p>
                     </div>
                     <div class="mobile-header-right">
-                        @if (auth()->user()->image)
-                            @php
-                                $userImg = Str::startsWith(auth()->user()->image, ['http://', 'https://'])
-                                    ? auth()->user()->image
-                                    : asset('storage/' . auth()->user()->image);
-                            @endphp
-                            <img src="{{ $userImg }}" alt="Profile" class="mobile-header-avatar">
-                        @else
-                            <div class="mobile-header-avatar-placeholder">
-                                <span class="material-symbols-outlined">payment</span>
-                            </div>
-                        @endif
+                        <div class="mobile-header-avatar-placeholder">
+                            <span class="material-symbols-outlined">payment</span>
+                        </div>
                     </div>
                 </div>
 
@@ -164,90 +155,96 @@
         </div>
 
         {{-- Mobile Payment List --}}
-<div class="mobile-employee-list">
-    @forelse ($paymentMethods as $paymentMethod)
-        <div class="payment-card-modern">
-            <div class="card-top-section">
-                <div class="card-icon-wrapper">
-                    @if ($paymentMethod->qris_image_url)
-                        <div class="qr-thumbnail" onclick="openImageModal('{{ asset('storage/' . $paymentMethod->qris_image_url) }}', '{{ $paymentMethod->provider_name }}')">
-                            <img src="{{ asset('storage/' . $paymentMethod->qris_image_url) }}" alt="">
-                            <div class="qr-overlay">
-                                <span class="material-symbols-outlined">fullscreen</span>
-                            </div>
-                        </div>
-                    @else
-                        <div class="card-icon-circle">
-                            @if ($paymentMethod->payment_type === 'manual_tf')
-                                <span class="material-symbols-outlined">account_balance</span>
-                            @elseif ($paymentMethod->payment_type === 'manual_ewallet')
-                                <span class="material-symbols-outlined">account_balance_wallet</span>
+        <div class="mobile-employee-list">
+            @forelse ($paymentMethods as $paymentMethod)
+                <div class="payment-card-modern">
+                    <div class="card-top-section">
+                        <div class="card-icon-wrapper">
+                            @if ($paymentMethod->qris_image_url)
+                                <div class="qr-thumbnail"
+                                    onclick="openImageModal('{{ asset('storage/' . $paymentMethod->qris_image_url) }}', '{{ $paymentMethod->provider_name }}')">
+                                    <img src="{{ asset('storage/' . $paymentMethod->qris_image_url) }}" alt="">
+                                    <div class="qr-overlay">
+                                        <span class="material-symbols-outlined">fullscreen</span>
+                                    </div>
+                                </div>
                             @else
-                                <span class="material-symbols-outlined">qr_code_scanner</span>
+                                <div class="card-icon-circle">
+                                    @if ($paymentMethod->payment_type === 'manual_tf')
+                                        <span class="material-symbols-outlined">account_balance</span>
+                                    @elseif ($paymentMethod->payment_type === 'manual_ewallet')
+                                        <span class="material-symbols-outlined">account_balance_wallet</span>
+                                    @else
+                                        <span class="material-symbols-outlined">qr_code_scanner</span>
+                                    @endif
+                                </div>
                             @endif
                         </div>
-                    @endif
-                </div>
-                
-                <div class="card-status-indicator">
-                    <div class="status-pill {{ $paymentMethod->is_active ? 'active' : 'inactive' }}">
-                        <span class="status-dot"></span>
-                        <span class="status-text">{{ $paymentMethod->is_active ? __('messages.owner.payment_methods.enabled') : __('messages.owner.payment_methods.disabled') }}</span>
+
+                        <div class="card-status-indicator">
+                            <div class="status-pill {{ $paymentMethod->is_active ? 'active' : 'inactive' }}">
+                                <span class="status-dot"></span>
+                                <span
+                                    class="status-text">{{ $paymentMethod->is_active ? __('messages.owner.payment_methods.enabled') : __('messages.owner.payment_methods.disabled') }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-content-section">
+                        <h3 class="payment-provider-name">{{ $paymentMethod->provider_name }}</h3>
+
+                        <div class="payment-type-row">
+                            <span class="type-label {{ $paymentMethod->payment_type }}">
+                                @if ($paymentMethod->payment_type === 'manual_tf')
+                                    Bank Transfer
+                                @elseif ($paymentMethod->payment_type === 'manual_ewallet')
+                                    E-Wallet
+                                @else
+                                    QRIS Payment
+                                @endif
+                            </span>
+                        </div>
+
+                        @if ($paymentMethod->provider_account_no)
+                            <div class="account-info-row">
+                                <span class="material-symbols-outlined">numbers</span>
+                                <span class="account-text">{{ $paymentMethod->provider_account_no }}</span>
+                            </div>
+                        @endif
+
+                        {{-- TAMBAHKAN INI: Additional Info --}}
+                        @if ($paymentMethod->additional_info)
+                            <div class="additional-info-row">
+                                <span class="material-symbols-outlined">info</span>
+                                <span class="additional-text">{{ $paymentMethod->additional_info }}</span>
+                            </div>
+                        @endif
+                    </div>
+
+                    <div class="card-footer-actions">
+                        <a href="{{ route('owner.user-owner.payment-methods.edit', $paymentMethod) }}"
+                            class="footer-btn primary">
+                            <span class="material-symbols-outlined">edit_square</span>
+                            <span>Edit</span>
+                        </a>
+                        <div class="btn-divider"></div>
+                        <button
+                            onclick="deletePaymentMethod({{ $paymentMethod->id }}, '{{ $paymentMethod->provider_name }}')"
+                            class="footer-btn danger">
+                            <span class="material-symbols-outlined">delete_forever</span>
+                            <span>Delete</span>
+                        </button>
                     </div>
                 </div>
-            </div>
-            
-            <div class="card-content-section">
-    <h3 class="payment-provider-name">{{ $paymentMethod->provider_name }}</h3>
-    
-    <div class="payment-type-row">
-        <span class="type-label {{ $paymentMethod->payment_type }}">
-            @if ($paymentMethod->payment_type === 'manual_tf')
-                Bank Transfer
-            @elseif ($paymentMethod->payment_type === 'manual_ewallet')
-                E-Wallet
-            @else
-                QRIS Payment
-            @endif
-        </span>
-    </div>
-    
-    @if ($paymentMethod->provider_account_no)
-        <div class="account-info-row">
-            <span class="material-symbols-outlined">numbers</span>
-            <span class="account-text">{{ $paymentMethod->provider_account_no }}</span>
+            @empty
+                <div class="table-empty-state">
+                    <span class="material-symbols-outlined">payment</span>
+                    <h4>{{ __('messages.owner.payment_methods.no_results_found') ?? 'No payment methods found' }}</h4>
+                    <p>{{ __('messages.owner.payment_methods.add_first_payment_method') ?? 'Add your first payment method to get started' }}
+                    </p>
+                </div>
+            @endforelse
         </div>
-    @endif
-    
-    {{-- TAMBAHKAN INI: Additional Info --}}
-    @if ($paymentMethod->additional_info)
-        <div class="additional-info-row">
-            <span class="material-symbols-outlined">info</span>
-            <span class="additional-text">{{ $paymentMethod->additional_info }}</span>
-        </div>
-    @endif
-</div>
-            
-            <div class="card-footer-actions">
-                <a href="{{ route('owner.user-owner.payment-methods.edit', $paymentMethod) }}" class="footer-btn primary">
-                    <span class="material-symbols-outlined">edit_square</span>
-                    <span>Edit</span>
-                </a>
-                <div class="btn-divider"></div>
-                <button onclick="deletePaymentMethod({{ $paymentMethod->id }}, '{{ $paymentMethod->provider_name }}')" class="footer-btn danger">
-                    <span class="material-symbols-outlined">delete_forever</span>
-                    <span>Delete</span>
-                </button>
-            </div>
-        </div>
-    @empty
-        <div class="table-empty-state">
-            <span class="material-symbols-outlined">payment</span>
-            <h4>{{ __('messages.owner.payment_methods.no_results_found') ?? 'No payment methods found' }}</h4>
-            <p>{{ __('messages.owner.payment_methods.add_first_payment_method') ?? 'Add your first payment method to get started' }}</p>
-        </div>
-    @endforelse
-</div>
     </div>
 
     {{-- MODALS --}}
@@ -449,249 +446,251 @@
         max-width: 100%;
         object-fit: contain;
     }
+
     /* Modern Payment Card */
-.payment-card-modern {
-    background: #ffffff;
-    border-radius: 20px;
-    margin-bottom: 16px;
-    overflow: hidden;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+    .payment-card-modern {
+        background: #ffffff;
+        border-radius: 20px;
+        margin-bottom: 16px;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-.payment-card-modern:active {
-    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-    transform: translateY(-2px);
-}
+    .payment-card-modern:active {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
 
-.card-top-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 16px 16px 0;
-}
+    .card-top-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 16px 16px 0;
+    }
 
-.card-icon-wrapper {
-    flex-shrink: 0;
-}
+    .card-icon-wrapper {
+        flex-shrink: 0;
+    }
 
-.qr-thumbnail {
-    position: relative;
-    width: 64px;
-    height: 64px;
-    border-radius: 14px;
-    overflow: hidden;
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
+    .qr-thumbnail {
+        position: relative;
+        width: 64px;
+        height: 64px;
+        border-radius: 14px;
+        overflow: hidden;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
 
-.qr-thumbnail img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
+    .qr-thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 
-.qr-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.2s;
-}
+    .qr-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
 
-.qr-thumbnail:active .qr-overlay {
-    opacity: 1;
-}
+    .qr-thumbnail:active .qr-overlay {
+        opacity: 1;
+    }
 
-.qr-overlay .material-symbols-outlined {
-    color: white;
-    font-size: 28px;
-}
+    .qr-overlay .material-symbols-outlined {
+        color: white;
+        font-size: 28px;
+    }
 
-.card-icon-circle {
-    width: 64px;
-    height: 64px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #b3311d 0%, #f65c5c 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 12px rgba(241, 99, 99, 0.3);
-}
+    .card-icon-circle {
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #b3311d 0%, #f65c5c 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(241, 99, 99, 0.3);
+    }
 
-.card-icon-circle .material-symbols-outlined {
-    color: white;
-    font-size: 32px;
-}
+    .card-icon-circle .material-symbols-outlined {
+        color: white;
+        font-size: 32px;
+    }
 
-.card-status-indicator {
-    flex-shrink: 0;
-}
+    .card-status-indicator {
+        flex-shrink: 0;
+    }
 
-.status-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-}
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
 
-.status-pill.active {
-    background: linear-gradient(135deg, #d4f4dd 0%, #c8f0d4 100%);
-    color: #16a34a;
-}
+    .status-pill.active {
+        background: linear-gradient(135deg, #d4f4dd 0%, #c8f0d4 100%);
+        color: #16a34a;
+    }
 
-.status-pill.inactive {
-    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-    color: #dc2626;
-}
+    .status-pill.inactive {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        color: #dc2626;
+    }
 
-.status-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: currentColor;
-}
+    .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+    }
 
-.status-text {
-    line-height: 1;
-}
+    .status-text {
+        line-height: 1;
+    }
 
-.card-content-section {
-    padding: 12px 16px 16px;
-}
+    .card-content-section {
+        padding: 12px 16px 16px;
+    }
 
-.payment-provider-name {
-    font-size: 18px;
-    font-weight: 700;
-    color: #0f172a;
-    margin: 0 0 10px 0;
-    letter-spacing: -0.02em;
-}
+    .payment-provider-name {
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 10px 0;
+        letter-spacing: -0.02em;
+    }
 
-.payment-type-row {
-    margin-bottom: 10px;
-}
+    .payment-type-row {
+        margin-bottom: 10px;
+    }
 
-.type-label {
-    display: inline-block;
-    padding: 6px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-}
+    .type-label {
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+    }
 
-.type-label.manual_tf {
-    background: #dbeafe;
-    color: #1e40af;
-}
+    .type-label.manual_tf {
+        background: #dbeafe;
+        color: #1e40af;
+    }
 
-.type-label.manual_ewallet {
-    background: #dcfce7;
-    color: #16a34a;
-}
+    .type-label.manual_ewallet {
+        background: #dcfce7;
+        color: #16a34a;
+    }
 
-.type-label.manual_qris {
-    background: #fef3c7;
-    color: #d97706;
-}
+    .type-label.manual_qris {
+        background: #fef3c7;
+        color: #d97706;
+    }
 
-.account-info-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 12px;
-    background: #f8fafc;
-    border-radius: 10px;
-    border: 1px solid #e2e8f0;
-}
+    .account-info-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        background: #f8fafc;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+    }
 
-.account-info-row .material-symbols-outlined {
-    font-size: 20px;
-    color: #64748b;
-}
+    .account-info-row .material-symbols-outlined {
+        font-size: 20px;
+        color: #64748b;
+    }
 
-.account-text {
-    font-size: 14px;
-    font-family: 'Courier New', monospace;
-    color: #334155;
-    font-weight: 500;
-}
+    .account-text {
+        font-size: 14px;
+        font-family: 'Courier New', monospace;
+        color: #334155;
+        font-weight: 500;
+    }
 
-.card-footer-actions {
-    display: flex;
-    align-items: stretch;
-    border-top: 1px solid #f1f5f9;
-}
+    .card-footer-actions {
+        display: flex;
+        align-items: stretch;
+        border-top: 1px solid #f1f5f9;
+    }
 
-.footer-btn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 14px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-}
+    .footer-btn {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 14px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+    }
 
-.footer-btn.primary {
-    color: #3b82f6;
-}
+    .footer-btn.primary {
+        color: #3b82f6;
+    }
 
-.footer-btn.primary:active {
-    background: #eff6ff;
-}
+    .footer-btn.primary:active {
+        background: #eff6ff;
+    }
 
-.footer-btn.danger {
-    color: #ef4444;
-}
+    .footer-btn.danger {
+        color: #ef4444;
+    }
 
-.footer-btn.danger:active {
-    background: #fef2f2;
-}
+    .footer-btn.danger:active {
+        background: #fef2f2;
+    }
 
-.footer-btn .material-symbols-outlined {
-    font-size: 20px;
-}
+    .footer-btn .material-symbols-outlined {
+        font-size: 20px;
+    }
 
-.btn-divider {
-    width: 1px;
-    background: #f1f5f9;
-}
-.additional-info-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 10px 12px;
-    background: #fefce8;
-    border-radius: 10px;
-    border: 1px solid #fde047;
-    margin-top: 8px;
-}
+    .btn-divider {
+        width: 1px;
+        background: #f1f5f9;
+    }
 
-.additional-info-row .material-symbols-outlined {
-    font-size: 20px;
-    color: #ca8a04;
-    flex-shrink: 0;
-    margin-top: 1px;
-}
+    .additional-info-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 10px 12px;
+        background: #fefce8;
+        border-radius: 10px;
+        border: 1px solid #fde047;
+        margin-top: 8px;
+    }
 
-.additional-text {
-    font-size: 13px;
-    color: #713f12;
-    line-height: 1.5;
-    word-break: break-word;
-}
+    .additional-info-row .material-symbols-outlined {
+        font-size: 20px;
+        color: #ca8a04;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    .additional-text {
+        font-size: 13px;
+        color: #713f12;
+        line-height: 1.5;
+        word-break: break-word;
+    }
 </style>
