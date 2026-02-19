@@ -33,6 +33,7 @@ use App\Models\Store\Stock;
 use App\Services\StockRecalculationService;
 use App\Services\UnitConversionService;
 use Illuminate\Support\Facades\Schema;
+use App\Models\Store\StockMovement;
 
 
 class CashierMobileOrderController extends Controller
@@ -519,7 +520,67 @@ class CashierMobileOrderController extends Controller
             ];
         }
 
-        $storeName = optional($order->partner)->name ?? ($order->username ?? '-');
+        // Inject ke response
+        $order->setAttribute('payment_request', $paymentRequest);
+
+        return response()->json($order);
+    }
+
+    public function printDetail($id)
+    {
+        $employee = auth('employee_api')->user();
+
+        $order = BookingOrder::with([
+            'table',
+            'customer',
+            'payment',
+            'latestPayment',
+            'order_details.partnerProduct',
+            'order_details.order_detail_options.option.parent',
+            'partner',
+        ])->findOrFail($id);
+
+        if ($employee->partner_id !== $order->partner_id) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Anda tidak bisa mengakses order outlet lain',
+            ], 403);
+        }
+
+        $paymentRequest = null;
+        if ($order->order_status === 'PAYMENT REQUEST' && $order->latestPayment) {
+            $p = $order->latestPayment;
+
+            $paymentTypeLabel = match ($p->payment_type) {
+                'manual_tf'      => 'Transfer Manual',
+                'manual_ewallet' => 'E-Wallet Manual',
+                'manual_qris'    => 'QRIS Manual/Statis',
+                default          => strtoupper((string) $p->payment_type),
+            };
+
+            $paymentRequest = [
+                'payment_type'                 => $p->payment_type,
+                'payment_type_label'           => $paymentTypeLabel,
+                'manual_provider_name'         => $p->manual_provider_name,
+                'manual_provider_account_name' => $p->manual_provider_account_name,
+                'manual_provider_account_no'   => $p->manual_provider_account_no,
+                'manual_payment_image'         => $p->manual_payment_image,
+            ];
+        }
+
+        $partner = $order->partner;
+        $storeName = optional($partner)->name ?? ($order->username ?? '-');
+
+        $storeAddress = implode(', ', array_filter([
+            optional($partner)->address,
+            optional($partner)->urban_village,
+            optional($partner)->subdistrict,
+            optional($partner)->city,
+        ], fn ($v) => filled($v)));
+        $isWifiShown = $partner->is_wifi_shown ?? '';
+        $wifiUser = $partner->user_wifi ?? '';
+        $wifiPass = $partner->pass_wifi ?? '';
+
 
         $employeeName = $employee->name ?? $employee->user_name ?? '-';
 
@@ -527,6 +588,10 @@ class CashierMobileOrderController extends Controller
         $order->setAttribute('payment_request', $paymentRequest);
         $order->setAttribute('store_name', $storeName);
         $order->setAttribute('employee_name', $employeeName);
+        $order->setAttribute('store_is_wifi_shown', $isWifiShown);
+        $order->setAttribute('store_address', $storeAddress);
+        $order->setAttribute('store_wifi_user', $wifiUser);
+        $order->setAttribute('store_wifi_password', $wifiPass);
 
         return response()->json($order);
     }
@@ -750,6 +815,230 @@ class CashierMobileOrderController extends Controller
                 'message' => 'Terjadi kesalahan',
                 'error' => $e->getMessage(),
             ], 500);
+        }
+    }
+
+    public function processOrder($id)
+    {
+        $cashier = Auth::user();
+        $booking_order = BookingOrder::with('order_details')->findOrFail($id);
+
+        // 1. Verifikasi Kepemilikan (Tetap)
+        if ($booking_order->partner_id !== $cashier->partner_id) {
+            return response()->json(['status' => 'error', 'message' => 'Tidak bisa proses order toko lain!'], 403);
+        }
+
+        DB::beginTransaction();
+        try {
+            // 2. VERIFIKASI STATUS KRITIS: Cek apakah order sudah PROCESSED atau SERVED
+            if (in_array($booking_order->order_status, ['PROCESSED', 'SERVED'])) {
+                DB::rollBack(); // Tidak ada perubahan, jadi rollback aman.
+
+                // Berikan respon sukses SEMU (TAPI status khusus)
+                return response()->json([
+                    'status' => 'warning', // Status baru untuk frontend
+                    'message' => 'Order ini sudah diproses oleh tim lain (Kitchen). Order akan di-refresh.',
+                    'already_processed' => true // Flag khusus
+                ]);
+            }
+
+            // 3. Jika status masih UNPAID/PENDING, lanjutkan proses
+            $booking_order->order_status = 'PROCESSED';
+            $booking_order->cashier_process_id = $cashier->id;
+            $booking_order->save();
+
+            foreach ($booking_order->order_details as $detail) {
+                $detail->status = 'PROCESSED BY CASHIER';
+                $detail->save();
+            }
+
+            DB::commit();
+
+            return response()->json(['status' => 'ok', 'message' => 'Order berhasil diproses.']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['status' => 'error', 'message' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function cancelProcessOrder($id)
+    {
+        $cashier = Auth::user();
+        $booking_order = BookingOrder::with('order_details')->findOrFail($id);
+        if ($booking_order->partner_id !== $cashier->partner_id) {
+            return redirect()->back()->with('error', 'Tidak bisa batalkan proses order toko lain!');
+        }
+
+        DB::beginTransaction();
+        try {
+
+            $booking_order->order_status = 'PAID';
+            $booking_order->cashier_process_id = null;
+            $booking_order->kitchen_process_id = null;
+
+            $booking_order->save();
+            foreach ($booking_order->order_details as $detail) {
+                $detail->status = '';
+                $detail->save();
+            }
+            DB::commit();
+
+            return response()->json(['status' => 'ok', 'message' => 'Process cancelled']);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Order tidak ditemukan'
+            ], 404);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function finishOrder(Request $request, $id)
+    {
+        $cashier = Auth::user();
+        $partner = User::findOrFail($cashier->partner_id);
+
+        DB::beginTransaction();
+        try {
+
+            $booking_order = BookingOrder::with([
+                'order_details.partnerProduct.stock',
+                'order_details.partnerProduct.recipes',
+                'order_details.order_detail_options.option.stock',
+                'order_details.order_detail_options.option.recipes',
+            ])->findOrFail($id);
+
+            if (!$booking_order) {
+                return redirect()->back()->with('error', 'Order tidak ditemukan');
+            }
+
+            if ($cashier->partner_id !== $booking_order->partner_id) {
+                return redirect()->back()->with('error', 'Anda tidak bisa menyelesaikan order outlet lain');
+            }
+
+            $masterMovement = StockMovement::create([
+                'owner_id'   => $partner->owner_id,
+                'partner_id' => $partner->id,
+                'type'       => 'out',
+                'category'   => 'sale',
+            ]);
+
+            // 2. PENGURANGAN FISIK & PENCATATAN MOVEMENT ITEM
+            foreach ($booking_order->order_details as $detail) {
+                $qty = $detail->quantity;
+                $product = $detail->partnerProduct;
+                if ($product) {
+                    // A. Pengurangan Produk Utama
+                    if ($product->stock_type === 'direct' && $product->always_available_flag === 0 && $product->stock) {
+                        // Kurangi fisik (quantity) dan hapus reservasi (quantity_reserved)
+                        $this->processStockConsumption($product->stock, $qty, $masterMovement);
+                    } elseif ($product->stock_type === 'linked') {
+                        // Kurangi bahan baku (ingredients)
+                        $this->processRecipeConsumption($product->recipes, $qty, $masterMovement);
+                    }
+
+                    // B. Pengurangan Opsi Produk
+                    foreach ($detail->order_detail_options as $detailOption) {
+                        $opt = $detailOption->option;
+                        if (!$opt) continue;
+
+                        if ($opt->stock_type === 'direct' && $opt->always_available_flag === 0 && $opt->stock) {
+                            $this->processStockConsumption($opt->stock, $qty, $masterMovement);
+                        } elseif ($opt->stock_type === 'linked') {
+                            $this->processRecipeConsumption($opt->recipes, $qty, $masterMovement);
+                        }
+                    }
+                }
+            }
+
+            $booking_order->order_status = 'SERVED';
+            $booking_order->employee_order_note = trim(
+                ($booking_order->employee_order_note ?? '') . '|| ' . 'CASHIER ' . $cashier->name . ': ' . $request->note
+            );
+            $booking_order->save();
+
+            DB::commit();
+            return response()->json([
+                'status' => 'ok',
+                'message' => 'Order berhasil diselesaikan',
+                'id' => $booking_order->id,
+                'order_status' => $booking_order->order_status,
+            ], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Order tidak ditemukan'
+            ], 404);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    private function processStockConsumption(Stock $stock, int $qty, StockMovement $masterMovement): void
+    {
+        $reservedColumnExists = Schema::hasColumn('stocks', 'quantity_reserved');
+
+        $updateData = [
+            // Mengurangi kolom quantity fisik
+            'quantity' => DB::raw('quantity - ' . $qty)
+        ];
+
+        if ($reservedColumnExists) {
+            // Mengurangi kolom quantity_reserved (membersihkan reservasi)
+            $updateData['quantity_reserved'] = DB::raw('quantity_reserved - ' . $qty);
+        }
+
+        $stock->update($updateData);
+
+        $masterMovement->items()->create([
+            'stock_id' => $stock->id,
+            'quantity' => $qty,
+            'unit_price' => $stock->last_price_per_unit ?? 0,
+        ]);
+    }
+
+    private function processRecipeConsumption($recipes, int $orderedQuantity, StockMovement $masterMovement): void
+    {
+        foreach ($recipes as $recipe) {
+            $ingredientStock = Stock::find($recipe->stock_id);
+
+            if (!$ingredientStock) {
+                continue;
+            }
+
+            $quantityPerUnit = $recipe->quantity_used;
+            $totalQuantityToConsume = $quantityPerUnit * $orderedQuantity;
+
+            // 1. Pengurangan Stok Fisik (quantity)
+            $ingredientStock->decrement('quantity', $totalQuantityToConsume);
+
+            // 2. Pengurangan Reservasi (quantity_reserved)
+            if (Schema::hasColumn('stocks', 'quantity_reserved')) {
+                $ingredientStock->decrement('quantity_reserved', $totalQuantityToConsume);
+            }
+
+            // 3. Pencatatan Movement Item
+            $masterMovement->items()->create([
+                'stock_id' => $ingredientStock->id,
+                'quantity' => $totalQuantityToConsume,
+                'unit_price' => $ingredientStock->last_price_per_unit ?? 0,
+            ]);
+
+            // PANGGIL RECALCULATION SERVICE
+            $this->recalculationService->recalculateLinkedProducts($ingredientStock);
         }
     }
 }
