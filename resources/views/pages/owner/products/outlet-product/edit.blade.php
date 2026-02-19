@@ -11,10 +11,10 @@
           <h1 class="page-title">{{ __('messages.owner.products.outlet_products.edit_outlet_product') }}</h1>
           <p class="page-subtitle">{{ __('messages.owner.products.outlet_products.update_subtitle') }}</p>
         </div>
-          <a href="{{ route('owner.user-owner.outlet-products.index') }}" class="back-button">
-              <span class="material-symbols-outlined">arrow_back</span>
-              {{ __('messages.owner.products.outlet_products.back') }}
-          </a>
+        <a href="{{ route('owner.user-owner.outlet-products.index') }}" class="back-button">
+          <span class="material-symbols-outlined">arrow_back</span>
+          {{ __('messages.owner.products.outlet_products.back') }}
+        </a>
       </div>
 
       @if ($errors->any())
@@ -82,7 +82,7 @@
                   <div class="col-md-6">
                     <div class="form-group-modern">
                       <label class="form-label-modern">
-                         {{ __('messages.owner.products.outlet_products.product_name') }}
+                        {{ __('messages.owner.products.outlet_products.product_name') }}
                       </label>
                       <input type="text" class="form-control-modern" value="{{ $data->name }}" readonly>
                     </div>
@@ -94,7 +94,8 @@
                         {{ __('messages.owner.products.outlet_products.category') }}
                       </label>
                       <input type="text" class="form-control-modern"
-                        value="{{ optional($data->category)->category_name ?? __('messages.owner.products.outlet_products.uncategorized') }}" readonly>
+                        value="{{ optional($data->category)->category_name ?? __('messages.owner.products.outlet_products.uncategorized') }}"
+                        readonly>
                     </div>
                   </div>
 
@@ -111,7 +112,7 @@
                     <div class="col-md-12">
                       <div class="form-group-modern">
                         <label class="form-label-modern">
-                           {{ __('messages.owner.products.outlet_products.description') }}
+                          {{ __('messages.owner.products.outlet_products.description') }}
                         </label>
                         <div class="alert alert-secondary py-2 px-3 mb-0">
                           <div style="font-size: 0.9rem;">{!! $data->description !!}</div>
@@ -138,7 +139,7 @@
                 $prodStockType = old('stock_type', $data->stock_type ?? 'direct');
                 $currentQuantity = 0;
                 if ($data->stock_type === 'direct' && $data->stock) {
-                  $currentQuantity = (int) $data->quantity_available;
+                  $currentQuantity = (int) ($data->stock->quantity - ($data->stock->quantity_reserved ?? 0));
                 }
               @endphp
 
@@ -378,7 +379,11 @@
                                 @php
                                   $optStockType = old("options.{$opt->id}.stock_type", $opt->stock_type ?? 'direct');
                                   $optUnlimited = old("options.{$opt->id}.always_available", $opt->always_available_flag ?? 0);
-                                  $optCurrentQty = (int) ($opt->quantity_available ?? 0);
+
+                                  $optCurrentQty = 0;
+                                  if ($opt->stock) {
+                                    $optCurrentQty = (int) ($opt->stock->quantity - ($opt->stock->quantity_reserved ?? 0));
+                                  }
                                 @endphp
                                 <tr>
                                   <td class="fw-600">{{ $opt->name }}</td>
@@ -403,7 +408,8 @@
                                             data-opt-id="{{ $opt->id }}" {{ $optUnlimited ? 'checked' : '' }}>
                                           <span class="slider-modern"></span>
                                         </label>
-                                        <span class="status-label small">{{ __('messages.owner.products.outlet_products.always_available') }}</span>
+                                        <span
+                                          class="status-label small">{{ __('messages.owner.products.outlet_products.always_available') }}</span>
                                       </div>
                                     </div>
 
@@ -462,43 +468,44 @@
   </div>
 
 
-{{-- Recipe Management Modal --}}
-<div class="modal fade" id="recipeModal" tabindex="-1" role="dialog" aria-labelledby="recipeModalLabel"
-  aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content modern-modal">
-      <div class="modal-header modern-modal-header">
-        <h5 class="modal-title">
-          <span class="material-symbols-outlined">restaurant</span>
-          {{ __('messages.owner.products.outlet_products.manage_recipe') }}:
-          <span id="modal-item-name"></span>
-        </h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
+  {{-- Recipe Management Modal --}}
+  <div class="modal fade" id="recipeModal" tabindex="-1" role="dialog" aria-labelledby="recipeModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content modern-modal">
+        <div class="modal-header modern-modal-header">
+          <h5 class="modal-title">
+            <span class="material-symbols-outlined">restaurant</span>
+            {{ __('messages.owner.products.outlet_products.manage_recipe') }}:
+            <span id="modal-item-name"></span>
+          </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
 
-      <div class="modal-body" style="padding: var(--spacing-lg);">
-        <div id="recipe-items-container">
+        <div class="modal-body" style="padding: var(--spacing-lg);">
+          <div id="recipe-items-container">
           </div>
 
-        <button type="button" class="btn-modern btn-sm-modern btn-secondary-modern" id="add-recipe-item" style="margin-top: var(--spacing-md);">
-          <span class="material-symbols-outlined">add_circle</span>
-          {{ __('messages.owner.products.outlet_products.add_ingredient') }}
-        </button>
-      </div>
+          <button type="button" class="btn-modern btn-sm-modern btn-secondary-modern" id="add-recipe-item"
+            style="margin-top: var(--spacing-md);">
+            <span class="material-symbols-outlined">add_circle</span>
+            {{ __('messages.owner.products.outlet_products.add_ingredient') }}
+          </button>
+        </div>
 
-      <div class="modal-footer modern-modal-footer">
-        <button type="button" class="btn-cancel-modern" data-dismiss="modal">
-          {{ __('messages.owner.products.outlet_products.cancel') }}
-        </button>
-        <button type="button" class="btn-submit-modern" id="save-recipe">
-          {{ __('messages.owner.products.outlet_products.save_recipe') }}
-        </button>
+        <div class="modal-footer modern-modal-footer">
+          <button type="button" class="btn-cancel-modern" data-dismiss="modal">
+            {{ __('messages.owner.products.outlet_products.cancel') }}
+          </button>
+          <button type="button" class="btn-submit-modern" id="save-recipe">
+            {{ __('messages.owner.products.outlet_products.save_recipe') }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
 @endsection
 @push('scripts')

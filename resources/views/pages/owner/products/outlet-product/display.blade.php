@@ -122,33 +122,33 @@
                 @forelse ($products as $index => $p)
                     @php
                         $name = $p->name ?? $p->product_name;
-                        $img =
-                            !empty($p->pictures) && isset($p->pictures[0]['path'])
-                                ? asset($p->pictures[0]['path'])
-                                : null;
+                        $img = !empty($p->pictures) && isset($p->pictures[0]['path'])
+                            ? asset($p->pictures[0]['path'])
+                            : null;
+                        $active = (int) ($p->is_active ?? 1);
+
+
                         $qtyAvailable = $p->quantity_available;
-                        $isQtyZero = $qtyAvailable < 1 && $qtyAvailable !== 999999999;
+                        $isUnlimited = (int) $p->always_available_flag === 1;
+
                         $stockDisplay = '0';
-                        if ($p->stock_type == 'linked') {
-                            if ($qtyAvailable === 999999999) {
-                                $stockDisplay = __('messages.owner.products.outlet_products.always_available');
-                            } elseif ($isQtyZero) {
+
+                        if ($isUnlimited) {
+                            $stockDisplay = __('messages.owner.products.outlet_products.always_available');
+                        } elseif ($qtyAvailable <= 0) {
+                            if ($p->stock_type == 'linked') {
                                 $stockDisplay = 'Out of Stock';
                             } else {
-                                $stockDisplay = number_format(floor($qtyAvailable), 0) . ' pcs';
-                            }
-                        } elseif ((int) $p->always_available_flag === 1) {
-                            $stockDisplay = __('messages.owner.products.outlet_products.always_available');
-                        } elseif ($p->stock) {
-                            if ($isQtyZero) {
                                 $stockDisplay = '0';
+                            }
+                        } else {
+                            if ($p->stock_type == 'linked') {
+                                $stockDisplay = number_format(floor($qtyAvailable), 0) . ' pcs';
                             } else {
                                 $unit = $p->stock->displayUnit->unit_name ?? 'unit';
-                                $stockDisplay =
-                                    rtrim(rtrim(number_format($qtyAvailable, 2, ',', '.'), '0'), ',') . ' ' . $unit;
+                                $stockDisplay = rtrim(rtrim(number_format($qtyAvailable, 2, ',', '.'), '0'), ',') . ' ' . $unit;
                             }
                         }
-                        $active = (int) ($p->is_active ?? 1);
                     @endphp
                     <tr class="table-row">
                         <td class="text-center text-muted">{{ $products->firstItem() + $index }}</td>
@@ -157,8 +157,7 @@
                                 <div class="position-relative" style="width:40px;height:40px;">
                                     @if ($img)
                                         <img src="{{ $img }}" alt="{{ $name }}" class="user-avatar"
-                                            style="width:40px;height:40px;object-fit:cover;border-radius:10px;"
-                                            loading="lazy">
+                                            style="width:40px;height:40px;object-fit:cover;border-radius:10px;" loading="lazy">
                                     @else
                                         <div class="user-avatar-placeholder">
                                             <span class="material-symbols-outlined">image</span>
@@ -233,31 +232,35 @@
             @forelse ($products as $p)
                 @php
                     $name = $p->name ?? $p->product_name;
-                    $img =
-                        !empty($p->pictures) && isset($p->pictures[0]['path']) ? asset($p->pictures[0]['path']) : null;
+                    $img = !empty($p->pictures) && isset($p->pictures[0]['path'])
+                        ? asset($p->pictures[0]['path'])
+                        : null;
+                    $active = (int) ($p->is_active ?? 1);
+
+
                     $qtyAvailable = $p->quantity_available;
-                    $isQtyZero = $qtyAvailable < 1 && $qtyAvailable !== 999999999;
+                    $isUnlimited = (int) $p->always_available_flag === 1;
+
                     $stockDisplay = '0';
-                    if ($p->stock_type == 'linked') {
-                        if ($qtyAvailable === 999999999) {
-                            $stockDisplay = __('messages.owner.products.outlet_products.always_available');
-                        } elseif ($isQtyZero) {
+
+                    if ($isUnlimited) {
+                        $stockDisplay = __('messages.owner.products.outlet_products.always_available');
+                    }
+                    elseif ($qtyAvailable <= 0) {
+                        if ($p->stock_type == 'linked') {
                             $stockDisplay = 'Out of Stock';
                         } else {
-                            $stockDisplay = number_format(floor($qtyAvailable), 0) . ' pcs';
-                        }
-                    } elseif ((int) $p->always_available_flag === 1) {
-                        $stockDisplay = __('messages.owner.products.outlet_products.always_available');
-                    } elseif ($p->stock) {
-                        if ($isQtyZero) {
                             $stockDisplay = '0';
-                        } else {
-                            $unit = $p->stock->displayUnit->unit_name ?? 'unit';
-                            $stockDisplay =
-                                rtrim(rtrim(number_format($qtyAvailable, 2, ',', '.'), '0'), ',') . ' ' . $unit;
                         }
                     }
-                    $active = (int) ($p->is_active ?? 1);
+                    else {
+                        if ($p->stock_type == 'linked') {
+                            $stockDisplay = number_format(floor($qtyAvailable), 0) . ' pcs';
+                        } else {
+                            $unit = $p->stock->displayUnit->unit_name ?? 'unit';
+                            $stockDisplay = rtrim(rtrim(number_format($qtyAvailable, 2, ',', '.'), '0'), ',') . ' ' . $unit;
+                        }
+                    }
                 @endphp
                 <div class="product-card-v2">
                     <div class="card-image-header">
@@ -298,8 +301,7 @@
                             </div>
                         @endif
                         <div class="action-buttons-v2">
-                            <a href="{{ route('owner.user-owner.outlet-products.edit', $p->id) }}"
-                                class="btn-v2 btn-edit">
+                            <a href="{{ route('owner.user-owner.outlet-products.edit', $p->id) }}" class="btn-v2 btn-edit">
                                 <span class="material-symbols-outlined">edit</span>
                             </a>
                             <button onclick="deleteProduct({{ $p->id }})" class="btn-v2 btn-delete">
@@ -331,14 +333,16 @@
 </button>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    // Mobile Filter Modal Functions
+    document.addEventListener('DOMContentLoaded', function () {
+        // Open/Close Modal
         const openBtn = document.getElementById('openFilterModalBtn');
         const closeBtn = document.getElementById('closeFilterModalBtn');
         const backdrop = document.getElementById('filterModalBackdrop');
         const modal = document.getElementById('mobileFilterModal');
 
         if (openBtn) {
-            openBtn.addEventListener('click', function() {
+            openBtn.addEventListener('click', function () {
                 if (modal) {
                     modal.classList.add('show');
                     document.body.style.overflow = 'hidden';
@@ -359,7 +363,7 @@
         const searchInputMobile = document.getElementById('productSearchInputMobile');
         if (searchInputMobile) {
             let timer;
-            searchInputMobile.addEventListener('input', function() {
+            searchInputMobile.addEventListener('input', function () {
                 clearTimeout(timer);
                 timer = setTimeout(() => {
                     const params = new URLSearchParams(window.location.search);

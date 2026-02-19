@@ -61,7 +61,7 @@ class CashierTransactionController extends Controller
             'order_details.partnerProduct',
             'order_details.order_detail_options.option.parent'
         ])->findOrFail($id);
-         $paymentRequest = null;
+        $paymentRequest = null;
 
         if ($order->order_status === 'PAYMENT REQUEST' && $order->latestPayment) {
             $p = $order->latestPayment;
@@ -190,36 +190,50 @@ class CashierTransactionController extends Controller
                 return redirect()->back()->with('error', 'Anda tidak bisa menyelesaikan order outlet lain');
             }
 
-            $masterMovement = StockMovement::create([
-                'owner_id'   => $partner->owner_id,
-                'partner_id' => $partner->id,
-                'type'       => 'out',
-                'category'   => 'sale',
-            ]);
+            $masterMovement = null;
 
-            // 2. PENGURANGAN FISIK & PENCATATAN MOVEMENT ITEM
             foreach ($booking_order->order_details as $detail) {
                 $qty = $detail->quantity;
                 $product = $detail->partnerProduct;
+
                 if ($product) {
-                    // A. Pengurangan Produk Utama
-                    if ($product->stock_type === 'direct' && $product->always_available_flag === 0 && $product->stock) {
-                        // Kurangi fisik (quantity) dan hapus reservasi (quantity_reserved)
-                        $this->processStockConsumption($product->stock, $qty, $masterMovement);
-                    } elseif ($product->stock_type === 'linked') {
-                        // Kurangi bahan baku (ingredients)
-                        $this->processRecipeConsumption($product->recipes, $qty, $masterMovement);
+                    if ($product->always_available_flag === 0) {
+
+                        if (!$masterMovement) {
+                            $masterMovement = StockMovement::create([
+                                'owner_id'   => $partner->owner_id,
+                                'partner_id' => $partner->id,
+                                'type'       => 'out',
+                                'category'   => 'sale',
+                            ]);
+                        }
+
+                        if ($product->stock_type === 'direct' && $product->stock) {
+                            $this->processStockConsumption($product->stock, $qty, $masterMovement);
+                        } elseif ($product->stock_type === 'linked') {
+                            $this->processRecipeConsumption($product->recipes, $qty, $masterMovement);
+                        }
                     }
 
-                    // B. Pengurangan Opsi Produk
                     foreach ($detail->order_detail_options as $detailOption) {
                         $opt = $detailOption->option;
                         if (!$opt) continue;
 
-                        if ($opt->stock_type === 'direct' && $opt->always_available_flag === 0 && $opt->stock) {
-                            $this->processStockConsumption($opt->stock, $qty, $masterMovement);
-                        } elseif ($opt->stock_type === 'linked') {
-                            $this->processRecipeConsumption($opt->recipes, $qty, $masterMovement);
+                        if ($opt->always_available_flag === 0) {
+                            if (!$masterMovement) {
+                                $masterMovement = StockMovement::create([
+                                    'owner_id'   => $partner->owner_id,
+                                    'partner_id' => $partner->id,
+                                    'type'       => 'out',
+                                    'category'   => 'sale',
+                                ]);
+                            }
+
+                            if ($opt->stock_type === 'direct' && $opt->stock) {
+                                $this->processStockConsumption($opt->stock, $qty, $masterMovement);
+                            } elseif ($opt->stock_type === 'linked') {
+                                $this->processRecipeConsumption($opt->recipes, $qty, $masterMovement);
+                            }
                         }
                     }
                 }
@@ -607,11 +621,10 @@ class CashierTransactionController extends Controller
 
             if ($product->always_available_flag === 0) {
                 if ($product->stock_type === 'direct') {
-                    $productStock = $product->stock;
 
                     // Cek Direct Stock: Stok harus lebih besar atau sama dengan jumlah yang dipesan
-                    if (!$productStock || $productStock->quantity < $qty) {
-                        throw new \Exception("Stok {$product->name} (Produk) tidak mencukupi.");
+                    if ($product->quantity_available < $qty) {
+                        throw new \Exception("Stok {$product->name} tidak mencukupi.");
                     }
                 } elseif ($product->stock_type === 'linked') {
                     $recipes = PartnerProductRecipe::where('partner_product_id', $productId)->get();

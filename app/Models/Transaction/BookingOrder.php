@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Transaction\OrderPayment;
 use App\Models\Xendit\XenditInvoice;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Partner\HumanResource\Employee;
 
 
 class BookingOrder extends Model
@@ -77,6 +78,12 @@ class BookingOrder extends Model
         // pakai created_at, sesuaikan kalau mau pakai kolom lain
         return $this->hasOne(XenditInvoice::class, 'order_id', 'id')->latest('created_at');
     }
+
+    public function employeeOrder()
+    {
+        return $this->belongsTo(Employee::class, 'employee_order_id', 'id');
+    }
+
 
     public function saveWifiSnapshot($wifiSsid, $wifiPassword, $isWifiShown)
     {

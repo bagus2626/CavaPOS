@@ -978,7 +978,7 @@ class CustomerMenuController extends Controller
 
                 file_put_contents($storagePath . '/' . $filename, $image);
 
-                $publicUrl = asset('storage/' . $newRelativePath);
+                $publicUrl = '/storage/' . $newRelativePath;
 
             } else {
                 $filename = $filenameBase . '.' . $extension;
@@ -986,7 +986,8 @@ class CustomerMenuController extends Controller
 
                 $file->storeAs($folder, $filename, 'public');
 
-                $publicUrl = asset('storage/' . $newRelativePath);
+                $publicUrl = '/storage/' . $newRelativePath;
+
             }
 
             $payment->update([
