@@ -49,6 +49,7 @@ use App\Http\Controllers\Owner\Product\OwnerOutletProductController;
 use App\Http\Controllers\Owner\HumanResource\OwnerEmployeeController;
 use App\Http\Controllers\Employee\Dashboard\CashierDashboardController;
 use App\Http\Controllers\Employee\Dashboard\KitchenDashboardController;
+use App\Http\Controllers\Owner\Outlet\OwnerTablesController;
 use App\Http\Controllers\Partner\HumanResource\PartnerEmployeeController;
 use App\Http\Controllers\Employee\Transaction\CashierTransactionController;
 use App\Http\Controllers\Customer\Auth\CustomerPasswordResetController;
@@ -323,6 +324,9 @@ Route::middleware('setlocale')->group(function () {
                 Route::get('outlets/check-username', [OwnerOutletController::class, 'checkUsername'])->name('outlets.check-username')->middleware('throttle:30,1');
                 Route::get('outlets/check-slug', [OwnerOutletController::class, 'checkSlug'])->name('outlets.check-slug')->middleware('throttle:30,1');
                 Route::resource('outlets', OwnerOutletController::class);
+Route::get('tables/generate-barcode/{tableId}', [OwnerTablesController::class, 'generateBarcode'])->name('tables.generate-barcode');
+Route::get('tables/generate-all-barcode', [OwnerTablesController::class, 'generateAllBarcode'])->name('tables.generate-all-barcode');
+Route::resource('tables', OwnerTablesController::class);
                 Route::get('employees/check-username', [OwnerEmployeeController::class, 'checkUsername'])->name('employees.check-username');
                 Route::resource('employees', OwnerEmployeeController::class);
                 Route::resource('master-products', OwnerMasterProductController::class);
