@@ -33,6 +33,8 @@ class EmployeeAccess
                             return redirect()->route('employee.cashier.dashboard');
                         } elseif ($employee->role === 'KITCHEN') {
                             return redirect()->route('employee.kitchen.dashboard');
+                        } elseif (in_array($employee->role, ['MANAGER', 'SUPERVISOR'])) {
+                            return redirect()->route('employee.' . strtolower($employee->role) . '.dashboard');
                         }
                     }
                 }
