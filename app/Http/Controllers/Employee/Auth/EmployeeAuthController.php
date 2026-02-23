@@ -50,13 +50,15 @@ class EmployeeAuthController extends Controller
         return redirect()->route('employee.login');
     }
 
-    private function dashboardFor(string $role): string
-    {
-        return match ($role) {
-            'CASHIER' => route('employee.cashier.dashboard'),
-            'KITCHEN' => route('employee.kitchen.dashboard'),
-            'WAITER'  => route('employee.waiter.dashboard'),
-            default   => route('employee.login'),
-        };
-    }
+private function dashboardFor(string $role): string
+{
+    return match ($role) {
+        'CASHIER'    => route('employee.cashier.dashboard'),
+        'KITCHEN'    => route('employee.kitchen.dashboard'),
+        // 'WAITER'     => route('employee.waiter.dashboard'),
+        'MANAGER'    => route('employee.manager.dashboard'),
+        'SUPERVISOR' => route('employee.supervisor.dashboard'),
+        default      => route('employee.login'),
+    };
+}
 }
