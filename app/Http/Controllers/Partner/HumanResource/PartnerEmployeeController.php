@@ -8,6 +8,7 @@ use App\Models\Partner\Products\PartnerProduct;
 use App\Models\Partner\Products\PartnerProductParentOption;
 use App\Models\Partner\Products\PartnerProductOption;
 use App\Models\Partner\HumanResource\Employee;
+use App\Http\Controllers\Owner\Store\OwnerTableController;
 use App\Models\Product\Specification;
 use App\Models\Admin\Product\Category;
 use Illuminate\Http\Request;

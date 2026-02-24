@@ -1,0 +1,448 @@
+<?php
+
+namespace App\Http\Controllers\Owner\Outlet;
+
+use App\Http\Controllers\Controller;
+use App\Models\Store\Table;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Storage;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Writer\PngWriter;
+use Endroid\QrCode\Color\Color;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Str;
+
+class OwnerTablesController extends Controller
+{
+    public function index(Request $request)
+    {
+        $owner = Auth::guard('owner')->user();
+
+        $partnerIds = $owner->users()->pluck('id');
+
+        $table_classes = Table::whereIn('partner_id', $partnerIds)
+            ->whereNotNull('table_class')
+            ->where('table_class', '!=', '')
+            ->pluck('table_class')
+            ->unique()
+            ->sort()
+            ->values();
+
+        $outlets = $owner->users()->get(['id', 'name']);
+
+        $tableClass = $request->query('table_class');
+        $outletId   = $request->query('outlet_id');
+
+        $tablesQuery = Table::whereIn('partner_id', $partnerIds)
+            ->with('partner') // eager load nama outlet
+            ->orderBy('table_class')
+            ->orderBy('table_no');
+
+        if ($tableClass && $tableClass !== 'all') {
+            $tablesQuery->where('table_class', $tableClass);
+        }
+
+        if ($outletId && $outletId !== 'all') {
+            $tablesQuery->where('partner_id', $outletId);
+        }
+
+        $allTables = $tablesQuery->get();
+
+        $allTablesFormatted = $allTables->map(function ($table) {
+            return [
+                'id'          => $table->id,
+                'partner_id'   => $table->partner_id,
+                'table_no'    => $table->table_no,
+                'table_code'  => $table->table_code,
+                'table_class' => $table->table_class,
+                'description' => $table->description,
+                'status'      => $table->status,
+                'images'      => $table->images,
+                'table_url'   => $table->table_url,
+                'outlet_name' => $table->partner->name ?? '-',
+            ];
+        });
+
+        $perPage     = 10;
+        $currentPage = $request->input('page', 1);
+        $offset      = ($currentPage - 1) * $perPage;
+
+        $tables = new \Illuminate\Pagination\LengthAwarePaginator(
+            $allTables->slice($offset, $perPage)->values(),
+            $allTables->count(),
+            $perPage,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        return view('pages.owner.outlet.tables.index', compact(
+            'tables',
+            'table_classes',
+            'tableClass',
+            'allTablesFormatted',
+            'outlets'
+        ));
+    }
+
+    public function create()
+    {
+        $owner = Auth::guard('owner')->user();
+
+        $partnerIds = $owner->users()->pluck('id');
+
+        $table_classes = Table::whereIn('partner_id', $partnerIds)
+            ->whereNotNull('table_class')
+            ->where('table_class', '!=', '')
+            ->pluck('table_class')
+            ->unique()
+            ->values();
+
+        $outlets = $owner->users()->get(['id', 'name']);
+
+        return view('pages.owner.outlet.tables.create', compact('table_classes', 'outlets'));
+    }
+    public function store(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $owner = Auth::guard('owner')->user();
+
+            // Validate dulu sebelum query
+            $request->validate([
+                'partner_id'      => 'required|integer|exists:users,id',
+                'table_no'        => 'required|string|max:255',
+                'table_class'     => 'required_without:new_table_class|nullable|string|max:255',
+                'new_table_class' => 'nullable|string|max:255',
+                'description'     => 'nullable|string',
+                'images'          => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+                'status'          => 'required|in:available,not_available',
+            ]);
+
+            // Baru query setelah validate lolos
+            $partner = $owner->users()->where('id', $request->partner_id)->firstOrFail();
+
+            $tableClass = $request->filled('new_table_class')
+                ? $request->new_table_class
+                : $request->table_class;
+
+            $storedImageData = null;
+            if ($request->hasFile('images')) {
+                $image    = $request->file('images');
+                $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                $path     = $image->storeAs('uploads/owner/tables', $filename, 'public');
+
+                $storedImageData = [[
+                    'path'     => 'storage/' . $path,
+                    'filename' => $filename,
+                    'mime'     => $image->getClientMimeType(),
+                    'size'     => $image->getSize(),
+                ]];
+            }
+
+            $barcode   = 'TB' . strtoupper(uniqid());
+            $table_url = 'customer/' . $partner->slug . '/menu/' . $barcode;
+
+            $table              = new Table();
+            $table->table_no    = $request->table_no;
+            $table->table_code  = $barcode;
+            $table->partner_id  = $partner->id;
+            $table->table_class = $tableClass;
+            $table->description = $request->description ?? null;
+            $table->status      = $request->status;
+            $table->images      = $storedImageData;
+            $table->table_url   = $table_url;
+            $table->save();
+
+            DB::commit();
+
+            return redirect()
+                ->route('owner.user-owner.tables.index')
+                ->with('success', 'Table berhasil ditambahkan!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            throw $e; // biarkan Laravel handle redirect + error bag
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            DB::rollBack();
+            return back()->withInput()->withErrors(['error' => 'Outlet tidak valid atau bukan milik Anda.']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+        }
+    }
+
+    public function show(Table $table)
+    {
+        $owner      = Auth::guard('owner')->user();
+        $partnerIds = $owner->users()->pluck('id');
+
+        if (!$partnerIds->contains($table->partner_id)) {
+            abort(403, 'Akses ditolak.');
+        }
+
+        $data = $table->load('partner');
+        return view('pages.owner.outlet.tables.show', compact('data'));
+    }
+
+    public function edit(Table $table)
+    {
+        $owner      = Auth::guard('owner')->user();
+        $partnerIds = $owner->users()->pluck('id');
+
+        if (!$partnerIds->contains($table->partner_id)) {
+            abort(403, 'Akses ditolak.');
+        }
+
+        $table_classes = Table::whereIn('partner_id', $partnerIds)
+            ->whereNotNull('table_class')
+            ->where('table_class', '!=', '')
+            ->pluck('table_class')
+            ->unique()
+            ->values();
+
+        $table->load('partner');
+
+        return view('pages.owner.outlet.tables.edit', compact('table', 'table_classes'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        DB::beginTransaction();
+        try {
+            $owner = Auth::guard('owner')->user();
+
+            // Ambil semua partner_id milik owner
+            $partnerIds = $owner->users()->pluck('id');
+
+            // Cari table yang partner_id-nya termasuk milik owner
+            $table = Table::whereIn('partner_id', $partnerIds)
+                ->where('id', $id)
+                ->firstOrFail();
+
+            $request->validate([
+                'table_no'        => 'required|string|max:255',
+                'table_class'     => 'required_without:new_table_class|nullable|string|max:255',
+                'new_table_class' => 'nullable|string|max:255',
+                'description'     => 'nullable|string',
+                'images'          => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
+                'status'          => 'required|in:available,not_available',
+            ]);
+
+            $tableClass = $request->filled('new_table_class')
+                ? $request->new_table_class
+                : $request->table_class;
+
+            $disk         = Storage::disk('public');
+            $storedImages = $table->images;
+
+            if ($request->keep_existing_image == '0' || $request->hasFile('images')) {
+                if (!empty($storedImages) && is_array($storedImages)) {
+                    foreach ($storedImages as $img) {
+                        $relativePath = ltrim(preg_replace('#^storage/#', '', $img['path']), '/');
+                        if ($disk->exists($relativePath)) {
+                            $disk->delete($relativePath);
+                        }
+                    }
+                }
+                $storedImages = null;
+            }
+
+            if ($request->hasFile('images')) {
+                $image    = $request->file('images');
+                $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                $path     = $image->storeAs('uploads/owner/tables', $filename, 'public');
+
+                $storedImages = [[
+                    'path'     => 'storage/' . $path,
+                    'filename' => $filename,
+                    'mime'     => $image->getClientMimeType(),
+                    'size'     => $image->getSize(),
+                ]];
+            }
+
+            $table->update([
+                'table_no'    => $request->table_no,
+                'table_class' => $tableClass,
+                'description' => $request->description ?? null,
+                'status'      => $request->status,
+                'images'      => $storedImages,
+            ]);
+
+            DB::commit();
+
+            return redirect()
+                ->route('owner.user-owner.tables.index')
+                ->with('success', 'Table berhasil diperbarui!');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            DB::rollBack();
+            return back()->withInput()->withErrors(['error' => 'Table tidak ditemukan atau bukan milik outlet Anda.']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()->withErrors(['error' => 'Gagal memperbarui: ' . $e->getMessage()]);
+        }
+    }
+
+    public function destroy(Table $table)
+    {
+        $owner      = Auth::guard('owner')->user();
+        $partnerIds = $owner->users()->pluck('id');
+
+        // Validasi table memang milik owner
+        if (!$partnerIds->contains($table->partner_id)) {
+            return redirect()
+                ->route('owner.user-owner.tables.index')
+                ->with('error', 'Table tidak ditemukan atau bukan milik outlet Anda.');
+        }
+
+        if ($table->images && is_array($table->images)) {
+            foreach ($table->images as $image) {
+                if (isset($image['path'])) {
+                    $relativePath = str_replace('storage/', '', $image['path']);
+                    Storage::disk('public')->delete($relativePath);
+                }
+            }
+        }
+
+        $table->delete();
+
+        return redirect()
+            ->route('owner.user-owner.tables.index')
+            ->with('success', 'Table berhasil dihapus!');
+    }
+
+    public function generateBarcode($tableId)
+    {
+        $owner = Auth::guard('owner')->user();
+
+        // Ambil semua partner_id milik owner
+        $partnerIds = $owner->users()->pluck('id');
+
+        // Cari table yang partner_id-nya termasuk milik owner
+        $table = Table::whereIn('partner_id', $partnerIds)
+            ->where('id', $tableId)
+            ->firstOrFail();
+
+        if (!$table->table_url) {
+            abort(404, 'Table URL not found');
+        }
+
+        // Gunakan nama outlet (partner), bukan nama owner
+        $storeName = $table->partner->name ?? $owner->name;
+
+        $pngBinary = $this->buildBarcodePng($table, $storeName);
+
+        return response($pngBinary, 200)->header('Content-Type', 'image/png');
+    }
+
+    public function generateAllBarcode(Request $request)
+    {
+        $owner = Auth::guard('owner')->user();
+
+        $partnerIds = $owner->users()->pluck('id');
+
+        $tables = Table::whereIn('partner_id', $partnerIds)
+            ->with('partner')
+            ->orderBy('table_class')
+            ->orderBy('table_no')
+            ->get();
+
+        if ($tables->isEmpty()) {
+            return back()->with('error', 'Tidak ada meja yang tersedia.');
+        }
+
+        $barcodes = $tables->map(function ($table) use ($owner) {
+            $storeName = $table->partner->name ?? $owner->name;
+            $pngBinary = $this->buildBarcodePng($table, $storeName);
+            return [
+                'table' => $table,
+                'src'   => 'data:image/png;base64,' . base64_encode($pngBinary),
+            ];
+        });
+
+        $pdf = Pdf::loadView('pages.owner.outlet.tables.pdf.all-barcodes-pdf', [
+            'barcodes'  => $barcodes,
+            'storeName' => $owner->name,
+        ])->setPaper('a6', 'portrait');
+
+        return $pdf->stream('barcodes-' . Str::slug($owner->name) . '.pdf');
+    }
+
+    private function buildBarcodePng(Table $table, string $storeName): string
+    {
+        if (!$table->table_url) {
+            throw new \RuntimeException('Table URL not found');
+        }
+
+        $result = Builder::create()
+            ->writer(new PngWriter())
+            ->data(url($table->table_url))
+            ->size(300)
+            ->margin(10)
+            ->backgroundColor(new Color(255, 255, 255))
+            ->foregroundColor(new Color(0, 0, 0))
+            ->build();
+
+        $qrImage  = imagecreatefromstring($result->getString());
+        $qrWidth  = imagesx($qrImage);
+        $qrHeight = imagesy($qrImage);
+
+        $paddingTop    = 100;
+        $paddingSide   = 40;
+        $paddingBottom = 100;
+
+        $finalWidth  = $qrWidth + ($paddingSide * 2);
+        $finalHeight = $qrHeight + $paddingTop + $paddingBottom;
+
+        $canvas = imagecreatetruecolor($finalWidth, $finalHeight);
+        $black  = imagecolorallocate($canvas, 0, 0, 0);
+        $white  = imagecolorallocate($canvas, 255, 255, 255);
+        imagefill($canvas, 0, 0, $black);
+
+        $fontPath = public_path('fonts/MotleyForcesRegular-w1rZ3.ttf');
+
+        // Store name (atas)
+        $bbox       = imagettfbbox(18, 0, $fontPath, $storeName);
+        $textWidth  = $bbox[2] - $bbox[0];
+        $textHeight = $bbox[1] - $bbox[7];
+        imagettftext(
+            $canvas,
+            18,
+            0,
+            (int)(($finalWidth - $textWidth) / 2),
+            (int)(($paddingTop / 2) + ($textHeight / 2)),
+            $white,
+            $fontPath,
+            $storeName
+        );
+
+        // QR Code
+        imagecopy($canvas, $qrImage, $paddingSide, $paddingTop, 0, 0, $qrWidth, $qrHeight);
+
+        // Table No (bawah)
+        $tableText  = "Table: {$table->table_no}";
+        $bbox2      = imagettfbbox(28, 0, $fontPath, $tableText);
+        $textWidth2 = $bbox2[2] - $bbox2[0];
+        $textHeight2 = $bbox2[1] - $bbox2[7];
+        imagettftext(
+            $canvas,
+            28,
+            0,
+            (int)(($finalWidth - $textWidth2) / 2),
+            (int)($qrHeight + $paddingTop + (($paddingBottom + $textHeight2) / 2)),
+            $white,
+            $fontPath,
+            $tableText
+        );
+
+        ob_start();
+        imagepng($canvas);
+        $png = ob_get_clean();
+
+        imagedestroy($qrImage);
+        imagedestroy($canvas);
+
+        return $png;
+    }
+}
