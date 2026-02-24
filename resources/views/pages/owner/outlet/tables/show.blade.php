@@ -1,7 +1,7 @@
 @extends('layouts.owner')
 
-@section('title', 'Table Detail')
-@section('page_title', 'Table Detail')
+@section('title', __('messages.owner.outlet.tables.detail_title'))
+@section('page_title', __('messages.owner.outlet.tables.detail_title'))
 
 @section('content')
     @php
@@ -9,10 +9,10 @@
         $table = $data;
         $status = strtolower($table->status);
         $statusMap = [
-            'available'     => ['class' => 'badge-success', 'label' => 'Available'],
-            'occupied'      => ['class' => 'badge-danger',  'label' => 'Occupied'],
-            'reserved'      => ['class' => 'badge-warning', 'label' => 'Reserved'],
-            'not_available' => ['class' => 'badge-danger',  'label' => 'Not Available'],
+            'available' => ['class' => 'badge-success', 'label' => __('messages.owner.outlet.tables.available')],
+            'occupied' => ['class' => 'badge-danger', 'label' => __('messages.owner.outlet.tables.occupied')],
+            'reserved' => ['class' => 'badge-warning', 'label' => __('messages.owner.outlet.tables.reserved')],
+            'not_available' => ['class' => 'badge-danger', 'label' => __('messages.owner.outlet.tables.not_available')],
         ];
         $statusInfo = $statusMap[$status] ?? ['class' => 'badge-secondary', 'label' => ucfirst($table->status)];
 
@@ -32,11 +32,12 @@
 
             <div class="page-header">
                 <div class="header-content">
-                    <h1 class="page-title">Table Detail</h1>
-                    <p class="page-subtitle">View complete table information</p>
+                    <h1 class="page-title">{{ __('messages.owner.outlet.tables.detail_title') }}</h1>
+                    <p class="page-subtitle">{{ __('messages.owner.outlet.tables.view_complete_information') }}</p>
                 </div>
                 <a href="{{ route('owner.user-owner.tables.index') }}" class="back-button">
-                    <span class="material-symbols-outlined">arrow_back</span> Back to Tables
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    {{ __('messages.owner.outlet.tables.back') }}
                 </a>
             </div>
 
@@ -53,10 +54,12 @@
                         @endif
                     </div>
                     <div class="detail-hero-info">
-                        <h3 class="detail-hero-name">Table {{ $table->table_no }}</h3>
+                        <h3 class="detail-hero-name">{{ __('messages.owner.outlet.tables.table_no') }}
+                            {{ $table->table_no }}</h3>
                         <p class="detail-hero-subtitle">{{ $table->table_code }}</p>
                         <p class="detail-hero-outlet">
-                            <span class="material-symbols-outlined" style="font-size:1rem;vertical-align:middle;">store</span>
+                            <span class="material-symbols-outlined"
+                                style="font-size:1rem;vertical-align:middle;">store</span>
                             {{ $table->partner->name ?? '-' }}
                         </p>
                         <div class="detail-hero-badges">
@@ -66,7 +69,6 @@
                     </div>
                 </div>
 
-                {{-- Gallery (jika lebih dari 1 gambar) --}}
                 @if (!empty($table->images) && is_array($table->images) && count($table->images) > 1)
                     <div class="detail-gallery">
                         @foreach ($table->images as $img)
@@ -94,49 +96,46 @@
                         <div class="section-icon section-icon-red">
                             <span class="material-symbols-outlined">table_restaurant</span>
                         </div>
-                        <h3 class="section-title">Table Information</h3>
+                        <h3 class="section-title">{{ __('messages.owner.outlet.tables.table_information') }}</h3>
                     </div>
 
                     <div class="detail-info-grid">
                         <div class="detail-info-group">
                             <div class="detail-info-item">
-                                <div class="detail-info-label">Table No</div>
+                                <div class="detail-info-label">{{ __('messages.owner.outlet.tables.table_no') }}</div>
                                 <div class="detail-info-value">{{ $table->table_no ?? '—' }}</div>
                             </div>
                             <div class="detail-info-item">
-                                <div class="detail-info-label">Table Code</div>
+                                <div class="detail-info-label">{{ __('messages.owner.outlet.tables.table_code') }}</div>
                                 <div class="detail-info-value">{{ $table->table_code ?? '—' }}</div>
                             </div>
                             <div class="detail-info-item">
-                                <div class="detail-info-label">Outlet</div>
+                                <div class="detail-info-label">{{ __('messages.owner.layout.outlets') }}</div>
                                 <div class="detail-info-value">{{ $table->partner->name ?? '—' }}</div>
                             </div>
                             <div class="detail-info-item">
-                                <div class="detail-info-label">Created At</div>
-                                <div class="detail-info-value">
-                                    {{ $table->created_at?->format('d M Y, H:i') ?? '—' }}
-                                </div>
+                                <div class="detail-info-label">{{ __('messages.owner.outlet.tables.created_at') }}</div>
+                                <div class="detail-info-value">{{ $table->created_at?->format('d M Y, H:i') ?? '—' }}</div>
                             </div>
                         </div>
                         <div class="detail-info-group">
                             <div class="detail-info-item">
-                                <div class="detail-info-label">Class Type</div>
+                                <div class="detail-info-label">{{ __('messages.owner.outlet.tables.class_type') }}</div>
                                 <div class="detail-info-value">{{ $table->table_class ?? '—' }}</div>
                             </div>
                             <div class="detail-info-item">
-                                <div class="detail-info-label">Status</div>
+                                <div class="detail-info-label">{{ __('messages.owner.outlet.tables.status') }}</div>
                                 <div class="detail-info-value">
-                                    <span class="badge-modern {{ $statusInfo['class'] }}">
-                                        {{ $statusInfo['label'] }}
-                                    </span>
+                                    <span
+                                        class="badge-modern {{ $statusInfo['class'] }}">{{ $statusInfo['label'] }}</span>
                                 </div>
                             </div>
                             <div class="detail-info-item">
-                                <div class="detail-info-label">Table URL</div>
+                                <div class="detail-info-label">{{ __('messages.owner.outlet.tables.table_url') }}</div>
                                 <div class="detail-info-value">
                                     @if ($table->table_url)
-                                        <a href="{{ url($table->table_url) }}" target="_blank"
-                                            class="text-primary" style="word-break:break-all;">
+                                        <a href="{{ url($table->table_url) }}" target="_blank" class="text-primary"
+                                            style="word-break:break-all;">
                                             {{ url($table->table_url) }}
                                         </a>
                                     @else
@@ -153,7 +152,7 @@
                             <div class="section-icon section-icon-red">
                                 <span class="material-symbols-outlined">description</span>
                             </div>
-                            <h3 class="section-title">Description</h3>
+                            <h3 class="section-title">{{ __('messages.owner.outlet.tables.description') }}</h3>
                         </div>
                         <div class="detail-info-item">
                             <div class="detail-info-value">{!! nl2br(e($table->description)) !!}</div>
@@ -163,14 +162,16 @@
                     <div class="action-buttons-group" style="margin-top:1.5rem;">
                         <a href="{{ route('owner.user-owner.tables.edit', $table->id) }}"
                             class="btn-action btn-action-edit">
-                            <span class="material-symbols-outlined">edit</span> Edit
+                            <span class="material-symbols-outlined">edit</span>
+                            {{ __('messages.owner.outlet.tables.edit') }}
                         </a>
                         <form action="{{ route('owner.user-owner.tables.destroy', $table->id) }}" method="POST"
                             class="d-inline-block" id="deleteForm">
                             @csrf
                             @method('DELETE')
                             <button type="button" class="btn-action btn-action-delete" onclick="confirmDelete()">
-                                <span class="material-symbols-outlined">delete</span> Delete
+                                <span class="material-symbols-outlined">delete</span>
+                                {{ __('messages.owner.outlet.tables.delete') }}
                             </button>
                         </form>
                     </div>
@@ -185,7 +186,7 @@
                             <div class="section-icon section-icon-red">
                                 <span class="material-symbols-outlined">qr_code_2</span>
                             </div>
-                            <h3 class="section-title">QR Code</h3>
+                            <h3 class="section-title">{{ __('messages.owner.outlet.tables.qr_code') }}</h3>
                         </div>
                         <div class="qr-code-display">
                             <div class="qr-frame-inner">
@@ -195,9 +196,10 @@
                         </div>
                         <div class="text-center mt-3">
                             <a href="{{ route('owner.user-owner.tables.generate-barcode', $table->id) }}"
-                                download="qrcode-table-{{ $table->table_no }}.png"
-                                class="btn-action btn-action-edit" style="display:inline-flex;">
-                                <span class="material-symbols-outlined">download</span> Download QR Code
+                                download="qrcode-table-{{ $table->table_no }}.png" class="btn-action btn-action-edit"
+                                style="display:inline-flex;">
+                                <span class="material-symbols-outlined">download</span>
+                                {{ __('messages.owner.outlet.tables.download_qr') }}
                             </a>
                         </div>
                     </div>
@@ -291,14 +293,14 @@
     <script>
         function confirmDelete() {
             Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
+                title: '{{ __('messages.owner.outlet.tables.delete_confirm_1') }}',
+                text: '{{ __('messages.owner.outlet.tables.delete_confirm_2') }}',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#ae1504',
                 cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, delete it!',
-                cancelButtonText: 'Cancel'
+                confirmButtonText: '{{ __('messages.owner.outlet.tables.delete_confirm_3') }}',
+                cancelButtonText: '{{ __('messages.owner.outlet.tables.delete_confirm_4') }}'
             }).then(result => {
                 if (result.isConfirmed) document.getElementById('deleteForm').submit();
             });
