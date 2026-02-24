@@ -60,9 +60,12 @@ use \App\Http\Controllers\Admin\MessageNotification\MessageController;
 use App\Http\Controllers\Customer\Table\TableStatusController;
 use App\Http\Controllers\Employee\Dashboard\StaffDashboardController;
 use App\Http\Controllers\Employee\Staff\Product\StaffProductController;
+use App\Http\Controllers\Employee\Staff\Report\StaffSalesReportController;
 use App\Http\Controllers\Owner\OwnerMessageController;
 use App\Http\Controllers\Owner\Report\StockReportController;
 use App\Http\Controllers\Partner\PartnerMessageController;
+use App\Http\Controllers\Employee\Staff\Product\StaffStockController;
+use App\Http\Controllers\Employee\Staff\Product\StaffStockMovementController;
 use App\Notifications\CustomerVerifyEmail;
 use App\Models\Owner;
 
@@ -539,7 +542,6 @@ Route::middleware('setlocale')->group(function () {
                 // Route::resource('employees', StaffEmployeeController::class);
 
                 // PRODUCTS (Di Owner ini adalah Outlet Products)
-                Route::resource('products', StaffProductController::class);
                 Route::prefix('products')->name('products.')->group(function () {
                     Route::get('get-master-products', [StaffProductController::class, 'getMasterProducts'])->name('get-master-products');
                     Route::get('list-product', [StaffProductController::class, 'list'])->name('list');
@@ -548,7 +550,11 @@ Route::middleware('setlocale')->group(function () {
                     Route::get('recipe/ingredients', [StaffProductController::class, 'getRecipeIngredients'])->name('recipe.ingredients');
                     Route::get('recipe/load', [StaffProductController::class, 'loadRecipe'])->name('recipe.load');
                     Route::post('recipe/save', [StaffProductController::class, 'saveRecipe'])->name('recipe.save');
+
+                    Route::get('create-custom', [StaffProductController::class, 'createCustom'])->name('create');
+                    Route::post('store-custom', [StaffProductController::class, 'storeCustom'])->name('store-custom');
                 });
+                Route::resource('products', StaffProductController::class);
 
                 // // Categories
                 // Route::post('/categories/reorder', [StaffCategoryController::class, 'reorder'])->name('categories.reorder');
@@ -561,39 +567,37 @@ Route::middleware('setlocale')->group(function () {
 
                 // Route::resource('payment-methods', StaffPaymentMethodController::class);
 
-                // // Reports
-                // Route::prefix('report')->name('report.')->group(function () {
-                //     // Sales
-                //     Route::get('sales/export', [StaffSalesReportController::class, 'export'])->name('sales.export');
-                //     Route::get('sales/products', [StaffSalesReportController::class, 'getTopProductsAjax'])->name('sales.products');
-                //     Route::get('order-details/{id}', [StaffSalesReportController::class, 'getOrderDetails'])->name('order-details');
-                //     Route::resource('sales', StaffSalesReportController::class)->only(['index']);
+                // Reports
+                Route::prefix('report')->name('report.')->group(function () {
+                    // Sales
+                    Route::get('sales/export', [StaffSalesReportController::class, 'export'])->name('sales.export');
+                    Route::get('sales/products', [StaffSalesReportController::class, 'getTopProductsAjax'])->name('sales.products');
+                    Route::get('order-details/{id}', [StaffSalesReportController::class, 'getOrderDetails'])->name('order-details');
+                    Route::resource('sales', StaffSalesReportController::class)->only(['index']);
 
-                //     // Stocks
-                //     Route::prefix('stocks')->name('stocks.')->group(function () {
-                //         Route::get('/', [StaffStockReportController::class, 'index'])->name('index');
-                //         Route::get('/{stock:stock_code}/movement', [StaffStockReportController::class, 'showStockMovement'])->name('movement');
-                //         Route::get('/export', [StaffStockReportController::class, 'export'])->name('export');
-                //         Route::get('/{stock:stock_code}/movement/export', [StaffStockReportController::class, 'exportMovement'])->name('movement.export');
-                //     });
-                // });
+                    // Stocks
+                    // Route::prefix('stocks')->name('stocks.')->group(function () {
+                    //     Route::get('/', [StaffStockReportController::class, 'index'])->name('index');
+                    //     Route::get('/{stock:stock_code}/movement', [StaffStockReportController::class, 'showStockMovement'])->name('movement');
+                    //     Route::get('/export', [StaffStockReportController::class, 'export'])->name('export');
+                    //     Route::get('/{stock:stock_code}/movement/export', [StaffStockReportController::class, 'exportMovement'])->name('movement.export');
+                    // });
+                });
 
-                // // Stocks & Movements
-                // Route::prefix('stocks')->name('stocks.')->group(function () {
-                //     Route::delete('/delete-stock/{id}', [StaffStockController::class, 'deleteStock'])->name('delete-stock');
+                // Stocks & Movements
+                Route::prefix('stocks')->name('stocks.')->group(function () {
+                    Route::delete('/delete-stock/{id}', [StaffStockController::class, 'deleteStock'])->name('delete-stock');
 
-                //     // Parameter binding manual agar route URL jadi '/stocks/{stock}' bukan '/stocks/{stock_id}' dll
-                //     Route::resource('/', StaffStockController::class)->parameters(['' => 'stock']);
-
-                //     Route::prefix('movements')->name('movements.')->group(function () {
-                //         Route::get('/', [StaffStockMovementController::class, 'index'])->name('index');
-                //         Route::get('/stock-in/create', [StaffStockMovementController::class, 'createStockIn'])->name('create-stock-in');
-                //         Route::get('/adjustment/create', [StaffStockMovementController::class, 'createAdjustment'])->name('create-adjustment');
-                //         Route::get('/transfer/create', [StaffStockMovementController::class, 'createTransfer'])->name('create-transfer');
-                //         Route::post('/', [StaffStockMovementController::class, 'store'])->name('store');
-                //         Route::get('/{id}/items', [StaffStockMovementController::class, 'getMovementItemsJson'])->name('items.json');
-                //     });
-                // });
+                    Route::prefix('movements')->name('movements.')->group(function () {
+                        Route::get('/', [StaffStockMovementController::class, 'index'])->name('index');
+                        Route::get('/stock-in/create', [StaffStockMovementController::class, 'createStockIn'])->name('create-stock-in');
+                        Route::get('/adjustment/create', [StaffStockMovementController::class, 'createAdjustment'])->name('create-adjustment');
+                        Route::get('/transfer/create', [StaffStockMovementController::class, 'createTransfer'])->name('create-transfer');
+                        Route::post('/', [StaffStockMovementController::class, 'store'])->name('store');
+                        Route::get('/{id}/items', [StaffStockMovementController::class, 'getMovementItemsJson'])->name('items.json');
+                    });
+                    Route::resource('/', StaffStockController::class)->parameters(['' => 'stock']);
+                });
 
                 // // Settings
                 // Route::prefix('settings')->name('settings.')->group(function () {
