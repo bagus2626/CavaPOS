@@ -1,19 +1,19 @@
 @extends('layouts.owner')
 
-@section('title', 'Create Table')
-@section('page_title', 'Create Table')
+@section('title', __('messages.owner.outlet.tables.create_title'))
+@section('page_title', __('messages.owner.outlet.tables.create_title'))
 
 @section('content')
     <div class="modern-container">
         <div class="container-modern">
             <div class="page-header">
                 <div class="header-content">
-                    <h1 class="page-title">Create New Table</h1>
-                    <p class="page-subtitle">Add a new table to your restaurant</p>
+                    <h1 class="page-title">{{ __('messages.owner.outlet.tables.create_title') }}</h1>
+                    <p class="page-subtitle">{{ __('messages.owner.outlet.tables.create_subtitle') }}</p>
                 </div>
                 <a href="{{ route('owner.user-owner.tables.index') }}" class="back-button">
                     <span class="material-symbols-outlined">arrow_back</span>
-                    Back to Tables
+                    {{ __('messages.owner.outlet.tables.back') }}
                 </a>
             </div>
 
@@ -21,7 +21,7 @@
                 <div class="alert alert-danger alert-modern">
                     <div class="alert-icon"><span class="material-symbols-outlined">error</span></div>
                     <div class="alert-content">
-                        <strong>Please re-check your input:</strong>
+                        <strong>{{ __('messages.owner.outlet.tables.re_check_input') }}</strong>
                         <ul class="mb-0 mt-2">
                             @foreach ($errors->all() as $err)
                                 <li>{{ $err }}</li>
@@ -44,12 +44,12 @@
                                 <div class="profile-picture-container" id="tableImageContainer">
                                     <div class="upload-placeholder" id="uploadPlaceholder">
                                         <span class="material-symbols-outlined">image</span>
-                                        <span class="upload-text">Upload</span>
+                                        <span class="upload-text">{{ __('messages.owner.outlet.tables.upload_text') }}</span>
                                     </div>
                                     <img id="imagePreview" class="profile-preview" alt="Table Preview">
                                 </div>
                                 <input type="file" name="images" id="tableImage" accept="image/*" style="display:none;">
-                                <small class="text-muted d-block text-center mt-2">JPG, PNG, WEBP. Max 2 MB</small>
+                                <small class="text-muted d-block text-center mt-2">{{ __('messages.owner.outlet.tables.image_hint') }}</small>
                                 @error('images')
                                     <div class="text-danger text-center mt-1 small">{{ $message }}</div>
                                 @enderror
@@ -61,7 +61,7 @@
                                     <div class="section-icon section-icon-red">
                                         <span class="material-symbols-outlined">table_restaurant</span>
                                     </div>
-                                    <h3 class="section-title">Table Information</h3>
+                                    <h3 class="section-title">{{ __('messages.owner.outlet.tables.table_information') }}</h3>
                                 </div>
 
                                 <div class="row g-4">
@@ -70,13 +70,13 @@
                                     <div class="col-md-12">
                                         <div class="form-group-modern">
                                             <label class="form-label-modern">
-                                                Outlet <span class="text-danger">*</span>
+                                                {{ __('messages.owner.layout.outlets') }} <span class="text-danger">*</span>
                                             </label>
                                             <div class="select-wrapper">
                                                 <select name="partner_id" id="partner_id"
                                                     class="form-control-modern @error('partner_id') is-invalid @enderror"
                                                     required>
-                                                    <option value="">Choose Outlet</option>
+                                                    <option value="">{{ __('messages.owner.outlet.tables.choose_outlet') }}</option>
                                                     @foreach ($outlets as $outlet)
                                                         <option value="{{ $outlet->id }}"
                                                             {{ old('partner_id') == $outlet->id ? 'selected' : '' }}>
@@ -96,11 +96,13 @@
                                     <div class="col-md-6">
                                         <div class="form-group-modern">
                                             <label class="form-label-modern">
-                                                Table No <span class="text-danger">*</span>
+                                                {{ __('messages.owner.outlet.tables.table_no') }} <span class="text-danger">*</span>
                                             </label>
                                             <input type="text" name="table_no" id="table_no"
                                                 class="form-control-modern @error('table_no') is-invalid @enderror"
-                                                value="{{ old('table_no') }}" placeholder="e.g. T01" required>
+                                                value="{{ old('table_no') }}"
+                                                placeholder="{{ __('messages.owner.outlet.tables.enter_table_number') }}"
+                                                required>
                                             @error('table_no')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -111,20 +113,20 @@
                                     <div class="col-md-6">
                                         <div class="form-group-modern">
                                             <label class="form-label-modern">
-                                                Status <span class="text-danger">*</span>
+                                                {{ __('messages.owner.outlet.tables.status') }} <span class="text-danger">*</span>
                                             </label>
                                             <div class="select-wrapper">
                                                 <select name="status" id="status"
                                                     class="form-control-modern @error('status') is-invalid @enderror"
                                                     required>
-                                                    <option value="">Choose Status</option>
+                                                    <option value="">{{ __('messages.owner.outlet.tables.choose_status') }}</option>
                                                     <option value="available"
                                                         {{ old('status') == 'available' ? 'selected' : '' }}>
-                                                        Available
+                                                        {{ __('messages.owner.outlet.tables.available') }}
                                                     </option>
                                                     <option value="not_available"
                                                         {{ old('status') == 'not_available' ? 'selected' : '' }}>
-                                                        Not Available
+                                                        {{ __('messages.owner.outlet.tables.not_available') }}
                                                     </option>
                                                 </select>
                                                 <span class="material-symbols-outlined select-arrow">expand_more</span>
@@ -139,7 +141,7 @@
                                     <div class="col-md-12">
                                         <div class="form-group-modern">
                                             <label class="form-label-modern">
-                                                Class Type <span class="text-danger">*</span>
+                                                {{ __('messages.owner.outlet.tables.class_type') }} <span class="text-danger">*</span>
                                             </label>
 
                                             <div id="select_mode">
@@ -147,7 +149,7 @@
                                                     <select name="table_class" id="table_class"
                                                         class="form-control-modern @error('table_class') is-invalid @enderror"
                                                         required>
-                                                        <option value="">Choose or add new class</option>
+                                                        <option value="">{{ __('messages.owner.outlet.tables.choose_or_add_class') }}</option>
                                                         @foreach ($table_classes as $class)
                                                             <option value="{{ $class }}"
                                                                 {{ old('table_class') == $class ? 'selected' : '' }}>
@@ -164,17 +166,18 @@
                                                     class="btn-modern btn-primary-modern btn-sm-modern mt-3"
                                                     id="btn_add_new_class">
                                                     <span class="material-symbols-outlined">add_circle</span>
-                                                    Add New Class
+                                                    {{ __('messages.owner.outlet.tables.add_class') }}
                                                 </button>
                                             </div>
 
                                             <div id="input_mode" style="display:none;">
                                                 <input type="text" name="new_table_class" id="new_table_class"
-                                                    class="form-control-modern" placeholder="Enter new class name">
+                                                    class="form-control-modern"
+                                                    placeholder="{{ __('messages.owner.outlet.tables.enter_new_table_class') }}">
                                                 <button type="button"
                                                     class="btn-modern btn-secondary-modern btn-sm-modern mt-3"
                                                     id="cancel_new_class">
-                                                    Cancel
+                                                    {{ __('messages.owner.outlet.tables.cancel') }}
                                                 </button>
                                             </div>
                                         </div>
@@ -183,9 +186,11 @@
                                     {{-- Description --}}
                                     <div class="col-12">
                                         <div class="form-group-modern">
-                                            <label class="form-label-modern">Description</label>
-                                            <textarea name="description" id="description" class="form-control-modern @error('description') is-invalid @enderror"
-                                                rows="4" placeholder="Optional table description">{{ old('description') }}</textarea>
+                                            <label class="form-label-modern">{{ __('messages.owner.outlet.tables.description') }}</label>
+                                            <textarea name="description" id="description"
+                                                class="form-control-modern @error('description') is-invalid @enderror"
+                                                rows="4"
+                                                placeholder="{{ __('messages.owner.outlet.tables.enter_table_description') }}">{{ old('description') }}</textarea>
                                             @error('description')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -198,8 +203,8 @@
                     </div>
 
                     <div class="card-footer-modern">
-                        <a href="{{ route('owner.user-owner.tables.index') }}" class="btn-cancel-modern">Cancel</a>
-                        <button type="submit" class="btn-submit-modern">Save Table</button>
+                        <a href="{{ route('owner.user-owner.tables.index') }}" class="btn-cancel-modern">{{ __('messages.owner.outlet.tables.cancel') }}</a>
+                        <button type="submit" class="btn-submit-modern">{{ __('messages.owner.outlet.tables.save') }}</button>
                     </div>
                 </form>
             </div>
@@ -211,7 +216,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
 
-            // ── Image Preview ────────────────────────────────────────────────────────
             const imageContainer = document.getElementById('tableImageContainer');
             const imageInput = document.getElementById('tableImage');
             const imagePreview = document.getElementById('imagePreview');
@@ -238,7 +242,6 @@
                 });
             }
 
-            // ── Table Class Toggle ───────────────────────────────────────────────────
             const selectMode = document.getElementById('select_mode');
             const inputMode = document.getElementById('input_mode');
             const selectClass = document.getElementById('table_class');
@@ -290,7 +293,6 @@
                 });
             }
 
-            // Restore input mode jika ada old('new_table_class')
             const oldNewClass = '{{ old('new_table_class') }}';
             if (oldNewClass) {
                 switchToInputMode();

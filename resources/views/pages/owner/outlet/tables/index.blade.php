@@ -1,15 +1,27 @@
 @extends('layouts.owner')
 
-@section('title', 'Tables')
-@section('page_title', 'Tables')
+@section('title', __('messages.owner.outlet.tables.page_title'))
+@section('page_title', __('messages.owner.outlet.tables.page_title'))
 
 @section('content')
+    <style>
+        @media (max-width: 768px) {
+            .page-header {
+                display: none !important;
+            }
+
+            .desktop-filter-card {
+                display: none !important;
+            }
+        }
+    </style>
+
     <div class="modern-container">
         <div class="container-modern">
             <div class="page-header">
                 <div class="header-content">
-                    <h1 class="page-title">Table List</h1>
-                    <p class="page-subtitle">Manage your restaurant tables and seating</p>
+                    <h1 class="page-title">{{ __('messages.owner.outlet.tables.page_title') }}</h1>
+                    <p class="page-subtitle">{{ __('messages.owner.outlet.tables.page_subtitle') }}</p>
                 </div>
             </div>
 
@@ -27,7 +39,8 @@
                 </div>
             @endif
 
-            <div class="modern-card mb-4">
+            {{-- Desktop Search & Filter --}}
+            <div class="modern-card mb-4 desktop-filter-card">
                 <div class="card-body-modern" style="padding: var(--spacing-lg) var(--spacing-xl);">
                     <div class="table-controls">
                         <div class="search-filter-group">
@@ -38,13 +51,13 @@
                                     <span class="material-symbols-outlined">search</span>
                                 </span>
                                 <input type="text" id="searchInput" class="form-control-modern with-icon"
-                                    placeholder="Search tables...">
+                                    placeholder="{{ __('messages.partner.outlet.table_management.tables.search_tables') }}">
                             </div>
 
                             {{-- Filter Outlet --}}
                             <div class="select-wrapper" style="min-width: 180px;">
                                 <select id="outletFilter" class="form-control-modern">
-                                    <option value="">All Outlets</option>
+                                    <option value="">{{ __('messages.owner.user_management.employees.all_outlets') }}</option>
                                     @foreach ($outlets as $outlet)
                                         <option value="{{ $outlet->id }}">{{ $outlet->name }}</option>
                                     @endforeach
@@ -55,7 +68,7 @@
                             {{-- Filter Table Class --}}
                             <div class="select-wrapper" style="min-width: 180px;">
                                 <select id="tableClassFilter" class="form-control-modern">
-                                    <option value="">All Table Classes</option>
+                                    <option value="">{{ __('messages.partner.outlet.table_management.tables.all_table_classes') }}</option>
                                     @foreach ($table_classes as $class)
                                         <option value="{{ $class }}">{{ $class }}</option>
                                     @endforeach
@@ -66,7 +79,7 @@
                         </div>
                         <a href="{{ route('owner.user-owner.tables.create') }}" class="btn-modern btn-primary-modern">
                             <span class="material-symbols-outlined">add</span>
-                            Add Table
+                            {{ __('messages.partner.outlet.table_management.tables.add_table') }}
                         </a>
                     </div>
                 </div>
@@ -81,12 +94,95 @@
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // ==========================================
+        // MOBILE FILTER MODAL
+        // ==========================================
+        function toggleMobileTableFilter() {
+            const modal = document.getElementById('mobileTableFilterModal');
+            if (modal) {
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function onMobileOutletChange(val) {
+            const outletFilter = document.getElementById('outletFilter');
+            if (outletFilter) {
+                outletFilter.value = val;
+                outletFilter.dispatchEvent(new Event('change'));
+            }
+        }
+
+        function onMobileClassChange(val) {
+            const tableClassFilter = document.getElementById('tableClassFilter');
+            if (tableClassFilter) {
+                tableClassFilter.value = val;
+                tableClassFilter.dispatchEvent(new Event('change'));
+            }
+        }
+
+        function closeMobileTableFilter() {
+            const modal = document.getElementById('mobileTableFilterModal');
+            if (modal) {
+                modal.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        }
+
+        let activeMobileTableClass = '';
+
+        function setMobileTableClassFilter(cls) {
+            activeMobileTableClass = cls;
+
+            // Update pill active states
+            document.querySelectorAll('[id^="mobilePillClass-"]').forEach(el => {
+                el.classList.remove('active');
+                el.querySelector('.pill-icon-wrapper')?.classList.remove('active');
+                const check = el.querySelector('.pill-right');
+                if (check) check.innerHTML = '';
+            });
+
+            const activeId = cls ? `mobilePillClass-${cls.toLowerCase().replace(/\s+/g, '-')}` : 'mobilePillClass-all';
+            const activePill = document.getElementById(activeId);
+            if (activePill) {
+                activePill.classList.add('active');
+                activePill.querySelector('.pill-icon-wrapper')?.classList.add('active');
+                const check = activePill.querySelector('.pill-right');
+                if (check) check.innerHTML = '<span class="material-symbols-outlined pill-check">check_circle</span>';
+            }
+
+            // Sync with desktop filter and trigger filter
+            const tableClassFilter = document.getElementById('tableClassFilter');
+            if (tableClassFilter) {
+                tableClassFilter.value = cls;
+                tableClassFilter.dispatchEvent(new Event('change'));
+            }
+
+            closeMobileTableFilter();
+        }
+
+        // Sync mobile search input with desktop
         document.addEventListener('DOMContentLoaded', function() {
+            const mobileSearchInput = document.getElementById('mobileTableSearchInput');
+            const desktopSearchInput = document.getElementById('searchInput');
+            const mobileHeaderSubtitle = document.querySelector('.mobile-header-subtitle');
+
+            if (mobileSearchInput && desktopSearchInput) {
+                mobileSearchInput.addEventListener('input', function() {
+                    desktopSearchInput.value = this.value;
+                    desktopSearchInput.dispatchEvent(new Event('input'));
+                });
+            }
+
+            // ==========================================
+            // DESKTOP FILTER & TABLE RENDER
+            // ==========================================
             const searchInput = document.getElementById('searchInput');
             const outletFilter = document.getElementById('outletFilter');
-            const tableBody = document.getElementById('tableTableBody');
-            const paginationWrapper = document.querySelector('.table-pagination');
             const tableClassFilter = document.getElementById('tableClassFilter');
+            const tableBody = document.getElementById('tableTableBody');
+            const mobileTableList = document.getElementById('mobileTableList');
+            const paginationWrapper = document.querySelector('.table-pagination');
 
             if (!tableBody) return;
 
@@ -105,12 +201,16 @@
                         `${table.table_no||''} ${table.table_class||''} ${table.description||''} ${table.outlet_name||''}`
                         .toLowerCase();
                     const matchSearch = !searchTerm || text.includes(searchTerm);
-                    const matchOutlet = !selectedOutlet || String(table.partner_id) === String(
-                        selectedOutlet);
+                    const matchOutlet = !selectedOutlet || String(table.partner_id) === String(selectedOutlet);
                     const matchClass = !selectedClass || table.table_class === selectedClass;
                     return matchSearch && matchOutlet && matchClass;
                 });
                 currentPage = 1;
+
+                if (mobileHeaderSubtitle) {
+                    mobileHeaderSubtitle.textContent = `${filteredTables.length} {{ __('messages.partner.outlet.table_management.tables.table_list') }}`;
+                }
+
                 renderTable();
             }
 
@@ -119,21 +219,40 @@
                 const startIndex = (currentPage - 1) * itemsPerPage;
                 const currentTables = filteredTables.slice(startIndex, startIndex + itemsPerPage);
 
-                tableBody.innerHTML = '';
+                // Render Desktop
+                if (tableBody) {
+                    tableBody.innerHTML = '';
+                    if (currentTables.length === 0) {
+                        tableBody.innerHTML = `
+                            <tr><td colspan="9" class="text-center">
+                                <div class="table-empty-state">
+                                    <span class="material-symbols-outlined">table_restaurant</span>
+                                    <h4>{{ __('messages.partner.outlet.table_management.tables.no_tables') ?? 'No tables found' }}</h4>
+                                    <p>{{ __('messages.partner.outlet.table_management.tables.add_first_table') ?? 'Add your first table to get started' }}</p>
+                                </div>
+                            </td></tr>`;
+                    } else {
+                        currentTables.forEach((table, index) => {
+                            tableBody.appendChild(createTableRow(table, startIndex + index + 1));
+                        });
+                    }
+                }
 
-                if (currentTables.length === 0) {
-                    tableBody.innerHTML = `
-                        <tr><td colspan="9" class="text-center">
+                // Render Mobile
+                if (mobileTableList) {
+                    mobileTableList.innerHTML = '';
+                    if (currentTables.length === 0) {
+                        mobileTableList.innerHTML = `
                             <div class="table-empty-state">
                                 <span class="material-symbols-outlined">table_restaurant</span>
-                                <h4>No tables found</h4>
-                                <p>Try adjusting your search or filter</p>
-                            </div>
-                        </td></tr>`;
-                } else {
-                    currentTables.forEach((table, index) => {
-                        tableBody.appendChild(createTableRow(table, startIndex + index + 1));
-                    });
+                                <h4>{{ __('messages.partner.outlet.table_management.tables.no_tables') ?? 'No tables found' }}</h4>
+                                <p>{{ __('messages.partner.outlet.table_management.tables.add_first_table') ?? 'Add your first table to get started' }}</p>
+                            </div>`;
+                    } else {
+                        currentTables.forEach(table => {
+                            mobileTableList.appendChild(createMobileTableCard(table));
+                        });
+                    }
                 }
 
                 if (paginationWrapper) {
@@ -147,14 +266,14 @@
                 tr.className = 'table-row';
 
                 const statusMap = {
-                    available: '<span class="badge-modern badge-success">Available</span>',
-                    occupied: '<span class="badge-modern badge-warning">Occupied</span>',
-                    reserved: '<span class="badge-modern badge-info">Reserved</span>',
-                    not_available: '<span class="badge-modern badge-danger">Not Available</span>',
+                    available: '<span class="badge-modern badge-success">{{ __("messages.partner.outlet.table_management.tables.available") }}</span>',
+                    occupied: '<span class="badge-modern badge-warning">{{ __("messages.partner.outlet.table_management.tables.occupied") }}</span>',
+                    reserved: '<span class="badge-modern badge-info">{{ __("messages.partner.outlet.table_management.tables.reserved") }}</span>',
+                    not_available: '<span class="badge-modern badge-danger">{{ __("messages.partner.outlet.table_management.tables.not_available") }}</span>',
                 };
                 const statusBadge = statusMap[table.status] || '<span class="text-muted">-</span>';
 
-                let imagesHtml = '<span class="text-muted">No image</span>';
+                let imagesHtml = '<span class="text-muted">{{ __("messages.partner.outlet.table_management.tables.no_images") }}</span>';
                 if (table.images && Array.isArray(table.images) && table.images.length > 0) {
                     const valid = table.images.filter(img => img && img.path);
                     if (valid.length > 0) {
@@ -181,21 +300,79 @@
                     <td class="text-center">${statusBadge}</td>
                     <td class="text-center">${imagesHtml}</td>
                     <td class="text-center">
-                        <button onclick="generateBarcode(${table.id})" class="btn-table-action primary" title="Generate Barcode">
+                        <button onclick="generateBarcode(${table.id})" class="btn-table-action primary" title="{{ __('messages.partner.outlet.table_management.tables.table_barcode') }}">
                             <span class="material-symbols-outlined">qr_code</span>
                         </button>
                     </td>
                     <td class="text-center">
                         <div class="table-actions">
-                            <a href="${showUrl}" class="btn-table-action view" title="View">
+                            <a href="${showUrl}" class="btn-table-action view" title="{{ __('messages.partner.outlet.table_management.tables.view_complete_information') ?? 'View' }}">
                                 <span class="material-symbols-outlined">visibility</span></a>
-                            <a href="${editUrl}" class="btn-table-action edit" title="Edit">
+                            <a href="${editUrl}" class="btn-table-action edit" title="{{ __('messages.partner.outlet.table_management.tables.edit_table') }}">
                                 <span class="material-symbols-outlined">edit</span></a>
-                            <button onclick="deleteTable(${table.id})" class="btn-table-action delete" title="Delete">
+                            <button onclick="deleteTable(${table.id})" class="btn-table-action delete" title="{{ __('messages.partner.outlet.table_management.tables.delete') }}">
                                 <span class="material-symbols-outlined">delete</span></button>
                         </div>
                     </td>`;
                 return tr;
+            }
+
+            function createMobileTableCard(table) {
+                const showUrl = `/owner/user-owner/tables/${table.id}`;
+                const editUrl = `/owner/user-owner/tables/${table.id}/edit`;
+
+                const statusMap = {
+                    available: '<span class="badge-modern badge-success" style="font-size:0.7rem;">{{ __("messages.partner.outlet.table_management.tables.available") }}</span>',
+                    occupied: '<span class="badge-modern badge-warning" style="font-size:0.7rem;">{{ __("messages.partner.outlet.table_management.tables.occupied") }}</span>',
+                    reserved: '<span class="badge-modern badge-info" style="font-size:0.7rem;">{{ __("messages.partner.outlet.table_management.tables.reserved") }}</span>',
+                    not_available: '<span class="badge-modern badge-danger" style="font-size:0.7rem;">{{ __("messages.partner.outlet.table_management.tables.not_available") }}</span>',
+                };
+                const statusBadge = statusMap[table.status] || '';
+
+                let avatarHtml = `<div class="user-avatar-placeholder"><span class="material-symbols-outlined">table_restaurant</span></div>`;
+                if (table.images && Array.isArray(table.images) && table.images.length > 0) {
+                    const valid = table.images.filter(img => img && img.path);
+                    if (valid.length > 0) {
+                        const src = valid[0].path.startsWith('http') ? valid[0].path :
+                            `{{ asset('') }}${valid[0].path}`;
+                        avatarHtml = `<img src="${src}" alt="Table ${table.table_no}" loading="lazy">`;
+                    }
+                }
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'outlet-card-wrapper';
+                wrapper.innerHTML = `
+                    <div class="swipe-actions">
+                        <button onclick="generateBarcode(${table.id})" class="swipe-action" style="background:#8c1000;">
+                            <span class="material-symbols-outlined">qr_code</span>
+                        </button>
+                        <a href="${editUrl}" class="swipe-action edit">
+                            <span class="material-symbols-outlined">edit</span>
+                        </a>
+                        <button type="button" onclick="deleteTable(${table.id})" class="swipe-action delete">
+                            <span class="material-symbols-outlined">delete</span>
+                        </button>
+                    </div>
+                    <a href="${showUrl}" class="outlet-card-link">
+                        <div class="outlet-card-clickable">
+                            <div class="outlet-card__left">
+                                <div class="outlet-card__avatar">${avatarHtml}</div>
+                                <div class="outlet-card__info">
+                                    <div class="outlet-card__name">{{ __('messages.partner.outlet.table_management.tables.table_no') }} ${table.table_no || '-'}</div>
+                                    <div class="outlet-card__details">
+                                        <span class="detail-text">${table.table_class || '-'}</span>
+                                        <span class="detail-separator">•</span>
+                                        <span class="detail-text">${table.outlet_name || '-'}</span>
+                                    </div>
+                                    <div class="mt-1">${statusBadge}</div>
+                                </div>
+                            </div>
+                            <div class="outlet-card__right">
+                                <span class="material-symbols-outlined chevron">chevron_right</span>
+                            </div>
+                        </div>
+                    </a>`;
+                return wrapper;
             }
 
             function renderPagination(totalPages) {
@@ -214,7 +391,6 @@
                     `<a href="#" class="page-link" data-page="${cp - 1}"><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/></svg></a>`;
                 ul.appendChild(prevLi);
 
-                // Pages
                 for (let i = 1; i <= totalPages; i++) {
                     if (i === 1 || i === totalPages || (i >= cp - 1 && i <= cp + 1)) {
                         const li = document.createElement('li');
@@ -249,10 +425,7 @@
                         if (page > 0 && page <= totalPages && page !== currentPage) {
                             currentPage = page;
                             renderTable();
-                            window.scrollTo({
-                                top: 0,
-                                behavior: 'smooth'
-                            });
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
                         }
                     });
                 });
@@ -265,16 +438,19 @@
             renderTable();
         });
 
+        // ==========================================
+        // DELETE & BARCODE
+        // ==========================================
         function deleteTable(tableId) {
             Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
+                title: '{{ __('messages.partner.outlet.table_management.tables.delete_confirm_1') }}',
+                text: '{{ __('messages.partner.outlet.table_management.tables.delete_confirm_2') }}',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#b3311d',
                 cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, delete it!',
-                cancelButtonText: 'Cancel'
+                confirmButtonText: '{{ __('messages.partner.outlet.table_management.tables.delete_confirm_3') }}',
+                cancelButtonText: '{{ __('messages.partner.outlet.table_management.tables.delete_confirm_4') }}'
             }).then((result) => {
                 if (result.isConfirmed) {
                     const form = document.createElement('form');
