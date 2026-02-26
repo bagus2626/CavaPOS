@@ -249,7 +249,7 @@
 
                         </div>
                         <div class="card-footer-modern">
-                            <a href="{{ rroute('employee.' . $empRole . '.employees.index') }}"
+                            <a href="{{ route('employee.' . $empRole . '.employees.index') }}"
                                 class="btn-cancel-modern">Cancel</a>
                             <button type="submit" class="btn-submit-modern">Update Employee</button>
                         </div>
