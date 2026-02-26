@@ -60,7 +60,10 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use \App\Http\Controllers\Admin\MessageNotification\MessageController;
 use App\Http\Controllers\Customer\Table\TableStatusController;
 use App\Http\Controllers\Employee\Dashboard\StaffDashboardController;
+use App\Http\Controllers\Employee\Product\StaffCategoryController;
+use App\Http\Controllers\Employee\Product\StaffPromotionController;
 use App\Http\Controllers\Employee\Staff\Product\StaffProductController;
+use App\Http\Controllers\Employee\StaffMessageController;
 use App\Http\Controllers\Employee\Staff\Report\StaffSalesReportController;
 use App\Http\Controllers\Employee\Employee\StaffEmployeeController;
 use App\Http\Controllers\Employee\SettingsProfile\StaffSettingsController;
@@ -533,16 +536,16 @@ Route::middleware('setlocale')->group(function () {
 
                 // Dashboard & General
                 Route::get('dashboard', [StaffDashboardController::class, 'index'])->name('dashboard');
-                // Route::get('timeline/messages', [StaffDashboardController::class, 'timelineMessages'])->name('timeline.messages');
+                Route::get('timeline/messages', [StaffDashboardController::class, 'timelineMessages'])->name('timeline.messages');
 
-                // // Messages
-                // Route::prefix('messages')->name('messages.')->group(function () {
-                //     Route::get('/', [StaffMessageController::class, 'index'])->name('index');
-                //     Route::get('/{id}', [StaffMessageController::class, 'show'])->name('show');
-                //     Route::get('/notifications/list', [StaffMessageController::class, 'getNotificationMessages'])->name('notifications');
-                //     Route::post('/mark-as-read/{id}', [StaffMessageController::class, 'markMessageAsRead'])->name('mark-read');
-                //     Route::post('/mark-all-read', [StaffMessageController::class, 'markAllMessagesAsRead'])->name('mark-all-read');
-                // });
+                // Messages
+                Route::prefix('messages')->name('messages.')->group(function () {
+                    Route::get('/', [StaffMessageController::class, 'index'])->name('index');
+                    Route::get('/{id}', [StaffMessageController::class, 'show'])->name('show');
+                    Route::get('/notifications/list', [StaffMessageController::class, 'getNotificationMessages'])->name('notifications');
+                    Route::post('/mark-as-read/{id}', [StaffMessageController::class, 'markMessageAsRead'])->name('mark-read');
+                    Route::post('/mark-all-read', [StaffMessageController::class, 'markAllMessagesAsRead'])->name('mark-all-read');
+                });
 
                 // // Employees
                 // Route::get('employees/check-username', [StaffEmployeeController::class, 'checkUsername'])->name('employees.check-username');
@@ -566,12 +569,12 @@ Route::middleware('setlocale')->group(function () {
                 });
                 Route::resource('products', StaffProductController::class);
 
-                // // Categories
-                // Route::post('/categories/reorder', [StaffCategoryController::class, 'reorder'])->name('categories.reorder');
-                // Route::resource('categories', StaffCategoryController::class);
+                // Categories
+                Route::post('/categories/reorder', [StaffCategoryController::class, 'reorder'])->name('categories.reorder');
+                Route::resource('categories', StaffCategoryController::class);
 
                 // // Promotions
-                // Route::resource('promotions', StaffPromotionController::class);
+                Route::resource('promotions', StaffPromotionController::class);
 
                 // // Payment Methods
 

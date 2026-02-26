@@ -138,13 +138,13 @@
                             </a>
                         </div>
                         <div class="nav-item">
-                            <a href="{{-- route(" employee.{$empRole}.categories.index") --}}"
+                            <a href="{{route("employee.{$empRole}.categories.index")}}"
                                 class="nav-link {{ Route::is("employee.{$empRole}.categories.*") ? 'active' : '' }}">
                                 <span>{{ __('messages.owner.layout.categories') ?? 'Categories' }}</span>
                             </a>
                         </div>
                         <div class="nav-item">
-                            <a href="{{-- route(" employee.{$empRole}.promotions.index") --}}"
+                            <a href="{{route("employee.{$empRole}.promotions.index")}}"
                                 class="nav-link {{ Route::is("employee.{$empRole}.promotions.*") ? 'active' : '' }}">
                                 <span>{{ __('messages.owner.layout.promotions') ?? 'Promotions' }}</span>
                             </a>
@@ -243,6 +243,41 @@
 
                     <div class="navbar-divider"></div>
 
+                    <!-- Notifications -->
+                    <div class="dropdown">
+                        <button class="navbar-icon-btn" type="button" data-toggle="dropdown" id="notificationBtn">
+                            <span class="material-symbols-outlined">notifications</span>
+                            <span class="badge" id="notificationBadge" style="display: none;"></span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right notification-dropdown"
+                            style="min-width: 380px; max-height: 500px; overflow-y: auto;">
+                            <div class="dropdown-header d-flex justify-content-between align-items-center">
+                                <span id="notificationTitle">Pesan</span>
+                                <button class="btn btn-sm btn-link text-primary p-0" id="markAllReadBtn"
+                                    style="display: none;">
+                                    Tandai telah dibaca
+                                </button>
+                            </div>
+                            <div class="dropdown-divider m-0"></div>
+
+                            <div id="notificationContent">
+                                <div class="text-center py-4" id="notificationLoading">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                        <span class="sr-only">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="dropdown-divider m-0" id="notificationDivider" style="display: none;"></div>
+                            <div class="dropdown-footer text-center" id="notificationFooter" style="display: none;">
+                                <a href="{{ route("employee.{$empRole}.messages.index") }}"
+                                    class="btn btn-sm btn-link text-primary">
+                                    Lihat semua
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="dropdown">
                         <button class="user-dropdown-btn" type="button" data-toggle="dropdown">
                             <div class="user-avatar">
@@ -306,8 +341,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
-    <script src="{{ asset('js/image-cropper.js') }}"></script>
-    <script src="{{ asset('js/remove-image.js') }}"></script>
+    <script src="{{ asset('js/image-cropper.js') }}"></script> 
+    <script src="{{ asset('js/remove-image.js') }}"></script> 
 
     <script>
         // Toggle Sidebar (Desktop)
@@ -382,6 +417,167 @@
                 @endforeach
             @endif
         });
+    </script>
+
+    <!-- NOTIFICATION SCRIPT -->
+    <script>
+    $(document).ready(function () {
+        let currentPage = 1;
+        let lastPage    = 1;
+        let isLoading   = false;
+
+        $('#notificationBtn').on('click', function () {
+            if ($('#notificationContent').children('.notification-item').length === 0) {
+                loadNotifications(1);
+            }
+        });
+
+        function loadNotifications(page = 1) {
+            if (isLoading) return;
+            isLoading = true;
+            $('#notificationLoading').show();
+
+            $.ajax({
+                url: '{{ route("employee.{$empRole}.messages.notifications") }}',
+                method: 'GET',
+                data: { page: page },
+                success: function (response) {
+                    if (response.success) {
+                        currentPage = response.pagination.current_page;
+                        lastPage    = response.pagination.last_page;
+
+                        updateBadge(response.unread_count);
+                        $('#notificationLoading').hide();
+
+                        if (response.messages.length === 0 && page === 1) {
+                            showEmptyState();
+                        } else {
+                            if (page === 1) $('#notificationContent').empty();
+                            renderNotifications(response.messages);
+                            $('#notificationDivider').show();
+                            $('#notificationFooter').show();
+                        }
+                    }
+                },
+                error: function () {
+                    $('#notificationLoading').hide();
+                    toastr.error('Gagal memuat notifikasi');
+                },
+                complete: function () { isLoading = false; }
+            });
+        }
+
+        function renderNotifications(messages) {
+            messages.forEach(function (message) {
+                const isRead   = message.recipients && message.recipients.length > 0 && message.recipients[0].is_read;
+                const timeAgo  = formatTimeAgo(message.created_at);
+                const msgUrl   = '{{ route("employee.{$empRole}.messages.show", ":id") }}'.replace(':id', message.id);
+
+                const html = `
+                    <a href="${msgUrl}" class="notification-item ${!isRead ? 'unread' : ''}"
+                        data-id="${message.id}" style="text-decoration:none;color:inherit;display:block;">
+                        <div class="d-flex">
+                            <div class="notification-icon mr-3">
+                                <span class="material-symbols-outlined">mail</span>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-title">${message.title || 'No Title'}</div>
+                                <div class="notification-time">${timeAgo}</div>
+                            </div>
+                        </div>
+                    </a>`;
+                $('#notificationContent').append(html);
+            });
+        }
+
+        function showEmptyState() {
+            $('#notificationContent').html(`
+                <div class="notification-empty">
+                    <span class="material-symbols-outlined">notifications_off</span>
+                    <div style="font-size:14px;font-weight:500;">Tidak ada notifikasi</div>
+                    <div style="font-size:12px;margin-top:4px;">Semua sudah terbaca!</div>
+                </div>`);
+            $('#notificationDivider').hide();
+            $('#notificationFooter').hide();
+        }
+
+        function updateBadge(count) {
+            if (count > 0) {
+                $('#notificationBadge').text(count > 99 ? '99+' : count).show();
+                $('#markAllReadBtn').show();
+                $('#notificationTitle').text(`${count} Pesan belum terbaca`);
+            } else {
+                $('#notificationBadge').hide();
+                $('#markAllReadBtn').hide();
+                $('#notificationTitle').text('Pesan');
+            }
+        }
+
+        $(document).on('click', '.notification-item', function (e) {
+            const id   = $(this).data('id');
+            const $item = $(this);
+            const url  = $(this).attr('href');
+
+            if ($item.hasClass('unread')) {
+                e.preventDefault();
+                $.ajax({
+                    url: '{{ route("employee.{$empRole}.messages.mark-read", ":id") }}'.replace(':id', id),
+                    method: 'POST',
+                    data: { _token: '{{ csrf_token() }}' },
+                    success: function (response) {
+                        if (response.success) {
+                            $item.removeClass('unread');
+                            updateBadge(response.unread_count);
+                            window.location.href = url;
+                        }
+                    },
+                    error: function () { window.location.href = url; }
+                });
+            }
+        });
+
+        $('#markAllReadBtn').on('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $.ajax({
+                url: '{{ route("employee.{$empRole}.messages.mark-all-read") }}',
+                method: 'POST',
+                data: { _token: '{{ csrf_token() }}' },
+                success: function (response) {
+                    if (response.success) {
+                        $('.notification-item').removeClass('unread');
+                        updateBadge(0);
+                        toastr.success('Semua pesan telah ditandai terbaca');
+                    }
+                },
+                error: function () { toastr.error('Gagal menandai pesan'); }
+            });
+        });
+
+        $('.notification-dropdown').on('scroll', function () {
+            if (isLoading || currentPage >= lastPage) return;
+            const scrollTop    = $(this).scrollTop();
+            const scrollHeight = $(this)[0].scrollHeight;
+            const clientHeight = $(this).height();
+            if (scrollTop + clientHeight >= scrollHeight - 50) {
+                loadNotifications(currentPage + 1);
+            }
+        });
+
+        function formatTimeAgo(datetime) {
+            const now  = new Date();
+            const past = new Date(datetime);
+            const diff = Math.floor((now - past) / 1000);
+            if (diff < 60)     return 'Baru saja';
+            if (diff < 3600)   return Math.floor(diff / 60) + ' menit lalu';
+            if (diff < 86400)  return Math.floor(diff / 3600) + ' jam lalu';
+            if (diff < 604800) return Math.floor(diff / 86400) + ' hari lalu';
+            return past.toLocaleDateString();
+        }
+
+        // Load awal
+        loadNotifications(1);
+    });
     </script>
 
     @yield('scripts')
