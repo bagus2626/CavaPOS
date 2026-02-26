@@ -96,7 +96,7 @@
                     </a>
                     <div class="nav-treeview {{ !$isActive ? 'disabled' : '' }}">
                         <div class="nav-item">
-                            <a href="{{-- route("employee.{$empRole}.employees.index") --}}"
+                            <a href="{{ $isActive ? route('employee.' . $empRole . '.employees.index') : 'javascript:void(0)' }}"
                                 class="nav-link {{ Route::is("employee.{$empRole}.employees.*") ? 'active' : '' }}">
                                 <span>{{ __('messages.owner.layout.employees') ?? 'All Employees' }}</span>
                             </a>
@@ -177,7 +177,7 @@
                 @endphp
 
                 <div class="nav-item">
-                    <a href="{{-- route("employee.{$empRole}.settings.index") --}}"
+                    <a href="{{ route('employee.' . $empRole . '.settings.index') }}"
                         class="nav-link {{ !$isActive ? 'disabled-link' : '' }} {{ Route::is($settingRoutes) ? 'active' : '' }}">
                         <span class="material-symbols-outlined">settings</span>
                         <span>{{ __('messages.owner.layout.settings') ?? 'Settings' }}</span>
@@ -195,7 +195,7 @@
                 </div>
 
                 <div class="nav-item">
-                    <a href="{{-- $isActive ? route("employee.{$empRole}.report.stocks.index") : 'javascript:void(0)' --}}"
+                    <a href="{{ $isActive ? route('employee.' . $empRole . '.report.stocks.index') : 'javascript:void(0)' }}"
                         class="nav-link {{ !$isActive ? 'disabled-link' : '' }} {{ Route::is("employee.{$empRole}.report.stocks.*") ? 'active' : '' }}">
                         <span class="material-symbols-outlined">receipt_long</span>
                         <span>{{ __('messages.owner.layout.stock_report') ?? 'Stock Report' }}</span>

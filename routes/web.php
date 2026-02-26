@@ -49,6 +49,7 @@ use App\Http\Controllers\Owner\Product\OwnerOutletProductController;
 use App\Http\Controllers\Owner\HumanResource\OwnerEmployeeController;
 use App\Http\Controllers\Employee\Dashboard\CashierDashboardController;
 use App\Http\Controllers\Employee\Dashboard\KitchenDashboardController;
+use App\Http\Controllers\Owner\Outlet\OwnerTablesController;
 use App\Http\Controllers\Partner\HumanResource\PartnerEmployeeController;
 use App\Http\Controllers\Employee\Transaction\CashierTransactionController;
 use App\Http\Controllers\Customer\Auth\CustomerPasswordResetController;
@@ -63,6 +64,9 @@ use App\Http\Controllers\Employee\Product\StaffCategoryController;
 use App\Http\Controllers\Employee\Product\StaffPromotionController;
 use App\Http\Controllers\Employee\Staff\Product\StaffProductController;
 use App\Http\Controllers\Employee\StaffMessageController;
+use App\Http\Controllers\Employee\Employee\StaffEmployeeController;
+use App\Http\Controllers\Employee\SettingsProfile\StaffSettingsController;
+use App\Http\Controllers\Employee\StockReport\StaffStockReportController;
 use App\Http\Controllers\Owner\OwnerMessageController;
 use App\Http\Controllers\Owner\Report\StockReportController;
 use App\Http\Controllers\Partner\PartnerMessageController;
@@ -328,6 +332,9 @@ Route::middleware('setlocale')->group(function () {
                 Route::get('outlets/check-username', [OwnerOutletController::class, 'checkUsername'])->name('outlets.check-username')->middleware('throttle:30,1');
                 Route::get('outlets/check-slug', [OwnerOutletController::class, 'checkSlug'])->name('outlets.check-slug')->middleware('throttle:30,1');
                 Route::resource('outlets', OwnerOutletController::class);
+Route::get('tables/generate-barcode/{tableId}', [OwnerTablesController::class, 'generateBarcode'])->name('tables.generate-barcode');
+Route::get('tables/generate-all-barcode', [OwnerTablesController::class, 'generateAllBarcode'])->name('tables.generate-all-barcode');
+Route::resource('tables', OwnerTablesController::class);
                 Route::get('employees/check-username', [OwnerEmployeeController::class, 'checkUsername'])->name('employees.check-username');
                 Route::resource('employees', OwnerEmployeeController::class);
                 Route::resource('master-products', OwnerMasterProductController::class);
@@ -540,6 +547,9 @@ Route::middleware('setlocale')->group(function () {
                 // // Employees
                 // Route::get('employees/check-username', [StaffEmployeeController::class, 'checkUsername'])->name('employees.check-username');
                 // Route::resource('employees', StaffEmployeeController::class);
+                // Employees ← TAMBAHKAN INI
+        Route::get('employees/check-username', [StaffEmployeeController::class, 'checkUsername'])->name('employees.check-username')->middleware('throttle:30,1');
+        Route::resource('employees', StaffEmployeeController::class);
 
                 // PRODUCTS (Di Owner ini adalah Outlet Products)
                 Route::resource('products', StaffProductController::class);
@@ -565,21 +575,21 @@ Route::middleware('setlocale')->group(function () {
                 // Route::resource('payment-methods', StaffPaymentMethodController::class);
 
                 // // Reports
-                // Route::prefix('report')->name('report.')->group(function () {
+                Route::prefix('report')->name('report.')->group(function () {
                 //     // Sales
                 //     Route::get('sales/export', [StaffSalesReportController::class, 'export'])->name('sales.export');
                 //     Route::get('sales/products', [StaffSalesReportController::class, 'getTopProductsAjax'])->name('sales.products');
                 //     Route::get('order-details/{id}', [StaffSalesReportController::class, 'getOrderDetails'])->name('order-details');
                 //     Route::resource('sales', StaffSalesReportController::class)->only(['index']);
 
-                //     // Stocks
-                //     Route::prefix('stocks')->name('stocks.')->group(function () {
-                //         Route::get('/', [StaffStockReportController::class, 'index'])->name('index');
-                //         Route::get('/{stock:stock_code}/movement', [StaffStockReportController::class, 'showStockMovement'])->name('movement');
-                //         Route::get('/export', [StaffStockReportController::class, 'export'])->name('export');
-                //         Route::get('/{stock:stock_code}/movement/export', [StaffStockReportController::class, 'exportMovement'])->name('movement.export');
-                //     });
-                // });
+                    // Stocks
+                    Route::prefix('stocks')->name('stocks.')->group(function () {
+                        Route::get('/', [StaffStockReportController::class, 'index'])->name('index');
+                        Route::get('/{stock:stock_code}/movement', [StaffStockReportController::class, 'showStockMovement'])->name('movement');
+                        Route::get('/export', [StaffStockReportController::class, 'export'])->name('export');
+                        Route::get('/{stock:stock_code}/movement/export', [StaffStockReportController::class, 'exportMovement'])->name('movement.export');
+                    });
+                });
 
                 // // Stocks & Movements
                 // Route::prefix('stocks')->name('stocks.')->group(function () {
@@ -598,12 +608,13 @@ Route::middleware('setlocale')->group(function () {
                 //     });
                 // });
 
-                // // Settings
-                // Route::prefix('settings')->name('settings.')->group(function () {
-                //     Route::get('/', [StaffSettingsController::class, 'index'])->name('index');
-                //     Route::get('/edit', [StaffSettingsController::class, 'edit'])->name('edit');
-                //     Route::post('/personal-info', [StaffSettingsController::class, 'updatePersonalInfo'])->name('update-personal-info');
-                // });
+                
+                // Settings
+Route::prefix('settings')->name('settings.')->group(function () {
+    Route::get('/', [StaffSettingsController::class, 'index'])->name('index');
+    Route::get('/edit', [StaffSettingsController::class, 'edit'])->name('edit');
+    Route::post('/personal-info', [StaffSettingsController::class, 'updatePersonalInfo'])->name('update-personal-info');
+});
             });
         }
     });
