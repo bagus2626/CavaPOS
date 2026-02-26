@@ -74,7 +74,7 @@
 
                 <div class="nav-item">
                     <a href="{{ $isActive ? route("employee.{$empRole}.dashboard") : 'javascript:void(0)' }}"
-                        class="nav-link {{ !$isActive ? 'disabled-link' : '' }} @if(Route::is("employee.{$empRole}.dashboard")) active @endif">
+                        class="nav-link {{ !$isActive ? 'disabled-link' : '' }} @if (Route::is("employee.{$empRole}.dashboard")) active @endif">
                         <span class="material-symbols-outlined">dashboard</span>
                         <span>{{ __('messages.owner.layout.dashboard') ?? 'Dashboard' }}</span>
                     </a>
@@ -98,7 +98,7 @@
                     </a>
                     <div class="nav-treeview {{ !$isActive ? 'disabled' : '' }}">
                         <div class="nav-item">
-                            <a href="{{-- route(" employee.{$empRole}.employees.index") --}}"
+                            <a href="{{ $isActive ? route('employee.' . $empRole . '.employees.index') : 'javascript:void(0)' }}"
                                 class="nav-link {{ Route::is("employee.{$empRole}.employees.*") ? 'active' : '' }}">
                                 <span>{{ __('messages.owner.layout.employees') ?? 'All Employees' }}</span>
                             </a>
@@ -112,7 +112,7 @@
                         "employee.{$empRole}.products.*",
                         "employee.{$empRole}.categories.*",
                         "employee.{$empRole}.promotions.*",
-                        "employee.{$empRole}.stocks.*"
+                        "employee.{$empRole}.stocks.*",
                     ];
                 @endphp
 
@@ -179,7 +179,7 @@
                 @endphp
 
                 <div class="nav-item">
-                    <a href="{{-- route(" employee.{$empRole}.settings.index") --}}"
+                    <a href="{{ route('employee.' . $empRole . '.settings.index') }}"
                         class="nav-link {{ !$isActive ? 'disabled-link' : '' }} {{ Route::is($settingRoutes) ? 'active' : '' }}">
                         <span class="material-symbols-outlined">settings</span>
                         <span>{{ __('messages.owner.layout.settings') ?? 'Settings' }}</span>
@@ -197,8 +197,7 @@
                 </div>
 
                 <div class="nav-item">
-                    <a href="{{-- $isActive ? route(" employee.{$empRole}.report.stocks.index") : 'javascript:void(0)'
-                        --}}"
+                    <a href="{{ $isActive ? route('employee.' . $empRole . '.report.stocks.index') : 'javascript:void(0)' }}"
                         class="nav-link {{ !$isActive ? 'disabled-link' : '' }} {{ Route::is("employee.{$empRole}.report.stocks.*") ? 'active' : '' }}">
                         <span class="material-symbols-outlined">receipt_long</span>
                         <span>{{ __('messages.owner.layout.stock_report') ?? 'Stock Report' }}</span>
@@ -227,7 +226,7 @@
                                 <img src="{{ asset('icons/icon-indonesia-96.png') }}" alt="Indonesia"
                                     class="lang-flag mr-2">
                                 Bahasa
-                                @if(app()->getLocale() === 'id')
+                                @if (app()->getLocale() === 'id')
                                     <i class="fas fa-check ml-auto" style="color: var(--primary)"></i>
                                 @endif
                             </a>
@@ -235,7 +234,7 @@
                                 <img src="{{ asset('icons/icon-english-96.png') }}" alt="English"
                                     class="lang-flag mr-2">
                                 English
-                                @if(app()->getLocale() === 'en')
+                                @if (app()->getLocale() === 'en')
                                     <i class="fas fa-check ml-auto" style="color: var(--primary)"></i>
                                 @endif
                             </a>
@@ -325,7 +324,7 @@
         }
 
         // Close sidebar when clicking overlay
-        document.getElementById('sidebarOverlay').addEventListener('click', function () {
+        document.getElementById('sidebarOverlay').addEventListener('click', function() {
             toggleSidebar();
         });
 
@@ -337,7 +336,7 @@
         }
 
         // Initialize plugins
-        $(function () {
+        $(function() {
             // DataTables
             $('.datatable').DataTable({
                 "paging": true,
@@ -369,16 +368,16 @@
             });
 
             // Toastr notifications
-            @if(session('success'))
+            @if (session('success'))
                 toastr.success({!! json_encode(session('success')) !!});
             @endif
 
-            @if(session('error'))
+            @if (session('error'))
                 toastr.error({!! json_encode(session('error')) !!});
             @endif
 
-            @if($errors->any())
-                @foreach($errors->all() as $err)
+            @if ($errors->any())
+                @foreach ($errors->all() as $err)
                     toastr.error({!! json_encode($err) !!});
                 @endforeach
             @endif
