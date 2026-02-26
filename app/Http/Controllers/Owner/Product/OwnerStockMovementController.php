@@ -63,7 +63,9 @@ class OwnerStockMovementController extends Controller
     {
         $owner = Auth::user();
 
+        // HANYA AMBIL STOK LINKED
         $stocks = Stock::where('owner_id', $owner->id)
+            ->where('stock_type', 'linked')
             ->with('partner', 'displayUnit')
             ->orderBy('stock_name')
             ->get();
@@ -82,12 +84,13 @@ class OwnerStockMovementController extends Controller
         ]);
     }
 
-
-   public function createAdjustment()
+    public function createAdjustment()
     {
         $owner = Auth::user();
 
+        // HANYA AMBIL STOK LINKED
         $stocks = Stock::where('owner_id', $owner->id)
+            ->where('stock_type', 'linked')
             ->with('partner', 'displayUnit')
             ->orderBy('stock_name')
             ->get();
@@ -110,27 +113,24 @@ class OwnerStockMovementController extends Controller
 
         $allUnits = MasterUnit::all();
 
-        // Daftar kategori default yang sudah ada di hardcode view
         $defaultCategories = [
-            'damaged', 
-            'expired', 
-            'internal_use', 
-            'lost', 
+            'damaged',
+            'expired',
+            'internal_use',
+            'lost',
             'audit_adjustment'
         ];
 
-        // Ambil kategori kustom yang pernah disimpan sebelumnya
         $customCategories = StockMovement::where('owner_id', $owner->id)
             ->whereNotIn('category', $defaultCategories)
             ->distinct()
             ->pluck('category');
-        // -----------------------------
 
         return view('pages.owner.products.stock-movements.create-adjustment', [
             'stocks' => $stocks,
             'partners' => $partners,
             'allUnits' => $allUnits,
-            'customCategories' => $customCategories, // <-- Jangan lupa dikirim ke view
+            'customCategories' => $customCategories,
         ]);
     }
 
@@ -138,7 +138,9 @@ class OwnerStockMovementController extends Controller
     {
         $owner = Auth::user();
 
+        // HANYA AMBIL STOK LINKED
         $stocks = Stock::where('owner_id', $owner->id)
+            ->where('stock_type', 'linked')
             ->with('partner', 'displayUnit')
             ->orderBy('stock_name')
             ->get();
@@ -151,7 +153,7 @@ class OwnerStockMovementController extends Controller
                     $stock->display_unit_id
                 );
             }
-            $stock->setAttribute('display_quantity', round($displayQty, 4)); // Membulatkan untuk tampilan
+            $stock->setAttribute('display_quantity', round($displayQty, 4));
         });
 
         $partners = User::where('owner_id', $owner->id)
@@ -174,6 +176,10 @@ class OwnerStockMovementController extends Controller
         $type = $request->input('movement_type');
         $validatedData = [];
 
+        $stockExistsRule = Rule::exists('stocks', 'id')
+            ->where('owner_id', $owner->id)
+            ->where('stock_type', 'linked');
+
         if ($type === 'in') {
             $validatedData = $request->validate([
                 'movement_type' => 'required|in:in',
@@ -181,7 +187,7 @@ class OwnerStockMovementController extends Controller
                 'category' => 'required|string|max:100',
                 'notes' => 'nullable|string|max:1000',
                 'items' => 'required|array|min:1',
-                'items.*.stock_id' => ['required', 'string', Rule::exists('stocks', 'id')->where('owner_id', $owner->id)],
+                'items.*.stock_id' => ['required', 'string', $stockExistsRule],
                 'items.*.unit_id' => 'required|exists:master_units,id',
                 'items.*.quantity' => 'required|numeric|min:0.01',
                 'items.*.unit_price' => 'nullable|numeric|min:0',
@@ -194,7 +200,7 @@ class OwnerStockMovementController extends Controller
                 'category' => 'required|string|max:100',
                 'notes' => 'nullable|string|max:1000',
                 'items' => 'required|array|min:1',
-                'items.*.stock_id' => ['required', 'string', Rule::exists('stocks', 'id')->where('owner_id', $owner->id)],
+                'items.*.stock_id' => ['required', 'string', $stockExistsRule],
                 'items.*.unit_id' => 'required|exists:master_units,id',
                 'items.*.quantity' => 'required|numeric|min:0.01',
             ]);
@@ -205,7 +211,7 @@ class OwnerStockMovementController extends Controller
                 'category' => 'required|string|max:100',
                 'notes' => 'nullable|string|max:1000',
                 'items' => 'required|array|min:1',
-                'items.*.stock_id' => ['required', 'string', Rule::exists('stocks', 'id')->where('owner_id', $owner->id)],
+                'items.*.stock_id' => ['required', 'string', $stockExistsRule],
                 'items.*.unit_id' => 'required|exists:master_units,id',
                 'items.*.new_quantity' => 'required|numeric|min:0',
                 'items.*.current_quantity' => 'required|numeric|min:0',
@@ -217,7 +223,7 @@ class OwnerStockMovementController extends Controller
                 'category' => 'required|string|max:100|not_in:transfer_out,transfer_in',
                 'notes' => 'nullable|string|max:1000',
                 'items' => 'required|array|min:1',
-                'items.*.stock_id' => ['required', 'string', Rule::exists('stocks', 'id')->where('owner_id', $owner->id)],
+                'items.*.stock_id' => ['required', 'string', $stockExistsRule],
                 'items.*.unit_id' => 'required|exists:master_units,id',
                 'items.*.quantity' => 'required|numeric|min:0.01',
             ]);
