@@ -32,13 +32,15 @@
 
     <link rel="stylesheet" href="{{ asset('css/base.css') }}">
     <link rel="stylesheet" href="{{ asset('css/components.css') }}">
+
     <link rel="stylesheet" href="{{ asset('css/message.css') }}">
     <link rel="stylesheet" href="{{ asset('css/sidebar.css') }}">
     <link rel="stylesheet" href="{{ asset('css/forms.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/add-product-options.css') }}">
     <link rel="stylesheet" href="{{ asset('css/table.css') }}">
     <link rel="stylesheet" href="{{ asset('css/show.css') }}">
     <link rel="stylesheet" href="{{ asset('css/responsive-global.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/partner.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/owner.css') }}">
 
     @stack('styles')
 </head>
@@ -124,13 +126,13 @@
                     </a>
                     <div class="nav-treeview {{ !$isActive ? 'disabled' : '' }}">
                         <div class="nav-item">
-                            <a href="{{-- route("employee.{$empRole}.products.index") --}}"
+                            <a href="{{ route("employee.{$empRole}.products.index")}}"
                                 class="nav-link {{ Route::is("employee.{$empRole}.products.*") ? 'active' : '' }}">
-                                <span>{{ __('messages.owner.layout.outlet_products') ?? 'Outlet Products' }}</span>
+                                <span>Products</span>
                             </a>
                         </div>
                         <div class="nav-item">
-                            <a href="{{-- route("employee.{$empRole}.stocks.index") --}}"
+                            <a href="{{ route("employee.{$empRole}.stocks.index") }}"
                                 class="nav-link {{ Route::is("employee.{$empRole}.stocks.*") ? 'active' : '' }}">
                                 <span>{{ __('messages.owner.layout.stocks') ?? 'Stocks' }}</span>
                             </a>
@@ -164,7 +166,7 @@
                     </a>
                     <div class="nav-treeview {{ !$isActive ? 'disabled' : '' }}">
                         <div class="nav-item">
-                            <a href="{{-- route("employee.{$empRole}.payment-methods.index") --}}"
+                            <a href="{{-- route(" employee.{$empRole}.payment-methods.index") --}}"
                                 class="nav-link {{ Route::is("employee.{$empRole}.payment-methods.*") ? 'active' : '' }}">
                                 <span>{{ __('messages.owner.layout.all_payment_methods') ?? 'All Payment Methods' }}</span>
                             </a>
@@ -187,7 +189,7 @@
                 <div class="nav-section-title">{{ __('messages.owner.layout.reports') ?? 'Reports' }}</div>
 
                 <div class="nav-item">
-                    <a href="{{-- $isActive ? route("employee.{$empRole}.report.sales.index") : 'javascript:void(0)' --}}"
+                    <a href="{{ $isActive ? route("employee.{$empRole}.report.sales.index") : 'javascript:void(0)' }}"
                         class="nav-link {{ !$isActive ? 'disabled-link' : '' }} {{ Route::is("employee.{$empRole}.report.sales.*") ? 'active' : '' }}">
                         <span class="material-symbols-outlined">payments</span>
                         <span>{{ __('messages.owner.layout.sales_report') ?? 'Sales Report' }}</span>
