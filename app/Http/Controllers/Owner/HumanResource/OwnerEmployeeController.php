@@ -164,7 +164,7 @@ class OwnerEmployeeController extends Controller
             'username'              => ['required', 'string', 'unique:employees,user_name'],
             'email'                 => ['required', 'email:rfc,dns', 'max:254', 'unique:employees,email'],
             'partner'               => ['required'],
-            'role'                  => ['required', 'in:CASHIER,KITCHEN,WAITER'],
+            'role'                  => ['required', 'in:CASHIER,KITCHEN,WAITER,MANAGER,SUPERVISOR'],
             'password'              => ['required', 'string', 'min:8', 'confirmed'],
             'image'                 => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp'], // max 2MB
             'is_active'             => ['nullable', 'boolean'],
@@ -276,7 +276,7 @@ class OwnerEmployeeController extends Controller
             'name'                  => ['required', 'string', 'max:100'],
             'username'              => ['required', 'string', 'min:3', 'max:30', 'regex:/^[A-Za-z0-9._-]+$/', 'unique:employees,user_name,' . $employee->id],
             'email'                 => ['required', 'email:rfc,dns', 'max:254', 'unique:employees,email,' . $employee->id],
-            'role'                  => ['required', 'in:CASHIER,KITCHEN,WAITER'],
+            'role'                  => ['required', 'in:CASHIER,KITCHEN,WAITER,MANAGER,SUPERVISOR'],
             'partner'               => ['required'],
             'password'              => ['nullable', 'string', 'min:8', 'confirmed'],
             'image'                 => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],

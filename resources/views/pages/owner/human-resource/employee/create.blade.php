@@ -55,7 +55,8 @@
             @endif
 
             <div class="modern-card">
-                <input type="hidden" id="usernameCheckUrl" value="{{ route('owner.user-owner.employees.check-username') }}">
+                <input type="hidden" id="usernameCheckUrl"
+                    value="{{ route('owner.user-owner.employees.check-username') }}">
                 <form action="{{ route('owner.user-owner.employees.store') }}" method="POST" enctype="multipart/form-data"
                     id="employeeForm">
                     @csrf
@@ -136,11 +137,21 @@
                                                     <option value="">
                                                         {{ __('messages.owner.user_management.employees.select_role_default') }}
                                                     </option>
-                                                    <option value="CASHIER" {{ old('role') == 'CASHIER' ? 'selected' : '' }}>
+                                                    <option value="CASHIER"
+                                                        {{ old('role') == 'CASHIER' ? 'selected' : '' }}>
                                                         {{ __('messages.owner.user_management.employees.cashier') }}
                                                     </option>
-                                                    <option value="KITCHEN" {{ old('role') == 'KITCHEN' ? 'selected' : '' }}>
+                                                    <option value="KITCHEN"
+                                                        {{ old('role') == 'KITCHEN' ? 'selected' : '' }}>
                                                         {{ __('messages.owner.user_management.employees.kitchen') }}
+                                                    </option>
+                                                    <option value="MANAGER"
+                                                        {{ old('role') == 'MANAGER' ? 'selected' : '' }}>
+                                                        Manager
+                                                    </option>
+                                                    <option value="SUPERVISOR"
+                                                        {{ old('role') == 'SUPERVISOR' ? 'selected' : '' }}>
+                                                        Supervisor
                                                     </option>
                                                 </select>
                                                 <span class="material-symbols-outlined select-arrow">expand_more</span>
@@ -248,7 +259,8 @@
                                             <span class="text-danger">*</span>
                                         </label>
                                         <div class="password-wrapper">
-                                            <input type="password" name="password_confirmation" id="password_confirmation"
+                                            <input type="password" name="password_confirmation"
+                                                id="password_confirmation"
                                                 class="form-control-modern @error('password_confirmation') is-invalid @enderror"
                                                 placeholder="{{ __('messages.owner.user_management.employees.password_placeholder_reenter') }}"
                                                 required>
@@ -320,7 +332,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
 
             // Initialize Image Cropper (Square 1:1)
             ImageCropper.init({
@@ -352,7 +364,7 @@
                 const inp = document.getElementById(inputId);
                 if (!btn || !inp) return;
 
-                btn.addEventListener('click', function (e) {
+                btn.addEventListener('click', function(e) {
                     e.preventDefault();
                     const isPw = inp.type === 'password';
                     inp.type = isPw ? 'text' : 'password';
@@ -372,7 +384,7 @@
             const pwc = document.getElementById('password_confirmation');
 
             if (form && pw && pwc) {
-                form.addEventListener('submit', function (e) {
+                form.addEventListener('submit', function(e) {
                     if (pw.value.length < 8) {
                         e.preventDefault();
                         alert('{{ __('messages.owner.user_management.employees.js_password_length') }}');
@@ -436,18 +448,24 @@
 
                     if (val.length < 3 || val.length > 30 || !/^[A-Za-z0-9._-]+$/.test(val)) {
                         setLoading(false);
-                        showStatus(false, '{{ __('messages.owner.user_management.employees.js_username_invalid_format') }}');
+                        showStatus(false,
+                            '{{ __('messages.owner.user_management.employees.js_username_invalid_format') }}'
+                            );
                         return;
                     }
 
                     try {
-                        const params = new URLSearchParams({ username: val });
+                        const params = new URLSearchParams({
+                            username: val
+                        });
                         const excludeId = inputUsername.dataset.excludeId || '';
                         if (excludeId) params.append('exclude_id', excludeId);
 
                         const res = await fetch(`${urlCheck}?${params.toString()}`, {
                             method: 'GET',
-                            headers: { 'Accept': 'application/json' },
+                            headers: {
+                                'Accept': 'application/json'
+                            },
                         });
 
                         if (res.status === 422) {
@@ -459,9 +477,12 @@
 
                         if (data && typeof data.available !== 'undefined') {
                             if (data.available) {
-                                showStatus(true, '{{ __('messages.owner.user_management.employees.username_available') }}');
+                                showStatus(true,
+                                    '{{ __('messages.owner.user_management.employees.username_available') }}'
+                                    );
                             } else {
-                                showStatus(false, '{{ __('messages.owner.user_management.employees.username_used') }}');
+                                showStatus(false,
+                                    '{{ __('messages.owner.user_management.employees.username_used') }}');
                             }
                         } else {
                             showNeutral('{{ __('messages.owner.user_management.employees.js_check_error') }}');
@@ -474,7 +495,7 @@
                 }
 
                 let debounceTimer;
-                inputUsername.addEventListener('input', function () {
+                inputUsername.addEventListener('input', function() {
                     clearTimeout(debounceTimer);
 
                     const val = this.value.trim();
