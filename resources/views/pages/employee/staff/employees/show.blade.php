@@ -1,5 +1,5 @@
 @extends('layouts.staff')
-@section('title', 'Employee Detail')
+@section('title', __('messages.owner.user_management.employees.employee_detail'))
 
 @section('content')
     @php
@@ -20,12 +20,12 @@
 
             <div class="page-header">
                 <div class="header-content">
-                    <h1 class="page-title">Employee Detail</h1>
-                    <p class="page-subtitle">View complete employee information</p>
+                    <h1 class="page-title">{{ __('messages.owner.user_management.employees.employee_detail') }}</h1>
+                    <p class="page-subtitle">View complete information about this employee.</p>
                 </div>
                 <a href="{{ route('employee.' . $empRole . '.employees.index') }}" class="back-button">
                     <span class="material-symbols-outlined">arrow_back</span>
-                    Back
+                    {{ __('messages.owner.user_management.employees.back') }}
                 </a>
             </div>
 
@@ -33,6 +33,13 @@
                 <div class="alert alert-success alert-modern">
                     <div class="alert-icon"><span class="material-symbols-outlined">check_circle</span></div>
                     <div class="alert-content">{{ session('success') }}</div>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="alert alert-danger alert-modern">
+                    <div class="alert-icon"><span class="material-symbols-outlined">error</span></div>
+                    <div class="alert-content">{{ session('error') }}</div>
                 </div>
             @endif
 
@@ -54,9 +61,13 @@
                         <div class="detail-hero-badges">
                             <span class="badge-modern badge-info">{{ $emp->role ?? '—' }}</span>
                             @if ($isActive)
-                                <span class="badge-modern badge-success">Active</span>
+                                <span class="badge-modern badge-success">
+                                    {{ __('messages.owner.user_management.employees.active') }}
+                                </span>
                             @else
-                                <span class="badge-modern badge-danger">Inactive</span>
+                                <span class="badge-modern badge-danger">
+                                    {{ __('messages.owner.user_management.employees.non_active') }}
+                                </span>
                             @endif
                         </div>
                     </div>
@@ -77,11 +88,15 @@
                     <div class="detail-info-grid">
                         <div class="detail-info-group">
                             <div class="detail-info-item">
-                                <div class="detail-info-label">Full Name</div>
+                                <div class="detail-info-label">
+                                    {{ __('messages.owner.user_management.employees.employee_name') }}
+                                </div>
                                 <div class="detail-info-value">{{ $emp->name ?? '—' }}</div>
                             </div>
                             <div class="detail-info-item">
-                                <div class="detail-info-label">Email</div>
+                                <div class="detail-info-label">
+                                    {{ __('messages.owner.user_management.employees.email') }}
+                                </div>
                                 <div class="detail-info-value">
                                     @if (!empty($emp->email))
                                         <a href="mailto:{{ $emp->email }}">{{ $emp->email }}</a>
@@ -93,11 +108,15 @@
                         </div>
                         <div class="detail-info-group">
                             <div class="detail-info-item">
-                                <div class="detail-info-label">Outlet</div>
+                                <div class="detail-info-label">
+                                    {{ __('messages.owner.user_management.employees.outlet') }}
+                                </div>
                                 <div class="detail-info-value">{{ optional($emp->partner)->name ?? '—' }}</div>
                             </div>
                             <div class="detail-info-item">
-                                <div class="detail-info-label">Username</div>
+                                <div class="detail-info-label">
+                                    {{ __('messages.owner.user_management.employees.username') }}
+                                </div>
                                 <div class="detail-info-value">{{ $emp->user_name ?? '—' }}</div>
                             </div>
                         </div>
@@ -115,16 +134,22 @@
                     <div class="detail-info-grid">
                         <div class="detail-info-group">
                             <div class="detail-info-item">
-                                <div class="detail-info-label">Created At</div>
+                                <div class="detail-info-label">
+                                    {{ __('messages.owner.user_management.employees.created') }}
+                                </div>
                                 <div class="detail-info-value">
-                                    {{ optional($emp->created_at)->format('d M Y, H:i') ?? '—' }}</div>
+                                    {{ optional($emp->created_at)->format('d M Y, H:i') ?? '—' }}
+                                </div>
                             </div>
                         </div>
                         <div class="detail-info-group">
                             <div class="detail-info-item">
-                                <div class="detail-info-label">Updated At</div>
+                                <div class="detail-info-label">
+                                    {{ __('messages.owner.user_management.employees.updated') }}
+                                </div>
                                 <div class="detail-info-value">
-                                    {{ optional($emp->updated_at)->format('d M Y, H:i') ?? '—' }}</div>
+                                    {{ optional($emp->updated_at)->format('d M Y, H:i') ?? '—' }}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -134,7 +159,7 @@
                             <a href="{{ route('employee.' . $empRole . '.employees.edit', $employee->id) }}"
                                 class="btn-action btn-action-edit">
                                 <span class="material-symbols-outlined">edit</span>
-                                Edit
+                                {{ __('messages.owner.user_management.employees.edit') }}
                             </a>
                             <form action="{{ route('employee.' . $empRole . '.employees.destroy', $employee->id) }}"
                                 method="POST" class="d-inline-block" id="deleteForm">
@@ -142,7 +167,7 @@
                                 @method('DELETE')
                                 <button type="button" class="btn-action btn-action-delete" onclick="confirmDelete()">
                                     <span class="material-symbols-outlined">delete</span>
-                                    Delete
+                                    {{ __('messages.owner.user_management.employees.delete') }}
                                 </button>
                             </form>
                         </div>
@@ -220,14 +245,14 @@
         <script>
             function confirmDelete() {
                 Swal.fire({
-                    title: 'Delete this employee?',
-                    text: 'This action cannot be undone.',
+                    title: '{{ __('messages.owner.user_management.employees.delete_confirmation_1') }}',
+                    text: '{{ __('messages.owner.user_management.employees.delete_confirmation_2') }}',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#b3311d',
                     cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Yes, delete',
-                    cancelButtonText: 'Cancel'
+                    confirmButtonText: '{{ __('messages.owner.user_management.employees.delete_confirmation_3') }}',
+                    cancelButtonText: '{{ __('messages.owner.user_management.employees.cancel') }}'
                 }).then((result) => {
                     if (result.isConfirmed) document.getElementById('deleteForm').submit();
                 });
@@ -235,4 +260,3 @@
         </script>
     @endpush
 @endsection
-

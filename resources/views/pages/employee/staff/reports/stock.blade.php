@@ -1,5 +1,5 @@
 @extends('layouts.staff')
-@section('title', 'Stock Report')
+@section('title', __('messages.owner.stock_report.title'))
 
 @section('content')
     @php $empRole = strtolower(Auth::guard('employee')->user()->role ?? 'manager'); @endphp
@@ -9,8 +9,8 @@
 
             <div class="page-header">
                 <div class="header-content">
-                    <h1 class="page-title">Stock Report</h1>
-                    <p class="page-subtitle">Monitor stock movement in your outlet</p>
+                    <h1 class="page-title">{{ __('messages.owner.stock_report.page_title') }}</h1>
+                    <p class="page-subtitle">{{ __('messages.owner.stock_report.subtitle') }}</p>
                 </div>
             </div>
 
@@ -21,14 +21,16 @@
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label class="form-label-modern">Stock Type</label>
+                                    <label class="form-label-modern">{{ __('messages.owner.stock_report.filter.stock_type') }}</label>
                                     <div class="select-wrapper">
                                         <select name="stock_type" class="form-control-modern">
-                                            <option value="">All Types</option>
-                                            <option value="direct"
-                                                {{ request('stock_type') == 'direct' ? 'selected' : '' }}>Direct</option>
-                                            <option value="linked"
-                                                {{ request('stock_type') == 'linked' ? 'selected' : '' }}>Linked</option>
+                                            <option value="">{{ __('messages.owner.stock_report.filter.all_types') }}</option>
+                                            <option value="direct" {{ request('stock_type') == 'direct' ? 'selected' : '' }}>
+                                                {{ __('messages.owner.stock_report.filter.direct') }}
+                                            </option>
+                                            <option value="linked" {{ request('stock_type') == 'linked' ? 'selected' : '' }}>
+                                                {{ __('messages.owner.stock_report.filter.linked') }}
+                                            </option>
                                         </select>
                                         <span class="material-symbols-outlined select-arrow">expand_more</span>
                                     </div>
@@ -36,7 +38,7 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label class="form-label-modern">Month</label>
+                                    <label class="form-label-modern">{{ __('messages.owner.stock_report.filter.month') }}</label>
                                     <input type="month" name="month" class="form-control-modern"
                                         value="{{ request('month') }}" max="{{ date('Y-m') }}">
                                 </div>
@@ -44,7 +46,7 @@
                             <div class="col-md-4 d-flex align-items-end">
                                 <div class="form-group">
                                     <button type="submit" class="btn-modern btn-primary-modern">
-                                        Apply Filter
+                                        {{ __('messages.owner.stock_report.filter.apply_filter') }}
                                     </button>
                                 </div>
                             </div>
@@ -63,13 +65,13 @@
                                     <span class="material-symbols-outlined">search</span>
                                 </span>
                                 <input type="text" id="searchInput" class="form-control-modern with-icon"
-                                    placeholder="Search stock name or code...">
+                                    placeholder="{{ __('messages.owner.stock_report.table.search_placeholder') }}">
                             </div>
                         </div>
                         <a href="{{ route('employee.' . $empRole . '.report.stocks.export', request()->all()) }}"
                             class="btn-modern btn-sm-modern btn-success-modern">
                             <span class="material-symbols-outlined">download</span>
-                            Export Excel
+                            {{ __('messages.owner.stock_report.table.export_excel') }}
                         </a>
                     </div>
                 </div>
@@ -81,11 +83,11 @@
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th class="text-center" style="width: 60px;">#</th>
-                                <th>Stock Name / Code</th>
-                                <th class="text-end"><span class="text-success">Total In</span></th>
-                                <th class="text-end"><span class="text-danger">Total Out</span></th>
-                                <th class="text-center" style="width: 120px;">Action</th>
+                                <th class="text-center" style="width: 60px;">{{ __('messages.owner.stock_report.table.number') }}</th>
+                                <th>{{ __('messages.owner.stock_report.table.stock_name_code') }}</th>
+                                <th class="text-end"><span class="text-success">{{ __('messages.owner.stock_report.table.total_in') }}</span></th>
+                                <th class="text-end"><span class="text-danger">{{ __('messages.owner.stock_report.table.total_out') }}</span></th>
+                                <th class="text-center" style="width: 120px;">{{ __('messages.owner.stock_report.table.action') }}</th>
                             </tr>
                         </thead>
                         <tbody id="stockTableBody">
@@ -98,19 +100,18 @@
                                         <div class="text-muted small mono">{{ $stock->stock_code }}</div>
                                     </td>
                                     <td class="text-end">
-                                        <span
-                                            class="fw-600 text-success">{{ number_format($stock->lifetime_in, 2) }}</span>
+                                        <span class="fw-600 text-success">{{ number_format($stock->lifetime_in, 2) }}</span>
                                         <span class="text-muted small">{{ $stock->displayUnit->unit_name ?? 'N/A' }}</span>
                                     </td>
                                     <td class="text-end">
-                                        <span
-                                            class="fw-600 text-danger">{{ number_format($stock->lifetime_out, 2) }}</span>
+                                        <span class="fw-600 text-danger">{{ number_format($stock->lifetime_out, 2) }}</span>
                                         <span class="text-muted small">{{ $stock->displayUnit->unit_name ?? 'N/A' }}</span>
                                     </td>
                                     <td class="text-center">
                                         <div class="table-actions">
                                             <a href="{{ route('employee.' . $empRole . '.report.stocks.movement', ['stock' => $stock->stock_code, 'month' => request('month'), 'stock_type' => request('stock_type')]) }}"
-                                                class="btn-table-action view" title="View Movement">
+                                                class="btn-table-action view"
+                                                title="{{ __('messages.owner.stock_report.table.detail_button') }}">
                                                 <span class="material-symbols-outlined">visibility</span>
                                             </a>
                                         </div>
@@ -121,7 +122,7 @@
                                     <td colspan="5" class="text-center">
                                         <div class="table-empty-state">
                                             <span class="material-symbols-outlined">inventory_2</span>
-                                            <h4>No stock data found</h4>
+                                            <h4>{{ __('messages.owner.stock_report.table.no_data') }}</h4>
                                             <p>Try adjusting your filters.</p>
                                         </div>
                                     </td>
@@ -132,7 +133,7 @@
                                 <td colspan="5" class="text-center">
                                     <div class="table-empty-state">
                                         <span class="material-symbols-outlined">search_off</span>
-                                        <h4>No results found</h4>
+                                        <h4>{{ __('messages.owner.stock_report.table.no_result') }}</h4>
                                         <p>No results for "<span id="searchKeyword"></span>"</p>
                                     </div>
                                 </td>
