@@ -68,10 +68,19 @@
                     $employee = auth('employee')->user();
                     $isActive = $employee && $employee->is_active;
                     $empRole = strtolower($employee->role ?? 'manager');
+
+                    // Helper untuk mengecek grup akses
+                    $hasAnyProductAccess = $employee->hasMenuAccess('products') ||
+                        $employee->hasMenuAccess('stocks') ||
+                        $employee->hasMenuAccess('categories') ||
+                        $employee->hasMenuAccess('promotions');
+
+                    $hasAnyReportAccess = $employee->hasMenuAccess('report_sales') ||
+                        $employee->hasMenuAccess('report_stocks');
                 @endphp
 
+                {{-- DASHBOARD  --}}
                 <div class="nav-section-title">{{ __('messages.owner.layout.dashboard') ?? 'Dashboard' }}</div>
-
                 <div class="nav-item">
                     <a href="{{ $isActive ? route("employee.{$empRole}.dashboard") : 'javascript:void(0)' }}"
                         class="nav-link {{ !$isActive ? 'disabled-link' : '' }} @if (Route::is("employee.{$empRole}.dashboard")) active @endif">
@@ -80,129 +89,128 @@
                     </a>
                 </div>
 
+                {{-- USER MANAGEMENT (EMPLOYEES) --}}
+                @if($employee->hasMenuAccess('employees'))
+                    <div class="nav-section-title">{{ __('messages.owner.layout.user_management') ?? 'User Management' }}
+                    </div>
 
-                <div class="nav-section-title">{{ __('messages.owner.layout.user_management') ?? 'User Management' }}
-                </div>
-
-                @php
-                    $employeeRoutes = ["employee.{$empRole}.employees.*"];
-                @endphp
-
-                <div class="nav-item {{ Route::is($employeeRoutes) ? 'menu-open' : '' }}">
-                    <a href="javascript:void(0)"
-                        class="nav-link {{ !$isActive ? 'disabled-link' : '' }} {{ Route::is($employeeRoutes) ? 'active' : '' }}"
-                        onclick="{{ !$isActive ? '' : 'toggleSubmenu(this)' }}">
-                        <span class="material-symbols-outlined">group</span>
-                        <span>{{ __('messages.owner.layout.employees') ?? 'Employees' }}</span>
-                        <span class="material-symbols-outlined expand-icon">expand_more</span>
-                    </a>
-                    <div class="nav-treeview {{ !$isActive ? 'disabled' : '' }}">
-                        <div class="nav-item">
-                            <a href="{{ $isActive ? route('employee.' . $empRole . '.employees.index') : 'javascript:void(0)' }}"
-                                class="nav-link {{ Route::is("employee.{$empRole}.employees.*") ? 'active' : '' }}">
-                                <span>{{ __('messages.owner.layout.employees') ?? 'All Employees' }}</span>
-                            </a>
+                    @php $employeeRoutes = ["employee.{$empRole}.employees.*"]; @endphp
+                    <div class="nav-item {{ Route::is($employeeRoutes) ? 'menu-open' : '' }}">
+                        <a href="javascript:void(0)"
+                            class="nav-link {{ !$isActive ? 'disabled-link' : '' }} {{ Route::is($employeeRoutes) ? 'active' : '' }}"
+                            onclick="{{ !$isActive ? '' : 'toggleSubmenu(this)' }}">
+                            <span class="material-symbols-outlined">group</span>
+                            <span>{{ __('messages.owner.layout.employees') ?? 'Employees' }}</span>
+                            <span class="material-symbols-outlined expand-icon">expand_more</span>
+                        </a>
+                        <div class="nav-treeview {{ !$isActive ? 'disabled' : '' }}">
+                            <div class="nav-item">
+                                <a href="{{ $isActive ? route('employee.' . $empRole . '.employees.index') : 'javascript:void(0)' }}"
+                                    class="nav-link {{ Route::is("employee.{$empRole}.employees.*") ? 'active' : '' }}">
+                                    <span>{{ __('messages.owner.layout.employees') ?? 'All Employees' }}</span>
+                                </a>
+                            </div>
                         </div>
                     </div>
-                </div>
+                @endif
 
+                {{-- PRODUCTS GROUP --}}
+                @if($hasAnyProductAccess)
+                    @php
+                        $allProductRoutes = [
+                            "employee.{$empRole}.products.*",
+                            "employee.{$empRole}.categories.*",
+                            "employee.{$empRole}.promotions.*",
+                            "employee.{$empRole}.stocks.*",
+                        ];
+                    @endphp
 
-                @php
-                    $allProductRoutes = [
-                        "employee.{$empRole}.products.*",
-                        "employee.{$empRole}.categories.*",
-                        "employee.{$empRole}.promotions.*",
-                        "employee.{$empRole}.stocks.*",
-                    ];
-                @endphp
+                    <div class="nav-item {{ Route::is($allProductRoutes) ? 'menu-open' : '' }}">
+                        <a href="javascript:void(0)"
+                            class="nav-link {{ !$isActive ? 'disabled-link' : '' }} {{ Route::is($allProductRoutes) ? 'active' : '' }}"
+                            onclick="{{ !$isActive ? '' : 'toggleSubmenu(this)' }}">
+                            <span class="material-symbols-outlined">inventory_2</span>
+                            <span>{{ __('messages.owner.layout.products') ?? 'Products' }}</span>
+                            <span class="material-symbols-outlined expand-icon">expand_more</span>
+                        </a>
+                        <div class="nav-treeview {{ !$isActive ? 'disabled' : '' }}">
 
-                <div class="nav-item {{ Route::is($allProductRoutes) ? 'menu-open' : '' }}">
-                    <a href="javascript:void(0)"
-                        class="nav-link {{ !$isActive ? 'disabled-link' : '' }} {{ Route::is($allProductRoutes) ? 'active' : '' }}"
-                        onclick="{{ !$isActive ? '' : 'toggleSubmenu(this)' }}">
-                        <span class="material-symbols-outlined">inventory_2</span>
-                        <span>{{ __('messages.owner.layout.products') ?? 'Products' }}</span>
-                        <span class="material-symbols-outlined expand-icon">expand_more</span>
-                    </a>
-                    <div class="nav-treeview {{ !$isActive ? 'disabled' : '' }}">
-                        <div class="nav-item">
-                            <a href="{{ route("employee.{$empRole}.products.index")}}"
-                                class="nav-link {{ Route::is("employee.{$empRole}.products.*") ? 'active' : '' }}">
-                                <span>Products</span>
-                            </a>
-                        </div>
-                        <div class="nav-item">
-                            <a href="{{ route("employee.{$empRole}.stocks.index") }}"
-                                class="nav-link {{ Route::is("employee.{$empRole}.stocks.*") ? 'active' : '' }}">
-                                <span>{{ __('messages.owner.layout.stocks') ?? 'Stocks' }}</span>
-                            </a>
-                        </div>
-                        <div class="nav-item">
-                            <a href="{{route("employee.{$empRole}.categories.index")}}"
-                                class="nav-link {{ Route::is("employee.{$empRole}.categories.*") ? 'active' : '' }}">
-                                <span>{{ __('messages.owner.layout.categories') ?? 'Categories' }}</span>
-                            </a>
-                        </div>
-                        <div class="nav-item">
-                            <a href="{{route("employee.{$empRole}.promotions.index")}}"
-                                class="nav-link {{ Route::is("employee.{$empRole}.promotions.*") ? 'active' : '' }}">
-                                <span>{{ __('messages.owner.layout.promotions') ?? 'Promotions' }}</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
+                            @if($employee->hasMenuAccess('products'))
+                                <div class="nav-item">
+                                    <a href="{{ route("employee.{$empRole}.products.index")}}"
+                                        class="nav-link {{ Route::is("employee.{$empRole}.products.*") ? 'active' : '' }}">
+                                        <span>Products</span>
+                                    </a>
+                                </div>
+                            @endif
 
-                @php
-                    $paymentMethodRoutes = ["employee.{$empRole}.payment-methods.*"];
-                @endphp
+                            @if($employee->hasMenuAccess('stocks'))
+                                <div class="nav-item">
+                                    <a href="{{ route("employee.{$empRole}.stocks.index") }}"
+                                        class="nav-link {{ Route::is("employee.{$empRole}.stocks.*") ? 'active' : '' }}">
+                                        <span>{{ __('messages.owner.layout.stocks') ?? 'Stocks' }}</span>
+                                    </a>
+                                </div>
+                            @endif
 
-                <div class="nav-item {{ Route::is($paymentMethodRoutes) ? 'menu-open' : '' }}">
-                    <a href="javascript:void(0)"
-                        class="nav-link {{ !$isActive ? 'disabled-link' : '' }} {{ Route::is($paymentMethodRoutes) ? 'active' : '' }}"
-                        onclick="{{ !$isActive ? '' : 'toggleSubmenu(this)' }}">
-                        <span class="material-symbols-outlined">payment</span>
-                        <span>{{ __('messages.owner.layout.payment_methods') ?? 'Payment Methods' }}</span>
-                        <span class="material-symbols-outlined expand-icon">expand_more</span>
-                    </a>
-                    <div class="nav-treeview {{ !$isActive ? 'disabled' : '' }}">
-                        <div class="nav-item">
-                            <a href="{{-- route(" employee.{$empRole}.payment-methods.index") --}}"
-                                class="nav-link {{ Route::is("employee.{$empRole}.payment-methods.*") ? 'active' : '' }}">
-                                <span>{{ __('messages.owner.layout.all_payment_methods') ?? 'All Payment Methods' }}</span>
-                            </a>
+                            @if($employee->hasMenuAccess('categories'))
+                                <div class="nav-item">
+                                    <a href="{{route("employee.{$empRole}.categories.index")}}"
+                                        class="nav-link {{ Route::is("employee.{$empRole}.categories.*") ? 'active' : '' }}">
+                                        <span>{{ __('messages.owner.layout.categories') ?? 'Categories' }}</span>
+                                    </a>
+                                </div>
+                            @endif
+
+                            @if($employee->hasMenuAccess('promotions'))
+                                <div class="nav-item">
+                                    <a href="{{route("employee.{$empRole}.promotions.index")}}"
+                                        class="nav-link {{ Route::is("employee.{$empRole}.promotions.*") ? 'active' : '' }}">
+                                        <span>{{ __('messages.owner.layout.promotions') ?? 'Promotions' }}</span>
+                                    </a>
+                                </div>
+                            @endif
                         </div>
                     </div>
-                </div>
+                @endif
 
-                @php
-                    $settingRoutes = ["employee.{$empRole}.settings.*"];
-                @endphp
+                {{-- SETTINGS --}}
+                @if($employee->hasMenuAccess('settings'))
+                    @php $settingRoutes = ["employee.{$empRole}.settings.*"]; @endphp
+                    <div class="nav-item">
+                        <a href="{{ route('employee.' . $empRole . '.settings.index') }}"
+                            class="nav-link {{ !$isActive ? 'disabled-link' : '' }} {{ Route::is($settingRoutes) ? 'active' : '' }}">
+                            <span class="material-symbols-outlined">settings</span>
+                            <span>{{ __('messages.owner.layout.settings') ?? 'Settings' }}</span>
+                        </a>
+                    </div>
+                @endif
 
-                <div class="nav-item">
-                    <a href="{{ route('employee.' . $empRole . '.settings.index') }}"
-                        class="nav-link {{ !$isActive ? 'disabled-link' : '' }} {{ Route::is($settingRoutes) ? 'active' : '' }}">
-                        <span class="material-symbols-outlined">settings</span>
-                        <span>{{ __('messages.owner.layout.settings') ?? 'Settings' }}</span>
-                    </a>
-                </div>
+                {{-- REPORTS GROUP --}}
+                @if($hasAnyReportAccess)
+                    <div class="nav-section-title">{{ __('messages.owner.layout.reports') ?? 'Reports' }}</div>
 
-                <div class="nav-section-title">{{ __('messages.owner.layout.reports') ?? 'Reports' }}</div>
+                    @if($employee->hasMenuAccess('report_sales'))
+                        <div class="nav-item">
+                            <a href="{{ $isActive ? route("employee.{$empRole}.report.sales.index") : 'javascript:void(0)' }}"
+                                class="nav-link {{ !$isActive ? 'disabled-link' : '' }} {{ Route::is("employee.{$empRole}.report.sales.*") ? 'active' : '' }}">
+                                <span class="material-symbols-outlined">payments</span>
+                                <span>{{ __('messages.owner.layout.sales_report') ?? 'Sales Report' }}</span>
+                            </a>
+                        </div>
+                    @endif
 
-                <div class="nav-item">
-                    <a href="{{ $isActive ? route("employee.{$empRole}.report.sales.index") : 'javascript:void(0)' }}"
-                        class="nav-link {{ !$isActive ? 'disabled-link' : '' }} {{ Route::is("employee.{$empRole}.report.sales.*") ? 'active' : '' }}">
-                        <span class="material-symbols-outlined">payments</span>
-                        <span>{{ __('messages.owner.layout.sales_report') ?? 'Sales Report' }}</span>
-                    </a>
-                </div>
+                    @if($employee->hasMenuAccess('report_stocks'))
+                        <div class="nav-item">
+                            <a href="{{ $isActive ? route('employee.' . $empRole . '.report.stocks.index') : 'javascript:void(0)' }}"
+                                class="nav-link {{ !$isActive ? 'disabled-link' : '' }} {{ Route::is("employee.{$empRole}.report.stocks.*") ? 'active' : '' }}">
+                                <span class="material-symbols-outlined">receipt_long</span>
+                                <span>{{ __('messages.owner.layout.stock_report') ?? 'Stock Report' }}</span>
+                            </a>
+                        </div>
+                    @endif
+                @endif
 
-                <div class="nav-item">
-                    <a href="{{ $isActive ? route('employee.' . $empRole . '.report.stocks.index') : 'javascript:void(0)' }}"
-                        class="nav-link {{ !$isActive ? 'disabled-link' : '' }} {{ Route::is("employee.{$empRole}.report.stocks.*") ? 'active' : '' }}">
-                        <span class="material-symbols-outlined">receipt_long</span>
-                        <span>{{ __('messages.owner.layout.stock_report') ?? 'Stock Report' }}</span>
-                    </a>
-                </div>
             </nav>
         </aside>
 
@@ -341,8 +349,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
-    <script src="{{ asset('js/image-cropper.js') }}"></script> 
-    <script src="{{ asset('js/remove-image.js') }}"></script> 
+    <script src="{{ asset('js/image-cropper.js') }}"></script>
+    <script src="{{ asset('js/remove-image.js') }}"></script>
 
     <script>
         // Toggle Sidebar (Desktop)
@@ -359,7 +367,7 @@
         }
 
         // Close sidebar when clicking overlay
-        document.getElementById('sidebarOverlay').addEventListener('click', function() {
+        document.getElementById('sidebarOverlay').addEventListener('click', function () {
             toggleSidebar();
         });
 
@@ -371,7 +379,7 @@
         }
 
         // Initialize plugins
-        $(function() {
+        $(function () {
             // DataTables
             $('.datatable').DataTable({
                 "paging": true,
@@ -421,59 +429,59 @@
 
     <!-- NOTIFICATION SCRIPT -->
     <script>
-    $(document).ready(function () {
-        let currentPage = 1;
-        let lastPage    = 1;
-        let isLoading   = false;
+        $(document).ready(function () {
+            let currentPage = 1;
+            let lastPage = 1;
+            let isLoading = false;
 
-        $('#notificationBtn').on('click', function () {
-            if ($('#notificationContent').children('.notification-item').length === 0) {
-                loadNotifications(1);
-            }
-        });
-
-        function loadNotifications(page = 1) {
-            if (isLoading) return;
-            isLoading = true;
-            $('#notificationLoading').show();
-
-            $.ajax({
-                url: '{{ route("employee.{$empRole}.messages.notifications") }}',
-                method: 'GET',
-                data: { page: page },
-                success: function (response) {
-                    if (response.success) {
-                        currentPage = response.pagination.current_page;
-                        lastPage    = response.pagination.last_page;
-
-                        updateBadge(response.unread_count);
-                        $('#notificationLoading').hide();
-
-                        if (response.messages.length === 0 && page === 1) {
-                            showEmptyState();
-                        } else {
-                            if (page === 1) $('#notificationContent').empty();
-                            renderNotifications(response.messages);
-                            $('#notificationDivider').show();
-                            $('#notificationFooter').show();
-                        }
-                    }
-                },
-                error: function () {
-                    $('#notificationLoading').hide();
-                    toastr.error('Gagal memuat notifikasi');
-                },
-                complete: function () { isLoading = false; }
+            $('#notificationBtn').on('click', function () {
+                if ($('#notificationContent').children('.notification-item').length === 0) {
+                    loadNotifications(1);
+                }
             });
-        }
 
-        function renderNotifications(messages) {
-            messages.forEach(function (message) {
-                const isRead   = message.recipients && message.recipients.length > 0 && message.recipients[0].is_read;
-                const timeAgo  = formatTimeAgo(message.created_at);
-                const msgUrl   = '{{ route("employee.{$empRole}.messages.show", ":id") }}'.replace(':id', message.id);
+            function loadNotifications(page = 1) {
+                if (isLoading) return;
+                isLoading = true;
+                $('#notificationLoading').show();
 
-                const html = `
+                $.ajax({
+                    url: '{{ route("employee.{$empRole}.messages.notifications") }}',
+                    method: 'GET',
+                    data: { page: page },
+                    success: function (response) {
+                        if (response.success) {
+                            currentPage = response.pagination.current_page;
+                            lastPage = response.pagination.last_page;
+
+                            updateBadge(response.unread_count);
+                            $('#notificationLoading').hide();
+
+                            if (response.messages.length === 0 && page === 1) {
+                                showEmptyState();
+                            } else {
+                                if (page === 1) $('#notificationContent').empty();
+                                renderNotifications(response.messages);
+                                $('#notificationDivider').show();
+                                $('#notificationFooter').show();
+                            }
+                        }
+                    },
+                    error: function () {
+                        $('#notificationLoading').hide();
+                        toastr.error('Gagal memuat notifikasi');
+                    },
+                    complete: function () { isLoading = false; }
+                });
+            }
+
+            function renderNotifications(messages) {
+                messages.forEach(function (message) {
+                    const isRead = message.recipients && message.recipients.length > 0 && message.recipients[0].is_read;
+                    const timeAgo = formatTimeAgo(message.created_at);
+                    const msgUrl = '{{ route("employee.{$empRole}.messages.show", ":id") }}'.replace(':id', message.id);
+
+                    const html = `
                     <a href="${msgUrl}" class="notification-item ${!isRead ? 'unread' : ''}"
                         data-id="${message.id}" style="text-decoration:none;color:inherit;display:block;">
                         <div class="d-flex">
@@ -486,98 +494,98 @@
                             </div>
                         </div>
                     </a>`;
-                $('#notificationContent').append(html);
-            });
-        }
+                    $('#notificationContent').append(html);
+                });
+            }
 
-        function showEmptyState() {
-            $('#notificationContent').html(`
+            function showEmptyState() {
+                $('#notificationContent').html(`
                 <div class="notification-empty">
                     <span class="material-symbols-outlined">notifications_off</span>
                     <div style="font-size:14px;font-weight:500;">Tidak ada notifikasi</div>
                     <div style="font-size:12px;margin-top:4px;">Semua sudah terbaca!</div>
                 </div>`);
-            $('#notificationDivider').hide();
-            $('#notificationFooter').hide();
-        }
-
-        function updateBadge(count) {
-            if (count > 0) {
-                $('#notificationBadge').text(count > 99 ? '99+' : count).show();
-                $('#markAllReadBtn').show();
-                $('#notificationTitle').text(`${count} Pesan belum terbaca`);
-            } else {
-                $('#notificationBadge').hide();
-                $('#markAllReadBtn').hide();
-                $('#notificationTitle').text('Pesan');
+                $('#notificationDivider').hide();
+                $('#notificationFooter').hide();
             }
-        }
 
-        $(document).on('click', '.notification-item', function (e) {
-            const id   = $(this).data('id');
-            const $item = $(this);
-            const url  = $(this).attr('href');
+            function updateBadge(count) {
+                if (count > 0) {
+                    $('#notificationBadge').text(count > 99 ? '99+' : count).show();
+                    $('#markAllReadBtn').show();
+                    $('#notificationTitle').text(`${count} Pesan belum terbaca`);
+                } else {
+                    $('#notificationBadge').hide();
+                    $('#markAllReadBtn').hide();
+                    $('#notificationTitle').text('Pesan');
+                }
+            }
 
-            if ($item.hasClass('unread')) {
+            $(document).on('click', '.notification-item', function (e) {
+                const id = $(this).data('id');
+                const $item = $(this);
+                const url = $(this).attr('href');
+
+                if ($item.hasClass('unread')) {
+                    e.preventDefault();
+                    $.ajax({
+                        url: '{{ route("employee.{$empRole}.messages.mark-read", ":id") }}'.replace(':id', id),
+                        method: 'POST',
+                        data: { _token: '{{ csrf_token() }}' },
+                        success: function (response) {
+                            if (response.success) {
+                                $item.removeClass('unread');
+                                updateBadge(response.unread_count);
+                                window.location.href = url;
+                            }
+                        },
+                        error: function () { window.location.href = url; }
+                    });
+                }
+            });
+
+            $('#markAllReadBtn').on('click', function (e) {
                 e.preventDefault();
+                e.stopPropagation();
                 $.ajax({
-                    url: '{{ route("employee.{$empRole}.messages.mark-read", ":id") }}'.replace(':id', id),
+                    url: '{{ route("employee.{$empRole}.messages.mark-all-read") }}',
                     method: 'POST',
                     data: { _token: '{{ csrf_token() }}' },
                     success: function (response) {
                         if (response.success) {
-                            $item.removeClass('unread');
-                            updateBadge(response.unread_count);
-                            window.location.href = url;
+                            $('.notification-item').removeClass('unread');
+                            updateBadge(0);
+                            toastr.success('Semua pesan telah ditandai terbaca');
                         }
                     },
-                    error: function () { window.location.href = url; }
+                    error: function () { toastr.error('Gagal menandai pesan'); }
                 });
-            }
-        });
-
-        $('#markAllReadBtn').on('click', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            $.ajax({
-                url: '{{ route("employee.{$empRole}.messages.mark-all-read") }}',
-                method: 'POST',
-                data: { _token: '{{ csrf_token() }}' },
-                success: function (response) {
-                    if (response.success) {
-                        $('.notification-item').removeClass('unread');
-                        updateBadge(0);
-                        toastr.success('Semua pesan telah ditandai terbaca');
-                    }
-                },
-                error: function () { toastr.error('Gagal menandai pesan'); }
             });
-        });
 
-        $('.notification-dropdown').on('scroll', function () {
-            if (isLoading || currentPage >= lastPage) return;
-            const scrollTop    = $(this).scrollTop();
-            const scrollHeight = $(this)[0].scrollHeight;
-            const clientHeight = $(this).height();
-            if (scrollTop + clientHeight >= scrollHeight - 50) {
-                loadNotifications(currentPage + 1);
+            $('.notification-dropdown').on('scroll', function () {
+                if (isLoading || currentPage >= lastPage) return;
+                const scrollTop = $(this).scrollTop();
+                const scrollHeight = $(this)[0].scrollHeight;
+                const clientHeight = $(this).height();
+                if (scrollTop + clientHeight >= scrollHeight - 50) {
+                    loadNotifications(currentPage + 1);
+                }
+            });
+
+            function formatTimeAgo(datetime) {
+                const now = new Date();
+                const past = new Date(datetime);
+                const diff = Math.floor((now - past) / 1000);
+                if (diff < 60) return 'Baru saja';
+                if (diff < 3600) return Math.floor(diff / 60) + ' menit lalu';
+                if (diff < 86400) return Math.floor(diff / 3600) + ' jam lalu';
+                if (diff < 604800) return Math.floor(diff / 86400) + ' hari lalu';
+                return past.toLocaleDateString();
             }
+
+            // Load awal
+            loadNotifications(1);
         });
-
-        function formatTimeAgo(datetime) {
-            const now  = new Date();
-            const past = new Date(datetime);
-            const diff = Math.floor((now - past) / 1000);
-            if (diff < 60)     return 'Baru saja';
-            if (diff < 3600)   return Math.floor(diff / 60) + ' menit lalu';
-            if (diff < 86400)  return Math.floor(diff / 3600) + ' jam lalu';
-            if (diff < 604800) return Math.floor(diff / 86400) + ' hari lalu';
-            return past.toLocaleDateString();
-        }
-
-        // Load awal
-        loadNotifications(1);
-    });
     </script>
 
     @yield('scripts')

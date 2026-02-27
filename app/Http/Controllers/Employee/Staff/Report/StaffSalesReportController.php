@@ -52,7 +52,7 @@ class StaffSalesReportController extends Controller
             'routePrefix'        => $context->role_prefix,
         ];
 
-        return view('pages.employee.staff.report.sales-report.index', $data);
+        return view('pages.employee.staff.reports.sales', $data);
     }
 
     public function getTopProductsAjax(Request $request)
