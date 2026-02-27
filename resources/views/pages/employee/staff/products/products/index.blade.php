@@ -208,15 +208,12 @@
             if (!result.isConfirmed) return;
 
             try {
-                // Route dinamis menyesuaikan role
-                const routeName = staffRole + '.products.destroy';
-                let url = "{{ route('employee.manager.products.index', ':id') }}"; // Placeholder
-                
-                // Gunakan URL statis agar aman jika ada perbedaan nama route
-                url = `/${staffRole}/products/${id}`; 
+                // Ambil base URL dari Laravel, lalu gabungkan secara dinamis dengan role dan ID
+                const baseUrl = "{{ url('/') }}"; 
+                const url = `${baseUrl}/employee/${staffRole}/products/${id}`; 
 
                 const formData = new FormData();
-                formData.append('_method', 'DELETE');
+                formData.append('_method', 'DELETE'); // Override method menjadi DELETE
                 
                 const res = await fetch(url, {
                     method: 'POST',
@@ -226,6 +223,7 @@
                     },
                     body: formData
                 });
+                
                 if (res.ok) {
                     await Swal.fire({
                         title: '{{ __('messages.owner.products.outlet_products.success') }}',
