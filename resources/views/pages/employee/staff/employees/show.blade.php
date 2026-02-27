@@ -235,15 +235,4 @@
         </script>
     @endpush
 @endsection
-```
 
----
-
-**Ringkasan struktur folder:**
-```
-resources/views/pages/employee/human-resource/employee/
-├── index.blade.php
-├── display.blade.php
-├── create.blade.php
-├── edit.blade.php
-└── show.blade.php
