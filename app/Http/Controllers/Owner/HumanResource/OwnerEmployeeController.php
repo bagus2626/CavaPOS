@@ -246,13 +246,53 @@ class OwnerEmployeeController extends Controller
 
     public function show(Employee $employee)
     {
-        $data = Employee::where('id', $employee->id)
-            ->first();
-        $partner = User::where('id', $data->partner_id)->first();
-        if ($partner->owner_id != Auth::id()) {
+        $partner = User::where('id', $employee->partner_id)->first();
+        if (!$partner || $partner->owner_id != Auth::id()) {
             abort(403);
         }
-        return view('pages.owner.human-resource.employee.show', compact('data'));
+
+        $availableMenus = config('staff-menus', []);
+
+        $resolvedPermissions = $employee->getResolvedPermissions();
+
+        $data = $employee;
+
+        return view('pages.owner.human-resource.employee.show', compact('data', 'partner', 'availableMenus', 'resolvedPermissions'));
+    }
+
+    /**
+     * Memproses update Hak Akses Menu dari Modal
+     */
+    public function updatePermissions(Request $request, Employee $employee)
+    {
+        $partner = User::where('id', $employee->partner_id)->first();
+        if (!$partner || $partner->owner_id != Auth::id()) {
+            abort(403, 'Akses ditolak.');
+        }
+
+        if (!$employee->isStaff()) {
+            return back()->with('error', 'Pengaturan akses menu hanya berlaku untuk role Manager dan Supervisor.');
+        }
+
+        $request->validate([
+            'permissions'   => 'nullable|array',
+            'permissions.*' => 'string'
+        ]);
+
+        $availableMenus = config('staff-menus', []);
+        $submittedKeys = $request->input('permissions', []);
+
+        $formattedPermissions = [];
+
+        foreach (array_keys($availableMenus) as $menuKey) {
+            $formattedPermissions[$menuKey] = in_array($menuKey, $submittedKeys);
+        }
+
+        $employee->update([
+            'menu_permissions' => $formattedPermissions
+        ]);
+
+        return redirect()->back()->with('success', 'Hak akses menu untuk ' . $employee->name . ' berhasil diperbarui!');
     }
 
     public function edit(Employee $employee)

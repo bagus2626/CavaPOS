@@ -2,18 +2,14 @@
 
 namespace App\Models\Partner\HumanResource;
 
-use Illuminate\Foundation\Auth\User as Authenticatable; // penting
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\User;
 use Laravel\Sanctum\HasApiTokens;
-// use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Employee extends Authenticatable
 {
-    use HasApiTokens, Notifiable; //, HasFactory;
-
-    // Kalau nama tabel default "employees", baris ini bisa dihapus
-    // protected $table = 'employees';
+    use HasApiTokens, Notifiable;
 
     protected $fillable = [
         'name',
@@ -24,6 +20,7 @@ class Employee extends Authenticatable
         'password',
         'is_active',
         'image',
+        'menu_permissions',
     ];
 
     protected $hidden = [
@@ -32,17 +29,51 @@ class Employee extends Authenticatable
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
-        // 'email_verified_at' => 'datetime',
+        'is_active'        => 'boolean',
+        'menu_permissions' => 'array',
     ];
 
-    // Relasi: sesuaikan namespace model Partner-mu yang sebenarnya
     public function partner()
     {
         return $this->belongsTo(User::class, 'partner_id');
     }
 
-    // Opsional: auto-hash password jika diberi plaintext
+    public function isStaff(): bool
+    {
+        return in_array(strtoupper($this->role), ['MANAGER', 'SUPERVISOR']);
+    }
+
+    /**
+     * Cek apakah employee bisa mengakses menu tertentu.
+     */
+    public function hasMenuAccess(string $menuKey): bool
+    {
+        if (!$this->isStaff()) return true;
+
+        $permissions = $this->menu_permissions;
+
+        if (is_null($permissions)) return true;
+
+        return (bool) ($permissions[$menuKey] ?? true);
+    }
+
+    /**
+     * Ambil semua permission sebagai array [key => bool].
+     */
+    public function getResolvedPermissions(): array
+    {
+        $allMenuKeys = array_keys(config('staff-menus', []));
+        $saved       = $this->menu_permissions ?? [];
+        $resolved    = [];
+
+        foreach ($allMenuKeys as $key) {
+            $resolved[$key] = (bool) ($saved[$key] ?? true);
+        }
+
+        return $resolved;
+    }
+
+
     public function setPasswordAttribute($value)
     {
         if ($value && strlen($value) < 60) { // cek kasar: belum di-hash

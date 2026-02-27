@@ -12,7 +12,7 @@ use App\Http\Middleware\RedirectIfAuthenticatedWithRole;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__ . '/../routes/web.php',
-        api: __DIR__.'/../routes/api.php',
+        api: __DIR__ . '/../routes/api.php',
         commands: __DIR__ . '/../routes/console.php',
         health: '/up',
         then: function () {
@@ -34,7 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'customer.access' => \App\Http\Middleware\CustomerAccess::class,
             'employee.access' => \App\Http\Middleware\EmployeeAccess::class,
             'check.table.status' => \App\Http\Middleware\CheckTableStatus::class,
-
+            'staff.permission' => \App\Http\Middleware\CheckStaffPermission::class,
         ]);
 
         $middleware->appendToGroup('web', \Illuminate\Session\Middleware\StartSession::class);
