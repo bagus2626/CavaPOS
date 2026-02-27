@@ -2171,6 +2171,22 @@ return [
             ],
         ],
     ],
+    'staff'=>[
+        'dashboard' => [
+            'title' => 'Staff Dashboard',
+            'page_title' => 'Staff Dashboard',
+            'subtitle' => 'Today\'s sales overview and outlet performance',
+            'stats_sales_today' => 'Today\'s Sales',
+            'active_employees' => 'Active Employees',
+            'paid_orders' => 'Paid Orders',
+            'total_products' => 'Total Products',
+            'sales_trend' => 'Last 7 Days Sales Trend',
+            'top_products' => 'Top 5 Products (This Month)',
+            'performance_this_month' => 'Performance Per Category (This Month)',
+            'best_performing' => 'Best Performing',
+            'lowest_performing' => 'Lowest Performing',
+        ],    
+    ],
     'partner' => [
         'auth' => [
             'login' => [

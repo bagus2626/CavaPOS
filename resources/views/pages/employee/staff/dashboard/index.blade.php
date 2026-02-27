@@ -8,8 +8,8 @@
 
         <div class="page-header">
             <div class="header-content">
-                <h1 class="page-title">Dashboard</h1>
-                <p class="page-subtitle">Overview penjualan dan performa outlet hari ini</p>
+                <h1 class="page-title">{{ __('messages.staff.dashboard.page_title') }}</h1>
+                <p class="page-subtitle">{{ __('messages.staff.dashboard.subtitle') }}</p>
             </div>
         </div>
 
@@ -35,7 +35,7 @@
                         <span class="material-symbols-outlined">payments</span>
                     </div>
                     <div class="stats-content">
-                        <div class="stats-label">Penjualan Hari Ini</div>
+                        <div class="stats-label">{{ __('messages.staff.dashboard.stats_sales_today') }}</div>
                         <div class="stats-value">Rp {{ number_format($data['today_sales'], 0, ',', '.') }}</div>
                     </div>
                 </div>
@@ -47,7 +47,7 @@
                         <span class="material-symbols-outlined">group</span>
                     </div>
                     <div class="stats-content">
-                        <div class="stats-label">Karyawan Aktif</div>
+                        <div class="stats-label">{{ __('messages.staff.dashboard.active_employees') }}</div>
                         <div class="stats-value">{{ $data['total_employees_active'] }}</div>
                     </div>
                 </div>
@@ -59,7 +59,7 @@
                         <span class="material-symbols-outlined">receipt_long</span>
                     </div>
                     <div class="stats-content">
-                        <div class="stats-label">Pesanan Hari Ini</div>
+                        <div class="stats-label">{{ __('messages.staff.dashboard.paid_orders') }}</div>
                         <div class="stats-value">{{ number_format($data['today_orders_paid']) }}</div>
                     </div>
                 </div>
@@ -71,7 +71,7 @@
                         <span class="material-symbols-outlined">inventory_2</span>
                     </div>
                     <div class="stats-content">
-                        <div class="stats-label">Total Produk</div>
+                        <div class="stats-label">{{ __('messages.staff.dashboard.total_products') }}</div>
                         <div class="stats-value">{{ number_format($data['total_products']) }}</div>
                     </div>
                 </div>
@@ -87,7 +87,7 @@
                             <div class="section-icon section-icon-red">
                                 <span class="material-symbols-outlined">trending_up</span>
                             </div>
-                            <h3 class="section-title">Tren Penjualan 7 Hari</h3>
+                            <h3 class="section-title">{{ __('messages.staff.dashboard.sales_trend') }}</h3>
                         </div>
                     </div>
                     <div class="card-body-modern">
@@ -103,7 +103,7 @@
                             <div class="section-icon section-icon-red">
                                 <span class="material-symbols-outlined">star</span>
                             </div>
-                            <h3 class="section-title">Top 5 Produk</h3>
+                            <h3 class="section-title">{{ __('messages.staff.dashboard.top_products') }}</h3>
                         </div>
                     </div>
                     <div class="card-body-modern">
@@ -122,13 +122,13 @@
                             <div class="section-icon section-icon-red">
                                 <span class="material-symbols-outlined">leaderboard</span>
                             </div>
-                            <h3 class="section-title">Performa Kategori Bulan Ini</h3>
+                            <h3 class="section-title">{{ __('messages.staff.dashboard.performance_this_month') }}</h3>
                         </div>
                         <div class="chart-filter-group">
                             <div class="select-wrapper">
                                 <select id="categoryFilterType" class="form-control-modern">
-                                    <option value="top">Terbaik</option>
-                                    <option value="bottom">Terendah</option>
+                                    <option value="top">{{ __('messages.staff.dashboard.best_performing') }}</option>
+                                    <option value="bottom">{{ __('messages.staff.dashboard.lowest_performing') }}</option>
                                 </select>
                                 <span class="material-symbols-outlined select-arrow">expand_more</span>
                             </div>

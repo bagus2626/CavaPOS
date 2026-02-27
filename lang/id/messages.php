@@ -2174,6 +2174,22 @@ return [
             ],
         ],
     ],
+    'staff' => [
+        'dashboard' => [
+            'title' => 'Dashboard staff',
+            'page_title' => 'Dashboard staff',
+            'subtitle' => 'Overview penjualan dan performa outlet hari ini',
+            'stats_sales_today' => 'Penjualan Hari Ini',
+            'active_employees' => 'Pegawai Aktif',
+            'paid_orders' => 'Pesanan Dibayar',
+            'total_products' => 'Total Produk',
+            'sales_trend' => 'Trend Penjualan 7 Hari Terakhir',
+            'top_products' => 'Top 5 Produk (Bulan Ini)',
+            'performance_this_month' => 'Performa Per Kategori (Bulan Ini)',
+            'best_performing' => 'Terbaik',
+            'lowest_performing' => 'Terburuk',
+        ],
+    ],
     'partner' => [
         'auth' => [
             'login' => [

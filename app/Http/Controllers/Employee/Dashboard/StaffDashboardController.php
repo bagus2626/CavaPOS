@@ -24,6 +24,7 @@ class StaffDashboardController extends Controller
 
         $total_employees_active = Employee::where('partner_id', $partnerId)
             ->where('is_active', 1)
+            ->where('id', '!=', $employeeId)
             ->count();
 
         $total_products = PartnerProduct::where('partner_id', $partnerId)->count();
