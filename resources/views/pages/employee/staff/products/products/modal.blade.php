@@ -58,7 +58,7 @@
 {{-- 2. MODAL FORM DARI MASTER PRODUCT (Kode Anda sebelumnya) --}}
 <div class="modal fade" id="addFromMasterModal" tabindex="-1" aria-labelledby="addFromMasterModalLabel"
     aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <form id="outletProductQuickAddForm" method="POST"
             action="{{ route('employee.' . $staffRoutePrefix . '.products.store') }}"
             class="modal-content modern-modal">

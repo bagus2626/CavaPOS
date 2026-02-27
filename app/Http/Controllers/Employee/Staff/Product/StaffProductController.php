@@ -1034,7 +1034,7 @@ class StaffProductController extends Controller
         $product = PartnerProduct::where('partner_id', $context->partner_id)->findOrFail($id);
         $product->delete();
 
-        return redirect()->route("{$routePrefix}.products.index")->with('success', 'Product deleted successfully!');
+        return redirect()->route("employee.{$routePrefix}.products.index")->with('success', 'Product deleted successfully!');
     }
 
     private function generateUniqueStockCode(): string
