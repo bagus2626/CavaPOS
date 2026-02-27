@@ -1,5 +1,5 @@
 @extends('layouts.staff')
-@section('title', 'Employee List')
+@section('title', __('messages.owner.user_management.employees.employee_list'))
 
 @section('content')
     <style>
@@ -15,8 +15,8 @@
 
             <div class="page-header">
                 <div class="header-content">
-                    <h1 class="page-title">All Employees</h1>
-                    <p class="page-subtitle">Manage your team members</p>
+                    <h1 class="page-title">{{ __('messages.owner.user_management.employees.all_employees') }}</h1>
+                    <p class="page-subtitle">{{ __('messages.owner.user_management.employees.manage_team_subtitle') }}</p>
                 </div>
             </div>
 
@@ -45,19 +45,17 @@
                                         <span class="material-symbols-outlined">search</span>
                                     </span>
                                     <input type="text" name="q" value="{{ request('q') }}"
-                                        class="form-control-modern with-icon" placeholder="Search employees..."
+                                        class="form-control-modern with-icon"
+                                        placeholder="{{ __('messages.owner.user_management.employees.search_placeholder') }}"
                                         oninput="searchFilter(this, 600)">
                                 </div>
                             </div>
-                            {{-- Hanya tampilkan tombol Add jika role adalah manager --}}
                             @php $empRole = strtolower(Auth::guard('employee')->user()->role ?? 'manager'); @endphp
-                            @if ($empRole === 'manager')
-                                <a href="{{ route('employee.' . $empRole . '.employees.create') }}"
-                                    class="btn-modern btn-primary-modern">
-                                    <span class="material-symbols-outlined">add</span>
-                                    Add Employee
-                                </a>
-                            @endif
+                            <a href="{{ route('employee.' . $empRole . '.employees.create') }}"
+                                class="btn-modern btn-primary-modern">
+                                <span class="material-symbols-outlined">add</span>
+                                {{ __('messages.owner.user_management.employees.add_employee') }}
+                            </a>
                         </div>
                     </form>
                 </div>
@@ -82,14 +80,14 @@
         function deleteEmployee(employeeId) {
             @php $empRole = strtolower(Auth::guard('employee')->user()->role ?? 'manager'); @endphp
             Swal.fire({
-                title: 'Delete this employee?',
-                text: 'This action cannot be undone.',
+                title: '{{ __('messages.owner.user_management.employees.delete_confirmation_1') }}',
+                text: '{{ __('messages.owner.user_management.employees.delete_confirmation_2') }}',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#b3311d',
                 cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, delete',
-                cancelButtonText: 'Cancel'
+                confirmButtonText: '{{ __('messages.owner.user_management.employees.delete_confirmation_3') }}',
+                cancelButtonText: '{{ __('messages.owner.user_management.employees.cancel') }}'
             }).then((result) => {
                 if (result.isConfirmed) {
                     const form = document.createElement('form');

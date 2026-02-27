@@ -1,5 +1,5 @@
 @extends('layouts.staff')
-@section('title', 'Profile Settings')
+@section('title', __('messages.owner.settings.settings.profile_settings'))
 
 @section('content')
 @php
@@ -18,8 +18,8 @@
 
         <div class="page-header">
             <div class="header-content">
-                <h1 class="page-title">Profile Settings</h1>
-                <p class="page-subtitle">View and manage your account information</p>
+                <h1 class="page-title">{{ __('messages.owner.settings.settings.profile_settings') }}</h1>
+                <p class="page-subtitle">{{ __('messages.owner.settings.settings.subtitle') }}</p>
             </div>
         </div>
 
@@ -57,9 +57,13 @@
                             {{ $employee->role ?? '—' }}
                         </span>
                         @if($isActive)
-                            <span class="badge-modern badge-success">Active</span>
+                            <span class="badge-modern badge-success">
+                                {{ __('messages.owner.settings.settings.active') }}
+                            </span>
                         @else
-                            <span class="badge-modern badge-danger">Inactive</span>
+                            <span class="badge-modern badge-danger">
+                                {{ __('messages.owner.settings.settings.inactive') }}
+                            </span>
                         @endif
                     </div>
                 </div>
@@ -74,17 +78,17 @@
                     <div class="section-icon section-icon-red">
                         <span class="material-symbols-outlined">person</span>
                     </div>
-                    <h3 class="section-title">Personal Information</h3>
+                    <h3 class="section-title">{{ __('messages.owner.settings.settings.personal_information') }}</h3>
                 </div>
 
                 <div class="detail-info-grid">
                     <div class="detail-info-group">
                         <div class="detail-info-item">
-                            <div class="detail-info-label">Full Name</div>
+                            <div class="detail-info-label">{{ __('messages.owner.settings.settings.full_name') }}</div>
                             <div class="detail-info-value">{{ $employee->name ?? '—' }}</div>
                         </div>
                         <div class="detail-info-item">
-                            <div class="detail-info-label">Email</div>
+                            <div class="detail-info-label">{{ __('messages.owner.settings.settings.email_address') }}</div>
                             <div class="detail-info-value">
                                 @if(!empty($employee->email))
                                     <a href="mailto:{{ $employee->email }}">{{ $employee->email }}</a>
@@ -95,11 +99,11 @@
                     </div>
                     <div class="detail-info-group">
                         <div class="detail-info-item">
-                            <div class="detail-info-label">Username</div>
+                            <div class="detail-info-label">{{ __('messages.owner.user_management.employees.username') }}</div>
                             <div class="detail-info-value">{{ $employee->user_name ?? '—' }}</div>
                         </div>
                         <div class="detail-info-item">
-                            <div class="detail-info-label">Outlet</div>
+                            <div class="detail-info-label">{{ __('messages.owner.user_management.employees.outlet') }}</div>
                             <div class="detail-info-value">{{ optional($employee->partner)->name ?? '—' }}</div>
                         </div>
                     </div>
@@ -111,13 +115,13 @@
                     <div class="section-icon section-icon-red">
                         <span class="material-symbols-outlined">info</span>
                     </div>
-                    <h3 class="section-title">Account Information</h3>
+                    <h3 class="section-title">{{ __('messages.owner.settings.settings.another_information') }}</h3>
                 </div>
 
                 <div class="detail-info-grid">
                     <div class="detail-info-group">
                         <div class="detail-info-item">
-                            <div class="detail-info-label">Member Since</div>
+                            <div class="detail-info-label">{{ __('messages.owner.settings.settings.member_since') }}</div>
                             <div class="detail-info-value">
                                 {{ \Carbon\Carbon::parse($employee->created_at)->format('d M Y') }}
                             </div>
@@ -125,7 +129,7 @@
                     </div>
                     <div class="detail-info-group">
                         <div class="detail-info-item">
-                            <div class="detail-info-label">Last Update</div>
+                            <div class="detail-info-label">{{ __('messages.owner.settings.settings.last_update') }}</div>
                             <div class="detail-info-value">
                                 {{ \Carbon\Carbon::parse($employee->updated_at)->diffForHumans() }}
                             </div>
@@ -137,7 +141,7 @@
             <div class="card-footer-modern">
                 <div></div>
                 <a href="{{ route('employee.' . $empRole . '.settings.edit') }}" class="btn-submit-modern">
-                    Edit Profile
+                    {{ __('messages.owner.settings.settings.edit_profile') }}
                 </a>
             </div>
         </div>

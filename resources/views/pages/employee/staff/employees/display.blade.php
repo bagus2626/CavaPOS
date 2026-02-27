@@ -11,13 +11,13 @@
             <thead>
                 <tr>
                     <th class="text-center" style="width: 60px;">#</th>
-                    <th>Employee Name</th>
-                    <th>Outlet</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th class="text-center">Status</th>
-                    <th class="text-center" style="width: 180px;">Actions</th>
+                    <th>{{ __('messages.owner.user_management.employees.employee_name') }}</th>
+                    <th>{{ __('messages.owner.user_management.employees.outlet') }}</th>
+                    <th>{{ __('messages.owner.user_management.employees.username') }}</th>
+                    <th>{{ __('messages.owner.user_management.employees.email') }}</th>
+                    <th>{{ __('messages.owner.user_management.employees.role') }}</th>
+                    <th class="text-center">{{ __('messages.owner.user_management.employees.status') }}</th>
+                    <th class="text-center" style="width: 180px;">{{ __('messages.owner.user_management.employees.actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -50,27 +50,32 @@
                         <td><span class="badge-modern badge-info">{{ $employee->role }}</span></td>
                         <td class="text-center">
                             @if ((int) $employee->is_active === 1)
-                                <span class="badge-modern badge-success">Active</span>
+                                <span class="badge-modern badge-success">
+                                    {{ __('messages.owner.user_management.employees.active') }}
+                                </span>
                             @else
-                                <span class="badge-modern badge-danger">Inactive</span>
+                                <span class="badge-modern badge-danger">
+                                    {{ __('messages.owner.user_management.employees.non_active') }}
+                                </span>
                             @endif
                         </td>
                         <td class="text-center">
                             <div class="table-actions">
                                 <a href="{{ route('employee.' . $empRole . '.employees.show', $employee->id) }}"
-                                    class="btn-table-action view" title="View Details">
+                                    class="btn-table-action view"
+                                    title="{{ __('messages.owner.user_management.employees.view_details') ?? 'View Details' }}">
                                     <span class="material-symbols-outlined">visibility</span>
                                 </a>
-                                @if ($empRole === 'manager')
-                                    <a href="{{ route('employee.' . $empRole . '.employees.edit', $employee->id) }}"
-                                        class="btn-table-action edit" title="Edit">
-                                        <span class="material-symbols-outlined">edit</span>
-                                    </a>
-                                    <button type="button" onclick="deleteEmployee({{ $employee->id }})"
-                                        class="btn-table-action delete" title="Delete">
-                                        <span class="material-symbols-outlined">delete</span>
-                                    </button>
-                                @endif
+                                <a href="{{ route('employee.' . $empRole . '.employees.edit', $employee->id) }}"
+                                    class="btn-table-action edit"
+                                    title="{{ __('messages.owner.user_management.employees.edit') }}">
+                                    <span class="material-symbols-outlined">edit</span>
+                                </a>
+                                <button type="button" onclick="deleteEmployee({{ $employee->id }})"
+                                    class="btn-table-action delete"
+                                    title="{{ __('messages.owner.user_management.employees.delete') }}">
+                                    <span class="material-symbols-outlined">delete</span>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -79,8 +84,8 @@
                         <td colspan="8" class="text-center">
                             <div class="table-empty-state">
                                 <span class="material-symbols-outlined">person_off</span>
-                                <h4>No employees found</h4>
-                                <p>No employees have been added yet.</p>
+                                <h4>{{ __('messages.owner.user_management.employees.no_employees') ?? 'No employees found' }}</h4>
+                                <p>{{ __('messages.owner.user_management.employees.add_first_employee') ?? 'Add your first employee to get started' }}</p>
                             </div>
                         </td>
                     </tr>
@@ -114,7 +119,8 @@
                                     <span class="material-symbols-outlined">search</span>
                                 </span>
                                 <input type="text" name="q" value="{{ request('q') }}"
-                                    class="mobile-search-input" placeholder="Search employees..."
+                                    class="mobile-search-input"
+                                    placeholder="{{ __('messages.owner.user_management.employees.search_placeholder') }}"
                                     oninput="searchFilter(this, 600)">
                                 <button type="button" class="mobile-filter-btn" onclick="toggleMobileFilter()">
                                     <span class="material-symbols-outlined">tune</span>
@@ -161,16 +167,14 @@
                     @endphp
                     <div class="employee-card-wrapper">
                         <div class="swipe-actions">
-                            @if ($empRole === 'manager')
-                                <a href="{{ route('employee.' . $empRole . '.employees.edit', $employee->id) }}"
-                                    class="swipe-action edit">
-                                    <span class="material-symbols-outlined">edit</span>
-                                </a>
-                                <button type="button" onclick="deleteEmployee({{ $employee->id }})"
-                                    class="swipe-action delete">
-                                    <span class="material-symbols-outlined">delete</span>
-                                </button>
-                            @endif
+                            <a href="{{ route('employee.' . $empRole . '.employees.edit', $employee->id) }}"
+                                class="swipe-action edit">
+                                <span class="material-symbols-outlined">edit</span>
+                            </a>
+                            <button type="button" onclick="deleteEmployee({{ $employee->id }})"
+                                class="swipe-action delete">
+                                <span class="material-symbols-outlined">delete</span>
+                            </button>
                         </div>
                         <a href="{{ route('employee.' . $empRole . '.employees.show', $employee->id) }}"
                             class="employee-card-link">
@@ -203,8 +207,8 @@
                 @empty
                     <div class="table-empty-state">
                         <span class="material-symbols-outlined">person_off</span>
-                        <h4>No employees found</h4>
-                        <p>No employees have been added yet.</p>
+                        <h4>{{ __('messages.owner.user_management.employees.no_employees') ?? 'No employees found' }}</h4>
+                        <p>{{ __('messages.owner.user_management.employees.add_first_employee') ?? 'Add your first employee to get started' }}</p>
                     </div>
                 @endforelse
             </div>
@@ -219,12 +223,10 @@
 
 </div>
 
-{{-- Floating Add Button (Mobile, manager only) --}}
-@if ($empRole === 'manager')
-    <a href="{{ route('employee.' . $empRole . '.employees.create') }}" class="btn-add-employee-mobile">
-        <span class="material-symbols-outlined">add</span>
-    </a>
-@endif
+{{-- Floating Add Button (Mobile) --}}
+<a href="{{ route('employee.' . $empRole . '.employees.create') }}" class="btn-add-employee-mobile">
+    <span class="material-symbols-outlined">add</span>
+</a>
 
 {{-- Mobile Filter Modal --}}
 <div id="mobileFilterModal" class="mobile-filter-modal">

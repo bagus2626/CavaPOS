@@ -1,5 +1,5 @@
 @extends('layouts.staff')
-@section('title', 'Edit Profile')
+@section('title', __('messages.owner.settings.settings.edit_profile'))
 
 @section('content')
 @php
@@ -11,12 +11,12 @@
 
         <div class="page-header">
             <div class="header-content">
-                <h1 class="page-title">Edit Profile</h1>
-                <p class="page-subtitle">Update your account information</p>
+                <h1 class="page-title">{{ __('messages.owner.settings.settings.edit_profile') }}</h1>
+                <p class="page-subtitle">{{ __('messages.owner.settings.settings.update_profile_subtitle') }}</p>
             </div>
             <a href="{{ route('employee.' . $empRole . '.settings.index') }}" class="back-button">
                 <span class="material-symbols-outlined">arrow_back</span>
-                Back
+                {{ __('messages.owner.settings.settings.back') }}
             </a>
         </div>
 
@@ -24,7 +24,7 @@
             <div class="alert alert-danger alert-modern">
                 <div class="alert-icon"><span class="material-symbols-outlined">error</span></div>
                 <div class="alert-content">
-                    <strong>Please check your input:</strong>
+                    <strong>{{ __('messages.owner.settings.settings.whoops') }}</strong> {{ __('messages.owner.settings.settings.input_problems') }}
                     <ul class="mb-0 mt-2">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
@@ -48,14 +48,13 @@
 
                 <div class="card-body-modern">
 
-                    {{-- Profile Picture & Personal Info --}}
                     <div class="profile-section">
                         <div class="profile-picture-wrapper">
                             <div class="profile-picture-container" id="profilePictureContainer">
                                 <div class="upload-placeholder" id="uploadPlaceholder"
                                     style="{{ $employee->image ? 'display: none;' : '' }}">
                                     <span class="material-symbols-outlined">add_a_photo</span>
-                                    <span class="upload-text">Upload Photo</span>
+                                    <span class="upload-text">{{ __('messages.owner.settings.settings.upload_text') }}</span>
                                 </div>
                                 <img id="imagePreview"
                                     class="profile-preview {{ $employee->image ? 'active' : '' }}"
@@ -68,7 +67,7 @@
                             </div>
                             <input type="file" name="image" id="image" accept="image/*" style="display: none;">
                             <input type="hidden" name="remove_image" id="remove_image" value="0">
-                            <small class="text-muted d-block text-center mt-2">JPG, PNG, WebP, max 2MB</small>
+                            <small class="text-muted d-block text-center mt-2">{{ __('messages.owner.settings.settings.image_requirements') }}</small>
                             @error('image')
                                 <div class="text-danger text-center mt-1 small">{{ $message }}</div>
                             @enderror
@@ -79,16 +78,20 @@
                                 <div class="section-icon section-icon-red">
                                     <span class="material-symbols-outlined">person</span>
                                 </div>
-                                <h3 class="section-title">Personal Information</h3>
+                                <h3 class="section-title">{{ __('messages.owner.settings.settings.personal_information') }}</h3>
                             </div>
                             <div class="row g-4">
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
-                                        <label class="form-label-modern">Full Name <span class="text-danger">*</span></label>
+                                        <label class="form-label-modern">
+                                            {{ __('messages.owner.settings.settings.full_name') }}
+                                            <span class="text-danger">*</span>
+                                        </label>
                                         <input type="text" name="name" id="name"
                                             class="form-control-modern @error('name') is-invalid @enderror"
                                             value="{{ old('name', $employee->name) }}"
-                                            placeholder="Enter your full name" required>
+                                            placeholder="{{ __('messages.owner.settings.settings.name_example') }}"
+                                            required>
                                         @error('name')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -96,7 +99,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
-                                        <label class="form-label-modern">Email</label>
+                                        <label class="form-label-modern">{{ __('messages.owner.settings.settings.email_address') }}</label>
                                         <input type="email" class="form-control-modern"
                                             value="{{ $employee->email }}" readonly disabled
                                             style="background-color: #f8f9fa; cursor: not-allowed;">
@@ -104,7 +107,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
-                                        <label class="form-label-modern">Username</label>
+                                        <label class="form-label-modern">{{ __('messages.owner.user_management.employees.username') }}</label>
                                         <input type="text" class="form-control-modern"
                                             value="{{ $employee->user_name }}" readonly disabled
                                             style="background-color: #f8f9fa; cursor: not-allowed;">
@@ -112,7 +115,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
-                                        <label class="form-label-modern">Role</label>
+                                        <label class="form-label-modern">{{ __('messages.owner.user_management.employees.role') }}</label>
                                         <input type="text" class="form-control-modern"
                                             value="{{ $employee->role }}" readonly disabled
                                             style="background-color: #f8f9fa; cursor: not-allowed;">
@@ -124,30 +127,29 @@
 
                     <div class="section-divider"></div>
 
-                    {{-- Change Password --}}
                     <div class="account-section">
                         <div class="section-header">
                             <div class="section-icon section-icon-red">
                                 <span class="material-symbols-outlined">lock</span>
                             </div>
-                            <h3 class="section-title">Change Password (Optional)</h3>
+                            <h3 class="section-title">{{ __('messages.owner.settings.settings.change_password_optional') }}</h3>
                         </div>
 
                         <div class="alert alert-info alert-modern mb-4">
                             <div class="alert-icon"><span class="material-symbols-outlined">info</span></div>
                             <div class="alert-content">
-                                <small>Leave password fields empty if you don't want to change your password.</small>
+                                <small>{{ __('messages.owner.settings.settings.password_change_notice') }}</small>
                             </div>
                         </div>
 
                         <div class="row g-4">
                             <div class="col-md-12">
                                 <div class="form-group-modern">
-                                    <label class="form-label-modern">Current Password</label>
+                                    <label class="form-label-modern">{{ __('messages.owner.settings.settings.current_password') }}</label>
                                     <div class="password-wrapper">
                                         <input type="password" name="current_password" id="current_password"
                                             class="form-control-modern @error('current_password') is-invalid @enderror"
-                                            placeholder="Enter current password">
+                                            placeholder="{{ __('messages.owner.settings.settings.current_password_placeholder') }}">
                                         <button type="button" class="password-toggle" id="toggleCurrentPassword">
                                             <span class="material-symbols-outlined">visibility</span>
                                         </button>
@@ -159,11 +161,11 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group-modern">
-                                    <label class="form-label-modern">New Password</label>
+                                    <label class="form-label-modern">{{ __('messages.owner.settings.settings.new_password') }}</label>
                                     <div class="password-wrapper">
                                         <input type="password" name="new_password" id="new_password"
                                             class="form-control-modern @error('new_password') is-invalid @enderror"
-                                            placeholder="Enter new password (min. 8 characters)">
+                                            placeholder="{{ __('messages.owner.settings.settings.new_password_placeholder') }}">
                                         <button type="button" class="password-toggle" id="toggleNewPassword">
                                             <span class="material-symbols-outlined">visibility</span>
                                         </button>
@@ -175,12 +177,12 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group-modern">
-                                    <label class="form-label-modern">Confirm New Password</label>
+                                    <label class="form-label-modern">{{ __('messages.owner.settings.settings.confirm_new_password') }}</label>
                                     <div class="password-wrapper">
                                         <input type="password" name="new_password_confirmation"
                                             id="new_password_confirmation"
                                             class="form-control-modern"
-                                            placeholder="Re-enter new password">
+                                            placeholder="{{ __('messages.owner.settings.settings.confirm_password_placeholder') }}">
                                         <button type="button" class="password-toggle" id="toggleConfirmPassword">
                                             <span class="material-symbols-outlined">visibility</span>
                                         </button>
@@ -194,9 +196,11 @@
 
                 <div class="card-footer-modern">
                     <a href="{{ route('employee.' . $empRole . '.settings.index') }}" class="btn-cancel-modern">
-                        Cancel
+                        {{ __('messages.owner.settings.settings.cancel') }}
                     </a>
-                    <button type="submit" class="btn-submit-modern">Save Changes</button>
+                    <button type="submit" class="btn-submit-modern">
+                        {{ __('messages.owner.settings.settings.save_changes') }}
+                    </button>
                 </div>
             </form>
         </div>
@@ -209,21 +213,30 @@
             <div class="modal-content modern-modal">
                 <div class="modal-header modern-modal-header">
                     <h5 class="modal-title">
-                        <span class="material-symbols-outlined">crop</span> Crop Photo
+                        <span class="material-symbols-outlined">crop</span>
+                        {{ __('messages.owner.settings.settings.crop_profile_photo') }}
                     </h5>
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body p-4">
+                    <div class="alert alert-info alert-modern mb-3">
+                        <div class="alert-icon"><span class="material-symbols-outlined">info</span></div>
+                        <div class="alert-content">
+                            <small>{{ __('messages.owner.settings.settings.crop_instruction') }}</small>
+                        </div>
+                    </div>
                     <div class="img-container-crop">
-                        <img id="imageToCrop" style="max-width: 100%;" alt="Crop">
+                        <img id="imageToCrop" style="max-width: 100%;" alt="Image to crop">
                     </div>
                 </div>
                 <div class="modal-footer modern-modal-footer">
                     <button type="button" class="btn-cancel-modern" data-dismiss="modal">
-                        <span class="material-symbols-outlined">close</span> Cancel
+                        <span class="material-symbols-outlined">close</span>
+                        {{ __('messages.owner.settings.settings.cancel') }}
                     </button>
                     <button type="button" id="cropBtn" class="btn-submit-modern">
-                        <span class="material-symbols-outlined">check</span> Save Crop
+                        <span class="material-symbols-outlined">check</span>
+                        {{ __('messages.owner.settings.settings.crop_save') }}
                     </button>
                 </div>
             </div>
@@ -287,38 +300,44 @@
 
                 if (!name) {
                     e.preventDefault();
-                    alert('Please enter your full name.');
+                    alert('{{ __('messages.owner.settings.settings.alert_enter_name') }}');
                     return false;
                 }
 
                 if (currentPw || newPw || confirmPw) {
                     if (!currentPw) {
                         e.preventDefault();
-                        alert('Please enter your current password.');
+                        alert('{{ __('messages.owner.settings.settings.alert_enter_current_pw') }}');
                         document.getElementById('current_password').focus();
                         return false;
                     }
                     if (!newPw) {
                         e.preventDefault();
-                        alert('Please enter a new password.');
+                        alert('{{ __('messages.owner.settings.settings.alert_enter_new_pw') }}');
                         document.getElementById('new_password').focus();
                         return false;
                     }
                     if (newPw.length < 8) {
                         e.preventDefault();
-                        alert('New password must be at least 8 characters.');
+                        alert('{{ __('messages.owner.settings.settings.alert_min_8_chars') }}');
                         document.getElementById('new_password').focus();
+                        return false;
+                    }
+                    if (!confirmPw) {
+                        e.preventDefault();
+                        alert('{{ __('messages.owner.settings.settings.alert_confirm_pw') }}');
+                        document.getElementById('new_password_confirmation').focus();
                         return false;
                     }
                     if (newPw !== confirmPw) {
                         e.preventDefault();
-                        alert('Passwords do not match.');
+                        alert('{{ __('messages.owner.settings.settings.alert_pw_mismatch') }}');
                         document.getElementById('new_password_confirmation').focus();
                         return false;
                     }
                     if (currentPw === newPw) {
                         e.preventDefault();
-                        alert('New password must be different from current password.');
+                        alert('{{ __('messages.owner.settings.settings.alert_pw_same') }}');
                         document.getElementById('new_password').focus();
                         return false;
                     }

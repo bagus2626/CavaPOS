@@ -1,5 +1,5 @@
 @extends('layouts.staff')
-@section('title', 'Stock Movement Detail')
+@section('title', __('messages.owner.stock_report.movement.title'))
 
 @section('content')
     @php $empRole = strtolower(Auth::guard('employee')->user()->role ?? 'manager'); @endphp
@@ -9,12 +9,12 @@
 
             <div class="page-header">
                 <div class="header-content">
-                    <h1 class="page-title">Stock Movement Detail</h1>
-                    <p class="page-subtitle">Detailed movement history for this stock item</p>
+                    <h1 class="page-title">{{ __('messages.owner.stock_report.movement.page_title') }}</h1>
+                    <p class="page-subtitle">{{ __('messages.owner.stock_report.movement.subtitle') }}</p>
                 </div>
                 <a href="{{ route('employee.' . $empRole . '.report.stocks.index') }}" class="back-button">
                     <span class="material-symbols-outlined">arrow_back</span>
-                    Back
+                    {{ __('messages.owner.settings.settings.back') }}
                 </a>
             </div>
 
@@ -24,21 +24,21 @@
                     <div class="row">
                         <div class="col-md-4">
                             <div class="info-group">
-                                <label class="info-label">Stock Name</label>
+                                <label class="info-label">{{ __('messages.owner.stock_report.movement.info.stock_name') }}</label>
                                 <p class="info-value">{{ $stockItem->stock_name }}</p>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="info-group">
-                                <label class="info-label">Stock Code</label>
+                                <label class="info-label">{{ __('messages.owner.stock_report.movement.info.stock_code') }}</label>
                                 <p class="info-value mono">{{ $stockItem->stock_code }}</p>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="info-group">
-                                <label class="info-label">Period</label>
+                                <label class="info-label">{{ __('messages.owner.stock_report.movement.info.period') }}</label>
                                 <p class="info-value">
-                                    {{ request('month') ? \Carbon\Carbon::parse(request('month'))->translatedFormat('F Y') : 'All Time' }}
+                                    {{ request('month') ? \Carbon\Carbon::parse(request('month'))->translatedFormat('F Y') : __('messages.owner.stock_report.movement.info.all_time') }}
                                 </p>
                             </div>
                         </div>
@@ -51,7 +51,7 @@
                 <a href="{{ route('employee.' . $empRole . '.report.stocks.movement.export', array_merge(['stock' => $stockItem->stock_code], request()->all())) }}"
                     class="btn-modern btn-sm-modern btn-success-modern">
                     <span class="material-symbols-outlined">download</span>
-                    Export Excel
+                    {{ __('messages.owner.stock_report.movement.table.export_excel') }}
                 </a>
             </div>
 
@@ -61,11 +61,11 @@
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th class="text-center" style="width: 60px;">#</th>
-                                <th>Date & Time</th>
-                                <th>Category</th>
-                                <th class="text-center">Quantity</th>
-                                <th>Notes</th>
+                                <th class="text-center" style="width: 60px;">{{ __('messages.owner.stock_report.movement.table.number') }}</th>
+                                <th>{{ __('messages.owner.stock_report.movement.table.date_time') }}</th>
+                                <th>{{ __('messages.owner.stock_report.movement.table.category') }}</th>
+                                <th class="text-center">{{ __('messages.owner.stock_report.movement.table.quantity') }}</th>
+                                <th>{{ __('messages.owner.stock_report.movement.table.notes') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -81,10 +81,8 @@
                                 <tr class="table-row">
                                     <td class="text-center text-muted">{{ $movements->firstItem() + $index }}</td>
                                     <td>
-                                        <div class="fw-600">{{ optional($item->movement->created_at)->format('d M Y') }}
-                                        </div>
-                                        <div class="text-muted small">
-                                            {{ optional($item->movement->created_at)->format('H:i:s') }}</div>
+                                        <div class="fw-600">{{ optional($item->movement->created_at)->format('d M Y') }}</div>
+                                        <div class="text-muted small">{{ optional($item->movement->created_at)->format('H:i:s') }}</div>
                                     </td>
                                     <td>
                                         <span class="badge-modern {{ $isOut ? 'badge-danger' : 'badge-success' }}">
@@ -95,8 +93,7 @@
                                         <span class="fw-600 {{ $qtyClass }}">
                                             {{ $qtySign }}{{ number_format($displayQty, 2) }}
                                         </span>
-                                        <span
-                                            class="text-muted small">{{ optional($item->stock->displayUnit)->unit_name ?? 'N/A' }}</span>
+                                        <span class="text-muted small">{{ optional($item->stock->displayUnit)->unit_name ?? 'N/A' }}</span>
                                     </td>
                                     <td>
                                         <span class="text-truncate d-inline-block" style="max-width: 250px;"
@@ -110,8 +107,8 @@
                                     <td colspan="5" class="text-center">
                                         <div class="table-empty-state">
                                             <span class="material-symbols-outlined">inventory_2</span>
-                                            <h4>No movement records found</h4>
-                                            <p>No movement data for this stock item.</p>
+                                            <h4>{{ __('messages.owner.stock_report.movement.table.no_data') }}</h4>
+                                            <p>No movement records found for this stock item</p>
                                         </div>
                                     </td>
                                 </tr>
